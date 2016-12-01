@@ -14,14 +14,31 @@
  * limitations under the License.
  */
 
-package models
+package controllers
 
-import play.api.libs.json.Json
+import helpers.PAYERegSpec
+import play.api.http.Status
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+
+class WelcomeControllerSpec extends PAYERegSpec {
+
+  val fakeRequest = FakeRequest("GET", "/")
 
 
-case class TradingNameModel (tradeUnderDifferentName: String,
-                             tradingName:Option[String])
+  "GET /start" should {
+    "return 200" in {
+      val result = WelcomeController.show(fakeRequest)
+      status(result) shouldBe Status.OK
+    }
 
-object TradingNameModel {
-  implicit val formats = Json.format[TradingNameModel]
+    "return HTML" in {
+      val result = WelcomeController.show(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+    }
+
+
+  }
+
 }

@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-package models
+package helpers
 
-import play.api.libs.json.Json
+import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
 
+trait PAYERegSpec extends UnitSpec with WithFakeApplication {
 
-case class TradingNameModel (tradeUnderDifferentName: String,
-                             tradingName:Option[String])
-
-object TradingNameModel {
-  implicit val formats = Json.format[TradingNameModel]
 }

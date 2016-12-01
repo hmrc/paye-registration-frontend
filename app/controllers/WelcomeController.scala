@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package models
+package controllers
 
-import play.api.libs.json.Json
+import uk.gov.hmrc.play.frontend.controller.FrontendController
+import play.api.mvc._
+import scala.concurrent.Future
+import play.api.Play.current
+import play.api.i18n.Messages.Implicits._
+
+object WelcomeController extends WelcomeController {
+
+}
 
 
-case class TradingNameModel (tradeUnderDifferentName: String,
-                             tradingName:Option[String])
+trait WelcomeController extends FrontendController {
 
-object TradingNameModel {
-  implicit val formats = Json.format[TradingNameModel]
+  val show = Action.async { implicit request =>
+    Future.successful(Ok(views.html.pages.welcome()))
+  }
+
 }
