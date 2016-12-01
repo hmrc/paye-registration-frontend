@@ -23,17 +23,17 @@ import play.api.test.Helpers._
 
 class WelcomeControllerSpec extends PAYERegSpec {
 
-  val fakeRequest = FakeRequest("GET", "/start")
+  val fakeRequest = FakeRequest("GET", "/")
 
 
   "GET /start" should {
     "return 200" in {
-      val result = WelcocmeController.show(fakeRequest)
+      val result = WelcomeController.show(fakeRequest)
       status(result) shouldBe Status.OK
     }
 
     "return HTML" in {
-      val result = WelcocmeController.show(fakeRequest)
+      val result = WelcomeController.show(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
