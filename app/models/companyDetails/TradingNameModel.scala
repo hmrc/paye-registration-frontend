@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package forms
+package models.companyDetails
 
-import models.TradingNameModel
-import play.api.data.Form
-import play.api.data.Forms._
+import play.api.libs.json.Json
 
 
-object TradingNameForm {
-  val form = Form(
-    mapping(
-      "tradeUnderDifferentName" -> text,
-      "tradingName" -> optional(text)
-    )(TradingNameModel.apply)(TradingNameModel.unapply)
-  )
+case class TradingNameModel (tradeUnderDifferentName: String,
+                             tradingName:Option[String])
+
+object TradingNameModel {
+  implicit val formats = Json.format[TradingNameModel]
 }
