@@ -1,3 +1,6 @@
+#Global
+app.title=Register your company
+
 #Welcome page
 page.welcome.title=Register as an employer
 page.welcome.heading=Before you register as an employer
@@ -5,7 +8,7 @@ page.welcome.heading.register=You need to register as an employer if you:
 page.welcome.bullet.pay=pay any employees £112 or more a week
 page.welcome.bullet.pension=employ anyone who''s getting a pension or already has another job
 page.welcome.bullet.car=provide any employees with expenses or benefits (for example, a company car)
-page.welcome.director=You must register if you''re employing yourself (for example, if you''re the only director of a limited company)
+page.welcome.director=You must register if you''re employing yourself (for example, if you''re the only director of a limited company).
 page.welcome.2months=You can''t register more than 2 months before you start paying people.
 page.welcome.nino=You''ll need the director''s National Insurance number to complete this registration.
 
