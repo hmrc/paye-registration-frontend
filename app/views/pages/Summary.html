@@ -1,0 +1,189 @@
+@(companyName : String,
+jurisdiction : String,
+accDate : AccountingDatesModel,
+ppob : PPOBModel,
+roAddress : CHROAddress,
+ctContactDets : CompanyContactViewModel,
+tradingDetails : TradingDetails,
+applicant : AboutYouChoice,
+accountsPrepDate: String)(implicit request: Request[_], lang: Lang)
+
+@import uk.gov.hmrc.play.views.html.helpers.form
+@import models.AccountingDatesModel.{WHEN_REGISTERED, FUTURE_DATE, NOT_PLANNING_TO_YET}
+
+@formatAddress(addressElement: String) = {
+@if(addressElement != "") {
+@addressElement<br>
+}
+}
+
+@readableTrading(tradingDetails : TradingDetails) = {
+@if(tradingDetails.regularPayments) {
+@Html("Yes")
+} else {
+@Html("No")
+}
+}
+
+@main_template(title = Messages("page.reg.summary.title"), mainClass = Some("full-width")){
+<div style="width:40%; display: inline-block" align="left" class="form-group-compound" xmlns:>
+    <a id="back" class="back-link" href="@controllers.reg.routes.SummaryController.back()">@Messages("common.button.back")</a>
+</div>
+
+<div class="grid-row">
+    <div class="column-two-thirds">
+        <header class="page-header">
+            <h1 id="main-heading" class="heading-xlarge"> @Messages("page.reg.summary.heading")</h1>
+        </header>
+
+        <div class="form-group">
+            <table class="table--borderless">
+                <thead>
+                <tr>
+                    <th colspan="3" id="applicantTitle"><h2>@Messages("page.reg.summary.heading.applicant")</h2></th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr>
+                    <td>@Messages("page.reg.summary.applicantText")</td>
+                    <td id="applicant">@applicant.completionCapacity.capitalize</td>
+                    <td><a href="about-you" id="change-applicant">@Messages("change")</a></td>
+                </tr>
+                </tbody>
+
+                <thead>
+                <tr>
+                    <th colspan="3" id="companyNameTitle"><h2>@Messages("page.reg.summary.heading.one")</h2></th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr>
+                    <td>@Messages("page.reg.summary.companyNameText")</td>
+                    <td id="companyName">@companyName</td>
+                    <td><a href='@controllers.reg.routes.SummaryController.summaryBackLink("company_name")' id="change-companyname">@Messages("change")</a></td>
+                </tr>
+                <tr>
+                    <td>@Messages("page.reg.summary.ROAddressText")</td>
+
+                    <td id="ROAddress">
+                        @formatAddress(roAddress.premises)
+                        @formatAddress(roAddress.address_line_1)
+                        @formatAddress(roAddress.address_line_2.fold[String]("")(s => s ))
+                        @formatAddress(roAddress.locality)
+                        @formatAddress(roAddress.region.fold[String]("")(s => s ))
+                        @formatAddress(roAddress.postal_code.fold[String]("")(s => s ))
+                        @formatAddress(roAddress.country)
+                    </td>
+                    <td><a href='@controllers.reg.routes.SummaryController.summaryBackLink("company_address")' id="change-roaddress">@Messages("change")</a></td>
+                </tr>
+
+                <tr>
+                    <td>@Messages("page.reg.summary.jurisdictionText")</td>
+                    <td id="jurisdiction">@jurisdiction</td>
+                    <td><a href='@controllers.reg.routes.SummaryController.summaryBackLink("company_jurisdiction")' id="change-jurisdiction">@Messages("change")</a></td>
+                </tr>
+
+                <tr>
+                    <td>@Messages("page.reg.summary.PPOBAddressText")</td>
+
+                    <td id="PPOBAddress">
+                        @{
+                        if(ppob.ppob.addressType == "RO"){
+                        Html("Same as registered office address")
+                        } else {
+                        Html(
+                        ppob.ppob.address.get.houseNameNumber + "<br>" +
+                        ppob.ppob.address.get.addressLine1 + "<br>" +
+                        ppob.ppob.address.get.addressLine2.fold[String]("")(s => s + "<br>") +
+                        ppob.ppob.address.get.addressLine3.fold[String]("")(s => s + "<br>") +
+                        ppob.ppob.address.get.addressLine4.fold[String]("")(s => s + "<br>") +
+                        ppob.ppob.address.get.postCode.fold[String]("")(s => s + "<br>") +
+                        ppob.ppob.address.get.country.fold[String]("")(s => s )
+                        )
+                        }
+                        }
+                    </td>
+                    <td><a href="principal-place-of-business" id="change-ppob">@Messages("change")</a></td>
+                </tr>
+
+                </tbody>
+
+                <thead>
+                <tr>
+                    <th colspan="3" id="companyContactDetails"><h2>@Messages("page.reg.summary.heading.one.b")</h2></th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr>
+                    <td>@Messages("page.reg.summary.companyContactName")</td>
+                    <td id="companyContactName">@ctContactDets.contactName</td>
+                    <td><a href="company-contact-details" id="change-contact-details">@Messages("change")</a></td>
+                </tr>
+                <tr>
+                    <td>@Messages("page.reg.summary.companyContactDaytimeTelephoneNumber")</td>
+                    <td id="companyContactDaytimeTelephoneNumber">@ctContactDets.contactDaytimeTelephoneNumber</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>@Messages("page.reg.summary.companycontactMobileNumber")</td>
+                    <td id="companycontactMobileNumber">@ctContactDets.contactMobileNumber</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>@Messages("page.reg.summary.companyContactEmail")</td>
+                    <td id="companyContactEmail">@ctContactDets.contactEmail</td>
+                    <td></td>
+                </tr>
+                </tbody>
+
+
+                <thead>
+                <tr>
+                    <th colspan="3" id="companyAccountingTitle"><h2>@Messages("page.reg.summary.heading.two")</h2></th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr>
+                    <td>@Messages("page.reg.summary.startDate")</td>
+                    <td id="startDate">@{if(accDate.crnDate == WHEN_REGISTERED){Messages("page.reg.summary.dateRegistered")}
+                        else if(accDate.crnDate == NOT_PLANNING_TO_YET){Messages("page.reg.summary.notPlanningToStartYet")}
+                        else {accDate.toSummaryDate}}</td>
+                    <td><a href="accounting-dates" id="change-accountingdates">@Messages("change")</a></td>
+                </tr>
+                <tr>
+                    <td>@Messages("page.reg.summary.accountPrepDate")</td>
+                    <td id="prepDate">
+                        @accountsPrepDate
+                    </td>
+                    <td><a href="account-preparation" id="change-prepdate">@Messages("change")</a></td>
+                </tr>
+                </tbody>
+
+                <thead>
+                <tr>
+                    <th colspan="3" id="tradingDetailsTitle"><h2>@Messages("page.reg.summary.heading.three")</h2></th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr>
+                    <td>@Messages("page.reg.summary.tradingDetails")</td>
+                    <td id="tradingDetails">@readableTrading(tradingDetails)</td>
+                    <td><a href="trading-details" id="change-trading-details">@Messages("change")</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        @form(action = controllers.reg.routes.SummaryController.submit()) {
+        <div class="form-group">
+            <button class="button" type="submit" id="next">@Messages("common.button.snc")</button>
+        </div>
+        }
+    </div>
+</div>
+}
