@@ -2,4 +2,8 @@
 
 GET        /hello-world             controllers.HelloWorld.helloWorld
 
+## WELCOME PAGE
 GET        /start                   controllers.WelcomeController.show
+
+## COMPANY DETAILS
+GET        /trading-name            controllers.CompanyDetailsController.tradingName
