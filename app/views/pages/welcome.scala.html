@@ -7,10 +7,13 @@
 
 <div class="grid-row">
     <div class="column-one-third">
+
         <header class="page-header">
             <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.welcome.heading")</h1>
         </header>
+
         <h2 class="heading-medium" id="subHeading">@Messages("pages.welcome.heading.register")</h2>
+
         <div class="form-group">
             <ul class="list list-bullet">
                 <li id="pay">@Messages("pages.welcome.bullet.pay")</li>
@@ -18,20 +21,21 @@
                 <li id="car">@Messages("pages.welcome.bullet.car")</li>
             </ul>
         </div>
-        <div class="form-group">
 
+        <div class="form-group">
             <div class="panel-indent">
                 <p id="info">@Messages("pages.welcome.director")</p>
             </div>
         </div>
-        <div class="form-group">
-            <button class="button-get-started" role="button" id="next">@Messages("app.common.continue")</button>
-        </div>
-            <p id="cost">@Messages("pages.welcome.2months")</p>
-            <p id="nino">@Messages("pages.welcome.nino")</p>
-        </div>
 
+        @form(action = controllers.routes.CompanyDetailsController.tradingName()) {
+            <div class="form-group">
+                <button class="button-get-started" role="button" id="next">@Messages("app.common.continue")</button>
+            </div>
+        }
 
+        <p id="cost">@Messages("pages.welcome.2months")</p>
+        <p id="nino">@Messages("pages.welcome.nino")</p>
 
     </div>
 
