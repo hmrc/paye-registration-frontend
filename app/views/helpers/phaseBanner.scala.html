@@ -3,6 +3,6 @@
 <div class="phase-banner">
     <p>
         <strong id="phase" class="phase-tag">@phaseId</strong>
-        <span>@Html(Messages("app.phaseBannerFeedback","/company-registration/feedback"))</span>
+        <span>@Html(Messages("app.phaseBannerFeedback", controllers.feedback.routes.FeedbackController.show))</span>
     </p>
 </div>
