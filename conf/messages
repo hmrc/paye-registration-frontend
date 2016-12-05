@@ -4,6 +4,7 @@ app.phaseBannerFeedback            = This is a new service – your <a href= {0}
 app.common.yes                     = Yes
 app.common.no                      = No
 app.common.continue                = Continue
+app.common.saveAndContinue         = Save and continue
 app.common.errorSummaryLabel       = There are errors on this page.
 
 
