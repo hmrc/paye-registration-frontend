@@ -1,0 +1,8 @@
+@(phaseId: String)(implicit messages: Messages)
+
+<div class="phase-banner">
+    <p>
+        <strong id="phase" class="phase-tag">@phaseId</strong>
+        <span>@Messages("app.feedbackFirst")<a href="/company-registration/feedback">&nbsp;@Messages("app.feedbackLinkText")</a> @Messages("app.feedbackSecond")</span>
+    </p>
+</div>
