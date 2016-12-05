@@ -1,8 +1,6 @@
 #Global
 app.title                         =Register your company
-app.feedbackFirst                 =This is a new service – your
-app.feedbackSecond                =will help us to improve it.
-app.feedbackLinkText              =feedback
+app.phaseBannerFeedback           =This is a new service – your <a href={0}>feedback</a> will help us to improve it.
 
 
 #Welcome page
