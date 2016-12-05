@@ -1,11 +1,11 @@
 # microservice specific routes
 
-GET         /assets/*file                                       controllers.Assets.at(path="/public", file)
+GET         /assets/*file            controllers.Assets.at(path="/public", file)
 
 ## WELCOME PAGE
-GET        /                        controllers.WelcomeController.show
-GET        /start                   controllers.WelcomeController.show
+GET         /                        controllers.WelcomeController.show
+GET         /start                   controllers.WelcomeController.show
 
 ## COMPANY DETAILS
-GET        /trading-name            controllers.CompanyDetailsController.tradingName
-POST       /trading-name            controllers.CompanyDetailsController.tradingName
+GET         /trading-name            controllers.CompanyDetailsController.tradingName
+POST        /trading-name            controllers.CompanyDetailsController.submitTradingName

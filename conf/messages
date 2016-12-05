@@ -29,3 +29,4 @@ pages.tradingName.nameRulesIntro   = Trading names must not:
 pages.tradingName.nameRules1       = include ''limited'', ''Ltd'', ''limited liability partnership'', ''LLP'', ''public limited company'' or ''plc''
 pages.tradingName.nameRules2       = be the same as an <a href={0}>existing trade mark</a>
 pages.tradingName.nameRules3       = contain a 'sensitive' word or expression unless you <a href={0}>get permission</a>
+pages.tradingName.errorQuestion    = Please enter a correct trading name

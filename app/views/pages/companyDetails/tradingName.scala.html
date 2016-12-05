@@ -29,7 +29,7 @@
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.tradingName.heading")</h1>
 
-    @govHelpers.form(action = routes.CompanyDetailsController.tradingName) {
+    @govHelpers.form(action = routes.CompanyDetailsController.submitTradingName) {
 
     <div class="inline form-group">
         @formHiddenYesNoRadio(
@@ -41,7 +41,7 @@
 
     </div>
 
-    @hiddenDetails("tradingName", Messages("pages.tradingName.nameRulesSummary"), hiddenDetailsContent)
+    @hiddenDetails("tradingNameRules", Messages("pages.tradingName.nameRulesSummary"), hiddenDetailsContent)
 
     <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
     }
