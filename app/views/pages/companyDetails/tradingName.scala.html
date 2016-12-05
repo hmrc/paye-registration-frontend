@@ -7,8 +7,7 @@
 @hiddenYesNoContent = {
     @govHelpers.input(
         tradingNameForm("tradingName"),
-        '_divClass -> "inline",
-        'inputHint -> "Hint",
+        '_labelClass -> "form-label cascading",
         '_label -> Messages("pages.tradingName.tradingNameLabel")
     )
 }
@@ -28,7 +27,7 @@
         Messages("app.common.errorSummaryLabel"), tradingNameForm
     )
 
-    <h1 class="heading-large">@Messages("pages.tradingName.heading")</h1>
+    <h1 class="heading-large" id="pageHeading">@Messages("pages.tradingName.heading")</h1>
 
     @govHelpers.form(action = routes.CompanyDetailsController.tradingName) {
 
@@ -44,7 +43,7 @@
 
     @hiddenDetails("tradingName", Messages("pages.tradingName.nameRulesSummary"), hiddenDetailsContent)
 
-    <button class="button" type="submit" id="continue-button" >@Messages("app.common.continue")</button>
+    <button class="button" type="submit" id="continue" >@Messages("app.common.continue")</button>
     }
 
 }
