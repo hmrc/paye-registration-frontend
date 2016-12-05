@@ -12,6 +12,7 @@
 @import layouts.{govuk_template => hmrcGovUkTemplate}
 @import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
 @import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
+@import views.html.helpers.phaseBanner
 
 @head = {
     @uiLayouts.head(
@@ -49,15 +50,9 @@
 
 @serviceInfo = {
     @uiLayouts.serviceInfo(
-      betaBanner = HtmlFormat.empty,
+      betaBanner = phaseBanner("ALPHA"),
       includeGridWrapper = false,
       serviceInfoContent = Some(serviceInfoContent))
-}
-
-@mainContentHeader = {
-    @if(contentHeader.isDefined) {
-        @uiLayouts.main_content_header(contentHeader = contentHeader.get)
-    }
 }
 
 @getHelpForm = @{uiHelpers.reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}
@@ -67,7 +62,6 @@
       article = mainContent,
       mainClass = mainClass,
       mainDataAttributes = mainDataAttributes,
-      mainContentHeader = mainContentHeader,
       serviceInfo = serviceInfo,
       getHelpForm = getHelpForm,
       sidebar = sidebar)

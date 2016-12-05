@@ -1,0 +1,8 @@
+@(phaseId: String)(implicit messages: Messages)
+
+<div class="phase-banner">
+    <p>
+        <strong id="phase" class="phase-tag">@phaseId</strong>
+        <span>@Html(Messages("app.phaseBannerFeedback","/company-registration/feedback"))</span>
+    </p>
+</div>
