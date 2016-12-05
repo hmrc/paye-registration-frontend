@@ -8,3 +8,4 @@ GET        /start                   controllers.WelcomeController.show
 
 ## COMPANY DETAILS
 GET        /trading-name            controllers.CompanyDetailsController.tradingName
+POST       /trading-name            controllers.CompanyDetailsController.tradingName
