@@ -1,5 +1,7 @@
 # microservice specific routes
 
+GET         /assets/*file                                       controllers.Assets.at(path="/public", file)
+
 ## WELCOME PAGE
 GET        /                        controllers.WelcomeController.show
 GET        /start                   controllers.WelcomeController.show

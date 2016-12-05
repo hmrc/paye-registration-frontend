@@ -1,6 +1,8 @@
 #Global
 app.title                         =Register your company
 app.phaseBannerFeedback           =This is a new service – your <a href={0}>feedback</a> will help us to improve it.
+app.yes                           =Yes
+app.no                            =No
 
 
 #Welcome page

@@ -7,7 +7,7 @@
   contentHeader: Option[Html] = None,
   mainContent: Html = HtmlFormat.empty,
   serviceInfoContent: Html = HtmlFormat.empty,
-  scriptElem: Option[Html] = None)(implicit request: Request[_], messages: Messages)
+  pageScripts: Option[Html] = None)(implicit request: Request[_], messages: Messages)
 
 @import layouts.{govuk_template => hmrcGovUkTemplate}
 @import uk.gov.hmrc.play.views.html.{layouts => uiLayouts}
@@ -36,12 +36,24 @@
 
 @afterHeader = {}
 
+
+
+@scriptElement = {
+    <script type="text/javascript" src='@routes.Assets.at("javascripts/paye.js")'></script>
+}
+
+@scripts = {
+    @scriptElement
+    @pageScripts
+}
+
+
 @bodyEnd = {
     @uiLayouts.footer(
       analyticsToken = Some(appConfig.analyticsToken),
       analyticsHost = appConfig.analyticsHost,
       ssoUrl = None,
-      scriptElem = scriptElem,
+      scriptElem = Some(scripts),
       gaCalls = None)
 }
 
