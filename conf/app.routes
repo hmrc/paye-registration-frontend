@@ -1,8 +1,7 @@
 # microservice specific routes
 
-GET        /hello-world             controllers.HelloWorld.helloWorld
-
 ## WELCOME PAGE
+GET        /                        controllers.WelcomeController.show
 GET        /start                   controllers.WelcomeController.show
 
 ## COMPANY DETAILS
