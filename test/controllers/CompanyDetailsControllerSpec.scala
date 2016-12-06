@@ -16,13 +16,20 @@
 
 package controllers
 
+import connectors.S4LConnector
+import helpers.PAYERegSpec
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
 
-class CompanyDetailsControllerSpec extends UnitSpec with WithFakeApplication {
+class CompanyDetailsControllerSpec extends PAYERegSpec {
 
+  val mockS4LConnector = mock[S4LConnector]
+
+  object TestCompanyDetailsController extends CompanyDetailsController {
+    override val s4LConnector = mockS4LConnector
+  }
 
   val fakeRequest = FakeRequest("GET", "/")
 

@@ -16,9 +16,9 @@
 
 package controllers
 
+import connectors.S4LConnector
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
@@ -26,10 +26,14 @@ import forms.companyDetails.TradingNameForm
 
 object CompanyDetailsController extends CompanyDetailsController {
 
+  override val s4LConnector = S4LConnector
+
 }
 
 
 trait CompanyDetailsController extends FrontendController {
+
+  val s4LConnector: S4LConnector
 
   val tradingName = Action.async { implicit request =>
     Future.successful(Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form)))
