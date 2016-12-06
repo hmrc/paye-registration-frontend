@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.userJourney
 
 import connectors.S4LConnector
-import play.api.mvc.Action
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import scala.concurrent.Future
+import forms.companyDetails.TradingNameForm
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
-import forms.companyDetails.TradingNameForm
+import play.api.mvc.Action
+import uk.gov.hmrc.play.frontend.controller.FrontendController
+
+import scala.concurrent.Future
 
 object CompanyDetailsController extends CompanyDetailsController {
 
@@ -47,7 +48,7 @@ trait CompanyDetailsController extends FrontendController {
         if(validatedForm.hasErrors) {
           Future.successful(BadRequest(views.html.pages.companyDetails.tradingName(validatedForm)))
         } else {
-          Future.successful(Redirect(controllers.routes.WelcomeController.show()))
+          Future.successful(Redirect(controllers.userJourney.routes.WelcomeController.show()))
         }
       }
     )

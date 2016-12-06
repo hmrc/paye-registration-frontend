@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.userJourney
 
 import connectors.S4LConnector
 import helpers.PAYERegSpec

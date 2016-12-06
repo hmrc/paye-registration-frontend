@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.userJourney
 
 import helpers.PAYERegSpec
 import play.api.http.Status

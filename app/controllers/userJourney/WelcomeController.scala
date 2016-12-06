@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.userJourney
 
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import play.api.mvc._
-import scala.concurrent.Future
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
+import play.api.mvc._
+import uk.gov.hmrc.play.frontend.controller.FrontendController
+
+import scala.concurrent.Future
 
 object WelcomeController extends WelcomeController {
 

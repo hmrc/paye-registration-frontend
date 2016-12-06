@@ -3,12 +3,12 @@
 GET         /assets/*file            controllers.Assets.at(path="/public", file)
 
 ## WELCOME PAGE
-GET         /                        controllers.WelcomeController.show
-GET         /start                   controllers.WelcomeController.show
+GET         /                        controllers.userJourney.WelcomeController.show
+GET         /start                   controllers.userJourney.WelcomeController.show
 
 ## COMPANY DETAILS
-GET         /trading-name            controllers.CompanyDetailsController.tradingName
-POST        /trading-name            controllers.CompanyDetailsController.submitTradingName
+GET         /trading-name            controllers.userJourney.CompanyDetailsController.tradingName
+POST        /trading-name            controllers.userJourney.CompanyDetailsController.submitTradingName
 
 
 
