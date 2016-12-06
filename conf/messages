@@ -1,20 +1,32 @@
-#Global
-app.title                         =Register your company
-app.phaseBannerFeedback           =This is a new service – your <a href={0}>feedback</a> will help us to improve it.
+## Global
+app.title                          = Register your company
+app.phaseBannerFeedback            = This is a new service – your <a href= {0}>feedback</a> will help us to improve it.
+app.common.yes                     = Yes
+app.common.no                      = No
+app.common.continue                = Continue
+app.common.saveAndContinue         = Save and continue
+app.common.errorSummaryLabel       = There are errors on this page.
 
 
-#Welcome page
-page.welcome.title                =Register as an employer
-page.welcome.heading              =Before you register as an employer
-page.welcome.heading.register     =You need to register as an employer if you:
-page.welcome.bullet.pay           =pay any employees £112 or more a week
-page.welcome.bullet.pension       =employ anyone who''s getting a pension or already has another job
-page.welcome.bullet.car           =provide any employees with expenses or benefits (for example, a company car)
-page.welcome.director             =You must register if you''re employing yourself (for example, if you''re the only director of a limited company).
-page.welcome.2months              =You can''t register more than 2 months before you start paying people.
-page.welcome.nino                 =You''ll need the director''s National Insurance number to complete this registration.
+## Welcome page
+pages.welcome.title                = Register as an employer
+pages.welcome.heading              = Before you register as an employer
+pages.welcome.heading.register     = You need to register as an employer if you:
+pages.welcome.bullet.pay           = pay any employees £112 or more a week
+pages.welcome.bullet.pension       = employ anyone who''s getting a pension or already has another job
+pages.welcome.bullet.car           = provide any employees with expenses or benefits (for example, a company car)
+pages.welcome.director             = You must register if you''re employing yourself (for example, if you''re the only director of a limited company).
+pages.welcome.2months              = You can''t register more than 2 months before you start paying people.
+pages.welcome.nino                 = You''ll need the director''s National Insurance number to complete this registration.
 
-common.button.continue            =Continue
-
-
-
+## Trading Name Page
+pages.tradingName.title            = Trading name
+pages.tradingName.heading          = Does the company trade under any other names?
+pages.tradingName.legend           = Tell us if you do business using a different name to your registered company name.
+pages.tradingName.tradingNameLabel = Trading name
+pages.tradingName.nameRulesSummary = What are the rules for trading names?
+pages.tradingName.nameRulesIntro   = Trading names must not:
+pages.tradingName.nameRules1       = include ''limited'', ''Ltd'', ''limited liability partnership'', ''LLP'', ''public limited company'' or ''plc''
+pages.tradingName.nameRules2       = be the same as an <a href={0}>existing trade mark</a>
+pages.tradingName.nameRules3       = contain a 'sensitive' word or expression unless you <a href={0}>get permission</a>
+pages.tradingName.errorQuestion    = Please enter a correct trading name

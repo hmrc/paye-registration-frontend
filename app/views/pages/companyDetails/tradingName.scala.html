@@ -1,7 +1,49 @@
 @import models.companyDetails.TradingNameModel
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import helpers.templates.{formHiddenYesNoRadio,hiddenDetails}
 
 @(tradingNameForm: Form[TradingNameModel])(implicit request: Request[_], messages: Messages)
 
-@main_template(title = Messages("page.welcome.title")) {
+@hiddenYesNoContent = {
+    @govHelpers.input(
+        tradingNameForm("tradingName"),
+        '_labelClass -> "form-label cascading",
+        '_label -> Messages("pages.tradingName.tradingNameLabel")
+    )
+}
+
+@hiddenDetailsContent = {
+    <p>@Messages("pages.tradingName.nameRulesIntro")</p>
+    <ul class="list list-bullet">
+        <li>@Messages("pages.tradingName.nameRules1")</li>
+        <li>@Html(Messages("pages.tradingName.nameRules2", "https://www.gov.uk/search-for-trademark"))</li>
+        <li>@Html(Messages("pages.tradingName.nameRules3", "https://www.gov.uk/government/publications/incorporation-and-names"))</li>
+    </ul>
+}
+
+@main_template(title = Messages("pages.tradingName.title")) {
+
+    @govHelpers.errorSummary(
+        Messages("app.common.errorSummaryLabel"), tradingNameForm
+    )
+
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.tradingName.heading")</h1>
+
+    @govHelpers.form(action = routes.CompanyDetailsController.submitTradingName) {
+
+    <div class="inline form-group">
+        @formHiddenYesNoRadio(
+        tradingNameForm,
+        "tradeUnderDifferentName",
+        Messages("pages.tradingName.legend"),
+        hiddenYesNoContent
+        )
+
+    </div>
+
+    @hiddenDetails("tradingNameRules", Messages("pages.tradingName.nameRulesSummary"), hiddenDetailsContent)
+
+    <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
+    }
 
 }

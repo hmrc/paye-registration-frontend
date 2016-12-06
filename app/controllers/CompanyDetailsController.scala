@@ -34,4 +34,18 @@ trait CompanyDetailsController extends FrontendController {
     Future.successful(Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form)))
   }
 
+  val submitTradingName = Action.async { implicit request =>
+    TradingNameForm.form.bindFromRequest.fold(
+      errors  => Future.successful(BadRequest(views.html.pages.companyDetails.tradingName(errors))),
+      success => {
+        val validatedForm = TradingNameForm.validateForm(TradingNameForm.form.fill(success))
+        if(validatedForm.hasErrors) {
+          Future.successful(BadRequest(views.html.pages.companyDetails.tradingName(validatedForm)))
+        } else {
+          Future.successful(Redirect(controllers.routes.WelcomeController.show()))
+        }
+      }
+    )
+  }
+
 }
