@@ -17,13 +17,13 @@
 package auth
 
 import controllers.userJourney.routes
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.config.{RunMode, ServicesConfig}
 
-object PAYEExternalUrls extends ServicesConfig {
+object PAYEExternalUrls extends RunMode with ServicesConfig {
 
-  private[PAYEExternalUrls] val companyAuthHost = getConfString(s"$env.microservice.services.auth.company-auth.url","")
-  private[PAYEExternalUrls] val loginCallback = getConfString(s"$env.microservice.services.auth.login-callback.url","")
-  private[PAYEExternalUrls] val loginPath = getConfString(s"$env.microservice.services.auth.login_path","")
+  private[PAYEExternalUrls] val companyAuthHost = getConfString("auth.company-auth.url","")
+  private[PAYEExternalUrls] val loginCallback = getConfString("auth.login-callback.url","")
+  private[PAYEExternalUrls] val loginPath = getConfString("auth.login_path","")
 
   val loginURL = s"$companyAuthHost$loginPath"
   val continueURL = s"$loginCallback${routes.SignInOutController.postSignIn()}"
