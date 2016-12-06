@@ -2,6 +2,9 @@
 
 GET         /assets/*file            controllers.Assets.at(path="/public", file)
 
+## POST SIGN IN
+GET         /post-sign-in            controllers.userJourney.SignInOutController.postSignIn
+
 ## WELCOME PAGE
 GET         /                        controllers.userJourney.WelcomeController.show
 GET         /start                   controllers.userJourney.WelcomeController.show

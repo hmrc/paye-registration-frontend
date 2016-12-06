@@ -16,27 +16,30 @@
 
 package controllers.userJourney
 
+import auth.PAYERegime
+import config.FrontendAuthConnector
 import connectors.S4LConnector
 import forms.companyDetails.TradingNameForm
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.Action
+import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
 object CompanyDetailsController extends CompanyDetailsController {
 
+  override val authConnector = FrontendAuthConnector
   override val s4LConnector = S4LConnector
 
 }
 
-
-trait CompanyDetailsController extends FrontendController {
+trait CompanyDetailsController extends FrontendController with Actions {
 
   val s4LConnector: S4LConnector
 
-  val tradingName = Action.async { implicit request =>
+  val tradingName = AuthorisedFor(taxRegime = PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     Future.successful(Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form)))
   }
 
