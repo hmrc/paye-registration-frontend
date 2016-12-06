@@ -16,8 +16,9 @@
 
 package helpers
 
+import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
 
-trait PAYERegSpec extends UnitSpec with WithFakeApplication {
+trait PAYERegSpec extends UnitSpec with WithFakeApplication with MockitoSugar {
 
 }

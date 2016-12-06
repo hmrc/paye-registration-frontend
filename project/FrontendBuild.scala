@@ -23,8 +23,10 @@ private object AppDependencies {
   private val playAuthorisedFrontendVersion = "6.2.0"
   private val playConfigVersion = "3.0.0"
   private val hmrcTestVersion = "2.2.0"
-  private val scalaTestVersion = "2.2.6"
+  private val scalaTestVersion = "3.0.0"
   private val pegdownVersion = "1.6.0"
+  private val mockitoCoreVersion = "1.9.5"
+
 
   val compile = Seq(
     ws,
@@ -52,7 +54,8 @@ private object AppDependencies {
         "org.scalatestplus" %% "play" % "1.2.0" % scope,
         "org.pegdown" % "pegdown" % pegdownVersion % scope,
         "org.jsoup" % "jsoup" % "1.8.1" % scope,
-        "com.typesafe.play" %% "play-test" % PlayVersion.current % scope
+        "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
+        "org.mockito" % "mockito-core" % mockitoCoreVersion %scope
       )
     }.test
   }
