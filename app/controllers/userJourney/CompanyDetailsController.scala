@@ -14,27 +14,37 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.userJourney
 
-import play.api.mvc.Action
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import scala.concurrent.Future
+import auth.PAYERegime
+import config.FrontendAuthConnector
+import connectors.S4LConnector
+import forms.companyDetails.TradingNameForm
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
-import forms.companyDetails.TradingNameForm
+import play.api.mvc.Action
+import uk.gov.hmrc.play.frontend.auth.Actions
+import uk.gov.hmrc.play.frontend.controller.FrontendController
+
+import scala.concurrent.Future
 
 object CompanyDetailsController extends CompanyDetailsController {
+  //$COVERAGE-OFF$
+  override val authConnector = FrontendAuthConnector
+  override val s4LConnector = S4LConnector
+  //$COVERAGE-ON
 
 }
 
+trait CompanyDetailsController extends FrontendController with Actions {
 
-trait CompanyDetailsController extends FrontendController {
+  val s4LConnector: S4LConnector
 
-  val tradingName = Action.async { implicit request =>
+  val tradingName = AuthorisedFor(taxRegime = PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     Future.successful(Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form)))
   }
 
-  val submitTradingName = Action.async { implicit request =>
+  val submitTradingName = AuthorisedFor(taxRegime = PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     TradingNameForm.form.bindFromRequest.fold(
       errors  => Future.successful(BadRequest(views.html.pages.companyDetails.tradingName(errors))),
       success => {
@@ -42,7 +52,7 @@ trait CompanyDetailsController extends FrontendController {
         if(validatedForm.hasErrors) {
           Future.successful(BadRequest(views.html.pages.companyDetails.tradingName(validatedForm)))
         } else {
-          Future.successful(Redirect(controllers.routes.WelcomeController.show()))
+          Future.successful(Redirect(controllers.userJourney.routes.WelcomeController.show()))
         }
       }
     )

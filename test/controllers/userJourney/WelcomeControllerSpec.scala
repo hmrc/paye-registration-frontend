@@ -14,27 +14,26 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.userJourney
 
+import helpers.PAYERegSpec
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
 
-class CompanyDetailsControllerSpec extends UnitSpec with WithFakeApplication {
-
+class WelcomeControllerSpec extends PAYERegSpec {
 
   val fakeRequest = FakeRequest("GET", "/")
 
 
-  "GET /trading-name" should {
+  "GET /start" should {
     "return 200" in {
-      val result = CompanyDetailsController.tradingName(fakeRequest)
+      val result = WelcomeController.show(fakeRequest)
       status(result) shouldBe Status.OK
     }
 
     "return HTML" in {
-      val result = CompanyDetailsController.tradingName(fakeRequest)
+      val result = WelcomeController.show(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
