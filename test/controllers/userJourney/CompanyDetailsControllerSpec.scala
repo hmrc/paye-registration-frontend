@@ -34,11 +34,36 @@ class CompanyDetailsControllerSpec extends PAYERegSpec {
   val fakeRequest = FakeRequest("GET", "/")
 
 
-  "GET /trading-name" should {
-    "return 200" in new Setup {
+  "calling the tradingName action" should {
+    "return 200 for an authorised user" in new Setup {
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         result =>
           status(result) shouldBe Status.OK
+      }
+    }
+
+    "return 303 for an unauthorised user" in new Setup {
+      val result = controller.tradingName()(FakeRequest())
+      status(result) shouldBe Status.SEE_OTHER
+    }
+  }
+
+  "calling the submitTradingName action" should {
+    "return 303 when a user enters valid data" in new Setup {
+      AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "tradeUnderDifferentName" -> "yes",
+        "tradingName" -> "Tradez R us"
+      )) {
+        result =>
+          status(result) shouldBe Status.SEE_OTHER
+      }
+    }
+    "return 400 when a user enters invalid data" in new Setup {
+      AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "tradeUnderDifferentName" -> "yes"
+      )) {
+        result =>
+          status(result) shouldBe Status.BAD_REQUEST
       }
     }
   }
