@@ -37,7 +37,7 @@ trait SignInOutController extends FrontendController with Actions {
   def postSignIn = AuthorisedFor(taxRegime = PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        Future.successful(Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form)))
+        Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.tradingName()))
   }
 
 }
