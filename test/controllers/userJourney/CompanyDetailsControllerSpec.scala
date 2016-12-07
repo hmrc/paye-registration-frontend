@@ -16,36 +16,31 @@
 
 package controllers.userJourney
 
-import connectors.S4LConnector
+import builders.AuthBuilder
 import helpers.PAYERegSpec
 import play.api.http.Status
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 
 class CompanyDetailsControllerSpec extends PAYERegSpec {
 
-  val mockS4LConnector = mock[S4LConnector]
 
-  object TestCompanyDetailsController extends CompanyDetailsController {
-    override val s4LConnector = mockS4LConnector
+  class Setup {
+    val controller = new CompanyDetailsController {
+      override val s4LConnector = mockS4LConnector
+      override val authConnector = mockAuthConnector
+    }
   }
 
   val fakeRequest = FakeRequest("GET", "/")
 
 
   "GET /trading-name" should {
-    "return 200" in {
-      val result = CompanyDetailsController.tradingName(fakeRequest)
-      status(result) shouldBe Status.OK
+    "return 200" in new Setup {
+      AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
+        result =>
+          status(result) shouldBe Status.OK
+      }
     }
-
-    "return HTML" in {
-      val result = CompanyDetailsController.tradingName(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
-
-
   }
 
 }
