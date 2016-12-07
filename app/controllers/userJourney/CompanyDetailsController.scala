@@ -43,7 +43,7 @@ trait CompanyDetailsController extends FrontendController with Actions {
     Future.successful(Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form)))
   }
 
-  val submitTradingName = Action.async { implicit request =>
+  val submitTradingName = AuthorisedFor(taxRegime = PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     TradingNameForm.form.bindFromRequest.fold(
       errors  => Future.successful(BadRequest(views.html.pages.companyDetails.tradingName(errors))),
       success => {
