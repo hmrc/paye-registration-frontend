@@ -29,9 +29,10 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 import scala.concurrent.Future
 
 object CompanyDetailsController extends CompanyDetailsController {
-
+  //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
   override val s4LConnector = S4LConnector
+  //$COVERAGE-ON
 
 }
 

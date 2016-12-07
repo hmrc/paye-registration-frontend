@@ -58,6 +58,13 @@ class CompanyDetailsControllerSpec extends PAYERegSpec {
           status(result) shouldBe Status.SEE_OTHER
       }
     }
+    "return 400 when a user enters no data" in new Setup {
+      AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+      )) {
+        result =>
+          status(result) shouldBe Status.BAD_REQUEST
+      }
+    }
     "return 400 when a user enters invalid data" in new Setup {
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "tradeUnderDifferentName" -> "yes"
