@@ -40,11 +40,11 @@ trait CompanyDetailsController extends FrontendController with Actions {
 
   val s4LConnector: S4LConnector
 
-  val tradingName = AuthorisedFor(taxRegime = PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+  val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     Future.successful(Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form)))
   }
 
-  val submitTradingName = AuthorisedFor(taxRegime = PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+  val submitTradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     TradingNameForm.form.bindFromRequest.fold(
       errors  => Future.successful(BadRequest(views.html.pages.companyDetails.tradingName(errors))),
       success => {

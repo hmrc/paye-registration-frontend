@@ -19,9 +19,7 @@ package auth
 import uk.gov.hmrc.play.frontend.auth.{AuthenticationProvider, TaxRegime}
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
 
-object PAYERegime extends PAYERegime
-
-trait PAYERegime extends TaxRegime {
+class PAYERegime extends TaxRegime {
   override def isAuthorised(accounts: Accounts): Boolean = true
   override def authenticationType: AuthenticationProvider = PAYEAuthenticationProvider
 }
