@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package helpers
+package auth
 
-import mocks.PAYEMocks
-import org.scalatest.mockito.MockitoSugar
-import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
+import uk.gov.hmrc.play.frontend.auth.{AuthenticationProvider, TaxRegime}
+import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
 
-trait PAYERegSpec extends UnitSpec with WithFakeApplication with MockitoSugar with PAYEMocks {
+object PAYERegime extends PAYERegime
 
+trait PAYERegime extends TaxRegime {
+  override def isAuthorised(accounts: Accounts): Boolean = true
+  override def authenticationType: AuthenticationProvider = PAYEAuthenticationProvider
 }

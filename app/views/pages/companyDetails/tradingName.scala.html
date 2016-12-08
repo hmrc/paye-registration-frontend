@@ -29,7 +29,7 @@
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.tradingName.heading")</h1>
 
-    @govHelpers.form(action = routes.CompanyDetailsController.submitTradingName) {
+    @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.submitTradingName) {
 
     <div class="inline form-group">
         @formHiddenYesNoRadio(

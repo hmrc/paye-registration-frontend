@@ -14,12 +14,24 @@
  * limitations under the License.
  */
 
-package helpers
+package controllers.userJourney
 
-import mocks.PAYEMocks
-import org.scalatest.mockito.MockitoSugar
-import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
+import play.api.Play.current
+import play.api.i18n.Messages.Implicits._
+import play.api.mvc._
+import uk.gov.hmrc.play.frontend.controller.FrontendController
 
-trait PAYERegSpec extends UnitSpec with WithFakeApplication with MockitoSugar with PAYEMocks {
+import scala.concurrent.Future
+
+object WelcomeController extends WelcomeController {
+
+}
+
+
+trait WelcomeController extends FrontendController {
+
+  val show = Action.async { implicit request =>
+    Future.successful(Ok(views.html.pages.welcome()))
+  }
 
 }

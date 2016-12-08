@@ -14,31 +14,18 @@
  * limitations under the License.
  */
 
-package controllers
+package auth
 
-import helpers.PAYERegSpec
-import play.api.http.Status
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import controllers.userJourney.routes
+import uk.gov.hmrc.play.config.{RunMode, ServicesConfig}
 
-class WelcomeControllerSpec extends PAYERegSpec {
+object PAYEExternalUrls extends RunMode with ServicesConfig {
 
-  val fakeRequest = FakeRequest("GET", "/")
+  private[PAYEExternalUrls] val companyAuthHost = getConfString("auth.company-auth.url","")
+  private[PAYEExternalUrls] val loginCallback = getConfString("auth.login-callback.url","")
+  private[PAYEExternalUrls] val loginPath = getConfString("auth.login_path","")
 
-
-  "GET /start" should {
-    "return 200" in {
-      val result = WelcomeController.show(fakeRequest)
-      status(result) shouldBe Status.OK
-    }
-
-    "return HTML" in {
-      val result = WelcomeController.show(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
-
-
-  }
+  val loginURL = s"$companyAuthHost$loginPath"
+  val continueURL = s"$loginCallback${routes.SignInOutController.postSignIn()}"
 
 }

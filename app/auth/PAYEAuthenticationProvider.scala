@@ -14,23 +14,11 @@
  * limitations under the License.
  */
 
-package controllers
+package auth
 
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import play.api.mvc._
-import scala.concurrent.Future
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
+import uk.gov.hmrc.play.frontend.auth.GovernmentGateway
 
-object WelcomeController extends WelcomeController {
-
-}
-
-
-trait WelcomeController extends FrontendController {
-
-  val show = Action.async { implicit request =>
-    Future.successful(Ok(views.html.pages.welcome()))
-  }
-
+object PAYEAuthenticationProvider extends GovernmentGateway {
+  override val continueURL: String = PAYEExternalUrls.continueURL
+  override val loginURL: String = PAYEExternalUrls.loginURL
 }
