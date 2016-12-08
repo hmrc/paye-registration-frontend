@@ -18,18 +18,21 @@ package controllers.userJourney
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import forms.companyDetails.TradingNameForm
-import uk.gov.hmrc.play.frontend.auth.Actions
-import uk.gov.hmrc.play.frontend.controller.FrontendController
+import enums.DownstreamOutcome
+import play.api.mvc.{AnyContent, Request, Result}
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
+import services.CurrentProfileService
+import uk.gov.hmrc.play.frontend.auth.Actions
+import uk.gov.hmrc.play.frontend.controller.FrontendController
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
 object SignInOutController extends SignInOutController {
-
-  val authConnector = FrontendAuthConnector
-
+  //$COVERAGE-OFF$
+  override val authConnector = FrontendAuthConnector
+  //$COVERAGE-ON$
 }
 
 trait SignInOutController extends FrontendController with Actions {
@@ -37,7 +40,15 @@ trait SignInOutController extends FrontendController with Actions {
   def postSignIn = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.tradingName()))
+        checkAndStoreCurrentProfile {
+          Redirect(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+        }
   }
 
+  private def checkAndStoreCurrentProfile(f: => Result)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+    CurrentProfileService.fetchAndStoreCurrentProfile map {
+      case DownstreamOutcome.Success => f
+      case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+    }
+  }
 }
