@@ -34,7 +34,7 @@ object SignInOutController extends SignInOutController {
 
 trait SignInOutController extends FrontendController with Actions {
 
-  def postSignIn = AuthorisedFor(taxRegime = PAYERegime, pageVisibility = GGConfidence).async {
+  def postSignIn = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.tradingName()))
