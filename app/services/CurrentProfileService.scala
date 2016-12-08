@@ -16,8 +16,9 @@
 
 package services
 
-import connectors.{BusinessRegistrationSuccessResponse, BusinessRegistrationConnector}
-import enums.DownstreamOutcome
+import connectors.{KeystoreConnector, BusinessRegistrationSuccessResponse, BusinessRegistrationConnector}
+import enums.{DownstreamOutcome,CacheKeys}
+import models.currentProfile.CurrentProfile
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -26,14 +27,22 @@ import scala.concurrent.Future
 
 object CurrentProfileService extends CurrentProfileService {
 
+  override val keystoreConnector = KeystoreConnector
+
 }
 
 trait CurrentProfileService {
 
+  val keystoreConnector: KeystoreConnector
+
   def fetchAndStoreCurrentProfile(implicit hc: HeaderCarrier) : Future[DownstreamOutcome.Value] = {
-    BusinessRegistrationConnector.retrieveCurrentProfile map {
-      case BusinessRegistrationSuccessResponse(profile) => DownstreamOutcome.Success
-      case _ => DownstreamOutcome.Failure
+    BusinessRegistrationConnector.retrieveCurrentProfile flatMap {
+      case BusinessRegistrationSuccessResponse(profile) =>
+        val currentProfile = CurrentProfile(profile.registrationID, profile.completionCapacity, profile.language)
+        keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, currentProfile).map { cacheMap =>
+          DownstreamOutcome.Success
+        }
+      case _ => Future.successful(DownstreamOutcome.Failure)
     }
   }
 

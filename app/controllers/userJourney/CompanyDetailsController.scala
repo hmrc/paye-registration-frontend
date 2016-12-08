@@ -18,8 +18,9 @@ package controllers.userJourney
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.S4LConnector
+import connectors.{KeystoreConnector, S4LConnector}
 import forms.companyDetails.TradingNameForm
+import models.companyDetails.TradingNameModel
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.Action
@@ -32,6 +33,7 @@ object CompanyDetailsController extends CompanyDetailsController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
   override val s4LConnector = S4LConnector
+  override val keystoreConnector = KeystoreConnector
   //$COVERAGE-ON
 
 }
@@ -39,9 +41,13 @@ object CompanyDetailsController extends CompanyDetailsController {
 trait CompanyDetailsController extends FrontendController with Actions {
 
   val s4LConnector: S4LConnector
+  val keystoreConnector: KeystoreConnector
 
   val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    Future.successful(Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form)))
+    keystoreConnector.fetchAndGet[TradingNameModel]("tName"). map {
+      case Some(model) => Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form.fill(model)))
+      case _ => Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form))
+    }
   }
 
   val submitTradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
