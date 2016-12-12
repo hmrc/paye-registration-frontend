@@ -19,5 +19,5 @@ package enums
 object CacheKeys extends Enumeration {
 
   val CurrentProfile = Value
-
+  val TradingName = Value
 }

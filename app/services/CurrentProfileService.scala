@@ -41,6 +41,8 @@ trait CurrentProfileService {
         val currentProfile = CurrentProfile(profile.registrationID, profile.completionCapacity, profile.language)
         keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, currentProfile).map { cacheMap =>
           DownstreamOutcome.Success
+        } recover {
+          case e => DownstreamOutcome.Failure
         }
       case _ => Future.successful(DownstreamOutcome.Failure)
     }

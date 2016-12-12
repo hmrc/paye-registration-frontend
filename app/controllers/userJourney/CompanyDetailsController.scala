@@ -19,6 +19,7 @@ package controllers.userJourney
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnector, S4LConnector}
+import enums.CacheKeys
 import forms.companyDetails.TradingNameForm
 import models.companyDetails.TradingNameModel
 import play.api.Play.current
@@ -44,10 +45,7 @@ trait CompanyDetailsController extends FrontendController with Actions {
   val keystoreConnector: KeystoreConnector
 
   val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    keystoreConnector.fetchAndGet[TradingNameModel]("tName"). map {
-      case Some(model) => Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form.fill(model)))
-      case _ => Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form))
-    }
+    Future.successful(Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form)))
   }
 
   val submitTradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
