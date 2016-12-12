@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
-package mocks
+package fixtures
 
-import mocks.internal._
-import org.scalatest.mockito.MockitoSugar
-import uk.gov.hmrc.http.cache.client.SessionCache
-import uk.gov.hmrc.play.audit.model.Audit
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import models.currentProfile.CurrentProfile
 
-trait PAYEMocks
-  extends SaveForLaterMock
-    with KeystoreMock
-    with WSHTTPMock
-    with BusinessRegistrationConnectorMock {
+trait KeystoreFixture {
 
-  this: MockitoSugar =>
-    lazy val mockAuthConnector = mock[AuthConnector]
-    lazy val mockSessionCache = mock[SessionCache]
-    lazy val mockAudit = mock[Audit]
+  lazy val validCurrentProfileResponse = CurrentProfile(
+    "12345",
+    Some("Director"),
+    "ENG"
+  )
 
 }

@@ -37,9 +37,14 @@ trait KeystoreMock {
       .thenReturn(Future.successful(model))
   }
 
-  def mockKeystoreCache[T](key: String, model: T, cacheMap: CacheMap): OngoingStubbing[Future[CacheMap]] = {
+  def mockKeystoreCache[T](key: String, cacheMap: CacheMap): OngoingStubbing[Future[CacheMap]] = {
     when(mockKeystoreConnector.cache(Matchers.contains(key), Matchers.any[T]())(Matchers.any[HeaderCarrier](), Matchers.any[Format[T]]()))
       .thenReturn(Future.successful(cacheMap))
+  }
+
+  def mockKeystoreCacheError[T](key: String, err: Exception): OngoingStubbing[Future[CacheMap]] = {
+    when(mockKeystoreConnector.cache(Matchers.contains(key), Matchers.any[T]())(Matchers.any[HeaderCarrier](), Matchers.any[Format[T]]()))
+      .thenReturn(Future.failed(err))
   }
 
   def mockKeystoreClear(): OngoingStubbing[Future[HttpResponse]] = {

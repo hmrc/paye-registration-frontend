@@ -26,17 +26,20 @@ import scala.concurrent.Future
 
 
 object CurrentProfileService extends CurrentProfileService {
-
+  //$COVERAGE-OFF$
   override val keystoreConnector = KeystoreConnector
+  override val businessRegistrationConnector = BusinessRegistrationConnector
+  //$COVERAGE-ON$
 
 }
 
 trait CurrentProfileService {
 
   val keystoreConnector: KeystoreConnector
+  val businessRegistrationConnector: BusinessRegistrationConnector
 
   def fetchAndStoreCurrentProfile(implicit hc: HeaderCarrier) : Future[DownstreamOutcome.Value] = {
-    BusinessRegistrationConnector.retrieveCurrentProfile flatMap {
+    businessRegistrationConnector.retrieveCurrentProfile flatMap {
       case BusinessRegistrationSuccessResponse(profile) =>
         val currentProfile = CurrentProfile(profile.registrationID, profile.completionCapacity, profile.language)
         keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, currentProfile).map { cacheMap =>

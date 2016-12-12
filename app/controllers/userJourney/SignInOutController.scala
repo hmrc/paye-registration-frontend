@@ -32,10 +32,13 @@ import scala.concurrent.Future
 object SignInOutController extends SignInOutController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
+  override val currentProfileService = CurrentProfileService
   //$COVERAGE-ON$
 }
 
 trait SignInOutController extends FrontendController with Actions {
+
+  val currentProfileService: CurrentProfileService
 
   def postSignIn = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
@@ -46,7 +49,7 @@ trait SignInOutController extends FrontendController with Actions {
   }
 
   private def checkAndStoreCurrentProfile(f: => Result)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
-    CurrentProfileService.fetchAndStoreCurrentProfile map {
+    currentProfileService.fetchAndStoreCurrentProfile map {
       case DownstreamOutcome.Success => f
       case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
     }

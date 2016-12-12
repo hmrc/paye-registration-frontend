@@ -28,8 +28,10 @@ import scala.concurrent.Future
 
 
 object BusinessRegistrationConnector extends BusinessRegistrationConnector with ServicesConfig {
+  //$COVERAGE-OFF$
   val businessRegUrl = baseUrl("business-registration")
   val http = WSHttp
+  //$COVERAGE-ON$
 }
 
 sealed trait BusinessRegistrationResponse
