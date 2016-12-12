@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package mocks
+package common.exceptions
 
-import org.scalatest.mockito.MockitoSugar
-import uk.gov.hmrc.http.cache.client.SessionCache
-import uk.gov.hmrc.play.audit.model.Audit
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+object DownstreamExceptions extends DownstreamExceptions
 
-trait PAYEMocks
-  extends SaveForLaterMock
-    with KeystoreMock {
+trait DownstreamExceptions {
 
-  this: MockitoSugar =>
-    lazy val mockAuthConnector = mock[AuthConnector]
-    lazy val mockSessionCache = mock[SessionCache]
-    lazy val mockAudit = mock[Audit]
+  class CurrentProfileNotFoundException extends Exception
 
 }
