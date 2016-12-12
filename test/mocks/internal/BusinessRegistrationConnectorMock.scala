@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package mocks
+package mocks.internal
 
-import mocks.internal._
+import connectors.{BusinessRegistrationResponse, BusinessRegistrationConnector}
+import org.mockito.Matchers
+import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
-import uk.gov.hmrc.http.cache.client.SessionCache
-import uk.gov.hmrc.play.audit.model.Audit
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 
-trait PAYEMocks
-  extends SaveForLaterMock
-    with KeystoreMock
-    with WSHTTPMock
-    with BusinessRegistrationConnectorMock {
+import scala.concurrent.Future
 
+trait BusinessRegistrationConnectorMock {
   this: MockitoSugar =>
-    lazy val mockAuthConnector = mock[AuthConnector]
-    lazy val mockSessionCache = mock[SessionCache]
-    lazy val mockAudit = mock[Audit]
 
+    lazy val mockBusinessRegistrationConnector = mock[BusinessRegistrationConnector]
+
+    def mockBusinessRegFetch(response: BusinessRegistrationResponse) = {
+        when(mockBusinessRegistrationConnector.retrieveCurrentProfile(Matchers.any(), Matchers.any()))
+          .thenReturn(Future.successful(response))
+    }
 }

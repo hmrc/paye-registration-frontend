@@ -27,6 +27,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec {
   class Setup {
     val controller = new CompanyDetailsController {
       override val s4LConnector = mockS4LConnector
+      override val keystoreConnector = mockKeystoreConnector
       override val authConnector = mockAuthConnector
     }
   }

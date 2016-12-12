@@ -30,3 +30,9 @@ pages.tradingName.nameRules1       = include ''limited'', ''Ltd'', ''limited lia
 pages.tradingName.nameRules2       = be the same as an <a href={0}>existing trade mark</a>
 pages.tradingName.nameRules3       = contain a 'sensitive' word or expression unless you <a href={0}>get permission</a>
 pages.tradingName.errorQuestion    = Please enter a correct trading name
+
+
+## Error Pages
+errorPages.title                   = Something went wrong
+errorPages.restart.heading         = Sorry, we''re having technical issues.
+errorPages.restart.p1              = You can try again by <a href={0}>restarting</a> your PAYE registration.

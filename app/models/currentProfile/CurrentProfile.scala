@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-package mocks
+package models.currentProfile
 
-import mocks.internal._
-import org.scalatest.mockito.MockitoSugar
-import uk.gov.hmrc.http.cache.client.SessionCache
-import uk.gov.hmrc.play.audit.model.Audit
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import play.api.libs.json.Json
 
-trait PAYEMocks
-  extends SaveForLaterMock
-    with KeystoreMock
-    with WSHTTPMock
-    with BusinessRegistrationConnectorMock {
+case class CurrentProfile(registrationId: String,
+                          completionCapacity : Option[String],
+                          language: String)
 
-  this: MockitoSugar =>
-    lazy val mockAuthConnector = mock[AuthConnector]
-    lazy val mockSessionCache = mock[SessionCache]
-    lazy val mockAudit = mock[Audit]
-
+object CurrentProfile {
+  implicit val formats = Json.format[CurrentProfile]
 }
