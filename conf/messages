@@ -10,9 +10,9 @@ app.common.errorSummaryLabel       = There are errors on this page.
 
 ## Welcome page
 pages.welcome.title                = Register as an employer
-pages.welcome.heading              = Before you register as an employer
+pages.welcome.heading              = Register as an employer
 pages.welcome.heading.register     = You need to register as an employer if you:
-pages.welcome.bullet.pay           = pay any employees £112 or more a week
+pages.welcome.bullet.pay           = pay any employees £112 or more a week (this is the same as £486 a month or £5,824 a year)
 pages.welcome.bullet.pension       = employ anyone who''s getting a pension or already has another job
 pages.welcome.bullet.car           = provide any employees with expenses or benefits (for example, a company car)
 pages.welcome.director             = You must register if you''re employing yourself (for example, if you''re the only director of a limited company).
