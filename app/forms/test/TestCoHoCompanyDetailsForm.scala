@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package common.exceptions
+package forms.test
 
-object InternalExceptions extends InternalExceptions
+import models.test.CoHoCompanyDetailsFormModel
+import play.api.data.Form
+import play.api.data.Forms._
 
-trait InternalExceptions {
+object TestCoHoCompanyDetailsForm {
 
-  class UnableToCreateEnumException(val enumName: String, attemptedString: String) extends Exception(
-    s"Couldn't create enum $enumName from input $attemptedString"
-  )
-
-  class ExpectedFormFieldNotPopulatedException(val formName: String, field: String) extends Exception(
-    s"Field $field not populated when extracting data from $formName form"
-  )
-
-  class ConfigStringNotFoundException(val confString: String) extends Exception(
-    s"Unable to retrieve configuration string for $confString"
+  val form = Form(
+    mapping(
+      "companyName" -> nonEmptyText,
+      "sicCodes" -> list(text),
+      "descriptions" -> list(text)
+    )(CoHoCompanyDetailsFormModel.apply)(CoHoCompanyDetailsFormModel.unapply)
   )
 
 }
