@@ -1,0 +1,3 @@
+
+GET        /test-only/current-profile-setup            controllers.test.CurrentProfileController.currentProfileSetup
+
