@@ -16,7 +16,7 @@
 
 package controllers.test
 
-import auth.PAYERegime
+import auth.test.TestPAYERegime
 import config.FrontendAuthConnector
 import connectors.{BusinessRegistrationSuccessResponse, BusinessRegistrationConnector}
 import uk.gov.hmrc.play.frontend.auth.Actions
@@ -32,7 +32,7 @@ object CurrentProfileController extends CurrentProfileController {
 
 trait CurrentProfileController extends FrontendController with Actions {
 
-  def currentProfileSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+  def currentProfileSetup = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     BusinessRegistrationConnector.retrieveCurrentProfile flatMap {
       case BusinessRegistrationSuccessResponse(profile) => Future.successful(Ok(s"Profile already set up for reg ID ${profile.registrationID}"))
       case _ => BusinessRegistrationConnector.createCurrentProfileEntry map {
