@@ -16,9 +16,12 @@
 
 package controllers.test
 
-import auth.PAYERegime
+import auth.test.TestPAYERegime
 import config.FrontendAuthConnector
-import connectors.{BusinessRegistrationSuccessResponse, BusinessRegistrationConnector}
+import connectors.{KeystoreConnector, BusinessRegistrationSuccessResponse, BusinessRegistrationConnector}
+import enums.CacheKeys
+import models.businessRegistration.BusinessRegistration
+import models.currentProfile.CurrentProfile
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
@@ -27,19 +30,33 @@ import scala.concurrent.Future
 object CurrentProfileController extends CurrentProfileController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
+  override val keystoreConnector = KeystoreConnector
   //$COVERAGE-ON$
 }
 
 trait CurrentProfileController extends FrontendController with Actions {
 
-  def currentProfileSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+  val keystoreConnector: KeystoreConnector
+
+  def currentProfileSetup = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     BusinessRegistrationConnector.retrieveCurrentProfile flatMap {
-      case BusinessRegistrationSuccessResponse(profile) => Future.successful(Ok(s"Profile already set up for reg ID ${profile.registrationID}"))
-      case _ => BusinessRegistrationConnector.createCurrentProfileEntry map {
-          response => Ok(s"Profile set up for reg ID ${response.registrationID}")
+      case BusinessRegistrationSuccessResponse(profile) => {
+
+        keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, createCurrentProfileFromBRResponse(profile)).map {
+          case x => Ok(s"Profile already set up for reg ID ${profile.registrationID}")
         }
+      }
+      case _ => BusinessRegistrationConnector.createCurrentProfileEntry flatMap { brResponse =>
+        keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, createCurrentProfileFromBRResponse(brResponse)).map {
+          response => Ok(s"Profile set up for reg ID ${brResponse.registrationID}")
+        }
+      }
     }
 
+  }
+
+  private def createCurrentProfileFromBRResponse(resp: BusinessRegistration): CurrentProfile = {
+    CurrentProfile(resp.registrationID, resp.completionCapacity, resp.language)
   }
 
 }

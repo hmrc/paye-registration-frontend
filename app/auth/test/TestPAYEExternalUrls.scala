@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package common.exceptions
+package auth.test
 
-object InternalExceptions extends InternalExceptions
+import controllers.test.routes
+import uk.gov.hmrc.play.config.{ServicesConfig, RunMode}
 
-trait InternalExceptions {
+object TestPAYEExternalUrls extends RunMode with ServicesConfig {
 
-  class UnableToCreateEnumException(val enumName: String, attemptedString: String) extends Exception(
-    s"Couldn't create enum $enumName from input $attemptedString"
-  )
+  private[TestPAYEExternalUrls] val companyAuthHost = getConfString("auth.company-auth.url","")
+  private[TestPAYEExternalUrls] val loginCallback = getConfString("auth.login-callback.url","")
+  private[TestPAYEExternalUrls] val loginPath = getConfString("auth.login_path","")
 
-  class ExpectedFormFieldNotPopulatedException(val formName: String, field: String) extends Exception(
-    s"Field $field not populated when extracting data from $formName form"
-  )
-
-  class ConfigStringNotFoundException(val confString: String) extends Exception(
-    s"Unable to retrieve configuration string for $confString"
-  )
+  val loginURL = s"$companyAuthHost$loginPath"
+  val continueURL = s"$loginCallback${routes.CurrentProfileController.currentProfileSetup()}"
 
 }

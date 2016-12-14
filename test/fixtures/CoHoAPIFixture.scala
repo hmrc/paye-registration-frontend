@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-package common.exceptions
+package fixtures
 
-object InternalExceptions extends InternalExceptions
+import models.coHo.{AreaOfIndustry, CoHoCompanyDetailsModel}
 
-trait InternalExceptions {
+trait CoHoAPIFixture {
 
-  class UnableToCreateEnumException(val enumName: String, attemptedString: String) extends Exception(
-    s"Couldn't create enum $enumName from input $attemptedString"
-  )
-
-  class ExpectedFormFieldNotPopulatedException(val formName: String, field: String) extends Exception(
-    s"Field $field not populated when extracting data from $formName form"
-  )
-
-  class ConfigStringNotFoundException(val confString: String) extends Exception(
-    s"Unable to retrieve configuration string for $confString"
+  val validCoHoCompanyDetailsResponse = CoHoCompanyDetailsModel(
+    registrationID = "12345",
+    companyName = "Test Company",
+    areasOfIndustry = Seq(
+      AreaOfIndustry(
+        sicCode = "100",
+        description = "Chips"
+      ),
+      AreaOfIndustry(
+        sicCode = "101",
+        description = "Fish"
+      )
+    )
   )
 
 }

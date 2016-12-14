@@ -1,0 +1,52 @@
+@import models.test.CoHoCompanyDetailsFormModel
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+
+@(cohoForm: Form[CoHoCompanyDetailsFormModel])(implicit request: Request[_], messages: Messages)
+
+
+@main_template(title = "Enter details for the test company") {
+
+    @govHelpers.errorSummary(
+        Messages("app.common.errorSummaryLabel"), cohoForm
+    )
+
+    <h1 class="form-title heading-xlarge" id="pageHeading">Enter test company details</h1>
+
+    @govHelpers.form(action = controllers.test.routes.TestCoHoController.submitCoHoCompanyDetailsSetup) {
+
+        <div class="inline form-group">
+            @govHelpers.input(
+                cohoForm("companyName"),
+                '_label -> "Company name"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            cohoForm("sicCodes[0]"),
+            '_label -> "SIC code 1"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            cohoForm("descriptions[0]"),
+            '_label -> "Description 1"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            cohoForm("sicCodes[1]"),
+            '_label -> "SIC code 2"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            cohoForm("descriptions[1]"),
+            '_label -> "Description 2"
+            )
+        </div>
+
+
+        <button class="button" type="submit" id="continue" >Submit</button>
+
+    }
+}
