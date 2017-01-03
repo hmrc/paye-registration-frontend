@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import enums.DownstreamOutcome
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
-import services.CurrentProfileService
+import services.{CoHoAPIService, CurrentProfileService}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -33,23 +33,34 @@ object SignInOutController extends SignInOutController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
   override val currentProfileService = CurrentProfileService
+  override val coHoAPIService = CoHoAPIService
   //$COVERAGE-ON$
 }
 
 trait SignInOutController extends FrontendController with Actions {
 
   val currentProfileService: CurrentProfileService
+  val coHoAPIService: CoHoAPIService
 
   def postSignIn = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         checkAndStoreCurrentProfile {
-          Redirect(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+          checkAndStoreCompanyDetails {
+            Redirect(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+          }
         }
   }
 
-  private def checkAndStoreCurrentProfile(f: => Result)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
-    currentProfileService.fetchAndStoreCurrentProfile map {
+  private def checkAndStoreCurrentProfile(f: => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+    currentProfileService.fetchAndStoreCurrentProfile flatMap {
+      case DownstreamOutcome.Success => f
+      case DownstreamOutcome.Failure => Future.successful(InternalServerError(views.html.pages.error.restart()))
+    }
+  }
+
+  private def checkAndStoreCompanyDetails(f: => Result)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+    coHoAPIService.fetchAndStoreCoHoCompanyDetails map {
       case DownstreamOutcome.Success => f
       case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
     }

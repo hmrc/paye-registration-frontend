@@ -5,3 +5,5 @@ GET        /company-details-setup            controllers.test.TestCoHoController
 POST       /company-details-setup            controllers.test.TestCoHoController.submitCoHoCompanyDetailsSetup
 
 GET        /company-details-teardown         controllers.test.TestCoHoController.coHoCompanyDetailsTearDown
+
+GET        /s4l-teardown                     controllers.test.TestCacheController.tearDownS4L
