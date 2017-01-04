@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package services
 
-import connectors.{CohoApiResponse, CoHoAPIConnector, KeystoreConnector}
+import connectors.{CohoApiSuccessResponse, CohoApiResponse, CoHoAPIConnector, KeystoreConnector}
+import enums.{CacheKeys, DownstreamOutcome}
+import models.coHo.CoHoCompanyDetailsModel
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -25,16 +27,30 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object CoHoAPIService extends CoHoAPIService {
   //$COVERAGE-OFF$
   override val keystoreConnector = KeystoreConnector
+  override val coHoAPIConnector = CoHoAPIConnector
   //$COVERAGE-ON$
 }
 
 trait CoHoAPIService extends CommonService {
 
-  def fetchCoHoCompanyDetails(implicit hc: HeaderCarrier): Future[CohoApiResponse] = {
+  val coHoAPIConnector: CoHoAPIConnector
+
+  def fetchAndStoreCoHoCompanyDetails(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
       regID <- fetchRegistrationID
-      details <- CoHoAPIConnector.getCoHoCompanyDetails(regID)
-    } yield details
+      coHoResp <- coHoAPIConnector.getCoHoCompanyDetails(regID)
+      outcome <- processCoHoResponse(coHoResp)
+    } yield outcome
+  }
+
+  private def processCoHoResponse(resp: CohoApiResponse)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    resp match {
+      case CohoApiSuccessResponse(companyDetails) =>
+        keystoreConnector.cache[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, companyDetails) map {
+          cacheMap => DownstreamOutcome.Success
+        }
+      case _ => Future.successful(DownstreamOutcome.Failure)
+    }
   }
 
 }

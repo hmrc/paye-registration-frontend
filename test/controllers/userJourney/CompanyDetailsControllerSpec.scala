@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,56 +17,105 @@
 package controllers.userJourney
 
 import builders.AuthBuilder
+import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
+import enums.CacheKeys
+import fixtures.CoHoAPIFixture
 import helpers.PAYERegSpec
+import models.coHo.CoHoCompanyDetailsModel
+import models.companyDetails.TradingNameModel
+import org.jsoup._
+import org.mockito.Matchers
+import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.test.FakeRequest
+import services.S4LService
+import uk.gov.hmrc.http.cache.client.CacheMap
 
-class CompanyDetailsControllerSpec extends PAYERegSpec {
+import scala.concurrent.Future
 
+class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
+
+  val mockS4LService = mock[S4LService]
 
   class Setup {
     val controller = new CompanyDetailsController {
-      override val s4LConnector = mockS4LConnector
+      override val s4LService = mockS4LService
       override val keystoreConnector = mockKeystoreConnector
       override val authConnector = mockAuthConnector
     }
   }
 
-  val fakeRequest = FakeRequest("GET", "/")
+  val tstTradingNameModel = TradingNameModel(tradeUnderDifferentName = "yes", tradingName = Some("test trading name"))
 
+  val fakeRequest = FakeRequest("GET", "/")
+  implicit val materializer = fakeApplication.materializer
 
   "calling the tradingName action" should {
-    "return 200 for an authorised user" in new Setup {
-      AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
-        result =>
-          status(result) shouldBe Status.OK
-      }
-    }
 
     "return 303 for an unauthorised user" in new Setup {
       val result = controller.tradingName()(FakeRequest())
       status(result) shouldBe Status.SEE_OTHER
     }
+
+    "show the correctly pre-populated trading name page when data has already been entered" in new Setup {
+      mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, Some(validCoHoCompanyDetailsResponse))
+      when(mockS4LService.fetchAndGet[TradingNameModel](Matchers.matches(CacheKeys.TradingName.toString))(Matchers.any(), Matchers.any())).thenReturn(Future.successful(Some(tstTradingNameModel)))
+
+      AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
+        response =>
+          status(response) shouldBe Status.OK
+          val result = Jsoup.parse(bodyOf(response))
+          result.body().getElementById("pageHeading").text() shouldBe s"Does the company trade under any other names than ${validCoHoCompanyDetailsResponse.companyName}?"
+          result.body().getElementById("tradingName").attr("value") shouldBe "test trading name"
+      }
+    }
+
+    "show the a blank trading name page when no data has been entered" in new Setup {
+      mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, Some(validCoHoCompanyDetailsResponse))
+      when(mockS4LService.fetchAndGet[TradingNameModel](Matchers.matches(CacheKeys.TradingName.toString))(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
+
+      AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
+        response =>
+          status(response) shouldBe Status.OK
+          val result = Jsoup.parse(bodyOf(response))
+          result.body().getElementById("pageHeading").text() shouldBe s"Does the company trade under any other names than ${validCoHoCompanyDetailsResponse.companyName}?"
+          result.body().getElementById("tradingName").attr("value") shouldBe ""
+      }
+    }
+
+    "throw a CompanyDetailsNotFoundException if there are no company details in keystore" in new Setup {
+      mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, None)
+      when(mockS4LService.fetchAndGet[TradingNameModel](Matchers.matches(CacheKeys.TradingName.toString))(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
+      a[CompanyDetailsNotFoundException] shouldBe thrownBy (await(AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {result => status(result)} ))
+    }
   }
 
   "calling the submitTradingName action" should {
-    "return 303 when a user enters valid data" in new Setup {
+    "redirect to the WELCOME PAGE when a user enters valid data" in new Setup {
+      // TODO: Update test and description when flow is updated
+      when(mockS4LService.saveForm[TradingNameModel](Matchers.matches(CacheKeys.TradingName.toString), Matchers.any())(Matchers.any(),Matchers.any())).thenReturn(Future.successful(CacheMap("tstMap", Map.empty)))
+
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "tradeUnderDifferentName" -> "yes",
         "tradingName" -> "Tradez R us"
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
+          result.header.headers("Location") shouldBe "/paye-registration"
       }
     }
+
     "return 400 when a user enters no data" in new Setup {
+      mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, Some(validCoHoCompanyDetailsResponse))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
       )) {
         result =>
           status(result) shouldBe Status.BAD_REQUEST
       }
     }
+
     "return 400 when a user enters invalid data" in new Setup {
+      mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, Some(validCoHoCompanyDetailsResponse))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "tradeUnderDifferentName" -> "yes"
       )) {

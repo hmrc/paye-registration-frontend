@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,11 @@ trait SaveForLaterMock {
   def mockS4LFetchAndGet[T](formId: String, model: Option[T], mockS4LConnector: S4LConnector = mockS4LConnector): OngoingStubbing[Future[Option[T]]] = {
     when(mockS4LConnector.fetchAndGet[T](Matchers.anyString(), Matchers.contains(formId))(Matchers.any[HeaderCarrier](), Matchers.any[Format[T]]()))
       .thenReturn(Future.successful(model))
+  }
+
+  def mockS4LFetchAll(cacheMap: Option[CacheMap], mockS4LConnector: S4LConnector = mockS4LConnector) : OngoingStubbing[Future[Option[CacheMap]]] = {
+    when(mockS4LConnector.fetchAll(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+      .thenReturn(Future.successful(cacheMap))
   }
 
   def mockS4LClear(mockS4LConnector: S4LConnector = mockS4LConnector) : OngoingStubbing[Future[HttpResponse]] = {

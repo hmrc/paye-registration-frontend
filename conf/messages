@@ -21,7 +21,7 @@ pages.welcome.nino                 = You''ll need the director''s National Insur
 
 ## Trading Name Page
 pages.tradingName.title            = Trading name
-pages.tradingName.heading          = Does the company trade under any other names?
+pages.tradingName.heading          = Does the company trade under any other names than {0}?
 pages.tradingName.legend           = Tell us if you do business using a different name to your registered company name.
 pages.tradingName.tradingNameLabel = Trading name
 pages.tradingName.nameRulesSummary = What are the rules for trading names?
