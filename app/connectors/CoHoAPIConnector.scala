@@ -30,7 +30,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object CoHoAPIConnector extends CoHoAPIConnector with ServicesConfig {
   //$COVERAGE-OFF$
-  val coHoAPIUrl = getConfString("coho-api.url", throw new ConfigStringNotFoundException("coho-api.url"))
+  val coHoAPIUrl = baseUrl("coho-api")
   val http = WSHttp
   //$COVERAGE-ON$
 }
@@ -46,7 +46,7 @@ trait CoHoAPIConnector {
   val http: HttpGet with HttpPost
 
   def getCoHoCompanyDetails(registrationID: String)(implicit hc: HeaderCarrier): Future[CohoApiResponse] = {
-    http.GET[CoHoCompanyDetailsModel](s"$coHoAPIUrl/company/$registrationID") map {
+    http.GET[CoHoCompanyDetailsModel](s"$coHoAPIUrl/incorporation-frontend-stubs/company/$registrationID") map {
       res => CohoApiSuccessResponse(res)
     } recover {
       case badRequestErr: BadRequestException =>
@@ -60,10 +60,10 @@ trait CoHoAPIConnector {
 
   def addCoHoCompanyDetails(coHoCompanyDetailsModel: CoHoCompanyDetailsModel)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val json = Json.toJson[CoHoCompanyDetailsModel](coHoCompanyDetailsModel)
-    http.POST[JsValue, HttpResponse](s"$coHoAPIUrl/test-only/insert-company-details", json)
+    http.POST[JsValue, HttpResponse](s"$coHoAPIUrl/incorporation-frontend-stubs/test-only/insert-company-details", json)
   }
 
   def tearDownCoHoCompanyDetails()(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    http.GET[HttpResponse](s"$coHoAPIUrl/test-only/wipe-company-details")
+    http.GET[HttpResponse](s"$coHoAPIUrl/incorporation-frontend-stubs/test-only/wipe-company-details")
   }
 }
