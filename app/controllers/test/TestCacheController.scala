@@ -16,7 +16,7 @@
 
 package controllers.test
 
-import auth.PAYERegime
+import auth.test.TestPAYERegime
 import config.FrontendAuthConnector
 import connectors.KeystoreConnector
 import services.S4LService
@@ -37,7 +37,7 @@ trait TestCacheController extends FrontendController with Actions {
   val keystoreConnector: KeystoreConnector
   val s4LService: S4LService
 
-  val tearDownS4L = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+  val tearDownS4L = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     s4LService.clear() map {
       response => Ok("Save4Later cleared")
     }
