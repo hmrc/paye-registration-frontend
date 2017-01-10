@@ -14,26 +14,22 @@
  * limitations under the License.
  */
 
-package enums
+package models.payeRegistration.companyDetails
 
-import common.exceptions.InternalExceptions
+import play.api.libs.json.Json
 
+case class CompanyDetails(
+                           crn: Option[String],
+                           companyName: String,
+                           tradingName: TradingName
+                           )
 
+case class TradingName(tradingName: Option[String])
 
-object YesNo extends Enumeration {
-  val Yes = Value
-  val No  = Value
+object TradingName {
+  implicit val formats = Json.format[TradingName]
+}
 
-  def fromString(str: String): Value = {
-    str.toLowerCase match {
-      case "yes" => Yes
-      case "no"  => No
-      case _     => throw new InternalExceptions.UnableToCreateEnumException("YesNo", str)
-    }
-  }
-
-  def fromBoolean(bool: Boolean): Value = {
-    if(bool) Yes else No
-  }
-
+object CompanyDetails {
+  implicit val formats = Json.format[CompanyDetails]
 }

@@ -37,6 +37,12 @@ class YesNoSpec extends UnitSpec {
     "throw the correct exception" in {
       a[UnableToCreateEnumException] should be thrownBy YesNo.fromString("wrongInput")
     }
+    "correctly handle true" in {
+      YesNo.fromBoolean(true) shouldBe YesNo.Yes
+    }
+    "correctly handle false" in {
+      YesNo.fromBoolean(false) shouldBe YesNo.No
+    }
   }
 
 }

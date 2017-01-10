@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package models.companyDetails
+package models.payeRegistration
 
-import play.api.libs.json.Json
+import models.payeRegistration.companyDetails.CompanyDetails
 
-
-case class TradingNameModel (tradeUnderDifferentName: String,
-                             tradingName:Option[String])
-
-object TradingNameModel {
-  implicit val formats = Json.format[TradingNameModel]
-}
+case class PAYERegistration(
+                            registrationID: String,
+                            formCreationTimestamp: String,
+                            companyDetails: Option[CompanyDetails]
+                            )

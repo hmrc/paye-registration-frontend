@@ -22,7 +22,8 @@ import enums.CacheKeys
 import fixtures.CoHoAPIFixture
 import helpers.PAYERegSpec
 import models.coHo.CoHoCompanyDetailsModel
-import models.companyDetails.TradingNameModel
+import models.formModels.TradingNameFormModel
+import models.payeRegistration.companyDetails.TradingName
 import org.jsoup._
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -45,7 +46,8 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
     }
   }
 
-  val tstTradingNameModel = TradingNameModel(tradeUnderDifferentName = "yes", tradingName = Some("test trading name"))
+  val tstTradingNameFormModel = TradingNameFormModel(tradeUnderDifferentName = "yes", tradingName = Some("test trading name"))
+  val tstTradingNameDataModel = TradingName(Some("test trading name"))
 
   val fakeRequest = FakeRequest("GET", "/")
   implicit val materializer = fakeApplication.materializer
@@ -59,7 +61,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
 
     "show the correctly pre-populated trading name page when data has already been entered" in new Setup {
       mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, Some(validCoHoCompanyDetailsResponse))
-      when(mockS4LService.fetchAndGet[TradingNameModel](Matchers.matches(CacheKeys.TradingName.toString))(Matchers.any(), Matchers.any())).thenReturn(Future.successful(Some(tstTradingNameModel)))
+      when(mockS4LService.fetchAndGet[TradingName](Matchers.matches(CacheKeys.TradingName.toString))(Matchers.any(), Matchers.any())).thenReturn(Future.successful(Some(tstTradingNameDataModel)))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         response =>
@@ -72,7 +74,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
 
     "show the a blank trading name page when no data has been entered" in new Setup {
       mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, Some(validCoHoCompanyDetailsResponse))
-      when(mockS4LService.fetchAndGet[TradingNameModel](Matchers.matches(CacheKeys.TradingName.toString))(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
+      when(mockS4LService.fetchAndGet[TradingName](Matchers.matches(CacheKeys.TradingName.toString))(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         response =>
@@ -85,7 +87,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
 
     "throw a CompanyDetailsNotFoundException if there are no company details in keystore" in new Setup {
       mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, None)
-      when(mockS4LService.fetchAndGet[TradingNameModel](Matchers.matches(CacheKeys.TradingName.toString))(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
+      when(mockS4LService.fetchAndGet[TradingNameFormModel](Matchers.matches(CacheKeys.TradingName.toString))(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
       a[CompanyDetailsNotFoundException] shouldBe thrownBy (await(AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {result => status(result)} ))
     }
   }
@@ -93,7 +95,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
   "calling the submitTradingName action" should {
     "redirect to the WELCOME PAGE when a user enters valid data" in new Setup {
       // TODO: Update test and description when flow is updated
-      when(mockS4LService.saveForm[TradingNameModel](Matchers.matches(CacheKeys.TradingName.toString), Matchers.any())(Matchers.any(),Matchers.any())).thenReturn(Future.successful(CacheMap("tstMap", Map.empty)))
+      when(mockS4LService.saveForm[TradingNameFormModel](Matchers.matches(CacheKeys.TradingName.toString), Matchers.any())(Matchers.any(),Matchers.any())).thenReturn(Future.successful(CacheMap("tstMap", Map.empty)))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "tradeUnderDifferentName" -> "yes",

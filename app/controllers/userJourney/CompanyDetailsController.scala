@@ -23,7 +23,8 @@ import connectors.KeystoreConnector
 import enums.CacheKeys
 import forms.companyDetails.TradingNameForm
 import models.coHo.CoHoCompanyDetailsModel
-import models.companyDetails.TradingNameModel
+import models.formModels.TradingNameFormModel
+import models.payeRegistration.companyDetails.TradingName
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import services.S4LService
@@ -47,9 +48,9 @@ trait CompanyDetailsController extends FrontendController with Actions {
   val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     for {
       companyDetails <- keystoreConnector.fetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString)
-      tradingNameData <- s4LService.fetchAndGet[TradingNameModel](CacheKeys.TradingName.toString)
+      tradingNameData <- s4LService.fetchAndGet[TradingName](CacheKeys.TradingName.toString)
     } yield tradingNameData match {
-      case Some(data) => Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form.fill(data), getCompanyNameFromDetails(companyDetails)))
+      case Some(data) => Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form.fill(new TradingNameFormModel(data)), getCompanyNameFromDetails(companyDetails)))
       case _          => Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form, getCompanyNameFromDetails(companyDetails)))
     }
   }
@@ -66,7 +67,7 @@ trait CompanyDetailsController extends FrontendController with Actions {
             companyDetails => BadRequest(views.html.pages.companyDetails.tradingName(validatedForm, getCompanyNameFromDetails(companyDetails)))
           }
         } else {
-          s4LService.saveForm[TradingNameModel](CacheKeys.TradingName.toString, success) map {
+          s4LService.saveForm[TradingName](CacheKeys.TradingName.toString, success.toData) map {
             cacheMap => Redirect(controllers.userJourney.routes.WelcomeController.show())
           }
         }
