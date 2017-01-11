@@ -60,7 +60,7 @@ trait CompanyDetailsController extends FrontendController with Actions {
       errors => keystoreConnector.fetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString) map {
           companyDetails => BadRequest(views.html.pages.companyDetails.tradingName(errors, getCompanyNameFromDetails(companyDetails)))
         },
-      success => {
+      (success: TradingNameFormModel) => {
         val validatedForm = TradingNameForm.validateForm(TradingNameForm.form.fill(success))
         if(validatedForm.hasErrors) {
           keystoreConnector.fetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString) map {

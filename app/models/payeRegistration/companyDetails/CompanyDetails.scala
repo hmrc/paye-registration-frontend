@@ -16,12 +16,14 @@
 
 package models.payeRegistration.companyDetails
 
-import play.api.libs.json.Json
+import play.api.libs.json._
+import play.api.libs.json.Reads._
+import play.api.libs.functional.syntax._
 
 case class CompanyDetails(
                            crn: Option[String],
                            companyName: String,
-                           tradingName: TradingName
+                           tradingName: Option[TradingName]
                            )
 
 case class TradingName(tradingName: Option[String])
@@ -31,5 +33,11 @@ object TradingName {
 }
 
 object CompanyDetails {
-  implicit val formats = Json.format[CompanyDetails]
+  implicit val locationFormat: Format[CompanyDetails] = (
+    (JsPath \ "crn").formatNullable[String] and
+    (JsPath \ "companyName").format[String] and
+    (JsPath \ "tradingName").formatNullable[String]
+      .inmap(str => str.map(tName => TradingName(Some(tName))), (tNameOpt: Option[TradingName]) => tNameOpt.map{tName => tName.tradingName}.getOrElse(None))
+  )(CompanyDetails.apply, unlift(CompanyDetails.unapply))
 }
+

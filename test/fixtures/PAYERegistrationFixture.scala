@@ -16,20 +16,21 @@
 
 package fixtures
 
-import models.currentProfile.CurrentProfile
-import uk.gov.hmrc.http.cache.client.CacheMap
+import models.payeRegistration.PAYERegistration
+import models.payeRegistration.companyDetails.{TradingName, CompanyDetails}
 
-trait KeystoreFixture {
+trait PAYERegistrationFixture {
 
-  lazy val validCurrentProfileResponse = CurrentProfile(
-    "12345",
-    Some("Director"),
-    "ENG"
+  val validCompanyDetails = CompanyDetails(
+    crn = None,
+    companyName = "Test Company",
+    tradingName = Some(TradingName(Some("Test Company Trading Name")))
   )
 
-  val blankCacheMap = CacheMap(
-    id="tstID",
-    data = Map.empty
+  val validPAYERegistration = PAYERegistration(
+    registrationID = "AC123456",
+    formCreationTimestamp = "2017-01-11T15:10:12",
+    companyDetails = Some(validCompanyDetails)
   )
 
 }

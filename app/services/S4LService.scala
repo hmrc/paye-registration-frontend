@@ -17,6 +17,9 @@
 package services
 
 import connectors.{KeystoreConnector, S4LConnector}
+import enums.CacheKeys
+import models.payeRegistration.PAYERegistration
+import models.payeRegistration.companyDetails.{CompanyDetails, TradingName}
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.{HttpResponse, HeaderCarrier}
@@ -62,6 +65,25 @@ trait S4LService extends CommonService {
       regId <- fetchRegistrationID
       cacheMap <- s4LConnector.fetchAll(regId)
     } yield cacheMap
+  }
+
+  def saveRegistration(reg: PAYERegistration)(implicit hc: HeaderCarrier): Future[PAYERegistration] = {
+    for {
+      regId <- fetchRegistrationID
+      tradingNameMap <- saveCompanyDetails(reg.companyDetails, regId)
+    } yield reg
+  }
+
+  private def saveCompanyDetails(details: Option[CompanyDetails], regID: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    details.flatMap {
+      deets => deets.tradingName.map {
+        tName => s4LConnector.saveForm[TradingName](regID, CacheKeys.TradingName.toString, tName).map {
+          cacheMap => true
+        }
+      }
+    }.getOrElse {
+      Future.successful(false)
+    }
   }
 
 }

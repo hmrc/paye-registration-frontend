@@ -28,6 +28,7 @@ import org.jsoup._
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import play.api.http.Status
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import services.S4LService
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -64,7 +65,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
       when(mockS4LService.fetchAndGet[TradingName](Matchers.matches(CacheKeys.TradingName.toString))(Matchers.any(), Matchers.any())).thenReturn(Future.successful(Some(tstTradingNameDataModel)))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
-        response =>
+        (response: Future[Result]) =>
           status(response) shouldBe Status.OK
           val result = Jsoup.parse(bodyOf(response))
           result.body().getElementById("pageHeading").text() shouldBe s"Does the company trade under any other names than ${validCoHoCompanyDetailsResponse.companyName}?"
