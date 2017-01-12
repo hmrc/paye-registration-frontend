@@ -17,9 +17,9 @@
 package connectors
 
 import fixtures.CoHoAPIFixture
-import helpers.PAYERegSpec
 import models.coHo.CoHoCompanyDetailsModel
 import play.api.libs.json.JsValue
+import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.{HttpResponse, BadRequestException, HeaderCarrier}
 
 import scala.concurrent.Future

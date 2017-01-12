@@ -16,9 +16,9 @@
 
 package models
 
-import helpers.PAYERegSpec
 import models.coHo.{AreaOfIndustry, CoHoCompanyDetailsModel}
 import play.api.libs.json.Json
+import testHelpers.PAYERegSpec
 
 class CoHoCompanyDetailsSpec extends PAYERegSpec {
 

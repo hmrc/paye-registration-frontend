@@ -16,10 +16,14 @@
 
 package services
 
+import java.time.LocalDateTime
+
 import common.exceptions.DownstreamExceptions
 import enums.DownstreamOutcome
 import connectors._
+import helpers.DateHelper
 import models.payeRegistration.PAYERegistration
+import models.payeRegistration.companyDetails.CompanyDetails
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -68,6 +72,23 @@ trait PAYERegistrationService extends CommonService {
     for {
       regID <- fetchRegistrationID
       regResponse <- payeRegistrationConnector.createNewRegistration(regID)
+    } yield regResponse match {
+      case PAYERegistrationSuccessResponse(reg: PAYERegistration) => DownstreamOutcome.Success
+      case _ => DownstreamOutcome.Failure
+    }
+  }
+
+  def addTestRegistration(companyDetails: CompanyDetails)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    val currentDT = DateHelper.formatTimestamp(LocalDateTime.now)
+    for {
+      regID <- fetchRegistrationID
+      outcome <- addTestRegistration(PAYERegistration(regID, currentDT, Some(companyDetails)))
+    } yield outcome
+  }
+
+  def addTestRegistration(reg: PAYERegistration)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    for {
+      regResponse <- payeRegistrationConnector.addTestRegistration(reg)
     } yield regResponse match {
       case PAYERegistrationSuccessResponse(reg: PAYERegistration) => DownstreamOutcome.Success
       case _ => DownstreamOutcome.Failure

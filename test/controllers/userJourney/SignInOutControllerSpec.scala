@@ -19,13 +19,13 @@ package controllers.userJourney
 import builders.AuthBuilder
 import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
-import helpers.PAYERegSpec
 import services.{PAYERegistrationService, CoHoAPIService, CurrentProfileService}
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import org.mockito.Matchers
 import org.mockito.Mockito._
+import testHelpers.PAYERegSpec
 
 import scala.concurrent.Future
 

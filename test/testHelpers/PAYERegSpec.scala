@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package helpers
+package testHelpers
 
 import mocks.PAYEMocks
 import org.scalatest.mockito.MockitoSugar
