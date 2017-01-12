@@ -16,8 +16,8 @@
 
 package fixtures
 
-import models.payeRegistration.PAYERegistration
-import models.payeRegistration.companyDetails.{TradingName, CompanyDetails}
+import models.dataModels.PAYERegistration
+import models.dataModels.companyDetails.{TradingName, CompanyDetails}
 
 trait PAYERegistrationFixture {
 

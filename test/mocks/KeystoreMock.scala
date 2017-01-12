@@ -17,7 +17,7 @@
 package mocks
 
 import connectors._
-import models.currentProfile.CurrentProfile
+import models.externalAPIModels.currentProfile.CurrentProfile
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing

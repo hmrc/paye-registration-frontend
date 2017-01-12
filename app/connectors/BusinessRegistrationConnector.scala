@@ -17,7 +17,7 @@
 package connectors
 
 import config.WSHttp
-import models.businessRegistration.{BusinessRegistrationRequest, BusinessRegistration}
+import models.externalAPIModels.businessRegistration.{BusinessRegistrationRequest, BusinessRegistration}
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig

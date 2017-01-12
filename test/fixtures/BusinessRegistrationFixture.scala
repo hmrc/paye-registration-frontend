@@ -16,7 +16,7 @@
 
 package fixtures
 
-import models.businessRegistration.{Links, BusinessRegistration}
+import models.externalAPIModels.businessRegistration.{Links, BusinessRegistration}
 
 trait BusinessRegistrationFixture {
 

@@ -18,7 +18,7 @@ package connectors
 
 import config.WSHttp
 import common.exceptions.InternalExceptions._
-import models.coHo.CoHoCompanyDetailsModel
+import models.externalAPIModels.coHo.CoHoCompanyDetailsModel
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig

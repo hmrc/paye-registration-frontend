@@ -20,7 +20,7 @@ import connectors._
 import enums.DownstreamOutcome
 import fixtures.{KeystoreFixture, PAYERegistrationFixture}
 import common.exceptions.DownstreamExceptions.PAYEMicroserviceException
-import models.payeRegistration.PAYERegistration
+import models.dataModels.PAYERegistration
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec

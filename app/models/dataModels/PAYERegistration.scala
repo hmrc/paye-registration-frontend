@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package models.currentProfile
+package models.dataModels
 
+import models.dataModels.companyDetails.CompanyDetails
 import play.api.libs.json.Json
 
-case class CurrentProfile(registrationId: String,
-                          completionCapacity : Option[String],
-                          language: String)
+case class PAYERegistration(
+                            registrationID: String,
+                            formCreationTimestamp: String,
+                            companyDetails: Option[CompanyDetails]
+                            )
 
-object CurrentProfile {
-  implicit val formats = Json.format[CurrentProfile]
+object PAYERegistration {
+  implicit val format = Json.format[PAYERegistration]
 }

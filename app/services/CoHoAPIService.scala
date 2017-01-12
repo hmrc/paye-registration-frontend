@@ -18,7 +18,7 @@ package services
 
 import connectors.{CohoApiSuccessResponse, CohoApiResponse, CoHoAPIConnector, KeystoreConnector}
 import enums.{CacheKeys, DownstreamOutcome}
-import models.coHo.CoHoCompanyDetailsModel
+import models.externalAPIModels.coHo.CoHoCompanyDetailsModel
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
