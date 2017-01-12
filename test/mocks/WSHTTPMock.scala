@@ -50,4 +50,20 @@ trait WSHTTPMock {
     when(mockWSHttp.PUT[I, O](Matchers.anyString(), Matchers.any[I]())(Matchers.any[Writes[I]](), Matchers.any[HttpReads[O]](), Matchers.any[HeaderCarrier]()))
       .thenReturn(Future.successful(thenReturn))
   }
+
+  def mockHttpPATCH[I, O](url: String, thenReturn: O, mockWSHttp: WSHttp = mockWSHttp): OngoingStubbing[Future[O]] = {
+    when(mockWSHttp.PATCH[I, O](Matchers.anyString(), Matchers.any[I]())(Matchers.any[Writes[I]](), Matchers.any[HttpReads[O]](), Matchers.any[HeaderCarrier]()))
+      .thenReturn(Future.successful(thenReturn))
+  }
+
+
+  def mockHttpFailedGet[T](url: String, exception: Exception): OngoingStubbing[Future[T]] = {
+    when(mockWSHttp.GET[T](Matchers.anyString())(Matchers.any[HttpReads[T]](), Matchers.any[HeaderCarrier]()))
+      .thenReturn(Future.failed(exception))
+  }
+
+  def mockHttpFailedPATCH[I, O](url: String, exception: Exception, mockWSHttp: WSHttp = mockWSHttp): OngoingStubbing[Future[O]] = {
+    when(mockWSHttp.PATCH[I, O](Matchers.anyString(), Matchers.any[I]())(Matchers.any[Writes[I]](), Matchers.any[HttpReads[O]](), Matchers.any[HeaderCarrier]()))
+      .thenReturn(Future.failed(exception))
+  }
 }

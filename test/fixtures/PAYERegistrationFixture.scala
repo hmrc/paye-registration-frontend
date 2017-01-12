@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package models.companyDetails
+package fixtures
 
-import play.api.libs.json.Json
+import models.payeRegistration.PAYERegistration
+import models.payeRegistration.companyDetails.{TradingName, CompanyDetails}
 
+trait PAYERegistrationFixture {
 
-case class TradingNameModel (tradeUnderDifferentName: String,
-                             tradingName:Option[String])
+  val validCompanyDetails = CompanyDetails(
+    crn = None,
+    companyName = "Test Company",
+    tradingName = Some(TradingName(Some("Test Company Trading Name")))
+  )
 
-object TradingNameModel {
-  implicit val formats = Json.format[TradingNameModel]
+  val validPAYERegistration = PAYERegistration(
+    registrationID = "AC123456",
+    formCreationTimestamp = "2017-01-11T15:10:12",
+    companyDetails = Some(validCompanyDetails)
+  )
+
 }

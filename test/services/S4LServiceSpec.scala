@@ -17,14 +17,15 @@
 package services
 
 import enums.CacheKeys
-import fixtures.KeystoreFixture
+import fixtures.{PAYERegistrationFixture, KeystoreFixture}
 import helpers.PAYERegSpec
-import models.companyDetails.TradingNameModel
 import models.currentProfile.CurrentProfile
+import models.formModels.TradingNameFormModel
+import models.payeRegistration.companyDetails.TradingName
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-class S4LServiceSpec extends PAYERegSpec with KeystoreFixture {
+class S4LServiceSpec extends PAYERegSpec with KeystoreFixture with PAYERegistrationFixture {
 
   trait Setup {
     val service = new S4LService {
@@ -35,22 +36,22 @@ class S4LServiceSpec extends PAYERegSpec with KeystoreFixture {
 
   implicit val hc = new HeaderCarrier()
 
-  val tstTradingNameModel = TradingNameModel(tradeUnderDifferentName = "no", tradingName = None)
+  val tstTradingNameModel = TradingNameFormModel(tradeUnderDifferentName = "no", tradingName = None)
 
   "S4L Service" should {
 
     "save a form with the correct key" in new Setup {
       mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
-      mockS4LSaveForm[TradingNameModel]("tradingName", CacheMap("t-name", Map.empty))
+      mockS4LSaveForm[TradingNameFormModel]("tradingName", CacheMap("t-name", Map.empty))
 
-      await(service.saveForm[TradingNameModel]("tradingName", tstTradingNameModel)).id shouldBe "t-name"
+      await(service.saveForm[TradingNameFormModel]("tradingName", tstTradingNameModel)).id shouldBe "t-name"
     }
 
     "fetch a form with the correct key" in new Setup {
       mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
-      mockS4LFetchAndGet[TradingNameModel]("tradingName2", Some(tstTradingNameModel))
+      mockS4LFetchAndGet[TradingNameFormModel]("tradingName2", Some(tstTradingNameModel))
 
-      await(service.fetchAndGet[TradingNameModel]("tradingName2")) shouldBe Some(tstTradingNameModel)
+      await(service.fetchAndGet[TradingNameFormModel]("tradingName2")) shouldBe Some(tstTradingNameModel)
     }
 
     "clear down S4L data" in new Setup {
@@ -65,6 +66,20 @@ class S4LServiceSpec extends PAYERegSpec with KeystoreFixture {
       mockS4LFetchAll(Some(CacheMap("allData", Map.empty)))
 
       await(service.fetchAll()) shouldBe Some(CacheMap("allData", Map.empty))
+    }
+
+    "save a full PAYE Registration" in new Setup {
+      mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
+      mockS4LSaveForm[TradingName](CacheKeys.TradingName.toString, CacheMap("t-name", Map.empty))
+
+      await(service.saveRegistration(validPAYERegistration)) shouldBe validPAYERegistration
+    }
+
+    "save a PAYE Registration with no company details" in new Setup {
+      mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
+
+      val noDetailsReg = validPAYERegistration.copy(companyDetails = None)
+      await(service.saveRegistration(noDetailsReg)) shouldBe noDetailsReg
     }
 
   }

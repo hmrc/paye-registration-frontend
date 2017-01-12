@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package fixtures
+package models.payeRegistration
 
-import models.currentProfile.CurrentProfile
-import uk.gov.hmrc.http.cache.client.CacheMap
+import models.payeRegistration.companyDetails.CompanyDetails
+import play.api.libs.json.Json
 
-trait KeystoreFixture {
+case class PAYERegistration(
+                            registrationID: String,
+                            formCreationTimestamp: String,
+                            companyDetails: Option[CompanyDetails]
+                            )
 
-  lazy val validCurrentProfileResponse = CurrentProfile(
-    "12345",
-    Some("Director"),
-    "ENG"
-  )
-
-  val blankCacheMap = CacheMap(
-    id="tstID",
-    data = Map.empty
-  )
-
+object PAYERegistration {
+  implicit val format = Json.format[PAYERegistration]
 }
