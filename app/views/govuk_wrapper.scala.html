@@ -62,10 +62,6 @@
 @footerLinks = {}
 
 @serviceInfo = {
-    @uiLayouts.serviceInfo(
-      betaBanner = phaseBanner("ALPHA"),
-      includeGridWrapper = false,
-      serviceInfoContent = Some(serviceInfoContent))
 }
 
 @getHelpForm = @{uiHelpers.reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}
@@ -75,6 +71,7 @@
       article = mainContent,
       mainClass = mainClass,
       mainDataAttributes = mainDataAttributes,
+      mainContentHeader = phaseBanner("ALPHA"),
       serviceInfo = serviceInfo,
       getHelpForm = getHelpForm,
       sidebar = sidebar)
