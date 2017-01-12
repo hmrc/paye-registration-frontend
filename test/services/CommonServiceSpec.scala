@@ -19,8 +19,8 @@ package services
 import common.exceptions.DownstreamExceptions
 import enums.CacheKeys
 import fixtures.KeystoreFixture
-import helpers.PAYERegSpec
 import models.currentProfile.CurrentProfile
+import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 class CommonServiceSpec extends PAYERegSpec with KeystoreFixture {

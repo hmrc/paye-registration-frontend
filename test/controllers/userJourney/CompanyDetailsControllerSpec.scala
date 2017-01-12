@@ -20,7 +20,6 @@ import builders.AuthBuilder
 import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
 import enums.CacheKeys
 import fixtures.CoHoAPIFixture
-import helpers.PAYERegSpec
 import models.coHo.CoHoCompanyDetailsModel
 import models.formModels.TradingNameFormModel
 import models.payeRegistration.companyDetails.TradingName
@@ -31,6 +30,7 @@ import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import services.S4LService
+import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future

@@ -19,11 +19,11 @@ package services
 import connectors.{CohoApiErrorResponse, CohoApiBadRequestResponse, CohoApiSuccessResponse, CoHoAPIConnector}
 import enums.{DownstreamOutcome, CacheKeys}
 import fixtures.{CoHoAPIFixture, KeystoreFixture}
-import helpers.PAYERegSpec
 import models.coHo.CoHoCompanyDetailsModel
 import models.currentProfile.CurrentProfile
 import org.mockito.Matchers
 import org.mockito.Mockito._
+import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 

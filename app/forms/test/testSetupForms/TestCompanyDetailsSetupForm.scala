@@ -14,31 +14,19 @@
  * limitations under the License.
  */
 
-package controllers.userJourney
+package forms.test.testSetupForms
 
-import play.api.http.Status
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import testHelpers.PAYERegSpec
+import models.test.testSetupFormModels.CompanyDetailsSetupFormModel
+import play.api.data.Form
+import play.api.data.Forms._
 
-class WelcomeControllerSpec extends PAYERegSpec {
+object TestCompanyDetailsSetupForm {
 
-  val fakeRequest = FakeRequest("GET", "/")
-
-
-  "GET /start" should {
-    "return 200" in {
-      val result = WelcomeController.show(fakeRequest)
-      status(result) shouldBe Status.OK
-    }
-
-    "return HTML" in {
-      val result = WelcomeController.show(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
-
-
-  }
-
+  val form = Form(
+    mapping(
+      "crn" -> optional(text),
+      "companyName" -> text,
+      "tradingName" -> optional(text)
+    )(CompanyDetailsSetupFormModel.apply)(CompanyDetailsSetupFormModel.unapply)
+  )
 }

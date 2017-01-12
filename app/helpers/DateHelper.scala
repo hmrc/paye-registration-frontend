@@ -14,31 +14,19 @@
  * limitations under the License.
  */
 
-package controllers.userJourney
+package helpers
 
-import play.api.http.Status
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import testHelpers.PAYERegSpec
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-class WelcomeControllerSpec extends PAYERegSpec {
+object DateHelper extends DateHelper
 
-  val fakeRequest = FakeRequest("GET", "/")
+trait DateHelper {
 
-
-  "GET /start" should {
-    "return 200" in {
-      val result = WelcomeController.show(fakeRequest)
-      status(result) shouldBe Status.OK
-    }
-
-    "return HTML" in {
-      val result = WelcomeController.show(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
-
-
+  def formatTimestamp(timeStamp: LocalDateTime) : String = {
+    val timeStampFormat = "yyyy-MM-dd'T'HH:mm:ss"
+    val format: DateTimeFormatter = DateTimeFormatter.ofPattern(timeStampFormat)
+    format.format(timeStamp)
   }
 
 }

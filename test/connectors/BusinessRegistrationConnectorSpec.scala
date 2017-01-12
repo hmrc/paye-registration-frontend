@@ -18,10 +18,10 @@ package connectors
 
 import fixtures.BusinessRegistrationFixture
 import models.businessRegistration.BusinessRegistration
-import helpers.PAYERegSpec
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import play.api.libs.json.JsValue
+import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, NotFoundException}
 
 import scala.concurrent.Future

@@ -17,6 +17,7 @@
 package connectors
 
 import config.WSHttp
+import enums.DownstreamOutcome
 import models.payeRegistration.PAYERegistration
 import play.api.Logger
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -73,6 +74,27 @@ trait PAYERegistrationConnector {
       case e: Exception =>
         Logger.warn(s"[PAYERegistrationConnector] [getCurrentRegistration] received error when expecting current profile from backend - Error: ${e.getMessage}")
         PAYERegistrationErrorResponse(e)
+    }
+  }
+
+
+  def addTestRegistration(reg: PAYERegistration)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistration]): Future[PAYERegistrationResponse] = {
+    http.POST[PAYERegistration, PAYERegistration](s"$payeRegUrl/register-for-paye/test-only/insert-registration/${reg.registrationID}", reg) map {
+      reg => PAYERegistrationSuccessResponse(reg)
+    } recover {
+      case e: Exception =>
+        Logger.warn(s"[PAYERegistrationConnector] [getCurrentRegistration] received error when setting up test Registration - Error: ${e.getMessage}")
+        PAYERegistrationErrorResponse(e)
+    }
+  }
+
+  def testRegistrationTeardown()(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistration]): Future[DownstreamOutcome.Value] = {
+    http.GET[HttpResponse](s"$payeRegUrl/register-for-paye/test-only/registration-teardown") map {
+      resp => DownstreamOutcome.Success
+    } recover {
+      case e: Exception =>
+        Logger.warn(s"[PAYERegistrationConnector] [testRegistrationTeardown] received error when clearing registration details - Error: ${e.getMessage}")
+        DownstreamOutcome.Failure
     }
   }
 
