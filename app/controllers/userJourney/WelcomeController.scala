@@ -34,4 +34,8 @@ trait WelcomeController extends FrontendController {
     Future.successful(Ok(views.html.pages.welcome()))
   }
 
+  val submit = Action.async { implicit request =>
+    Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.tradingName()))
+  }
+
 }
