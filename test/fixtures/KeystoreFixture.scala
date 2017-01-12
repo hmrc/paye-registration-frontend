@@ -16,7 +16,7 @@
 
 package fixtures
 
-import models.currentProfile.CurrentProfile
+import models.externalAPIModels.currentProfile.CurrentProfile
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 trait KeystoreFixture {

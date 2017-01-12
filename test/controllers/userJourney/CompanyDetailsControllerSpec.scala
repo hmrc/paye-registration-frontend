@@ -20,9 +20,9 @@ import builders.AuthBuilder
 import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
 import enums.CacheKeys
 import fixtures.CoHoAPIFixture
-import models.coHo.CoHoCompanyDetailsModel
+import models.externalAPIModels.coHo.CoHoCompanyDetailsModel
 import models.formModels.TradingNameFormModel
-import models.payeRegistration.companyDetails.TradingName
+import models.dataModels.companyDetails.TradingName
 import org.jsoup._
 import org.mockito.Matchers
 import org.mockito.Mockito._

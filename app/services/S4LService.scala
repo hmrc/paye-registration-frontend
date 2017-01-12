@@ -18,8 +18,8 @@ package services
 
 import connectors.{KeystoreConnector, S4LConnector}
 import enums.CacheKeys
-import models.payeRegistration.PAYERegistration
-import models.payeRegistration.companyDetails.{CompanyDetails, TradingName}
+import models.dataModels.PAYERegistration
+import models.dataModels.companyDetails.{CompanyDetails, TradingName}
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.{HttpResponse, HeaderCarrier}

@@ -22,9 +22,9 @@ import config.FrontendAuthConnector
 import connectors.KeystoreConnector
 import enums.CacheKeys
 import forms.companyDetails.TradingNameForm
-import models.coHo.CoHoCompanyDetailsModel
+import models.externalAPIModels.coHo.CoHoCompanyDetailsModel
 import models.formModels.TradingNameFormModel
-import models.payeRegistration.companyDetails.TradingName
+import models.dataModels.companyDetails.TradingName
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import services.S4LService

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package models.businessRegistration
+package models.externalAPIModels.businessRegistration
 
 import play.api.libs.json.Json
 

@@ -16,7 +16,7 @@
 
 package models.formModels
 
-import models.payeRegistration.companyDetails.TradingName
+import models.dataModels.companyDetails.TradingName
 import enums.YesNo
 import play.api.libs.json.Json
 

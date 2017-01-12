@@ -18,7 +18,7 @@ package connectors
 
 import config.WSHttp
 import enums.DownstreamOutcome
-import models.payeRegistration.PAYERegistration
+import models.dataModels.PAYERegistration
 import play.api.Logger
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._

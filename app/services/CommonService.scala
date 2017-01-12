@@ -19,7 +19,7 @@ package services
 import connectors.KeystoreConnector
 import common.exceptions.DownstreamExceptions._
 import enums.CacheKeys
-import models.currentProfile.CurrentProfile
+import models.externalAPIModels.currentProfile.CurrentProfile
 import play.api.Logger
 import uk.gov.hmrc.play.http.HeaderCarrier
 

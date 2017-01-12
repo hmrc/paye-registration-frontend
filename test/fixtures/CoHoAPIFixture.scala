@@ -16,7 +16,7 @@
 
 package fixtures
 
-import models.coHo.{AreaOfIndustry, CoHoCompanyDetailsModel}
+import models.externalAPIModels.coHo.{AreaOfIndustry, CoHoCompanyDetailsModel}
 
 trait CoHoAPIFixture {
 

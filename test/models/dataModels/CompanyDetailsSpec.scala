@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package models.payeRegistration
+package models.dataModels
 
-import models.payeRegistration.companyDetails.{TradingName, CompanyDetails}
+import models.dataModels.companyDetails.{TradingName, CompanyDetails}
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.test.UnitSpec
 

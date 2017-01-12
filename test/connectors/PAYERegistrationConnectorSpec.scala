@@ -18,7 +18,7 @@ package connectors
 
 import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
-import models.payeRegistration.PAYERegistration
+import models.dataModels.PAYERegistration
 import play.mvc.Http.Status
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._

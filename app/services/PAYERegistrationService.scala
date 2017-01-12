@@ -22,8 +22,8 @@ import common.exceptions.DownstreamExceptions
 import enums.DownstreamOutcome
 import connectors._
 import helpers.DateHelper
-import models.payeRegistration.PAYERegistration
-import models.payeRegistration.companyDetails.CompanyDetails
+import models.dataModels.PAYERegistration
+import models.dataModels.companyDetails.CompanyDetails
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global

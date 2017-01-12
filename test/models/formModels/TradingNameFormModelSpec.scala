@@ -16,7 +16,7 @@
 
 package models.formModels
 
-import models.payeRegistration.companyDetails.TradingName
+import models.dataModels.companyDetails.TradingName
 import uk.gov.hmrc.play.test.UnitSpec
 
 class TradingNameFormModelSpec extends UnitSpec {

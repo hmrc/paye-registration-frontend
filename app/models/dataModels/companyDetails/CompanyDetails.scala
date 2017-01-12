@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package models.payeRegistration.companyDetails
+package models.dataModels.companyDetails
 
 import play.api.libs.json._
 import play.api.libs.json.Reads._
