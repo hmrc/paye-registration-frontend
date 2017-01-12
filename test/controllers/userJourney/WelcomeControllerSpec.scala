@@ -31,14 +31,22 @@ class WelcomeControllerSpec extends PAYERegSpec {
       val result = WelcomeController.show(fakeRequest)
       status(result) shouldBe Status.OK
     }
-
     "return HTML" in {
       val result = WelcomeController.show(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
+  }
 
-
+  "POST /start" should {
+    "return 303" in {
+      val result = WelcomeController.submit(fakeRequest)
+      status(result) shouldBe Status.SEE_OTHER
+    }
+    "redirect to trading name page" in {
+      val result = WelcomeController.submit(fakeRequest)
+      redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.tradingName()}")
+    }
   }
 
 }
