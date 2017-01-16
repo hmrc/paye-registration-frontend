@@ -50,13 +50,6 @@ trait CompanyDetailsService extends CommonService {
     }
   }
 
-  def getTradingName(detailsViewOption: Option[CompanyDetailsView]): Option[TradingNameView] = {
-    detailsViewOption match {
-      case Some(detailsView) => detailsView.tradingName
-      case None => None
-    }
-  }
-
   def getCompanyName(detailsViewOption: Option[CompanyDetailsView])(implicit hc: HeaderCarrier): Future[String] = {
     detailsViewOption.map {
       detailsView => Future.successful(detailsView.companyName)

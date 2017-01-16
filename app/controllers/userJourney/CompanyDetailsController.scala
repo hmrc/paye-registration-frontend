@@ -19,11 +19,13 @@ package controllers.userJourney
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.KeystoreConnector
+import forms.companyDetails.TradingNameForm
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import services.{CompanyDetailsService, S4LService}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import views.html.pages.companyDetails.{tradingName => TradingNamePage}
 
 import scala.concurrent.Future
 
@@ -45,7 +47,13 @@ trait CompanyDetailsController extends FrontendController with Actions {
 
   val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
 
-    Future.successful(Ok)
+    for {
+      oCompanyDetails   <- companyDetailsService.getCompanyDetails()
+      companyName       <- companyDetailsService.getCompanyName(oCompanyDetails)
+    } yield oCompanyDetails flatMap (_.tradingName) match {
+      case Some(model) => Ok(TradingNamePage(TradingNameForm.form.fill(model), companyName))
+      case _ => Ok(TradingNamePage(TradingNameForm.form, companyName))
+    }
   }
 
   val submitTradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>

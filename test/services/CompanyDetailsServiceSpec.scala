@@ -78,20 +78,6 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
   }
 
-  "Calling getTradingName" should {
-    "return a defined Trading Name View option if passed a defined Company Details option" in new CompanyDetailsMockedSetup {
-      mockFetchRegID("54321")
-
-      await(service.getTradingName(Some(validCompanyDetailsViewModel))) shouldBe Some(validTradingNameViewModel)
-    }
-
-    "return an empty option if passed an empty Company Details option" in new NoCompanyDetailsMockedSetup {
-      mockFetchRegID("54321")
-
-      await(service.getTradingName(None)) shouldBe None
-    }
-  }
-
   "Calling getCompanyName" should {
     "return the name of the company when passed a defined Company Details Option" in new Setup {
       await(service.getCompanyName(Some(validCompanyDetailsViewModel))) shouldBe validCompanyDetailsViewModel.companyName

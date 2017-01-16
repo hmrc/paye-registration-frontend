@@ -27,8 +27,6 @@ import org.mockito.Matchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
 
-import scala.concurrent.Future
-
 class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   val mockCurrentProfileService = mock[CurrentProfileService]
@@ -63,6 +61,17 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
         result =>
           status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      }
+    }
+
+    "redirect to the Trading Name page for an authorised user with a registration ID and CoHo Company Details" in new Setup {
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any())).thenReturn(DownstreamOutcome.Success)
+      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(Matchers.any())).thenReturn(DownstreamOutcome.Success)
+
+      AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
+        result =>
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.tradingName()}")
       }
     }
   }
