@@ -71,6 +71,8 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
           status(response) shouldBe Status.OK
           val result = Jsoup.parse(bodyOf(response))
           result.body().getElementById("pageHeading").text() shouldBe s"Does the company trade under any other names than $cName?"
+          result.body.getElementById("differentName-true").parent.classNames().contains("selected") shouldBe true
+          result.body.getElementById("differentName-false").parent.classNames().contains("selected") shouldBe false
           result.body().getElementById("tradingName").attr("value") shouldBe validCompanyDetailsViewModel.tradingName.get.tradingName.get
       }
     }
@@ -86,6 +88,8 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
           status(response) shouldBe Status.OK
           val result = Jsoup.parse(bodyOf(response))
           result.body().getElementById("pageHeading").text() shouldBe s"Does the company trade under any other names than $cName?"
+          result.body.getElementById("differentName-true").parent.classNames().contains("selected") shouldBe false
+          result.body.getElementById("differentName-false").parent.classNames().contains("selected") shouldBe true
           result.body().getElementById("tradingName").attr("value") shouldBe ""
       }
     }
@@ -101,6 +105,8 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
           status(response) shouldBe Status.OK
           val result = Jsoup.parse(bodyOf(response))
           result.body().getElementById("pageHeading").text() shouldBe s"Does the company trade under any other names than $cName?"
+          result.body.getElementById("differentName-true").parent.classNames().contains("selected") shouldBe false
+          result.body.getElementById("differentName-false").parent.classNames().contains("selected") shouldBe false
           result.body().getElementById("tradingName").attr("value") shouldBe ""
       }
     }
@@ -115,6 +121,8 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
           status(response) shouldBe Status.OK
           val result = Jsoup.parse(bodyOf(response))
           result.body().getElementById("pageHeading").text() shouldBe s"Does the company trade under any other names than $cName?"
+          result.body.getElementById("differentName-true").parent.classNames().contains("selected") shouldBe false
+          result.body.getElementById("differentName-false").parent.classNames().contains("selected") shouldBe false
           result.body().getElementById("tradingName").attr("value") shouldBe ""
       }
     }
