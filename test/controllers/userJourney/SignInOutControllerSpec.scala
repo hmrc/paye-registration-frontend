@@ -46,33 +46,7 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   val fakeRequest = FakeRequest("GET", "/")
 
-
   "Calling the postSignIn action" should {
-    "redirect to Trading Name page for an authorised user with a registration ID and PAYE Registration" in new Setup {
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any())).thenReturn(DownstreamOutcome.Success)
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(Matchers.any())).thenReturn(DownstreamOutcome.Success)
-      when(mockPAYERegService.fetchAndStoreCurrentRegistration()(Matchers.any())).thenReturn(Future.successful(Some(validPAYERegistration)))
-
-      AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
-        result =>
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.tradingName()}")
-      }
-    }
-
-    "redirect to Trading Name page for an authorised user with a registration ID and No PAYE Registration" in new Setup {
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any())).thenReturn(DownstreamOutcome.Success)
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(Matchers.any())).thenReturn(DownstreamOutcome.Success)
-      when(mockPAYERegService.fetchAndStoreCurrentRegistration()(Matchers.any())).thenReturn(Future.successful(None))
-      when(mockPAYERegService.createNewRegistration()(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
-
-      AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
-        result =>
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.tradingName()}")
-      }
-    }
-
     "show an Error page for an authorised user without a registration ID" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any())).thenReturn(DownstreamOutcome.Failure)
 
@@ -85,29 +59,6 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
     "show an Error page for an authorised user with a registration ID but no CoHo Company Details" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any())).thenReturn(DownstreamOutcome.Success)
       when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(Matchers.any())).thenReturn(DownstreamOutcome.Failure)
-
-      AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
-        result =>
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-      }
-    }
-
-    "show an error page when the Microservice can't create a new PAYE Registration for the user when required" in new Setup {
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any())).thenReturn(DownstreamOutcome.Success)
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(Matchers.any())).thenReturn(DownstreamOutcome.Success)
-      when(mockPAYERegService.fetchAndStoreCurrentRegistration()(Matchers.any())).thenReturn(Future.successful(None))
-      when(mockPAYERegService.createNewRegistration()(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
-
-      AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
-        result =>
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-      }
-    }
-
-    "show an error page when the Microservice fetching/storing the user's PAYE Registration fails" in new Setup {
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any())).thenReturn(DownstreamOutcome.Success)
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(Matchers.any())).thenReturn(DownstreamOutcome.Success)
-      when(mockPAYERegService.fetchAndStoreCurrentRegistration()(Matchers.any())).thenReturn(Future.failed(new RuntimeException("tst")))
 
       AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
         result =>

@@ -9,6 +9,3 @@ GET        /company-details-teardown         controllers.test.TestCoHoController
 GET        /s4l-teardown                     controllers.test.TestCacheController.tearDownS4L
 
 GET        /reg-teardown                     controllers.test.TestRegSetupController.regTeardown
-
-GET        /reg-setup-company-details        controllers.test.TestRegSetupController.regSetupCompanyDetails
-POST       /reg-setup-company-details        controllers.test.TestRegSetupController.submitRegSetupCompanyDetails

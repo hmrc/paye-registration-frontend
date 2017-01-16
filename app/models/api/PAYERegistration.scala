@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
-package fixtures
+package models.api
 
-import models.api.{PAYERegistration, CompanyDetails}
+import play.api.libs.json.Json
 
-trait PAYERegistrationFixture {
+case class PAYERegistration (
+                            registrationID: String,
+                            formCreationTimestamp: String,
+                            companyDetails: Option[CompanyDetails]
+                              )
 
-  val validCompanyDetailsAPI = CompanyDetails(
-    crn = None,
-    companyName = "Test Company",
-    tradingName = Some("Test Company Trading Name")
-  )
-
-
-  val validPAYERegistrationAPI = PAYERegistration(
-    registrationID = "AC123456",
-    formCreationTimestamp = "2017-01-11T15:10:12",
-    companyDetails = Some(validCompanyDetailsAPI)
-  )
-
+object PAYERegistration {
+  implicit val format = Json.format[PAYERegistration]
 }

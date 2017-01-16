@@ -18,9 +18,7 @@ package services
 
 import connectors._
 import enums.DownstreamOutcome
-import fixtures.{KeystoreFixture, PAYERegistrationFixture}
-import common.exceptions.DownstreamExceptions.PAYEMicroserviceException
-import models.dataModels.PAYERegistration
+import fixtures.PAYERegistrationFixture
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
@@ -28,7 +26,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixture with KeystoreFixture {
+class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   val mockRegConnector = mock[PAYERegistrationConnector]
   val mockS4LService = mock[S4LService]
@@ -43,56 +41,11 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
 
   implicit val hc = HeaderCarrier()
 
-  "Calling fetchAndStoreCurrentRegistration" should {
-
-    "throw the correct exception when the microservice sends back a Bad Request response" in new Setup {
-      mockFetchRegID()
-      when(mockRegConnector.getCurrentRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationBadRequestResponse))
-
-      a[PAYEMicroserviceException] shouldBe thrownBy(await(service.fetchAndStoreCurrentRegistration()))
-    }
-
-    "throw the correct exception when the microservice sends back a Forbidden response" in new Setup {
-      mockFetchRegID()
-      when(mockRegConnector.getCurrentRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationForbiddenResponse))
-
-      a[PAYEMicroserviceException] shouldBe thrownBy(await(service.fetchAndStoreCurrentRegistration()))
-    }
-
-    "throw the correct exception when the microservice sends back an Internal error response" in new Setup {
-      mockFetchRegID()
-      when(mockRegConnector.getCurrentRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationErrorResponse(new RuntimeException("tst"))))
-
-      a[PAYEMicroserviceException] shouldBe thrownBy(await(service.fetchAndStoreCurrentRegistration()))
-    }
-
-    "return an empty option when there is no Registration returned by the microservice" in new Setup {
-      mockFetchRegID()
-      when(mockRegConnector.getCurrentRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationNotFoundResponse))
-
-      await(service.fetchAndStoreCurrentRegistration()) shouldBe None
-    }
-
-    "return the saved Registration object when it is retrieved from the microservice" in new Setup {
-      mockFetchRegID()
-      when(mockRegConnector.getCurrentRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationSuccessResponse(validPAYERegistration)))
-      when(mockS4LService.saveRegistration(Matchers.any())(Matchers.any()))
-        .thenReturn(Future.successful(validPAYERegistration))
-
-      await(service.fetchAndStoreCurrentRegistration()) shouldBe Some(validPAYERegistration)
-    }
-  }
-
   "Calling createNewRegistration" should {
     "return a success response when the Registration is successfully created" in new Setup {
       mockFetchRegID()
       when(mockRegConnector.createNewRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationSuccessResponse(validPAYERegistration)))
+        .thenReturn(Future.successful(PAYERegistrationSuccessResponse(validPAYERegistrationAPI)))
 
       await(service.createNewRegistration()) shouldBe DownstreamOutcome.Success
     }
@@ -106,37 +59,4 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
     }
   }
 
-  "Calling addTestRegistration" should {
-    "return a success response when correctly adding a registration with CompanyDetails" in new Setup {
-      mockFetchRegID()
-      when(mockRegConnector.addTestRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationSuccessResponse(validPAYERegistration)))
-
-      await(service.addTestRegistration(validCompanyDetails)) shouldBe DownstreamOutcome.Success
-    }
-
-    "return a failure response when unable to add a registration with CompanyDetails" in new Setup {
-      mockFetchRegID()
-      when(mockRegConnector.addTestRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationErrorResponse(new RuntimeException("tst msg"))))
-
-      await(service.addTestRegistration(validCompanyDetails)) shouldBe DownstreamOutcome.Failure
-    }
-
-    "return a success response when correctly adding a registration with a full PAYERegistration" in new Setup {
-      mockFetchRegID()
-      when(mockRegConnector.addTestRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationSuccessResponse(validPAYERegistration)))
-
-      await(service.addTestRegistration(validPAYERegistration)) shouldBe DownstreamOutcome.Success
-    }
-
-    "return a failure response when unable to add a registration with a full PAYERegistration" in new Setup {
-      mockFetchRegID()
-      when(mockRegConnector.addTestRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationErrorResponse(new RuntimeException("tst msg"))))
-
-      await(service.addTestRegistration(validPAYERegistration)) shouldBe DownstreamOutcome.Failure
-    }
-  }
 }

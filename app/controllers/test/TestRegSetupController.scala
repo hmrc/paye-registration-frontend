@@ -49,18 +49,4 @@ trait TestRegSetupController extends FrontendController with Actions {
     }
   }
 
-  val regSetupCompanyDetails = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    Future.successful(Ok(views.html.pages.test.testCompanyDetailsPAYERegSetup(TestCompanyDetailsSetupForm.form)))
-  }
-
-  val submitRegSetupCompanyDetails = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    TestCompanyDetailsSetupForm.form.bindFromRequest.fold (
-      errors => Future.successful(Ok(views.html.pages.test.testCompanyDetailsPAYERegSetup(errors))),
-      success => payeRegService.addTestRegistration(success.toCompanyDetailsModel) map {
-        case DownstreamOutcome.Success => Ok("Company details successfully set up")
-        case DownstreamOutcome.Failure => InternalServerError("Error setting up Company Details")
-      }
-    )
-  }
-
 }

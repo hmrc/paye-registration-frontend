@@ -18,16 +18,17 @@ package connectors
 
 import config.WSHttp
 import enums.DownstreamOutcome
-import models.dataModels.PAYERegistration
+import models.api.{PAYERegistration => PAYERegistrationAPI}
 import play.api.Logger
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
+import models.api.{CompanyDetails => CompanyDetailsAPI}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 sealed trait PAYERegistrationResponse
-case class PAYERegistrationSuccessResponse(response: PAYERegistration) extends PAYERegistrationResponse
+case class PAYERegistrationSuccessResponse[T](response: T) extends PAYERegistrationResponse
 case object PAYERegistrationNotFoundResponse extends PAYERegistrationResponse
 case object PAYERegistrationBadRequestResponse extends PAYERegistrationResponse
 case object PAYERegistrationForbiddenResponse extends PAYERegistrationResponse
@@ -45,8 +46,8 @@ trait PAYERegistrationConnector {
   val payeRegUrl: String
   val http: HttpGet with HttpPost with HttpPatch
 
-  def createNewRegistration(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistration]): Future[PAYERegistrationResponse] = {
-    http.PATCH[String, PAYERegistration](s"$payeRegUrl/register-for-paye/$regID/new", regID) map {
+  def createNewRegistration(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[PAYERegistrationResponse] = {
+    http.PATCH[String, PAYERegistrationAPI](s"$payeRegUrl/register-for-paye/$regID/new", regID) map {
       reg => PAYERegistrationSuccessResponse(reg)
     } recover {
       case e: BadRequestException =>
@@ -61,25 +62,26 @@ trait PAYERegistrationConnector {
     }
   }
 
-  def getCurrentRegistration(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistration]): Future[PAYERegistrationResponse] = {
-    http.GET[PAYERegistration](s"$payeRegUrl/register-for-paye/$regID") map {
-      reg => PAYERegistrationSuccessResponse(reg)
+  def getCompanyDetails(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[CompanyDetailsAPI]): Future[PAYERegistrationResponse] = {
+    http.GET[CompanyDetailsAPI](s"$payeRegUrl/register-for-paye/$regID/company-details") map {
+      details => PAYERegistrationSuccessResponse[Option[CompanyDetailsAPI]](Some(details))
     } recover {
       case e: NotFoundException =>
-        Logger.info("[PAYERegistrationConnector] [getCurrentRegistration] received Not Found response getting PAYE Registration from backend")
-        PAYERegistrationNotFoundResponse
+        PAYERegistrationSuccessResponse[Option[CompanyDetailsAPI]](None)
+      case e: BadRequestException =>
+        Logger.warn("[PAYERegistrationConnector] [getCompanyDetails] received Bad Request response when getting company details from microservice")
+        PAYERegistrationBadRequestResponse
       case e: ForbiddenException =>
-        Logger.warn("[PAYERegistrationConnector] [getCurrentRegistration] received Forbidden response when expecting PAYE Registration from backend")
+        Logger.warn("[PAYERegistrationConnector] [getCompanyDetails] received Forbidden response when getting company details from microservice")
         PAYERegistrationForbiddenResponse
       case e: Exception =>
-        Logger.warn(s"[PAYERegistrationConnector] [getCurrentRegistration] received error when expecting current profile from backend - Error: ${e.getMessage}")
+        Logger.warn(s"[PAYERegistrationConnector] [getCompanyDetails] received error when getting company details from microservice - Error: ${e.getMessage}")
         PAYERegistrationErrorResponse(e)
     }
   }
 
-
-  def addTestRegistration(reg: PAYERegistration)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistration]): Future[PAYERegistrationResponse] = {
-    http.POST[PAYERegistration, PAYERegistration](s"$payeRegUrl/register-for-paye/test-only/insert-registration/${reg.registrationID}", reg) map {
+  def addTestRegistration(reg: PAYERegistrationAPI)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[PAYERegistrationResponse] = {
+    http.POST[PAYERegistrationAPI, PAYERegistrationAPI](s"$payeRegUrl/register-for-paye/test-only/insert-registration/${reg.registrationID}", reg) map {
       reg => PAYERegistrationSuccessResponse(reg)
     } recover {
       case e: Exception =>
@@ -88,7 +90,7 @@ trait PAYERegistrationConnector {
     }
   }
 
-  def testRegistrationTeardown()(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistration]): Future[DownstreamOutcome.Value] = {
+  def testRegistrationTeardown()(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     http.GET[HttpResponse](s"$payeRegUrl/register-for-paye/test-only/registration-teardown") map {
       resp => DownstreamOutcome.Success
     } recover {

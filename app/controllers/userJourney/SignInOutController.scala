@@ -49,10 +49,8 @@ trait SignInOutController extends FrontendController with Actions {
     implicit user =>
       implicit request =>
         checkAndStoreCurrentProfile {
-            checkAndStoreCompanyDetails {
-              fetchAndStorePAYERegistration {
-              Redirect(controllers.userJourney.routes.CompanyDetailsController.tradingName())
-            }
+          checkAndStoreCompanyDetails {
+            Redirect(controllers.userJourney.routes.CompanyDetailsController.tradingName())
           }
         }
   }
@@ -64,26 +62,10 @@ trait SignInOutController extends FrontendController with Actions {
     }
   }
 
-  private def checkAndStoreCompanyDetails(f: => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
-    coHoAPIService.fetchAndStoreCoHoCompanyDetails flatMap {
+  private def checkAndStoreCompanyDetails(f: => Result)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+    coHoAPIService.fetchAndStoreCoHoCompanyDetails map {
       case DownstreamOutcome.Success => f
-      case DownstreamOutcome.Failure => Future.successful(InternalServerError(views.html.pages.error.restart()))
-    }
-  }
-
-  private def fetchAndStorePAYERegistration(f: => Result)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
-    payeRegistrationService.fetchAndStoreCurrentRegistration() flatMap {
-      case regOpt => regOpt match {
-        case Some(reg) => Future.successful(f)
-        case _ => payeRegistrationService.createNewRegistration() map {
-          case DownstreamOutcome.Success => f
-          case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-        }
-      }
-    } recover {
-      case e =>
-        Logger.warn(s"[SignInOutController] [fetchAndStorePAYERegistration] Unable to fetch/store current registration. Error: ${e.getMessage}")
-        InternalServerError(views.html.pages.error.restart())
+      case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
     }
   }
 }

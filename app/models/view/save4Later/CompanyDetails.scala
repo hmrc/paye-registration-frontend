@@ -14,23 +14,15 @@
  * limitations under the License.
  */
 
-package fixtures
+package models.view.save4Later
 
-import models.api.{PAYERegistration, CompanyDetails}
+case class CompanyDetails(
+                           crn: Option[String],
+                           companyName: String,
+                           tradingName: Option[TradingName]
+                           )
 
-trait PAYERegistrationFixture {
-
-  val validCompanyDetailsAPI = CompanyDetails(
-    crn = None,
-    companyName = "Test Company",
-    tradingName = Some("Test Company Trading Name")
-  )
-
-
-  val validPAYERegistrationAPI = PAYERegistration(
-    registrationID = "AC123456",
-    formCreationTimestamp = "2017-01-11T15:10:12",
-    companyDetails = Some(validCompanyDetailsAPI)
-  )
-
-}
+case class TradingName (
+                         differentName: Boolean,
+                         tradingName:Option[String]
+                         )

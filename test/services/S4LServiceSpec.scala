@@ -68,20 +68,6 @@ class S4LServiceSpec extends PAYERegSpec with KeystoreFixture with PAYERegistrat
       await(service.fetchAll()) shouldBe Some(CacheMap("allData", Map.empty))
     }
 
-    "save a full PAYE Registration" in new Setup {
-      mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
-      mockS4LSaveForm[TradingName](CacheKeys.TradingName.toString, CacheMap("t-name", Map.empty))
-
-      await(service.saveRegistration(validPAYERegistration)) shouldBe validPAYERegistration
-    }
-
-    "save a PAYE Registration with no company details" in new Setup {
-      mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
-
-      val noDetailsReg = validPAYERegistration.copy(companyDetails = None)
-      await(service.saveRegistration(noDetailsReg)) shouldBe noDetailsReg
-    }
-
   }
 
 }
