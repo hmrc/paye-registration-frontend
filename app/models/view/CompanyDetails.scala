@@ -16,6 +16,8 @@
 
 package models.view
 
+import play.api.libs.json.Json
+
 case class CompanyDetails(
                            crn: Option[String],
                            companyName: String,
@@ -26,3 +28,10 @@ case class TradingName (
                          differentName: Boolean,
                          tradingName:Option[String]
                          )
+object TradingName {
+  implicit val format = Json.format[TradingName]
+}
+
+object CompanyDetails {
+  implicit val format = Json.format[CompanyDetails]
+}
