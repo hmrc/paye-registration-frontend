@@ -87,6 +87,30 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
     }
   }
 
+  "Calling upsertCompanyDetails" should {
+    "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
+      mockHttpFailedPATCH[CompanyDetailsAPI, CompanyDetailsAPI]("tst-url", new ForbiddenException("tst"))
+
+      await(connector.upsertCompanyDetails("tstID", validCompanyDetailsAPI)) shouldBe PAYERegistrationForbiddenResponse
+    }
+    "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
+      val e = new InternalServerException("tst")
+      mockHttpFailedPATCH[CompanyDetailsAPI, CompanyDetailsAPI]("tst-url", e)
+
+      await(connector.upsertCompanyDetails("tstID", validCompanyDetailsAPI)) shouldBe PAYERegistrationErrorResponse(e)
+    }
+    "return a Not Found PAYEResponse when the microservice returns a NotFound response (No PAYERegistration in database)" in new Setup {
+      mockHttpFailedPATCH[CompanyDetailsAPI, CompanyDetailsAPI]("tst-url", new NotFoundException("tst"))
+
+      await(connector.upsertCompanyDetails("tstID", validCompanyDetailsAPI)) shouldBe PAYERegistrationNotFoundResponse
+    }
+    "return the correct PAYEResponse when the microservice completes and returns a Company Details API model" in new Setup {
+      mockHttpPATCH[CompanyDetailsAPI, CompanyDetailsAPI]("tst-url", validCompanyDetailsAPI)
+
+      await(connector.upsertCompanyDetails("tstID", validCompanyDetailsAPI)) shouldBe PAYERegistrationSuccessResponse(validCompanyDetailsAPI)
+    }
+  }
+
   "Calling addTestRegistration" should {
     "return a successful PAYEResponse when the test reg is successfully added" in new Setup {
       mockHttpPOST[PAYERegistrationAPI, PAYERegistrationAPI]("tst-url", validPAYERegistrationAPI)

@@ -80,6 +80,22 @@ trait PAYERegistrationConnector {
     }
   }
 
+  def upsertCompanyDetails(regID: String, companyDetails: CompanyDetailsAPI)(implicit hc: HeaderCarrier, rds: HttpReads[CompanyDetailsAPI]): Future[PAYERegistrationResponse] = {
+    http.PATCH[CompanyDetailsAPI, CompanyDetailsAPI](s"$payeRegUrl/register-for-paye/$regID/company-details", companyDetails) map {
+      details => PAYERegistrationSuccessResponse[CompanyDetailsAPI](details)
+    } recover {
+      case e: NotFoundException =>
+        Logger.warn("[PAYERegistrationConnector] [upsertCompanyDetails] received Not Found response when upserting company details in microservice")
+        PAYERegistrationNotFoundResponse
+      case e: ForbiddenException =>
+        Logger.warn("[PAYERegistrationConnector] [upsertCompanyDetails] received Forbidden response when upserting company details in microservice")
+        PAYERegistrationForbiddenResponse
+      case e: Exception =>
+        Logger.warn(s"[PAYERegistrationConnector] [upsertCompanyDetails] received error when upserting company details in microservice - Error: ${e.getMessage}")
+        PAYERegistrationErrorResponse(e)
+    }
+  }
+
   // TODO - move to a test package
   def addTestRegistration(reg: PAYERegistrationAPI)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[PAYERegistrationResponse] = {
     http.POST[PAYERegistrationAPI, PAYERegistrationAPI](s"$payeRegUrl/register-for-paye/test-only/insert-registration/${reg.registrationID}", reg) map {
