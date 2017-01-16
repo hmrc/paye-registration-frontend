@@ -33,10 +33,12 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   implicit val hc = HeaderCarrier()
 
   val mockPAYERegConnector = mock[PAYERegistrationConnector]
+  val mockCoHoService = mock[CoHoAPIService]
   class Setup {
     val service = new CompanyDetailsService {
       override val keystoreConnector = mockKeystoreConnector
       override val payeRegConnector = mockPAYERegConnector
+      override val cohoService = mockCoHoService
     }
   }
 
@@ -44,6 +46,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
     val service = new CompanyDetailsService {
       override val keystoreConnector = mockKeystoreConnector
       override val payeRegConnector = mockPAYERegConnector
+      override val cohoService = mockCoHoService
 
       override def getCompanyDetails()(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsView]] = {
         Future.successful(None)
@@ -55,6 +58,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
     val service = new CompanyDetailsService {
       override val keystoreConnector = mockKeystoreConnector
       override val payeRegConnector = mockPAYERegConnector
+      override val cohoService = mockCoHoService
 
       override def getCompanyDetails()(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsView]] = {
         Future.successful(Some(validCompanyDetailsViewModel))
@@ -66,6 +70,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
     val service = new CompanyDetailsService {
       override val keystoreConnector = mockKeystoreConnector
       override val payeRegConnector = mockPAYERegConnector
+      override val cohoService = mockCoHoService
 
       override def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
         validCompanyDetailsViewModel
@@ -74,16 +79,27 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   }
 
   "Calling getTradingName" should {
-    "return a defined Trading Name View option if returned from the connector" in new CompanyDetailsMockedSetup {
+    "return a defined Trading Name View option if passed a defined Company Details option" in new CompanyDetailsMockedSetup {
       mockFetchRegID("54321")
 
-      await(service.getTradingName()) shouldBe Some(validTradingNameViewModel)
+      await(service.getTradingName(Some(validCompanyDetailsViewModel))) shouldBe Some(validTradingNameViewModel)
     }
 
-    "return an empty option if no Company Details are returned from the connector" in new NoCompanyDetailsMockedSetup {
+    "return an empty option if passed an empty Company Details option" in new NoCompanyDetailsMockedSetup {
       mockFetchRegID("54321")
 
-      await(service.getTradingName()) shouldBe None
+      await(service.getTradingName(None)) shouldBe None
+    }
+  }
+
+  "Calling getCompanyName" should {
+    "return the name of the company when passed a defined Company Details Option" in new Setup {
+      await(service.getCompanyName(Some(validCompanyDetailsViewModel))) shouldBe validCompanyDetailsViewModel.companyName
+    }
+
+    "fetch the name of the company from Keystore when passed an empty Company Details Option" in new Setup {
+      when(mockCoHoService.getStoredCompanyName()(Matchers.any())).thenReturn(Future.successful("tstName"))
+      await(service.getCompanyName(None)) shouldBe "tstName"
     }
   }
 

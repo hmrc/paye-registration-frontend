@@ -29,21 +29,16 @@ object CompanyDetailsService extends CompanyDetailsService {
   //$COVERAGE-OFF$
   override val keystoreConnector = KeystoreConnector
   override val payeRegConnector = PAYERegistrationConnector
+  override val cohoService = CoHoAPIService
   //$COVERAGE-ON$
 }
 
 trait CompanyDetailsService extends CommonService {
 
   val payeRegConnector: PAYERegistrationConnector
+  val cohoService: CoHoAPIService
 
-  def getTradingName()(implicit hc: HeaderCarrier): Future[Option[TradingNameView]] = {
-    getCompanyDetails() map {
-      case Some(detailsView) => detailsView.tradingName
-      case None => None
-    }
-  }
-
-  private[services] def getCompanyDetails()(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsView]] = {
+  def getCompanyDetails()(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsView]] = {
     for {
       regID <- fetchRegistrationID
       regResponse <- payeRegConnector.getCompanyDetails(regID)
@@ -52,6 +47,21 @@ trait CompanyDetailsService extends CommonService {
       case PAYERegistrationNotFoundResponse => None
       case PAYERegistrationErrorResponse(e) => throw new PAYEMicroserviceException(e.getMessage)
       case resp => throw new PAYEMicroserviceException(s"Received $resp response from connector when expecting PAYERegSuccessResponse[Option[CompanyDetailsAPI]]")
+    }
+  }
+
+  def getTradingName(detailsViewOption: Option[CompanyDetailsView]): Option[TradingNameView] = {
+    detailsViewOption match {
+      case Some(detailsView) => detailsView.tradingName
+      case None => None
+    }
+  }
+
+  def getCompanyName(detailsViewOption: Option[CompanyDetailsView])(implicit hc: HeaderCarrier): Future[String] = {
+    detailsViewOption.map {
+      detailsView => Future.successful(detailsView.companyName)
+    }.getOrElse {
+      cohoService.getStoredCompanyName()
     }
   }
 

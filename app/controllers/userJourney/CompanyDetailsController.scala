@@ -21,7 +21,7 @@ import config.FrontendAuthConnector
 import connectors.KeystoreConnector
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
-import services.S4LService
+import services.{CompanyDetailsService, S4LService}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
@@ -32,6 +32,7 @@ object CompanyDetailsController extends CompanyDetailsController {
   override val authConnector = FrontendAuthConnector
   override val s4LService = S4LService
   override val keystoreConnector = KeystoreConnector
+  override val companyDetailsService = CompanyDetailsService
   //$COVERAGE-ON$
 
 }
@@ -40,16 +41,11 @@ trait CompanyDetailsController extends FrontendController with Actions {
 
   val s4LService: S4LService
   val keystoreConnector: KeystoreConnector
+  val companyDetailsService: CompanyDetailsService
 
   val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+
     Future.successful(Ok)
-//    for {
-//      companyDetails <- keystoreConnector.fetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString)
-//      tradingNameData <- s4LService.fetchAndGet[TradingName](CacheKeys.TradingName.toString)
-//    } yield tradingNameData match {
-//      case Some(data) => Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form.fill(data), getCompanyNameFromDetails(companyDetails)))
-//      case _          => Ok(views.html.pages.companyDetails.tradingName(TradingNameForm.form, getCompanyNameFromDetails(companyDetails)))
-//    }
   }
 
   val submitTradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>

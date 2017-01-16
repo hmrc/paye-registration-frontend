@@ -28,7 +28,7 @@ import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import services.S4LService
+import services.{CompanyDetailsService, S4LService}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
 
@@ -37,12 +37,14 @@ import scala.concurrent.Future
 class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
 
   val mockS4LService = mock[S4LService]
+  val mockCompanyDetailsService = mock[CompanyDetailsService]
 
   class Setup {
     val controller = new CompanyDetailsController {
       override val s4LService = mockS4LService
       override val keystoreConnector = mockKeystoreConnector
       override val authConnector = mockAuthConnector
+      override val companyDetailsService = mockCompanyDetailsService
     }
   }
 

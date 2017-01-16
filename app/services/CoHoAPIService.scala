@@ -16,6 +16,7 @@
 
 package services
 
+import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
 import connectors.{CohoApiSuccessResponse, CohoApiResponse, CoHoAPIConnector, KeystoreConnector}
 import enums.{CacheKeys, DownstreamOutcome}
 import models.externalAPIModels.coHo.CoHoCompanyDetailsModel
@@ -50,6 +51,13 @@ trait CoHoAPIService extends CommonService {
           cacheMap => DownstreamOutcome.Success
         }
       case _ => Future.successful(DownstreamOutcome.Failure)
+    }
+  }
+
+  def getStoredCompanyName()(implicit hc: HeaderCarrier): Future[String] = {
+    keystoreConnector.fetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString) map {
+      case Some(model) => model.companyName
+      case _ => throw new CompanyDetailsNotFoundException()
     }
   }
 
