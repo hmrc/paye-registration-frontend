@@ -21,7 +21,7 @@ import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
 import enums.CacheKeys
 import fixtures.CoHoAPIFixture
 import models.externalAPIModels.coHo.CoHoCompanyDetailsModel
-import models.view.{TradingName => TraddingNameView}
+import models.view.{TradingName => TradingNameView}
 import org.jsoup._
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -46,7 +46,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
     }
   }
 
-  val tstTradingNameModel = TraddingNameView(differentName = true, tradingName = Some("test trading name"))
+  val tstTradingNameModel = TradingNameView(differentName = true, tradingName = Some("test trading name"))
 
   val fakeRequest = FakeRequest("GET", "/")
   implicit val materializer = fakeApplication.materializer
@@ -84,7 +84,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
 
     "throw a CompanyDetailsNotFoundException if there are no company details in keystore" in new Setup {
       mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, None)
-      when(mockS4LService.fetchAndGet[TraddingNameView](Matchers.matches(CacheKeys.TradingName.toString))(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
+      when(mockS4LService.fetchAndGet[TradingNameView](Matchers.matches(CacheKeys.TradingName.toString))(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
       a[CompanyDetailsNotFoundException] shouldBe thrownBy (await(AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {result => status(result)} ))
     }
   }
@@ -92,7 +92,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
   "calling the submitTradingName action" should {
     "redirect to the WELCOME PAGE when a user enters valid data" in new Setup {
       // TODO: Update test and description when flow is updated
-      when(mockS4LService.saveForm[TraddingNameView](Matchers.matches(CacheKeys.TradingName.toString), Matchers.any())(Matchers.any(),Matchers.any())).thenReturn(Future.successful(CacheMap("tstMap", Map.empty)))
+      when(mockS4LService.saveForm[TradingNameView](Matchers.matches(CacheKeys.TradingName.toString), Matchers.any())(Matchers.any(),Matchers.any())).thenReturn(Future.successful(CacheMap("tstMap", Map.empty)))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "tradeUnderDifferentName" -> "yes",
