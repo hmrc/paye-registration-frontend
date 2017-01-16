@@ -20,14 +20,9 @@ import auth.test.TestPAYERegime
 import config.FrontendAuthConnector
 import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
-import forms.test.testSetupForms.TestCompanyDetailsSetupForm
 import services.PAYERegistrationService
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
-
-import scala.concurrent.Future
 
 object TestRegSetupController extends TestRegSetupController {
   //$COVERAGE-OFF$

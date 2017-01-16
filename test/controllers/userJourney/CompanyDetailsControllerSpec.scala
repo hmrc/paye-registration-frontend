@@ -22,7 +22,6 @@ import enums.CacheKeys
 import fixtures.CoHoAPIFixture
 import models.externalAPIModels.coHo.CoHoCompanyDetailsModel
 import models.view.{TradingName => TraddingNameView}
-import models.dataModels.companyDetails.TradingName
 import org.jsoup._
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -48,7 +47,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
   }
 
   val tstTradingNameModel = TraddingNameView(differentName = true, tradingName = Some("test trading name"))
-  val tstTradingNameDataModel = TradingName(Some("test trading name"))
 
   val fakeRequest = FakeRequest("GET", "/")
   implicit val materializer = fakeApplication.materializer
@@ -62,7 +60,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
 
     "show the correctly pre-populated trading name page when data has already been entered" in new Setup {
       mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, Some(validCoHoCompanyDetailsResponse))
-      when(mockS4LService.fetchAndGet[TradingName](Matchers.matches(CacheKeys.TradingName.toString))(Matchers.any(), Matchers.any())).thenReturn(Future.successful(Some(tstTradingNameDataModel)))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -75,7 +72,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
 
     "show the a blank trading name page when no data has been entered" in new Setup {
       mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, Some(validCoHoCompanyDetailsResponse))
-      when(mockS4LService.fetchAndGet[TradingName](Matchers.matches(CacheKeys.TradingName.toString))(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         response =>
