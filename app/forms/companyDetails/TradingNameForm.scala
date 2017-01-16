@@ -18,31 +18,31 @@ package forms.companyDetails
 
 import enums.YesNo
 import common.exceptions.InternalExceptions
-import models.formModels.TradingNameFormModel
+import models.view.TradingName
 import play.api.data.Form
 import play.api.data.Forms._
 
 object TradingNameForm {
 
-  def validateForm(vForm: Form[TradingNameFormModel]): Form[TradingNameFormModel] = {
+  def validateForm(vForm: Form[TradingName]): Form[TradingName] = {
     if(!validationNeeded(vForm)) vForm else {
       if (tradingNameFieldNotCompleted(vForm)) vForm.withError("tradingName", "pages.tradingName.errorQuestion")
       else vForm
     }
   }
 
-  private def validationNeeded(data: Form[TradingNameFormModel]): Boolean = {
+  private def validationNeeded(data: Form[TradingName]): Boolean = {
     val yn = data("tradeUnderDifferentName").value.getOrElse(
       throw new InternalExceptions.ExpectedFormFieldNotPopulatedException("TradingNameForm", "tradeUnderDifferentName"))
     YesNo.fromString(yn) == YesNo.Yes
   }
 
-  private def tradingNameFieldNotCompleted(data: Form[TradingNameFormModel]) = data("tradingName").value.isEmpty
+  private def tradingNameFieldNotCompleted(data: Form[TradingName]) = data("tradingName").value.isEmpty
 
   val form = Form(
     mapping(
-      "tradeUnderDifferentName" -> text,
+      "differentName" -> boolean,
       "tradingName" -> optional(text)
-    )(TradingNameFormModel.apply)(TradingNameFormModel.unapply)
+    )(TradingName.apply)(TradingName.unapply)
   )
 }
