@@ -64,10 +64,10 @@ trait PAYERegistrationConnector {
 
   def getCompanyDetails(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[CompanyDetailsAPI]): Future[PAYERegistrationResponse] = {
     http.GET[CompanyDetailsAPI](s"$payeRegUrl/register-for-paye/$regID/company-details") map {
-      details => PAYERegistrationSuccessResponse[Option[CompanyDetailsAPI]](Some(details))
+      details => PAYERegistrationSuccessResponse[CompanyDetailsAPI](details)
     } recover {
       case e: NotFoundException =>
-        PAYERegistrationSuccessResponse[Option[CompanyDetailsAPI]](None)
+        PAYERegistrationNotFoundResponse
       case e: BadRequestException =>
         Logger.warn("[PAYERegistrationConnector] [getCompanyDetails] received Bad Request response when getting company details from microservice")
         PAYERegistrationBadRequestResponse
@@ -80,6 +80,7 @@ trait PAYERegistrationConnector {
     }
   }
 
+  // TODO - move to a test package
   def addTestRegistration(reg: PAYERegistrationAPI)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[PAYERegistrationResponse] = {
     http.POST[PAYERegistrationAPI, PAYERegistrationAPI](s"$payeRegUrl/register-for-paye/test-only/insert-registration/${reg.registrationID}", reg) map {
       reg => PAYERegistrationSuccessResponse(reg)
@@ -90,6 +91,7 @@ trait PAYERegistrationConnector {
     }
   }
 
+  // TODO - move to a test package
   def testRegistrationTeardown()(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     http.GET[HttpResponse](s"$payeRegUrl/register-for-paye/test-only/registration-teardown") map {
       resp => DownstreamOutcome.Success

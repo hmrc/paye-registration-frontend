@@ -53,10 +53,10 @@ trait KeystoreMock {
       .thenReturn(Future.successful(HttpResponse(200)))
   }
 
-  def mockFetchRegID(): OngoingStubbing[Future[Option[CurrentProfile]]] = {
+  def mockFetchRegID(regID: String = "12345"): OngoingStubbing[Future[Option[CurrentProfile]]] = {
     when(mockKeystoreConnector.fetchAndGet[CurrentProfile](Matchers.any())(Matchers.any[HeaderCarrier](), Matchers.any[Format[CurrentProfile]]()))
         .thenReturn(Future.successful(Some(CurrentProfile(
-          "12345",
+          regID,
           Some("Director"),
           "ENG"
         ))))

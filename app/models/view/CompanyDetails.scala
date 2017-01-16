@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package models.view.save4Later
+package models.view
 
 case class CompanyDetails(
                            crn: Option[String],

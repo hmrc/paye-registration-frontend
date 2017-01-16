@@ -78,12 +78,12 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
     "return the correct PAYEResponse when the microservice returns a Company Details API model" in new Setup {
       mockHttpGet[CompanyDetailsAPI]("tst-url", validCompanyDetailsAPI)
 
-      await(connector.getCompanyDetails("tstID")) shouldBe PAYERegistrationSuccessResponse(Some(validCompanyDetailsAPI))
+      await(connector.getCompanyDetails("tstID")) shouldBe PAYERegistrationSuccessResponse(validCompanyDetailsAPI)
     }
-    "return the correct PAYEResponse when the microservice returns no Company Details API model" in new Setup {
+    "return a Not Found PAYEResponse when the microservice returns no Company Details API model" in new Setup {
       mockHttpFailedGET[CompanyDetailsAPI]("tst-url", new NotFoundException("tst"))
 
-      await(connector.getCompanyDetails("tstID")) shouldBe PAYERegistrationSuccessResponse(None)
+      await(connector.getCompanyDetails("tstID")) shouldBe PAYERegistrationNotFoundResponse
     }
   }
 

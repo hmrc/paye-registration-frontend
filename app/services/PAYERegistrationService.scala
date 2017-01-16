@@ -23,7 +23,6 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.control.NoStackTrace
 
 object PAYERegistrationService extends PAYERegistrationService {
   //$COVERAGE-OFF$
@@ -32,8 +31,6 @@ object PAYERegistrationService extends PAYERegistrationService {
   override val s4LService = S4LService
   //$COVERAGE-ON$
 }
-
-sealed class NotFoundResponse extends NoStackTrace
 
 trait PAYERegistrationService extends CommonService {
 
