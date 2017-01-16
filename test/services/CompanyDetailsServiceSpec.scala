@@ -18,6 +18,8 @@ package services
 
 import connectors._
 import fixtures.{PAYERegistrationFixture, S4LFixture}
+import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
+import models.api.{CompanyDetails => CompanyDetailsAPI}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
@@ -38,29 +40,105 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
   }
 
-  "Caling getTradingName" should {
-    "return a defined Trading Name View option if returned from the connector" in new Setup {
+  class NoCompanyDetailsMockedSetup {
+    val service = new CompanyDetailsService {
+      override val keystoreConnector = mockKeystoreConnector
+      override val payeRegConnector = mockPAYERegConnector
+
+      override def getCompanyDetails()(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsView]] = {
+        Future.successful(None)
+      }
+    }
+  }
+
+  class CompanyDetailsMockedSetup {
+    val service = new CompanyDetailsService {
+      override val keystoreConnector = mockKeystoreConnector
+      override val payeRegConnector = mockPAYERegConnector
+
+      override def getCompanyDetails()(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsView]] = {
+        Future.successful(Some(validCompanyDetailsViewModel))
+      }
+    }
+  }
+
+  class APIConverterMockedSetup {
+    val service = new CompanyDetailsService {
+      override val keystoreConnector = mockKeystoreConnector
+      override val payeRegConnector = mockPAYERegConnector
+
+      override def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
+        validCompanyDetailsViewModel
+      }
+    }
+  }
+
+  "Calling getTradingName" should {
+    "return a defined Trading Name View option if returned from the connector" in new CompanyDetailsMockedSetup {
       mockFetchRegID("54321")
-      when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(),Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationSuccessResponse(validCompanyDetailsAPI)))
 
       await(service.getTradingName()) shouldBe Some(validTradingNameViewModel)
     }
 
-    "return a defined, negative Trading Name View option if no Trading Name details are returned from the connector" in new Setup {
+    "return an empty option if no Company Details are returned from the connector" in new NoCompanyDetailsMockedSetup {
       mockFetchRegID("54321")
-      when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationSuccessResponse(validCompanyDetailsAPI.copy(tradingName = None))))
 
-      await(service.getTradingName()) shouldBe Some(negativeTradingNameViewModel)
+      await(service.getTradingName()) shouldBe None
+    }
+  }
+
+  "Calling apiToView" should {
+    "correctly produce a view model from a Company Details API model with a completed trading name" in new Setup {
+      val tstModelAPI = CompanyDetailsAPI(
+        Some("tstCRN"),
+        "Comp name",
+        Some("trading name")
+      )
+      val tstModelView = CompanyDetailsView(
+        Some("tstCRN"),
+        "Comp name",
+        Some(TradingNameView(
+          differentName = true,
+          tradingName = Some("trading name")
+        ))
+      )
+      service.apiToView(tstModelAPI) shouldBe tstModelView
     }
 
-    "return an empty option if no Company Details are returned from the connector" in new Setup {
+    "correctly produce a view model from a Company Details API model without a completed trading name" in new Setup {
+      val tstModelAPI = CompanyDetailsAPI(
+        Some("tstCRN"),
+        "Comp name",
+        None
+      )
+      val tstModelView = CompanyDetailsView(
+        Some("tstCRN"),
+        "Comp name",
+        Some(TradingNameView(
+          differentName = false,
+          tradingName = None
+        ))
+      )
+      service.apiToView(tstModelAPI) shouldBe tstModelView
+    }
+  }
+
+  "Calling getCompanyDetails" should {
+
+    "return the correct View response when Company Details are returned from the connector" in new APIConverterMockedSetup {
+      mockFetchRegID("54321")
+      when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(PAYERegistrationSuccessResponse(validCompanyDetailsAPI)))
+
+      await(service.getCompanyDetails()) shouldBe Some(validCompanyDetailsViewModel)
+    }
+
+    "return an empty option when no Company Details are returned from the connector" in new Setup {
       mockFetchRegID("54321")
       when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(PAYERegistrationNotFoundResponse))
 
-      await(service.getTradingName()) shouldBe None
+      await(service.getCompanyDetails()) shouldBe None
     }
 
     "throw a PAYEMicroserviceException an exception response is returned from the connector" in new Setup {
@@ -68,7 +146,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(PAYERegistrationErrorResponse(new RuntimeException("tst"))))
 
-      a[PAYEMicroserviceException] shouldBe thrownBy(await(service.getTradingName()))
+      a[PAYEMicroserviceException] shouldBe thrownBy(await(service.getCompanyDetails()))
     }
 
     "throw a PAYEMicroserviceException an unexpected response is returned from the connector" in new Setup {
@@ -76,7 +154,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(PAYERegistrationForbiddenResponse))
 
-      a[PAYEMicroserviceException] shouldBe thrownBy(await(service.getTradingName()))
+      a[PAYEMicroserviceException] shouldBe thrownBy(await(service.getCompanyDetails()))
     }
 
   }

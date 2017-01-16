@@ -43,7 +43,7 @@ trait CompanyDetailsService extends CommonService {
     }
   }
 
-  private def getCompanyDetails()(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsView]] = {
+  private[services] def getCompanyDetails()(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsView]] = {
     for {
       regID <- fetchRegistrationID
       regResponse <- payeRegConnector.getCompanyDetails(regID)
@@ -55,7 +55,7 @@ trait CompanyDetailsService extends CommonService {
     }
   }
 
-  private def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
+  private[services] def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
     val tradingNameView = apiModel.tradingName.map {
       tName => Some(TradingNameView(differentName = true, Some(tName)))
     }.getOrElse {

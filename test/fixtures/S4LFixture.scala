@@ -16,7 +16,7 @@
 
 package fixtures
 
-import models.view.TradingName
+import models.view.{CompanyDetails, TradingName}
 
 trait S4LFixture {
 
@@ -28,6 +28,12 @@ trait S4LFixture {
   val negativeTradingNameViewModel = TradingName(
     differentName = false,
     tradingName = None
+  )
+
+  val validCompanyDetailsViewModel = CompanyDetails(
+    Some("crn"),
+    "Tst Company Name",
+    Some(validTradingNameViewModel)
   )
 
 }
