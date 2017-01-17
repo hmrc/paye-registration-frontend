@@ -20,8 +20,7 @@ import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
 import connectors.{CohoApiErrorResponse, CohoApiBadRequestResponse, CohoApiSuccessResponse, CoHoAPIConnector}
 import enums.{DownstreamOutcome, CacheKeys}
 import fixtures.{CoHoAPIFixture, KeystoreFixture}
-import models.externalAPIModels.coHo.CoHoCompanyDetailsModel
-import models.externalAPIModels.currentProfile.CurrentProfile
+import models.external.{CurrentProfile, CoHoCompanyDetailsModel}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec

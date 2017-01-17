@@ -20,7 +20,7 @@ import builders.AuthBuilder
 import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
 import enums.{DownstreamOutcome, CacheKeys}
 import fixtures.{S4LFixture, CoHoAPIFixture}
-import models.externalAPIModels.coHo.CoHoCompanyDetailsModel
+import models.external.CoHoCompanyDetailsModel
 import models.view.{TradingName => TradingNameView}
 import org.jsoup._
 import org.mockito.Matchers

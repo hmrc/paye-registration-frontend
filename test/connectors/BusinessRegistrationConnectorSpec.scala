@@ -17,7 +17,7 @@
 package connectors
 
 import fixtures.BusinessRegistrationFixture
-import models.externalAPIModels.businessRegistration.BusinessRegistration
+import models.external.BusinessRegistration
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import play.api.libs.json.JsValue

@@ -17,7 +17,7 @@
 package connectors
 
 import fixtures.CoHoAPIFixture
-import models.externalAPIModels.coHo.CoHoCompanyDetailsModel
+import models.external.CoHoCompanyDetailsModel
 import play.api.libs.json.JsValue
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.{HttpResponse, BadRequestException, HeaderCarrier}

@@ -19,7 +19,7 @@ package services
 import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
 import connectors.{CohoApiSuccessResponse, CohoApiResponse, CoHoAPIConnector, KeystoreConnector}
 import enums.{CacheKeys, DownstreamOutcome}
-import models.externalAPIModels.coHo.CoHoCompanyDetailsModel
+import models.external.CoHoCompanyDetailsModel
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future

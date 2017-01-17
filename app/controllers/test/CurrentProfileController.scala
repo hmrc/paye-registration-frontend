@@ -20,8 +20,7 @@ import auth.test.TestPAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnector, BusinessRegistrationSuccessResponse, BusinessRegistrationConnector}
 import enums.CacheKeys
-import models.externalAPIModels.businessRegistration.BusinessRegistration
-import models.externalAPIModels.currentProfile.CurrentProfile
+import models.external.{CurrentProfile, BusinessRegistration}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 

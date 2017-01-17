@@ -19,7 +19,7 @@ package services
 import common.exceptions.DownstreamExceptions
 import enums.CacheKeys
 import fixtures.KeystoreFixture
-import models.externalAPIModels.currentProfile.CurrentProfile
+import models.external.CurrentProfile
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
 

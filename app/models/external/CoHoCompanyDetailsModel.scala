@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package models.externalAPIModels.coHo
+package models.external
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._

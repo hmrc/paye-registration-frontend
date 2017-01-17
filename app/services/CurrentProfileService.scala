@@ -18,7 +18,7 @@ package services
 
 import connectors.{KeystoreConnector, BusinessRegistrationSuccessResponse, BusinessRegistrationConnector}
 import enums.{DownstreamOutcome,CacheKeys}
-import models.externalAPIModels.currentProfile.CurrentProfile
+import models.external.CurrentProfile
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global

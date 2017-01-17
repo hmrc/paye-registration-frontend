@@ -18,7 +18,7 @@ package services
 
 import enums.CacheKeys
 import fixtures.{PAYERegistrationFixture, KeystoreFixture}
-import models.externalAPIModels.currentProfile.CurrentProfile
+import models.external.CurrentProfile
 import models.view.{TradingName => TradingNameView}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap

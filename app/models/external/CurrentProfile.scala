@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package models.externalAPIModels.currentProfile
+package models.external
 
 import play.api.libs.json.Json
 

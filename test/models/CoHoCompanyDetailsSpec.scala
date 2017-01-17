@@ -16,7 +16,7 @@
 
 package models
 
-import models.externalAPIModels.coHo.{AreaOfIndustry, CoHoCompanyDetailsModel}
+import models.external.{AreaOfIndustry, CoHoCompanyDetailsModel}
 import play.api.libs.json.Json
 import testHelpers.PAYERegSpec
 
