@@ -19,9 +19,9 @@ package forms.helpers
 import play.api.data.FormError
 import uk.gov.hmrc.play.test.UnitSpec
 
-class YesNoFormSpec extends UnitSpec {
+class RequiredBooleanFormSpec extends UnitSpec {
 
-  object TestForm extends YesNoForm {
+  object TestForm extends RequiredBooleanForm {
 
   }
 

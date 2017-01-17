@@ -19,7 +19,7 @@ package forms.helpers
 import play.api.data.{Mapping, FormError, Forms}
 import play.api.data.format.Formatter
 
-trait YesNoForm {
+trait RequiredBooleanForm {
   implicit def requiredBooleanFormatter: Formatter[Boolean] = new Formatter[Boolean] {
 
     override val format = Some(("format.boolean", Nil))

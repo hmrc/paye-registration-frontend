@@ -17,12 +17,12 @@
 package forms.companyDetails
 
 import common.exceptions.InternalExceptions
-import forms.helpers.YesNoForm
+import forms.helpers.RequiredBooleanForm
 import models.view.TradingName
 import play.api.data.Form
 import play.api.data.Forms._
 
-object TradingNameForm extends YesNoForm {
+object TradingNameForm extends RequiredBooleanForm {
 
   def validateForm(vForm: Form[TradingName]): Form[TradingName] = {
     if(!validationNeeded(vForm)) vForm else {
