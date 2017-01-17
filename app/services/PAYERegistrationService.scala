@@ -37,7 +37,7 @@ trait PAYERegistrationService extends CommonService {
   val payeRegistrationConnector: PAYERegistrationConnector
   val s4LService: S4LService
 
-  def createNewRegistration()(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def assertRegistrationFootprint()(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
       regID <- fetchRegistrationID
       regResponse <- payeRegistrationConnector.createNewRegistration(regID)

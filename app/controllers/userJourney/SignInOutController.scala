@@ -19,7 +19,6 @@ package controllers.userJourney
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import enums.DownstreamOutcome
-import play.api.Logger
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
@@ -50,7 +49,9 @@ trait SignInOutController extends FrontendController with Actions {
       implicit request =>
         checkAndStoreCurrentProfile {
           checkAndStoreCompanyDetails {
-            Redirect(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+            assertPAYERegistrationFootprint {
+              Redirect(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+            }
           }
         }
   }
@@ -62,8 +63,15 @@ trait SignInOutController extends FrontendController with Actions {
     }
   }
 
-  private def checkAndStoreCompanyDetails(f: => Result)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
-    coHoAPIService.fetchAndStoreCoHoCompanyDetails map {
+  private def checkAndStoreCompanyDetails(f: => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+    coHoAPIService.fetchAndStoreCoHoCompanyDetails flatMap {
+      case DownstreamOutcome.Success => f
+      case DownstreamOutcome.Failure => Future.successful(InternalServerError(views.html.pages.error.restart()))
+    }
+  }
+
+  private def assertPAYERegistrationFootprint(f: => Result)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+    payeRegistrationService.assertRegistrationFootprint map {
       case DownstreamOutcome.Success => f
       case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
     }

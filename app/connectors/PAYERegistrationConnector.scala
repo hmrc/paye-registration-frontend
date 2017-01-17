@@ -51,13 +51,13 @@ trait PAYERegistrationConnector {
       reg => PAYERegistrationSuccessResponse(reg)
     } recover {
       case e: BadRequestException =>
-        Logger.warn("[PAYERegistrationConnector] [createNewRegistration] received Bad Request response creating new PAYE Registration in backend")
+        Logger.warn("[PAYERegistrationConnector] [createNewRegistration] received Bad Request response creating/asserting new PAYE Registration in backend")
         PAYERegistrationBadRequestResponse
       case e: ForbiddenException =>
-        Logger.warn("[PAYERegistrationConnector] [createNewRegistration] received Forbidden response when creating new PAYE Registration in backend")
+        Logger.warn("[PAYERegistrationConnector] [createNewRegistration] received Forbidden response when creating/asserting new PAYE Registration in backend")
         PAYERegistrationForbiddenResponse
       case e: Exception =>
-        Logger.warn(s"[PAYERegistrationConnector] [createNewRegistration] received error when creating new PAYE Registration in backend - Error: ${e.getMessage}")
+        Logger.warn(s"[PAYERegistrationConnector] [createNewRegistration] received error when creating/asserting new PAYE Registration in backend - Error: ${e.getMessage}")
         PAYERegistrationErrorResponse(e)
     }
   }

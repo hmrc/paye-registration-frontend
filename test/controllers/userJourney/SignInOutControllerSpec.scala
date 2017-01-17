@@ -45,6 +45,12 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
   val fakeRequest = FakeRequest("GET", "/")
 
   "Calling the postSignIn action" should {
+
+    "return 303 for an unauthorised user" in new Setup {
+      val result = controller.postSignIn()(FakeRequest())
+      status(result) shouldBe Status.SEE_OTHER
+    }
+
     "show an Error page for an authorised user without a registration ID" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any())).thenReturn(DownstreamOutcome.Failure)
 
@@ -64,9 +70,21 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       }
     }
 
-    "redirect to the Trading Name page for an authorised user with a registration ID and CoHo Company Details" in new Setup {
+    "show an Error page for an authorised user with a registration ID and CoHo Company Details, with an error response from the microservice" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any())).thenReturn(DownstreamOutcome.Success)
       when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(Matchers.any())).thenReturn(DownstreamOutcome.Success)
+      when(mockPAYERegService.assertRegistrationFootprint()(Matchers.any())).thenReturn(DownstreamOutcome.Failure)
+
+      AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
+        result =>
+          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      }
+    }
+
+    "redirect to the Trading Name page for an authorised user with a registration ID and CoHo Company Details, with PAYE Footprint correctly asserted" in new Setup {
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any())).thenReturn(DownstreamOutcome.Success)
+      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(Matchers.any())).thenReturn(DownstreamOutcome.Success)
+      when(mockPAYERegService.assertRegistrationFootprint()(Matchers.any())).thenReturn(DownstreamOutcome.Success)
 
       AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
         result =>

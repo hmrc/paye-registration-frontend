@@ -47,7 +47,7 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
       when(mockRegConnector.createNewRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(PAYERegistrationSuccessResponse(validPAYERegistrationAPI)))
 
-      await(service.createNewRegistration()) shouldBe DownstreamOutcome.Success
+      await(service.assertRegistrationFootprint()) shouldBe DownstreamOutcome.Success
     }
 
     "return a failure response when the Registration can't be created" in new Setup {
@@ -55,7 +55,7 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
       when(mockRegConnector.createNewRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(PAYERegistrationBadRequestResponse))
 
-      await(service.createNewRegistration()) shouldBe DownstreamOutcome.Failure
+      await(service.assertRegistrationFootprint()) shouldBe DownstreamOutcome.Failure
     }
   }
 
