@@ -16,13 +16,13 @@
 
 package forms.companyDetails
 
-import enums.YesNo
 import common.exceptions.InternalExceptions
+import forms.helpers.YesNoForm
 import models.view.TradingName
 import play.api.data.Form
 import play.api.data.Forms._
 
-object TradingNameForm {
+object TradingNameForm extends YesNoForm {
 
   def validateForm(vForm: Form[TradingName]): Form[TradingName] = {
     if(!validationNeeded(vForm)) vForm else {
@@ -32,16 +32,16 @@ object TradingNameForm {
   }
 
   private def validationNeeded(data: Form[TradingName]): Boolean = {
-    val yn = data("tradeUnderDifferentName").value.getOrElse(
-      throw new InternalExceptions.ExpectedFormFieldNotPopulatedException("TradingNameForm", "tradeUnderDifferentName"))
-    YesNo.fromString(yn) == YesNo.Yes
+    data("differentName").value.getOrElse{
+      throw new InternalExceptions.ExpectedFormFieldNotPopulatedException("TradingNameForm", "differentName")
+    } == "true"
   }
 
   private def tradingNameFieldNotCompleted(data: Form[TradingName]) = data("tradingName").value.isEmpty
 
   val form = Form(
     mapping(
-      "differentName" -> boolean,
+      "differentName" -> requiredBoolean,
       "tradingName" -> optional(text)
     )(TradingName.apply)(TradingName.unapply)
   )
