@@ -31,14 +31,14 @@ import scala.concurrent.Future
 object TestCoHoController extends TestCoHoController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
-  override val cohoAPIConnector = TestCoHoAPIConnector
+  override val testCoHoAPIConnector = TestCoHoAPIConnector
   override val coHoAPIService = CoHoAPIService
   //$COVERAGE-ON$
 }
 
 trait TestCoHoController extends FrontendController with Actions {
 
-  val cohoAPIConnector: TestCoHoAPIConnector
+  val testCoHoAPIConnector: TestCoHoAPIConnector
   val coHoAPIService: CoHoAPIService
 
   def coHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
@@ -50,13 +50,13 @@ trait TestCoHoController extends FrontendController with Actions {
       errors => Future.successful(Ok(views.html.pages.test.coHoCompanyDetailsSetup(errors))),
       success => for {
         regId <- CoHoAPIService.fetchRegistrationID
-        resp <- cohoAPIConnector.addCoHoCompanyDetails(success.toCoHoCompanyDetailsAPIModel(regId))
+        resp <- testCoHoAPIConnector.addCoHoCompanyDetails(success.toCoHoCompanyDetailsAPIModel(regId))
       } yield Ok(s"Company details response status: ${resp.status}")
     )
   }
 
   def coHoCompanyDetailsTearDown = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    cohoAPIConnector.tearDownCoHoCompanyDetails().map { result =>
+    testCoHoAPIConnector.tearDownCoHoCompanyDetails().map { result =>
       Ok("Company details collection removed")
     }
   }

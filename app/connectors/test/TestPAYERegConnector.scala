@@ -17,10 +17,11 @@
 package connectors.test
 
 import config.WSHttp
-import connectors.{PAYERegistrationResponse, PAYERegistrationErrorResponse, PAYERegistrationSuccessResponse}
+import connectors._
 import enums.DownstreamOutcome
-import models.api.{PAYERegistration => PAYERegistrationAPI}
+import models.api.{PAYERegistration => PAYERegistrationAPI, CompanyDetails => CompanyDetailsAPI}
 import play.api.Logger
+import services.CommonService
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
@@ -31,13 +32,16 @@ object TestPAYERegConnector extends TestPAYERegConnector with ServicesConfig {
   //$COVERAGE-OFF$
   val payeRegUrl = baseUrl("paye-registration")
   val http = WSHttp
+  val keystoreConnector = KeystoreConnector
+  val payeRegConnector = PAYERegistrationConnector
   //$COVERAGE-ON$
 }
 
-trait TestPAYERegConnector {
+trait TestPAYERegConnector extends CommonService {
 
   val payeRegUrl: String
   val http: HttpGet with HttpPost with HttpPatch
+  val payeRegConnector: PAYERegistrationConnector
 
   def addTestRegistration(reg: PAYERegistrationAPI)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[PAYERegistrationResponse] = {
     http.POST[PAYERegistrationAPI, PAYERegistrationAPI](s"$payeRegUrl/register-for-paye/test-only/insert-registration/${reg.registrationID}", reg) map {
@@ -46,6 +50,16 @@ trait TestPAYERegConnector {
       case e: Exception =>
         Logger.warn(s"[PAYERegistrationConnector] [getCurrentRegistration] received error when setting up test Registration - Error: ${e.getMessage}")
         PAYERegistrationErrorResponse(e)
+    }
+  }
+
+  def addTestCompanyDetails(details: CompanyDetailsAPI)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    for {
+      regID <- fetchRegistrationID
+      resp <- payeRegConnector.upsertCompanyDetails(regID,  details)
+    } yield resp match {
+      case PAYERegistrationSuccessResponse(details: CompanyDetailsAPI) => DownstreamOutcome.Success
+      case _ => DownstreamOutcome.Failure
     }
   }
 

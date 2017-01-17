@@ -16,7 +16,7 @@
 
 package connectors.test
 
-import connectors.{PAYERegistrationErrorResponse, PAYERegistrationSuccessResponse}
+import connectors.{PAYERegistrationConnector, PAYERegistrationErrorResponse, PAYERegistrationSuccessResponse}
 import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
 import models.api.{PAYERegistration => PAYERegistrationAPI}
@@ -26,10 +26,14 @@ import uk.gov.hmrc.play.http._
 
 class TestPAYERegConnectorSpec extends PAYERegSpec with PAYERegistrationFixture {
 
+  val mockPAYERegConnector = mock[PAYERegistrationConnector]
+
   class Setup {
     val connector = new TestPAYERegConnector {
       override val payeRegUrl: String = "tst-url"
       override val http: HttpGet with HttpPost with HttpPatch = mockWSHttp
+      override val keystoreConnector = mockKeystoreConnector
+      override val payeRegConnector = mockPAYERegConnector
     }
   }
 
