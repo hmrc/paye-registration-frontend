@@ -18,6 +18,7 @@ package controllers.test
 
 import auth.test.TestPAYERegime
 import config.FrontendAuthConnector
+import connectors.test.TestBusinessRegConnector
 import connectors.{KeystoreConnector, BusinessRegistrationSuccessResponse, BusinessRegistrationConnector}
 import enums.CacheKeys
 import models.external.CurrentProfile
@@ -28,26 +29,29 @@ object CurrentProfileController extends CurrentProfileController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
   override val keystoreConnector = KeystoreConnector
+  override val businessRegConnector = BusinessRegistrationConnector
+  override val testBusinessRegConnector = TestBusinessRegConnector
   //$COVERAGE-ON$
 }
 
 trait CurrentProfileController extends FrontendController with Actions {
 
   val keystoreConnector: KeystoreConnector
+  val businessRegConnector: BusinessRegistrationConnector
+  val testBusinessRegConnector: TestBusinessRegConnector
 
   def currentProfileSetup = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    BusinessRegistrationConnector.retrieveCurrentProfile flatMap {
-      case BusinessRegistrationSuccessResponse(profile) => {
-
+    businessRegConnector.retrieveCurrentProfile flatMap {
+      case BusinessRegistrationSuccessResponse(profile) =>
         keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, profile).map {
           case x => Ok(s"Profile already set up for reg ID ${profile.registrationID}")
         }
-      }
-      case _ => BusinessRegistrationConnector.createCurrentProfileEntry flatMap { newProfile =>
-        keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, newProfile).map {
-          response => Ok(s"Profile set up for reg ID ${newProfile.registrationID}")
+      case _ =>
+        testBusinessRegConnector.createCurrentProfileEntry flatMap { newProfile =>
+          keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, newProfile).map {
+            response => Ok(s"Profile set up for reg ID ${newProfile.registrationID}")
+          }
         }
-      }
     }
 
   }

@@ -39,14 +39,6 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
 
   implicit val hc = HeaderCarrier()
 
-  "createMetadataEntry" should {
-    "make a http POST request to business registration micro-service to create a CurrentProfile entry" in new Setup {
-      mockHttpPOST[JsValue, CurrentProfile](connector.businessRegUrl, validBusinessRegistrationResponse)
-
-      await(connector.createCurrentProfileEntry) shouldBe validBusinessRegistrationResponse
-    }
-  }
-
   "retrieveCurrentProfile" should {
     "return a a CurrentProfile response if one is found in business registration micro-service" in new Setup {
       mockHttpGet[CurrentProfile]("testUrl", validBusinessRegistrationResponse)

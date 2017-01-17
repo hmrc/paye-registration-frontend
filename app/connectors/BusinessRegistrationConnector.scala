@@ -45,11 +45,6 @@ trait BusinessRegistrationConnector {
   val businessRegUrl: String
   val http: HttpGet with HttpPost
 
-  def createCurrentProfileEntry(implicit hc: HeaderCarrier): Future[CurrentProfile] = {
-    val json = Json.toJson[BusinessRegistrationRequest](BusinessRegistrationRequest("ENG"))
-    http.POST[JsValue, CurrentProfile](s"$businessRegUrl/business-registration/business-tax-registration", json)
-  }
-
   def retrieveCurrentProfile(implicit hc: HeaderCarrier, rds: HttpReads[CurrentProfile]): Future[BusinessRegistrationResponse] = {
     http.GET[CurrentProfile](s"$businessRegUrl/business-registration/business-tax-registration") map {
       currentProfile =>
