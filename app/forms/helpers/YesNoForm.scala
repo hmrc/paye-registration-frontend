@@ -29,7 +29,7 @@ trait YesNoForm {
       Right(data.getOrElse(key,"")).right.flatMap {
         case "true" => Right(true)
         case "false" => Right(false)
-        case _ => Left(Seq(FormError(key, "error.boolean", Nil)))
+        case _ => Left(Seq(FormError(key, "error.required", Nil)))
       }
     }
 
