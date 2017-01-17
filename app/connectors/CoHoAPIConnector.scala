@@ -57,13 +57,4 @@ trait CoHoAPIConnector {
         CohoApiErrorResponse(ex)
     }
   }
-
-  def addCoHoCompanyDetails(coHoCompanyDetailsModel: CoHoCompanyDetailsModel)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    val json = Json.toJson[CoHoCompanyDetailsModel](coHoCompanyDetailsModel)
-    http.POST[JsValue, HttpResponse](s"$coHoAPIUrl/incorporation-frontend-stubs/test-only/insert-company-details", json)
-  }
-
-  def tearDownCoHoCompanyDetails()(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    http.GET[HttpResponse](s"$coHoAPIUrl/incorporation-frontend-stubs/test-only/wipe-company-details")
-  }
 }

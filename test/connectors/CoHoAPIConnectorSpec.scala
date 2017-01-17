@@ -58,22 +58,4 @@ class CoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
     }
   }
 
-  "addCoHoCompanyDetails" should {
-    "return a valid response when successfully set up" in new Setup {
-      val resp = HttpResponse(responseStatus = 200)
-      mockHttpPOST[JsValue, HttpResponse](connector.coHoAPIUrl, Future.successful(resp))
-
-      await(connector.addCoHoCompanyDetails(validCoHoCompanyDetailsResponse)) shouldBe resp
-    }
-  }
-
-  "tearDownCoHoCompanyDetails" should {
-    "return a valid response when successfully completed" in new Setup {
-      val resp = HttpResponse(responseStatus = 200)
-      mockHttpGet[HttpResponse](connector.coHoAPIUrl, Future.successful(resp))
-
-      await(connector.tearDownCoHoCompanyDetails()) shouldBe resp
-    }
-  }
-
 }

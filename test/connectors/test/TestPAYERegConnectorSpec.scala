@@ -24,7 +24,7 @@ import play.mvc.Http.Status
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._
 
-class PAYERegConnectorSpec extends PAYERegSpec with PAYERegistrationFixture {
+class TestPAYERegConnectorSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   class Setup {
     val connector = new TestPAYERegConnector {
