@@ -33,7 +33,7 @@ class YesNoFormSpec extends UnitSpec {
       TestForm.requiredBooleanFormatter.bind("tstKey", Map[String, String]("tstKey" -> "false")) shouldBe Right(false)
     }
     "fail to bind from \"\"" in {
-      TestForm.requiredBooleanFormatter.bind("tstKey", Map[String, String]("tstKey" -> "")) shouldBe Left(Seq(FormError("tstKey", "error.boolean", Nil)))
+      TestForm.requiredBooleanFormatter.bind("tstKey", Map[String, String]("tstKey" -> "")) shouldBe Left(Seq(FormError("tstKey", "error.required", Nil)))
     }
     "unbind from true" in {
       TestForm.requiredBooleanFormatter.unbind("tstKey", true) shouldBe Map("tstKey" -> "true")
