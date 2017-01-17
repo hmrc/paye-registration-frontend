@@ -32,4 +32,5 @@ trait InternalExceptions {
     s"Unable to retrieve configuration string for $confString"
   )
 
+  class APIConversionException(msg: String) extends Exception(msg)
 }

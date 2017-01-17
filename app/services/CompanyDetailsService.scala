@@ -17,9 +17,12 @@
 package services
 
 import connectors._
+import enums.DownstreamOutcome
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import common.exceptions.DownstreamExceptions.PAYEMicroserviceException
+import common.exceptions.InternalExceptions.APIConversionException
+import play.api.Logger
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -58,6 +61,32 @@ trait CompanyDetailsService extends CommonService {
     }
   }
 
+  def submitTradingName(tradingNameView: TradingNameView)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    for {
+      regID <- fetchRegistrationID
+      oCompanyDetails <- getCompanyDetails
+      updatedDetails <- addTradingNameToCompanyDetails(tradingNameView, oCompanyDetails)
+      outcome <- submitCompanyDetails(updatedDetails, regID)
+    } yield outcome
+  }
+
+  private[services] def addTradingNameToCompanyDetails(tradingNameView: TradingNameView, oCompanyDetails: Option[CompanyDetailsView])
+                                                      (implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+    oCompanyDetails match {
+      case Some(companyDetails) => Future.successful(companyDetails.copy(tradingName = Some(tradingNameView)))
+      case None => cohoService.getStoredCompanyName() map {
+        cName => CompanyDetailsView(None, cName, Some(tradingNameView))
+      }
+    }
+  }
+
+  private[services] def submitCompanyDetails(detailsView: CompanyDetailsView, regID:String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    payeRegConnector.upsertCompanyDetails(regID, viewToAPI(detailsView)) map {
+      case PAYERegistrationSuccessResponse(details: CompanyDetailsAPI) => DownstreamOutcome.Success
+      case _ => DownstreamOutcome.Failure
+    }
+  }
+
   private[services] def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
     val tradingNameView = apiModel.tradingName.map {
       tName => Some(TradingNameView(differentName = true, Some(tName)))
@@ -69,6 +98,24 @@ trait CompanyDetailsService extends CommonService {
       apiModel.crn,
       apiModel.companyName,
       tradingNameView
+    )
+  }
+
+  private[services] def viewToAPI(viewModel: CompanyDetailsView): CompanyDetailsAPI = {
+    val tradingNameAPI: Option[String] = viewModel.tradingName.map {
+      companyDetails => companyDetails.differentName match {
+        case true  => companyDetails.tradingName
+        case false => None
+      }
+    }.getOrElse {
+      Logger.warn("[CompanyDetailsService] [viewToAPI] Unable to create API model from view model - missing TradingNameView model")
+      throw new APIConversionException("Trading name view not defined when converting Company Details View to API model")
+    }
+
+    CompanyDetailsAPI(
+      viewModel.crn,
+      viewModel.companyName,
+      tradingNameAPI
     )
   }
 
