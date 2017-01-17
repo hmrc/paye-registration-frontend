@@ -24,16 +24,11 @@ object BusinessRegistrationRequest {
   implicit val formats = Json.format[BusinessRegistrationRequest]
 }
 
-case class BusinessRegistration(registrationID: String,
-                                formCreationTimestamp: String,
-                                language: String,
-                                completionCapacity : Option[String],
-                                links: Links)
+case class CurrentProfile(registrationID: String,
+                          completionCapacity : Option[String],
+                          language: String)
 
-case class Links(self: Option[String],
-                 registration: Option[String] = None)
-
-object BusinessRegistration {
-  implicit val formatLinks = Json.format[Links]
-  implicit val formats = Json.format[BusinessRegistration]
+object CurrentProfile {
+  implicit val formats = Json.format[CurrentProfile]
 }
+

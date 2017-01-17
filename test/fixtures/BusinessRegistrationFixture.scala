@@ -16,15 +16,13 @@
 
 package fixtures
 
-import models.external.{Links, BusinessRegistration}
+import models.external.CurrentProfile
 
 trait BusinessRegistrationFixture {
 
-  lazy val validBusinessRegistrationResponse = BusinessRegistration(
+  lazy val validBusinessRegistrationResponse = CurrentProfile(
     "12345",
-    "2016-08-03T10:49:11Z",
-    "ENG",
-    Some("String"),
-    Links(Some("/business-registration/business-tax-registartion/12345"))
+    Some("director"),
+    "ENG"
   )
 }

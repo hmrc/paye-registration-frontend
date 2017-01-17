@@ -20,11 +20,9 @@ import auth.test.TestPAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnector, BusinessRegistrationSuccessResponse, BusinessRegistrationConnector}
 import enums.CacheKeys
-import models.external.{CurrentProfile, BusinessRegistration}
+import models.external.CurrentProfile
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-
-import scala.concurrent.Future
 
 object CurrentProfileController extends CurrentProfileController {
   //$COVERAGE-OFF$
@@ -41,21 +39,17 @@ trait CurrentProfileController extends FrontendController with Actions {
     BusinessRegistrationConnector.retrieveCurrentProfile flatMap {
       case BusinessRegistrationSuccessResponse(profile) => {
 
-        keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, createCurrentProfileFromBRResponse(profile)).map {
+        keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, profile).map {
           case x => Ok(s"Profile already set up for reg ID ${profile.registrationID}")
         }
       }
-      case _ => BusinessRegistrationConnector.createCurrentProfileEntry flatMap { brResponse =>
-        keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, createCurrentProfileFromBRResponse(brResponse)).map {
-          response => Ok(s"Profile set up for reg ID ${brResponse.registrationID}")
+      case _ => BusinessRegistrationConnector.createCurrentProfileEntry flatMap { newProfile =>
+        keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, newProfile).map {
+          response => Ok(s"Profile set up for reg ID ${newProfile.registrationID}")
         }
       }
     }
 
-  }
-
-  private def createCurrentProfileFromBRResponse(resp: BusinessRegistration): CurrentProfile = {
-    CurrentProfile(resp.registrationID, resp.completionCapacity, resp.language)
   }
 
 }

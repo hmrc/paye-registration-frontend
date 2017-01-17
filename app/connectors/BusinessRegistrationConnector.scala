@@ -17,7 +17,7 @@
 package connectors
 
 import config.WSHttp
-import models.external.{BusinessRegistrationRequest, BusinessRegistration}
+import models.external.{CurrentProfile, BusinessRegistrationRequest}
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -35,7 +35,7 @@ object BusinessRegistrationConnector extends BusinessRegistrationConnector with 
 }
 
 sealed trait BusinessRegistrationResponse
-case class BusinessRegistrationSuccessResponse(response: BusinessRegistration) extends BusinessRegistrationResponse
+case class BusinessRegistrationSuccessResponse(response: CurrentProfile) extends BusinessRegistrationResponse
 case object BusinessRegistrationNotFoundResponse extends BusinessRegistrationResponse
 case object BusinessRegistrationForbiddenResponse extends BusinessRegistrationResponse
 case class BusinessRegistrationErrorResponse(err: Exception) extends BusinessRegistrationResponse
@@ -45,13 +45,13 @@ trait BusinessRegistrationConnector {
   val businessRegUrl: String
   val http: HttpGet with HttpPost
 
-  def createCurrentProfileEntry(implicit hc: HeaderCarrier): Future[BusinessRegistration] = {
+  def createCurrentProfileEntry(implicit hc: HeaderCarrier): Future[CurrentProfile] = {
     val json = Json.toJson[BusinessRegistrationRequest](BusinessRegistrationRequest("ENG"))
-    http.POST[JsValue, BusinessRegistration](s"$businessRegUrl/business-registration/business-tax-registration", json)
+    http.POST[JsValue, CurrentProfile](s"$businessRegUrl/business-registration/business-tax-registration", json)
   }
 
-  def retrieveCurrentProfile(implicit hc: HeaderCarrier, rds: HttpReads[BusinessRegistration]): Future[BusinessRegistrationResponse] = {
-    http.GET[BusinessRegistration](s"$businessRegUrl/business-registration/business-tax-registration") map {
+  def retrieveCurrentProfile(implicit hc: HeaderCarrier, rds: HttpReads[CurrentProfile]): Future[BusinessRegistrationResponse] = {
+    http.GET[CurrentProfile](s"$businessRegUrl/business-registration/business-tax-registration") map {
       currentProfile =>
         BusinessRegistrationSuccessResponse(currentProfile)
     } recover {

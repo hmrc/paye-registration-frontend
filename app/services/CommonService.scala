@@ -32,7 +32,7 @@ trait CommonService {
 
   def fetchRegistrationID(implicit hc: HeaderCarrier): Future[String] = {
     keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString).map {
-      case Some(profile) => profile.registrationId
+      case Some(profile) => profile.registrationID
       case None =>
         Logger.error(s"[CommonService] [fetchRegistrationID] - Could not find a Current Profile in keystore")
         throw new CurrentProfileNotFoundException
