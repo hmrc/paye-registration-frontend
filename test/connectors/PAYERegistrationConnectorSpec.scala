@@ -16,10 +16,8 @@
 
 package connectors
 
-import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
 import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
-import play.mvc.Http.Status
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._
 
@@ -108,35 +106,6 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
       mockHttpPATCH[CompanyDetailsAPI, CompanyDetailsAPI]("tst-url", validCompanyDetailsAPI)
 
       await(connector.upsertCompanyDetails("tstID", validCompanyDetailsAPI)) shouldBe PAYERegistrationSuccessResponse(validCompanyDetailsAPI)
-    }
-  }
-
-  "Calling addTestRegistration" should {
-    "return a successful PAYEResponse when the test reg is successfully added" in new Setup {
-      mockHttpPOST[PAYERegistrationAPI, PAYERegistrationAPI]("tst-url", validPAYERegistrationAPI)
-
-      await(connector.addTestRegistration(validPAYERegistrationAPI)) shouldBe PAYERegistrationSuccessResponse(validPAYERegistrationAPI)
-    }
-
-    "return a PAYE ErrorResponse when adding the test reg throws an exception" in new Setup {
-      val e = new RuntimeException("tst")
-      mockHttpFailedPOST[PAYERegistrationAPI, PAYERegistrationAPI]("tst-url", e)
-
-      await(connector.addTestRegistration(validPAYERegistrationAPI)) shouldBe PAYERegistrationErrorResponse(e)
-    }
-  }
-
-  "Calling testRegistrationTeardown" should {
-    "return a successful outcome for a successful teardown" in new Setup {
-      mockHttpGet[HttpResponse]("tst-url", HttpResponse(Status.OK))
-
-      await(connector.testRegistrationTeardown()) shouldBe DownstreamOutcome.Success
-    }
-    "return a failed outcome for an unsuccessful teardown" in new Setup {
-      val e = new RuntimeException("tst")
-      mockHttpFailedGET[HttpResponse]("tst-url", e)
-
-      await(connector.testRegistrationTeardown()) shouldBe DownstreamOutcome.Failure
     }
   }
 }

@@ -19,6 +19,7 @@ package controllers.test
 import auth.test.TestPAYERegime
 import config.FrontendAuthConnector
 import connectors.PAYERegistrationConnector
+import connectors.test.TestPAYERegConnector
 import enums.DownstreamOutcome
 import services.PAYERegistrationService
 import uk.gov.hmrc.play.frontend.auth.Actions
@@ -28,14 +29,14 @@ object TestRegSetupController extends TestRegSetupController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
   override val payeRegService = PAYERegistrationService
-  override val payeRegConnector = PAYERegistrationConnector
+  override val payeRegConnector = TestPAYERegConnector
   //$COVERAGE-ON$
 }
 
 trait TestRegSetupController extends FrontendController with Actions {
 
   val payeRegService: PAYERegistrationService
-  val payeRegConnector: PAYERegistrationConnector
+  val payeRegConnector: TestPAYERegConnector
 
   val regTeardown = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     payeRegConnector.testRegistrationTeardown() map {

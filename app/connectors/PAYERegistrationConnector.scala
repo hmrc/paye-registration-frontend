@@ -17,7 +17,6 @@
 package connectors
 
 import config.WSHttp
-import enums.DownstreamOutcome
 import models.api.{PAYERegistration => PAYERegistrationAPI}
 import play.api.Logger
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -93,28 +92,6 @@ trait PAYERegistrationConnector {
       case e: Exception =>
         Logger.warn(s"[PAYERegistrationConnector] [upsertCompanyDetails] received error when upserting company details in microservice - Error: ${e.getMessage}")
         PAYERegistrationErrorResponse(e)
-    }
-  }
-
-  // TODO - move to a test package
-  def addTestRegistration(reg: PAYERegistrationAPI)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[PAYERegistrationResponse] = {
-    http.POST[PAYERegistrationAPI, PAYERegistrationAPI](s"$payeRegUrl/register-for-paye/test-only/insert-registration/${reg.registrationID}", reg) map {
-      reg => PAYERegistrationSuccessResponse(reg)
-    } recover {
-      case e: Exception =>
-        Logger.warn(s"[PAYERegistrationConnector] [getCurrentRegistration] received error when setting up test Registration - Error: ${e.getMessage}")
-        PAYERegistrationErrorResponse(e)
-    }
-  }
-
-  // TODO - move to a test package
-  def testRegistrationTeardown()(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    http.GET[HttpResponse](s"$payeRegUrl/register-for-paye/test-only/registration-teardown") map {
-      resp => DownstreamOutcome.Success
-    } recover {
-      case e: Exception =>
-        Logger.warn(s"[PAYERegistrationConnector] [testRegistrationTeardown] received error when clearing registration details - Error: ${e.getMessage}")
-        DownstreamOutcome.Failure
     }
   }
 
