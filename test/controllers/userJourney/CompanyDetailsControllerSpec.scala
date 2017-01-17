@@ -18,7 +18,7 @@ package controllers.userJourney
 
 import builders.AuthBuilder
 import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
-import enums.CacheKeys
+import enums.{DownstreamOutcome, CacheKeys}
 import fixtures.{S4LFixture, CoHoAPIFixture}
 import models.externalAPIModels.coHo.CoHoCompanyDetailsModel
 import models.view.{TradingName => TradingNameView}
@@ -28,7 +28,7 @@ import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import services.{CompanyDetailsService, S4LService}
+import services.{CoHoAPIService, CompanyDetailsService, S4LService}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -39,6 +39,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
 
   val mockS4LService = mock[S4LService]
   val mockCompanyDetailsService = mock[CompanyDetailsService]
+  val mockCoHoService = mock[CoHoAPIService]
 
   class Setup {
     val controller = new CompanyDetailsController {
@@ -46,6 +47,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
       override val keystoreConnector = mockKeystoreConnector
       override val authConnector = mockAuthConnector
       override val companyDetailsService = mockCompanyDetailsService
+      override val cohoService = mockCoHoService
     }
   }
 
@@ -134,36 +136,50 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
       val result = controller.submitTradingName()(FakeRequest())
       status(result) shouldBe Status.SEE_OTHER
     }
-//    "redirect to the WELCOME PAGE when a user enters valid data" in new Setup {
-//      // TODO: Update test and description when flow is updated
-//      when(mockS4LService.saveForm[TradingNameView](Matchers.matches(CacheKeys.TradingName.toString), Matchers.any())(Matchers.any(),Matchers.any())).thenReturn(Future.successful(CacheMap("tstMap", Map.empty)))
-//
-//      AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
-//        "tradeUnderDifferentName" -> "yes",
-//        "tradingName" -> "Tradez R us"
-//      )) {
-//        result =>
-//          status(result) shouldBe Status.SEE_OTHER
-//          result.header.headers("Location") shouldBe "/paye-registration"
-//      }
-//    }
-//
-//    "return 400 when a user enters no data" in new Setup {
-//      AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
-//      )) {
-//        result =>
-//          status(result) shouldBe Status.BAD_REQUEST
-//      }
-//    }
-//
-//    "return 400 when a user enters invalid data" in new Setup {
-//      AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
-//        "tradeUnderDifferentName" -> "yes"
-//      )) {
-//        result =>
-//          status(result) shouldBe Status.BAD_REQUEST
-//      }
-//    }
+    "redirect to the WELCOME PAGE when a user enters valid data" in new Setup {
+      // TODO: Update test and description when flow is updated
+      when(mockCompanyDetailsService.submitTradingName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "differentName" -> "true",
+        "tradingName" -> "Tradez R us"
+      )) {
+        result =>
+          status(result) shouldBe Status.SEE_OTHER
+          result.header.headers("Location") shouldBe "/paye-registration"
+      }
+    }
+
+    "show an error page when there is an error response from the microservice" in new Setup {
+      // TODO: Update test and description when flow is updated
+      when(mockCompanyDetailsService.submitTradingName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
+      AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "differentName" -> "true",
+        "tradingName" -> "Tradez R us"
+      )) {
+        result =>
+          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      }
+    }
+
+    "return 400 when a user enters no data" in new Setup {
+      when(mockCompanyDetailsService.submitTradingName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      when(mockCoHoService.getStoredCompanyName()(Matchers.any())).thenReturn(Future.successful("tst Name"))
+      AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+      )) {
+        result =>
+          status(result) shouldBe Status.BAD_REQUEST
+      }
+    }
+
+    "return 400 when a user enters invalid data" in new Setup {
+      when(mockCoHoService.getStoredCompanyName()(Matchers.any())).thenReturn(Future.successful("tst Name"))
+      AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "differentName" -> "true"
+      )) {
+        result =>
+          status(result) shouldBe Status.BAD_REQUEST
+      }
+    }
   }
 
 }

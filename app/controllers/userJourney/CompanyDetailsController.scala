@@ -19,10 +19,14 @@ package controllers.userJourney
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.KeystoreConnector
+import enums.DownstreamOutcome
 import forms.companyDetails.TradingNameForm
+import models.view.TradingName
 import play.api.Play.current
+import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
-import services.{CompanyDetailsService, S4LService}
+import play.api.mvc.{Result, Request, AnyContent}
+import services.{CoHoAPIService, CompanyDetailsService, S4LService}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import views.html.pages.companyDetails.{tradingName => TradingNamePage}
@@ -35,6 +39,7 @@ object CompanyDetailsController extends CompanyDetailsController {
   override val s4LService = S4LService
   override val keystoreConnector = KeystoreConnector
   override val companyDetailsService = CompanyDetailsService
+  override val cohoService = CoHoAPIService
   //$COVERAGE-ON$
 
 }
@@ -44,6 +49,7 @@ trait CompanyDetailsController extends FrontendController with Actions {
   val s4LService: S4LService
   val keystoreConnector: KeystoreConnector
   val companyDetailsService: CompanyDetailsService
+  val cohoService: CoHoAPIService
 
   val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
 
@@ -58,32 +64,26 @@ trait CompanyDetailsController extends FrontendController with Actions {
 
   val submitTradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
 
-    Future.successful(Ok)
-//    TradingNameForm.form.bindFromRequest.fold(
-//      errors => keystoreConnector.fetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString) map {
-//          companyDetails => BadRequest(views.html.pages.companyDetails.tradingName(errors, getCompanyNameFromDetails(companyDetails)))
-//        },
-//      (success: TradingNameFormModel) => {
-//        val validatedForm = TradingNameForm.validateForm(TradingNameForm.form.fill(success))
-//        if(validatedForm.hasErrors) {
-//          keystoreConnector.fetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString) map {
-//            companyDetails => BadRequest(views.html.pages.companyDetails.tradingName(validatedForm, getCompanyNameFromDetails(companyDetails)))
-//          }
-//        } else {
-//          s4LService.saveForm[TradingName](CacheKeys.TradingName.toString, success.toData) map {
-//            cacheMap => Redirect(controllers.userJourney.routes.WelcomeController.show())
-//          }
-//        }
-//      }
-//    )
+    TradingNameForm.form.bindFromRequest.fold(
+      errors => badRequestResponse(errors),
+      success => {
+        val validatedForm = TradingNameForm.validateForm(TradingNameForm.form.fill(success))
+        if (validatedForm.hasErrors) {
+          badRequestResponse(validatedForm)
+        } else {
+          companyDetailsService.submitTradingName(success) map {
+            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.WelcomeController.show())
+            case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+          }
+        }
+      }
+    )
   }
 
-//  private def getCompanyNameFromDetails(details: Option[CoHoCompanyDetailsModel]): String = {
-//    details map {
-//      details => details.companyName
-//    } getOrElse {
-//      throw new CompanyDetailsNotFoundException
-//    }
-//  }
+  private def badRequestResponse(form: Form[TradingName])(implicit request: Request[AnyContent]): Future[Result] = {
+    cohoService.getStoredCompanyName map {
+      cName => BadRequest(TradingNamePage(form, cName))
+    }
+  }
 
 }
