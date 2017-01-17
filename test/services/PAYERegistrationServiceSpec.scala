@@ -18,6 +18,8 @@ package services
 
 import connectors._
 import enums.DownstreamOutcome
+import models.api.{PAYERegistration => PAYERegistrationAPI, CompanyDetails => CompanyDetailsAPI}
+import models.view.{Summary, SummarySection, SummaryRow}
 import fixtures.PAYERegistrationFixture
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -39,6 +41,27 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
     }
   }
 
+  val apiRegistration = PAYERegistrationAPI(
+    registrationID = "AC123456",
+    formCreationTimestamp = "2017-01-11T15:10:12",
+    companyDetails = CompanyDetailsAPI(
+      crn = None,
+      companyName = "Test Company",
+      tradingName = Some("tstTrade")
+    )
+  )
+
+  lazy val summary = Summary(
+    Seq(SummarySection(
+      id="tradingName",
+      Seq(SummaryRow(
+        id="tradingName",
+        answer = Some("tstTrade"),
+        changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+      ))
+    ))
+  )
+
   implicit val hc = HeaderCarrier()
 
   "Calling createNewRegistration" should {
@@ -56,6 +79,48 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
         .thenReturn(Future.successful(PAYERegistrationBadRequestResponse))
 
       await(service.assertRegistrationFootprint()) shouldBe DownstreamOutcome.Failure
+    }
+  }
+
+  "Calling getRegistrationSummary" should {
+    "return a defined Summary option when the connector returns a valid PAYE Registration response" in new Setup {
+
+      mockFetchRegID("45632")
+      when(mockRegConnector.getRegistration(Matchers.contains("45632"))(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(PAYERegistrationSuccessResponse(apiRegistration)))
+
+      await(service.getRegistrationSummary()) shouldBe Some(summary)
+    }
+
+    "return None when the connector returns a Forbidden response" in new Setup {
+      mockFetchRegID("45632")
+      when(mockRegConnector.getRegistration(Matchers.contains("45632"))(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(PAYERegistrationForbiddenResponse))
+
+      await(service.getRegistrationSummary()) shouldBe None
+    }
+
+    "return None when the connector returns a Not Found response" in new Setup {
+      mockFetchRegID("45632")
+      when(mockRegConnector.getRegistration(Matchers.contains("45632"))(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(PAYERegistrationNotFoundResponse))
+
+      await(service.getRegistrationSummary()) shouldBe None
+    }
+
+    "return None when the connector returns an exception response" in new Setup {
+      mockFetchRegID("45632")
+      when(mockRegConnector.getRegistration(Matchers.contains("45632"))(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(PAYERegistrationErrorResponse(new RuntimeException("tst"))))
+
+      await(service.getRegistrationSummary()) shouldBe None
+    }
+  }
+
+  "Calling registrationToSummary" should {
+    "convert a PAYE Registration API Model  to a summary model" in new Setup {
+
+      service.registrationToSummary(apiRegistration) shouldBe summary
     }
   }
 

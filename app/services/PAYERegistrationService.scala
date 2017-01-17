@@ -19,6 +19,7 @@ package services
 import enums.DownstreamOutcome
 import connectors._
 import models.api.{PAYERegistration => PAYERegistrationAPI}
+import models.view.{SummaryRow, SummarySection, Summary}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -46,4 +47,29 @@ trait PAYERegistrationService extends CommonService {
       case _ => DownstreamOutcome.Failure
     }
   }
+
+  def getRegistrationSummary()(implicit hc: HeaderCarrier): Future[Option[Summary]] = {
+    for {
+      regID <- fetchRegistrationID
+      regResponse <- payeRegistrationConnector.getRegistration(regID)
+    } yield regResponse match {
+      case PAYERegistrationSuccessResponse(reg: PAYERegistrationAPI) => Some(registrationToSummary(reg))
+      case _ => None
+    }
+  }
+
+  private[services] def registrationToSummary(apiModel: PAYERegistrationAPI): Summary = {
+    Summary(
+      Seq(SummarySection(
+        id="tradingName",
+        Seq(SummaryRow(
+          id="tradingName",
+          answer = apiModel.companyDetails.tradingName,
+          changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+        ))
+      ))
+    )
+  }
+
+
 }

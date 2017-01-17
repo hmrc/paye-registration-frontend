@@ -21,7 +21,7 @@ import play.api.libs.json.Json
 case class PAYERegistration (
                             registrationID: String,
                             formCreationTimestamp: String,
-                            companyDetails: Option[CompanyDetails]
+                            companyDetails: CompanyDetails
                               )
 
 object PAYERegistration {

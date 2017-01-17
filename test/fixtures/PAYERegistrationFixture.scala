@@ -30,7 +30,7 @@ trait PAYERegistrationFixture {
   val validPAYERegistrationAPI = PAYERegistration(
     registrationID = "AC123456",
     formCreationTimestamp = "2017-01-11T15:10:12",
-    companyDetails = Some(validCompanyDetailsAPI)
+    companyDetails = validCompanyDetailsAPI
   )
 
 }
