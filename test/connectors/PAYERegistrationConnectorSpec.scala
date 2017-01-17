@@ -56,6 +56,30 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
     }
   }
 
+  "Calling getRegistration" should {
+    "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[PAYERegistrationAPI]("tst-url", new ForbiddenException("tst"))
+
+      await(connector.getRegistration("tstID")) shouldBe PAYERegistrationForbiddenResponse
+    }
+    "return the correct PAYEResponse when a Not Found response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[PAYERegistrationAPI]("tst-url", new NotFoundException("tst"))
+
+      await(connector.getRegistration("tstID")) shouldBe PAYERegistrationNotFoundResponse
+    }
+    "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
+      val e = new InternalServerException("tst")
+      mockHttpFailedGET[PAYERegistrationAPI]("tst-url", e)
+
+      await(connector.getRegistration("tstID")) shouldBe PAYERegistrationErrorResponse(e)
+    }
+    "return the correct PAYEResponse when the microservice returns a PAYE Registration model" in new Setup {
+      mockHttpGet[PAYERegistrationAPI]("tst-url", validPAYERegistrationAPI)
+
+      await(connector.getRegistration("tstID")) shouldBe PAYERegistrationSuccessResponse(validPAYERegistrationAPI)
+    }
+  }
+
   "Calling getCompanyDetails" should {
     "return the correct PAYEResponse when a Bad Request response is returned by the microservice" in new Setup {
       mockHttpFailedGET[CompanyDetailsAPI]("tst-url", new BadRequestException("tst"))

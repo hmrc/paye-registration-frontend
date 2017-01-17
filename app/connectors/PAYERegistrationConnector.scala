@@ -50,13 +50,29 @@ trait PAYERegistrationConnector {
       reg => PAYERegistrationSuccessResponse(reg)
     } recover {
       case e: BadRequestException =>
-        Logger.warn("[PAYERegistrationConnector] [createNewRegistration] received Bad Request response creating/asserting new PAYE Registration in backend")
+        Logger.warn("[PAYERegistrationConnector] [createNewRegistration] received Bad Request response creating/asserting new PAYE Registration in microservice")
         PAYERegistrationBadRequestResponse
       case e: ForbiddenException =>
-        Logger.warn("[PAYERegistrationConnector] [createNewRegistration] received Forbidden response when creating/asserting new PAYE Registration in backend")
+        Logger.warn("[PAYERegistrationConnector] [createNewRegistration] received Forbidden response when creating/asserting new PAYE Registration in microservice")
         PAYERegistrationForbiddenResponse
       case e: Exception =>
-        Logger.warn(s"[PAYERegistrationConnector] [createNewRegistration] received error when creating/asserting new PAYE Registration in backend - Error: ${e.getMessage}")
+        Logger.warn(s"[PAYERegistrationConnector] [createNewRegistration] received error when creating/asserting new PAYE Registration in microservice - Error: ${e.getMessage}")
+        PAYERegistrationErrorResponse(e)
+    }
+  }
+
+  def getRegistration(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[PAYERegistrationResponse] = {
+    http.GET[PAYERegistrationAPI](s"$payeRegUrl/register-for-paye/$regID") map {
+      reg => PAYERegistrationSuccessResponse(reg)
+    } recover {
+      case e: ForbiddenException =>
+        Logger.warn("[PAYERegistrationConnector] [getRegistration] received Forbidden response when fetching completed PAYE Registration from microservice")
+        PAYERegistrationForbiddenResponse
+      case e: NotFoundException =>
+        Logger.warn("[PAYERegistrationConnector] [getRegistration] received Not Found response when fetching completed PAYE Registration from microservice")
+        PAYERegistrationNotFoundResponse
+      case e: Exception =>
+        Logger.warn(s"[PAYERegistrationConnector] [getRegistration] received error when fetching completed PAYE Registration from microservice - Error: ${e.getMessage}")
         PAYERegistrationErrorResponse(e)
     }
   }
