@@ -27,8 +27,6 @@ import org.mockito.Matchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
 
-import scala.concurrent.Future
-
 class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   val mockCurrentProfileService = mock[CurrentProfileService]
@@ -46,31 +44,11 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   val fakeRequest = FakeRequest("GET", "/")
 
-
   "Calling the postSignIn action" should {
-    "redirect to Trading Name page for an authorised user with a registration ID and PAYE Registration" in new Setup {
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any())).thenReturn(DownstreamOutcome.Success)
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(Matchers.any())).thenReturn(DownstreamOutcome.Success)
-      when(mockPAYERegService.fetchAndStoreCurrentRegistration()(Matchers.any())).thenReturn(Future.successful(Some(validPAYERegistration)))
 
-      AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
-        result =>
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.tradingName()}")
-      }
-    }
-
-    "redirect to Trading Name page for an authorised user with a registration ID and No PAYE Registration" in new Setup {
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any())).thenReturn(DownstreamOutcome.Success)
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(Matchers.any())).thenReturn(DownstreamOutcome.Success)
-      when(mockPAYERegService.fetchAndStoreCurrentRegistration()(Matchers.any())).thenReturn(Future.successful(None))
-      when(mockPAYERegService.createNewRegistration()(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
-
-      AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
-        result =>
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.tradingName()}")
-      }
+    "return 303 for an unauthorised user" in new Setup {
+      val result = controller.postSignIn()(FakeRequest())
+      status(result) shouldBe Status.SEE_OTHER
     }
 
     "show an Error page for an authorised user without a registration ID" in new Setup {
@@ -92,11 +70,10 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       }
     }
 
-    "show an error page when the Microservice can't create a new PAYE Registration for the user when required" in new Setup {
+    "show an Error page for an authorised user with a registration ID and CoHo Company Details, with an error response from the microservice" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any())).thenReturn(DownstreamOutcome.Success)
       when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(Matchers.any())).thenReturn(DownstreamOutcome.Success)
-      when(mockPAYERegService.fetchAndStoreCurrentRegistration()(Matchers.any())).thenReturn(Future.successful(None))
-      when(mockPAYERegService.createNewRegistration()(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
+      when(mockPAYERegService.assertRegistrationFootprint()(Matchers.any())).thenReturn(DownstreamOutcome.Failure)
 
       AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
         result =>
@@ -104,14 +81,15 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       }
     }
 
-    "show an error page when the Microservice fetching/storing the user's PAYE Registration fails" in new Setup {
+    "redirect to the Trading Name page for an authorised user with a registration ID and CoHo Company Details, with PAYE Footprint correctly asserted" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any())).thenReturn(DownstreamOutcome.Success)
       when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(Matchers.any())).thenReturn(DownstreamOutcome.Success)
-      when(mockPAYERegService.fetchAndStoreCurrentRegistration()(Matchers.any())).thenReturn(Future.failed(new RuntimeException("tst")))
+      when(mockPAYERegService.assertRegistrationFootprint()(Matchers.any())).thenReturn(DownstreamOutcome.Success)
 
       AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
         result =>
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.tradingName()}")
       }
     }
   }

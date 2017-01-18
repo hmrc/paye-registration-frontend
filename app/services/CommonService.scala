@@ -19,7 +19,7 @@ package services
 import connectors.KeystoreConnector
 import common.exceptions.DownstreamExceptions._
 import enums.CacheKeys
-import models.externalAPIModels.currentProfile.CurrentProfile
+import models.external.CurrentProfile
 import play.api.Logger
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -32,7 +32,7 @@ trait CommonService {
 
   def fetchRegistrationID(implicit hc: HeaderCarrier): Future[String] = {
     keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString).map {
-      case Some(profile) => profile.registrationId
+      case Some(profile) => profile.registrationID
       case None =>
         Logger.error(s"[CommonService] [fetchRegistrationID] - Could not find a Current Profile in keystore")
         throw new CurrentProfileNotFoundException

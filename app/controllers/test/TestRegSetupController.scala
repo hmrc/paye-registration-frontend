@@ -18,9 +18,9 @@ package controllers.test
 
 import auth.test.TestPAYERegime
 import config.FrontendAuthConnector
-import connectors.PAYERegistrationConnector
+import connectors.test.TestPAYERegConnector
 import enums.DownstreamOutcome
-import forms.test.testSetupForms.TestCompanyDetailsSetupForm
+import forms.test.TestPAYERegCompanyDetailsSetupForm
 import services.PAYERegistrationService
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -33,30 +33,30 @@ object TestRegSetupController extends TestRegSetupController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
   override val payeRegService = PAYERegistrationService
-  override val payeRegConnector = PAYERegistrationConnector
+  override val testPAYERegConnector = TestPAYERegConnector
   //$COVERAGE-ON$
 }
 
 trait TestRegSetupController extends FrontendController with Actions {
 
   val payeRegService: PAYERegistrationService
-  val payeRegConnector: PAYERegistrationConnector
+  val testPAYERegConnector: TestPAYERegConnector
 
   val regTeardown = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    payeRegConnector.testRegistrationTeardown() map {
+    testPAYERegConnector.testRegistrationTeardown() map {
       case DownstreamOutcome.Success => Ok("Registration collection successfully cleared")
       case DownstreamOutcome.Failure => InternalServerError("Error clearing registration collection")
     }
   }
 
   val regSetupCompanyDetails = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    Future.successful(Ok(views.html.pages.test.testCompanyDetailsPAYERegSetup(TestCompanyDetailsSetupForm.form)))
+    Future.successful(Ok(views.html.pages.test.payeRegCompanyDetailsSetup(TestPAYERegCompanyDetailsSetupForm.form)))
   }
 
   val submitRegSetupCompanyDetails = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    TestCompanyDetailsSetupForm.form.bindFromRequest.fold (
-      errors => Future.successful(Ok(views.html.pages.test.testCompanyDetailsPAYERegSetup(errors))),
-      success => payeRegService.addTestRegistration(success.toCompanyDetailsModel) map {
+    TestPAYERegCompanyDetailsSetupForm.form.bindFromRequest.fold (
+      errors => Future.successful(Ok(views.html.pages.test.payeRegCompanyDetailsSetup(errors))),
+      success => testPAYERegConnector.addTestCompanyDetails(success) map {
         case DownstreamOutcome.Success => Ok("Company details successfully set up")
         case DownstreamOutcome.Failure => InternalServerError("Error setting up Company Details")
       }

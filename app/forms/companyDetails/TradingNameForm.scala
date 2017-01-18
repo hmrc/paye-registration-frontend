@@ -16,33 +16,33 @@
 
 package forms.companyDetails
 
-import enums.YesNo
 import common.exceptions.InternalExceptions
-import models.formModels.TradingNameFormModel
+import forms.helpers.RequiredBooleanForm
+import models.view.TradingName
 import play.api.data.Form
 import play.api.data.Forms._
 
-object TradingNameForm {
+object TradingNameForm extends RequiredBooleanForm {
 
-  def validateForm(vForm: Form[TradingNameFormModel]): Form[TradingNameFormModel] = {
+  def validateForm(vForm: Form[TradingName]): Form[TradingName] = {
     if(!validationNeeded(vForm)) vForm else {
       if (tradingNameFieldNotCompleted(vForm)) vForm.withError("tradingName", "pages.tradingName.errorQuestion")
       else vForm
     }
   }
 
-  private def validationNeeded(data: Form[TradingNameFormModel]): Boolean = {
-    val yn = data("tradeUnderDifferentName").value.getOrElse(
-      throw new InternalExceptions.ExpectedFormFieldNotPopulatedException("TradingNameForm", "tradeUnderDifferentName"))
-    YesNo.fromString(yn) == YesNo.Yes
+  private def validationNeeded(data: Form[TradingName]): Boolean = {
+    data("differentName").value.getOrElse{
+      throw new InternalExceptions.ExpectedFormFieldNotPopulatedException("TradingNameForm", "differentName")
+    } == "true"
   }
 
-  private def tradingNameFieldNotCompleted(data: Form[TradingNameFormModel]) = data("tradingName").value.isEmpty
+  private def tradingNameFieldNotCompleted(data: Form[TradingName]) = data("tradingName").value.isEmpty
 
   val form = Form(
     mapping(
-      "tradeUnderDifferentName" -> text,
+      "differentName" -> requiredBoolean,
       "tradingName" -> optional(text)
-    )(TradingNameFormModel.apply)(TradingNameFormModel.unapply)
+    )(TradingName.apply)(TradingName.unapply)
   )
 }

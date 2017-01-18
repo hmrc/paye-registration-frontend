@@ -57,7 +57,7 @@ trait WSHTTPMock {
   }
 
 
-  def mockHttpFailedGet[T](url: String, exception: Exception): OngoingStubbing[Future[T]] = {
+  def mockHttpFailedGET[T](url: String, exception: Exception): OngoingStubbing[Future[T]] = {
     when(mockWSHttp.GET[T](Matchers.anyString())(Matchers.any[HttpReads[T]](), Matchers.any[HeaderCarrier]()))
       .thenReturn(Future.failed(exception))
   }

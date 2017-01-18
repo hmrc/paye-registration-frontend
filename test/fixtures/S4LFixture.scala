@@ -16,13 +16,24 @@
 
 package fixtures
 
-import models.external.CurrentProfile
+import models.view.{CompanyDetails, TradingName}
 
-trait BusinessRegistrationFixture {
+trait S4LFixture {
 
-  lazy val validBusinessRegistrationResponse = CurrentProfile(
-    "12345",
-    Some("director"),
-    "ENG"
+  val validTradingNameViewModel = TradingName(
+    differentName = true,
+    tradingName = Some("Test Company Trading Name")
   )
+
+  val negativeTradingNameViewModel = TradingName(
+    differentName = false,
+    tradingName = None
+  )
+
+  val validCompanyDetailsViewModel = CompanyDetails(
+    Some("crn"),
+    "Tst Company Name",
+    Some(validTradingNameViewModel)
+  )
+
 }

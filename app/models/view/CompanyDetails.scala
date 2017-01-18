@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-package forms.test.testSetupForms
+package models.view
 
-import models.test.testSetupFormModels.CompanyDetailsSetupFormModel
-import play.api.data.Form
-import play.api.data.Forms._
+import play.api.libs.json.Json
 
-object TestCompanyDetailsSetupForm {
+case class CompanyDetails(
+                           crn: Option[String],
+                           companyName: String,
+                           tradingName: Option[TradingName]
+                           )
 
-  val form = Form(
-    mapping(
-      "crn" -> optional(text),
-      "companyName" -> text,
-      "tradingName" -> optional(text)
-    )(CompanyDetailsSetupFormModel.apply)(CompanyDetailsSetupFormModel.unapply)
-  )
+case class TradingName (
+                         differentName: Boolean,
+                         tradingName:Option[String]
+                         )
+object TradingName {
+  implicit val format = Json.format[TradingName]
+}
+
+object CompanyDetails {
+  implicit val format = Json.format[CompanyDetails]
 }

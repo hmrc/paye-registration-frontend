@@ -16,21 +16,21 @@
 
 package fixtures
 
-import models.dataModels.PAYERegistration
-import models.dataModels.companyDetails.{TradingName, CompanyDetails}
+import models.api.{PAYERegistration, CompanyDetails}
 
 trait PAYERegistrationFixture {
 
-  val validCompanyDetails = CompanyDetails(
+  val validCompanyDetailsAPI = CompanyDetails(
     crn = None,
     companyName = "Test Company",
-    tradingName = Some(TradingName(Some("Test Company Trading Name")))
+    tradingName = Some("Test Company Trading Name")
   )
 
-  val validPAYERegistration = PAYERegistration(
+
+  val validPAYERegistrationAPI = PAYERegistration(
     registrationID = "AC123456",
     formCreationTimestamp = "2017-01-11T15:10:12",
-    companyDetails = Some(validCompanyDetails)
+    companyDetails = Some(validCompanyDetailsAPI)
   )
 
 }

@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package models.externalAPIModels.currentProfile
+package forms.test
 
-import play.api.libs.json.Json
+import models.api.{CompanyDetails => CompanyDetailsAPI}
+import play.api.data.Form
+import play.api.data.Forms._
 
-case class CurrentProfile(registrationId: String,
-                          completionCapacity : Option[String],
-                          language: String)
+object TestPAYERegCompanyDetailsSetupForm {
 
-object CurrentProfile {
-  implicit val formats = Json.format[CurrentProfile]
+  val form = Form(
+    mapping(
+      "crn" -> optional(text),
+      "companyName" -> text,
+      "tradingName" -> optional(text)
+    )(CompanyDetailsAPI.apply)(CompanyDetailsAPI.unapply)
+  )
 }

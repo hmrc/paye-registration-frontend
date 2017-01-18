@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package helpers
+package models.api
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import play.api.libs.json.Json
 
-object DateHelper extends DateHelper
+case class PAYERegistration (
+                            registrationID: String,
+                            formCreationTimestamp: String,
+                            companyDetails: Option[CompanyDetails]
+                              )
 
-trait DateHelper {
-
-  def formatTimestamp(timeStamp: LocalDateTime) : String = {
-    val timeStampFormat = "yyyy-MM-dd'T'HH:mm:ss"
-    val format: DateTimeFormatter = DateTimeFormatter.ofPattern(timeStampFormat)
-    format.format(timeStamp)
-  }
-
+object PAYERegistration {
+  implicit val format = Json.format[PAYERegistration]
 }

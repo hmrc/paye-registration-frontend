@@ -17,7 +17,7 @@
 package connectors
 
 import fixtures.CoHoAPIFixture
-import models.externalAPIModels.coHo.CoHoCompanyDetailsModel
+import models.external.CoHoCompanyDetailsModel
 import play.api.libs.json.JsValue
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.{HttpResponse, BadRequestException, HeaderCarrier}
@@ -55,24 +55,6 @@ class CoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
       mockHttpGet[CoHoCompanyDetailsModel](connector.coHoAPIUrl, Future.failed(ex))
 
       await(connector.getCoHoCompanyDetails("testRegID")) shouldBe CohoApiErrorResponse(ex)
-    }
-  }
-
-  "addCoHoCompanyDetails" should {
-    "return a valid response when successfully set up" in new Setup {
-      val resp = HttpResponse(responseStatus = 200)
-      mockHttpPOST[JsValue, HttpResponse](connector.coHoAPIUrl, Future.successful(resp))
-
-      await(connector.addCoHoCompanyDetails(validCoHoCompanyDetailsResponse)) shouldBe resp
-    }
-  }
-
-  "tearDownCoHoCompanyDetails" should {
-    "return a valid response when successfully completed" in new Setup {
-      val resp = HttpResponse(responseStatus = 200)
-      mockHttpGet[HttpResponse](connector.coHoAPIUrl, Future.successful(resp))
-
-      await(connector.tearDownCoHoCompanyDetails()) shouldBe resp
     }
   }
 

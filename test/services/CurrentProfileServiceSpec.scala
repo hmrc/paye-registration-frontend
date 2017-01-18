@@ -19,7 +19,7 @@ package services
 import connectors.{BusinessRegistrationErrorResponse, BusinessRegistrationForbiddenResponse, BusinessRegistrationNotFoundResponse, BusinessRegistrationSuccessResponse}
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.BusinessRegistrationFixture
-import models.externalAPIModels.currentProfile.CurrentProfile
+import models.external.CurrentProfile
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier

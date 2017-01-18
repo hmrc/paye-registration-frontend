@@ -23,14 +23,14 @@ class TradingNameFormSpec extends UnitSpec {
 
   val testForm = TradingNameForm.form
   val validData = Map(
-    "tradeUnderDifferentName" -> "yes",
+    "differentName" -> "true",
     "tradingName" -> "Tradez R Us"
   )
   val invalidData = Map(
-    "tradeUnderDifferentName" -> "yes"
+    "differentName" -> "true"
   )
   val noValidationNeedData = Map(
-    "tradeUnderDifferentName" -> "no"
+    "differentName" -> "false"
   )
 
   "Validating the trading name form" should {

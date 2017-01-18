@@ -17,7 +17,7 @@
 package connectors
 
 import fixtures.BusinessRegistrationFixture
-import models.externalAPIModels.businessRegistration.BusinessRegistration
+import models.external.CurrentProfile
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import play.api.libs.json.JsValue
@@ -39,37 +39,29 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
 
   implicit val hc = HeaderCarrier()
 
-  "createMetadataEntry" should {
-    "make a http POST request to business registration micro-service to create a CurrentProfile entry" in new Setup {
-      mockHttpPOST[JsValue, BusinessRegistration](connector.businessRegUrl, validBusinessRegistrationResponse)
-
-      await(connector.createCurrentProfileEntry) shouldBe validBusinessRegistrationResponse
-    }
-  }
-
   "retrieveCurrentProfile" should {
     "return a a CurrentProfile response if one is found in business registration micro-service" in new Setup {
-      mockHttpGet[BusinessRegistration]("testUrl", validBusinessRegistrationResponse)
+      mockHttpGet[CurrentProfile]("testUrl", validBusinessRegistrationResponse)
 
       await(connector.retrieveCurrentProfile) shouldBe BusinessRegistrationSuccessResponse(validBusinessRegistrationResponse)
     }
 
     "return a Not Found response when a CurrentProfile record can not be found" in new Setup {
-      when(mockWSHttp.GET[BusinessRegistration](Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockWSHttp.GET[CurrentProfile](Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(new NotFoundException("Bad request")))
 
       await(connector.retrieveCurrentProfile) shouldBe BusinessRegistrationNotFoundResponse
     }
 
     "return a Forbidden response when a CurrentProfile record can not be accessed by the user" in new Setup {
-      when(mockWSHttp.GET[BusinessRegistration](Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockWSHttp.GET[CurrentProfile](Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(new ForbiddenException("Forbidden")))
 
       await(connector.retrieveCurrentProfile) shouldBe BusinessRegistrationForbiddenResponse
     }
 
     "return an Exception response when an unspecified error has occurred" in new Setup {
-      when(mockWSHttp.GET[BusinessRegistration](Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockWSHttp.GET[CurrentProfile](Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(new Exception("exception")))
 
       await(connector.retrieveCurrentProfile).getClass shouldBe BusinessRegistrationErrorResponse(new Exception).getClass

@@ -18,7 +18,7 @@ package controllers.test
 
 import auth.test.TestPAYERegime
 import config.FrontendAuthConnector
-import connectors.CoHoAPIConnector
+import connectors.test.TestCoHoAPIConnector
 import forms.test.TestCoHoCompanyDetailsForm
 import services.CoHoAPIService
 import uk.gov.hmrc.play.frontend.auth.Actions
@@ -31,10 +31,15 @@ import scala.concurrent.Future
 object TestCoHoController extends TestCoHoController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
+  override val testCoHoAPIConnector = TestCoHoAPIConnector
+  override val coHoAPIService = CoHoAPIService
   //$COVERAGE-ON$
 }
 
 trait TestCoHoController extends FrontendController with Actions {
+
+  val testCoHoAPIConnector: TestCoHoAPIConnector
+  val coHoAPIService: CoHoAPIService
 
   def coHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     Future.successful(Ok(views.html.pages.test.coHoCompanyDetailsSetup(TestCoHoCompanyDetailsForm.form)))
@@ -45,14 +50,13 @@ trait TestCoHoController extends FrontendController with Actions {
       errors => Future.successful(Ok(views.html.pages.test.coHoCompanyDetailsSetup(errors))),
       success => for {
         regId <- CoHoAPIService.fetchRegistrationID
-        resp <- CoHoAPIConnector.addCoHoCompanyDetails(success.toCoHoCompanyDetailsAPIModel(regId))
+        resp <- testCoHoAPIConnector.addCoHoCompanyDetails(success.toCoHoCompanyDetailsAPIModel(regId))
       } yield Ok(s"Company details response status: ${resp.status}")
     )
-
   }
 
   def coHoCompanyDetailsTearDown = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    CoHoAPIConnector.tearDownCoHoCompanyDetails().map { result =>
+    testCoHoAPIConnector.tearDownCoHoCompanyDetails().map { result =>
       Ok("Company details collection removed")
     }
   }

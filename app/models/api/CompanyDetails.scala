@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package models.dataModels
+package models.api
 
-import models.dataModels.companyDetails.CompanyDetails
 import play.api.libs.json.Json
 
-case class PAYERegistration(
-                            registrationID: String,
-                            formCreationTimestamp: String,
-                            companyDetails: Option[CompanyDetails]
-                            )
+case class CompanyDetails(
+                           crn: Option[String],
+                           companyName: String,
+                           tradingName: Option[String]
+                           )
 
-object PAYERegistration {
-  implicit val format = Json.format[PAYERegistration]
+object CompanyDetails {
+  implicit val format = Json.format[CompanyDetails]
 }

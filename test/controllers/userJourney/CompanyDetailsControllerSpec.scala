@@ -18,37 +18,40 @@ package controllers.userJourney
 
 import builders.AuthBuilder
 import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
-import enums.CacheKeys
-import fixtures.CoHoAPIFixture
-import models.externalAPIModels.coHo.CoHoCompanyDetailsModel
-import models.formModels.TradingNameFormModel
-import models.dataModels.companyDetails.TradingName
+import enums.{DownstreamOutcome, CacheKeys}
+import fixtures.{S4LFixture, CoHoAPIFixture}
+import models.external.CoHoCompanyDetailsModel
+import models.view.{TradingName => TradingNameView}
 import org.jsoup._
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import services.S4LService
+import services.{CoHoAPIService, CompanyDetailsService, S4LService}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
+class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
 
   val mockS4LService = mock[S4LService]
+  val mockCompanyDetailsService = mock[CompanyDetailsService]
+  val mockCoHoService = mock[CoHoAPIService]
 
   class Setup {
     val controller = new CompanyDetailsController {
       override val s4LService = mockS4LService
       override val keystoreConnector = mockKeystoreConnector
       override val authConnector = mockAuthConnector
+      override val companyDetailsService = mockCompanyDetailsService
+      override val cohoService = mockCoHoService
     }
   }
 
-  val tstTradingNameFormModel = TradingNameFormModel(tradeUnderDifferentName = "yes", tradingName = Some("test trading name"))
-  val tstTradingNameDataModel = TradingName(Some("test trading name"))
+  val tstTradingNameModel = TradingNameView(differentName = true, tradingName = Some("test trading name"))
 
   val fakeRequest = FakeRequest("GET", "/")
   implicit val materializer = fakeApplication.materializer
@@ -61,45 +64,83 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
     }
 
     "show the correctly pre-populated trading name page when data has already been entered" in new Setup {
-      mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, Some(validCoHoCompanyDetailsResponse))
-      when(mockS4LService.fetchAndGet[TradingName](Matchers.matches(CacheKeys.TradingName.toString))(Matchers.any(), Matchers.any())).thenReturn(Future.successful(Some(tstTradingNameDataModel)))
+      val cName = "tst Company Name"
+      when(mockCompanyDetailsService.getCompanyDetails()(Matchers.any())).thenReturn(Future.successful(Some(validCompanyDetailsViewModel)))
+      when(mockCompanyDetailsService.getCompanyName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(cName))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         (response: Future[Result]) =>
           status(response) shouldBe Status.OK
           val result = Jsoup.parse(bodyOf(response))
-          result.body().getElementById("pageHeading").text() shouldBe s"Does the company trade under any other names than ${validCoHoCompanyDetailsResponse.companyName}?"
-          result.body().getElementById("tradingName").attr("value") shouldBe "test trading name"
+          result.body().getElementById("pageHeading").text() shouldBe s"Does the company trade under any other names than $cName?"
+          result.body.getElementById("differentName-true").parent.classNames().contains("selected") shouldBe true
+          result.body.getElementById("differentName-false").parent.classNames().contains("selected") shouldBe false
+          result.body().getElementById("tradingName").attr("value") shouldBe validCompanyDetailsViewModel.tradingName.get.tradingName.get
       }
     }
 
-    "show the a blank trading name page when no data has been entered" in new Setup {
-      mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, Some(validCoHoCompanyDetailsResponse))
-      when(mockS4LService.fetchAndGet[TradingName](Matchers.matches(CacheKeys.TradingName.toString))(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
+    "show the correctly pre-populated trading name page when negative data has already been entered" in new Setup {
+      val cName = "tst Company Name"
+      val negativeTradingNameCompanyDetails = validCompanyDetailsViewModel.copy(tradingName = Some(negativeTradingNameViewModel))
+      when(mockCompanyDetailsService.getCompanyDetails()(Matchers.any())).thenReturn(Future.successful(Some(negativeTradingNameCompanyDetails)))
+      when(mockCompanyDetailsService.getCompanyName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(cName))
+
+      AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
+        (response: Future[Result]) =>
+          status(response) shouldBe Status.OK
+          val result = Jsoup.parse(bodyOf(response))
+          result.body().getElementById("pageHeading").text() shouldBe s"Does the company trade under any other names than $cName?"
+          result.body.getElementById("differentName-true").parent.classNames().contains("selected") shouldBe false
+          result.body.getElementById("differentName-false").parent.classNames().contains("selected") shouldBe true
+          result.body().getElementById("tradingName").attr("value") shouldBe ""
+      }
+    }
+
+    "show a blank trading name page when no Trading Name data has been entered" in new Setup {
+      val cName = "tst Company Name"
+      val noTradingNameCompanyDetails = validCompanyDetailsViewModel.copy(tradingName = None)
+      when(mockCompanyDetailsService.getCompanyDetails()(Matchers.any())).thenReturn(Future.successful(Some(noTradingNameCompanyDetails)))
+      when(mockCompanyDetailsService.getCompanyName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(cName))
+
+      AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
+        (response: Future[Result]) =>
+          status(response) shouldBe Status.OK
+          val result = Jsoup.parse(bodyOf(response))
+          result.body().getElementById("pageHeading").text() shouldBe s"Does the company trade under any other names than $cName?"
+          result.body.getElementById("differentName-true").parent.classNames().contains("selected") shouldBe false
+          result.body.getElementById("differentName-false").parent.classNames().contains("selected") shouldBe false
+          result.body().getElementById("tradingName").attr("value") shouldBe ""
+      }
+    }
+
+    "show a blank trading name page when no Company Details data has been entered" in new Setup {
+      val cName = "tst Company Name"
+      when(mockCompanyDetailsService.getCompanyDetails()(Matchers.any())).thenReturn(Future.successful(None))
+      when(mockCompanyDetailsService.getCompanyName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(cName))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         response =>
           status(response) shouldBe Status.OK
           val result = Jsoup.parse(bodyOf(response))
-          result.body().getElementById("pageHeading").text() shouldBe s"Does the company trade under any other names than ${validCoHoCompanyDetailsResponse.companyName}?"
+          result.body().getElementById("pageHeading").text() shouldBe s"Does the company trade under any other names than $cName?"
+          result.body.getElementById("differentName-true").parent.classNames().contains("selected") shouldBe false
+          result.body.getElementById("differentName-false").parent.classNames().contains("selected") shouldBe false
           result.body().getElementById("tradingName").attr("value") shouldBe ""
       }
-    }
-
-    "throw a CompanyDetailsNotFoundException if there are no company details in keystore" in new Setup {
-      mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, None)
-      when(mockS4LService.fetchAndGet[TradingNameFormModel](Matchers.matches(CacheKeys.TradingName.toString))(Matchers.any(), Matchers.any())).thenReturn(Future.successful(None))
-      a[CompanyDetailsNotFoundException] shouldBe thrownBy (await(AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {result => status(result)} ))
     }
   }
 
   "calling the submitTradingName action" should {
+
+    "return 303 for an unauthorised user" in new Setup {
+      val result = controller.submitTradingName()(FakeRequest())
+      status(result) shouldBe Status.SEE_OTHER
+    }
     "redirect to the WELCOME PAGE when a user enters valid data" in new Setup {
       // TODO: Update test and description when flow is updated
-      when(mockS4LService.saveForm[TradingNameFormModel](Matchers.matches(CacheKeys.TradingName.toString), Matchers.any())(Matchers.any(),Matchers.any())).thenReturn(Future.successful(CacheMap("tstMap", Map.empty)))
-
+      when(mockCompanyDetailsService.submitTradingName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
-        "tradeUnderDifferentName" -> "yes",
+        "differentName" -> "true",
         "tradingName" -> "Tradez R us"
       )) {
         result =>
@@ -108,8 +149,21 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
       }
     }
 
+    "show an error page when there is an error response from the microservice" in new Setup {
+      // TODO: Update test and description when flow is updated
+      when(mockCompanyDetailsService.submitTradingName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
+      AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "differentName" -> "true",
+        "tradingName" -> "Tradez R us"
+      )) {
+        result =>
+          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      }
+    }
+
     "return 400 when a user enters no data" in new Setup {
-      mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, Some(validCoHoCompanyDetailsResponse))
+      when(mockCompanyDetailsService.submitTradingName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      when(mockCoHoService.getStoredCompanyName()(Matchers.any())).thenReturn(Future.successful("tst Name"))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
       )) {
         result =>
@@ -118,9 +172,9 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with CoHoAPIFixture {
     }
 
     "return 400 when a user enters invalid data" in new Setup {
-      mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, Some(validCoHoCompanyDetailsResponse))
+      when(mockCoHoService.getStoredCompanyName()(Matchers.any())).thenReturn(Future.successful("tst Name"))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
-        "tradeUnderDifferentName" -> "yes"
+        "differentName" -> "true"
       )) {
         result =>
           status(result) shouldBe Status.BAD_REQUEST

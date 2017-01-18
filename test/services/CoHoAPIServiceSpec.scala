@@ -16,11 +16,11 @@
 
 package services
 
+import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
 import connectors.{CohoApiErrorResponse, CohoApiBadRequestResponse, CohoApiSuccessResponse, CoHoAPIConnector}
 import enums.{DownstreamOutcome, CacheKeys}
 import fixtures.{CoHoAPIFixture, KeystoreFixture}
-import models.externalAPIModels.coHo.CoHoCompanyDetailsModel
-import models.externalAPIModels.currentProfile.CurrentProfile
+import models.external.{CurrentProfile, CoHoCompanyDetailsModel}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
@@ -68,6 +68,20 @@ class CoHoAPIServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFi
       when(mockCoHoAPIConnector.getCoHoCompanyDetails(Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(tstInternalErrorResult))
 
       await(service.fetchAndStoreCoHoCompanyDetails) shouldBe DownstreamOutcome.Failure
+    }
+  }
+
+  "Calling getCompanyName" should {
+    "return the Company Name when there is a CoHo company details model stored in keystore" in new Setup {
+      mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, Some(validCoHoCompanyDetailsResponse))
+
+      await(service.getStoredCompanyName()) shouldBe validCoHoCompanyDetailsResponse.companyName
+    }
+
+    "throw a CompanyDetailsNotFoundException when there is no CoHo company details model stored in keystore" in new Setup {
+      mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, None)
+
+      a[CompanyDetailsNotFoundException] shouldBe thrownBy(await(service.getStoredCompanyName()))
     }
   }
 

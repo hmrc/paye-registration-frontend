@@ -16,7 +16,7 @@
 
 package connectors
 
-import models.formModels.TradingNameFormModel
+import models.view.{TradingName => TradingNameView}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
@@ -45,30 +45,28 @@ class S4LConnectorSpec  extends UnitSpec with MockitoSugar with WithFakeApplicat
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val tNameModel = TradingNameFormModel("yes",Some("Tradez R Us"))
+  val tNameModel = TradingNameView(differentName = true, Some("Tradez R Us"))
   val cacheMap = CacheMap("", Map("" -> Json.toJson(tNameModel)))
 
   "Fetching from save4later" should {
     "return the correct model" in {
-      val model = TradingNameFormModel("yes",Some("Tradez R Us"))
 
-      when(mockShortLivedCache.fetchAndGetEntry[TradingNameFormModel](Matchers.anyString(), Matchers.anyString())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(Option(model)))
+      when(mockShortLivedCache.fetchAndGetEntry[TradingNameView](Matchers.anyString(), Matchers.anyString())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(Option(tNameModel)))
 
-      val result = S4LConnectorTest.fetchAndGet[TradingNameFormModel]("", "")
-      await(result) shouldBe Some(model)
+      val result = S4LConnectorTest.fetchAndGet[TradingNameView]("", "")
+      await(result) shouldBe Some(tNameModel)
     }
   }
 
   "Saving a model into save4later" should {
     "save the model" in {
-      val model = TradingNameFormModel("yes",Some("Tradez R Us"))
-      val returnCacheMap = CacheMap("", Map("" -> Json.toJson(model)))
+      val returnCacheMap = CacheMap("", Map("" -> Json.toJson(tNameModel)))
 
-      when(mockShortLivedCache.cache[TradingNameFormModel](Matchers.anyString(), Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockShortLivedCache.cache[TradingNameView](Matchers.anyString(), Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(returnCacheMap))
 
-      val result = S4LConnectorTest.saveForm[TradingNameFormModel]("", "", model)
+      val result = S4LConnectorTest.saveForm[TradingNameView]("", "", tNameModel)
       await(result) shouldBe returnCacheMap
     }
   }

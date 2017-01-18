@@ -19,7 +19,6 @@ package controllers.userJourney
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import enums.DownstreamOutcome
-import play.api.Logger
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
@@ -49,8 +48,8 @@ trait SignInOutController extends FrontendController with Actions {
     implicit user =>
       implicit request =>
         checkAndStoreCurrentProfile {
-            checkAndStoreCompanyDetails {
-              fetchAndStorePAYERegistration {
+          checkAndStoreCompanyDetails {
+            assertPAYERegistrationFootprint {
               Redirect(controllers.userJourney.routes.CompanyDetailsController.tradingName())
             }
           }
@@ -71,19 +70,10 @@ trait SignInOutController extends FrontendController with Actions {
     }
   }
 
-  private def fetchAndStorePAYERegistration(f: => Result)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
-    payeRegistrationService.fetchAndStoreCurrentRegistration() flatMap {
-      case regOpt => regOpt match {
-        case Some(reg) => Future.successful(f)
-        case _ => payeRegistrationService.createNewRegistration() map {
-          case DownstreamOutcome.Success => f
-          case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-        }
-      }
-    } recover {
-      case e =>
-        Logger.warn(s"[SignInOutController] [fetchAndStorePAYERegistration] Unable to fetch/store current registration. Error: ${e.getMessage}")
-        InternalServerError(views.html.pages.error.restart())
+  private def assertPAYERegistrationFootprint(f: => Result)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+    payeRegistrationService.assertRegistrationFootprint map {
+      case DownstreamOutcome.Success => f
+      case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
     }
   }
 }

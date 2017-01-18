@@ -16,10 +16,8 @@
 
 package connectors
 
-import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
-import models.dataModels.PAYERegistration
-import play.mvc.Http.Status
+import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._
 
@@ -36,79 +34,78 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
 
   "Calling createNewRegistration" should {
     "return the correct PAYEResponse when a Bad Request response is returned by the microservice" in new Setup {
-      mockHttpFailedPATCH[String, PAYERegistration]("tst-url", new BadRequestException("tst"))
+      mockHttpFailedPATCH[String, PAYERegistrationAPI]("tst-url", new BadRequestException("tst"))
 
       await(connector.createNewRegistration("tstID")) shouldBe PAYERegistrationBadRequestResponse
     }
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
-      mockHttpFailedPATCH[String, PAYERegistration]("tst-url", new ForbiddenException("tst"))
+      mockHttpFailedPATCH[String, PAYERegistrationAPI]("tst-url", new ForbiddenException("tst"))
 
       await(connector.createNewRegistration("tstID")) shouldBe PAYERegistrationForbiddenResponse
     }
     "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
       val e = new InternalServerException("tst")
-      mockHttpFailedPATCH[String, PAYERegistration]("tst-url", e)
+      mockHttpFailedPATCH[String, PAYERegistrationAPI]("tst-url", e)
 
       await(connector.createNewRegistration("tstID")) shouldBe PAYERegistrationErrorResponse(e)
     }
     "return the correct PAYEResponse when the microservice successfully creates a new PAYE Registration" in new Setup {
-      mockHttpPATCH[String, PAYERegistration]("tst-url", validPAYERegistration)
+      mockHttpPATCH[String, PAYERegistrationAPI]("tst-url", validPAYERegistrationAPI)
 
-      await(connector.createNewRegistration("tstID")) shouldBe PAYERegistrationSuccessResponse(validPAYERegistration)
+      await(connector.createNewRegistration("tstID")) shouldBe PAYERegistrationSuccessResponse(validPAYERegistrationAPI)
     }
   }
 
+  "Calling getCompanyDetails" should {
+    "return the correct PAYEResponse when a Bad Request response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[CompanyDetailsAPI]("tst-url", new BadRequestException("tst"))
 
-  "Calling getCurrentRegistration" should {
-    "return the correct PAYEResponse when a Not Found response is returned by the microservice" in new Setup {
-      mockHttpFailedGet[PAYERegistration]("tst-url", new NotFoundException("tst"))
-
-      await(connector.getCurrentRegistration("tstID")) shouldBe PAYERegistrationNotFoundResponse
+      await(connector.getCompanyDetails("tstID")) shouldBe PAYERegistrationBadRequestResponse
     }
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
-      mockHttpFailedGet[PAYERegistration]("tst-url", new ForbiddenException("tst"))
+      mockHttpFailedGET[CompanyDetailsAPI]("tst-url", new ForbiddenException("tst"))
 
-      await(connector.getCurrentRegistration("tstID")) shouldBe PAYERegistrationForbiddenResponse
+      await(connector.getCompanyDetails("tstID")) shouldBe PAYERegistrationForbiddenResponse
     }
     "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
       val e = new InternalServerException("tst")
-      mockHttpFailedGet[PAYERegistration]("tst-url", e)
+      mockHttpFailedGET[CompanyDetailsAPI]("tst-url", e)
 
-      await(connector.getCurrentRegistration("tstID")) shouldBe PAYERegistrationErrorResponse(e)
+      await(connector.getCompanyDetails("tstID")) shouldBe PAYERegistrationErrorResponse(e)
     }
-    "return the correct PAYEResponse when the microservice successfully creates a new PAYE Registration" in new Setup {
-      mockHttpGet[PAYERegistration]("tst-url", validPAYERegistration)
+    "return the correct PAYEResponse when the microservice returns a Company Details API model" in new Setup {
+      mockHttpGet[CompanyDetailsAPI]("tst-url", validCompanyDetailsAPI)
 
-      await(connector.getCurrentRegistration("tstID")) shouldBe PAYERegistrationSuccessResponse(validPAYERegistration)
+      await(connector.getCompanyDetails("tstID")) shouldBe PAYERegistrationSuccessResponse(validCompanyDetailsAPI)
     }
-  }
+    "return a Not Found PAYEResponse when the microservice returns no Company Details API model" in new Setup {
+      mockHttpFailedGET[CompanyDetailsAPI]("tst-url", new NotFoundException("tst"))
 
-  "Calling addTestRegistration" should {
-    "return a successful PAYEResponse when the test reg is successfully added" in new Setup {
-      mockHttpPOST[PAYERegistration, PAYERegistration]("tst-url", validPAYERegistration)
-
-      await(connector.addTestRegistration(validPAYERegistration)) shouldBe PAYERegistrationSuccessResponse(validPAYERegistration)
-    }
-
-    "return a PAYE ErrorResponse when adding the test reg throws an exception" in new Setup {
-      val e = new RuntimeException("tst")
-      mockHttpFailedPOST[PAYERegistration, PAYERegistration]("tst-url", e)
-
-      await(connector.addTestRegistration(validPAYERegistration)) shouldBe PAYERegistrationErrorResponse(e)
+      await(connector.getCompanyDetails("tstID")) shouldBe PAYERegistrationNotFoundResponse
     }
   }
 
-  "Calling testRegistrationTeardown" should {
-    "return a successful outcome for a successful teardown" in new Setup {
-      mockHttpGet[HttpResponse]("tst-url", HttpResponse(Status.OK))
+  "Calling upsertCompanyDetails" should {
+    "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
+      mockHttpFailedPATCH[CompanyDetailsAPI, CompanyDetailsAPI]("tst-url", new ForbiddenException("tst"))
 
-      await(connector.testRegistrationTeardown()) shouldBe DownstreamOutcome.Success
+      await(connector.upsertCompanyDetails("tstID", validCompanyDetailsAPI)) shouldBe PAYERegistrationForbiddenResponse
     }
-    "return a failed outcome for an unsuccessful teardown" in new Setup {
-      val e = new RuntimeException("tst")
-      mockHttpFailedGet[HttpResponse]("tst-url", e)
+    "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
+      val e = new InternalServerException("tst")
+      mockHttpFailedPATCH[CompanyDetailsAPI, CompanyDetailsAPI]("tst-url", e)
 
-      await(connector.testRegistrationTeardown()) shouldBe DownstreamOutcome.Failure
+      await(connector.upsertCompanyDetails("tstID", validCompanyDetailsAPI)) shouldBe PAYERegistrationErrorResponse(e)
+    }
+    "return a Not Found PAYEResponse when the microservice returns a NotFound response (No PAYERegistration in database)" in new Setup {
+      mockHttpFailedPATCH[CompanyDetailsAPI, CompanyDetailsAPI]("tst-url", new NotFoundException("tst"))
+
+      await(connector.upsertCompanyDetails("tstID", validCompanyDetailsAPI)) shouldBe PAYERegistrationNotFoundResponse
+    }
+    "return the correct PAYEResponse when the microservice completes and returns a Company Details API model" in new Setup {
+      mockHttpPATCH[CompanyDetailsAPI, CompanyDetailsAPI]("tst-url", validCompanyDetailsAPI)
+
+      await(connector.upsertCompanyDetails("tstID", validCompanyDetailsAPI)) shouldBe PAYERegistrationSuccessResponse(validCompanyDetailsAPI)
     }
   }
 }

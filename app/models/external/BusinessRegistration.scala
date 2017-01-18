@@ -14,29 +14,21 @@
  * limitations under the License.
  */
 
-package models.formModels
+package models.external
 
-import models.dataModels.companyDetails.TradingName
-import enums.YesNo
 import play.api.libs.json.Json
 
+case class BusinessRegistrationRequest(language: String)
 
-case class TradingNameFormModel (tradeUnderDifferentName: String,
-                             tradingName:Option[String]) {
-
-  def this(data: TradingName) = {
-    this (YesNo.fromBoolean(data.tradingName.isDefined).toString.toLowerCase, data.tradingName)
-  }
-
-  def toData: TradingName = {
-    YesNo.fromString(this.tradeUnderDifferentName) match {
-      case YesNo.Yes => TradingName(this.tradingName)
-      case YesNo.No  => TradingName(None)
-
-    }
-  }
+object BusinessRegistrationRequest {
+  implicit val formats = Json.format[BusinessRegistrationRequest]
 }
 
-object TradingNameFormModel {
-  implicit val formats = Json.format[TradingNameFormModel]
+case class CurrentProfile(registrationID: String,
+                          completionCapacity : Option[String],
+                          language: String)
+
+object CurrentProfile {
+  implicit val formats = Json.format[CurrentProfile]
 }
+
