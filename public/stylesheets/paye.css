@@ -23,3 +23,11 @@ label.cascading span {
   height: 1px; width: 1px;
   margin: -1px; padding: 0; border: 0;
 }
+
+.table--borderless th {
+  border: none;
+}
+
+tbody tr {
+  border-bottom: 1px solid #a1acb2;
+}

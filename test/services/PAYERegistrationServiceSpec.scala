@@ -56,7 +56,7 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
       id="tradingName",
       Seq(SummaryRow(
         id="tradingName",
-        answer = Some("tstTrade"),
+        answer = Right("tstTrade"),
         changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
       ))
     ))

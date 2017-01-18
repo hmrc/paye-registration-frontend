@@ -1,0 +1,40 @@
+@import models.view.Summary
+
+@(summaryModel: Summary)(implicit request: Request[_], messages: Messages)
+
+@main_template(title = Messages("pages.summary.title")) {
+
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.summary.heading")</h1>
+
+    <table class="table--borderless">
+        @for(section <- summaryModel.sections) {
+
+            <thead>
+                <tr>
+                    <th colspan="3" id="@{section.id}SectionHeading"><h2>@Messages(s"pages.summary.${section.id}.sectionHeading")</h2></th>
+                </tr>
+            </thead>
+
+            @for(row <- section.rows) {
+
+                <tbody>
+                <tr>
+                    <td id="@{row.id}Question">@Messages(s"pages.summary.${row.id}.question")</td>
+                    <td id="@{row.id}Answer">
+                        @row.answer.fold(
+                        messageKey => Messages(s"pages.summary.${row.id}.answers.$messageKey"),
+                        answer => answer
+                        )
+                    <td>
+                        @row.changeLink.map { linkLocation =>
+                            <a href="@linkLocation" id="@{row.id}ChangeLink">@Messages("app.common.change")</a>
+                            <span class ="visually-hidden" id="@{row.id}HelpText">@Messages(s"pages.summary.${row.id}.hiddenChangeText")</span>
+                        }
+                    </td>
+                </tr>
+                </tbody>
+            }
+        }
+    </table>
+
+}

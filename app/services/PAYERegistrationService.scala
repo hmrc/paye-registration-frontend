@@ -64,7 +64,10 @@ trait PAYERegistrationService extends CommonService {
         id="tradingName",
         Seq(SummaryRow(
           id="tradingName",
-          answer = apiModel.companyDetails.tradingName,
+          answer = apiModel.companyDetails.tradingName match {
+            case Some(tName) => Right(tName)
+            case _ => Left("noAnswerGiven")
+          },
           changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
         ))
       ))

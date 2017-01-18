@@ -14,7 +14,8 @@ POST        /start                   controllers.userJourney.WelcomeController.s
 GET         /trading-name            controllers.userJourney.CompanyDetailsController.tradingName
 POST        /trading-name            controllers.userJourney.CompanyDetailsController.submitTradingName
 
-
+## SUMMARY
+GET         /summary                 controllers.userJourney.SummaryController.summary
 
 ## FEEDBACK
 GET         /feedback                controllers.feedback.FeedbackController.show

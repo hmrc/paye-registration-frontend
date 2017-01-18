@@ -6,6 +6,7 @@ app.common.no                      = No
 app.common.continue                = Continue
 app.common.saveAndContinue         = Save and continue
 app.common.errorSummaryLabel       = There are errors on this page.
+app.common.change                  = Change
 
 
 ## Welcome page
@@ -31,6 +32,14 @@ pages.tradingName.nameRules2       = be the same as an <a href={0}>existing trad
 pages.tradingName.nameRules3       = contain a 'sensitive' word or expression unless you <a href={0}>get permission</a>
 pages.tradingName.errorQuestion    = Please enter a correct trading name
 
+## Summary Page
+pages.summary.title                = Check your answers
+pages.summary.heading              = Check your answers
+
+pages.summary.tradingName.sectionHeading              = Company information
+pages.summary.tradingName.question                    = Other trading name
+pages.summary.tradingName.answers.noAnswerGiven       = No
+pages.summary.tradingName.hiddenChangeText            = Change the company's trading name
 
 ## Error Pages
 errorPages.title                   = Something went wrong
