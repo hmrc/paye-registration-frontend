@@ -17,8 +17,10 @@
 package connectors
 
 import config.WSHttp
+import enums.DownstreamOutcome
 import models.api.{PAYERegistration => PAYERegistrationAPI}
 import play.api.Logger
+import play.api.http.Status
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import models.api.{CompanyDetails => CompanyDetailsAPI}
@@ -45,18 +47,37 @@ trait PAYERegistrationConnector {
   val payeRegUrl: String
   val http: HttpGet with HttpPost with HttpPatch
 
-  def createNewRegistration(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[PAYERegistrationResponse] = {
-    http.PATCH[String, PAYERegistrationAPI](s"$payeRegUrl/register-for-paye/$regID/new", regID) map {
-      reg => PAYERegistrationSuccessResponse(reg)
+  def createNewRegistration(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[DownstreamOutcome.Value] = {
+    http.PATCH[String, HttpResponse](s"$payeRegUrl/register-for-paye/$regID/new", regID) map {
+      response => response.status match {
+        case Status.OK => DownstreamOutcome.Success
+        case _ => DownstreamOutcome.Failure
+      }
     } recover {
       case e: BadRequestException =>
-        Logger.warn("[PAYERegistrationConnector] [createNewRegistration] received Bad Request response creating/asserting new PAYE Registration in backend")
-        PAYERegistrationBadRequestResponse
+        Logger.warn("[PAYERegistrationConnector] [createNewRegistration] received Bad Request response creating/asserting new PAYE Registration in microservice")
+        DownstreamOutcome.Failure
       case e: ForbiddenException =>
-        Logger.warn("[PAYERegistrationConnector] [createNewRegistration] received Forbidden response when creating/asserting new PAYE Registration in backend")
-        PAYERegistrationForbiddenResponse
+        Logger.warn("[PAYERegistrationConnector] [createNewRegistration] received Forbidden response when creating/asserting new PAYE Registration in microservice")
+        DownstreamOutcome.Failure
       case e: Exception =>
-        Logger.warn(s"[PAYERegistrationConnector] [createNewRegistration] received error when creating/asserting new PAYE Registration in backend - Error: ${e.getMessage}")
+        Logger.warn(s"[PAYERegistrationConnector] [createNewRegistration] received error when creating/asserting new PAYE Registration in microservice - Error: ${e.getMessage}")
+        DownstreamOutcome.Failure
+    }
+  }
+
+  def getRegistration(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[PAYERegistrationResponse] = {
+    http.GET[PAYERegistrationAPI](s"$payeRegUrl/register-for-paye/$regID") map {
+      reg => PAYERegistrationSuccessResponse(reg)
+    } recover {
+      case e: ForbiddenException =>
+        Logger.warn("[PAYERegistrationConnector] [getRegistration] received Forbidden response when fetching completed PAYE Registration from microservice")
+        PAYERegistrationForbiddenResponse
+      case e: NotFoundException =>
+        Logger.warn("[PAYERegistrationConnector] [getRegistration] received Not Found response when fetching completed PAYE Registration from microservice")
+        PAYERegistrationNotFoundResponse
+      case e: Exception =>
+        Logger.warn(s"[PAYERegistrationConnector] [getRegistration] received error when fetching completed PAYE Registration from microservice - Error: ${e.getMessage}")
         PAYERegistrationErrorResponse(e)
     }
   }

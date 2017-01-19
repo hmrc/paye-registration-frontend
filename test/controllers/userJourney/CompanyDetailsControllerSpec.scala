@@ -136,8 +136,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
       val result = controller.submitTradingName()(FakeRequest())
       status(result) shouldBe Status.SEE_OTHER
     }
-    "redirect to the WELCOME PAGE when a user enters valid data" in new Setup {
-      // TODO: Update test and description when flow is updated
+    "redirect to the Summary page when a user enters valid data" in new Setup {
       when(mockCompanyDetailsService.submitTradingName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "differentName" -> "true",
@@ -145,12 +144,11 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/paye-registration"
+          result.header.headers("Location") shouldBe "/paye-registration/summary"
       }
     }
 
     "show an error page when there is an error response from the microservice" in new Setup {
-      // TODO: Update test and description when flow is updated
       when(mockCompanyDetailsService.submitTradingName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "differentName" -> "true",

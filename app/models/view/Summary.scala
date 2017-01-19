@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
-package models.api
+package models.view
 
-import play.api.libs.json.Json
+import play.api.mvc.Call
 
-case class PAYERegistration (
-                            registrationID: String,
-                            formCreationTimestamp: String,
-                            companyDetails: CompanyDetails
-                              )
+case class Summary(
+                  sections: Seq[SummarySection]
+                  ) {
 
-object PAYERegistration {
-  implicit val format = Json.format[PAYERegistration]
 }
+
+case class SummarySection(
+                        id: String,
+                        rows: Seq[SummaryRow]
+                        )
+
+case class SummaryRow(
+                      id: String,
+                      answer: Either[String, String],
+                      changeLink: Option[Call]
+                      )

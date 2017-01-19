@@ -1,0 +1,20 @@
+@import models.view.SummaryRow
+
+@(row: SummaryRow)(implicit messages: Messages)
+
+<tbody>
+    <tr>
+        <td id="@{row.id}Question">@Messages(s"pages.summary.${row.id}.question")</td>
+        <td id="@{row.id}Answer">
+            @row.answer.fold(
+            messageKey => Messages(s"pages.summary.${row.id}.answers.$messageKey"),
+            answer => answer
+            )
+        <td>
+            @row.changeLink.map { linkLocation =>
+            <a href="@linkLocation" id="@{row.id}ChangeLink">@Messages("app.common.change")</a>
+            <span class ="visually-hidden" id="@{row.id}HelpText">@Messages(s"pages.summary.${row.id}.hiddenChangeText")</span>
+            }
+        </td>
+    </tr>
+</tbody>

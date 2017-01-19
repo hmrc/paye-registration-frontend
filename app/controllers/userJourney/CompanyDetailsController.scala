@@ -72,7 +72,7 @@ trait CompanyDetailsController extends FrontendController with Actions {
           badRequestResponse(validatedForm)
         } else {
           companyDetailsService.submitTradingName(success) map {
-            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.WelcomeController.show())
+            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
             case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
           }
         }
