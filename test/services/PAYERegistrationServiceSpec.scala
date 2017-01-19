@@ -68,7 +68,7 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
     "return a success response when the Registration is successfully created" in new Setup {
       mockFetchRegID()
       when(mockRegConnector.createNewRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationSuccessResponse(validPAYERegistrationAPI)))
+        .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       await(service.assertRegistrationFootprint()) shouldBe DownstreamOutcome.Success
     }
@@ -76,7 +76,7 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
     "return a failure response when the Registration can't be created" in new Setup {
       mockFetchRegID()
       when(mockRegConnector.createNewRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationBadRequestResponse))
+        .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       await(service.assertRegistrationFootprint()) shouldBe DownstreamOutcome.Failure
     }
@@ -118,9 +118,35 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
   }
 
   "Calling registrationToSummary" should {
-    "convert a PAYE Registration API Model  to a summary model" in new Setup {
+    "convert a PAYE Registration API Model  to a summary model with a trading name" in new Setup {
 
       service.registrationToSummary(apiRegistration) shouldBe summary
+    }
+
+    "convert a PAYE Registration API Model  to a summary model without a trading name" in new Setup {
+
+
+      val apiRegistrationNoTName = PAYERegistrationAPI(
+        registrationID = "AC123456",
+        formCreationTimestamp = "2017-01-11T15:10:12",
+        companyDetails = CompanyDetailsAPI(
+          crn = None,
+          companyName = "Test Company",
+          tradingName = None
+        )
+      )
+
+      lazy val summaryNoTName = Summary(
+        Seq(SummarySection(
+          id="tradingName",
+          Seq(SummaryRow(
+            id="tradingName",
+            answer = Left("noAnswerGiven"),
+            changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+          ))
+        ))
+      )
+      service.registrationToSummary(apiRegistrationNoTName) shouldBe summaryNoTName
     }
   }
 

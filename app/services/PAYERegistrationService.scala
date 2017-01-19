@@ -42,10 +42,7 @@ trait PAYERegistrationService extends CommonService {
     for {
       regID <- fetchRegistrationID
       regResponse <- payeRegistrationConnector.createNewRegistration(regID)
-    } yield regResponse match {
-      case PAYERegistrationSuccessResponse(reg: PAYERegistrationAPI) => DownstreamOutcome.Success
-      case _ => DownstreamOutcome.Failure
-    }
+    } yield regResponse
   }
 
   def getRegistrationSummary()(implicit hc: HeaderCarrier): Future[Option[Summary]] = {

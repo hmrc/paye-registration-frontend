@@ -17,6 +17,7 @@
 package fixtures
 
 import models.api.{PAYERegistration, CompanyDetails}
+import models.view.{SummaryRow, SummarySection, Summary}
 
 trait PAYERegistrationFixture {
 
@@ -31,6 +32,17 @@ trait PAYERegistrationFixture {
     registrationID = "AC123456",
     formCreationTimestamp = "2017-01-11T15:10:12",
     companyDetails = validCompanyDetailsAPI
+  )
+
+  lazy val validSummaryView = Summary(
+    Seq(SummarySection(
+      id="tradingName",
+      Seq(SummaryRow(
+        id="tradingName",
+        answer = Right("tstTrade"),
+        changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+      ))
+    ))
   )
 
 }

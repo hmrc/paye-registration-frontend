@@ -16,8 +16,10 @@
 
 package connectors
 
+import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
 import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
+import play.api.http.Status
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._
 
@@ -33,26 +35,31 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
   implicit val hc = HeaderCarrier()
 
   "Calling createNewRegistration" should {
-    "return the correct PAYEResponse when a Bad Request response is returned by the microservice" in new Setup {
-      mockHttpFailedPATCH[String, PAYERegistrationAPI]("tst-url", new BadRequestException("tst"))
+    "return a failed outcome when a Bad Request response is returned by the microservice" in new Setup {
+      mockHttpFailedPATCH[String, HttpResponse]("tst-url", new BadRequestException("tst"))
 
-      await(connector.createNewRegistration("tstID")) shouldBe PAYERegistrationBadRequestResponse
+      await(connector.createNewRegistration("tstID")) shouldBe DownstreamOutcome.Failure
     }
-    "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
-      mockHttpFailedPATCH[String, PAYERegistrationAPI]("tst-url", new ForbiddenException("tst"))
+    "return a failed outcome when a Forbidden response is returned by the microservice" in new Setup {
+      mockHttpFailedPATCH[String, HttpResponse]("tst-url", new ForbiddenException("tst"))
 
-      await(connector.createNewRegistration("tstID")) shouldBe PAYERegistrationForbiddenResponse
+      await(connector.createNewRegistration("tstID")) shouldBe DownstreamOutcome.Failure
     }
-    "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
+    "return a failed outcome when an Internal Server Error response is returned by the microservice" in new Setup {
       val e = new InternalServerException("tst")
-      mockHttpFailedPATCH[String, PAYERegistrationAPI]("tst-url", e)
+      mockHttpFailedPATCH[String, HttpResponse]("tst-url", e)
 
-      await(connector.createNewRegistration("tstID")) shouldBe PAYERegistrationErrorResponse(e)
+      await(connector.createNewRegistration("tstID")) shouldBe DownstreamOutcome.Failure
     }
-    "return the correct PAYEResponse when the microservice successfully creates a new PAYE Registration" in new Setup {
-      mockHttpPATCH[String, PAYERegistrationAPI]("tst-url", validPAYERegistrationAPI)
+    "return a failed outcome when the microservice returns a 2xx response other than OK" in new Setup {
+      mockHttpPATCH[String, HttpResponse]("tst-url", HttpResponse(Status.ACCEPTED))
 
-      await(connector.createNewRegistration("tstID")) shouldBe PAYERegistrationSuccessResponse(validPAYERegistrationAPI)
+      await(connector.createNewRegistration("tstID")) shouldBe DownstreamOutcome.Failure
+    }
+    "return a successful outcome when the microservice successfully creates a new PAYE Registration" in new Setup {
+      mockHttpPATCH[String, HttpResponse]("tst-url", HttpResponse(Status.OK))
+
+      await(connector.createNewRegistration("tstID")) shouldBe DownstreamOutcome.Success
     }
   }
 

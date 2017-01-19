@@ -17,8 +17,10 @@
 package connectors
 
 import config.WSHttp
+import enums.DownstreamOutcome
 import models.api.{PAYERegistration => PAYERegistrationAPI}
 import play.api.Logger
+import play.api.http.Status
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import models.api.{CompanyDetails => CompanyDetailsAPI}
@@ -45,19 +47,22 @@ trait PAYERegistrationConnector {
   val payeRegUrl: String
   val http: HttpGet with HttpPost with HttpPatch
 
-  def createNewRegistration(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[PAYERegistrationResponse] = {
-    http.PATCH[String, PAYERegistrationAPI](s"$payeRegUrl/register-for-paye/$regID/new", regID) map {
-      reg => PAYERegistrationSuccessResponse(reg)
+  def createNewRegistration(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[DownstreamOutcome.Value] = {
+    http.PATCH[String, HttpResponse](s"$payeRegUrl/register-for-paye/$regID/new", regID) map {
+      response => response.status match {
+        case Status.OK => DownstreamOutcome.Success
+        case _ => DownstreamOutcome.Failure
+      }
     } recover {
       case e: BadRequestException =>
         Logger.warn("[PAYERegistrationConnector] [createNewRegistration] received Bad Request response creating/asserting new PAYE Registration in microservice")
-        PAYERegistrationBadRequestResponse
+        DownstreamOutcome.Failure
       case e: ForbiddenException =>
         Logger.warn("[PAYERegistrationConnector] [createNewRegistration] received Forbidden response when creating/asserting new PAYE Registration in microservice")
-        PAYERegistrationForbiddenResponse
+        DownstreamOutcome.Failure
       case e: Exception =>
         Logger.warn(s"[PAYERegistrationConnector] [createNewRegistration] received error when creating/asserting new PAYE Registration in microservice - Error: ${e.getMessage}")
-        PAYERegistrationErrorResponse(e)
+        DownstreamOutcome.Failure
     }
   }
 

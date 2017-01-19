@@ -1,4 +1,5 @@
 @import models.view.Summary
+@import helpers.templates.summaryRow
 
 @(summaryModel: Summary)(implicit request: Request[_], messages: Messages)
 
@@ -16,23 +17,7 @@
             </thead>
 
             @for(row <- section.rows) {
-
-                <tbody>
-                <tr>
-                    <td id="@{row.id}Question">@Messages(s"pages.summary.${row.id}.question")</td>
-                    <td id="@{row.id}Answer">
-                        @row.answer.fold(
-                        messageKey => Messages(s"pages.summary.${row.id}.answers.$messageKey"),
-                        answer => answer
-                        )
-                    <td>
-                        @row.changeLink.map { linkLocation =>
-                            <a href="@linkLocation" id="@{row.id}ChangeLink">@Messages("app.common.change")</a>
-                            <span class ="visually-hidden" id="@{row.id}HelpText">@Messages(s"pages.summary.${row.id}.hiddenChangeText")</span>
-                        }
-                    </td>
-                </tr>
-                </tbody>
+                @summaryRow(row)
             }
         }
     </table>
