@@ -9,7 +9,7 @@
         Messages("app.common.errorSummaryLabel"), employingStaffForm
     )
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.employingStaff.heading")</h1>
-    @govHelpers.form(action = controllers.userJourney.routes.EmployingStaffController.submit) {
+    @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitEmployingStaff) {
         <p>@Messages("pages.employingStaff.nameRulesIntro")</p>
         <ul class="list list-bullet">
             <li>@Messages("pages.employingStaff.nameRules1")</li>
@@ -19,7 +19,7 @@
         <p>@Messages("pages.employingStaff.nameRulesEnd")</p>
         <div class="inline form-group">
             @payeInputRadioGroup(
-                employingStaffForm("employingStaff"),
+                employingStaffForm("currentYear"),
                 Seq(
                     "true"->Messages("app.common.yes"),
                     "false"->Messages("app.common.no")
