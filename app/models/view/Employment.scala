@@ -24,7 +24,7 @@ object EmployingStaff {
   implicit val format = Json.format[EmployingStaff]
 }
 
-case class CompanyPension(provided: Boolean)
+case class CompanyPension(pensionProvided: Boolean)
 object CompanyPension {
   implicit val format = Json.format[CompanyPension]
 }
