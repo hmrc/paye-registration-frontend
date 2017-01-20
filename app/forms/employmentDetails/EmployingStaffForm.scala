@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-package models.view
+package forms.employmentDetails
 
-import play.api.libs.json.Json
+import forms.helpers.RequiredBooleanForm
+import models.view.EmployingStaff
+import play.api.data.Form
+import play.api.data.Forms._
 
-case class CompanyDetails(
-                           crn: Option[String],
-                           companyName: String,
-                           tradingName: Option[TradingName]
-                           )
-
-case class TradingName (
-                         differentName: Boolean,
-                         tradingName:Option[String]
-                         )
-
-object TradingName {
-  implicit val format = Json.format[TradingName]
-}
-
-object CompanyDetails {
-  implicit val format = Json.format[CompanyDetails]
+object EmployingStaffForm extends RequiredBooleanForm {
+  val form = Form(
+    mapping(
+      "currentYear" -> requiredBoolean
+    )(EmployingStaff.apply)(EmployingStaff.unapply)
+  )
 }

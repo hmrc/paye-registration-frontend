@@ -32,6 +32,17 @@ pages.tradingName.nameRules2       = be the same as an <a href={0}>existing trad
 pages.tradingName.nameRules3       = contain a 'sensitive' word or expression unless you <a href={0}>get permission</a>
 pages.tradingName.errorQuestion    = Please enter a correct trading name
 
+## Employing Staff Page
+pages.employingStaff.title               = Employing Staff
+pages.employingStaff.heading             = Will the company employ staff this year?
+pages.employingStaff.legend              = TEEEEEEST
+pages.employingStaff.employingStaffLabel = Employing Staff
+pages.employingStaff.nameRulesIntro      = ''Staff'' may be:
+pages.employingStaff.nameRules1          = yourself (for example, as the only director of a limited company)
+pages.employingStaff.nameRules2          = people already employed by the company
+pages.employingStaff.nameRules3          = people the company expects to employ before the end of year
+pages.employingStaff.nameRulesEnd        = This doesn''t include subcontractors doing construction work.
+
 ## Summary Page
 pages.summary.title                = Check your answers
 pages.summary.heading              = Check your answers
