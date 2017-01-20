@@ -35,7 +35,7 @@ pages.tradingName.errorQuestion    = Please enter a correct trading name
 ## Employing Staff Page
 pages.employingStaff.title               = Employing Staff
 pages.employingStaff.heading             = Will the company employ staff this year?
-pages.employingStaff.legend              =
+pages.employingStaff.legend              = Will the company employ staff this year?
 pages.employingStaff.employingStaffLabel = Employing Staff
 pages.employingStaff.nameRulesIntro      = ''Staff'' may be:
 pages.employingStaff.nameRules1          = yourself (for example, as the only director of a limited company)
@@ -49,6 +49,14 @@ pages.subcontractors.heading             = Will the company pay subcontractors t
 pages.subcontractors.legend              = Will the company pay subcontractors to do construction work this year?
 pages.subcontractors.subcontractorsLabel = Subcontractors
 pages.subcontractors.nameRulesIntro      = Companies who pay subcontractors to do construction work will be registered with the <a href={0}>Construction Industry Scheme (CIS)</a>.
+
+## Company Pension Page
+pages.companyPension.title               = Company Pension Scheme
+pages.companyPension.heading             = Do you want to provide a company pension scheme for your employees?
+pages.companyPension.legend              = Do you want to provide a company pension scheme for your employees?
+pages.companyPension.setUpPensionIntro   = As an employer, you can set up a company pension scheme to provide a pension and benefits to:
+pages.companyPension.setUpPension1       = employees after they retire
+pages.companyPension.setUpPension2       = dependants of deceased employees
 
 ## Summary Page
 pages.summary.title                = Check your answers
