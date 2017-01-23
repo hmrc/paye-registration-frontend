@@ -16,6 +16,8 @@
 
 package config
 
+import java.util.Base64
+
 import play.api.Play.{configuration, current}
 import uk.gov.hmrc.play.config.ServicesConfig
 
@@ -37,4 +39,13 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   override lazy val analyticsHost = loadConfig(s"google-analytics.host")
   override lazy val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   override lazy val reportAProblemNonJSUrl = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+
+  private def whiteListConfig(key : String) : Seq[String] = {
+    Some(new String(Base64.getDecoder
+      .decode(configuration.getString(key).getOrElse("")), "UTF-8"))
+      .map(_.split(",")).getOrElse(Array.empty).toSeq
+  }
+
+  lazy val whitelist = whiteListConfig("whitelist")
+  lazy val whitelistExcluded = whiteListConfig("whitelist-excluded")
 }
