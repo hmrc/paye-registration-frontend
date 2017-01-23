@@ -48,7 +48,7 @@ trait EmploymentController extends FrontendController with Actions {
         errors => BadRequest(EmployingStaffPage(errors)),
         model => model.currentYear match {
           case true => Redirect(controllers.userJourney.routes.EmploymentController.companyPension())
-          case false => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to Subcontractors
+          case false => Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
         }
       )
     )
