@@ -107,23 +107,23 @@ class EmploymentControllerSpec extends PAYERegSpec {
       }
     }
 
-    "redirect to the Summary page when a user enters YES answer" in new Setup {
+    "redirect to the Subcontractors page when a user enters YES answer" in new Setup {
       AuthBuilder.submitWithAuthorisedUser(controller.submitCompanyPension(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "pensionProvided" -> "true"
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/paye-registration/summary"
+          result.header.headers("Location") shouldBe "/paye-registration/subcontractors"
       }
     }
 
-    "redirect to the Summary page when a user enters NO answer" in new Setup {
+    "redirect to the Subcontractors page when a user enters NO answer" in new Setup {
       AuthBuilder.submitWithAuthorisedUser(controller.submitCompanyPension(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "pensionProvided" -> "false"
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/paye-registration/summary"
+          result.header.headers("Location") shouldBe "/paye-registration/subcontractors"
       }
     }
   }
