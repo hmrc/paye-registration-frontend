@@ -64,8 +64,8 @@ trait EmploymentController extends FrontendController with Actions {
       CompanyPensionForm.form.bindFromRequest.fold(
         errors => BadRequest(CompanyPensionPage(errors)),
         model => model.pensionProvided match {
-          case true => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to Subcontractors
-          case false => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to Subcontractors
+          case true => Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
+          case false => Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
         }
       )
     )
@@ -80,8 +80,8 @@ trait EmploymentController extends FrontendController with Actions {
       SubcontractorsForm.form.bindFromRequest.fold(
         errors => BadRequest(SubcontractorsPage(errors)),
         model => model.hasContractors match {
-          case true => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to Pension Scheme
-          case false => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to Subcontractors
+          case true => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to First Payment
+          case false => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to First Payment
         }
       )
     )
