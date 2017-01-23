@@ -69,13 +69,13 @@ class EmploymentControllerSpec extends PAYERegSpec {
       }
     }
 
-    "redirect to the Summary page when a user enters NO answer" in new Setup {
+    "redirect to the Subcontractors page when a user enters NO answer" in new Setup {
       AuthBuilder.submitWithAuthorisedUser(controller.submitEmployingStaff(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "currentYear" -> "false"
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/paye-registration/summary"
+          result.header.headers("Location") shouldBe "/paye-registration/subcontractors"
       }
     }
   }
@@ -107,9 +107,57 @@ class EmploymentControllerSpec extends PAYERegSpec {
       }
     }
 
-    "redirect to the Summary page when a user enters YES answer" in new Setup {
+    "redirect to the Subcontractors page when a user enters YES answer" in new Setup {
       AuthBuilder.submitWithAuthorisedUser(controller.submitCompanyPension(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "pensionProvided" -> "true"
+      )) {
+        result =>
+          status(result) shouldBe Status.SEE_OTHER
+          result.header.headers("Location") shouldBe "/paye-registration/subcontractors"
+      }
+    }
+
+    "redirect to the Subcontractors page when a user enters NO answer" in new Setup {
+      AuthBuilder.submitWithAuthorisedUser(controller.submitCompanyPension(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "pensionProvided" -> "false"
+      )) {
+        result =>
+          status(result) shouldBe Status.SEE_OTHER
+          result.header.headers("Location") shouldBe "/paye-registration/subcontractors"
+      }
+    }
+  }
+
+  "calling the subcontractors action" should {
+    "return 303 for an unauthorised user" in new Setup {
+      val result = controller.subcontractors()(FakeRequest())
+      status(result) shouldBe Status.SEE_OTHER
+    }
+
+    "return 200 for an authorised user" in new Setup {
+      AuthBuilder.showWithAuthorisedUser(controller.subcontractors(), mockAuthConnector) {
+        (response: Future[Result]) =>
+          status(response) shouldBe Status.OK
+      }
+    }
+  }
+
+  "calling the submitSubcontractors action" should {
+    "return 303 for an unauthorised user" in new Setup {
+      val result = controller.submitSubcontractors()(FakeRequest())
+      status(result) shouldBe Status.SEE_OTHER
+    }
+
+    "return 400 for an invalid answer" in new Setup {
+      AuthBuilder.submitWithAuthorisedUser(controller.submitSubcontractors(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody()) {
+        result =>
+          status(result) shouldBe Status.BAD_REQUEST
+      }
+    }
+
+    "redirect to the Summary page when a user enters YES answer" in new Setup {
+      AuthBuilder.submitWithAuthorisedUser(controller.submitSubcontractors(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "hasContractors" -> "true"
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
@@ -118,8 +166,8 @@ class EmploymentControllerSpec extends PAYERegSpec {
     }
 
     "redirect to the Summary page when a user enters NO answer" in new Setup {
-      AuthBuilder.submitWithAuthorisedUser(controller.submitCompanyPension(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
-        "pensionProvided" -> "false"
+      AuthBuilder.submitWithAuthorisedUser(controller.submitSubcontractors(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "hasContractors" -> "false"
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER

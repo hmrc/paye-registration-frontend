@@ -18,8 +18,14 @@ POST        /trading-name            controllers.userJourney.CompanyDetailsContr
 GET         /employing-staff         controllers.userJourney.EmploymentController.employingStaff
 POST        /employing-staff         controllers.userJourney.EmploymentController.submitEmployingStaff
 
+## SUBCONTRACTORS
+GET         /subcontractors          controllers.userJourney.EmploymentController.subcontractors
+POST        /subcontractors          controllers.userJourney.EmploymentController.submitSubcontractors
+
+## COMPANY PENSION
 GET         /company-pension         controllers.userJourney.EmploymentController.companyPension
 POST        /company-pension         controllers.userJourney.EmploymentController.submitCompanyPension
+
 
 ## SUMMARY
 GET         /summary                 controllers.userJourney.SummaryController.summary

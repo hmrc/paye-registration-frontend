@@ -43,7 +43,14 @@ pages.employingStaff.nameRules2          = people already employed by the compan
 pages.employingStaff.nameRules3          = people the company expects to employ before the end of year
 pages.employingStaff.nameRulesEnd        = This doesn''t include subcontractors doing construction work.
 
-## Employing Staff Page
+## Subcontractors Page
+pages.subcontractors.title               = Subcontractors
+pages.subcontractors.heading             = Will the company pay subcontractors to do construction work this year?
+pages.subcontractors.legend              = Will the company pay subcontractors to do construction work this year?
+pages.subcontractors.subcontractorsLabel = Subcontractors
+pages.subcontractors.nameRulesIntro      = Companies who pay subcontractors to do construction work will be registered with the <a href={0}>Construction Industry Scheme (CIS)</a>.
+
+## Company Pension Page
 pages.companyPension.title               = Company Pension Scheme
 pages.companyPension.heading             = Do you want to provide a company pension scheme for your employees?
 pages.companyPension.legend              = Do you want to provide a company pension scheme for your employees?

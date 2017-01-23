@@ -19,7 +19,7 @@ package controllers.userJourney
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import config.FrontendAuthConnector
 import auth.PAYERegime
-import forms.employmentDetails.{CompanyPensionForm, EmployingStaffForm}
+import forms.employmentDetails._
 
 import scala.concurrent.Future
 import play.api.Play.current
@@ -27,6 +27,7 @@ import play.api.i18n.Messages.Implicits._
 import uk.gov.hmrc.play.frontend.auth.Actions
 import views.html.pages.employmentDetails.{employingStaff => EmployingStaffPage}
 import views.html.pages.employmentDetails.{companyPension => CompanyPensionPage}
+import views.html.pages.employmentDetails.{subcontractors => SubcontractorsPage}
 
 object EmploymentController extends EmploymentController {
   //$COVERAGE-OFF$
@@ -47,7 +48,7 @@ trait EmploymentController extends FrontendController with Actions {
         errors => BadRequest(EmployingStaffPage(errors)),
         model => model.currentYear match {
           case true => Redirect(controllers.userJourney.routes.EmploymentController.companyPension())
-          case false => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to Subcontractors
+          case false => Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
         }
       )
     )
@@ -63,8 +64,24 @@ trait EmploymentController extends FrontendController with Actions {
       CompanyPensionForm.form.bindFromRequest.fold(
         errors => BadRequest(CompanyPensionPage(errors)),
         model => model.pensionProvided match {
-          case true => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to Subcontractors
-          case false => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to Subcontractors
+          case true => Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
+          case false => Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
+        }
+      )
+    )
+  }
+
+  val subcontractors = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+    Future.successful(Ok(SubcontractorsPage(SubcontractorsForm.form)))
+  }
+
+  val submitSubcontractors = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+    Future.successful(
+      SubcontractorsForm.form.bindFromRequest.fold(
+        errors => BadRequest(SubcontractorsPage(errors)),
+        model => model.hasContractors match {
+          case true => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to First Payment
+          case false => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to First Payment
         }
       )
     )
