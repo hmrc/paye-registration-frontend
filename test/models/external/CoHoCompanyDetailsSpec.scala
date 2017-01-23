@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package models
+package models.external
 
-import models.external.{AreaOfIndustry, CoHoCompanyDetailsModel}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsSuccess, Json}
 import testHelpers.PAYERegSpec
 
 class CoHoCompanyDetailsSpec extends PAYERegSpec {
@@ -55,7 +54,7 @@ class CoHoCompanyDetailsSpec extends PAYERegSpec {
 
   "CoHoCompanyDetailsModel" should {
     "read from Json" in {
-      Json.fromJson[CoHoCompanyDetailsModel](tstJson).asOpt shouldBe Some(tstModel)
+      Json.fromJson[CoHoCompanyDetailsModel](tstJson) shouldBe JsSuccess(tstModel)
     }
     "write to Json" in {
       Json.toJson[CoHoCompanyDetailsModel](tstModel) shouldBe tstJson
