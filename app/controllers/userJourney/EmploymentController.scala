@@ -28,6 +28,7 @@ import uk.gov.hmrc.play.frontend.auth.Actions
 import views.html.pages.employmentDetails.{employingStaff => EmployingStaffPage}
 import views.html.pages.employmentDetails.{companyPension => CompanyPensionPage}
 import views.html.pages.employmentDetails.{subcontractors => SubcontractorsPage}
+import views.html.pages.employmentDetails.{firstPayment => FirstPaymentPage}
 
 object EmploymentController extends EmploymentController {
   //$COVERAGE-OFF$
@@ -71,6 +72,7 @@ trait EmploymentController extends FrontendController with Actions {
     )
   }
 
+  // SUBCONTRACTORS
   val subcontractors = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     Future.successful(Ok(SubcontractorsPage(SubcontractorsForm.form)))
   }
@@ -80,6 +82,23 @@ trait EmploymentController extends FrontendController with Actions {
       SubcontractorsForm.form.bindFromRequest.fold(
         errors => BadRequest(SubcontractorsPage(errors)),
         model => model.hasContractors match {
+          case true => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to First Payment
+          case false => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to First Payment
+        }
+      )
+    )
+  }
+
+  // FIRST PAYMENT
+  val firstPayment = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+    Future.successful(Ok(FirstPaymentPage(FirstPaymentForm.form)))
+  }
+
+  val submitFirstPayment = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+    Future.successful(
+      FirstPaymentForm.form.bindFromRequest.fold(
+        errors => BadRequest(FirstPaymentPage(errors)),
+        model => model.paymentMade match {
           case true => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to First Payment
           case false => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to First Payment
         }

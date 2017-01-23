@@ -26,6 +26,9 @@ POST        /subcontractors          controllers.userJourney.EmploymentControlle
 GET         /company-pension         controllers.userJourney.EmploymentController.companyPension
 POST        /company-pension         controllers.userJourney.EmploymentController.submitCompanyPension
 
+## FIRST PAYMENT
+GET         /first-payment           controllers.userJourney.EmploymentController.firstPayment
+POST        /first-payment           controllers.userJourney.EmploymentController.submitFirstPayment
 
 ## SUMMARY
 GET         /summary                 controllers.userJourney.SummaryController.summary
