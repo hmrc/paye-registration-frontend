@@ -35,13 +35,9 @@ object Subcontractors {
 }
 
 case class FirstPayment(
-                      paymentMade: Boolean,
-                      pastPayYear: Option[String],
-                      pastPayMonth: Option[String],
-                      pastPayDay: Option[String],
-                      futurePayYear: Option[String],
-                      futurePayMonth: Option[String],
-                      futurePayDay: Option[String]
+                      firstPayYear: Option[String],
+                      firstPayMonth: Option[String],
+                      firstPayDay: Option[String]
                        )
 object FirstPayment {
   implicit val format = Json.format[FirstPayment]

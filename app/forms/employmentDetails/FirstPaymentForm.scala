@@ -27,10 +27,7 @@ object FirstPaymentForm extends RequiredBooleanForm {
       "paymentMade" -> requiredBoolean,
       "pastPayYear" -> optional(text),
       "pastPayMonth" -> optional(text),
-      "pastPayDay" -> optional(text),
-      "futurePayYear" -> optional(text),
-      "futurePayMonth" -> optional(text),
-      "futurePayDay" -> optional(text)
+      "pastPayDay" -> optional(text)
     )(FirstPayment.apply)(FirstPayment.unapply)
   )
 }
