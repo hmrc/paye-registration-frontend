@@ -48,7 +48,7 @@ trait PAYERegistrationConnector {
   val http: HttpGet with HttpPost with HttpPatch
 
   def createNewRegistration(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[DownstreamOutcome.Value] = {
-    http.PATCH[String, HttpResponse](s"$payeRegUrl/register-for-paye/$regID/new", regID) map {
+    http.PATCH[String, HttpResponse](s"$payeRegUrl/paye-registration/$regID/new", regID) map {
       response => response.status match {
         case Status.OK => DownstreamOutcome.Success
         case _ => DownstreamOutcome.Failure
@@ -67,7 +67,7 @@ trait PAYERegistrationConnector {
   }
 
   def getRegistration(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[PAYERegistrationResponse] = {
-    http.GET[PAYERegistrationAPI](s"$payeRegUrl/register-for-paye/$regID") map {
+    http.GET[PAYERegistrationAPI](s"$payeRegUrl/paye-registration/$regID") map {
       reg => PAYERegistrationSuccessResponse(reg)
     } recover {
       case e: ForbiddenException =>
@@ -83,7 +83,7 @@ trait PAYERegistrationConnector {
   }
 
   def getCompanyDetails(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[CompanyDetailsAPI]): Future[PAYERegistrationResponse] = {
-    http.GET[CompanyDetailsAPI](s"$payeRegUrl/register-for-paye/$regID/company-details") map {
+    http.GET[CompanyDetailsAPI](s"$payeRegUrl/paye-registration/$regID/company-details") map {
       details => PAYERegistrationSuccessResponse[CompanyDetailsAPI](details)
     } recover {
       case e: NotFoundException =>
@@ -101,7 +101,7 @@ trait PAYERegistrationConnector {
   }
 
   def upsertCompanyDetails(regID: String, companyDetails: CompanyDetailsAPI)(implicit hc: HeaderCarrier, rds: HttpReads[CompanyDetailsAPI]): Future[PAYERegistrationResponse] = {
-    http.PATCH[CompanyDetailsAPI, CompanyDetailsAPI](s"$payeRegUrl/register-for-paye/$regID/company-details", companyDetails) map {
+    http.PATCH[CompanyDetailsAPI, CompanyDetailsAPI](s"$payeRegUrl/paye-registration/$regID/company-details", companyDetails) map {
       details => PAYERegistrationSuccessResponse[CompanyDetailsAPI](details)
     } recover {
       case e: NotFoundException =>

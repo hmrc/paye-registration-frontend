@@ -65,7 +65,7 @@ class EmploymentControllerSpec extends PAYERegSpec {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/paye-registration/company-pension"
+          result.header.headers("Location") shouldBe "/register-for-paye/company-pension"
       }
     }
 
@@ -75,7 +75,7 @@ class EmploymentControllerSpec extends PAYERegSpec {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/paye-registration/subcontractors"
+          result.header.headers("Location") shouldBe "/register-for-paye/subcontractors"
       }
     }
   }
@@ -113,7 +113,7 @@ class EmploymentControllerSpec extends PAYERegSpec {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/paye-registration/subcontractors"
+          result.header.headers("Location") shouldBe "/register-for-paye/subcontractors"
       }
     }
 
@@ -123,7 +123,7 @@ class EmploymentControllerSpec extends PAYERegSpec {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/paye-registration/subcontractors"
+          result.header.headers("Location") shouldBe "/register-for-paye/subcontractors"
       }
     }
   }
@@ -161,7 +161,7 @@ class EmploymentControllerSpec extends PAYERegSpec {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/paye-registration/summary"
+          result.header.headers("Location") shouldBe "/register-for-paye/summary"
       }
     }
 
@@ -171,7 +171,7 @@ class EmploymentControllerSpec extends PAYERegSpec {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/paye-registration/summary"
+          result.header.headers("Location") shouldBe "/register-for-paye/summary"
       }
     }
   }
