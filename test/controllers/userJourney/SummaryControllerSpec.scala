@@ -44,7 +44,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   "Calling summary to show the summary page" should {
     "show the summary page when a valid model is returned from the microservice" in new Setup {
-      when(mockPAYERegistrationService.getRegistrationSummary()(Matchers.any())).thenReturn(Future.successful(Some(validSummaryView)))
+      when(mockPAYERegistrationService.getRegistrationSummary()(Matchers.any())).thenReturn(Future.successful(validSummaryView))
 
       AuthBuilder.showWithAuthorisedUser(controller.summary, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -56,7 +56,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
     }
 
     "return an Internal Server Error response when no valid model is returned from the microservice" in new Setup {
-      when(mockPAYERegistrationService.getRegistrationSummary()(Matchers.any())).thenReturn(Future.successful(None))
+      when(mockPAYERegistrationService.getRegistrationSummary()(Matchers.any())).thenReturn(Future.failed(new InternalError()))
 
       AuthBuilder.showWithAuthorisedUser(controller.summary, mockAuthConnector) {
         (response: Future[Result]) =>

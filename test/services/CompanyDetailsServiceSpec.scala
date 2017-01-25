@@ -26,7 +26,7 @@ import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
 import common.exceptions.DownstreamExceptions.PAYEMicroserviceException
 import common.exceptions.InternalExceptions.APIConversionException
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, NotFoundException, Upstream4xxResponse}
 
 import scala.concurrent.Future
 
@@ -195,7 +195,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
     "return the correct View response when Company Details are returned from the connector" in new APIConverterMockedSetup {
       mockFetchRegID("54321")
       when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationSuccessResponse(validCompanyDetailsAPI)))
+        .thenReturn(Future.successful(Some(validCompanyDetailsAPI)))
 
       await(service.getCompanyDetails()) shouldBe Some(validCompanyDetailsViewModel)
     }
@@ -203,25 +203,25 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
     "return an empty option when no Company Details are returned from the connector" in new Setup {
       mockFetchRegID("54321")
       when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationNotFoundResponse))
+        .thenReturn(Future.successful(None))
 
       await(service.getCompanyDetails()) shouldBe None
     }
 
-    "throw a PAYEMicroserviceException an exception response is returned from the connector" in new Setup {
+    "throw a 403 response is returned from the connector" in new Setup {
       mockFetchRegID("54321")
       when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationErrorResponse(new RuntimeException("tst"))))
+        .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
 
-      a[PAYEMicroserviceException] shouldBe thrownBy(await(service.getCompanyDetails()))
+      a[Upstream4xxResponse] shouldBe thrownBy(await(service.getCompanyDetails()))
     }
 
-    "throw a PAYEMicroserviceException an unexpected response is returned from the connector" in new Setup {
+    "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
       mockFetchRegID("54321")
       when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationForbiddenResponse))
+        .thenReturn(Future.failed(new ArrayIndexOutOfBoundsException))
 
-      a[PAYEMicroserviceException] shouldBe thrownBy(await(service.getCompanyDetails()))
+      a[Exception] shouldBe thrownBy(await(service.getCompanyDetails()))
     }
 
   }
@@ -250,28 +250,28 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   "Calling submitCompanyDetails" should {
     "return a success response when the upsert completes successfully" in new Setup {
       when(mockPAYERegConnector.upsertCompanyDetails(Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationSuccessResponse(validCompanyDetailsAPI)))
+        .thenReturn(Future.successful(validCompanyDetailsAPI))
 
       await(service.submitCompanyDetails(validCompanyDetailsViewModel, "54321")) shouldBe DownstreamOutcome.Success
     }
 
     "return a failure response when the upsert returns a Not Found response" in new Setup {
       when(mockPAYERegConnector.upsertCompanyDetails(Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationNotFoundResponse))
+        .thenReturn(Future.failed(new NotFoundException("404")))
 
       await(service.submitCompanyDetails(validCompanyDetailsViewModel, "54321")) shouldBe DownstreamOutcome.Failure
     }
 
     "return a failure response when the upsert returns a Forbidden response" in new Setup {
       when(mockPAYERegConnector.upsertCompanyDetails(Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationForbiddenResponse))
+        .thenReturn(Future.failed(new ForbiddenException("403")))
 
       await(service.submitCompanyDetails(validCompanyDetailsViewModel, "54321")) shouldBe DownstreamOutcome.Failure
     }
 
     "return a failure response when the upsert returns an Error response" in new Setup {
       when(mockPAYERegConnector.upsertCompanyDetails(Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(PAYERegistrationErrorResponse(new RuntimeException("tst"))))
+        .thenReturn(Future.failed(new RuntimeException("tst")))
 
       await(service.submitCompanyDetails(validCompanyDetailsViewModel, "54321")) shouldBe DownstreamOutcome.Failure
     }
