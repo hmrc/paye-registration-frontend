@@ -10,13 +10,13 @@
     )
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.employingStaff.heading")</h1>
     @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitEmployingStaff) {
-        <p>@Messages("pages.employingStaff.nameRulesIntro")</p>
+        <p>@Messages("pages.employingStaff.employingStaffRulesIntro")</p>
         <ul class="list list-bullet">
-            <li>@Messages("pages.employingStaff.nameRules1")</li>
-            <li>@Html(Messages("pages.employingStaff.nameRules2", "https://www.gov.uk/search-for-trademark"))</li>
-            <li>@Html(Messages("pages.employingStaff.nameRules3", "https://www.gov.uk/government/publications/incorporation-and-names"))</li>
+            <li>@Messages("pages.employingStaff.employingStaffRules1")</li>
+            <li>@Messages("pages.employingStaff.employingStaffRules2")</li>
+            <li>@Messages("pages.employingStaff.employingStaffRules3")</li>
         </ul>
-        <p>@Messages("pages.employingStaff.nameRulesEnd")</p>
+        <p>@Messages("pages.employingStaff.employingStaffRulesEnd")</p>
         <div class="inline form-group">
             @payeInputRadioGroup(
                 employingStaffForm("currentYear"),

@@ -35,7 +35,6 @@ object Subcontractors {
 }
 
 case class FirstPayment(
-                      paymentMade: Boolean,
                       firstPayYear: String,
                       firstPayMonth: String,
                       firstPayDay: String

@@ -5,27 +5,27 @@
 @(subcontractorsForm: Form[Subcontractors])(implicit request: Request[_], messages: Messages)
 
 @main_template(title = Messages("pages.subcontractors.title")) {
-@govHelpers.errorSummary(
-Messages("app.common.errorSummaryLabel"), subcontractorsForm
-)
-<h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.subcontractors.heading")</h1>
-@govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitSubcontractors) {
-<p>@Html(Messages("pages.subcontractors.nameRulesIntro", "https://www.gov.uk/what-is-the-construction-industry-scheme"))</p>
-<div class="inline form-group">
-    @payeInputRadioGroup(
-    subcontractorsForm("hasContractors"),
-    Seq(
-        "true"->Messages("app.common.yes"),
-        "false"->Messages("app.common.no")
-    ),
-    '_legend -> Messages("pages.subcontractors.legend"),
-    '_legendID -> "subcontractors",
-    '_helpText -> None,
-    '_labelAfter -> true,
-    '_labelClass -> "block-label",
-    '_groupClass -> "inline"
+    @govHelpers.errorSummary(
+    Messages("app.common.errorSummaryLabel"), subcontractorsForm
     )
-</div>
-<button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
-}
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.subcontractors.heading")</h1>
+    @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitSubcontractors) {
+        <p>@Html(Messages("pages.subcontractors.nameRulesIntro", "https://www.gov.uk/what-is-the-construction-industry-scheme"))</p>
+        <div class="inline form-group">
+            @payeInputRadioGroup(
+                subcontractorsForm("hasContractors"),
+                Seq(
+                    "true"->Messages("app.common.yes"),
+                    "false"->Messages("app.common.no")
+                ),
+                '_legend -> Messages("pages.subcontractors.legend"),
+                '_legendID -> "subcontractors",
+                '_helpText -> None,
+                '_labelAfter -> true,
+                '_labelClass -> "block-label",
+                '_groupClass -> "inline"
+            )
+        </div>
+        <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
+    }
 }

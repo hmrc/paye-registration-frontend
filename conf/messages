@@ -7,6 +7,9 @@ app.common.continue                = Continue
 app.common.saveAndContinue         = Save and continue
 app.common.errorSummaryLabel       = There are errors on this page.
 app.common.change                  = Change
+app.common.year                    = Year
+app.common.month                   = Month
+app.common.day                     = Day
 
 
 ## Welcome page
@@ -33,15 +36,15 @@ pages.tradingName.nameRules3       = contain a 'sensitive' word or expression un
 pages.tradingName.errorQuestion    = Please enter a correct trading name
 
 ## Employing Staff Page
-pages.employingStaff.title               = Employing Staff
-pages.employingStaff.heading             = Will the company employ staff this year?
-pages.employingStaff.legend              = Will the company employ staff this year?
-pages.employingStaff.employingStaffLabel = Employing Staff
-pages.employingStaff.nameRulesIntro      = ''Staff'' may be:
-pages.employingStaff.nameRules1          = yourself (for example, as the only director of a limited company)
-pages.employingStaff.nameRules2          = people already employed by the company
-pages.employingStaff.nameRules3          = people the company expects to employ before the end of year
-pages.employingStaff.nameRulesEnd        = This doesn''t include subcontractors doing construction work.
+pages.employingStaff.title                      = Employing Staff
+pages.employingStaff.heading                    = Will the company employ staff this year?
+pages.employingStaff.legend                     = Will the company employ staff this year?
+pages.employingStaff.employingStaffLabel        = Employing Staff
+pages.employingStaff.employingStaffRulesIntro   = ''Staff'' may be:
+pages.employingStaff.employingStaffRules1       = yourself (for example, as the only director of a limited company)
+pages.employingStaff.employingStaffRules2       = people already employed by the company
+pages.employingStaff.employingStaffRules3       = people the company expects to employ before the end of year
+pages.employingStaff.employingStaffRulesEnd     = This doesn''t include subcontractors doing construction work.
 
 ## Subcontractors Page
 pages.subcontractors.title               = Subcontractors
@@ -57,6 +60,23 @@ pages.companyPension.legend              = Do you want to provide a company pens
 pages.companyPension.setUpPensionIntro   = As an employer, you can set up a company pension scheme to provide a pension and benefits to:
 pages.companyPension.setUpPension1       = employees after they retire
 pages.companyPension.setUpPension2       = dependants of deceased employees
+
+## First Payment page
+pages.firstPayment.title                       = First Payment
+pages.firstPayment.heading                     = The company''s PAYE scheme start date
+pages.firstPayment.legend                      = The company''s PAYE scheme start date
+pages.firstPayment.firstPaymentLabel           = First Payment
+pages.firstPayment.intro                       = The company''s PAYE scheme starts when the first payment is made to an employee or subcontractor.
+pages.firstPayment.question                    = Has the company made any payments to employees or subcontractors?
+pages.firstPayment.hint                        = Enter the date the company made their first payment. This can be any date in the past.<br>Or<br>Enter the date the company will make their first payment. This can be up to 2 months in the future.
+pages.firstPayment.date.invalid                = You have not entered a valid date
+pages.firstPayment.date.invalidRange           = Please enter a date up to 2 months in the future
+pages.firstPayment.firstPaymentRulesSummary    = What counts as a payment?
+pages.firstPayment.firstPaymentRulesIntro      = Payments to employees or subcontractors include:
+pages.firstPayment.firstPaymentRules1          = their salary or wages
+pages.firstPayment.firstPaymentRules2          = expenses or benefits
+pages.firstPayment.firstPaymentRules3          = any tips or bonuses
+pages.firstPayment.firstPaymentRulesEnd        = This should include any payments made to yourself (for example, if you''re the only director of a limited company).
 
 ## Summary Page
 pages.summary.title                = Check your answers
