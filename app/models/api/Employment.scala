@@ -25,7 +25,7 @@ case class Employment(employees: Boolean,
                       subcontractors: Boolean,
                       firstPayment: FirstPayment)
 
-case class FirstPayment(paymentMade: Boolean, firstPayDate: LocalDate)
+case class FirstPayment(firstPayDate: LocalDate)
 
 
 object FirstPayment {

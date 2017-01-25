@@ -35,7 +35,6 @@ class EmploymentSpec extends PAYERegSpec with PAYERegistrationFixture {
           |  "companyPension":true,
           |  "subcontractors":true,
           |  "firstPayment":{
-          |     "paymentMade":true,
           |     "firstPayDate":"$validDate"
           |  }
           |}""".stripMargin)
@@ -49,7 +48,7 @@ class EmploymentSpec extends PAYERegSpec with PAYERegistrationFixture {
     }
 
     val testFutureDate = LocalDate.of(2016,12,20)
-    val testFuturePayment = FirstPayment(paymentMade = false, firstPayDate = testFutureDate)
+    val testFuturePayment = FirstPayment(firstPayDate = testFutureDate)
 
     val testEmploymentMin = validEmployment.copy(
         employees = false,
@@ -63,7 +62,6 @@ class EmploymentSpec extends PAYERegSpec with PAYERegistrationFixture {
           |  "employees":false,
           |  "subcontractors":false,
           |  "firstPayment":{
-          |     "paymentMade":false,
           |     "firstPayDate":"$testFutureDate"
           |  }
           |}""".stripMargin)
