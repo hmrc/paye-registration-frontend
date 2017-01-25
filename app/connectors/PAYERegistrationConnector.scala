@@ -58,13 +58,13 @@ trait PAYERegistrationConnector {
   }
 
   def getRegistration(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[PAYERegistrationAPI] = {
-    http.GET[PAYERegistrationAPI](s"$payeRegUrl/register-for-paye/$regID") recover {
+    http.GET[PAYERegistrationAPI](s"$payeRegUrl/paye-registration/$regID") recover {
       case e: Exception => throw logResponse(e, "getRegistration", "getting registration")
     }
   }
 
   def getCompanyDetails(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[CompanyDetailsAPI]): Future[Option[CompanyDetailsAPI]] = {
-    http.GET[CompanyDetailsAPI](s"$payeRegUrl/register-for-paye/$regID/company-details") map {
+    http.GET[CompanyDetailsAPI](s"$payeRegUrl/paye-registration/$regID/company-details") map {
       details => Some(details)
     } recover {
       case e: NotFoundException => None
@@ -73,13 +73,13 @@ trait PAYERegistrationConnector {
   }
 
   def upsertCompanyDetails(regID: String, companyDetails: CompanyDetailsAPI)(implicit hc: HeaderCarrier, rds: HttpReads[CompanyDetailsAPI]): Future[CompanyDetailsAPI] = {
-    http.PATCH[CompanyDetailsAPI, CompanyDetailsAPI](s"$payeRegUrl/register-for-paye/$regID/company-details", companyDetails) recover {
+    http.PATCH[CompanyDetailsAPI, CompanyDetailsAPI](s"$payeRegUrl/paye-registration/$regID/company-details", companyDetails) recover {
       case e: Exception => throw logResponse(e, "upsertCompanyDetails", "upserting company details")
     }
   }
 
   def getEmployment(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPI]): Future[Option[EmploymentAPI]] = {
-    http.GET[EmploymentAPI](s"$payeRegUrl/register-for-paye/$regID/employment") map {
+    http.GET[EmploymentAPI](s"$payeRegUrl/paye-registration/$regID/employment") map {
       s => Some(s)
     } recover {
       case e: NotFoundException => None
@@ -88,7 +88,7 @@ trait PAYERegistrationConnector {
   }
 
   def upsertEmployment(regID: String, employment: EmploymentAPI)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPI]): Future[EmploymentAPI] = {
-    http.PATCH[EmploymentAPI, EmploymentAPI](s"$payeRegUrl/register-for-paye/$regID/employment", employment) recover {
+    http.PATCH[EmploymentAPI, EmploymentAPI](s"$payeRegUrl/paye-registration/$regID/employment", employment) recover {
       case e: Exception => throw logResponse(e, "upsertEmployment", "upserting employment")
     }
   }
