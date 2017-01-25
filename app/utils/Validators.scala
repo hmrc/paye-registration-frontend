@@ -36,7 +36,7 @@ object Validators extends DateUtil {
     Constraint("constraints.firstPaymentDateRange")({
       model => {
         val date = toDate(model.firstPayYear, model.firstPayMonth, model.firstPayDay)
-        if( !lessThanXMonthsAfter(LocalDate.now(), date, 2) ) Invalid(Seq(ValidationError("pages.firstPayment.date.invalidRange", "firstPayDay"))) else Valid
+        if( !lessOrEqualThanXDaysAfter(LocalDate.now(), date, 61) ) Invalid(Seq(ValidationError("pages.firstPayment.date.invalidRange", "firstPayDay"))) else Valid
       }
     })
   }

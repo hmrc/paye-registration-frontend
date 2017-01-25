@@ -32,15 +32,27 @@ class DateUtilSpec extends UnitSpec with DateUtil {
     }
   }
 
-  "calling lessThanXMonthsAfter" should {
-    "return false if the date is more than 2 months in the future" in {
-      lessThanXMonthsAfter(LocalDate.parse("2016-12-31"), LocalDate.parse("2017-03-03"), 2) shouldBe false
+  "calling lessOrEqualThanXDaysAfter" should {
+    "return false if the date is more than 61 days in the future (case leap year)" in {
+      lessOrEqualThanXDaysAfter(LocalDate.parse("2016-02-29"), LocalDate.parse("2016-05-01"), 61) shouldBe false
     }
   }
 
-  "calling lessThanXMonthsAfter" should {
-    "return true if the date is less than 2 months in the future" in {
-      lessThanXMonthsAfter(LocalDate.parse("2016-12-31"), LocalDate.parse("2017-03-02"), 2) shouldBe true
+  "calling lessOrEqualThanXDaysAfter" should {
+    "return false if the date is more than 61 days in the future" in {
+      lessOrEqualThanXDaysAfter(LocalDate.parse("2017-02-28"), LocalDate.parse("2017-05-01"), 61) shouldBe false
+    }
+  }
+
+  "calling lessOrEqualThanXDaysAfter" should {
+    "return true if the date is less than 61 days in the future" in {
+      lessOrEqualThanXDaysAfter(LocalDate.parse("2016-12-31"), LocalDate.parse("2017-03-01"), 61) shouldBe true
+    }
+  }
+
+  "calling lessOrEqualThanXDaysAfter" should {
+    "return true if the date is equal to 61 days in the future" in {
+      lessOrEqualThanXDaysAfter(LocalDate.parse("2016-12-31"), LocalDate.parse("2017-03-02"), 61) shouldBe true
     }
   }
 }
