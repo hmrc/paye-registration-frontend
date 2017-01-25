@@ -18,21 +18,16 @@ package models.api
 
 import java.time.LocalDate
 
+import fixtures.PAYERegistrationFixture
 import play.api.libs.json.{JsSuccess, Json}
 import testHelpers.PAYERegSpec
 
-class EmploymentSpec extends PAYERegSpec {
+class EmploymentSpec extends PAYERegSpec with PAYERegistrationFixture {
 
 
   "Employment" should {
 
-    val testPastDate = LocalDate.of(2016,12,20)
-    val testPastPayment = FirstPayment(paymentMade = true, firstPayDate = testPastDate)
-
-    val testEmploymentMax = Employment(employees = true,
-      companyPension = Some(true),
-      subcontractors = true,
-      firstPayment = testPastPayment)
+    val testEmploymentMax = validEmployment
 
     val targetJsonMax = Json.parse(
       s"""{
@@ -41,7 +36,7 @@ class EmploymentSpec extends PAYERegSpec {
           |  "subcontractors":true,
           |  "firstPayment":{
           |     "paymentMade":true,
-          |     "firstPayDate":"$testPastDate"
+          |     "firstPayDate":"$validDate"
           |  }
           |}""".stripMargin)
 
@@ -56,10 +51,12 @@ class EmploymentSpec extends PAYERegSpec {
     val testFutureDate = LocalDate.of(2016,12,20)
     val testFuturePayment = FirstPayment(paymentMade = false, firstPayDate = testFutureDate)
 
-    val testEmploymentMin = Employment(employees = false,
-      companyPension = None,
-      subcontractors = false,
-      firstPayment = testFuturePayment)
+    val testEmploymentMin = validEmployment.copy(
+        employees = false,
+        companyPension = None,
+        subcontractors = false,
+        firstPayment = testFuturePayment
+    )
 
     val targetJsonMin = Json.parse(
       s"""{

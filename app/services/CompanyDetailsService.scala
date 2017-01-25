@@ -45,11 +45,8 @@ trait CompanyDetailsService extends CommonService {
     for {
       regID <- fetchRegistrationID
       regResponse <- payeRegConnector.getCompanyDetails(regID)
-    } yield regResponse match {
-      case PAYERegistrationSuccessResponse(details: CompanyDetailsAPI) => Some(apiToView(details))
-      case PAYERegistrationNotFoundResponse => None
-      case PAYERegistrationErrorResponse(e) => throw new PAYEMicroserviceException(e.getMessage)
-      case resp => throw new PAYEMicroserviceException(s"Received $resp response from connector when expecting PAYERegSuccessResponse[Option[CompanyDetailsAPI]]")
+    } yield regResponse map {
+      details => apiToView(details)
     }
   }
 
@@ -82,7 +79,8 @@ trait CompanyDetailsService extends CommonService {
 
   private[services] def submitCompanyDetails(detailsView: CompanyDetailsView, regID:String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     payeRegConnector.upsertCompanyDetails(regID, viewToAPI(detailsView)) map {
-      case PAYERegistrationSuccessResponse(details: CompanyDetailsAPI) => DownstreamOutcome.Success
+      _ => DownstreamOutcome.Success
+    } recover {
       case _ => DownstreamOutcome.Failure
     }
   }

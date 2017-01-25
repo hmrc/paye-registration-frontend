@@ -37,11 +37,10 @@ trait SummaryController extends FrontendController with Actions {
   val payeRegistrationService: PAYERegistrationService
 
   val summary = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    for {
-      oSummaryModel <- payeRegistrationService.getRegistrationSummary
-    } yield oSummaryModel match {
-      case Some(summaryModel) => Ok(SummaryPage(summaryModel))
-      case None => InternalServerError(views.html.pages.error.restart())
+    payeRegistrationService.getRegistrationSummary map {
+      summaryModel => Ok(SummaryPage(summaryModel))
+    } recover {
+      case _ => InternalServerError(views.html.pages.error.restart())
     }
   }
 }

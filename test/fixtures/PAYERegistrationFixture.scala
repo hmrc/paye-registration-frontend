@@ -16,8 +16,10 @@
 
 package fixtures
 
-import models.api.{PAYERegistration, CompanyDetails}
-import models.view.{SummaryRow, SummarySection, Summary}
+import java.time.LocalDate
+
+import models.api.{CompanyDetails, Employment, FirstPayment, PAYERegistration}
+import models.view.{Summary, SummaryRow, SummarySection}
 
 trait PAYERegistrationFixture {
 
@@ -27,6 +29,12 @@ trait PAYERegistrationFixture {
     tradingName = Some("Test Company Trading Name")
   )
 
+  val validDate = LocalDate.of(2016,12,20)
+  val validPayment = FirstPayment(paymentMade = true, firstPayDate = validDate)
+  val validEmployment = Employment(employees = true,
+                                  companyPension = Some(true),
+                                  subcontractors = true,
+                                  firstPayment = validPayment)
 
   val validPAYERegistrationAPI = PAYERegistration(
     registrationID = "AC123456",

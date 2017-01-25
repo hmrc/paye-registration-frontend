@@ -45,14 +45,11 @@ trait PAYERegistrationService extends CommonService {
     } yield regResponse
   }
 
-  def getRegistrationSummary()(implicit hc: HeaderCarrier): Future[Option[Summary]] = {
+  def getRegistrationSummary()(implicit hc: HeaderCarrier): Future[Summary] = {
     for {
       regID <- fetchRegistrationID
       regResponse <- payeRegistrationConnector.getRegistration(regID)
-    } yield regResponse match {
-      case PAYERegistrationSuccessResponse(reg: PAYERegistrationAPI) => Some(registrationToSummary(reg))
-      case _ => None
-    }
+    } yield registrationToSummary(regResponse)
   }
 
   private[services] def registrationToSummary(apiModel: PAYERegistrationAPI): Summary = {

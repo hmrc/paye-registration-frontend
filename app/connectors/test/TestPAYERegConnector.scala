@@ -54,11 +54,14 @@ trait TestPAYERegConnector extends CommonService {
   }
 
   def addTestCompanyDetails(details: CompanyDetailsAPI)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    for {
+    val response = for {
       regID <- fetchRegistrationID
       resp <- payeRegConnector.upsertCompanyDetails(regID,  details)
-    } yield resp match {
-      case PAYERegistrationSuccessResponse(details: CompanyDetailsAPI) => DownstreamOutcome.Success
+    } yield resp
+
+    response map {
+        _ => DownstreamOutcome.Success
+    } recover {
       case _ => DownstreamOutcome.Failure
     }
   }
