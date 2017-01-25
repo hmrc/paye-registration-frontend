@@ -166,7 +166,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/paye-registration/first-payment"
+          result.header.headers("Location") shouldBe "/register-for-paye/first-payment"
       }
     }
 
@@ -176,7 +176,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/paye-registration/first-payment"
+          result.header.headers("Location") shouldBe "/register-for-paye/first-payment"
       }
     }
   }
@@ -288,7 +288,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/paye-registration/summary"
+          result.header.headers("Location") shouldBe "/register-for-paye/summary"
       }
     }
 
@@ -302,7 +302,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/paye-registration/summary"
+          result.header.headers("Location") shouldBe "/register-for-paye/summary"
       }
     }
   }
