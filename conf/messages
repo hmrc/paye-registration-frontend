@@ -7,6 +7,9 @@ app.common.continue                = Continue
 app.common.saveAndContinue         = Save and continue
 app.common.errorSummaryLabel       = There are errors on this page.
 app.common.change                  = Change
+app.common.year                    = Year
+app.common.month                   = Month
+app.common.day                     = Day
 
 
 ## Welcome page
@@ -65,10 +68,9 @@ pages.firstPayment.legend                      = The company''s PAYE scheme star
 pages.firstPayment.firstPaymentLabel           = First Payment
 pages.firstPayment.intro                       = The company''s PAYE scheme starts when the first payment is made to an employee or subcontractor.
 pages.firstPayment.question                    = Has the company made any payments to employees or subcontractors?
-pages.firstPayment.yes                         = Yes, the company has made payments to employees or subcontractors
-pages.firstPayment.no                          = No, the company hasn''t made payments to employees or subcontractors
-pages.firstPayment.hiddenElem.yes              = Enter the date the company made their first payment. This can be any date in the past.
-pages.firstPayment.hiddenElem.no               = No, the company hasn''t made payments to employees or subcontractors
+pages.firstPayment.hint                        = Enter the date the company made their first payment. This can be any date in the past.<br>Or<br>Enter the date the company will make their first payment. This can be up to 2 months in the future.
+pages.firstPayment.date.invalid                = You have not entered a valid date
+pages.firstPayment.date.invalidRange           = Please enter a date up to 2 months in the future
 pages.firstPayment.firstPaymentRulesSummary    = What counts as a payment?
 pages.firstPayment.firstPaymentRulesIntro      = Payments to employees or subcontractors include:
 pages.firstPayment.firstPaymentRules1          = their salary or wages

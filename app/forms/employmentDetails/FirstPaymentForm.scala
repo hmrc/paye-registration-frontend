@@ -16,18 +16,22 @@
 
 package forms.employmentDetails
 
-import forms.helpers.RequiredBooleanForm
-import models.view.FirstPayment
-import play.api.data.Form
-import play.api.data.Forms.{mapping, optional, text}
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
-object FirstPaymentForm extends RequiredBooleanForm {
+import models.view.FirstPayment
+import utils.DateUtil
+import play.api.data.Form
+import play.api.data.Forms.{mapping, nonEmptyText}
+import uk.gov.hmrc.play.mappers.StopOnFirstFail
+import utils.Validators._
+
+object FirstPaymentForm extends DateUtil {
   val form = Form(
     mapping(
-      "paymentMade" -> requiredBoolean,
-      "pastPayYear" -> optional(text),
-      "pastPayMonth" -> optional(text),
-      "pastPayDay" -> optional(text)
-    )(FirstPayment.apply)(FirstPayment.unapply)
+      "firstPayYear" -> nonEmptyText,
+      "firstPayMonth" -> nonEmptyText,
+      "firstPayDay" -> nonEmptyText
+    )(FirstPayment.apply)(FirstPayment.unapply).verifying(StopOnFirstFail(isInvalidDate, firstPaymentDateRange))
   )
 }

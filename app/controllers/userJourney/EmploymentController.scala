@@ -82,8 +82,8 @@ trait EmploymentController extends FrontendController with Actions {
       SubcontractorsForm.form.bindFromRequest.fold(
         errors => BadRequest(SubcontractorsPage(errors)),
         model => model.hasContractors match {
-          case true => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to First Payment
-          case false => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to First Payment
+          case true => Redirect(controllers.userJourney.routes.EmploymentController.firstPayment())
+          case false => Redirect(controllers.userJourney.routes.EmploymentController.firstPayment())
         }
       )
     )
@@ -95,14 +95,11 @@ trait EmploymentController extends FrontendController with Actions {
   }
 
   val submitFirstPayment = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    Future.successful(
-      FirstPaymentForm.form.bindFromRequest.fold(
-        errors => BadRequest(FirstPaymentPage(errors)),
-        model => model.paymentMade match {
-          case true => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to First Payment
-          case false => Redirect(controllers.userJourney.routes.SummaryController.summary()) // Redirect to First Payment
-        }
-      )
-    )
+    Future.successful(FirstPaymentForm.form.bindFromRequest.fold(
+      errors => BadRequest(FirstPaymentPage(errors)),
+      success => {
+          Redirect(controllers.userJourney.routes.SummaryController.summary())
+      }
+    ))
   }
 }

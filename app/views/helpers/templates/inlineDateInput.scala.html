@@ -1,0 +1,61 @@
+@(formItem:Form[_],
+  fieldName: String,
+  questionText: Option[String],
+  questionHint: Html,
+  args: (Symbol,Any)*)(implicit lang: play.api.i18n.Lang, messages: Messages)
+
+@import uk.gov.hmrc.play.mappers.DateFields._
+@import play.api.i18n._
+@import uk.gov.hmrc.play.mappers.DateFormatSymbols._
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+
+@fieldsetClasses = @{if(formItem.hasErrors && (formItem.errors.find(_.key == "").isDefined)) "form-field--error" else "" }
+
+<fieldset class="form-group form-date @fieldsetClasses" id="@fieldName-fieldset">
+
+    @if(questionText.isDefined) {
+        <legend><span style="display: none">@questionText.get</span></legend>
+    }
+
+    <h2>@questionText</h2>
+
+    @if(formItem.hasErrors) {
+        @formItem.errors.filter(_.key == "").map { error => <span class="error-notification">@Messages(error.message)</span>}
+        @if(formItem.errors.find(_.key != "").isDefined) {
+            <span class="error-notification">@Messages("pages.firstPayment.date.invalid")</span>
+        }
+    }
+
+    <span class="form-hint">@questionHint</span>
+
+    @govHelpers.input(
+    formItem(fieldName + "Day"),
+    '_label -> Messages("app.common.day"),
+    '_labelClass -> "form-group form-group-day",
+    '_type -> "number",
+    '_inputClass -> s"input--xxsmall input--no-spinner",
+    '_maxlength -> "2",
+    '_required -> "true"
+    )
+
+    @govHelpers.input(
+    formItem(fieldName + "Month"),
+    '_label -> Messages("app.common.month"),
+    '_labelClass -> "form-group form-group-month",
+    '_type -> "number",
+    '_inputClass -> s"input--xxsmall input--no-spinner",
+    '_maxlength -> "2",
+    '_required -> "true"
+    )
+
+    @govHelpers.input(
+    formItem(fieldName + "Year"),
+    '_label -> Messages("app.common.year"),
+    '_labelClass -> "form-group form-group-year",
+    '_type -> "number",
+    '_inputClass -> s"input--small input--no-spinner",
+    '_maxlength -> "4",
+    '_required -> "true"
+    )
+
+</fieldset>

@@ -16,14 +16,19 @@
 
 package controllers.userJourney
 
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+
 import testHelpers.PAYERegSpec
 import play.api.http.Status
 import play.api.test.FakeRequest
 import builders.AuthBuilder
 import play.api.mvc.Result
+import utils.DateUtil
+
 import scala.concurrent.Future
 
-class EmploymentControllerSpec extends PAYERegSpec {
+class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
   class Setup {
     val controller = new EmploymentController {
       override val authConnector = mockAuthConnector
@@ -155,23 +160,149 @@ class EmploymentControllerSpec extends PAYERegSpec {
       }
     }
 
-    "redirect to the Summary page when a user enters YES answer" in new Setup {
+    "redirect to the First Payment page when a user enters YES answer" in new Setup {
       AuthBuilder.submitWithAuthorisedUser(controller.submitSubcontractors(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "hasContractors" -> "true"
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/summary"
+          result.header.headers("Location") shouldBe "/paye-registration/first-payment"
       }
     }
 
-    "redirect to the Summary page when a user enters NO answer" in new Setup {
+    "redirect to the First Payment page when a user enters NO answer" in new Setup {
       AuthBuilder.submitWithAuthorisedUser(controller.submitSubcontractors(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "hasContractors" -> "false"
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/summary"
+          result.header.headers("Location") shouldBe "/paye-registration/first-payment"
+      }
+    }
+  }
+
+  "calling the firstPayment action" should {
+    "return 303 for an unauthorised user" in new Setup {
+      val result = controller.firstPayment()(FakeRequest())
+      status(result) shouldBe Status.SEE_OTHER
+    }
+
+    "return 200 for an authorised user" in new Setup {
+      AuthBuilder.showWithAuthorisedUser(controller.firstPayment(), mockAuthConnector) {
+        (response: Future[Result]) =>
+          status(response) shouldBe Status.OK
+      }
+    }
+  }
+
+  "calling the submitFirstPayment action" should {
+    "return 303 for an unauthorised user" in new Setup {
+      val result = controller.submitFirstPayment()(FakeRequest())
+      status(result) shouldBe Status.SEE_OTHER
+    }
+
+    "return 400 for an empty year" in new Setup {
+      AuthBuilder.submitWithAuthorisedUser(controller.submitFirstPayment(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "firstPayYear" -> "",
+        "firstPayMonth" -> "10",
+        "firstPayDay" -> "01"
+      )) {
+        result =>
+          status(result) shouldBe Status.BAD_REQUEST
+      }
+    }
+
+    "return 400 for an empty month" in new Setup {
+      AuthBuilder.submitWithAuthorisedUser(controller.submitFirstPayment(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "firstPayYear" -> "2017",
+        "firstPayMonth" -> "",
+        "firstPayDay" -> "01"
+      )) {
+        result =>
+          status(result) shouldBe Status.BAD_REQUEST
+      }
+    }
+
+    "return 400 for an empty day" in new Setup {
+      AuthBuilder.submitWithAuthorisedUser(controller.submitFirstPayment(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "firstPayYear" -> "2017",
+        "firstPayMonth" -> "10",
+        "firstPayDay" -> ""
+      )) {
+        result =>
+          status(result) shouldBe Status.BAD_REQUEST
+      }
+    }
+
+    "return 400 for an invalid year" in new Setup {
+      AuthBuilder.submitWithAuthorisedUser(controller.submitFirstPayment(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "firstPayYear" -> "-3",
+        "firstPayMonth" -> "12",
+        "firstPayDay" -> "31"
+      )) {
+        result =>
+          status(result) shouldBe Status.BAD_REQUEST
+      }
+    }
+
+    "return 400 for an invalid day" in new Setup {
+      AuthBuilder.submitWithAuthorisedUser(controller.submitFirstPayment(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "firstPayYear" -> "2016",
+        "firstPayMonth" -> "12",
+        "firstPayDay" -> "32"
+      )) {
+        result =>
+          status(result) shouldBe Status.BAD_REQUEST
+      }
+    }
+
+    "return 400 for an invalid month" in new Setup {
+      AuthBuilder.submitWithAuthorisedUser(controller.submitFirstPayment(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "firstPayYear" -> "2016",
+        "firstPayMonth" -> "13",
+        "firstPayDay" -> "12"
+      )) {
+        result =>
+          status(result) shouldBe Status.BAD_REQUEST
+      }
+    }
+
+    "return 400 for a date more than 2 months in the future" in new Setup {
+      val today = LocalDate.now()
+      val futureDate = fromDate(today.plus(getTotalDaysInMonthstoInc(today, 2) + 1, ChronoUnit.DAYS))
+      AuthBuilder.submitWithAuthorisedUser(controller.submitFirstPayment(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "firstPayYear" -> futureDate._1,
+        "firstPayMonth" -> futureDate._2,
+        "firstPayDay" -> futureDate._3
+      )) {
+        result =>
+          status(result) shouldBe Status.BAD_REQUEST
+      }
+    }
+
+    "redirect to the Summary page when a user enters a valid past date" in new Setup {
+      AuthBuilder.submitWithAuthorisedUser(controller.submitFirstPayment(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "firstPayYear" -> "2016",
+        "firstPayMonth" -> "12",
+        "firstPayDay" -> "01"
+      )) {
+        result =>
+          status(result) shouldBe Status.SEE_OTHER
+          result.header.headers("Location") shouldBe "/paye-registration/summary"
+      }
+    }
+
+    "redirect to the Summary page when a user enters a valid future date" in new Setup {
+      val today = LocalDate.now()
+      val futureDate = fromDate(today.plus(getTotalDaysInMonthstoInc(today, 1), ChronoUnit.DAYS))
+      AuthBuilder.submitWithAuthorisedUser(controller.submitFirstPayment(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "firstPayYear" -> futureDate._1,
+        "firstPayMonth" -> futureDate._2,
+        "firstPayDay" -> futureDate._3
+      )) {
+        result =>
+          status(result) shouldBe Status.SEE_OTHER
+          result.header.headers("Location") shouldBe "/paye-registration/summary"
       }
     }
   }
