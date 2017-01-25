@@ -27,13 +27,6 @@ import uk.gov.hmrc.play.http._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-sealed trait PAYERegistrationResponse
-case class PAYERegistrationSuccessResponse[T](response: T) extends PAYERegistrationResponse
-case object PAYERegistrationNotFoundResponse extends PAYERegistrationResponse
-case object PAYERegistrationBadRequestResponse extends PAYERegistrationResponse
-case object PAYERegistrationForbiddenResponse extends PAYERegistrationResponse
-case class PAYERegistrationErrorResponse(err: Exception) extends PAYERegistrationResponse
-
 object PAYERegistrationConnector extends PAYERegistrationConnector with ServicesConfig {
   //$COVERAGE-OFF$
   val payeRegUrl = baseUrl("paye-registration")
@@ -94,19 +87,16 @@ trait PAYERegistrationConnector {
   }
 
   private[connectors] def logResponse(e: Throwable, f: String, m: String): Throwable = {
+    def log(s: String) = Logger.warn(s"[PAYERegistrationConnector] [$f] received $s when $m")
     e match {
-      case e: NotFoundException => Logger.warn(s"[PAYERegistrationConnector] [$f] received Not Found response when $m")
-      case e: BadRequestException => Logger.warn(s"[PAYERegistrationConnector] [$f] received Bad Request response when $m")
+      case e: NotFoundException => log("NOT FOUND")
+      case e: BadRequestException => log("BAD REQUEST")
       case e: Upstream4xxResponse => e.upstreamResponseCode match {
-        case 403 => Logger.warn(s"[PAYERegistrationConnector] [$f] received Forbidden response when $m")
-        case _ => Logger.warn(s"[PAYERegistrationConnector] [$f]" +
-                              s" received Upstream 4xx response when $m containing ${e.upstreamResponseCode} ${e.message}")
+        case 403 => log("FORBIDDEN")
+        case _ => log(s"Upstream 4xx: ${e.upstreamResponseCode} ${e.message}")
       }
-      case e: Upstream5xxResponse =>
-        Logger.warn(s"[PAYERegistrationConnector] [$f]" +
-                    s" received Upstream 5xx response when $m containing ${e.upstreamResponseCode}")
-      case e: Exception => Logger.warn(s"[PAYERegistrationConnector] [$f]" +
-        s" received error when $m - Error: ${e.getMessage}")
+      case e: Upstream5xxResponse => log(s"Upstream 5xx: ${e.upstreamResponseCode}")
+      case e: Exception => log(s"ERROR: ${e.getMessage}")
     }
     e
   }

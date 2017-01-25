@@ -269,12 +269,12 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       await(service.submitCompanyDetails(validCompanyDetailsViewModel, "54321")) shouldBe DownstreamOutcome.Failure
     }
 
-//    "return a failure response when the upsert returns an Error response" in new Setup {
-//      when(mockPAYERegConnector.upsertCompanyDetails(Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any()))
-//        .thenReturn(Future.successful(PAYERegistrationErrorResponse(new RuntimeException("tst"))))
-//
-//      await(service.submitCompanyDetails(validCompanyDetailsViewModel, "54321")) shouldBe DownstreamOutcome.Failure
-//    }
+    "return a failure response when the upsert returns an Error response" in new Setup {
+      when(mockPAYERegConnector.upsertCompanyDetails(Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.failed(new RuntimeException("tst")))
+
+      await(service.submitCompanyDetails(validCompanyDetailsViewModel, "54321")) shouldBe DownstreamOutcome.Failure
+    }
   }
 
   "Calling submitTradingName" should {

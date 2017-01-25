@@ -19,7 +19,7 @@ package connectors.test
 import config.WSHttp
 import connectors._
 import enums.DownstreamOutcome
-import models.api.{PAYERegistration => PAYERegistrationAPI, CompanyDetails => CompanyDetailsAPI}
+import models.api.{CompanyDetails => CompanyDetailsAPI}
 import play.api.Logger
 import services.CommonService
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -42,16 +42,6 @@ trait TestPAYERegConnector extends CommonService {
   val payeRegUrl: String
   val http: HttpGet with HttpPost with HttpPatch
   val payeRegConnector: PAYERegistrationConnector
-
-  def addTestRegistration(reg: PAYERegistrationAPI)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[PAYERegistrationResponse] = {
-    http.POST[PAYERegistrationAPI, PAYERegistrationAPI](s"$payeRegUrl/register-for-paye/test-only/insert-registration/${reg.registrationID}", reg) map {
-      reg => PAYERegistrationSuccessResponse(reg)
-    } recover {
-      case e: Exception =>
-        Logger.warn(s"[PAYERegistrationConnector] [getCurrentRegistration] received error when setting up test Registration - Error: ${e.getMessage}")
-        PAYERegistrationErrorResponse(e)
-    }
-  }
 
   def addTestCompanyDetails(details: CompanyDetailsAPI)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     val response = for {
