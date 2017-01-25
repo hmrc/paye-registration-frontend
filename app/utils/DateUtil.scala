@@ -34,7 +34,7 @@ trait DateUtil {
   def lessThanXMonthsAfter(today: LocalDate, dateToCheck: LocalDate, inc: Int) =
     dateToCheck.isBefore(today.plus(getTotalDaysInMonthstoInc(today, inc), ChronoUnit.DAYS))
 
-  def getTotalDaysInMonthstoInc(today: LocalDate, inc: Int) =
+  private def getTotalDaysInMonthstoInc(today: LocalDate, inc: Int) =
     (0 until inc).map(x => getDaysInMonth(today.plus(x, ChronoUnit.MONTHS))).sum
 
   private def getDaysInMonth(date: LocalDate): Int = date.getMonth.length(date.isLeapYear)

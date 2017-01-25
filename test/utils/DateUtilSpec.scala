@@ -34,7 +34,7 @@ class DateUtilSpec extends UnitSpec with DateUtil {
 
   "calling lessThanXMonthsAfter" should {
     "return false if the date is more than 2 months in the future" in {
-      lessThanXMonthsAfter(LocalDate.parse("2016-12-31"), LocalDate.parse("2017-03-04"), 2) shouldBe false
+      lessThanXMonthsAfter(LocalDate.parse("2016-12-31"), LocalDate.parse("2017-03-03"), 2) shouldBe false
     }
   }
 

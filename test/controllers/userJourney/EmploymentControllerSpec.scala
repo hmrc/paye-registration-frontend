@@ -269,7 +269,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
 
     "return 400 for a date more than 2 months in the future" in new Setup {
       val today = LocalDate.now()
-      val futureDate = fromDate(today.plus(getTotalDaysInMonthstoInc(today, 2) + 1, ChronoUnit.DAYS))
+      val futureDate = fromDate(today.plus(4, ChronoUnit.MONTHS))
       AuthBuilder.submitWithAuthorisedUser(controller.submitFirstPayment(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "firstPayYear" -> futureDate._1,
         "firstPayMonth" -> futureDate._2,
@@ -294,7 +294,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
 
     "redirect to the Summary page when a user enters a valid future date" in new Setup {
       val today = LocalDate.now()
-      val futureDate = fromDate(today.plus(getTotalDaysInMonthstoInc(today, 1), ChronoUnit.DAYS))
+      val futureDate = fromDate(today.plus(1, ChronoUnit.MONTHS))
       AuthBuilder.submitWithAuthorisedUser(controller.submitFirstPayment(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "firstPayYear" -> futureDate._1,
         "firstPayMonth" -> futureDate._2,

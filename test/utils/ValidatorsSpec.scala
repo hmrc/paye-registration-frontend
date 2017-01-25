@@ -52,11 +52,10 @@ class ValidatorsSpec extends UnitSpec with DateUtil {
     }
   }
 
-
   "calling firstPaymentDateRange" should {
     "return an error message if the date is more than 2 months in the future" in {
       val today = LocalDate.now()
-      val futureDate = fromDate(today.plus(getTotalDaysInMonthstoInc(today, 2) + 1, ChronoUnit.DAYS))
+      val futureDate = fromDate(today.plus(3, ChronoUnit.MONTHS))
       val data : Map[String, String] = Map(
         "firstPayYear" -> futureDate._1,
         "firstPayMonth" -> futureDate._2,
