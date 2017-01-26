@@ -53,6 +53,12 @@
 
     <logger name="application" level="DEBUG"/>
 
+    <logger name="org.eclipse.jetty" level="INFO"/>
+
+    <logger name="org.apache.http" level="INFO"/>
+
+    <logger name="io.netty.util.internal" level="INFO"/>
+
     <logger name="connector" level="TRACE">
         <appender-ref ref="STDOUT"/>
     </logger>
