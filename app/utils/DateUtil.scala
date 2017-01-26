@@ -17,17 +17,16 @@
 package utils
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-
-import scala.util.Try
 
 trait DateUtil {
   def toDate(year: String, month: String, day: String): LocalDate = {
-    LocalDate.parse(year + "-" + month + "-" + day)
+    LocalDate.parse(year + "-" + month + "-" + day, DateTimeFormatter.ofPattern("yyyy-M-d"))
   }
 
   def fromDate(date: LocalDate): (String, String, String) = {
-    val arrDate = date.toString.split("-")
+    val arrDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")).split("-")
     (arrDate(0), arrDate(1), arrDate(2))
   }
 

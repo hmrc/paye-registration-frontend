@@ -17,18 +17,32 @@
 package utils
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
 import uk.gov.hmrc.play.test.UnitSpec
 
 class DateUtilSpec extends UnitSpec with DateUtil {
   "calling toDate" should {
     "return a date" in {
-      toDate("2016", "12", "31") shouldBe LocalDate.parse("2016-12-31")
+      toDate("2016", "03", "01") shouldBe LocalDate.parse("2016-03-01")
     }
   }
 
-  "calling fromDate" should {
-    "return a tuple3 (String, String, String)" in {
+  "calling toDate with a day set as 1 and month set as 3" should {
+    "return a date" in {
+      toDate("2016", "3", "1") shouldBe LocalDate.parse("2016-03-01")
+    }
+  }
+
+  "calling fromDate with a date format yyyy-MM-dd" should {
+    "return a tuple3 (year: String, month: String, day: String)" in {
       fromDate(LocalDate.parse("2016-12-31")) shouldBe (("2016", "12", "31"))
+    }
+  }
+
+  "calling fromDate with a date format dd-MM-yyyy" should {
+    "return a tuple3 (year: String, month: String, day: String)" in {
+      fromDate(LocalDate.parse("31-12-2016", DateTimeFormatter.ofPattern("dd-MM-yyyy"))) shouldBe (("2016", "12", "31"))
     }
   }
 
