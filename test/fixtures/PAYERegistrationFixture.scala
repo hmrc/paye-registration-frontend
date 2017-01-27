@@ -54,4 +54,10 @@ trait PAYERegistrationFixture {
     ))
   )
 
+  val validEmploymentAPIModel = Employment(
+    true,
+    Some(true),
+    true,
+    LocalDate.of(2016, 12, 20)
+  )
 }

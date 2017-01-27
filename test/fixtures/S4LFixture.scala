@@ -16,7 +16,7 @@
 
 package fixtures
 
-import models.view.{CompanyDetails, TradingName}
+import models.view._
 
 trait S4LFixture {
 
@@ -36,4 +36,17 @@ trait S4LFixture {
     Some(validTradingNameViewModel)
   )
 
+  val validEmploymentViewModel = Employment(
+    Some(EmployingStaff(true)),
+    Some(CompanyPension(true)),
+    Some(Subcontractors(true)),
+    Some(FirstPayment("2016","12","20"))
+  )
+
+  val incompleteEmploymentViewModel = Employment(
+    Some(EmployingStaff(true)),
+    None,
+    None,
+    None
+  )
 }
