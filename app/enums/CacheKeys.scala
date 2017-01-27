@@ -21,4 +21,5 @@ object CacheKeys extends Enumeration {
   val CurrentProfile = Value
   val CoHoCompanyDetails = Value
   val TradingName = Value
+  val Employment = Value
 }
