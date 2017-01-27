@@ -20,7 +20,7 @@ import java.time.LocalDate
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.PAYERegistrationConnector
 import it.itutil.{IntegrationSpecBase, WiremockHelper}
-import models.api.{CompanyDetails, Employment, FirstPayment}
+import models.api.{CompanyDetails, Employment}
 import play.api.libs.json.Json
 import play.api.test.FakeApplication
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -91,7 +91,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
     val validEmployment = Employment(employees = false,
                                      companyPension = None,
                                      subcontractors = true,
-                                     firstPayment = FirstPayment(LocalDate.of(2016,1,1)))
+                                     firstPayDate = LocalDate.of(2016,1,1))
 
     def getResponse = PAYERegistrationConnector.getEmployment(regId)
     def patchResponse = PAYERegistrationConnector.upsertEmployment(regId, validEmployment)

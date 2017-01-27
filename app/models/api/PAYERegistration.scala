@@ -18,11 +18,10 @@ package models.api
 
 import play.api.libs.json.Json
 
-case class PAYERegistration (
-                            registrationID: String,
-                            formCreationTimestamp: String,
-                            companyDetails: CompanyDetails
-                              )
+case class PAYERegistration (registrationID: String,
+                             formCreationTimestamp: String,
+                             companyDetails: CompanyDetails,
+                             employment: Employment)
 
 object PAYERegistration {
   implicit val format = Json.format[PAYERegistration]

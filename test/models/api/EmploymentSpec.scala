@@ -27,16 +27,14 @@ class EmploymentSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   "Employment" should {
 
-    val testEmploymentMax = validEmployment
+    val testEmploymentMax = validEmploymentAPI
 
     val targetJsonMax = Json.parse(
       s"""{
           |  "employees":true,
           |  "companyPension":true,
           |  "subcontractors":true,
-          |  "firstPayment":{
-          |     "firstPayDate":"$validDate"
-          |  }
+          |  "firstPayDate":"$validDate"
           |}""".stripMargin)
 
     "read from maximum Json" in {
@@ -48,22 +46,20 @@ class EmploymentSpec extends PAYERegSpec with PAYERegistrationFixture {
     }
 
     val testFutureDate = LocalDate.of(2016,12,20)
-    val testFuturePayment = FirstPayment(firstPayDate = testFutureDate)
+    val testFuturePayment = testFutureDate
 
-    val testEmploymentMin = validEmployment.copy(
+    val testEmploymentMin = validEmploymentAPI.copy(
         employees = false,
         companyPension = None,
         subcontractors = false,
-        firstPayment = testFuturePayment
+        firstPayDate = testFuturePayment
     )
 
     val targetJsonMin = Json.parse(
       s"""{
           |  "employees":false,
           |  "subcontractors":false,
-          |  "firstPayment":{
-          |     "firstPayDate":"$testFutureDate"
-          |  }
+          |  "firstPayDate":"$testFutureDate"
           |}""".stripMargin)
 
     "read from minimum Json" in {

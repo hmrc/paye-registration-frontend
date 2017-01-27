@@ -23,16 +23,8 @@ import play.api.libs.json.Json
 case class Employment(employees: Boolean,
                       companyPension: Option[Boolean],
                       subcontractors: Boolean,
-                      firstPayment: FirstPayment)
-
-case class FirstPayment(firstPayDate: LocalDate)
-
-
-object FirstPayment {
-  implicit val format = Json.format[FirstPayment]
-}
+                      firstPayDate: LocalDate)
 
 object Employment {
-  implicit val fpFormat = FirstPayment.format
   implicit val format = Json.format[Employment]
 }

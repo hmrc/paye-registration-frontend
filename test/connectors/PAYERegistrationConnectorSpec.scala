@@ -155,9 +155,9 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
 
   "Calling getEmployment" should {
     "return the correct PAYEResponse when the microservice returns an Employment API model" in new Setup {
-      mockHttpGet[EmploymentAPI]("tst-url", validEmployment)
+      mockHttpGet[EmploymentAPI]("tst-url", validEmploymentAPI)
 
-      await(connector.getEmployment("tstID")) shouldBe Some(validEmployment)
+      await(connector.getEmployment("tstID")) shouldBe Some(validEmploymentAPI)
     }
     "return the correct PAYEResponse when a Bad Request response is returned by the microservice" in new Setup {
       mockHttpFailedGET[EmploymentAPI]("tst-url", badRequest)
@@ -183,24 +183,24 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
 
   "Calling upsertEmployment" should {
     "return the correct PAYEResponse when the microservice completes and returns an Employment API model" in new Setup {
-      mockHttpPATCH[EmploymentAPI, EmploymentAPI]("tst-url", validEmployment)
+      mockHttpPATCH[EmploymentAPI, EmploymentAPI]("tst-url", validEmploymentAPI)
 
-      await(connector.upsertEmployment("tstID", validEmployment)) shouldBe validEmployment
+      await(connector.upsertEmployment("tstID", validEmploymentAPI)) shouldBe validEmploymentAPI
     }
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
       mockHttpFailedPATCH[EmploymentAPI, EmploymentAPI]("tst-url", forbidden)
 
-      intercept[Upstream4xxResponse](await(connector.upsertEmployment("tstID", validEmployment)))
+      intercept[Upstream4xxResponse](await(connector.upsertEmployment("tstID", validEmploymentAPI)))
     }
     "return a Not Found PAYEResponse when the microservice returns a NotFound response (No PAYERegistration in database)" in new Setup {
       mockHttpFailedPATCH[EmploymentAPI, EmploymentAPI]("tst-url", notFound)
 
-      intercept[NotFoundException](await(connector.upsertEmployment("tstID", validEmployment)))
+      intercept[NotFoundException](await(connector.upsertEmployment("tstID", validEmploymentAPI)))
     }
     "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
       mockHttpFailedPATCH[EmploymentAPI, EmploymentAPI]("tst-url", internalServiceException)
 
-      intercept[InternalServerException](await(connector.upsertEmployment("tstID", validEmployment)))
+      intercept[InternalServerException](await(connector.upsertEmployment("tstID", validEmploymentAPI)))
     }
   }
 }

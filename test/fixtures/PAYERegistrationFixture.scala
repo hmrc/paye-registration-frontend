@@ -18,7 +18,7 @@ package fixtures
 
 import java.time.LocalDate
 
-import models.api.{CompanyDetails, Employment, FirstPayment, PAYERegistration}
+import models.api.{CompanyDetails, Employment, PAYERegistration}
 import models.view.{Summary, SummaryRow, SummarySection}
 
 trait PAYERegistrationFixture {
@@ -30,16 +30,17 @@ trait PAYERegistrationFixture {
   )
 
   val validDate = LocalDate.of(2016,12,20)
-  val validPayment = FirstPayment(firstPayDate = validDate)
-  val validEmployment = Employment(employees = true,
+  val validPayment = validDate
+  val validEmploymentAPI = Employment(employees = true,
                                   companyPension = Some(true),
                                   subcontractors = true,
-                                  firstPayment = validPayment)
+                                  firstPayDate = validPayment)
 
   val validPAYERegistrationAPI = PAYERegistration(
     registrationID = "AC123456",
     formCreationTimestamp = "2017-01-11T15:10:12",
-    companyDetails = validCompanyDetailsAPI
+    companyDetails = validCompanyDetailsAPI,
+    employment = validEmploymentAPI
   )
 
   lazy val validSummaryView = Summary(

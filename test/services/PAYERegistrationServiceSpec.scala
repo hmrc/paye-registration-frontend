@@ -48,7 +48,8 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
       crn = None,
       companyName = "Test Company",
       tradingName = Some("tstTrade")
-    )
+    ),
+    employment = validEmploymentAPI
   )
 
   lazy val summary = Summary(
@@ -137,7 +138,8 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
           crn = None,
           companyName = "Test Company",
           tradingName = None
-        )
+        ),
+        employment = validEmploymentAPI
       )
 
       lazy val summaryNoTName = Summary(

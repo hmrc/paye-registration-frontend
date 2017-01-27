@@ -17,22 +17,22 @@
 package services
 
 import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment => EmploymentView, FirstPayment => FirstPaymentView}
-import models.api.{Employment => EmploymentAPI, FirstPayment => FirstPaymentAPI}
+import models.api.{Employment => EmploymentAPI}
 import utils.DateUtil
 
 trait EmploymentService extends DateUtil {
   def convertToModelAPI(viewData: EmploymentView): Either[EmploymentView, EmploymentAPI] = viewData match {
     case EmploymentView(Some(EmployingStaff(true)), Some(pension), Some(cis), Some(pay)) =>
-      Right(EmploymentAPI(true, Some(pension.pensionProvided), cis.hasContractors, FirstPaymentAPI(toDate(pay.firstPayYear, pay.firstPayMonth, pay.firstPayDay))))
+      Right(EmploymentAPI(true, Some(pension.pensionProvided), cis.hasContractors, toDate(pay.firstPayYear, pay.firstPayMonth, pay.firstPayDay)))
     case EmploymentView(Some(EmployingStaff(false)), _, Some(cis), Some(pay)) =>
-      Right(EmploymentAPI(false, None, cis.hasContractors, FirstPaymentAPI(toDate(pay.firstPayYear, pay.firstPayMonth, pay.firstPayDay))))
+      Right(EmploymentAPI(false, None, cis.hasContractors, toDate(pay.firstPayYear, pay.firstPayMonth, pay.firstPayDay)))
     case _ => Left(viewData)
   }
 
   def convertToModelView(apiData: EmploymentAPI): EmploymentView = apiData match {
-    case EmploymentAPI(true, Some(pensionProvided), hasContractors, pay) =>
-      EmploymentView(Some(EmployingStaff(true)), Some(CompanyPension(pensionProvided)), Some(Subcontractors(hasContractors)), Some((FirstPaymentView.apply _).tupled(fromDate(pay.firstPayDate))))
-    case EmploymentAPI(false, _, hasContractors, pay) =>
-      EmploymentView(Some(EmployingStaff(false)), None, Some(Subcontractors(hasContractors)), Some((FirstPaymentView.apply _).tupled(fromDate(pay.firstPayDate))))
+    case EmploymentAPI(true, Some(pensionProvided), hasContractors, paymentDate) =>
+      EmploymentView(Some(EmployingStaff(true)), Some(CompanyPension(pensionProvided)), Some(Subcontractors(hasContractors)), Some((FirstPaymentView.apply _).tupled(fromDate(paymentDate))))
+    case EmploymentAPI(false, _, hasContractors, paymentDate) =>
+      EmploymentView(Some(EmployingStaff(false)), None, Some(Subcontractors(hasContractors)), Some((FirstPaymentView.apply _).tupled(fromDate(paymentDate))))
   }
 }
