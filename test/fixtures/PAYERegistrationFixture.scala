@@ -58,6 +58,6 @@ trait PAYERegistrationFixture {
     true,
     Some(true),
     true,
-    FirstPayment(LocalDate.of(2016, 12, 20))
+    LocalDate.of(2016, 12, 20)
   )
 }

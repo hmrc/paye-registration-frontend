@@ -31,6 +31,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 sealed trait SavedResponse
 case object S4LSaved extends SavedResponse
 case object MongoSaved extends SavedResponse
+case object FailSaved extends SavedResponse
 
 object EmploymentService extends EmploymentService {
   //$COVERAGE-OFF$
@@ -54,10 +55,10 @@ trait EmploymentService extends CommonService with DateUtil {
   }
 
   private[services] def apiToView(apiData: EmploymentAPI): EmploymentView = apiData match {
-    case EmploymentAPI(true, Some(pensionProvided), hasContractors, pay) =>
-      EmploymentView(Some(EmployingStaff(true)), Some(CompanyPension(pensionProvided)), Some(Subcontractors(hasContractors)), Some((FirstPaymentView.apply _).tupled(fromDate(pay.firstPayDate))))
-    case EmploymentAPI(false, _, hasContractors, pay) =>
-      EmploymentView(Some(EmployingStaff(false)), None, Some(Subcontractors(hasContractors)), Some((FirstPaymentView.apply _).tupled(fromDate(pay.firstPayDate))))
+    case EmploymentAPI(true, Some(pensionProvided), hasContractors, paymentDate) =>
+      EmploymentView(Some(EmployingStaff(true)), Some(CompanyPension(pensionProvided)), Some(Subcontractors(hasContractors)), Some((FirstPaymentView.apply _).tupled(fromDate(paymentDate))))
+    case EmploymentAPI(false, _, hasContractors, paymentDate) =>
+      EmploymentView(Some(EmployingStaff(false)), None, Some(Subcontractors(hasContractors)), Some((FirstPaymentView.apply _).tupled(fromDate(paymentDate))))
   }
 
   def fetchEmploymentView()(implicit hc: HeaderCarrier): Future[Option[EmploymentView]] =
@@ -82,5 +83,6 @@ trait EmploymentService extends CommonService with DateUtil {
           }
         })
       }
+      case None => Future.successful(FailSaved)
     }
 }
