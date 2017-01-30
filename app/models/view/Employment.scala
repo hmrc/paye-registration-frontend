@@ -16,6 +16,8 @@
 
 package models.view
 
+import java.time.LocalDate
+
 import play.api.libs.json.Json
 
 
@@ -35,9 +37,7 @@ object Subcontractors {
 }
 
 case class FirstPayment(
-                      firstPayYear: String,
-                      firstPayMonth: String,
-                      firstPayDay: String
+                      firstPayDate: LocalDate
                        )
 object FirstPayment {
   implicit val format = Json.format[FirstPayment]

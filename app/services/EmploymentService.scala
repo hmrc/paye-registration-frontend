@@ -20,12 +20,11 @@ import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment =
 import models.api.{Employment => EmploymentAPI}
 import utils.DateUtil
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import connectors.{KeystoreConnector, PAYERegistrationConnector, S4LConnector}
-import enums.{CacheKeys, DownstreamOutcome}
+import connectors.{KeystoreConnector, PAYERegistrationConnector}
+import enums.CacheKeys
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 sealed trait SavedResponse
@@ -48,17 +47,17 @@ trait EmploymentService extends CommonService with DateUtil {
 
   private[services] def viewToAPI(viewData: EmploymentView): Either[EmploymentView, EmploymentAPI] = viewData match {
     case EmploymentView(Some(EmployingStaff(true)), Some(pension), Some(cis), Some(pay)) =>
-      Right(EmploymentAPI(true, Some(pension.pensionProvided), cis.hasContractors, toDate(pay.firstPayYear, pay.firstPayMonth, pay.firstPayDay)))
+      Right(EmploymentAPI(true, Some(pension.pensionProvided), cis.hasContractors, pay.firstPayDate))
     case EmploymentView(Some(EmployingStaff(false)), _, Some(cis), Some(pay)) =>
-      Right(EmploymentAPI(false, None, cis.hasContractors, toDate(pay.firstPayYear, pay.firstPayMonth, pay.firstPayDay)))
+      Right(EmploymentAPI(false, None, cis.hasContractors, pay.firstPayDate))
     case _ => Left(viewData)
   }
 
-  private[services] def apiToView(apiData: EmploymentAPI): EmploymentView = apiData match {
-    case EmploymentAPI(true, Some(pensionProvided), hasContractors, paymentDate) =>
-      EmploymentView(Some(EmployingStaff(true)), Some(CompanyPension(pensionProvided)), Some(Subcontractors(hasContractors)), Some((FirstPaymentView.apply _).tupled(fromDate(paymentDate))))
-    case EmploymentAPI(false, _, hasContractors, paymentDate) =>
-      EmploymentView(Some(EmployingStaff(false)), None, Some(Subcontractors(hasContractors)), Some((FirstPaymentView.apply _).tupled(fromDate(paymentDate))))
+  def apiToView(apiData: EmploymentAPI): EmploymentView = apiData match {
+    case EmploymentAPI(true, Some(pensionProvided), hasContractors, pay) =>
+      EmploymentView(Some(EmployingStaff(true)), Some(CompanyPension(pensionProvided)), Some(Subcontractors(hasContractors)), Some(FirstPaymentView(apiData.firstPayDate)))
+    case EmploymentAPI(false, _, hasContractors, pay) =>
+      EmploymentView(Some(EmployingStaff(false)), None, Some(Subcontractors(hasContractors)), Some(FirstPaymentView(apiData.firstPayDate)))
   }
 
   def fetchEmploymentView()(implicit hc: HeaderCarrier): Future[Option[EmploymentView]] =

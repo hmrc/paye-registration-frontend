@@ -10,6 +10,7 @@ app.common.change                  = Change
 app.common.year                    = Year
 app.common.month                   = Month
 app.common.day                     = Day
+app.common.date.invalid            = You have not entered a valid date
 
 
 ## Welcome page
@@ -69,7 +70,6 @@ pages.firstPayment.firstPaymentLabel           = First Payment
 pages.firstPayment.intro                       = The company''s PAYE scheme starts when the first payment is made to an employee or subcontractor.
 pages.firstPayment.question                    = Has the company made any payments to employees or subcontractors?
 pages.firstPayment.hint                        = Enter the date the company made their first payment. This can be any date in the past.<br>Or<br>Enter the date the company will make their first payment. This can be up to 2 months in the future.
-pages.firstPayment.date.invalid                = You have not entered a valid date
 pages.firstPayment.date.invalidRange           = Please enter a date up to 61 days in the future
 pages.firstPayment.firstPaymentRulesSummary    = What counts as a payment?
 pages.firstPayment.firstPaymentRulesIntro      = Payments to employees or subcontractors include:

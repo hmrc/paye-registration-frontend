@@ -16,6 +16,8 @@
 
 package fixtures
 
+import java.time.LocalDate
+
 import models.view._
 
 trait S4LFixture {
@@ -40,7 +42,7 @@ trait S4LFixture {
     Some(EmployingStaff(true)),
     Some(CompanyPension(true)),
     Some(Subcontractors(true)),
-    Some(FirstPayment("2016","12","20"))
+    Some(FirstPayment(LocalDate.of(2016,12,20)))
   )
 
   val incompleteEmploymentViewModel = Employment(
