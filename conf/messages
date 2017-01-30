@@ -82,10 +82,31 @@ pages.firstPayment.firstPaymentRulesEnd        = This should include any payment
 pages.summary.title                = Check your answers
 pages.summary.heading              = Check your answers
 
+
 pages.summary.tradingName.sectionHeading              = Company information
 pages.summary.tradingName.question                    = Other trading name
 pages.summary.tradingName.answers.noAnswerGiven       = No
 pages.summary.tradingName.hiddenChangeText            = Change the company's trading name
+
+pages.summary.employees.sectionHeading = Employment information
+
+pages.summary.employees.question = Employing staff
+pages.summary.employees.answers.true = Yes
+pages.summary.employees.answers.false = No
+pages.summary.employees.hiddenChangeText = Change the company''s employment information
+
+pages.summary.companyPension.question = Providing company pension scheme
+pages.summary.companyPension.answers.true = Yes
+pages.summary.companyPension.answers.false = No
+pages.summary.companyPension.hiddenChangeText = Change the company''s pension scheme
+
+pages.summary.subcontractors.question = Paying subcontractors
+pages.summary.subcontractors.answers.true = Yes
+pages.summary.subcontractors.answers.false = No
+pages.summary.subcontractors.hiddenChangeText = Change the company''s subcontractor information
+
+pages.summary.firstPaymentDate.question = PAYE scheme start date
+pages.summary.firstPaymentDate.hiddenChangeText = Change the company''s first payment date
 
 ## Error Pages
 errorPages.title                   = Something went wrong

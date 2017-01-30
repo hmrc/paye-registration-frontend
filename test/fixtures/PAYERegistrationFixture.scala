@@ -30,11 +30,10 @@ trait PAYERegistrationFixture {
   )
 
   val validDate = LocalDate.of(2016,12,20)
-  val validPayment = validDate
   val validEmploymentAPI = Employment(employees = true,
                                   companyPension = Some(true),
                                   subcontractors = true,
-                                  firstPayDate = validPayment)
+                                  firstPayDate = validDate)
 
   val validPAYERegistrationAPI = PAYERegistration(
     registrationID = "AC123456",
