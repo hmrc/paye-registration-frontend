@@ -53,14 +53,43 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
   )
 
   lazy val summary = Summary(
-    Seq(SummarySection(
-      id="tradingName",
-      Seq(SummaryRow(
+    Seq(
+      SummarySection(
         id="tradingName",
-        answer = Right("tstTrade"),
-        changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
-      ))
-    ))
+        Seq(
+          SummaryRow(
+            id="tradingName",
+            answer = Right("tstTrade"),
+            changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+          )
+        )
+      ),
+      SummarySection(
+        id = "employees",
+        Seq(
+          SummaryRow(
+            id = "employees",
+            answer = Left("true"),
+            Some(controllers.userJourney.routes.EmploymentController.employingStaff())
+          ),
+          SummaryRow(
+            id = "companyPension",
+            answer = Left("true"),
+            Some(controllers.userJourney.routes.EmploymentController.companyPension())
+          ),
+          SummaryRow(
+            id = "subcontractors",
+            answer = Left("true"),
+            Some(controllers.userJourney.routes.EmploymentController.subcontractors())
+          ),
+          SummaryRow(
+            id = "firstPaymentDate",
+            Right("20/12/2016"),
+            Some(controllers.userJourney.routes.EmploymentController.firstPayment())
+          )
+        )
+      )
+    )
   )
 
   implicit val hc = HeaderCarrier()
@@ -143,14 +172,43 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
       )
 
       lazy val summaryNoTName = Summary(
-        Seq(SummarySection(
-          id="tradingName",
-          Seq(SummaryRow(
+        Seq(
+          SummarySection(
             id="tradingName",
-            answer = Left("noAnswerGiven"),
-            changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
-          ))
-        ))
+            Seq(
+              SummaryRow(
+                id="tradingName",
+                answer = Left("noAnswerGiven"),
+                changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+              )
+            )
+          ),
+          SummarySection(
+            id = "employees",
+            Seq(
+              SummaryRow(
+                id = "employees",
+                answer = Left("true"),
+                Some(controllers.userJourney.routes.EmploymentController.employingStaff())
+              ),
+              SummaryRow(
+                id = "companyPension",
+                answer = Left("true"),
+                Some(controllers.userJourney.routes.EmploymentController.companyPension())
+              ),
+              SummaryRow(
+                id = "subcontractors",
+                answer = Left("true"),
+                Some(controllers.userJourney.routes.EmploymentController.subcontractors())
+              ),
+              SummaryRow(
+                id = "firstPaymentDate",
+                Right("20/12/2016"),
+                Some(controllers.userJourney.routes.EmploymentController.firstPayment())
+              )
+            )
+          )
+        )
       )
       service.registrationToSummary(apiRegistrationNoTName) shouldBe summaryNoTName
     }

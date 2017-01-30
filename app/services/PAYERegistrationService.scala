@@ -16,10 +16,12 @@
 
 package services
 
+import java.time.format.DateTimeFormatter
+
 import enums.DownstreamOutcome
 import connectors._
-import models.api.{PAYERegistration => PAYERegistrationAPI}
-import models.view.{SummaryRow, SummarySection, Summary}
+import models.api.{Employment, PAYERegistration => PAYERegistrationAPI}
+import models.view.{Summary, SummaryRow, SummarySection}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -54,19 +56,62 @@ trait PAYERegistrationService extends CommonService {
 
   private[services] def registrationToSummary(apiModel: PAYERegistrationAPI): Summary = {
     Summary(
-      Seq(SummarySection(
-        id="tradingName",
-        Seq(SummaryRow(
-          id="tradingName",
-          answer = apiModel.companyDetails.tradingName match {
-            case Some(tName) => Right(tName)
-            case _ => Left("noAnswerGiven")
-          },
-          changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
-        ))
-      ))
+      Seq(
+        SummarySection(
+          id ="tradingName",
+          Seq(
+            SummaryRow(
+              id ="tradingName",
+              answer = apiModel.companyDetails.tradingName match {
+                case Some(tName) => Right(tName)
+                case _ => Left("noAnswerGiven")
+              },
+              changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+            )
+          )
+        ),
+        buildEmploymentSection(apiModel.employment)
+      )
     )
   }
 
-
+  private def buildEmploymentSection(employment : Employment) : SummarySection = {
+    SummarySection(
+      id = "employees",
+      Seq(
+        Some(SummaryRow(
+          id = "employees",
+          answer = employment.employees match {
+            case true => Left("true")
+            case false => Left("false")
+          },
+          changeLink = Some(controllers.userJourney.routes.EmploymentController.employingStaff())
+        )),
+        employment.companyPension map {
+          ocpn =>
+            SummaryRow(
+              id = "companyPension",
+              answer = ocpn match {
+                case true => Left("true")
+                case false => Left("false")
+              },
+              changeLink = Some(controllers.userJourney.routes.EmploymentController.companyPension())
+            )
+        },
+        Some(SummaryRow(
+          id = "subcontractors",
+          answer = employment.subcontractors match {
+            case true => Left("true")
+            case false => Left("false")
+          },
+          changeLink = Some(controllers.userJourney.routes.EmploymentController.subcontractors())
+        )),
+        Some(SummaryRow(
+          id = "firstPaymentDate",
+          answer = Right(DateTimeFormatter.ofPattern("dd/MM/yyyy").format(employment.firstPayDate)),
+          changeLink = Some(controllers.userJourney.routes.EmploymentController.firstPayment())
+        ))
+      ).flatten
+    )
+  }
 }
