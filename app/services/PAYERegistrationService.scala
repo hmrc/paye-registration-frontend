@@ -75,7 +75,7 @@ trait PAYERegistrationService extends CommonService {
     )
   }
 
-  private def buildEmploymentSection(employment : Employment) : SummarySection = {
+  private[services] def buildEmploymentSection(employment : Employment) : SummarySection = {
     SummarySection(
       id = "employees",
       Seq(

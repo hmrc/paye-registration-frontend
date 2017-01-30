@@ -18,7 +18,7 @@ package services
 
 import connectors._
 import enums.DownstreamOutcome
-import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
+import models.api.{Employment, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
 import models.view.{Summary, SummaryRow, SummarySection}
 import fixtures.PAYERegistrationFixture
 import org.mockito.Matchers
@@ -214,4 +214,42 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
     }
   }
 
+  "buildEmploymentSection" should {
+    "" in new Setup {
+
+      val validEmploymentAPIFalse = Employment(employees = false,
+        companyPension = Some(false),
+        subcontractors = false,
+        firstPayDate = validDate
+      )
+
+      val employmentSection = SummarySection(
+        id = "employees",
+        Seq(
+          SummaryRow(
+            id = "employees",
+            answer = Left("false"),
+            Some(controllers.userJourney.routes.EmploymentController.employingStaff())
+          ),
+          SummaryRow(
+            id = "companyPension",
+            answer = Left("false"),
+            Some(controllers.userJourney.routes.EmploymentController.companyPension())
+          ),
+          SummaryRow(
+            id = "subcontractors",
+            answer = Left("false"),
+            Some(controllers.userJourney.routes.EmploymentController.subcontractors())
+          ),
+          SummaryRow(
+            id = "firstPaymentDate",
+            Right("20/12/2016"),
+            Some(controllers.userJourney.routes.EmploymentController.firstPayment())
+          )
+        )
+      )
+
+      service.buildEmploymentSection(validEmploymentAPIFalse) shouldBe employmentSection
+    }
+  }
 }
