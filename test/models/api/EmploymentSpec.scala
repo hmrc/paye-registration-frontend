@@ -32,9 +32,9 @@ class EmploymentSpec extends PAYERegSpec with PAYERegistrationFixture {
     val targetJsonMax = Json.parse(
       s"""{
           |  "employees":true,
-          |  "companyPension":true,
-          |  "subcontractors":true,
-          |  "firstPayDate":"$validDate"
+          |  "ocpn":true,
+          |  "cis":true,
+          |  "first-payment-date":"$validDate"
           |}""".stripMargin)
 
     "read from maximum Json" in {
@@ -58,8 +58,8 @@ class EmploymentSpec extends PAYERegSpec with PAYERegistrationFixture {
     val targetJsonMin = Json.parse(
       s"""{
           |  "employees":false,
-          |  "subcontractors":false,
-          |  "firstPayDate":"$testFutureDate"
+          |  "cis":false,
+          |  "first-payment-date":"$testFutureDate"
           |}""".stripMargin)
 
     "read from minimum Json" in {
