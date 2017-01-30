@@ -19,7 +19,7 @@ package services
 import java.time.LocalDate
 
 import connectors.PAYERegistrationConnector
-import enums.CacheKeys
+import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{PAYERegistrationFixture, S4LFixture}
 import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment => EmploymentView, FirstPayment => FirstPaymentView}
 import models.api.{Employment => EmploymentAPI}
@@ -136,27 +136,73 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
   "calling saveEmploymentView" should {
     "save the Employment VIEW model in S4L if the model is incomplete" in new Setup {
       mockFetchRegID("54321")
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.Employment.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
-        .thenReturn(Future.successful(Some(incompleteEmploymentViewModel)))
-
       when(mockS4LService.saveForm[EmploymentView](Matchers.eq(CacheKeys.Employment.toString), Matchers.any())(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(returnCacheMap))
 
-      await(service.saveEmploymentView("54321")) shouldBe S4LSaved
+      await(service.saveEmploymentView(incompleteEmploymentViewModel)) shouldBe S4LSaved
     }
 
     "save the Employment VIEW model in BE if the model is complete" in new Setup {
       mockFetchRegID("54321")
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.Employment.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
-        .thenReturn(Future.successful(Some(validEmploymentViewModel)))
-
       when(mockPAYERegConnector.upsertEmployment(Matchers.eq("54321"), Matchers.eq(validEmploymentAPIModel))(Matchers.any[HeaderCarrier](), Matchers.any()))
         .thenReturn(Future.successful(validEmploymentAPIModel))
 
       when(mockS4LService.clear()(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(returnHttpResponse))
 
-      await(service.saveEmploymentView("54321")) shouldBe MongoSaved
+      await(service.saveEmploymentView(validEmploymentViewModel)) shouldBe MongoSaved
+    }
+  }
+
+  "calling saveEmployingStaff" should {
+    "update the Employment VIEW model" in new Setup {
+      mockFetchRegID("54321")
+      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.Employment.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+        .thenReturn(Future.successful(Some(incompleteEmploymentViewModel)))
+
+      when(mockS4LService.saveForm[EmploymentView](Matchers.eq(CacheKeys.Employment.toString), Matchers.any())(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+        .thenReturn(Future.successful(returnCacheMap))
+
+      await(service.saveEmployingStaff(EmployingStaff(false))) shouldBe DownstreamOutcome.Success
+    }
+  }
+
+  "calling saveCompanyPension" should {
+    "update the Employment VIEW model" in new Setup {
+      mockFetchRegID("54321")
+      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.Employment.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+        .thenReturn(Future.successful(Some(incompleteEmploymentViewModel)))
+
+      when(mockS4LService.saveForm[EmploymentView](Matchers.eq(CacheKeys.Employment.toString), Matchers.any())(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+        .thenReturn(Future.successful(returnCacheMap))
+
+      await(service.saveCompanyPension(CompanyPension(false))) shouldBe DownstreamOutcome.Success
+    }
+  }
+
+  "calling saveSubcontractors" should {
+    "update the Employment VIEW model" in new Setup {
+      mockFetchRegID("54321")
+      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.Employment.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+        .thenReturn(Future.successful(Some(incompleteEmploymentViewModel)))
+
+      when(mockS4LService.saveForm[EmploymentView](Matchers.eq(CacheKeys.Employment.toString), Matchers.any())(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+        .thenReturn(Future.successful(returnCacheMap))
+
+      await(service.saveSubcontractors(Subcontractors(false))) shouldBe DownstreamOutcome.Success
+    }
+  }
+
+  "calling saveFirstPayment" should {
+    "update the Employment VIEW model" in new Setup {
+      mockFetchRegID("54321")
+      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.Employment.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+        .thenReturn(Future.successful(Some(incompleteEmploymentViewModel)))
+
+      when(mockS4LService.saveForm[EmploymentView](Matchers.eq(CacheKeys.Employment.toString), Matchers.any())(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+        .thenReturn(Future.successful(returnCacheMap))
+
+      await(service.saveFirstPayment(FirstPaymentView("2016", "12", "01"))) shouldBe DownstreamOutcome.Success
     }
   }
 }

@@ -19,11 +19,13 @@ package controllers.userJourney
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import config.FrontendAuthConnector
 import auth.PAYERegime
+import enums.DownstreamOutcome
 import forms.employmentDetails._
 
 import scala.concurrent.Future
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
+import services.EmploymentService
 import uk.gov.hmrc.play.frontend.auth.Actions
 import views.html.pages.employmentDetails.{employingStaff => EmployingStaffPage}
 import views.html.pages.employmentDetails.{companyPension => CompanyPensionPage}
@@ -33,73 +35,98 @@ import views.html.pages.employmentDetails.{firstPayment => FirstPaymentPage}
 object EmploymentController extends EmploymentController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
+  override val employmentService = EmploymentService
   //$COVERAGE-ON$
 }
 
 trait EmploymentController extends FrontendController with Actions {
+  val employmentService: EmploymentService
 
   // EMPLOYING STAFF
   val employingStaff = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    Future.successful(Ok(EmployingStaffPage(EmployingStaffForm.form)))
+    for {
+      employment   <- employmentService.fetchEmploymentView()
+    } yield employment flatMap (_.employing) match {
+      case Some(model) => Ok(EmployingStaffPage(EmployingStaffForm.form.fill(model)))
+      case _ => Ok(EmployingStaffPage(EmployingStaffForm.form))
+    }
   }
 
   val submitEmployingStaff = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    Future.successful(
-      EmployingStaffForm.form.bindFromRequest.fold(
-        errors => BadRequest(EmployingStaffPage(errors)),
-        model => model.currentYear match {
+    EmployingStaffForm.form.bindFromRequest.fold(
+      errors => Future.successful(BadRequest(EmployingStaffPage(errors))),
+      model => employmentService.saveEmployingStaff(model) map {
+        case DownstreamOutcome.Success => model.currentYear match {
           case true => Redirect(controllers.userJourney.routes.EmploymentController.companyPension())
           case false => Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
         }
-      )
+      }
     )
   }
 
   // COMPANY PENSION
   val companyPension = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    Future.successful(Ok(CompanyPensionPage(CompanyPensionForm.form)))
+    for {
+      employment   <- employmentService.fetchEmploymentView()
+    } yield employment flatMap (_.companyPension) match {
+      case Some(model) => Ok(CompanyPensionPage(CompanyPensionForm.form.fill(model)))
+      case _ => Ok(CompanyPensionPage(CompanyPensionForm.form))
+    }
   }
 
   val submitCompanyPension = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    Future.successful(
-      CompanyPensionForm.form.bindFromRequest.fold(
-        errors => BadRequest(CompanyPensionPage(errors)),
-        model => model.pensionProvided match {
+    CompanyPensionForm.form.bindFromRequest.fold(
+      errors => Future.successful(BadRequest(CompanyPensionPage(errors))),
+      model => employmentService.saveCompanyPension(model) map {
+        case DownstreamOutcome.Success => model.pensionProvided match {
           case true => Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
           case false => Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
         }
-      )
+      }
     )
   }
 
   // SUBCONTRACTORS
   val subcontractors = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    Future.successful(Ok(SubcontractorsPage(SubcontractorsForm.form)))
+    for {
+      employment   <- employmentService.fetchEmploymentView()
+    } yield employment flatMap (_.subcontractors) match {
+      case Some(model) => Ok(SubcontractorsPage(SubcontractorsForm.form.fill(model)))
+      case _ => Ok(SubcontractorsPage(SubcontractorsForm.form))
+    }
   }
 
   val submitSubcontractors = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    Future.successful(
-      SubcontractorsForm.form.bindFromRequest.fold(
-        errors => BadRequest(SubcontractorsPage(errors)),
-        model => model.hasContractors match {
+    SubcontractorsForm.form.bindFromRequest.fold(
+      errors => Future.successful(BadRequest(SubcontractorsPage(errors))),
+      model => employmentService.saveSubcontractors(model) map {
+        case DownstreamOutcome.Success => model.hasContractors match {
           case true => Redirect(controllers.userJourney.routes.EmploymentController.firstPayment())
           case false => Redirect(controllers.userJourney.routes.EmploymentController.firstPayment())
         }
-      )
+      }
     )
   }
 
   // FIRST PAYMENT
   val firstPayment = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    Future.successful(Ok(FirstPaymentPage(FirstPaymentForm.form)))
+    for {
+      employment   <- employmentService.fetchEmploymentView()
+    } yield employment flatMap (_.firstPayment) match {
+      case Some(model) => Ok(FirstPaymentPage(FirstPaymentForm.form.fill(model)))
+      case _ => Ok(FirstPaymentPage(FirstPaymentForm.form))
+    }
   }
 
   val submitFirstPayment = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    Future.successful(FirstPaymentForm.form.bindFromRequest.fold(
-      errors => BadRequest(FirstPaymentPage(errors)),
-      success => {
-          Redirect(controllers.userJourney.routes.SummaryController.summary())
+    FirstPaymentForm.form.bindFromRequest.fold(
+      errors => Future.successful(BadRequest(FirstPaymentPage(errors))),
+      model => employmentService.saveFirstPayment(model) map {
+        case DownstreamOutcome.Success => model.fir match {
+          case true => Redirect(controllers.userJourney.routes.SummaryController.summary())
+          case false => Redirect(controllers.userJourney.routes.SummaryController.summary())
+        }
       }
-    ))
+    )
   }
 }

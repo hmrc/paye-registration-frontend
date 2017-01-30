@@ -24,14 +24,18 @@ import play.api.http.Status
 import play.api.test.FakeRequest
 import builders.AuthBuilder
 import play.api.mvc.Result
+import services.EmploymentService
 import utils.DateUtil
 
 import scala.concurrent.Future
 
 class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
+  val mockEmploymentService = mock[EmploymentService]
+
   class Setup {
     val controller = new EmploymentController {
       override val authConnector = mockAuthConnector
+      override val employmentService = mockEmploymentService
     }
   }
 
