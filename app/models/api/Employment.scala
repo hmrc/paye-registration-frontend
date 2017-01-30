@@ -18,7 +18,8 @@ package models.api
 
 import java.time.LocalDate
 
-import play.api.libs.json.Json
+import play.api.libs.functional.syntax._
+import play.api.libs.json.__
 
 case class Employment(employees: Boolean,
                       companyPension: Option[Boolean],
@@ -26,5 +27,10 @@ case class Employment(employees: Boolean,
                       firstPayDate: LocalDate)
 
 object Employment {
-  implicit val format = Json.format[Employment]
+  implicit val formatModel = (
+    (__ \ "employees").format[Boolean] and
+      (__ \ "ocpn").formatNullable[Boolean] and
+      (__ \ "cis").format[Boolean] and
+      (__ \ "first-payment-date").format[LocalDate]
+    )(Employment.apply, unlift(Employment.unapply))
 }

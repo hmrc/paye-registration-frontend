@@ -23,14 +23,22 @@ import testHelpers.PAYERegSpec
 import play.api.http.Status
 import play.api.test.FakeRequest
 import builders.AuthBuilder
+import enums.DownstreamOutcome
+import fixtures.S4LFixture
+import models.view.{CompanyPension, EmployingStaff, Employment, FirstPayment, Subcontractors}
 import play.api.mvc.Result
 import services.EmploymentService
 import utils.DateUtil
+import org.mockito.Matchers
+import org.mockito.Mockito.when
 
 import scala.concurrent.Future
 
 class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
   val mockEmploymentService = mock[EmploymentService]
+
+  val validEmploymentViewModel = Employment(Some(EmployingStaff(true)), Some(CompanyPension(true)), Some(Subcontractors(true)), Some(FirstPayment(LocalDate.of(2016, 12, 1))))
+  val nonValidEmploymentViewModel = Employment(None, None, None, None)
 
   class Setup {
     val controller = new EmploymentController {
@@ -47,7 +55,16 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       status(result) shouldBe Status.SEE_OTHER
     }
 
-    "return 200 for an authorised user" in new Setup {
+    "return 200 for an authorised user with data already saved" in new Setup {
+      when(mockEmploymentService.fetchEmploymentView()(Matchers.any())).thenReturn(Future.successful(validEmploymentViewModel))
+      AuthBuilder.showWithAuthorisedUser(controller.employingStaff, mockAuthConnector) {
+        (response: Future[Result]) =>
+          status(response) shouldBe Status.OK
+      }
+    }
+
+    "return 200 for an authorised user with no data" in new Setup {
+      when(mockEmploymentService.fetchEmploymentView()(Matchers.any())).thenReturn(Future.successful(nonValidEmploymentViewModel))
       AuthBuilder.showWithAuthorisedUser(controller.employingStaff, mockAuthConnector) {
         (response: Future[Result]) =>
           status(response) shouldBe Status.OK
@@ -69,6 +86,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
     }
 
     "redirect to the Company Pension page when a user enters YES answer" in new Setup {
+      when(mockEmploymentService.saveEmployingStaff(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
       AuthBuilder.submitWithAuthorisedUser(controller.submitEmployingStaff(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "currentYear" -> "true"
       )) {
@@ -79,6 +97,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
     }
 
     "redirect to the Subcontractors page when a user enters NO answer" in new Setup {
+      when(mockEmploymentService.saveEmployingStaff(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
       AuthBuilder.submitWithAuthorisedUser(controller.submitEmployingStaff(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "currentYear" -> "false"
       )) {
@@ -95,7 +114,16 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       status(result) shouldBe Status.SEE_OTHER
     }
 
-    "return 200 for an authorised user" in new Setup {
+    "return 200 for an authorised user with data already saved" in new Setup {
+      when(mockEmploymentService.fetchEmploymentView()(Matchers.any())).thenReturn(Future.successful(validEmploymentViewModel))
+      AuthBuilder.showWithAuthorisedUser(controller.companyPension, mockAuthConnector) {
+        (response: Future[Result]) =>
+          status(response) shouldBe Status.OK
+      }
+    }
+
+    "return 200 for an authorised user with no data" in new Setup {
+      when(mockEmploymentService.fetchEmploymentView()(Matchers.any())).thenReturn(Future.successful(nonValidEmploymentViewModel))
       AuthBuilder.showWithAuthorisedUser(controller.companyPension, mockAuthConnector) {
         (response: Future[Result]) =>
           status(response) shouldBe Status.OK
@@ -117,6 +145,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
     }
 
     "redirect to the Subcontractors page when a user enters YES answer" in new Setup {
+      when(mockEmploymentService.saveCompanyPension(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
       AuthBuilder.submitWithAuthorisedUser(controller.submitCompanyPension(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "pensionProvided" -> "true"
       )) {
@@ -127,6 +156,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
     }
 
     "redirect to the Subcontractors page when a user enters NO answer" in new Setup {
+      when(mockEmploymentService.saveCompanyPension(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
       AuthBuilder.submitWithAuthorisedUser(controller.submitCompanyPension(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "pensionProvided" -> "false"
       )) {
@@ -143,8 +173,17 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       status(result) shouldBe Status.SEE_OTHER
     }
 
-    "return 200 for an authorised user" in new Setup {
-      AuthBuilder.showWithAuthorisedUser(controller.subcontractors(), mockAuthConnector) {
+    "return 200 for an authorised user with data already saved" in new Setup {
+      when(mockEmploymentService.fetchEmploymentView()(Matchers.any())).thenReturn(Future.successful(validEmploymentViewModel))
+      AuthBuilder.showWithAuthorisedUser(controller.subcontractors, mockAuthConnector) {
+        (response: Future[Result]) =>
+          status(response) shouldBe Status.OK
+      }
+    }
+
+    "return 200 for an authorised user with no data" in new Setup {
+      when(mockEmploymentService.fetchEmploymentView()(Matchers.any())).thenReturn(Future.successful(nonValidEmploymentViewModel))
+      AuthBuilder.showWithAuthorisedUser(controller.subcontractors, mockAuthConnector) {
         (response: Future[Result]) =>
           status(response) shouldBe Status.OK
       }
@@ -165,6 +204,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
     }
 
     "redirect to the First Payment page when a user enters YES answer" in new Setup {
+      when(mockEmploymentService.saveSubcontractors(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
       AuthBuilder.submitWithAuthorisedUser(controller.submitSubcontractors(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "hasContractors" -> "true"
       )) {
@@ -175,6 +215,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
     }
 
     "redirect to the First Payment page when a user enters NO answer" in new Setup {
+      when(mockEmploymentService.saveSubcontractors(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
       AuthBuilder.submitWithAuthorisedUser(controller.submitSubcontractors(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "hasContractors" -> "false"
       )) {
@@ -191,8 +232,17 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       status(result) shouldBe Status.SEE_OTHER
     }
 
-    "return 200 for an authorised user" in new Setup {
-      AuthBuilder.showWithAuthorisedUser(controller.firstPayment(), mockAuthConnector) {
+    "return 200 for an authorised user with data already saved" in new Setup {
+      when(mockEmploymentService.fetchEmploymentView()(Matchers.any())).thenReturn(Future.successful(validEmploymentViewModel))
+      AuthBuilder.showWithAuthorisedUser(controller.firstPayment, mockAuthConnector) {
+        (response: Future[Result]) =>
+          status(response) shouldBe Status.OK
+      }
+    }
+
+    "return 200 for an authorised user with no data" in new Setup {
+      when(mockEmploymentService.fetchEmploymentView()(Matchers.any())).thenReturn(Future.successful(nonValidEmploymentViewModel))
+      AuthBuilder.showWithAuthorisedUser(controller.firstPayment, mockAuthConnector) {
         (response: Future[Result]) =>
           status(response) shouldBe Status.OK
       }
@@ -285,6 +335,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
     }
 
     "redirect to the Summary page when a user enters a valid past date" in new Setup {
+      when(mockEmploymentService.saveFirstPayment(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
       AuthBuilder.submitWithAuthorisedUser(controller.submitFirstPayment(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "firstPayYear" -> "2016",
         "firstPayMonth" -> "12",
@@ -299,6 +350,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
     "redirect to the Summary page when a user enters a valid future date" in new Setup {
       val today = LocalDate.now()
       val futureDate = fromDate(today.plus(1, ChronoUnit.MONTHS))
+      when(mockEmploymentService.saveFirstPayment(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
       AuthBuilder.submitWithAuthorisedUser(controller.submitFirstPayment(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "firstPayYear" -> futureDate._1,
         "firstPayMonth" -> futureDate._2,

@@ -46,7 +46,7 @@ trait EmploymentController extends FrontendController with Actions {
   val employingStaff = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     for {
       employment   <- employmentService.fetchEmploymentView()
-    } yield employment flatMap (_.employing) match {
+    } yield employment.employing match {
       case Some(model) => Ok(EmployingStaffPage(EmployingStaffForm.form.fill(model)))
       case _ => Ok(EmployingStaffPage(EmployingStaffForm.form))
     }
@@ -68,7 +68,7 @@ trait EmploymentController extends FrontendController with Actions {
   val companyPension = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     for {
       employment   <- employmentService.fetchEmploymentView()
-    } yield employment flatMap (_.companyPension) match {
+    } yield employment.companyPension match {
       case Some(model) => Ok(CompanyPensionPage(CompanyPensionForm.form.fill(model)))
       case _ => Ok(CompanyPensionPage(CompanyPensionForm.form))
     }
@@ -90,7 +90,7 @@ trait EmploymentController extends FrontendController with Actions {
   val subcontractors = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     for {
       employment   <- employmentService.fetchEmploymentView()
-    } yield employment flatMap (_.subcontractors) match {
+    } yield employment.subcontractors match {
       case Some(model) => Ok(SubcontractorsPage(SubcontractorsForm.form.fill(model)))
       case _ => Ok(SubcontractorsPage(SubcontractorsForm.form))
     }
@@ -112,7 +112,7 @@ trait EmploymentController extends FrontendController with Actions {
   val firstPayment = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     for {
       employment   <- employmentService.fetchEmploymentView()
-    } yield employment flatMap (_.firstPayment) match {
+    } yield employment.firstPayment match {
       case Some(model) => Ok(FirstPaymentPage(FirstPaymentForm.form.fill(model)))
       case _ => Ok(FirstPaymentPage(FirstPaymentForm.form))
     }
@@ -121,12 +121,7 @@ trait EmploymentController extends FrontendController with Actions {
   val submitFirstPayment = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     FirstPaymentForm.form.bindFromRequest.fold(
       errors => Future.successful(BadRequest(FirstPaymentPage(errors))),
-      model => employmentService.saveFirstPayment(model) map {
-        case DownstreamOutcome.Success => model.fir match {
-          case true => Redirect(controllers.userJourney.routes.SummaryController.summary())
-          case false => Redirect(controllers.userJourney.routes.SummaryController.summary())
-        }
-      }
+      model => employmentService.saveFirstPayment(model) map (_ => Redirect(controllers.userJourney.routes.SummaryController.summary()))
     )
   }
 }
