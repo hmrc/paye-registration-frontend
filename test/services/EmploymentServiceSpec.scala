@@ -56,28 +56,28 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
 
   "calling viewToAPI with EmployingStaff set as true" should {
     "return the corresponding converted Employment API Model with CompanyPension" in new Setup {
-      val viewModel = EmploymentView(Some(EmployingStaff(true)), Some(CompanyPension(true)), Some(Subcontractors(true)), Some((FirstPaymentView.apply _).tupled(dateUtil.fromDate(now))))
+      val viewModel = EmploymentView(Some(EmployingStaff(true)), Some(CompanyPension(true)), Some(Subcontractors(true)), Some(FirstPaymentView(LocalDate.now())))
       service.viewToAPI(viewModel) shouldBe Right(EmploymentAPI(true, Some(true), true, now))
     }
   }
 
   "calling viewToAPI with EmployingStaff set as false" should {
     "return the corresponding converted Employment API Model without CompanyPension" in new Setup {
-      val viewModel = EmploymentView(Some(EmployingStaff(false)), None, Some(Subcontractors(true)), Some((FirstPaymentView.apply _).tupled(dateUtil.fromDate(now))))
+      val viewModel = EmploymentView(Some(EmployingStaff(false)), None, Some(Subcontractors(true)), Some(FirstPaymentView(LocalDate.now())))
       service.viewToAPI(viewModel) shouldBe Right(EmploymentAPI(false, None, true, now))
     }
   }
 
   "calling viewToAPI with EmployingStaff set as true and CompanyPension set as None" should {
     "return the Employment VIEW Model" in new Setup {
-      val viewModel = EmploymentView(Some(EmployingStaff(true)), None, Some(Subcontractors(true)), Some((FirstPaymentView.apply _).tupled(dateUtil.fromDate(now))))
+      val viewModel = EmploymentView(Some(EmployingStaff(true)), None, Some(Subcontractors(true)), Some(FirstPaymentView(LocalDate.now())))
       service.viewToAPI(viewModel) shouldBe Left(viewModel)
     }
   }
 
   "calling viewToAPI with Subcontractors set as None" should {
     "return the Employment VIEW Model" in new Setup {
-      val viewModel = EmploymentView(Some(EmployingStaff(false)), None, None, Some((FirstPaymentView.apply _).tupled(dateUtil.fromDate(now))))
+      val viewModel = EmploymentView(Some(EmployingStaff(false)), None, None, Some(FirstPaymentView(LocalDate.now())))
       service.viewToAPI(viewModel) shouldBe Left(viewModel)
     }
   }
@@ -92,7 +92,7 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
   "calling apiToView with EmployingStaff set as true" should {
     "return the corresponding converted Employment View Model with CompanyPension" in new Setup {
       val apiModel = EmploymentAPI(true, Some(true), false, now)
-      val expected = EmploymentView(Some(EmployingStaff(true)), Some(CompanyPension(true)), Some(Subcontractors(false)), Some((FirstPaymentView.apply _).tupled(dateUtil.fromDate(now))))
+      val expected = EmploymentView(Some(EmployingStaff(true)), Some(CompanyPension(true)), Some(Subcontractors(false)), Some(FirstPaymentView(LocalDate.now())))
       service.apiToView(apiModel) shouldBe expected
     }
   }
@@ -100,7 +100,7 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
   "calling apiToView with EmployingStaff set as false" should {
     "return the corresponding converted Employment View Model without CompanyPension" in new Setup {
       val apiModel = EmploymentAPI(false, None, false, now)
-      service.apiToView(apiModel) shouldBe EmploymentView(Some(EmployingStaff(false)), None, Some(Subcontractors(false)), Some((FirstPaymentView.apply _).tupled(dateUtil.fromDate(now))))
+      service.apiToView(apiModel) shouldBe EmploymentView(Some(EmployingStaff(false)), None, Some(Subcontractors(false)), Some(FirstPaymentView(LocalDate.now())))
     }
   }
 

@@ -22,23 +22,9 @@ import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import scala.util.Try
 
 object Validators extends DateUtil {
-  def isInvalidDate: Constraint[FirstPayment] = {
-    Constraint("constraints.validateDate")({
-      model => {
-        val date = Try(toDate(model.firstPayYear, model.firstPayMonth, model.firstPayDay))
-        if( date.isFailure ) Invalid(Seq(ValidationError("pages.firstPayment.date.invalid", "firstPayDay"))) else Valid
-      }
-    })
-  }
 
-
-  def firstPaymentDateRange: Constraint[FirstPayment] = {
-    Constraint("constraints.firstPaymentDateRange")({
-      model => {
-        val date = toDate(model.firstPayYear, model.firstPayMonth, model.firstPayDay)
-        if( !lessOrEqualThanXDaysAfter(LocalDate.now(), date, 61) ) Invalid(Seq(ValidationError("pages.firstPayment.date.invalidRange", "firstPayDay"))) else Valid
-      }
-    })
+  def firstPaymentDateWithinRange(date: LocalDate): Boolean = {
+    lessOrEqualThanXDaysAfter(LocalDate.now(), date, 61)
   }
 }
 

@@ -17,21 +17,25 @@
 package forms.employmentDetails
 
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 
+import forms.helpers.DateForm
 import models.view.FirstPayment
-import utils.DateUtil
-import play.api.data.Form
-import play.api.data.Forms.{mapping, nonEmptyText}
-import uk.gov.hmrc.play.mappers.StopOnFirstFail
-import utils.Validators._
+import play.api.data.{Forms, Mapping, FormError, Form}
+import play.api.data.Forms._
+import utils.Validators
 
-object FirstPaymentForm extends DateUtil {
+object FirstPaymentForm extends DateForm {
+
+  override val prefix = "firstPay"
+  override def validation(dt: LocalDate) = {
+    if(Validators.firstPaymentDateWithinRange(dt)) Right(dt) else Left(Seq(FormError("firstPayDay", "pages.firstPayment.date.invalidRange")))
+  }
+
+  val threePartDate: Mapping[LocalDate] = Forms.of[LocalDate](dateFormatter)
   val form = Form(
     mapping(
-      "firstPayYear" -> nonEmptyText,
-      "firstPayMonth" -> nonEmptyText,
-      "firstPayDay" -> nonEmptyText
-    )(FirstPayment.apply)(FirstPayment.unapply).verifying(StopOnFirstFail(isInvalidDate, firstPaymentDateRange))
+    "firstPayDate" -> threePartDate
+    )(FirstPayment.apply)(FirstPayment.unapply)
   )
+
 }

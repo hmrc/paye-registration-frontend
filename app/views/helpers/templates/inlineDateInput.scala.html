@@ -1,61 +1,54 @@
 @(formItem:Form[_],
-  fieldName: String,
-  questionText: Option[String],
-  questionHint: Html,
-  args: (Symbol,Any)*)(implicit lang: play.api.i18n.Lang, messages: Messages)
+    fieldName: String,
+    questionText: String,
+    hintText: Option[Html],
+    args: (Symbol,Any)*)(implicit lang: play.api.i18n.Lang, messages: Messages)
 
 @import uk.gov.hmrc.play.mappers.DateFields._
 @import play.api.i18n._
 @import uk.gov.hmrc.play.mappers.DateFormatSymbols._
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import java.text.SimpleDateFormat
 
-@fieldsetClasses = @{if(formItem.hasErrors && (formItem.errors.find(_.key == "").isDefined)) "form-field--error" else "" }
+@fieldsetClasses = @{if(formItem.hasErrors && (formItem.errors.find(_.key != "psoAmt").isDefined)) "form-field--error" else "" }
 
 <fieldset class="form-group form-date @fieldsetClasses" id="@fieldName-fieldset">
 
-    @if(questionText.isDefined) {
-        <legend><span style="display: none">@questionText.get</span></legend>
-    }
-
-    <h2>@questionText</h2>
+    <h2>
+        @questionText
+    </h2>
 
     @if(formItem.hasErrors) {
-        @formItem.errors.filter(_.key == "").map { error => <span class="error-notification">@Messages(error.message)</span>}
-        @if(formItem.errors.find(_.key != "").isDefined) {
-            <span class="error-notification">@Messages("pages.firstPayment.date.invalid")</span>
-        }
+    @formItem.errors.filter(_.key.contains(fieldName)).map { error => <span class="error-notification" id='@{s"${error.key}-error-message"}'>@Messages(s"${error.message}")</span>}
     }
 
-    <span class="form-hint">@questionHint</span>
+    @if(hintText.isDefined) {<span class="form-hint">@hintText</span>}
 
-    @govHelpers.input(
-    formItem(fieldName + "Day"),
+    @simpleNoErrorInput(
+    formItem(s"${fieldName}Day"),
     '_label -> Messages("app.common.day"),
     '_labelClass -> "form-group form-group-day",
     '_type -> "number",
     '_inputClass -> s"input--xxsmall input--no-spinner",
-    '_maxlength -> "2",
-    '_required -> "true"
+    '_maxlength -> "2"
     )
 
-    @govHelpers.input(
-    formItem(fieldName + "Month"),
+    @simpleNoErrorInput(
+    formItem(s"${fieldName}Month"),
     '_label -> Messages("app.common.month"),
     '_labelClass -> "form-group form-group-month",
     '_type -> "number",
     '_inputClass -> s"input--xxsmall input--no-spinner",
-    '_maxlength -> "2",
-    '_required -> "true"
+    '_maxlength -> "2"
     )
 
-    @govHelpers.input(
-    formItem(fieldName + "Year"),
+    @simpleNoErrorInput(
+    formItem(s"${fieldName}Year"),
     '_label -> Messages("app.common.year"),
     '_labelClass -> "form-group form-group-year",
     '_type -> "number",
     '_inputClass -> s"input--small input--no-spinner",
-    '_maxlength -> "4",
-    '_required -> "true"
+    '_maxlength -> "4"
     )
 
 </fieldset>
