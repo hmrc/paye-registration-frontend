@@ -46,7 +46,7 @@ trait TestPAYERegConnector extends CommonService {
 
   def addPAYERegistration(reg: PAYERegistrationAPI)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
-      resp <- http.POST[PAYERegistrationAPI, HttpResponse](s"$payeRegUrl/register-for-paye/test-only/insert-registration/${reg.registrationID}", reg)
+      resp <- http.POST[PAYERegistrationAPI, HttpResponse](s"$payeRegUrl/register-for-paye/test-only/update-registration/${reg.registrationID}", reg)
     } yield resp.status match {
       case Status.OK => DownstreamOutcome.Success
       case _  =>        DownstreamOutcome.Failure
