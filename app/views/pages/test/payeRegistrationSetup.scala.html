@@ -1,0 +1,82 @@
+@import models.api.{PAYERegistration => PAYERegistrationAPI}
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import helpers.templates.inlineDateInput
+@import pages.test.testHelpers.manualPrePopulatedInput
+
+@(payeForm: Form[PAYERegistrationAPI], regID: String)(implicit request: Request[_], messages: Messages)
+
+
+@main_template(title = "Enter PAYE Details") {
+
+    @govHelpers.errorSummary(
+        Messages("app.common.errorSummaryLabel"), payeForm
+    )
+
+    <h1 class="form-title heading-xlarge" id="pageHeading">Enter PAYE Registration Details</h1>
+
+    @govHelpers.form(action = controllers.test.routes.TestRegSetupController.submitRegSetup) {
+
+
+        <div class="inline form-group">
+            @manualPrePopulatedInput(
+            payeForm("registrationID"),
+            '_label -> "Registration ID",
+            '_value -> regID
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            payeForm("formCreationTimestamp"),
+            '_label -> "Form Creation Timestamp"
+            )
+        </div>
+
+        <div class="inline form-group">
+            @govHelpers.input(
+            payeForm("crn"),
+            '_label -> "CRN (optional)"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            payeForm("companyDetails.companyName"),
+            '_label -> "Company name"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            payeForm("companyDetails.tradingName"),
+            '_label -> "Trading name (optional)"
+            )
+        </div>
+
+        <div class="inline form-group">
+            @govHelpers.input(
+            payeForm("employment.employees"),
+            '_label -> "Employees"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            payeForm("employment.companyPension"),
+            '_label -> "Company Pension (optional)"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            payeForm("employment.subcontractors"),
+            '_label -> "Subcontractors"
+            )
+        </div>
+        <div class="inline form-group">
+            @inlineDateInput(
+            payeForm,
+            "employment.firstPayDate",
+            "First Pay Date",
+            None)
+        </div>
+
+        <button class="button" type="submit" id="continue" >Submit</button>
+
+    }
+}

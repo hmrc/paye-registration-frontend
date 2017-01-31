@@ -19,8 +19,9 @@ package connectors.test
 import config.WSHttp
 import connectors._
 import enums.DownstreamOutcome
-import models.api.{CompanyDetails => CompanyDetailsAPI}
+import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.Logger
+import play.api.http.Status
 import services.CommonService
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
@@ -42,6 +43,15 @@ trait TestPAYERegConnector extends CommonService {
   val payeRegUrl: String
   val http: HttpGet with HttpPost with HttpPatch
   val payeRegConnector: PAYERegistrationConnector
+
+  def addPAYERegistration(reg: PAYERegistrationAPI)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    for {
+      resp <- http.POST[PAYERegistrationAPI, HttpResponse](s"$payeRegUrl/register-for-paye/test-only/insert-registration/${reg.registrationID}", reg)
+    } yield resp.status match {
+      case Status.OK => DownstreamOutcome.Success
+      case _  =>        DownstreamOutcome.Failure
+    }
+  }
 
   def addTestCompanyDetails(details: CompanyDetailsAPI)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     val response = for {

@@ -18,10 +18,11 @@ package controllers.test
 
 import auth.test.TestPAYERegime
 import config.FrontendAuthConnector
+import connectors.KeystoreConnector
 import connectors.test.TestPAYERegConnector
 import enums.DownstreamOutcome
-import forms.test.TestPAYERegCompanyDetailsSetupForm
-import services.PAYERegistrationService
+import forms.test.{TestPAYERegSetupForm, TestPAYERegCompanyDetailsSetupForm}
+import services.{CommonService, PAYERegistrationService}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import play.api.Play.current
@@ -34,10 +35,11 @@ object TestRegSetupController extends TestRegSetupController {
   override val authConnector = FrontendAuthConnector
   override val payeRegService = PAYERegistrationService
   override val testPAYERegConnector = TestPAYERegConnector
+  override val keystoreConnector = KeystoreConnector
   //$COVERAGE-ON$
 }
 
-trait TestRegSetupController extends FrontendController with Actions {
+trait TestRegSetupController extends FrontendController with Actions with CommonService {
 
   val payeRegService: PAYERegistrationService
   val testPAYERegConnector: TestPAYERegConnector
@@ -47,6 +49,25 @@ trait TestRegSetupController extends FrontendController with Actions {
       case DownstreamOutcome.Success => Ok("Registration collection successfully cleared")
       case DownstreamOutcome.Failure => InternalServerError("Error clearing registration collection")
     }
+  }
+
+  val regSetup = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+    for {
+      regID <- fetchRegistrationID
+    } yield Ok(views.html.pages.test.payeRegistrationSetup(TestPAYERegSetupForm.form, regID))
+  }
+
+  val submitRegSetup = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+    TestPAYERegSetupForm.form.bindFromRequest.fold (
+      errors => for {
+        regID <- fetchRegistrationID
+      } yield BadRequest(views.html.pages.test.payeRegistrationSetup(errors, regID)),
+
+      success => testPAYERegConnector.addPAYERegistration(success) map {
+        case DownstreamOutcome.Success => Ok("PAYE Registration et up successfully")
+        case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Registration")
+      }
+    )
   }
 
   val regSetupCompanyDetails = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
