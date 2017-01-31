@@ -31,7 +31,6 @@ object FirstPaymentForm extends DateForm {
     if(Validators.firstPaymentDateWithinRange(dt)) Right(dt) else Left(Seq(FormError("firstPayDay", "pages.firstPayment.date.invalidRange")))
   }
 
-  val threePartDate: Mapping[LocalDate] = Forms.of[LocalDate](dateFormatter)
   val form = Form(
     mapping(
     "firstPayDate" -> threePartDate

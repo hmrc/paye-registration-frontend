@@ -18,7 +18,7 @@ package forms.helpers
 
 import java.time.LocalDate
 
-import play.api.data.FormError
+import play.api.data.{Forms, Mapping, FormError}
 import play.api.data.format.Formatter
 import utils.DateUtil
 
@@ -56,5 +56,7 @@ trait DateForm extends DateUtil {
       s"${prefix}Month" -> value.getMonthValue.toString,
       s"${prefix}Year" -> value.getYear.toString)
   }
+
+  val threePartDate: Mapping[LocalDate] = Forms.of[LocalDate](dateFormatter)
 
 }
