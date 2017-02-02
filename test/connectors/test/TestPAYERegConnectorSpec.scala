@@ -16,23 +16,23 @@
 
 package connectors.test
 
+import config.WSHttp
 import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
 import play.mvc.Http.Status
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._
+import uk.gov.hmrc.play.http.ws.WSHttp
 
 class TestPAYERegConnectorSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   val mockPAYERegConnector = mock[PAYERegistrationConnector]
 
   class Setup {
-    val connector = new TestPAYERegConnector {
+    val connector = new TestPAYERegConnector(mockKeystoreConnector, mockPAYERegConnector) {
+      override val http: WSHttp = mockWSHttp
       override val payeRegUrl: String = "tst-url"
-      override val http: HttpGet with HttpPost with HttpPatch = mockWSHttp
-      override val keystoreConnector = mockKeystoreConnector
-      override val payeRegConnector = mockPAYERegConnector
     }
   }
 

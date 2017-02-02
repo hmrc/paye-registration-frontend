@@ -30,8 +30,8 @@ class TestCoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
 
   class Setup {
     val connector = new TestCoHoAPIConnector {
-      val coHoAPIUrl = testUrl
-      val http = mockWSHttp
+      override val coHoAPIUrl = testUrl
+      override val http = mockWSHttp
     }
   }
 

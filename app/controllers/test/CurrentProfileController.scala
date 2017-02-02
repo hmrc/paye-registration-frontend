@@ -17,9 +17,9 @@
 package controllers.test
 
 import auth.test.TestPAYERegime
-import config.FrontendAuthConnector
+import config.{FrontendAuthConnector, PAYESessionCache}
 import connectors.test.TestBusinessRegConnector
-import connectors.{KeystoreConnector, BusinessRegistrationSuccessResponse, BusinessRegistrationConnector}
+import connectors.{BusinessRegistrationConnector, BusinessRegistrationSuccessResponse, KeystoreConnector}
 import enums.CacheKeys
 import models.external.CurrentProfile
 import uk.gov.hmrc.play.frontend.auth.Actions
@@ -28,9 +28,9 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 object CurrentProfileController extends CurrentProfileController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
-  override val keystoreConnector = KeystoreConnector
-  override val businessRegConnector = BusinessRegistrationConnector
-  override val testBusinessRegConnector = TestBusinessRegConnector
+  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
+  override val businessRegConnector = new BusinessRegistrationConnector()
+  override val testBusinessRegConnector = new TestBusinessRegConnector()
   //$COVERAGE-ON$
 }
 

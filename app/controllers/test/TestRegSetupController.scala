@@ -17,11 +17,11 @@
 package controllers.test
 
 import auth.test.TestPAYERegime
-import config.FrontendAuthConnector
-import connectors.KeystoreConnector
+import config.{FrontendAuthConnector, PAYESessionCache}
+import connectors.{KeystoreConnector, PAYERegistrationConnector}
 import connectors.test.TestPAYERegConnector
 import enums.DownstreamOutcome
-import forms.test.{TestPAYERegSetupForm, TestPAYERegCompanyDetailsSetupForm}
+import forms.test.{TestPAYERegCompanyDetailsSetupForm, TestPAYERegSetupForm}
 import services.{CommonService, PAYERegistrationService}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -34,8 +34,8 @@ object TestRegSetupController extends TestRegSetupController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
   override val payeRegService = PAYERegistrationService
-  override val testPAYERegConnector = TestPAYERegConnector
-  override val keystoreConnector = KeystoreConnector
+  override val testPAYERegConnector = new TestPAYERegConnector(keystoreConnector, new PAYERegistrationConnector())
+  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache)
   //$COVERAGE-ON$
 }
 

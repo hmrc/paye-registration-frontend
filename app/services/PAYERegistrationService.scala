@@ -18,6 +18,7 @@ package services
 
 import java.time.format.DateTimeFormatter
 
+import config.PAYESessionCache
 import enums.DownstreamOutcome
 import connectors._
 import models.api.{Employment, PAYERegistration => PAYERegistrationAPI}
@@ -29,8 +30,8 @@ import scala.concurrent.Future
 
 object PAYERegistrationService extends PAYERegistrationService {
   //$COVERAGE-OFF$
-  override val keystoreConnector = KeystoreConnector
-  override val payeRegistrationConnector = PAYERegistrationConnector
+  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
+  override val payeRegistrationConnector = new PAYERegistrationConnector()
   override val s4LService = S4LService
   //$COVERAGE-ON$
 }

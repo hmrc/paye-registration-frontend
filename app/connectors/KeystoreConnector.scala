@@ -16,17 +16,21 @@
 
 package connectors
 
+import com.google.inject.{Inject, Singleton}
 import config.PAYESessionCache
 import play.api.libs.json.Format
-import uk.gov.hmrc.http.cache.client.{SessionCache, CacheMap}
+import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
 
-object KeystoreConnector extends KeystoreConnector
+@Singleton
+class KeystoreConnector @Inject()(payeSessionCache: PAYESessionCache) extends KeystoreConnect {
+  val sessionCache : SessionCache = payeSessionCache
+}
 
-trait KeystoreConnector {
-  val sessionCache: SessionCache = PAYESessionCache
+trait KeystoreConnect {
+  val sessionCache: SessionCache
 
   def cache[T](formId: String, body : T)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {
     sessionCache.cache[T](formId, body)
@@ -43,6 +47,4 @@ trait KeystoreConnector {
   def remove()(implicit hc : HeaderCarrier) : Future[HttpResponse] = {
     sessionCache.remove()
   }
-
-
 }

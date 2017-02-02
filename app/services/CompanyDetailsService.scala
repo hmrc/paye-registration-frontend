@@ -22,6 +22,7 @@ import models.view.{CompanyDetails => CompanyDetailsView, TradingName => Trading
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import common.exceptions.DownstreamExceptions.PAYEMicroserviceException
 import common.exceptions.InternalExceptions.APIConversionException
+import config.PAYESessionCache
 import play.api.Logger
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -30,8 +31,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object CompanyDetailsService extends CompanyDetailsService {
   //$COVERAGE-OFF$
-  override val keystoreConnector = KeystoreConnector
-  override val payeRegConnector = PAYERegistrationConnector
+  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
+  override val payeRegConnector = new PAYERegistrationConnector()
   override val cohoService = CoHoAPIService
   //$COVERAGE-ON$
 }

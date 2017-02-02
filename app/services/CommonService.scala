@@ -16,7 +16,7 @@
 
 package services
 
-import connectors.KeystoreConnector
+import connectors.KeystoreConnect
 import common.exceptions.DownstreamExceptions._
 import enums.CacheKeys
 import models.external.CurrentProfile
@@ -28,7 +28,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 trait CommonService {
 
-  val keystoreConnector: KeystoreConnector
+  val keystoreConnector: KeystoreConnect
 
   def fetchRegistrationID(implicit hc: HeaderCarrier): Future[String] = {
     keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString).map {

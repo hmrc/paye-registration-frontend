@@ -31,7 +31,7 @@ import scala.concurrent.Future
 object TestCoHoController extends TestCoHoController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
-  override val testCoHoAPIConnector = TestCoHoAPIConnector
+  override val testCoHoAPIConnector = new TestCoHoAPIConnector()
   override val coHoAPIService = CoHoAPIService
   //$COVERAGE-ON$
 }

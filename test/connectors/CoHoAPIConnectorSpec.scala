@@ -20,7 +20,8 @@ import fixtures.CoHoAPIFixture
 import models.external.CoHoCompanyDetailsModel
 import play.api.libs.json.JsValue
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.{HttpResponse, BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
 
@@ -31,8 +32,8 @@ class CoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
 
   class Setup {
     val connector = new CoHoAPIConnector {
-      val coHoAPIUrl = testUrl
-      val http = mockWSHttp
+      override val coHoAPIUrl = testUrl
+      override val http : WSHttp = mockWSHttp
     }
   }
 

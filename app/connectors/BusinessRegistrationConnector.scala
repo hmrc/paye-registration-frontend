@@ -16,22 +16,21 @@
 
 package connectors
 
+import com.google.inject.{Inject, Singleton}
 import config.WSHttp
-import models.external.{CurrentProfile, BusinessRegistrationRequest}
+import models.external.CurrentProfile
 import play.api.Logger
-import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
+import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-
-object BusinessRegistrationConnector extends BusinessRegistrationConnector with ServicesConfig {
-  //$COVERAGE-OFF$
+@Singleton
+class BusinessRegistrationConnector @Inject()() extends BusinessRegistrationConnect with ServicesConfig {
   val businessRegUrl = baseUrl("business-registration")
-  val http = WSHttp
-  //$COVERAGE-ON$
+  val http : WSHttp = WSHttp
 }
 
 sealed trait BusinessRegistrationResponse
@@ -40,10 +39,10 @@ case object BusinessRegistrationNotFoundResponse extends BusinessRegistrationRes
 case object BusinessRegistrationForbiddenResponse extends BusinessRegistrationResponse
 case class BusinessRegistrationErrorResponse(err: Exception) extends BusinessRegistrationResponse
 
-trait BusinessRegistrationConnector {
+trait BusinessRegistrationConnect {
 
   val businessRegUrl: String
-  val http: HttpGet with HttpPost
+  val http: WSHttp
 
   def retrieveCurrentProfile(implicit hc: HeaderCarrier, rds: HttpReads[CurrentProfile]): Future[BusinessRegistrationResponse] = {
     http.GET[CurrentProfile](s"$businessRegUrl/business-registration/business-tax-registration") map {

@@ -16,6 +16,7 @@
 
 package connectors
 
+import config.PAYEShortLivedCache
 import models.view.{TradingName => TradingNameView}
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -37,11 +38,9 @@ class S4LConnectorSpec  extends UnitSpec with MockitoSugar with WithFakeApplicat
     "Test.microservices.services.cachable.short-lived.cache.domain" -> "save4later"
   ))
 
-  val mockShortLivedCache = mock[ShortLivedCache]
+  val mockShortLivedCache = mock[PAYEShortLivedCache]
 
-  object S4LConnectorTest extends S4LConnector {
-    override val shortCache = mockShortLivedCache
-  }
+  val S4LConnectorTest = new S4LConnector(mockShortLivedCache)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 

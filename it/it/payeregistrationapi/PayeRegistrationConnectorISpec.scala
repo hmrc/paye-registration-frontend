@@ -21,8 +21,9 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.PAYERegistrationConnector
 import it.itutil.{IntegrationSpecBase, WiremockHelper}
 import models.api.{CompanyDetails, Employment}
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.test.FakeApplication
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
@@ -31,11 +32,15 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  override implicit lazy val app = FakeApplication(additionalConfiguration = Map(
+  val additionalConfiguration = Map(
     "microservice.services.paye-registration.host" -> s"$mockHost",
     "microservice.services.paye-registration.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes"
-  ))
+  )
+
+  override implicit lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(additionalConfiguration)
+    .build
 
   val regId = "12345"
   implicit val hc = HeaderCarrier()
@@ -47,11 +52,13 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
                                              companyName = "Test Company",
                                              tradingName = Some("Test Company Trading Name"))
 
-    def getResponse = PAYERegistrationConnector.getCompanyDetails(regId)
-    def patchResponse = PAYERegistrationConnector.upsertCompanyDetails(regId, validCompanyDetails)
-
-
     "get a model" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+
+      def getResponse = payeRegistrationConnector.getCompanyDetails(regId)
+      def patchResponse = payeRegistrationConnector.upsertCompanyDetails(regId, validCompanyDetails)
+
       stubFor(get(urlMatching(url("/company-details")))
         .willReturn(
           aResponse()
@@ -64,6 +71,12 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
     }
 
     "get a None" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+
+      def getResponse = payeRegistrationConnector.getCompanyDetails(regId)
+      def patchResponse = payeRegistrationConnector.upsertCompanyDetails(regId, validCompanyDetails)
+
       stubFor(get(urlMatching(url("/company-details")))
         .willReturn(
           aResponse()
@@ -75,6 +88,12 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
     }
 
     "upsert a model" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+
+      def getResponse = payeRegistrationConnector.getCompanyDetails(regId)
+      def patchResponse = payeRegistrationConnector.upsertCompanyDetails(regId, validCompanyDetails)
+
       stubFor(patch(urlMatching(url("/company-details")))
         .willReturn(
           aResponse()
@@ -93,10 +112,14 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
                                      subcontractors = true,
                                      firstPayDate = LocalDate.of(2016,1,1))
 
-    def getResponse = PAYERegistrationConnector.getEmployment(regId)
-    def patchResponse = PAYERegistrationConnector.upsertEmployment(regId, validEmployment)
 
     "get a model" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+
+      def getResponse = payeRegistrationConnector.getEmployment(regId)
+      def patchResponse = payeRegistrationConnector.upsertEmployment(regId, validEmployment)
+
       stubFor(get(urlMatching(url("/employment")))
         .willReturn(
           aResponse()
@@ -109,6 +132,12 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
     }
 
     "get a None" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+
+      def getResponse = payeRegistrationConnector.getEmployment(regId)
+      def patchResponse = payeRegistrationConnector.upsertEmployment(regId, validEmployment)
+
       stubFor(get(urlMatching(url("/employment")))
         .willReturn(
           aResponse()
@@ -120,6 +149,12 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
     }
 
     "upsert a model" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+
+      def getResponse = payeRegistrationConnector.getEmployment(regId)
+      def patchResponse = payeRegistrationConnector.upsertEmployment(regId, validEmployment)
+
       stubFor(patch(urlMatching(url("/employment")))
         .willReturn(
           aResponse()
