@@ -1,17 +1,19 @@
 
-GET        /current-profile-setup            controllers.test.CurrentProfileController.currentProfileSetup
+GET        /current-profile-setup                        controllers.test.CurrentProfileController.currentProfileSetup
 
-GET        /company-details-setup            controllers.test.TestCoHoController.coHoCompanyDetailsSetup
-POST       /company-details-setup            controllers.test.TestCoHoController.submitCoHoCompanyDetailsSetup
+GET        /company-details-setup                        controllers.test.TestCoHoController.coHoCompanyDetailsSetup
+POST       /company-details-setup                        controllers.test.TestCoHoController.submitCoHoCompanyDetailsSetup
 
-GET        /company-details-teardown         controllers.test.TestCoHoController.coHoCompanyDetailsTearDown
+GET        /company-details-teardown                     controllers.test.TestCoHoController.coHoCompanyDetailsTearDown
 
-GET        /s4l-teardown                     controllers.test.TestCacheController.tearDownS4L
+GET        /s4l-teardown                                 controllers.test.TestCacheController.tearDownS4L
 
-GET        /reg-teardown                     controllers.test.TestRegSetupController.regTeardown
+GET        /reg-teardown                                 controllers.test.TestRegSetupController.regTeardown
 
-GET        /reg-setup-company-details        controllers.test.TestRegSetupController.regSetupCompanyDetails
-POST       /reg-setup-company-details        controllers.test.TestRegSetupController.submitRegSetupCompanyDetails
+GET        /reg-setup-company-details                    controllers.test.TestRegSetupController.regSetupCompanyDetails
+POST       /reg-setup-company-details                    controllers.test.TestRegSetupController.submitRegSetupCompanyDetails
 
-GET        /reg-setup                        controllers.test.TestRegSetupController.regSetup
-POST       /reg-setup                        controllers.test.TestRegSetupController.submitRegSetup
+GET        /reg-setup                                    controllers.test.TestRegSetupController.regSetup
+POST       /reg-setup                                    controllers.test.TestRegSetupController.submitRegSetup
+
+GET        /feature-flag/:featureName/:featureStatus     controllers.test.FeatureSwitchController.addressServiceSwitch(featureName: String, featureStatus: String)
