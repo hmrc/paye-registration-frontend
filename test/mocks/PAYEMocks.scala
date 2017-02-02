@@ -16,9 +16,9 @@
 
 package mocks
 
+import config.PAYESessionCache
 import mocks.internal._
 import org.scalatest.mockito.MockitoSugar
-import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.play.audit.model.Audit
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 
@@ -30,7 +30,7 @@ trait PAYEMocks
 
   this: MockitoSugar =>
     lazy val mockAuthConnector = mock[AuthConnector]
-    lazy val mockSessionCache = mock[SessionCache]
+    lazy val mockSessionCache = mock[PAYESessionCache]
     lazy val mockAudit = mock[Audit]
 
 }

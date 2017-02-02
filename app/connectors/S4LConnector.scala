@@ -16,18 +16,22 @@
 
 package connectors
 
+import com.google.inject.{Inject, Singleton}
 import config.PAYEShortLivedCache
 import play.api.libs.json.Format
-import uk.gov.hmrc.http.cache.client.{ShortLivedCache, CacheMap}
-import uk.gov.hmrc.play.http.{HttpResponse, HeaderCarrier}
+import uk.gov.hmrc.http.cache.client.{CacheMap, ShortLivedCache}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
 
-object S4LConnector extends S4LConnector
+@Singleton
+class S4LConnector @Inject()(payeShortLivedCache: PAYEShortLivedCache) extends S4LConnect {
+  val shortCache : ShortLivedCache = payeShortLivedCache
+}
 
-trait S4LConnector {
+trait S4LConnect {
 
-  val shortCache : ShortLivedCache = PAYEShortLivedCache
+  val shortCache : ShortLivedCache
 
   def saveForm[T](userId: String, formId: String, data: T)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {
     shortCache.cache[T](userId, formId, data)

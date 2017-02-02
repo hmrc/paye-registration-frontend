@@ -16,6 +16,7 @@
 
 package connectors.test
 
+import com.google.inject.{Inject, Singleton}
 import config.WSHttp
 import connectors._
 import enums.DownstreamOutcome
@@ -25,24 +26,24 @@ import play.api.http.Status
 import services.CommonService
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
+import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object TestPAYERegConnector extends TestPAYERegConnector with ServicesConfig {
-  //$COVERAGE-OFF$
+@Singleton
+class TestPAYERegConnector @Inject()(keystore : KeystoreConnector,payeRegistrationConnector: PAYERegistrationConnector) extends TestPAYERegConnect with ServicesConfig {
   val payeRegUrl = baseUrl("paye-registration")
-  val http = WSHttp
-  val keystoreConnector = KeystoreConnector
-  val payeRegConnector = PAYERegistrationConnector
-  //$COVERAGE-ON$
+  val http : WSHttp = WSHttp
+  val keystoreConnector: KeystoreConnect = keystore
+  val payeRegConnector: PAYERegistrationConnect = payeRegistrationConnector
 }
 
-trait TestPAYERegConnector extends CommonService {
+trait TestPAYERegConnect extends CommonService {
 
   val payeRegUrl: String
-  val http: HttpGet with HttpPost with HttpPatch
-  val payeRegConnector: PAYERegistrationConnector
+  val http: WSHttp
+  val payeRegConnector: PAYERegistrationConnect
 
   def addPAYERegistration(reg: PAYERegistrationAPI)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {

@@ -18,17 +18,18 @@ package connectors
 
 import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
-import models.api.{Employment => EmploymentAPI, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
+import models.api.{CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.http.Status
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._
+import uk.gov.hmrc.play.http.ws.WSHttp
 
 class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   class Setup {
     val connector = new PAYERegistrationConnector {
       override val payeRegUrl: String = "tst-url"
-      override val http: HttpGet with HttpPost with HttpPatch = mockWSHttp
+      override val http: WSHttp = mockWSHttp
     }
   }
 

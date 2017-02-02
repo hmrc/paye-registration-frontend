@@ -17,7 +17,8 @@
 package services
 
 import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
-import connectors.{CohoApiSuccessResponse, CohoApiResponse, CoHoAPIConnector, KeystoreConnector}
+import config.PAYESessionCache
+import connectors.{CoHoAPIConnector, CohoApiResponse, CohoApiSuccessResponse, KeystoreConnector}
 import enums.{CacheKeys, DownstreamOutcome}
 import models.external.CoHoCompanyDetailsModel
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -27,8 +28,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object CoHoAPIService extends CoHoAPIService {
   //$COVERAGE-OFF$
-  override val keystoreConnector = KeystoreConnector
-  override val coHoAPIConnector = CoHoAPIConnector
+  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache)
+  override val coHoAPIConnector = new CoHoAPIConnector
   //$COVERAGE-ON$
 }
 

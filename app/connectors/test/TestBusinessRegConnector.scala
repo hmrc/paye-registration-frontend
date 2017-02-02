@@ -16,25 +16,26 @@
 
 package connectors.test
 
+import com.google.inject.{Inject, Singleton}
 import config.WSHttp
-import connectors.BusinessRegistrationConnector._
 import models.external.{BusinessRegistrationRequest, CurrentProfile}
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.play.http.{HttpPost, HttpGet, HeaderCarrier}
+import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpPost}
 
 import scala.concurrent.Future
 
-object TestBusinessRegConnector extends TestBusinessRegConnector {
-  //$COVERAGE-OFF$
+@Singleton
+class TestBusinessRegConnector @Inject()() extends TestBusinessRegConnect with ServicesConfig {
   val businessRegUrl = baseUrl("business-registration")
-  val http = WSHttp
-  //$COVERAGE-ON$
+  val http : WSHttp = WSHttp
 }
 
-trait TestBusinessRegConnector {
+trait TestBusinessRegConnect {
 
   val businessRegUrl: String
-  val http: HttpGet with HttpPost
+  val http: WSHttp
 
   def createCurrentProfileEntry(implicit hc: HeaderCarrier): Future[CurrentProfile] = {
     val json = Json.toJson[BusinessRegistrationRequest](BusinessRegistrationRequest("ENG"))

@@ -16,28 +16,29 @@
 
 package connectors
 
+import com.google.inject.{Inject, Singleton}
 import config.WSHttp
 import enums.DownstreamOutcome
-import models.api.{Employment => EmploymentAPI, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
+import models.api.{CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.Logger
 import play.api.http.Status
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
+import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object PAYERegistrationConnector extends PAYERegistrationConnector with ServicesConfig {
-  //$COVERAGE-OFF$
+@Singleton
+class PAYERegistrationConnector @Inject()() extends PAYERegistrationConnect with ServicesConfig {
   val payeRegUrl = baseUrl("paye-registration")
-  val http = WSHttp
-  //$COVERAGE-ON$
+  val http : WSHttp = WSHttp
 }
 
-trait PAYERegistrationConnector {
+trait PAYERegistrationConnect {
 
   val payeRegUrl: String
-  val http: HttpGet with HttpPost with HttpPatch
+  val http: WSHttp
 
   def createNewRegistration(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[DownstreamOutcome.Value] = {
     http.PATCH[String, HttpResponse](s"$payeRegUrl/paye-registration/$regID/new", regID) map {

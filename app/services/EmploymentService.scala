@@ -16,6 +16,7 @@
 
 package services
 
+import config.{PAYESessionCache, PAYEShortLivedCache}
 import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment => EmploymentView, FirstPayment => FirstPaymentView}
 import models.api.{Employment => EmploymentAPI}
 import utils.DateUtil
@@ -33,8 +34,8 @@ case object MongoSaved extends SavedResponse
 
 object EmploymentService extends EmploymentService {
   //$COVERAGE-OFF$
-  override val keystoreConnector = KeystoreConnector
-  override val payeRegConnector = PAYERegistrationConnector
+  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
+  override val payeRegConnector = new PAYERegistrationConnector()
   override val s4LService = S4LService
   //$COVERAGE-ON$
 }

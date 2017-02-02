@@ -16,25 +16,26 @@
 
 package connectors.test
 
+import com.google.inject.{Inject, Singleton}
 import config.WSHttp
-import connectors.CoHoAPIConnector._
 import models.external.CoHoCompanyDetailsModel
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.play.http.{HttpPost, HttpGet, HttpResponse, HeaderCarrier}
+import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
 
-object TestCoHoAPIConnector extends TestCoHoAPIConnector {
-  //$COVERAGE-OFF$
+@Singleton
+class TestCoHoAPIConnector @Inject()() extends TestCoHoAPIConnect with ServicesConfig {
   val coHoAPIUrl = baseUrl("coho-api")
-  val http = WSHttp
-  //$COVERAGE-ON$
+  val http : WSHttp = WSHttp
 }
 
-trait TestCoHoAPIConnector {
+trait TestCoHoAPIConnect {
 
   val coHoAPIUrl: String
-  val http: HttpGet with HttpPost
+  val http: WSHttp
 
   def addCoHoCompanyDetails(coHoCompanyDetailsModel: CoHoCompanyDetailsModel)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val json = Json.toJson[CoHoCompanyDetailsModel](coHoCompanyDetailsModel)
@@ -44,5 +45,4 @@ trait TestCoHoAPIConnector {
   def tearDownCoHoCompanyDetails()(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     http.GET[HttpResponse](s"$coHoAPIUrl/incorporation-frontend-stubs/test-only/wipe-company-details")
   }
-
 }

@@ -17,6 +17,7 @@
 package config
 
 import akka.stream.Materializer
+import com.google.inject.{Inject, Singleton}
 import play.api.mvc.Call
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.http.cache.client.{SessionCache, ShortLivedCache, ShortLivedHttpCaching}
@@ -32,7 +33,7 @@ object FrontendAuditConnector extends Auditing with AppName {
   override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
 }
 
-object WSHttp extends WSGet with WSPut with WSPost with WSDelete with WSPatch with AppName with RunMode {
+object WSHttp extends WSHttp { // with AppName with RunMode {
   override val hooks = NoneRequired
 }
 
@@ -50,12 +51,14 @@ object PAYEShortLivedHttpCaching extends ShortLivedHttpCaching with AppName with
     throw new Exception(s"Could not find config 'cachable.short-lived-cache.domain'"))
 }
 
-object PAYEShortLivedCache extends ShortLivedCache {
+@Singleton
+class PAYEShortLivedCache @Inject()() extends ShortLivedCache {
   override implicit lazy val crypto = ApplicationCrypto.JsonCrypto
   override lazy val shortLiveCache = PAYEShortLivedHttpCaching
 }
 
-object PAYESessionCache extends SessionCache with AppName with ServicesConfig {
+@Singleton
+class PAYESessionCache @Inject()() extends SessionCache with AppName with ServicesConfig {
   override lazy val http = WSHttp
   override lazy val defaultSource = appName
   override lazy val baseUri = baseUrl("cachable.session-cache")

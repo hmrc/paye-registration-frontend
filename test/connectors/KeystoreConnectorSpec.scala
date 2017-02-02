@@ -28,9 +28,7 @@ import scala.concurrent.Future
 
 class KeystoreConnectorSpec extends PAYERegSpec {
 
-  val connector = new KeystoreConnector {
-    override val sessionCache = mockSessionCache
-  }
+  val connector = new KeystoreConnector(mockSessionCache)
 
   implicit val hc : HeaderCarrier = HeaderCarrier()
 

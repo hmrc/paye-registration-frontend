@@ -16,8 +16,9 @@
 
 package services
 
-import connectors.{KeystoreConnector, BusinessRegistrationSuccessResponse, BusinessRegistrationConnector}
-import enums.{DownstreamOutcome,CacheKeys}
+import config.PAYESessionCache
+import connectors.{BusinessRegistrationConnector, BusinessRegistrationSuccessResponse, KeystoreConnector}
+import enums.{CacheKeys, DownstreamOutcome}
 import models.external.CurrentProfile
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -27,8 +28,8 @@ import scala.concurrent.Future
 
 object CurrentProfileService extends CurrentProfileService {
   //$COVERAGE-OFF$
-  override val keystoreConnector = KeystoreConnector
-  override val businessRegistrationConnector = BusinessRegistrationConnector
+  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
+  override val businessRegistrationConnector = new BusinessRegistrationConnector()
   //$COVERAGE-ON$
 
 }

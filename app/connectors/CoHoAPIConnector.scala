@@ -16,23 +16,21 @@
 
 package connectors
 
+import com.google.inject.{Inject, Singleton}
 import config.WSHttp
-import common.exceptions.InternalExceptions._
 import models.external.CoHoCompanyDetailsModel
 import play.api.Logger
-import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
+import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-
-object CoHoAPIConnector extends CoHoAPIConnector with ServicesConfig {
-  //$COVERAGE-OFF$
+@Singleton
+class CoHoAPIConnector @Inject()() extends CoHoAPIConnect with ServicesConfig {
   val coHoAPIUrl = baseUrl("coho-api")
-  val http = WSHttp
-  //$COVERAGE-ON$
+  val http : WSHttp = WSHttp
 }
 
 sealed trait CohoApiResponse
@@ -40,10 +38,10 @@ case class CohoApiSuccessResponse(response: CoHoCompanyDetailsModel) extends Coh
 case object CohoApiBadRequestResponse extends CohoApiResponse
 case class CohoApiErrorResponse(ex: Exception) extends CohoApiResponse
 
-trait CoHoAPIConnector {
+trait CoHoAPIConnect {
 
   val coHoAPIUrl: String
-  val http: HttpGet with HttpPost
+  val http: WSHttp
 
   def getCoHoCompanyDetails(registrationID: String)(implicit hc: HeaderCarrier): Future[CohoApiResponse] = {
     http.GET[CoHoCompanyDetailsModel](s"$coHoAPIUrl/incorporation-frontend-stubs/company/$registrationID") map {

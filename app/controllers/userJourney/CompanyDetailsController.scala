@@ -17,7 +17,7 @@
 package controllers.userJourney
 
 import auth.PAYERegime
-import config.FrontendAuthConnector
+import config.{FrontendAuthConnector, PAYESessionCache}
 import connectors.KeystoreConnector
 import enums.DownstreamOutcome
 import forms.companyDetails.TradingNameForm
@@ -25,7 +25,7 @@ import models.view.TradingName
 import play.api.Play.current
 import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
-import play.api.mvc.{Result, Request, AnyContent}
+import play.api.mvc.{AnyContent, Request, Result}
 import services.{CoHoAPIService, CompanyDetailsService, S4LService}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -37,7 +37,7 @@ object CompanyDetailsController extends CompanyDetailsController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
   override val s4LService = S4LService
-  override val keystoreConnector = KeystoreConnector
+  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
   override val companyDetailsService = CompanyDetailsService
   override val cohoService = CoHoAPIService
   //$COVERAGE-ON$
