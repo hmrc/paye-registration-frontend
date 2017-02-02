@@ -16,8 +16,8 @@
 
 package services
 
-import config.PAYESessionCache
-import connectors.{BusinessRegistrationConnector, BusinessRegistrationSuccessResponse, KeystoreConnector}
+import com.google.inject.{Inject, Singleton}
+import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import models.external.CurrentProfile
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -25,19 +25,16 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-
-object CurrentProfileService extends CurrentProfileService {
-  //$COVERAGE-OFF$
-  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
-  override val businessRegistrationConnector = new BusinessRegistrationConnector()
-  //$COVERAGE-ON$
-
+@Singleton
+class CurrentProfileService @Inject()(keystoreConn: KeystoreConnector, businessRegistrationConn: BusinessRegistrationConnector) extends CurrentProfileSrv {
+  override val keystoreConnector = keystoreConn
+  override val businessRegistrationConnector = businessRegistrationConn
 }
 
-trait CurrentProfileService {
+trait CurrentProfileSrv {
 
-  val keystoreConnector: KeystoreConnector
-  val businessRegistrationConnector: BusinessRegistrationConnector
+  val keystoreConnector: KeystoreConnect
+  val businessRegistrationConnector: BusinessRegistrationConnect
 
   def fetchAndStoreCurrentProfile(implicit hc: HeaderCarrier) : Future[DownstreamOutcome.Value] = {
     businessRegistrationConnector.retrieveCurrentProfile flatMap {

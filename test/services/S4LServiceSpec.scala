@@ -27,10 +27,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 class S4LServiceSpec extends PAYERegSpec with KeystoreFixture with PAYERegistrationFixture {
 
   trait Setup {
-    val service = new S4LService {
-      override val s4LConnector = mockS4LConnector
-      override val keystoreConnector = mockKeystoreConnector
-    }
+    val service = new S4LService (mockS4LConnector, mockKeystoreConnector)
   }
 
   implicit val hc = new HeaderCarrier()

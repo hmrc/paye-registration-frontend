@@ -28,10 +28,7 @@ class CurrentProfileServiceSpec extends PAYERegSpec with BusinessRegistrationFix
 
 
   trait Setup {
-    val service = new CurrentProfileService {
-      override val keystoreConnector = mockKeystoreConnector
-      override val businessRegistrationConnector = mockBusinessRegistrationConnector
-    }
+    val service = new CurrentProfileService (mockKeystoreConnector, mockBusinessRegistrationConnector)
   }
 
   implicit val hc = HeaderCarrier()

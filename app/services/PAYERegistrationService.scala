@@ -18,7 +18,8 @@ package services
 
 import java.time.format.DateTimeFormatter
 
-import config.PAYESessionCache
+import com.google.inject.{Inject, Singleton}
+import config.{PAYEShortLivedCache, PAYESessionCache}
 import enums.DownstreamOutcome
 import connectors._
 import models.api.{Employment, PAYERegistration => PAYERegistrationAPI}
@@ -28,18 +29,17 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object PAYERegistrationService extends PAYERegistrationService {
-  //$COVERAGE-OFF$
-  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
-  override val payeRegistrationConnector = new PAYERegistrationConnector()
-  override val s4LService = S4LService
-  //$COVERAGE-ON$
+@Singleton
+class PAYERegistrationService @Inject()(keystoreConn: KeystoreConnector, payeRegistrationConn: PAYERegistrationConnector, s4LServ: S4LService) extends PAYERegistrationSrv {
+  override val keystoreConnector = keystoreConn
+  override val payeRegistrationConnector = payeRegistrationConn
+  override val s4LService = s4LServ
 }
 
-trait PAYERegistrationService extends CommonService {
+trait PAYERegistrationSrv extends CommonService {
 
-  val payeRegistrationConnector: PAYERegistrationConnector
-  val s4LService: S4LService
+  val payeRegistrationConnector: PAYERegistrationConnect
+  val s4LService: S4LSrv
 
   def assertRegistrationFootprint()(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {

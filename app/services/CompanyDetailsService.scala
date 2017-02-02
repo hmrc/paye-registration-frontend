@@ -16,31 +16,29 @@
 
 package services
 
+import com.google.inject.{Inject, Singleton}
 import connectors._
 import enums.DownstreamOutcome
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
-import common.exceptions.DownstreamExceptions.PAYEMicroserviceException
 import common.exceptions.InternalExceptions.APIConversionException
-import config.PAYESessionCache
 import play.api.Logger
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object CompanyDetailsService extends CompanyDetailsService {
-  //$COVERAGE-OFF$
-  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
-  override val payeRegConnector = new PAYERegistrationConnector()
-  override val cohoService = CoHoAPIService
-  //$COVERAGE-ON$
+@Singleton
+class CompanyDetailsService @Inject()(keystoreConn: KeystoreConnector, payeRegConn: PAYERegistrationConnector, coHoSrv: CoHoAPIService) extends CompanyDetailsSrv {
+  override val keystoreConnector = keystoreConn
+  override val payeRegConnector = payeRegConn
+  override val cohoService = coHoSrv
 }
 
-trait CompanyDetailsService extends CommonService {
+trait CompanyDetailsSrv extends CommonService {
 
-  val payeRegConnector: PAYERegistrationConnector
-  val cohoService: CoHoAPIService
+  val payeRegConnector: PAYERegistrationConnect
+  val cohoService: CoHoAPISrv
 
   def getCompanyDetails()(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsView]] = {
     for {

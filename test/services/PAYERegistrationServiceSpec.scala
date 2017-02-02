@@ -34,11 +34,7 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
   val mockS4LService = mock[S4LService]
 
   class Setup {
-    val service = new PAYERegistrationService {
-      override val payeRegistrationConnector = mockRegConnector
-      override val s4LService = mockS4LService
-      override val keystoreConnector = mockKeystoreConnector
-    }
+    val service = new PAYERegistrationService (mockKeystoreConnector, mockRegConnector, mockS4LService)
   }
 
   val apiRegistration = PAYERegistrationAPI(

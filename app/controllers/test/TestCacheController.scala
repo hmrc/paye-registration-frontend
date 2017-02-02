@@ -17,8 +17,8 @@
 package controllers.test
 
 import auth.test.TestPAYERegime
-import config.{FrontendAuthConnector, PAYESessionCache}
-import connectors.KeystoreConnector
+import config.{PAYEShortLivedCache, FrontendAuthConnector, PAYESessionCache}
+import connectors.{S4LConnector, KeystoreConnector}
 import services.S4LService
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -27,7 +27,7 @@ object TestCacheController extends TestCacheController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
   override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
-  override val s4LService = S4LService
+  override val s4LService = new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache()))
   //$COVERAGE-ON$
 
 }

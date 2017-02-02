@@ -17,7 +17,8 @@
 package controllers.test
 
 import auth.test.TestPAYERegime
-import config.FrontendAuthConnector
+import config.{PAYESessionCache, FrontendAuthConnector}
+import connectors.{CoHoAPIConnector, KeystoreConnector}
 import connectors.test.TestCoHoAPIConnector
 import forms.test.TestCoHoCompanyDetailsForm
 import services.CoHoAPIService
@@ -32,7 +33,7 @@ object TestCoHoController extends TestCoHoController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
   override val testCoHoAPIConnector = new TestCoHoAPIConnector()
-  override val coHoAPIService = CoHoAPIService
+  override val coHoAPIService = new CoHoAPIService(new KeystoreConnector(new PAYESessionCache()), new CoHoAPIConnector())
   //$COVERAGE-ON$
 }
 
@@ -49,7 +50,7 @@ trait TestCoHoController extends FrontendController with Actions {
     TestCoHoCompanyDetailsForm.form.bindFromRequest.fold(
       errors => Future.successful(Ok(views.html.pages.test.coHoCompanyDetailsSetup(errors))),
       success => for {
-        regId <- CoHoAPIService.fetchRegistrationID
+        regId <- coHoAPIService.fetchRegistrationID
         resp <- testCoHoAPIConnector.addCoHoCompanyDetails(success.toCoHoCompanyDetailsAPIModel(regId))
       } yield Ok(s"Company details response status: ${resp.status}")
     )
