@@ -18,7 +18,7 @@ package services
 
 import java.time.format.DateTimeFormatter
 
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import config.{PAYEShortLivedCache, PAYESessionCache}
 import enums.DownstreamOutcome
 import connectors._

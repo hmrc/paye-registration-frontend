@@ -17,28 +17,31 @@
 package controllers.test
 
 import auth.test.TestPAYERegime
-import config.{FrontendAuthConnector, PAYESessionCache}
-import connectors.test.TestBusinessRegConnector
-import connectors.{BusinessRegistrationConnector, BusinessRegistrationSuccessResponse, KeystoreConnector}
+import javax.inject.{Inject, Singleton}
+import config.{FrontendAuthConnector}
+import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector}
+import connectors.{BusinessRegistrationConnect, BusinessRegistrationConnector, BusinessRegistrationSuccessResponse, KeystoreConnect, KeystoreConnector}
 import enums.CacheKeys
 import models.external.CurrentProfile
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
-object CurrentProfileController extends CurrentProfileController {
-  //$COVERAGE-OFF$
-  override val authConnector = FrontendAuthConnector
-  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
-  override val businessRegConnector = new BusinessRegistrationConnector()
-  override val testBusinessRegConnector = new TestBusinessRegConnector()
-  //$COVERAGE-ON$
+@Singleton
+class CurrentProfileController @Inject()(
+                                          injKeystoreConnector: KeystoreConnector,
+                                          injBusinessRegConnector: BusinessRegistrationConnector,
+                                          injTestBusinessRegConnector: TestBusinessRegConnector)
+  extends CurrentProfileCtrl {
+  val authConnector = FrontendAuthConnector
+  val keystoreConnector = injKeystoreConnector
+  val businessRegConnector = injBusinessRegConnector
+  val testBusinessRegConnector = injTestBusinessRegConnector
 }
 
-trait CurrentProfileController extends FrontendController with Actions {
-
-  val keystoreConnector: KeystoreConnector
-  val businessRegConnector: BusinessRegistrationConnector
-  val testBusinessRegConnector: TestBusinessRegConnector
+trait CurrentProfileCtrl extends FrontendController with Actions {
+  val keystoreConnector: KeystoreConnect
+  val businessRegConnector: BusinessRegistrationConnect
+  val testBusinessRegConnector: TestBusinessRegConnect
 
   def currentProfileSetup = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     businessRegConnector.retrieveCurrentProfile flatMap {

@@ -25,6 +25,7 @@ import services.PAYERegistrationService
 import testHelpers.PAYERegSpec
 import org.mockito.Matchers
 import org.mockito.Mockito._
+import play.api.i18n.MessagesApi
 
 import scala.concurrent.Future
 
@@ -33,10 +34,10 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
   val mockPAYERegistrationService = mock[PAYERegistrationService]
 
   class Setup {
-    val controller = new SummaryController {
-
+    val controller = new SummaryCtrl {
       override val payeRegistrationService = mockPAYERegistrationService
       override val authConnector = mockAuthConnector
+      implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
     }
   }
 

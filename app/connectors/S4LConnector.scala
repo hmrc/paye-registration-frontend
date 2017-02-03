@@ -16,7 +16,7 @@
 
 package connectors
 
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import config.PAYEShortLivedCache
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.{CacheMap, ShortLivedCache}

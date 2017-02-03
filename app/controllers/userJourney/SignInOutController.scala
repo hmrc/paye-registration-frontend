@@ -17,12 +17,11 @@
 package controllers.userJourney
 
 import auth.PAYERegime
-import config.{PAYEShortLivedCache, PAYESessionCache, FrontendAuthConnector}
-import connectors._
+import javax.inject.{Inject, Singleton}
+import config.FrontendAuthConnector
 import enums.DownstreamOutcome
 import play.api.mvc.{AnyContent, Request, Result}
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{I18nSupport, MessagesApi}
 import services._
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -30,20 +29,25 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-object SignInOutController extends SignInOutController {
-  //$COVERAGE-OFF$
-  override val authConnector = FrontendAuthConnector
-  override val currentProfileService = new CurrentProfileService(new KeystoreConnector(new PAYESessionCache()), new BusinessRegistrationConnector())
-  override val coHoAPIService = new CoHoAPIService(new KeystoreConnector(new PAYESessionCache()), new CoHoAPIConnector())
-  override val payeRegistrationService = new PAYERegistrationService(new KeystoreConnector(new PAYESessionCache), new PAYERegistrationConnector(), new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache())))
-  //$COVERAGE-ON$
+@Singleton
+class SignInOutController @Inject()(
+                                     injCurrentProfileService: CurrentProfileService,
+                                     injCoHoAPIService: CoHoAPIService,
+                                     injPayeRegistrationService: PAYERegistrationService,
+                                     injMessagesApi: MessagesApi)
+  extends SignInOutCtrl {
+  val authConnector = FrontendAuthConnector
+  val currentProfileService = injCurrentProfileService
+  val coHoAPIService = injCoHoAPIService
+  val payeRegistrationService = injPayeRegistrationService
+  val messagesApi = injMessagesApi
 }
 
-trait SignInOutController extends FrontendController with Actions {
+trait SignInOutCtrl extends FrontendController with Actions with I18nSupport {
 
   val currentProfileService: CurrentProfileSrv
   val coHoAPIService: CoHoAPISrv
-  val payeRegistrationService: PAYERegistrationService
+  val payeRegistrationService: PAYERegistrationSrv
 
   def postSignIn = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>

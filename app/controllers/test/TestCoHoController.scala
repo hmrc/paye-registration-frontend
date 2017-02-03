@@ -17,30 +17,33 @@
 package controllers.test
 
 import auth.test.TestPAYERegime
-import config.{PAYESessionCache, FrontendAuthConnector}
-import connectors.{CoHoAPIConnector, KeystoreConnector}
-import connectors.test.TestCoHoAPIConnector
+import javax.inject.{Inject, Singleton}
+import config.FrontendAuthConnector
+import connectors.test.{TestCoHoAPIConnect, TestCoHoAPIConnector}
 import forms.test.TestCoHoCompanyDetailsForm
-import services.CoHoAPIService
+import services.{CoHoAPIService, CoHoAPISrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{I18nSupport, MessagesApi}
 
 import scala.concurrent.Future
 
-object TestCoHoController extends TestCoHoController {
-  //$COVERAGE-OFF$
-  override val authConnector = FrontendAuthConnector
-  override val testCoHoAPIConnector = new TestCoHoAPIConnector()
-  override val coHoAPIService = new CoHoAPIService(new KeystoreConnector(new PAYESessionCache()), new CoHoAPIConnector())
-  //$COVERAGE-ON$
+@Singleton
+class TestCoHoController @Inject()(
+                                    injTestCoHoAPIConnector: TestCoHoAPIConnector,
+                                    injCoHoAPIService: CoHoAPIService,
+                                    injMessagesApi: MessagesApi)
+  extends TestCoHoCtrl {
+  val authConnector = FrontendAuthConnector
+  val testCoHoAPIConnector = injTestCoHoAPIConnector
+  val coHoAPIService = injCoHoAPIService
+  val messagesApi = injMessagesApi
 }
 
-trait TestCoHoController extends FrontendController with Actions {
+trait TestCoHoCtrl extends FrontendController with Actions with I18nSupport {
 
-  val testCoHoAPIConnector: TestCoHoAPIConnector
-  val coHoAPIService: CoHoAPIService
+  val testCoHoAPIConnector: TestCoHoAPIConnect
+  val coHoAPIService: CoHoAPISrv
 
   def coHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     Future.successful(Ok(views.html.pages.test.coHoCompanyDetailsSetup(TestCoHoCompanyDetailsForm.form)))

@@ -17,6 +17,7 @@
 package controllers.userJourney
 
 import play.api.http.Status
+import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testHelpers.PAYERegSpec
@@ -25,26 +26,31 @@ class WelcomeControllerSpec extends PAYERegSpec {
 
   val fakeRequest = FakeRequest("GET", "/")
 
+  class Setup {
+    val controller = new WelcomeCtrl{
+      implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+    }
+  }
 
   "GET /start" should {
-    "return 200" in {
-      val result = WelcomeController.show(fakeRequest)
+    "return 200" in new Setup {
+      val result = controller.show(fakeRequest)
       status(result) shouldBe Status.OK
     }
-    "return HTML" in {
-      val result = WelcomeController.show(fakeRequest)
+    "return HTML" in new Setup {
+      val result = controller.show(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
   }
 
   "POST /start" should {
-    "return 303" in {
-      val result = WelcomeController.submit(fakeRequest)
+    "return 303" in new Setup {
+      val result = controller.submit(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
     }
-    "redirect to trading name page" in {
-      val result = WelcomeController.submit(fakeRequest)
+    "redirect to trading name page" in new Setup {
+      val result = controller.submit(fakeRequest)
       redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.tradingName()}")
     }
   }

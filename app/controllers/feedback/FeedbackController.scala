@@ -16,15 +16,20 @@
 
 package controllers.feedback
 
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{I18nSupport, MessagesApi}
+
 import scala.concurrent.Future
 
-object FeedbackController extends FeedbackController
+@Singleton
+class FeedbackController @Inject()(injMessagesApi: MessagesApi)
+  extends FeedbackCtrl {
+  val messagesApi = injMessagesApi
+}
 
-trait FeedbackController extends FrontendController {
+trait FeedbackCtrl extends FrontendController with I18nSupport {
 
   // TODO: Implement feedback controller
   val show = Action.async { implicit request =>

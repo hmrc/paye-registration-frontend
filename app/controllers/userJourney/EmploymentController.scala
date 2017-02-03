@@ -16,32 +16,34 @@
 
 package controllers.userJourney
 
-import connectors.{S4LConnector, PAYERegistrationConnector, KeystoreConnector}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import config.{PAYEShortLivedCache, PAYESessionCache, FrontendAuthConnector}
+import config.FrontendAuthConnector
 import auth.PAYERegime
+import javax.inject.{Inject, Singleton}
 import enums.DownstreamOutcome
 import forms.employmentDetails._
 
 import scala.concurrent.Future
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
-import services.{S4LService, EmploymentService}
+import play.api.i18n.{I18nSupport, MessagesApi}
+import services.{EmploymentService, EmploymentSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import views.html.pages.employmentDetails.{employingStaff => EmployingStaffPage}
 import views.html.pages.employmentDetails.{companyPension => CompanyPensionPage}
 import views.html.pages.employmentDetails.{subcontractors => SubcontractorsPage}
 import views.html.pages.employmentDetails.{firstPayment => FirstPaymentPage}
 
-object EmploymentController extends EmploymentController {
-  //$COVERAGE-OFF$
-  override val authConnector = FrontendAuthConnector
-  override val employmentService = new EmploymentService(new KeystoreConnector(new PAYESessionCache()), new PAYERegistrationConnector(), new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache())))
-  //$COVERAGE-ON$
+@Singleton
+class EmploymentController @Inject()(
+                                      injEmploymentService: EmploymentService,
+                                      injMessagesApi: MessagesApi)
+  extends EmploymentCtrl {
+  val authConnector = FrontendAuthConnector
+  val employmentService = injEmploymentService
+  val messagesApi = injMessagesApi
 }
 
-trait EmploymentController extends FrontendController with Actions {
-  val employmentService: EmploymentService
+trait EmploymentCtrl extends FrontendController with Actions with I18nSupport {
+  val employmentService: EmploymentSrv
 
   // EMPLOYING STAFF
   val employingStaff = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>

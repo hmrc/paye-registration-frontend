@@ -16,19 +16,21 @@
 
 package controllers.userJourney
 
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
+import javax.inject.{Inject, Singleton}
+
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
-object WelcomeController extends WelcomeController {
-
+@Singleton
+class WelcomeController @Inject()(injMessagesApi: MessagesApi)
+  extends WelcomeCtrl {
+  val messagesApi = injMessagesApi
 }
 
-
-trait WelcomeController extends FrontendController {
+trait WelcomeCtrl extends FrontendController with I18nSupport {
 
   val show = Action.async { implicit request =>
     Future.successful(Ok(views.html.pages.welcome()))

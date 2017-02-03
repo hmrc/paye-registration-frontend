@@ -31,6 +31,7 @@ import services.EmploymentService
 import utils.DateUtil
 import org.mockito.Matchers
 import org.mockito.Mockito.when
+import play.api.i18n.MessagesApi
 
 import scala.concurrent.Future
 
@@ -41,9 +42,10 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
   val nonValidEmploymentViewModel = Employment(None, None, None, None)
 
   class Setup {
-    val controller = new EmploymentController {
+    val controller = new EmploymentCtrl {
       override val authConnector = mockAuthConnector
       override val employmentService = mockEmploymentService
+      implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
     }
   }
 
