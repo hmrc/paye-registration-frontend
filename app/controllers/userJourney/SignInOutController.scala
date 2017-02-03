@@ -17,7 +17,7 @@
 package controllers.userJourney
 
 import auth.PAYERegime
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import config.FrontendAuthConnector
 import enums.DownstreamOutcome
 import play.api.mvc.{AnyContent, Request, Result}

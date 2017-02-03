@@ -16,7 +16,7 @@
 
 package services
 
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import config.{PAYESessionCache, PAYEShortLivedCache}
 import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment => EmploymentView, FirstPayment => FirstPaymentView}
 import models.api.{Employment => EmploymentAPI}

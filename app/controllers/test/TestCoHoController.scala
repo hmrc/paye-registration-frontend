@@ -17,7 +17,7 @@
 package controllers.test
 
 import auth.test.TestPAYERegime
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import config.FrontendAuthConnector
 import connectors.test.{TestCoHoAPIConnect, TestCoHoAPIConnector}
 import forms.test.TestCoHoCompanyDetailsForm

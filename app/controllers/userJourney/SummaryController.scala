@@ -17,7 +17,7 @@
 package controllers.userJourney
 
 import auth.PAYERegime
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import config.FrontendAuthConnector
 import services.{PAYERegistrationService, PAYERegistrationSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions

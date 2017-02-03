@@ -16,7 +16,7 @@
 
 package services
 
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}

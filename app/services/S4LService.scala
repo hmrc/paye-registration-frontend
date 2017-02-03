@@ -16,7 +16,7 @@
 
 package services
 
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import connectors.{S4LConnect, KeystoreConnector, S4LConnector}
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.CacheMap

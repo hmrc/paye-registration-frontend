@@ -17,7 +17,7 @@
 package controllers.test
 
 import auth.test.TestPAYERegime
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector}
 import play.api.i18n.{I18nSupport, MessagesApi}

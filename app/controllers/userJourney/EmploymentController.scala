@@ -19,7 +19,7 @@ package controllers.userJourney
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import config.FrontendAuthConnector
 import auth.PAYERegime
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import enums.DownstreamOutcome
 import forms.employmentDetails._
 
