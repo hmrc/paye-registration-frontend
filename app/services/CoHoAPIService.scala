@@ -16,9 +16,9 @@
 
 package services
 
+import com.google.inject.{Inject, Singleton}
 import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
-import config.PAYESessionCache
-import connectors.{CoHoAPIConnector, CohoApiResponse, CohoApiSuccessResponse, KeystoreConnector}
+import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import models.external.CoHoCompanyDetailsModel
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -26,16 +26,15 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object CoHoAPIService extends CoHoAPIService {
-  //$COVERAGE-OFF$
-  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache)
-  override val coHoAPIConnector = new CoHoAPIConnector
-  //$COVERAGE-ON$
+@Singleton
+class CoHoAPIService @Inject()(keystoreConn: KeystoreConnector, coHoAPIConn: CoHoAPIConnector) extends CoHoAPISrv {
+  override val keystoreConnector = keystoreConn
+  override val coHoAPIConnector = coHoAPIConn
 }
 
-trait CoHoAPIService extends CommonService {
+trait CoHoAPISrv extends CommonService {
 
-  val coHoAPIConnector: CoHoAPIConnector
+  val coHoAPIConnector: CoHoAPIConnect
 
   def fetchAndStoreCoHoCompanyDetails(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {

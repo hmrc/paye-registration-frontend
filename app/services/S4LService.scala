@@ -16,8 +16,8 @@
 
 package services
 
-import config.{PAYESessionCache, PAYEShortLivedCache}
-import connectors.{KeystoreConnector, S4LConnector}
+import com.google.inject.{Inject, Singleton}
+import connectors.{S4LConnect, KeystoreConnector, S4LConnector}
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
@@ -25,16 +25,15 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object S4LService extends S4LService {
-  //$COVERAGE-OFF$
-  override val s4LConnector = new S4LConnector(new PAYEShortLivedCache)
-  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
-  //$COVERAGE-ON$
+@Singleton
+class S4LService @Inject()(s4LConn: S4LConnector, keystoreConn: KeystoreConnector) extends S4LSrv {
+  override val s4LConnector = s4LConn
+  override val keystoreConnector = keystoreConn
 }
 
-trait S4LService extends CommonService {
+trait S4LSrv extends CommonService {
 
-  val s4LConnector: S4LConnector
+  val s4LConnector: S4LConnect
 
   def saveForm[T](formId: String, data: T)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {
     for {

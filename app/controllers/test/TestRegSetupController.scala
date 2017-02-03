@@ -17,12 +17,12 @@
 package controllers.test
 
 import auth.test.TestPAYERegime
-import config.{FrontendAuthConnector, PAYESessionCache}
-import connectors.{KeystoreConnector, PAYERegistrationConnector}
+import config.{PAYEShortLivedCache, FrontendAuthConnector, PAYESessionCache}
+import connectors.{S4LConnector, KeystoreConnector, PAYERegistrationConnector}
 import connectors.test.TestPAYERegConnector
 import enums.DownstreamOutcome
 import forms.test.{TestPAYERegCompanyDetailsSetupForm, TestPAYERegSetupForm}
-import services.{CommonService, PAYERegistrationService}
+import services.{S4LService, CommonService, PAYERegistrationService}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import play.api.Play.current
@@ -33,8 +33,8 @@ import scala.concurrent.Future
 object TestRegSetupController extends TestRegSetupController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
-  override val payeRegService = PAYERegistrationService
-  override val testPAYERegConnector = new TestPAYERegConnector(keystoreConnector, new PAYERegistrationConnector())
+  override val payeRegService = new PAYERegistrationService(new KeystoreConnector(new PAYESessionCache), new PAYERegistrationConnector(), new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache())))
+  override val testPAYERegConnector = new TestPAYERegConnector(new KeystoreConnector(new PAYESessionCache), new PAYERegistrationConnector())
   override val keystoreConnector = new KeystoreConnector(new PAYESessionCache)
   //$COVERAGE-ON$
 }

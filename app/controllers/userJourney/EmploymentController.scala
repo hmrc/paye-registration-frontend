@@ -16,8 +16,9 @@
 
 package controllers.userJourney
 
+import connectors.{S4LConnector, PAYERegistrationConnector, KeystoreConnector}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import config.FrontendAuthConnector
+import config.{PAYEShortLivedCache, PAYESessionCache, FrontendAuthConnector}
 import auth.PAYERegime
 import enums.DownstreamOutcome
 import forms.employmentDetails._
@@ -25,7 +26,7 @@ import forms.employmentDetails._
 import scala.concurrent.Future
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
-import services.EmploymentService
+import services.{S4LService, EmploymentService}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import views.html.pages.employmentDetails.{employingStaff => EmployingStaffPage}
 import views.html.pages.employmentDetails.{companyPension => CompanyPensionPage}
@@ -35,7 +36,7 @@ import views.html.pages.employmentDetails.{firstPayment => FirstPaymentPage}
 object EmploymentController extends EmploymentController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
-  override val employmentService = EmploymentService
+  override val employmentService = new EmploymentService(new KeystoreConnector(new PAYESessionCache()), new PAYERegistrationConnector(), new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache())))
   //$COVERAGE-ON$
 }
 

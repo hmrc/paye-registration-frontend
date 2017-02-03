@@ -17,8 +17,8 @@
 package controllers.userJourney
 
 import auth.PAYERegime
-import config.{FrontendAuthConnector, PAYESessionCache}
-import connectors.KeystoreConnector
+import config.{PAYEShortLivedCache, FrontendAuthConnector, PAYESessionCache}
+import connectors.{S4LConnector, PAYERegistrationConnector, CoHoAPIConnector, KeystoreConnector}
 import enums.DownstreamOutcome
 import forms.companyDetails.TradingNameForm
 import models.view.TradingName
@@ -34,13 +34,11 @@ import views.html.pages.companyDetails.{tradingName => TradingNamePage}
 import scala.concurrent.Future
 
 object CompanyDetailsController extends CompanyDetailsController {
-  //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
-  override val s4LService = S4LService
+  override val s4LService = new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache()))
   override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
-  override val companyDetailsService = CompanyDetailsService
-  override val cohoService = CoHoAPIService
-  //$COVERAGE-ON$
+  override val companyDetailsService = new CompanyDetailsService(new KeystoreConnector(new PAYESessionCache()), new PAYERegistrationConnector(), new CoHoAPIService(new KeystoreConnector(new PAYESessionCache()), new CoHoAPIConnector()))
+  override val cohoService = new CoHoAPIService(new KeystoreConnector(new PAYESessionCache()), new CoHoAPIConnector())
 
 }
 

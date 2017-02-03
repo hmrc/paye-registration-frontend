@@ -17,12 +17,13 @@
 package controllers.userJourney
 
 import auth.PAYERegime
-import config.FrontendAuthConnector
+import config.{PAYEShortLivedCache, PAYESessionCache, FrontendAuthConnector}
+import connectors._
 import enums.DownstreamOutcome
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
-import services.{PAYERegistrationService, CoHoAPIService, CurrentProfileService}
+import services._
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -32,16 +33,16 @@ import scala.concurrent.Future
 object SignInOutController extends SignInOutController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
-  override val currentProfileService = CurrentProfileService
-  override val coHoAPIService = CoHoAPIService
-  override val payeRegistrationService = PAYERegistrationService
+  override val currentProfileService = new CurrentProfileService(new KeystoreConnector(new PAYESessionCache()), new BusinessRegistrationConnector())
+  override val coHoAPIService = new CoHoAPIService(new KeystoreConnector(new PAYESessionCache()), new CoHoAPIConnector())
+  override val payeRegistrationService = new PAYERegistrationService(new KeystoreConnector(new PAYESessionCache), new PAYERegistrationConnector(), new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache())))
   //$COVERAGE-ON$
 }
 
 trait SignInOutController extends FrontendController with Actions {
 
-  val currentProfileService: CurrentProfileService
-  val coHoAPIService: CoHoAPIService
+  val currentProfileService: CurrentProfileSrv
+  val coHoAPIService: CoHoAPISrv
   val payeRegistrationService: PAYERegistrationService
 
   def postSignIn = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {

@@ -17,8 +17,9 @@
 package controllers.userJourney
 
 import auth.PAYERegime
-import config.FrontendAuthConnector
-import services.PAYERegistrationService
+import config.{PAYEShortLivedCache, PAYESessionCache, FrontendAuthConnector}
+import connectors.{S4LConnector, PAYERegistrationConnector, KeystoreConnector}
+import services.{S4LService, PAYERegistrationService}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import views.html.pages.{summary => SummaryPage}
@@ -28,7 +29,7 @@ import play.api.i18n.Messages.Implicits._
 object SummaryController extends SummaryController {
   //$COVERAGE-OFF$
   override val authConnector = FrontendAuthConnector
-  override val payeRegistrationService = PAYERegistrationService
+  override val payeRegistrationService = new PAYERegistrationService(new KeystoreConnector(new PAYESessionCache), new PAYERegistrationConnector(), new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache())))
   //$COVERAGE-ON$
 }
 

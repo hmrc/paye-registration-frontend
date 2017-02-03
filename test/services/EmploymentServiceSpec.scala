@@ -45,11 +45,7 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
   val returnHttpResponse = HttpResponse(200)
 
   class Setup {
-    val service = new EmploymentService {
-      override val keystoreConnector = mockKeystoreConnector
-      override val payeRegConnector = mockPAYERegConnector
-      override val s4LService = mockS4LService
-    }
+    val service = new EmploymentService (mockKeystoreConnector, mockPAYERegConnector, mockS4LService)
 
     val dateUtil = new DateUtil {}
   }

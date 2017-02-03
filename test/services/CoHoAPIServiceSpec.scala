@@ -34,10 +34,7 @@ class CoHoAPIServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFi
   val mockCoHoAPIConnector = mock[CoHoAPIConnector]
 
   trait Setup {
-    val service = new CoHoAPIService {
-      override val coHoAPIConnector = mockCoHoAPIConnector
-      override val keystoreConnector = mockKeystoreConnector
-    }
+    val service = new CoHoAPIService (mockKeystoreConnector, mockCoHoAPIConnector)
   }
 
   val tstSuccessResult = CohoApiSuccessResponse(validCoHoCompanyDetailsResponse)

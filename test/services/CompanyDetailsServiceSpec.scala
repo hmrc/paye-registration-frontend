@@ -37,18 +37,11 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   val mockPAYERegConnector = mock[PAYERegistrationConnector]
   val mockCoHoService = mock[CoHoAPIService]
   class Setup {
-    val service = new CompanyDetailsService {
-      override val keystoreConnector = mockKeystoreConnector
-      override val payeRegConnector = mockPAYERegConnector
-      override val cohoService = mockCoHoService
-    }
+    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService)
   }
 
   class NoCompanyDetailsMockedSetup {
-    val service = new CompanyDetailsService {
-      override val keystoreConnector = mockKeystoreConnector
-      override val payeRegConnector = mockPAYERegConnector
-      override val cohoService = mockCoHoService
+    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService) {
 
       override def getCompanyDetails()(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsView]] = {
         Future.successful(None)
@@ -66,10 +59,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   }
 
   class CompanyDetailsMockedSetup {
-    val service = new CompanyDetailsService {
-      override val keystoreConnector = mockKeystoreConnector
-      override val payeRegConnector = mockPAYERegConnector
-      override val cohoService = mockCoHoService
+    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService) {
 
       override def getCompanyDetails()(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsView]] = {
         Future.successful(Some(validCompanyDetailsViewModel))
@@ -87,10 +77,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   }
 
   class APIConverterMockedSetup {
-    val service = new CompanyDetailsService {
-      override val keystoreConnector = mockKeystoreConnector
-      override val payeRegConnector = mockPAYERegConnector
-      override val cohoService = mockCoHoService
+    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService) {
 
       override def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
         validCompanyDetailsViewModel

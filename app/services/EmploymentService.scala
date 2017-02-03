@@ -16,6 +16,7 @@
 
 package services
 
+import com.google.inject.{Inject, Singleton}
 import config.{PAYESessionCache, PAYEShortLivedCache}
 import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment => EmploymentView, FirstPayment => FirstPaymentView}
 import models.api.{Employment => EmploymentAPI}
@@ -23,7 +24,7 @@ import utils.DateUtil
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import connectors.{KeystoreConnector, PAYERegistrationConnector}
+import connectors.{PAYERegistrationConnect, KeystoreConnector, PAYERegistrationConnector}
 import enums.{CacheKeys, DownstreamOutcome}
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -32,17 +33,18 @@ sealed trait SavedResponse
 case object S4LSaved extends SavedResponse
 case object MongoSaved extends SavedResponse
 
-object EmploymentService extends EmploymentService {
-  //$COVERAGE-OFF$
-  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
-  override val payeRegConnector = new PAYERegistrationConnector()
-  override val s4LService = S4LService
-  //$COVERAGE-ON$
+@Singleton
+class EmploymentService @Inject()(keystoreConn: KeystoreConnector, payeRegistrationConn: PAYERegistrationConnector, s4LServ: S4LService) extends EmploymentSrv {
+  override val keystoreConnector = keystoreConn
+  override val payeRegConnector = payeRegistrationConn
+  override val s4LService = s4LServ
 }
 
-trait EmploymentService extends CommonService with DateUtil {
-  val payeRegConnector: PAYERegistrationConnector
-  val s4LService: S4LService
+trait EmploymentSrv extends CommonService with DateUtil {
+
+  val payeRegConnector: PAYERegistrationConnect
+  val s4LService: S4LSrv
+
   implicit val formatRecordSet = Json.format[EmploymentView]
 
   private[services] def viewToAPI(viewData: EmploymentView): Either[EmploymentView, EmploymentAPI] = viewData match {
