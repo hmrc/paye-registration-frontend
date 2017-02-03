@@ -47,7 +47,7 @@ trait TestPAYERegConnect extends CommonService {
 
   def addPAYERegistration(reg: PAYERegistrationAPI)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
-      resp <- http.POST[PAYERegistrationAPI, HttpResponse](s"$payeRegUrl/register-for-paye/test-only/update-registration/${reg.registrationID}", reg)
+      resp <- http.POST[PAYERegistrationAPI, HttpResponse](s"$payeRegUrl/paye-registration/test-only/update-registration/${reg.registrationID}", reg)
     } yield resp.status match {
       case Status.OK => DownstreamOutcome.Success
       case _  =>        DownstreamOutcome.Failure
@@ -68,7 +68,7 @@ trait TestPAYERegConnect extends CommonService {
   }
 
   def testRegistrationTeardown()(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    http.GET[HttpResponse](s"$payeRegUrl/register-for-paye/test-only/registration-teardown") map {
+    http.GET[HttpResponse](s"$payeRegUrl/paye-registration/test-only/registration-teardown") map {
       resp => DownstreamOutcome.Success
     } recover {
       case e: Exception =>
