@@ -19,6 +19,6 @@ package auth.test
 import uk.gov.hmrc.play.frontend.auth.GovernmentGateway
 
 object TestPAYEAuthenticationProvider  extends GovernmentGateway {
-  override val continueURL: String = TestPAYEExternalUrls.continueURL
-  override val loginURL: String = TestPAYEExternalUrls.loginURL
+  override lazy val continueURL: String = TestPAYEExternalUrls.continueURL
+  override lazy val loginURL: String = TestPAYEExternalUrls.loginURL
 }
