@@ -18,43 +18,36 @@ package controllers.test
 
 import auth.test.TestPAYERegime
 import com.google.inject.{Inject, Singleton}
-import config.{PAYEShortLivedCache, FrontendAuthConnector, PAYESessionCache}
-import connectors.{S4LConnector, KeystoreConnector, PAYERegistrationConnector}
-import connectors.test.TestPAYERegConnector
+import config.FrontendAuthConnector
+import connectors.KeystoreConnector
+import connectors.test.{TestPAYERegConnect, TestPAYERegConnector}
 import enums.DownstreamOutcome
 import forms.test.{TestPAYERegCompanyDetailsSetupForm, TestPAYERegSetupForm}
-import services.{S4LService, CommonService, PAYERegistrationService}
+import services.{CommonService, PAYERegistrationService, PAYERegistrationSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{I18nSupport, MessagesApi}
 
 import scala.concurrent.Future
 
-//object TestRegSetupController extends TestRegSetupController {
-//  //$COVERAGE-OFF$
-//  override val authConnector = FrontendAuthConnector
-//  override val payeRegService = new PAYERegistrationService(new KeystoreConnector(new PAYESessionCache), new PAYERegistrationConnector(), new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache())))
-//  override val testPAYERegConnector = new TestPAYERegConnector(new KeystoreConnector(new PAYESessionCache), new PAYERegistrationConnector())
-//  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache)
-//  //$COVERAGE-ON$
-//}
 @Singleton
 class TestRegSetupController @Inject()(
                                         injPayeRegService:PAYERegistrationService,
                                         injTestPAYERegConnector: TestPAYERegConnector,
-                                        injKeystoreConnector: KeystoreConnector)
+                                        injKeystoreConnector: KeystoreConnector,
+                                        injMessagesApi: MessagesApi)
   extends TestRegSetupCtrl {
   val authConnector = FrontendAuthConnector
   val payeRegService = injPayeRegService
   val testPAYERegConnector = injTestPAYERegConnector
   val keystoreConnector = injKeystoreConnector
+  val messagesApi = injMessagesApi
 }
 
-trait TestRegSetupCtrl extends FrontendController with Actions with CommonService {
+trait TestRegSetupCtrl extends FrontendController with Actions with CommonService with I18nSupport {
 
-  val payeRegService: PAYERegistrationService
-  val testPAYERegConnector: TestPAYERegConnector
+  val payeRegService: PAYERegistrationSrv
+  val testPAYERegConnector: TestPAYERegConnect
 
   val regTeardown = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     testPAYERegConnector.testRegistrationTeardown() map {

@@ -18,59 +18,42 @@ package controllers.userJourney
 
 import auth.PAYERegime
 import com.google.inject.{Inject, Singleton}
-import config.{PAYEShortLivedCache, FrontendAuthConnector, PAYESessionCache}
-import connectors.{S4LConnector, PAYERegistrationConnector, CoHoAPIConnector, KeystoreConnector}
+import config.FrontendAuthConnector
+import connectors.{KeystoreConnect, KeystoreConnector}
 import enums.DownstreamOutcome
 import forms.companyDetails.TradingNameForm
 import models.view.TradingName
-import play.api.Play.current
 import play.api.data.Form
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{AnyContent, Request, Result}
-import services.{CoHoAPIService, CompanyDetailsService, S4LService}
+import services.{CoHoAPIService, CoHoAPISrv, CompanyDetailsService, CompanyDetailsSrv, S4LService, S4LSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import views.html.pages.companyDetails.{tradingName => TradingNamePage}
 
 import scala.concurrent.Future
 
-//object CompanyDetailsController extends CompanyDetailsController {
-//  //$COVERAGE-OFF$
-//  override val authConnector = FrontendAuthConnector
-//  override val s4LService = new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache()))
-//  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
-//  override val companyDetailsService = new CompanyDetailsService(new KeystoreConnector(new PAYESessionCache()), new PAYERegistrationConnector(), new CoHoAPIService(new KeystoreConnector(new PAYESessionCache()), new CoHoAPIConnector()))
-//  override val cohoService = new CoHoAPIService(new KeystoreConnector(new PAYESessionCache()), new CoHoAPIConnector())
-//  //$COVERAGE-ON$
-//
-//}
-//
-//trait CompanyDetailsController extends FrontendController with Actions {
-//
-//  val s4LService: S4LService
-//  val keystoreConnector: KeystoreConnector
-//  val companyDetailsService: CompanyDetailsService
-//  val cohoService: CoHoAPIService
-
 @Singleton
 class CompanyDetailsController @Inject()(
                                           injS4LService: S4LService,
                                           injKeystoreConnector: KeystoreConnector,
                                           injCompanyDetailsService: CompanyDetailsService,
-                                          injCohoService: CoHoAPIService)
+                                          injCohoService: CoHoAPIService,
+                                          injMessagesApi: MessagesApi)
   extends CompanyDetailsCtrl {
   val authConnector = FrontendAuthConnector
   val s4LService = injS4LService
   val keystoreConnector = injKeystoreConnector
   val companyDetailsService = injCompanyDetailsService
   val cohoService = injCohoService
+  val messagesApi = injMessagesApi
 }
 
-trait CompanyDetailsCtrl extends FrontendController with Actions {
-  val s4LService: S4LService
-  val keystoreConnector: KeystoreConnector
-  val companyDetailsService: CompanyDetailsService
-  val cohoService: CoHoAPIService
+trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSupport {
+  val s4LService: S4LSrv
+  val keystoreConnector: KeystoreConnect
+  val companyDetailsService: CompanyDetailsSrv
+  val cohoService: CoHoAPISrv
 
   val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
 

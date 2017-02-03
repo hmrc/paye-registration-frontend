@@ -18,31 +18,26 @@ package controllers.userJourney
 
 import auth.PAYERegime
 import com.google.inject.{Inject, Singleton}
-import config.{PAYEShortLivedCache, PAYESessionCache, FrontendAuthConnector}
-import connectors.{S4LConnector, PAYERegistrationConnector, KeystoreConnector}
-import services.{S4LService, PAYERegistrationService}
+import config.FrontendAuthConnector
+import services.{PAYERegistrationService, PAYERegistrationSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import views.html.pages.{summary => SummaryPage}
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{I18nSupport, MessagesApi}
 
-//object SummaryController extends SummaryController {
-//  //$COVERAGE-OFF$
-//  override val authConnector = FrontendAuthConnector
-//  override val payeRegistrationService = new PAYERegistrationService(new KeystoreConnector(new PAYESessionCache), new PAYERegistrationConnector(), new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache())))
-//  //$COVERAGE-ON$
-//}
 @Singleton
-class SummaryController @Inject()(injPayeRegistrationService: PAYERegistrationService)
+class SummaryController @Inject()(
+                                   injPayeRegistrationService: PAYERegistrationService,
+                                   injMessagesApi: MessagesApi)
   extends SummaryCtrl {
   val authConnector = FrontendAuthConnector
   val payeRegistrationService = injPayeRegistrationService
+  val messagesApi = injMessagesApi
 }
 
-trait SummaryCtrl extends FrontendController with Actions {
+trait SummaryCtrl extends FrontendController with Actions with I18nSupport {
 
-  val payeRegistrationService: PAYERegistrationService
+  val payeRegistrationService: PAYERegistrationSrv
 
   val summary = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     payeRegistrationService.getRegistrationSummary map {

@@ -17,6 +17,7 @@
 package controllers.userJourney
 
 import play.api.http.Status
+import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testHelpers.PAYERegSpec
@@ -26,7 +27,9 @@ class WelcomeControllerSpec extends PAYERegSpec {
   val fakeRequest = FakeRequest("GET", "/")
 
   class Setup {
-    val controller = new WelcomeCtrl{}
+    val controller = new WelcomeCtrl{
+      implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+    }
   }
 
   "GET /start" should {

@@ -18,35 +18,29 @@ package controllers.test
 
 import auth.test.TestPAYERegime
 import com.google.inject.{Inject, Singleton}
-import config.{PAYEShortLivedCache, FrontendAuthConnector, PAYESessionCache}
-import connectors.{S4LConnector, KeystoreConnector}
-import services.S4LService
+import config.FrontendAuthConnector
+import connectors.{KeystoreConnect, KeystoreConnector}
+import play.api.i18n.{I18nSupport, MessagesApi}
+import services.{S4LService, S4LSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-
-//object TestCacheController extends TestCacheController {
-//  //$COVERAGE-OFF$
-//  override val authConnector = FrontendAuthConnector
-//  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
-//  override val s4LService = new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache()))
-//  //$COVERAGE-ON$
-//
-//}
 
 @Singleton
 class TestCacheController @Inject()(
                                      injKeystoreConnector: KeystoreConnector,
-                                     injS4LService: S4LService)
+                                     injS4LService: S4LService,
+                                     injMessagesApi: MessagesApi)
   extends TestCacheCtrl {
   val authConnector = FrontendAuthConnector
-  val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
-  val s4LService = S4LService
+  val keystoreConnector = injKeystoreConnector
+  val s4LService = injS4LService
+  val messagesApi = injMessagesApi
 }
 
-trait TestCacheCtrl extends FrontendController with Actions {
+trait TestCacheCtrl extends FrontendController with Actions with I18nSupport {
 
-  val keystoreConnector: KeystoreConnector
-  val s4LService: S4LService
+  val keystoreConnector: KeystoreConnect
+  val s4LService: S4LSrv
 
   val tearDownS4L = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     s4LService.clear() map {

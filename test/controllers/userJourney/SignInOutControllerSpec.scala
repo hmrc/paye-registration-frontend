@@ -19,12 +19,13 @@ package controllers.userJourney
 import builders.AuthBuilder
 import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
-import services.{PAYERegistrationService, CoHoAPIService, CurrentProfileService}
+import services.{CoHoAPIService, CurrentProfileService, PAYERegistrationService}
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import org.mockito.Matchers
 import org.mockito.Mockito._
+import play.api.i18n.MessagesApi
 import testHelpers.PAYERegSpec
 
 class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
@@ -39,6 +40,7 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       override val currentProfileService = mockCurrentProfileService
       override val coHoAPIService = mockCoHoAPIService
       override val payeRegistrationService = mockPAYERegService
+      implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
     }
   }
 

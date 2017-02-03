@@ -18,14 +18,15 @@ package controllers.userJourney
 
 import builders.AuthBuilder
 import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
-import enums.{DownstreamOutcome, CacheKeys}
-import fixtures.{S4LFixture, CoHoAPIFixture}
+import enums.{CacheKeys, DownstreamOutcome}
+import fixtures.{CoHoAPIFixture, S4LFixture}
 import models.external.CoHoCompanyDetailsModel
 import models.view.{TradingName => TradingNameView}
 import org.jsoup._
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import play.api.http.Status
+import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import services.{CoHoAPIService, CompanyDetailsService, S4LService}
@@ -47,6 +48,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
       override val authConnector = mockAuthConnector
       override val companyDetailsService = mockCompanyDetailsService
       override val cohoService = mockCoHoService
+      implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
     }
   }
 

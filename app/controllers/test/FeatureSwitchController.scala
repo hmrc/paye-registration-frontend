@@ -16,15 +16,17 @@
 
 package controllers.test
 
+import com.google.inject.Singleton
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.{FeatureSwitch, PAYEFeatureSwitches}
 
 import scala.concurrent.Future
 
-object FeatureSwitchController extends FeatureSwitchController
+@Singleton
+class FeatureSwitchController extends FeatureSwitchCtrl
 
-trait FeatureSwitchController extends FrontendController {
+trait FeatureSwitchCtrl extends FrontendController {
 
   val featureSwitch = FeatureSwitch
 
