@@ -36,13 +36,12 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 
 class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
-
   val mockS4LService = mock[S4LService]
   val mockCompanyDetailsService = mock[CompanyDetailsService]
   val mockCoHoService = mock[CoHoAPIService]
 
   class Setup {
-    val controller = new CompanyDetailsController {
+    val controller = new CompanyDetailsCtrl {
       override val s4LService = mockS4LService
       override val keystoreConnector = mockKeystoreConnector
       override val authConnector = mockAuthConnector

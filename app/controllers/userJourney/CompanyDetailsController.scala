@@ -17,6 +17,7 @@
 package controllers.userJourney
 
 import auth.PAYERegime
+import com.google.inject.{Inject, Singleton}
 import config.{PAYEShortLivedCache, FrontendAuthConnector, PAYESessionCache}
 import connectors.{S4LConnector, PAYERegistrationConnector, CoHoAPIConnector, KeystoreConnector}
 import enums.DownstreamOutcome
@@ -33,17 +34,39 @@ import views.html.pages.companyDetails.{tradingName => TradingNamePage}
 
 import scala.concurrent.Future
 
-object CompanyDetailsController extends CompanyDetailsController {
-  override val authConnector = FrontendAuthConnector
-  override val s4LService = new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache()))
-  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
-  override val companyDetailsService = new CompanyDetailsService(new KeystoreConnector(new PAYESessionCache()), new PAYERegistrationConnector(), new CoHoAPIService(new KeystoreConnector(new PAYESessionCache()), new CoHoAPIConnector()))
-  override val cohoService = new CoHoAPIService(new KeystoreConnector(new PAYESessionCache()), new CoHoAPIConnector())
+//object CompanyDetailsController extends CompanyDetailsController {
+//  //$COVERAGE-OFF$
+//  override val authConnector = FrontendAuthConnector
+//  override val s4LService = new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache()))
+//  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
+//  override val companyDetailsService = new CompanyDetailsService(new KeystoreConnector(new PAYESessionCache()), new PAYERegistrationConnector(), new CoHoAPIService(new KeystoreConnector(new PAYESessionCache()), new CoHoAPIConnector()))
+//  override val cohoService = new CoHoAPIService(new KeystoreConnector(new PAYESessionCache()), new CoHoAPIConnector())
+//  //$COVERAGE-ON$
+//
+//}
+//
+//trait CompanyDetailsController extends FrontendController with Actions {
+//
+//  val s4LService: S4LService
+//  val keystoreConnector: KeystoreConnector
+//  val companyDetailsService: CompanyDetailsService
+//  val cohoService: CoHoAPIService
 
+@Singleton
+class CompanyDetailsController @Inject()(
+                                          injS4LService: S4LService,
+                                          injKeystoreConnector: KeystoreConnector,
+                                          injCompanyDetailsService: CompanyDetailsService,
+                                          injCohoService: CoHoAPIService)
+  extends CompanyDetailsCtrl {
+  val authConnector = FrontendAuthConnector
+  val s4LService = injS4LService
+  val keystoreConnector = injKeystoreConnector
+  val companyDetailsService = injCompanyDetailsService
+  val cohoService = injCohoService
 }
 
-trait CompanyDetailsController extends FrontendController with Actions {
-
+trait CompanyDetailsCtrl extends FrontendController with Actions {
   val s4LService: S4LService
   val keystoreConnector: KeystoreConnector
   val companyDetailsService: CompanyDetailsService

@@ -16,15 +16,19 @@
 
 package controllers.feedback
 
+import com.google.inject.Singleton
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
+
 import scala.concurrent.Future
 
-object FeedbackController extends FeedbackController
+//object FeedbackController extends FeedbackController
+@Singleton
+class FeedbackController extends FeedbackCtrl
 
-trait FeedbackController extends FrontendController {
+trait FeedbackCtrl extends FrontendController {
 
   // TODO: Implement feedback controller
   val show = Action.async { implicit request =>

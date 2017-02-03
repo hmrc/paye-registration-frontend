@@ -17,6 +17,7 @@
 package controllers.userJourney
 
 import auth.PAYERegime
+import com.google.inject.{Inject, Singleton}
 import config.{PAYEShortLivedCache, PAYESessionCache, FrontendAuthConnector}
 import connectors._
 import enums.DownstreamOutcome
@@ -30,16 +31,26 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-object SignInOutController extends SignInOutController {
-  //$COVERAGE-OFF$
-  override val authConnector = FrontendAuthConnector
-  override val currentProfileService = new CurrentProfileService(new KeystoreConnector(new PAYESessionCache()), new BusinessRegistrationConnector())
-  override val coHoAPIService = new CoHoAPIService(new KeystoreConnector(new PAYESessionCache()), new CoHoAPIConnector())
-  override val payeRegistrationService = new PAYERegistrationService(new KeystoreConnector(new PAYESessionCache), new PAYERegistrationConnector(), new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache())))
-  //$COVERAGE-ON$
+//object SignInOutController extends SignInOutController {
+//  //$COVERAGE-OFF$
+//  override val authConnector = FrontendAuthConnector
+//  override val currentProfileService = new CurrentProfileService(new KeystoreConnector(new PAYESessionCache()), new BusinessRegistrationConnector())
+//  override val coHoAPIService = new CoHoAPIService(new KeystoreConnector(new PAYESessionCache()), new CoHoAPIConnector())
+//  override val payeRegistrationService = new PAYERegistrationService(new KeystoreConnector(new PAYESessionCache), new PAYERegistrationConnector(), new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache())))
+//  //$COVERAGE-ON$
+//}
+@Singleton
+class SignInOutController @Inject()(
+                                     injCurrentProfileService: CurrentProfileService,
+                                     injCoHoAPIService: CoHoAPIService,
+                                     injPayeRegistrationService: PAYERegistrationService) extends SignInOutCtrl {
+  val authConnector = FrontendAuthConnector
+  val currentProfileService = injCurrentProfileService
+  val coHoAPIService = injCoHoAPIService
+  val payeRegistrationService = injPayeRegistrationService
 }
 
-trait SignInOutController extends FrontendController with Actions {
+trait SignInOutCtrl extends FrontendController with Actions {
 
   val currentProfileService: CurrentProfileSrv
   val coHoAPIService: CoHoAPISrv

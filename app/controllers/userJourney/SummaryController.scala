@@ -17,6 +17,7 @@
 package controllers.userJourney
 
 import auth.PAYERegime
+import com.google.inject.{Inject, Singleton}
 import config.{PAYEShortLivedCache, PAYESessionCache, FrontendAuthConnector}
 import connectors.{S4LConnector, PAYERegistrationConnector, KeystoreConnector}
 import services.{S4LService, PAYERegistrationService}
@@ -26,14 +27,20 @@ import views.html.pages.{summary => SummaryPage}
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 
-object SummaryController extends SummaryController {
-  //$COVERAGE-OFF$
-  override val authConnector = FrontendAuthConnector
-  override val payeRegistrationService = new PAYERegistrationService(new KeystoreConnector(new PAYESessionCache), new PAYERegistrationConnector(), new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache())))
-  //$COVERAGE-ON$
+//object SummaryController extends SummaryController {
+//  //$COVERAGE-OFF$
+//  override val authConnector = FrontendAuthConnector
+//  override val payeRegistrationService = new PAYERegistrationService(new KeystoreConnector(new PAYESessionCache), new PAYERegistrationConnector(), new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache())))
+//  //$COVERAGE-ON$
+//}
+@Singleton
+class SummaryController @Inject()(injPayeRegistrationService: PAYERegistrationService)
+  extends SummaryCtrl {
+  val authConnector = FrontendAuthConnector
+  val payeRegistrationService = injPayeRegistrationService
 }
 
-trait SummaryController extends FrontendController with Actions {
+trait SummaryCtrl extends FrontendController with Actions {
 
   val payeRegistrationService: PAYERegistrationService
 

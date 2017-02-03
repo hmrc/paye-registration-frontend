@@ -20,6 +20,7 @@ import connectors.{S4LConnector, PAYERegistrationConnector, KeystoreConnector}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import config.{PAYEShortLivedCache, PAYESessionCache, FrontendAuthConnector}
 import auth.PAYERegime
+import com.google.inject.{Inject, Singleton}
 import enums.DownstreamOutcome
 import forms.employmentDetails._
 
@@ -33,14 +34,20 @@ import views.html.pages.employmentDetails.{companyPension => CompanyPensionPage}
 import views.html.pages.employmentDetails.{subcontractors => SubcontractorsPage}
 import views.html.pages.employmentDetails.{firstPayment => FirstPaymentPage}
 
-object EmploymentController extends EmploymentController {
-  //$COVERAGE-OFF$
-  override val authConnector = FrontendAuthConnector
-  override val employmentService = new EmploymentService(new KeystoreConnector(new PAYESessionCache()), new PAYERegistrationConnector(), new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache())))
-  //$COVERAGE-ON$
+//object EmploymentController extends EmploymentController {
+//  //$COVERAGE-OFF$
+//  override val authConnector = FrontendAuthConnector
+//  override val employmentService = new EmploymentService(new KeystoreConnector(new PAYESessionCache()), new PAYERegistrationConnector(), new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache())))
+//  //$COVERAGE-ON$
+//}
+//
+@Singleton
+class EmploymentController @Inject()(injEmploymentService: EmploymentService) extends EmploymentCtrl {
+  val authConnector = FrontendAuthConnector
+  val employmentService = injEmploymentService
 }
 
-trait EmploymentController extends FrontendController with Actions {
+trait EmploymentCtrl extends FrontendController with Actions {
   val employmentService: EmploymentService
 
   // EMPLOYING STAFF

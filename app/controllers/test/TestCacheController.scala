@@ -17,22 +17,33 @@
 package controllers.test
 
 import auth.test.TestPAYERegime
+import com.google.inject.{Inject, Singleton}
 import config.{PAYEShortLivedCache, FrontendAuthConnector, PAYESessionCache}
 import connectors.{S4LConnector, KeystoreConnector}
 import services.S4LService
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
-object TestCacheController extends TestCacheController {
-  //$COVERAGE-OFF$
-  override val authConnector = FrontendAuthConnector
-  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
-  override val s4LService = new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache()))
-  //$COVERAGE-ON$
+//object TestCacheController extends TestCacheController {
+//  //$COVERAGE-OFF$
+//  override val authConnector = FrontendAuthConnector
+//  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
+//  override val s4LService = new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache()))
+//  //$COVERAGE-ON$
+//
+//}
 
+@Singleton
+class TestCacheController @Inject()(
+                                     injKeystoreConnector: KeystoreConnector,
+                                     injS4LService: S4LService)
+  extends TestCacheCtrl {
+  val authConnector = FrontendAuthConnector
+  val keystoreConnector = new KeystoreConnector(new PAYESessionCache())
+  val s4LService = S4LService
 }
 
-trait TestCacheController extends FrontendController with Actions {
+trait TestCacheCtrl extends FrontendController with Actions {
 
   val keystoreConnector: KeystoreConnector
   val s4LService: S4LService

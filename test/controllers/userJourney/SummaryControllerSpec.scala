@@ -33,7 +33,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
   val mockPAYERegistrationService = mock[PAYERegistrationService]
 
   class Setup {
-    val controller = new SummaryController {
+    val controller = new SummaryCtrl {
 
       override val payeRegistrationService = mockPAYERegistrationService
       override val authConnector = mockAuthConnector

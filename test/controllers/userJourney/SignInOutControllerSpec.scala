@@ -34,7 +34,7 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
   val mockPAYERegService = mock[PAYERegistrationService]
 
   class Setup {
-    val controller = new SignInOutController {
+    val controller = new SignInOutCtrl {
       override val authConnector = mockAuthConnector
       override val currentProfileService = mockCurrentProfileService
       override val coHoAPIService = mockCoHoAPIService

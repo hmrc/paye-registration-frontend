@@ -17,6 +17,7 @@
 package controllers.test
 
 import auth.test.TestPAYERegime
+import com.google.inject.{Inject, Singleton}
 import config.{PAYESessionCache, FrontendAuthConnector}
 import connectors.{CoHoAPIConnector, KeystoreConnector}
 import connectors.test.TestCoHoAPIConnector
@@ -29,15 +30,23 @@ import play.api.i18n.Messages.Implicits._
 
 import scala.concurrent.Future
 
-object TestCoHoController extends TestCoHoController {
-  //$COVERAGE-OFF$
-  override val authConnector = FrontendAuthConnector
-  override val testCoHoAPIConnector = new TestCoHoAPIConnector()
-  override val coHoAPIService = new CoHoAPIService(new KeystoreConnector(new PAYESessionCache()), new CoHoAPIConnector())
-  //$COVERAGE-ON$
+//object TestCoHoController extends TestCoHoController {
+//  //$COVERAGE-OFF$
+//  override val authConnector = FrontendAuthConnector
+//  override val testCoHoAPIConnector = new TestCoHoAPIConnector()
+//  override val coHoAPIService = new CoHoAPIService(new KeystoreConnector(new PAYESessionCache()), new CoHoAPIConnector())//  //$COVERAGE-ON$
+//}
+@Singleton
+class TestCoHoController @Inject()(
+                                    injTestCoHoAPIConnector: TestCoHoAPIConnector,
+                                    injCoHoAPIService: CoHoAPIService)
+  extends TestCoHoCtrl {
+  val authConnector = FrontendAuthConnector
+  val testCoHoAPIConnector = injTestCoHoAPIConnector
+  val coHoAPIService = injCoHoAPIService
 }
 
-trait TestCoHoController extends FrontendController with Actions {
+trait TestCoHoCtrl extends FrontendController with Actions {
 
   val testCoHoAPIConnector: TestCoHoAPIConnector
   val coHoAPIService: CoHoAPIService

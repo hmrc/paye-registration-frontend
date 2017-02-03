@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import com.google.inject.Singleton
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc._
@@ -23,12 +24,10 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
-object WelcomeController extends WelcomeController {
+@Singleton
+class WelcomeController extends WelcomeCtrl {}
 
-}
-
-
-trait WelcomeController extends FrontendController {
+trait WelcomeCtrl extends FrontendController {
 
   val show = Action.async { implicit request =>
     Future.successful(Ok(views.html.pages.welcome()))

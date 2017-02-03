@@ -41,7 +41,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
   val nonValidEmploymentViewModel = Employment(None, None, None, None)
 
   class Setup {
-    val controller = new EmploymentController {
+    val controller = new EmploymentCtrl {
       override val authConnector = mockAuthConnector
       override val employmentService = mockEmploymentService
     }

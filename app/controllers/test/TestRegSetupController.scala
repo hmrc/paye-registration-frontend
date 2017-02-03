@@ -17,6 +17,7 @@
 package controllers.test
 
 import auth.test.TestPAYERegime
+import com.google.inject.{Inject, Singleton}
 import config.{PAYEShortLivedCache, FrontendAuthConnector, PAYESessionCache}
 import connectors.{S4LConnector, KeystoreConnector, PAYERegistrationConnector}
 import connectors.test.TestPAYERegConnector
@@ -30,16 +31,27 @@ import play.api.i18n.Messages.Implicits._
 
 import scala.concurrent.Future
 
-object TestRegSetupController extends TestRegSetupController {
-  //$COVERAGE-OFF$
-  override val authConnector = FrontendAuthConnector
-  override val payeRegService = new PAYERegistrationService(new KeystoreConnector(new PAYESessionCache), new PAYERegistrationConnector(), new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache())))
-  override val testPAYERegConnector = new TestPAYERegConnector(new KeystoreConnector(new PAYESessionCache), new PAYERegistrationConnector())
-  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache)
-  //$COVERAGE-ON$
+//object TestRegSetupController extends TestRegSetupController {
+//  //$COVERAGE-OFF$
+//  override val authConnector = FrontendAuthConnector
+//  override val payeRegService = new PAYERegistrationService(new KeystoreConnector(new PAYESessionCache), new PAYERegistrationConnector(), new S4LService(new S4LConnector(new PAYEShortLivedCache()), new KeystoreConnector(new PAYESessionCache())))
+//  override val testPAYERegConnector = new TestPAYERegConnector(new KeystoreConnector(new PAYESessionCache), new PAYERegistrationConnector())
+//  override val keystoreConnector = new KeystoreConnector(new PAYESessionCache)
+//  //$COVERAGE-ON$
+//}
+@Singleton
+class TestRegSetupController @Inject()(
+                                        injPayeRegService:PAYERegistrationService,
+                                        injTestPAYERegConnector: TestPAYERegConnector,
+                                        injKeystoreConnector: KeystoreConnector)
+  extends TestRegSetupCtrl {
+  val authConnector = FrontendAuthConnector
+  val payeRegService = injPayeRegService
+  val testPAYERegConnector = injTestPAYERegConnector
+  val keystoreConnector = injKeystoreConnector
 }
 
-trait TestRegSetupController extends FrontendController with Actions with CommonService {
+trait TestRegSetupCtrl extends FrontendController with Actions with CommonService {
 
   val payeRegService: PAYERegistrationService
   val testPAYERegConnector: TestPAYERegConnector
