@@ -30,14 +30,6 @@ case class CHROAddress(
                         postalCode: Option[String],
                         region: Option[String]
                       ) {
-  implicit def convertToAddress: Address = Address(
-    s"${this.premises} ${this.addressLine1}",
-    this.locality,
-    this.addressLine2,
-    this.poBox,
-    this.postalCode,
-    this.country
-  )
 }
 
 object CHROAddress {
@@ -51,4 +43,15 @@ object CHROAddress {
       (__ \ "postal_code").formatNullable[String] and
       (__ \ "region").formatNullable[String]
     )(CHROAddress.apply, unlift(CHROAddress.unapply))
+
+  import scala.language.implicitConversions
+
+  implicit def convertToAddress(address: CHROAddress): Address = Address(
+    s"${address.premises} ${address.addressLine1}",
+    address.locality,
+    address.addressLine2,
+    address.poBox,
+    address.postalCode,
+    address.country
+  )
 }

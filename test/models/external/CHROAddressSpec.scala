@@ -16,11 +16,12 @@
 
 package models.external
 
+import fixtures.CoHoAPIFixture
 import models.view.Address
 import play.api.libs.json.{JsSuccess, Json}
 import testHelpers.PAYERegSpec
 
-class CHROAddressSpec extends PAYERegSpec {
+class CHROAddressSpec extends PAYERegSpec with CoHoAPIFixture {
   val tstCHROAddress = CHROAddress(
     premises = "14",
     addressLine1 = "St Test Walker",
@@ -60,7 +61,8 @@ class CHROAddressSpec extends PAYERegSpec {
 
   "convertToAddress" should {
     "convert CHROAddress to Address" in {
-      tstCHROAddress.convertToAddress shouldBe tstAddress
+      def testImplicitConversion(address: Address) = address
+      testImplicitConversion(tstCHROAddress) shouldBe tstAddress
     }
   }
 }
