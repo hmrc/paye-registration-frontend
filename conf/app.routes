@@ -3,35 +3,39 @@
 GET         /assets/*file            controllers.Assets.at(path="/public", file)
 
 ## POST SIGN IN
-GET         /post-sign-in            controllers.userJourney.SignInOutController.postSignIn
+GET         /post-sign-in                           controllers.userJourney.SignInOutController.postSignIn
 
 ## WELCOME PAGE
-GET         /                        controllers.userJourney.WelcomeController.show
-GET         /start                   controllers.userJourney.WelcomeController.show
-POST        /start                   controllers.userJourney.WelcomeController.submit
+GET         /                                       controllers.userJourney.WelcomeController.show
+GET         /start                                  controllers.userJourney.WelcomeController.show
+POST        /start                                  controllers.userJourney.WelcomeController.submit
 
 ## COMPANY DETAILS
-GET         /trading-name            controllers.userJourney.CompanyDetailsController.tradingName
-POST        /trading-name            controllers.userJourney.CompanyDetailsController.submitTradingName
+GET         /trading-name                           controllers.userJourney.CompanyDetailsController.tradingName
+POST        /trading-name                           controllers.userJourney.CompanyDetailsController.submitTradingName
+
+## CONFIRM RO ADDRESS
+GET         /registered-office-address              controllers.userJourney.RegisteredOfficeAddressController.roAddress
+POST        /registered-office-address              controllers.userJourney.RegisteredOfficeAddressController.confirmRO
 
 ## EMPLOYMENT
-GET         /employing-staff         controllers.userJourney.EmploymentController.employingStaff
-POST        /employing-staff         controllers.userJourney.EmploymentController.submitEmployingStaff
+GET         /employing-staff                        controllers.userJourney.EmploymentController.employingStaff
+POST        /employing-staff                        controllers.userJourney.EmploymentController.submitEmployingStaff
 
 ## SUBCONTRACTORS
-GET         /subcontractors          controllers.userJourney.EmploymentController.subcontractors
-POST        /subcontractors          controllers.userJourney.EmploymentController.submitSubcontractors
+GET         /subcontractors                         controllers.userJourney.EmploymentController.subcontractors
+POST        /subcontractors                         controllers.userJourney.EmploymentController.submitSubcontractors
 
 ## COMPANY PENSION
-GET         /company-pension         controllers.userJourney.EmploymentController.companyPension
-POST        /company-pension         controllers.userJourney.EmploymentController.submitCompanyPension
+GET         /company-pension                        controllers.userJourney.EmploymentController.companyPension
+POST        /company-pension                        controllers.userJourney.EmploymentController.submitCompanyPension
 
 ## FIRST PAYMENT
-GET         /first-payment           controllers.userJourney.EmploymentController.firstPayment
-POST        /first-payment           controllers.userJourney.EmploymentController.submitFirstPayment
+GET         /first-payment                          controllers.userJourney.EmploymentController.firstPayment
+POST        /first-payment                          controllers.userJourney.EmploymentController.submitFirstPayment
 
 ## SUMMARY
-GET         /summary                 controllers.userJourney.SummaryController.summary
+GET         /summary                                controllers.userJourney.SummaryController.summary
 
 ## FEEDBACK
-GET         /feedback                controllers.feedback.FeedbackController.show
+GET         /feedback                               controllers.feedback.FeedbackController.show

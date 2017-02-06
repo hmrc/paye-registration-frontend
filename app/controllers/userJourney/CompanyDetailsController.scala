@@ -76,7 +76,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
           badRequestResponse(validatedForm)
         } else {
           companyDetailsService.submitTradingName(success) map {
-            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
+            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.RegisteredOfficeAddressController.roAddress())
             case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
           }
         }
