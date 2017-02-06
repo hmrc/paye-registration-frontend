@@ -137,7 +137,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
       val result = controller.submitTradingName()(FakeRequest())
       status(result) shouldBe Status.SEE_OTHER
     }
-    "redirect to the Employing Staff page when a user enters valid data" in new Setup {
+    "redirect to the confirm ro address page when a user enters valid data" in new Setup {
       when(mockCompanyDetailsService.submitTradingName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "differentName" -> "true",
@@ -145,7 +145,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/employing-staff"
+          result.header.headers("Location") shouldBe "/register-for-paye/registered-office-address"
       }
     }
 

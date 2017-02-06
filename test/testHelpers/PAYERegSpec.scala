@@ -18,8 +18,11 @@ package testHelpers
 
 import mocks.PAYEMocks
 import org.scalatest.mockito.MockitoSugar
-import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
+import play.api.inject.Injector
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 trait PAYERegSpec extends UnitSpec with WithFakeApplication with MockitoSugar with PAYEMocks {
+
+  val injector : Injector = fakeApplication.injector
 
 }

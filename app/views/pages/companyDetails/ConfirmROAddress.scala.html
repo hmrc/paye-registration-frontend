@@ -1,0 +1,36 @@
+@import uk.gov.hmrc.play.views.html.helpers._
+@import helpers.templates.hiddenDetails
+
+@(companyName : String)(implicit request: Request[_], messages: Messages)
+
+@main_template(title = messages("pages.confirmRO.title")) {
+
+    <h1 class="form-title heading-xlarge" id="pageHeading">@messages("pages.confirmRO.heading.part1") @companyName@messages("pages.confirmRO.heading.part2")</h1>
+
+    <p id="lead-paragraph">@messages("pages.confirmRO.lede")</p>
+
+    @form(action = controllers.userJourney.routes.RegisteredOfficeAddressController.confirmRO()) {
+        <div class="form-group">
+            <p class="lede" id="ro-address">
+                <span id="address-line-1">12 Test Road</span><br>
+                <span id="address-line-2">Test town</span><br>
+                <span id="address-line-3">Testshire</span><br>
+                <span id="post-code">TS14 7ST</span><br>
+            </p>
+        </div>
+
+        <div class="form-group">
+            @hiddenDetails("incorrect-address-", Messages("pages.confirmRO.help.link"), incorrectAddressContent)
+        </div>
+
+        <div class="form-group">
+            <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
+        </div>
+    }
+}
+
+@incorrectAddressContent = {
+    <p>@messages("pages.confirmRO.help.body") <a id="companies-house-link" href="@messages("pages.confirmRO.help.body.link.url")">@messages("app.common.companies-house")</a>.</p>
+}
+
+
