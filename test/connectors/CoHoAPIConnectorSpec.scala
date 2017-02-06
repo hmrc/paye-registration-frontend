@@ -59,7 +59,6 @@ class CoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
     }
   }
 
-
   "getRegisteredOfficeAddress" should {
 
     val testAddr =
@@ -95,4 +94,5 @@ class CoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
       intercept[RuntimeException](await(connector.getRegisteredOfficeAddress(testTransId)) )
     }
   }
+
 }

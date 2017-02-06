@@ -19,7 +19,7 @@ package fixtures
 import java.time.LocalDate
 
 import models.api.{CompanyDetails, Employment, PAYERegistration}
-import models.view.{Summary, SummaryRow, SummarySection}
+import models.view.{Address, Summary, SummaryRow, SummarySection}
 
 trait PAYERegistrationFixture {
 
@@ -58,5 +58,14 @@ trait PAYERegistrationFixture {
     Some(true),
     true,
     LocalDate.of(2016, 12, 20)
+  )
+
+  val validROAddress = Address(
+    line1 = "14 St Test Walker",
+    line2 = "Testford",
+    line3 = Some("Testley"),
+    line4 = None,
+    country = Some("UK"),
+    postCode = Some("TE1 1ST")
   )
 }

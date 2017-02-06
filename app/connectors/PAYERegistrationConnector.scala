@@ -17,9 +17,11 @@
 package connectors
 
 import javax.inject.{Inject, Singleton}
+
 import config.WSHttp
 import enums.DownstreamOutcome
 import models.api.{CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
+import models.view.Address
 import play.api.Logger
 import play.api.http.Status
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -84,6 +86,21 @@ trait PAYERegistrationConnect {
   def upsertEmployment(regID: String, employment: EmploymentAPI)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPI]): Future[EmploymentAPI] = {
     http.PATCH[EmploymentAPI, EmploymentAPI](s"$payeRegUrl/paye-registration/$regID/employment", employment) recover {
       case e: Exception => throw logResponse(e, "upsertEmployment", "upserting employment")
+    }
+  }
+
+  def getROAddress(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[Address]): Future[Option[Address]] = {
+    http.GET[Address](s"$payeRegUrl/paye-registration/$regID/ro-address") map {
+      res => Some(res)
+    } recover {
+      case e: NotFoundException => None
+      case e: Exception => throw logResponse(e, "getROAddress", "getting RO address")
+    }
+  }
+
+  def upsertROAddress(regID: String, roAddress: Address)(implicit hc: HeaderCarrier, rds: HttpReads[Address]): Future[Address] = {
+    http.PATCH[Address, Address](s"$payeRegUrl/paye-registration/$regID/ro-address", roAddress) recover {
+      case e: Exception => throw logResponse(e, "upsertROAddress", "upserting ro address")
     }
   }
 

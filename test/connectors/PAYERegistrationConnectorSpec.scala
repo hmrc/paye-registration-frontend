@@ -19,6 +19,7 @@ package connectors
 import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
 import models.api.{CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
+import models.view.Address
 import play.api.http.Status
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._
@@ -202,6 +203,57 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
       mockHttpFailedPATCH[EmploymentAPI, EmploymentAPI]("tst-url", internalServiceException)
 
       intercept[InternalServerException](await(connector.upsertEmployment("tstID", validEmploymentAPI)))
+    }
+  }
+
+  "Calling getROAddress" should {
+    "return the correct PAYEResponse when the microservice returns an Address model" in new Setup {
+      mockHttpGet[Address]("tst-url", validROAddress)
+
+      await(connector.getROAddress("tstID")) shouldBe Some(validROAddress)
+    }
+    "return the correct PAYEResponse when a Bad Request response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[Address]("tst-url", badRequest)
+
+      intercept[BadRequestException](await(connector.getROAddress("tstID")))
+    }
+    "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[Address]("test-url", forbidden)
+
+      intercept[Upstream4xxResponse](await(connector.getROAddress("tstID")))
+    }
+    "return a Not Found PAYEResponse when the microservice returns no Address API model" in new Setup {
+      mockHttpFailedGET[Address]("tst-url", notFound)
+
+      await(connector.getROAddress("tstID")) shouldBe None
+    }
+    "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[Address]("tst-url", internalServiceException)
+
+      intercept[InternalServerException](await(connector.getROAddress("tstID")))
+    }
+  }
+
+  "Calling upsertROAddress" should {
+    "return the correct PAYEResponse when the microservice completes and returns an Address model" in new Setup {
+      mockHttpPATCH[Address, Address]("tst-url", validROAddress)
+
+      await(connector.upsertROAddress("tstID", validROAddress)) shouldBe validROAddress
+    }
+    "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
+      mockHttpFailedPATCH[Address, Address]("tst-url", forbidden)
+
+      intercept[Upstream4xxResponse](await(connector.upsertROAddress("tstID", validROAddress)))
+    }
+    "return a Not Found PAYEResponse when the microservice returns a NotFound response (No PAYERegistration in database)" in new Setup {
+      mockHttpFailedPATCH[Address, Address]("tst-url", notFound)
+
+      intercept[NotFoundException](await(connector.upsertROAddress("tstID", validROAddress)))
+    }
+    "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
+      mockHttpFailedPATCH[Address, Address]("tst-url", internalServiceException)
+
+      intercept[InternalServerException](await(connector.upsertROAddress("tstID", validROAddress)))
     }
   }
 }
