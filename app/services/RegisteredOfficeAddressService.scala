@@ -18,9 +18,12 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import connectors.{CoHoAPIConnect, CoHoAPIConnector, CompanyRegistrationConnect, CompanyRegistrationConnector}
+import connectors._
+import models.external.CHROAddress
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class RegisteredOfficeAddressService @Inject()(injCompRegConnector : CompanyRegistrationConnector,
@@ -34,5 +37,12 @@ trait RegisteredOfficeAddressSrv {
   val compRegConnector: CompanyRegistrationConnect
   val cohoAPIConnector: CoHoAPIConnect
 
-  def retrieveRegisteredOfficeAddress(registrationId: String): Future[]
+  def retrieveRegisteredOfficeAddress(registrationId: String)(implicit hc : HeaderCarrier): Future[CHROAddress] = {
+    for {
+      tID <- compRegConnector.getTransactionId(registrationId)
+      address <- cohoAPIConnector.getRegisteredOfficeAddress(tID)
+    } yield {
+      address
+    }
+  }
 }

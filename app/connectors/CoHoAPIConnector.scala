@@ -19,9 +19,8 @@ package connectors
 import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
-import models.external.CoHoCompanyDetailsModel
+import models.external.{CHROAddress, CoHoCompanyDetailsModel}
 import play.api.Logger
-import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -40,7 +39,7 @@ case class CohoApiSuccessResponse(response: CoHoCompanyDetailsModel) extends Coh
 case object CohoApiBadRequestResponse extends CohoApiResponse
 case class CohoApiErrorResponse(ex: Exception) extends CohoApiResponse
 
-case class CohoApiROAddress(response : JsValue) extends CohoApiResponse
+case class CohoApiROAddress(response : CHROAddress) extends CohoApiResponse
 
 trait CoHoAPIConnect {
 
@@ -60,16 +59,14 @@ trait CoHoAPIConnect {
     }
   }
 
-  def getRegisteredOfficeAddress(transactionId: String)(implicit hc : HeaderCarrier): Future[CohoApiResponse] = {
-    http.GET[JsValue](s"$coHoAPIUrl/incorporation-frontend-stubs/ro-address/$transactionId") map {
-      res => CohoApiROAddress(res)
-    } recover {
+  def getRegisteredOfficeAddress(transactionId: String)(implicit hc : HeaderCarrier): Future[CHROAddress] = {
+    http.GET[CHROAddress](s"$coHoAPIUrl/incorporation-frontend-stubs/ro-address/$transactionId") recover {
       case badRequestErr: BadRequestException =>
         Logger.error("[CohoAPIConnector] [getRegisteredOfficeAddress] - Received a BadRequest status code when expecting a Registered office address")
-        CohoApiBadRequestResponse
+        throw badRequestErr
       case ex: Exception =>
         Logger.error(s"[CohoAPIConnector] [getRegisteredOfficeAddress] - Received an error response when expecting a Registered office address - error: ${ex.getMessage}")
-        CohoApiErrorResponse(ex)
+        throw ex
     }
   }
 }

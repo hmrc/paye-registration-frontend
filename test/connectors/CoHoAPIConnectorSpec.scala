@@ -17,7 +17,7 @@
 package connectors
 
 import fixtures.CoHoAPIFixture
-import models.external.CoHoCompanyDetailsModel
+import models.external.{CHROAddress, CoHoCompanyDetailsModel}
 import play.api.libs.json.{JsValue, Json}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -62,33 +62,37 @@ class CoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
 
   "getRegisteredOfficeAddress" should {
 
-    val testJson =
-      Json.toJson(
-        """
-          |{
-          |   "testKey" : "testValue"
-          |}
-        """.stripMargin)
+    val testAddr =
+      CHROAddress(
+        "premises",
+        "l1",
+        Some("l2"),
+        "locality",
+        Some("country"),
+        Some("pobox"),
+        Some("pCode"),
+        Some("region")
+      )
 
     val testTransId = "testTransId"
 
     "return a successful CoHo api response object for valid data" in new Setup {
-      mockHttpGet[JsValue](connector.coHoAPIUrl, Future.successful(testJson))
+      mockHttpGet[CHROAddress](connector.coHoAPIUrl, Future.successful(testAddr))
 
-      await(connector.getRegisteredOfficeAddress(testTransId)) shouldBe CohoApiROAddress(testJson)
+      await(connector.getRegisteredOfficeAddress(testTransId)) shouldBe testAddr
     }
 
     "return a CoHo Bad Request api response object for a bad request" in new Setup {
-      mockHttpGet[JsValue](connector.coHoAPIUrl, Future.failed(new BadRequestException("tstException")))
+      mockHttpGet[CHROAddress](connector.coHoAPIUrl, Future.failed(new BadRequestException("tstException")))
 
-      await(connector.getRegisteredOfficeAddress(testTransId)) shouldBe CohoApiBadRequestResponse
+      intercept[BadRequestException](await(connector.getRegisteredOfficeAddress(testTransId)))
     }
 
     "return a CoHo error api response object for a downstream error" in new Setup {
       val ex = new RuntimeException("tstException")
-      mockHttpGet[JsValue](connector.coHoAPIUrl, Future.failed(ex))
+      mockHttpGet[CHROAddress](connector.coHoAPIUrl, Future.failed(ex))
 
-      await(connector.getRegisteredOfficeAddress(testTransId)) shouldBe CohoApiErrorResponse(ex)
+      intercept[RuntimeException](await(connector.getRegisteredOfficeAddress(testTransId)) )
     }
   }
 }

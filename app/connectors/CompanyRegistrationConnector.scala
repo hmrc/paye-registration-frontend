@@ -21,10 +21,11 @@ import javax.inject.{Inject, Singleton}
 import config.WSHttp
 import play.api.Logger
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.BadRequestException
+import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class CompanyRegistrationConnector @Inject()() extends CompanyRegistrationConnect with ServicesConfig {
@@ -37,7 +38,7 @@ trait CompanyRegistrationConnect {
   val companyRegistrationUri : String
   val http : WSHttp
 
-  def getTransactionId(regId: String) : Future[String] = {
+  def getTransactionId(regId: String)(implicit hc : HeaderCarrier) : Future[String] = {
     http.GET[String](s"$companyRegistrationUri/company-registration/$regId/transaction-id") recover {
       case badRequestErr: BadRequestException =>
         Logger.error("[CompanyRegistrationConnect] [getTransactionId] - Received a BadRequest status code when expecting a transaction Id")
