@@ -17,8 +17,8 @@
 package connectors
 
 import fixtures.CoHoAPIFixture
-import models.external.CoHoCompanyDetailsModel
-import play.api.libs.json.JsValue
+import models.external.{CHROAddress, CoHoCompanyDetailsModel}
+import play.api.libs.json.{JsValue, Json}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier, HttpResponse}
@@ -59,4 +59,40 @@ class CoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
     }
   }
 
+
+  "getRegisteredOfficeAddress" should {
+
+    val testAddr =
+      CHROAddress(
+        "premises",
+        "l1",
+        Some("l2"),
+        "locality",
+        Some("country"),
+        Some("pobox"),
+        Some("pCode"),
+        Some("region")
+      )
+
+    val testTransId = "testTransId"
+
+    "return a successful CoHo api response object for valid data" in new Setup {
+      mockHttpGet[CHROAddress](connector.coHoAPIUrl, Future.successful(testAddr))
+
+      await(connector.getRegisteredOfficeAddress(testTransId)) shouldBe testAddr
+    }
+
+    "return a CoHo Bad Request api response object for a bad request" in new Setup {
+      mockHttpGet[CHROAddress](connector.coHoAPIUrl, Future.failed(new BadRequestException("tstException")))
+
+      intercept[BadRequestException](await(connector.getRegisteredOfficeAddress(testTransId)))
+    }
+
+    "return a CoHo error api response object for a downstream error" in new Setup {
+      val ex = new RuntimeException("tstException")
+      mockHttpGet[CHROAddress](connector.coHoAPIUrl, Future.failed(ex))
+
+      intercept[RuntimeException](await(connector.getRegisteredOfficeAddress(testTransId)) )
+    }
+  }
 }
