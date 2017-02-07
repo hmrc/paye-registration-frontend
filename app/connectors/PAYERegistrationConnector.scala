@@ -89,21 +89,6 @@ trait PAYERegistrationConnect {
     }
   }
 
-  def getROAddress(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[Address]): Future[Option[Address]] = {
-    http.GET[Address](s"$payeRegUrl/paye-registration/$regID/ro-address") map {
-      res => Some(res)
-    } recover {
-      case e: NotFoundException => None
-      case e: Exception => throw logResponse(e, "getROAddress", "getting RO address")
-    }
-  }
-
-  def upsertROAddress(regID: String, roAddress: Address)(implicit hc: HeaderCarrier, rds: HttpReads[Address]): Future[Address] = {
-    http.PATCH[Address, Address](s"$payeRegUrl/paye-registration/$regID/ro-address", roAddress) recover {
-      case e: Exception => throw logResponse(e, "upsertROAddress", "upserting ro address")
-    }
-  }
-
   private[connectors] def logResponse(e: Throwable, f: String, m: String): Throwable = {
     def log(s: String) = Logger.warn(s"[PAYERegistrationConnector] [$f] received $s when $m")
     e match {

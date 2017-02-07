@@ -17,6 +17,7 @@
 package forms.test
 
 import models.api.{CompanyDetails => CompanyDetailsAPI}
+import models.view.Address
 import play.api.data.Form
 import play.api.data.Forms._
 
@@ -26,7 +27,15 @@ object TestPAYERegCompanyDetailsSetupForm {
     mapping(
       "crn" -> optional(text),
       "companyName" -> text,
-      "tradingName" -> optional(text)
+      "tradingName" -> optional(text),
+      "address" -> mapping(
+        "line1" -> text,
+        "line2" -> text,
+        "line3" -> optional(text),
+        "line4" -> optional(text),
+        "postCode" -> optional(text),
+        "country" -> optional(text)
+      )(Address.apply)(Address.unapply)
     )(CompanyDetailsAPI.apply)(CompanyDetailsAPI.unapply)
   )
 }

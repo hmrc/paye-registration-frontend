@@ -26,7 +26,8 @@ trait PAYERegistrationFixture {
   val validCompanyDetailsAPI = CompanyDetails(
     crn = None,
     companyName = "Test Company",
-    tradingName = Some("Test Company Trading Name")
+    tradingName = Some("Test Company Trading Name"),
+    Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
   )
 
   val validDate = LocalDate.of(2016,12,20)

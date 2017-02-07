@@ -17,9 +17,10 @@
 package services
 
 import javax.inject.{Inject, Singleton}
+
 import connectors._
-import enums.DownstreamOutcome
-import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
+import enums.{CacheKeys, DownstreamOutcome}
+import models.view.{Address, CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import common.exceptions.InternalExceptions.APIConversionException
 import play.api.Logger
@@ -29,23 +30,34 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class CompanyDetailsService @Inject()(keystoreConn: KeystoreConnector, payeRegConn: PAYERegistrationConnector, coHoSrv: CoHoAPIService) extends CompanyDetailsSrv {
+class CompanyDetailsService @Inject()(
+                                       keystoreConn: KeystoreConnector,
+                                       payeRegConn: PAYERegistrationConnector,
+                                       coHoSrv: CoHoAPIService,
+                                       s4LSrv: S4LService
+                                     )
+  extends CompanyDetailsSrv {
   override val keystoreConnector = keystoreConn
   override val payeRegConnector = payeRegConn
   override val cohoService = coHoSrv
+  override val s4LService = s4LSrv
 }
 
 trait CompanyDetailsSrv extends CommonService {
 
   val payeRegConnector: PAYERegistrationConnect
   val cohoService: CoHoAPISrv
+  val s4LService: S4LSrv
 
   def getCompanyDetails()(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsView]] = {
-    for {
-      regID <- fetchRegistrationID
-      regResponse <- payeRegConnector.getCompanyDetails(regID)
-    } yield regResponse map {
-      details => apiToView(details)
+    s4LService.fetchAndGet[CompanyDetailsView](CacheKeys.CompanyDetails.toString) flatMap {
+      case Some(companyDetails) => Future.successful(Some(companyDetails))
+      case None => for {
+        regID <- fetchRegistrationID
+        regResponse <- payeRegConnector.getCompanyDetails(regID)
+      } yield regResponse map {
+        details => apiToView(details)
+      }
     }
   }
 
@@ -66,12 +78,21 @@ trait CompanyDetailsSrv extends CommonService {
     } yield outcome
   }
 
+  def submitROAddress(tradingNameView: TradingNameView)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    for {
+      regID <- fetchRegistrationID
+      oCompanyDetails <- getCompanyDetails
+      updatedDetails <- addTradingNameToCompanyDetails(tradingNameView, oCompanyDetails)
+      outcome <- submitCompanyDetails(updatedDetails, regID)
+    } yield outcome
+  }
+
   private[services] def addTradingNameToCompanyDetails(tradingNameView: TradingNameView, oCompanyDetails: Option[CompanyDetailsView])
                                                       (implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
     oCompanyDetails match {
       case Some(companyDetails) => Future.successful(companyDetails.copy(tradingName = Some(tradingNameView)))
       case None => cohoService.getStoredCompanyName() map {
-        cName => CompanyDetailsView(None, cName, Some(tradingNameView))
+        cName => CompanyDetailsView(None, cName, Some(tradingNameView), None)
       }
     }
   }
@@ -94,7 +115,8 @@ trait CompanyDetailsSrv extends CommonService {
     CompanyDetailsView(
       apiModel.crn,
       apiModel.companyName,
-      tradingNameView
+      tradingNameView,
+      Some(apiModel.address)
     )
   }
 
@@ -112,7 +134,8 @@ trait CompanyDetailsSrv extends CommonService {
     CompanyDetailsAPI(
       viewModel.crn,
       viewModel.companyName,
-      tradingNameAPI
+      tradingNameAPI,
+      viewModel.address.get
     )
   }
 

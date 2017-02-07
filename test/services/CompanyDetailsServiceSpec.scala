@@ -17,15 +17,16 @@
 package services
 
 import connectors._
-import enums.DownstreamOutcome
+import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{PAYERegistrationFixture, S4LFixture}
-import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
+import models.view.{Address, CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
 import common.exceptions.DownstreamExceptions.PAYEMicroserviceException
 import common.exceptions.InternalExceptions.APIConversionException
+import play.api.libs.json.Format
 import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, NotFoundException, Upstream4xxResponse}
 
 import scala.concurrent.Future
@@ -36,12 +37,14 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
   val mockPAYERegConnector = mock[PAYERegistrationConnector]
   val mockCoHoService = mock[CoHoAPIService]
+  val mockS4LService = mock[S4LService]
+
   class Setup {
-    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService)
+    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService)
   }
 
   class NoCompanyDetailsMockedSetup {
-    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService) {
+    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService) {
 
       override def getCompanyDetails()(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsView]] = {
         Future.successful(None)
@@ -59,7 +62,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   }
 
   class CompanyDetailsMockedSetup {
-    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService) {
+    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService) {
 
       override def getCompanyDetails()(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsView]] = {
         Future.successful(Some(validCompanyDetailsViewModel))
@@ -77,7 +80,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   }
 
   class APIConverterMockedSetup {
-    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService) {
+    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService) {
 
       override def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
         validCompanyDetailsViewModel
@@ -101,7 +104,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       val tstModelAPI = CompanyDetailsAPI(
         Some("tstCRN"),
         "Comp name",
-        Some("trading name")
+        Some("trading name"),
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
       )
       val tstModelView = CompanyDetailsView(
         Some("tstCRN"),
@@ -109,7 +113,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         Some(TradingNameView(
           differentName = true,
           tradingName = Some("trading name")
-        ))
+        )),
+        Some(Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")))
       )
       service.apiToView(tstModelAPI) shouldBe tstModelView
     }
@@ -118,7 +123,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       val tstModelAPI = CompanyDetailsAPI(
         Some("tstCRN"),
         "Comp name",
-        None
+        None,
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
       )
       val tstModelView = CompanyDetailsView(
         Some("tstCRN"),
@@ -126,7 +132,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         Some(TradingNameView(
           differentName = false,
           tradingName = None
-        ))
+        )),
+        Some(Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")))
       )
       service.apiToView(tstModelAPI) shouldBe tstModelView
     }
@@ -137,7 +144,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       val tstModelAPI = CompanyDetailsAPI(
         Some("tstCRN"),
         "Comp name",
-        Some("trading name")
+        Some("trading name"),
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
       )
       val tstModelView = CompanyDetailsView(
         Some("tstCRN"),
@@ -145,7 +153,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         Some(TradingNameView(
           differentName = true,
           tradingName = Some("trading name")
-        ))
+        )),
+        Some(Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")))
       )
       service.viewToAPI(tstModelView) shouldBe tstModelAPI
     }
@@ -154,7 +163,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       val tstModelAPI = CompanyDetailsAPI(
         Some("tstCRN"),
         "Comp name",
-        None
+        None,
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
       )
       val tstModelView = CompanyDetailsView(
         Some("tstCRN"),
@@ -162,7 +172,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         Some(TradingNameView(
           differentName = false,
           tradingName = Some("trading name")
-        ))
+        )),
+        Some(Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")))
       )
       service.viewToAPI(tstModelView) shouldBe tstModelAPI
     }
@@ -171,7 +182,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       val tstModelView = CompanyDetailsView(
         Some("tstCRN"),
         "Comp name",
-        None
+        None,
+        Some(Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")))
       )
       an[APIConversionException] shouldBe thrownBy(service.viewToAPI(tstModelView))
     }
@@ -181,6 +193,9 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
     "return the correct View response when Company Details are returned from the connector" in new APIConverterMockedSetup {
       mockFetchRegID("54321")
+      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.CompanyDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))
+        .thenReturn(Future.successful(None))
+
       when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(Some(validCompanyDetailsAPI)))
 
@@ -189,18 +204,24 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
     "return an empty option when no Company Details are returned from the connector" in new Setup {
       mockFetchRegID("54321")
+      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.CompanyDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))
+        .thenReturn(Future.successful(None))
+
       when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(None))
 
       await(service.getCompanyDetails()) shouldBe None
     }
 
-    "throw a 403 response is returned from the connector" in new Setup {
+    "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
       mockFetchRegID("54321")
+      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.CompanyDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))
+        .thenReturn(Future.successful(None))
+
       when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
 
-      a[Upstream4xxResponse] shouldBe thrownBy(await(service.getCompanyDetails()))
+      an[Upstream4xxResponse] shouldBe thrownBy(await(service.getCompanyDetails()))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
@@ -208,7 +229,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(new ArrayIndexOutOfBoundsException))
 
-      a[Exception] shouldBe thrownBy(await(service.getCompanyDetails()))
+      an[Exception] shouldBe thrownBy(await(service.getCompanyDetails()))
     }
 
   }
@@ -219,6 +240,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       val tstNoTNameDetailsModel = CompanyDetailsView(
         Some("crn"),
         "company name",
+        None,
         None
       )
       await(service.addTradingNameToCompanyDetails(tstTName, Some(tstNoTNameDetailsModel))) shouldBe tstNoTNameDetailsModel.copy(tradingName = Some(tstTName))
@@ -228,7 +250,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockCoHoService.getStoredCompanyName()(Matchers.any())).thenReturn(Future.successful("Stored Name"))
 
       val tstTName = TradingNameView(differentName = true, tradingName = Some("trad name"))
-      val outcomeModel = CompanyDetailsView(None, "Stored Name", Some(tstTName))
+      val outcomeModel = CompanyDetailsView(None, "Stored Name", Some(tstTName), None)
 
       await(service.addTradingNameToCompanyDetails(tstTName, None)) shouldBe outcomeModel
     }

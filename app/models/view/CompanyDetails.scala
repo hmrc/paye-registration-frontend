@@ -21,7 +21,8 @@ import play.api.libs.json.Json
 case class CompanyDetails(
                            crn: Option[String],
                            companyName: String,
-                           tradingName: Option[TradingName]
+                           tradingName: Option[TradingName],
+                           address: Option[Address]
                            )
 
 case class TradingName (
@@ -42,10 +43,10 @@ object TradingName {
   implicit val format = Json.format[TradingName]
 }
 
-object CompanyDetails {
-  implicit val format = Json.format[CompanyDetails]
-}
-
 object Address {
   implicit val format = Json.format[Address]
+}
+
+object CompanyDetails {
+  implicit val format = Json.format[CompanyDetails]
 }
