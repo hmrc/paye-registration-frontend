@@ -46,12 +46,27 @@ object CHROAddress {
 
   import scala.language.implicitConversions
 
-  implicit def convertToAddress(address: CHROAddress): Address = Address(
-    s"${address.premises} ${address.addressLine1}",
-    address.locality,
-    address.addressLine2,
-    address.poBox,
-    address.postalCode,
-    address.country
-  )
+  implicit def convertToAddress(address: CHROAddress): Address = {
+    val (line1, oLine2) = if(address.premises.length + address.addressLine1.length > 26) {
+      (address.premises, Some(address.addressLine1))
+    } else {
+      (address.premises+" "+address.addressLine1, None)
+    }
+
+    val addrLine2POBox: Option[String] = Seq(address.addressLine2, address.poBox).flatten.foldLeft("")(_+" "+_).trim match {
+      case ""  => None
+      case str  => Some(str)
+    }
+
+    val additionalLines: Seq[String] = Seq(oLine2, addrLine2POBox, Some(address.locality), address.region).flatten
+
+    Address(
+        line1,
+        additionalLines.head,
+        {if(additionalLines.length > 1) Some(additionalLines(1)) else None},
+        {if(additionalLines.length > 2) Some(additionalLines(2)) else None},
+        address.postalCode,
+        address.country
+      )
+  }
 }
