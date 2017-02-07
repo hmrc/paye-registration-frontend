@@ -21,32 +21,38 @@ import javax.inject.{Inject, Singleton}
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import play.api.i18n.{I18nSupport, MessagesApi}
-import views.html.pages.companyDetails.ConfirmROAddress
-import play.api.mvc.{Action, AnyContent}
+import services.{AddressLookupService, AddressLookupSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
 @Singleton
-class RegisteredOfficeAddressController @Inject()(injMessagesApi: MessagesApi) extends RegisteredOfficeAddressCtrl{
+class AddressLookupController @Inject()(
+                                         injAddressLookupService: AddressLookupService,
+                                         injMessagesApi: MessagesApi)
+  extends AddressLookupCtrl{
   val authConnector = FrontendAuthConnector
+  val addressLookupService = injAddressLookupService
   val messagesApi = injMessagesApi
 }
 
-trait RegisteredOfficeAddressCtrl extends FrontendController with Actions with I18nSupport{
+trait AddressLookupCtrl extends FrontendController with Actions with I18nSupport {
+  val addressLookupService : AddressLookupSrv
 
-  val messagesApi : MessagesApi
-
-  def roAddress : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+  val redirectToLookup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        Future.successful(Ok(ConfirmROAddress("<INSERT NAME HERE>")))
+        Future.successful(Redirect(addressLookupService.buildAddressLookupUrl()))
   }
 
-  def confirmRO : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+  val returnFromLookup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        Future.successful(Redirect(controllers.userJourney.routes.AddressLookupController.redirectToLookup()))
+        request.getQueryString("id") match {
+          case Some(id) => addressLookupService.getAddress(id)
+        }
+        Future.successful(Redirect(controllers.userJourney.routes.EmploymentController.employingStaff()))
   }
+
 }

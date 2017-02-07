@@ -1,6 +1,6 @@
 # microservice specific routes
 
-GET         /assets/*file            controllers.Assets.at(path="/public", file)
+GET         /assets/*file                           controllers.Assets.at(path="/public", file)
 
 ## POST SIGN IN
 GET         /post-sign-in                           controllers.userJourney.SignInOutController.postSignIn
@@ -17,6 +17,10 @@ POST        /trading-name                           controllers.userJourney.Comp
 ## CONFIRM RO ADDRESS
 GET         /registered-office-address              controllers.userJourney.RegisteredOfficeAddressController.roAddress
 POST        /registered-office-address              controllers.userJourney.RegisteredOfficeAddressController.confirmRO
+
+## ADDRESS LOOKUP
+GET         /address-lookup                         controllers.userJourney.AddressLookupController.redirectToLookup
+GET         /return-from-address                    controllers.userJourney.AddressLookupController.returnFromLookup
 
 ## EMPLOYMENT
 GET         /employing-staff                        controllers.userJourney.EmploymentController.employingStaff

@@ -16,29 +16,37 @@
 
 package controllers.test
 
-import com.google.inject.Singleton
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.{FeatureSwitch, PAYEFeatureSwitches}
+import utils._
 
 import scala.concurrent.Future
 
 @Singleton
-class FeatureSwitchController extends FeatureSwitchCtrl
+class FeatureSwitchController @Inject()(
+                                       injFeatureSwitch: FeatureSwitchManager,
+                                       injPayeFeatureSwitch: PAYEFeatureSwitch)
+  extends FeatureSwitchCtrl{
+  val featureManager = injFeatureSwitch
+  val PayeFeatureSwitch = injPayeFeatureSwitch
+
+}
 
 trait FeatureSwitchCtrl extends FrontendController {
 
-  val featureSwitch = FeatureSwitch
+  val featureManager : FeatureManager
+  val PayeFeatureSwitch : PAYEFeatureSwitches
 
   def addressServiceSwitch(featureName: String, featureState: String) = Action.async {
     implicit request =>
 
       def feature: FeatureSwitch = featureState match {
-        case "addressFrontend" => featureSwitch.enable(FeatureSwitch(featureName, enabled = true))
-        case _ => featureSwitch.disable(FeatureSwitch(featureName, enabled = false))
+        case "addressLookupFrontend" => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
+        case _ => featureManager.disable(BooleanFeatureSwitch(featureName, enabled = false))
       }
 
-      PAYEFeatureSwitches(featureName) match {
+      PayeFeatureSwitch(featureName) match {
         case Some(_) => Future.successful(Ok(feature.toString))
         case None => Future.successful(BadRequest)
       }

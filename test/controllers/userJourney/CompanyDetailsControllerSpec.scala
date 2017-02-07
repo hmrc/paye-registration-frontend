@@ -17,10 +17,8 @@
 package controllers.userJourney
 
 import builders.AuthBuilder
-import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
-import enums.{CacheKeys, DownstreamOutcome}
-import fixtures.{CoHoAPIFixture, S4LFixture}
-import models.external.CoHoCompanyDetailsModel
+import enums.DownstreamOutcome
+import fixtures.S4LFixture
 import models.view.{TradingName => TradingNameView}
 import org.jsoup._
 import org.mockito.Matchers
@@ -31,8 +29,6 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import services.{CoHoAPIService, CompanyDetailsService, S4LService}
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 

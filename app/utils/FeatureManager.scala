@@ -16,7 +16,7 @@
 
 package utils
 
-import org.joda.time.format.ISODateTimeFormat
+import javax.inject.{Inject, Singleton}
 
 sealed trait FeatureSwitch {
   def name: String
@@ -25,7 +25,10 @@ sealed trait FeatureSwitch {
 
 case class BooleanFeatureSwitch(name: String, enabled: Boolean) extends FeatureSwitch
 
-object FeatureSwitch {
+@Singleton
+class FeatureSwitchManager extends FeatureManager
+
+trait FeatureManager {
 
   private[utils] def systemPropertyName(name: String) = s"feature.$name"
 
@@ -45,23 +48,25 @@ object FeatureSwitch {
 
   def enable(fs: FeatureSwitch): FeatureSwitch = setProperty(fs.name, "true")
   def disable(fs: FeatureSwitch): FeatureSwitch = setProperty(fs.name, "false")
-
-  def apply(name: String, enabled: Boolean = false): FeatureSwitch = getProperty(name)
-  def unapply(fs: FeatureSwitch): Option[(String, Boolean)] = Some(fs.name -> fs.enabled)
 }
 
-object PAYEFeatureSwitches extends PAYEFeatureSwitches {
-  val addressService = "addressService"
+@Singleton
+class PAYEFeatureSwitch @Inject()(
+                                   injManager: FeatureSwitchManager)
+  extends PAYEFeatureSwitches {
+  val addressLookupUrl = "addressService"
+  val manager = injManager
 }
 
 trait PAYEFeatureSwitches {
 
-  val addressService: String
+  val addressLookupUrl: String
+  val manager: FeatureManager
 
-  def addressFrontend = FeatureSwitch.getProperty(addressService)
+  def addressLookupFrontend = manager.getProperty(addressLookupUrl)
 
   def apply(name: String): Option[FeatureSwitch] = name match {
-    case "addressService" => Some(addressFrontend)
+    case "addressService" => Some(addressLookupFrontend)
     case _ => None
   }
 
