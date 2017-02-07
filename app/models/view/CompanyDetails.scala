@@ -29,10 +29,23 @@ case class TradingName (
                          tradingName:Option[String]
                          )
 
+case class Address(
+                    line1: String,
+                    line2: String,
+                    line3: Option[String],
+                    line4: Option[String],
+                    postCode: Option[String],
+                    country: Option[String] = None
+                  )
+
 object TradingName {
   implicit val format = Json.format[TradingName]
 }
 
 object CompanyDetails {
   implicit val format = Json.format[CompanyDetails]
+}
+
+object Address {
+  implicit val format = Json.format[Address]
 }
