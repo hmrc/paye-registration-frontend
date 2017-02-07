@@ -34,7 +34,7 @@ case class CHROAddress(
 
 object CHROAddress {
   implicit val formatModel: Reads[CHROAddress] = (
-    (__ \ "premises").read[String] and
+      (__ \ "premises").read[String] and
       (__ \ "address_line_1").read[String] and
       (__ \ "address_line_2").readNullable[String] and
       (__ \ "locality").read[String] and

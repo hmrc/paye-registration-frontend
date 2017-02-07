@@ -60,7 +60,7 @@ trait CoHoAPIConnect {
   }
 
   def getRegisteredOfficeAddress(transactionId: String)(implicit hc : HeaderCarrier): Future[CHROAddress] = {
-    http.GET[CHROAddress](s"$coHoAPIUrl/incorporation-frontend-stubs/ro-address/$transactionId") recover {
+    http.GET[CHROAddress](s"$coHoAPIUrl/incorporation-frontend-stubs/$transactionId/ro-address") recover {
       case badRequestErr: BadRequestException =>
         Logger.error("[CohoAPIConnector] [getRegisteredOfficeAddress] - Received a BadRequest status code when expecting a Registered office address")
         throw badRequestErr
