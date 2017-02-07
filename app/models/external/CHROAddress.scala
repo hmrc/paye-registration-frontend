@@ -18,7 +18,7 @@ package models.external
 
 import models.view.Address
 import play.api.libs.functional.syntax._
-import play.api.libs.json.__
+import play.api.libs.json.{Reads, __}
 
 case class CHROAddress(
                         premises: String,
@@ -33,16 +33,16 @@ case class CHROAddress(
 }
 
 object CHROAddress {
-  implicit val formatModel = (
-    (__ \ "premises").format[String] and
-      (__ \ "address_line_1").format[String] and
-      (__ \ "address_line_2").formatNullable[String] and
-      (__ \ "locality").format[String] and
-      (__ \ "country").formatNullable[String] and
-      (__ \ "po_box").formatNullable[String] and
-      (__ \ "postal_code").formatNullable[String] and
-      (__ \ "region").formatNullable[String]
-    )(CHROAddress.apply, unlift(CHROAddress.unapply))
+  implicit val formatModel: Reads[CHROAddress] = (
+    (__ \ "premises").read[String] and
+      (__ \ "address_line_1").read[String] and
+      (__ \ "address_line_2").readNullable[String] and
+      (__ \ "locality").read[String] and
+      (__ \ "country").readNullable[String] and
+      (__ \ "po_box").readNullable[String] and
+      (__ \ "postal_code").readNullable[String] and
+      (__ \ "region").readNullable[String]
+    )(CHROAddress.apply _)
 
   import scala.language.implicitConversions
 
