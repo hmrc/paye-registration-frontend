@@ -42,12 +42,10 @@ trait AddressLookupSrv {
   val featureSwitch: PAYEFeatureSwitches
 
   def buildAddressLookupUrl(query: String = "payereg1") = {
-    val url = useAddressLookupFrontend match {
-      case true => addressLookupFrontendUrl + "/lookup-address/uk/addresses/"
-      case false => controllers.userJourney.routes.EmploymentController.employingStaff().url
+    useAddressLookupFrontend match {
+      case true => addressLookupFrontendUrl + "/lookup-address/uk/addresses/" + query + s"?continue=" + payeRegistrationUrl + "/register-for-paye/return-from-address"
+      case false => payeRegistrationUrl + controllers.userJourney.routes.EmploymentController.employingStaff().url
     }
-
-    url + query + s"?continue=" + payeRegistrationUrl + "/register-for-paye/return-from-address"
   }
 
   def getAddress(id: String)(implicit hc: HeaderCarrier) = {

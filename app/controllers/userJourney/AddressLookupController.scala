@@ -40,19 +40,19 @@ class AddressLookupController @Inject()(
 trait AddressLookupCtrl extends FrontendController with Actions with I18nSupport {
   val addressLookupService : AddressLookupSrv
 
-  val redirectToLookup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+  val redirectToLookup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
     implicit user =>
       implicit request =>
-        Future.successful(Redirect(addressLookupService.buildAddressLookupUrl()))
+        Redirect(addressLookupService.buildAddressLookupUrl())
   }
 
-  val returnFromLookup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+  val returnFromLookup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
     implicit user =>
       implicit request =>
         request.getQueryString("id") match {
           case Some(id) => addressLookupService.getAddress(id)
         }
-        Future.successful(Redirect(controllers.userJourney.routes.EmploymentController.employingStaff()))
+        Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
   }
 
 }
