@@ -64,7 +64,7 @@ trait PAYERegistrationConnect {
       details => Some(details)
     } recover {
       case e: NotFoundException => None
-      case e: Exception => throw logResponse(e, "getEmployment", "getting employment")
+      case e: Exception => throw logResponse(e, "getCompanyDetails", "getting company details")
     }
   }
 

@@ -49,14 +49,19 @@ trait CompanyDetailsSrv extends CommonService {
   val cohoService: CoHoAPISrv
   val s4LService: S4LSrv
 
-  def getCompanyDetails()(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsView]] = {
+  def getCompanyDetails()(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
     s4LService.fetchAndGet[CompanyDetailsView](CacheKeys.CompanyDetails.toString) flatMap {
-      case Some(companyDetails) => Future.successful(Some(companyDetails))
-      case None => for {
-        regID <- fetchRegistrationID
-        regResponse <- payeRegConnector.getCompanyDetails(regID)
-      } yield regResponse map {
-        details => apiToView(details)
+      case Some(companyDetails) => Future.successful(companyDetails)
+      case None => {
+        for {
+          regID <- fetchRegistrationID
+          regResponse <- payeRegConnector.getCompanyDetails(regID)
+          details <- regResponse
+        } yield apiToView(details)
+      }.recoverWith {
+        case _: NoSuchElementException => for {
+          companyName <- cohoService.getStoredCompanyName()
+        } yield CompanyDetailsView(None, companyName, None, None)
       }
     }
   }
@@ -78,19 +83,21 @@ trait CompanyDetailsSrv extends CommonService {
     } yield outcome
   }
 
-  def submitROAddress(tradingNameView: TradingNameView)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def getROAddress()(implicit hc: HeaderCarrier): Future[Address] = ???
+
+  def submitROAddress(address: Address)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
       regID <- fetchRegistrationID
       oCompanyDetails <- getCompanyDetails
-      updatedDetails <- addTradingNameToCompanyDetails(tradingNameView, oCompanyDetails)
+      updatedDetails <- oCompanyDetails.copy(address = Some(address))
       outcome <- submitCompanyDetails(updatedDetails, regID)
     } yield outcome
   }
 
-  private[services] def addTradingNameToCompanyDetails(tradingNameView: TradingNameView, oCompanyDetails: Option[CompanyDetailsView])
+  private[services] def addTradingNameToCompanyDetails(tradingNameView: TradingNameView, oCompanyDetails: CompanyDetailsView)
                                                       (implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
     oCompanyDetails match {
-      case Some(companyDetails) => Future.successful(companyDetails.copy(tradingName = Some(tradingNameView)))
+      case Some(companyDetails) => Future.successful()
       case None => cohoService.getStoredCompanyName() map {
         cName => CompanyDetailsView(None, cName, Some(tradingNameView), None)
       }
@@ -120,23 +127,13 @@ trait CompanyDetailsSrv extends CommonService {
     )
   }
 
-  private[services] def viewToAPI(viewModel: CompanyDetailsView): CompanyDetailsAPI = {
-    val tradingNameAPI: Option[String] = viewModel.tradingName.map {
-      companyDetails => companyDetails.differentName match {
-        case true  => companyDetails.tradingName
-        case false => None
-      }
-    }.getOrElse {
-      Logger.warn("[CompanyDetailsService] [viewToAPI] Unable to create API model from view model - missing TradingNameView model")
-      throw new APIConversionException("Trading name view not defined when converting Company Details View to API model")
-    }
+  private def tradingNameAPIValue(tradingNameView: TradingNameView): Option[String] =
+    if( tradingNameView.differentName ) tradingNameView.tradingName else None
 
-    CompanyDetailsAPI(
-      viewModel.crn,
-      viewModel.companyName,
-      tradingNameAPI,
-      viewModel.address.get
-    )
+  private[services] def viewToAPI(viewData: CompanyDetailsView): Either[CompanyDetailsView, CompanyDetailsAPI] = viewData match {
+    case CompanyDetailsView(crn, companyName, Some(tradingName), Some(address)) =>
+      Right(CompanyDetailsAPI(crn, companyName, tradingNameAPIValue(tradingName), address)
+    case _ => Left(viewData)
   }
 
 }
