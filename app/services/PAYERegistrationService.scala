@@ -17,13 +17,13 @@
 package services
 
 import java.time.format.DateTimeFormatter
-
 import javax.inject.{Inject, Singleton}
-import config.{PAYEShortLivedCache, PAYESessionCache}
+
+import config.{PAYESessionCache, PAYEShortLivedCache}
 import enums.DownstreamOutcome
 import connectors._
-import models.api.{Employment, PAYERegistration => PAYERegistrationAPI}
-import models.view.{Summary, SummaryRow, SummarySection}
+import models.api.{CompanyDetails, Employment, PAYERegistration => PAYERegistrationAPI}
+import models.view.{Address, Summary, SummaryRow, SummarySection}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -58,22 +58,42 @@ trait PAYERegistrationSrv extends CommonService {
   private[services] def registrationToSummary(apiModel: PAYERegistrationAPI): Summary = {
     Summary(
       Seq(
-        SummarySection(
-          id ="tradingName",
-          Seq(
-            SummaryRow(
-              id ="tradingName",
-              answer = apiModel.companyDetails.tradingName match {
-                case Some(tName) => Right(tName)
-                case _ => Left("noAnswerGiven")
-              },
-              changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
-            )
-          )
-        ),
+        buildCompanyDetailsSection(apiModel.companyDetails),
         buildEmploymentSection(apiModel.employment)
       )
     )
+  }
+
+  private[services] def buildCompanyDetailsSection(companyDetails: CompanyDetails) : SummarySection = {
+    SummarySection(
+      id = "companyDetails",
+      Seq(
+        Some(SummaryRow(
+          id ="tradingName",
+          answer = companyDetails.tradingName match {
+            case Some(tName) => Right(tName)
+            case _ => Left("noAnswerGiven")
+          },
+          changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+        )),
+        Some(SummaryRow(
+          id = "roAddress",
+          answer = Right(formatHTMLROAddress(companyDetails.roAddress)),
+          changeLink = None
+        ))
+      ).flatten
+    )
+  }
+
+  private[services] def formatHTMLROAddress(address: Address): String = {
+    List(
+      Some(address.line1),
+      Some(address.line2),
+      address.line3,
+      address.line4,
+      address.postCode,
+      address.country
+    ).flatten.mkString("<br />")
   }
 
   private[services] def buildEmploymentSection(employment : Employment) : SummarySection = {

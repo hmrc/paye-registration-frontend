@@ -44,20 +44,27 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
       crn = None,
       companyName = "Test Company",
       tradingName = Some("tstTrade"),
-      Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
+      Address("14 St Test Walk", "Testley", None, None, None, None)
     ),
     employment = validEmploymentAPI
   )
 
+  lazy val formatHMTLROAddress = ""
+
   lazy val summary = Summary(
     Seq(
       SummarySection(
-        id="tradingName",
+        id = "companyDetails",
         Seq(
           SummaryRow(
-            id="tradingName",
+            id = "tradingName",
             answer = Right("tstTrade"),
             changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+          ),
+          SummaryRow(
+            id = "roAddress",
+            answer = Right("14 St Test Walk<br />Testley"),
+            None
           )
         )
       ),
@@ -169,15 +176,22 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
         employment = validEmploymentAPI
       )
 
+      val formatHMTLROAddress = service.formatHTMLROAddress(apiRegistrationNoTName.companyDetails.roAddress)
+
       lazy val summaryNoTName = Summary(
         Seq(
           SummarySection(
-            id="tradingName",
+            id = "companyDetails",
             Seq(
               SummaryRow(
-                id="tradingName",
+                id = "tradingName",
                 answer = Left("noAnswerGiven"),
                 changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+              ),
+              SummaryRow(
+                id = "roAddress",
+                answer = Right(formatHMTLROAddress),
+                None
               )
             )
           ),
@@ -212,8 +226,40 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
     }
   }
 
+  "buildCompanyDetailsSection" should {
+    "return a valid summary section" in new Setup {
+
+      val validCompanyDetailsAPI = CompanyDetailsAPI(
+        crn = None,
+        companyName = "Test Company",
+        tradingName = Some("Test Company Trading Name"),
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
+      )
+
+      val formatHMTLROAddress = service.formatHTMLROAddress(validCompanyDetailsAPI.roAddress)
+
+      val companyDetailsSection = SummarySection(
+        id = "companyDetails",
+        Seq(
+          SummaryRow(
+            id = "tradingName",
+            answer = Right("Test Company Trading Name"),
+            changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+          ),
+          SummaryRow(
+            id = "roAddress",
+            answer = Right(formatHMTLROAddress),
+            None
+          )
+        )
+      )
+
+      service.buildCompanyDetailsSection(validCompanyDetailsAPI) shouldBe companyDetailsSection
+    }
+  }
+
   "buildEmploymentSection" should {
-    "" in new Setup {
+    "return a valid summary section" in new Setup {
 
       val validEmploymentAPIFalse = Employment(employees = false,
         companyPension = Some(false),
