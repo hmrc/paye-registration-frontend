@@ -34,6 +34,43 @@
             )
         </div>
 
+        <div class="inline form-group">
+            @govHelpers.input(
+            detailsForm("roAddress.line1"),
+            '_label -> "RO Address Line 1"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            detailsForm("roAddress.line2"),
+            '_label -> "RO Address Line 2"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            detailsForm("roAddress.line3"),
+            '_label -> "RO Address Line 3 (optional)"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            detailsForm("roAddress.line4"),
+            '_label -> "RO Address Line 4 (optional)"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            detailsForm("roAddress.postCode"),
+            '_label -> "RO Address Postcode (optional)"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            detailsForm("roAddress.country"),
+            '_label -> "RO Address Country (optional)"
+            )
+        </div>
+
         <button class="button" type="submit" id="continue" >Submit</button>
 
     }
