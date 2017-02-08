@@ -1,7 +1,8 @@
 @import uk.gov.hmrc.play.views.html.helpers._
-@import helpers.templates.hiddenDetails
+@import helpers.templates.{hiddenDetails, addressDisplay}
 
-@(companyName : String)(implicit request: Request[_], messages: Messages)
+@import models.view.Address
+@(companyName : String, address : Address)(implicit request: Request[_], messages: Messages)
 
 @main_template(title = messages("pages.confirmRO.title")) {
 
@@ -9,15 +10,8 @@
 
     <p id="lead-paragraph">@messages("pages.confirmRO.lede")</p>
 
-    @form(action = controllers.userJourney.routes.RegisteredOfficeAddressController.confirmRO()) {
-        <div class="form-group">
-            <p class="lede" id="ro-address">
-                <span id="address-line-1">12 Test Road</span><br>
-                <span id="address-line-2">Test town</span><br>
-                <span id="address-line-3">Testshire</span><br>
-                <span id="post-code">TS14 7ST</span><br>
-            </p>
-        </div>
+    @form(action = controllers.userJourney.routes.CompanyDetailsController.confirmRO()) {
+        @addressDisplay(address, "ro-address")
 
         <div class="form-group">
             @hiddenDetails("incorrect-address-", Messages("pages.confirmRO.help.link"), incorrectAddressContent)

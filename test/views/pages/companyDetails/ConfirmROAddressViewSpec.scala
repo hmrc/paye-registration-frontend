@@ -16,6 +16,7 @@
 
 package views.pages.companyDetails
 
+import models.view.Address
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.test.FakeRequest
@@ -28,9 +29,18 @@ class ConfirmROAddressViewSpec extends PAYERegSpec with I18nSupport {
   implicit val messagesApi : MessagesApi = injector.instanceOf[MessagesApi]
 
   val testCompanyName = "Test company limited"
+  val testAddress =
+    Address(
+      "testL1",
+      "testL2",
+      Some("testL3"),
+      Some("testL4"),
+      Some("testPostCode"),
+      None
+    )
 
   "The confirm your RO address screen" should {
-    lazy val view = ConfirmROAddress(testCompanyName)
+    lazy val view = ConfirmROAddress(testCompanyName, testAddress)
     lazy val document = Jsoup.parse(view.body)
 
     "have the company company in the page title" in {
