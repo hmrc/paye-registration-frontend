@@ -30,17 +30,19 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class CompanyRegistrationConnector @Inject()() extends CompanyRegistrationConnect with ServicesConfig {
-  val companyRegistrationUri: String = baseUrl("company-registration")
+  lazy val companyRegistrationUrl: String = baseUrl("company-registration")
+  lazy val companyRegistrationUri: String = getConfString("company-registration.uri","")
   val http = WSHttp
 }
 
 trait CompanyRegistrationConnect {
 
+  val companyRegistrationUrl : String
   val companyRegistrationUri : String
   val http : WSHttp
 
   def getTransactionId(regId: String)(implicit hc : HeaderCarrier) : Future[String] = {
-    http.GET[JsObject](s"$companyRegistrationUri/company-registration/corporation-tax-registration/$regId/confirmation-references") map {
+    http.GET[JsObject](s"$companyRegistrationUrl$companyRegistrationUri/corporation-tax-registration/$regId/confirmation-references") map {
       _.\("transaction-id").get.as[String]
     } recover {
       case badRequestErr: BadRequestException =>

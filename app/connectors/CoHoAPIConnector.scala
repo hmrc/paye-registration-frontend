@@ -30,7 +30,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class CoHoAPIConnector @Inject()() extends CoHoAPIConnect with ServicesConfig {
-  val coHoAPIUrl = baseUrl("coho-api")
+  lazy val coHoAPIUrl = baseUrl("coho-api")
+  lazy val coHoAPIUri = getConfString("coho-api.uri","")
   val http : WSHttp = WSHttp
 }
 
@@ -43,10 +44,11 @@ case class CohoApiROAddress(response : CHROAddress) extends CohoApiResponse
 trait CoHoAPIConnect {
 
   val coHoAPIUrl: String
+  val coHoAPIUri: String
   val http: WSHttp
 
   def getCoHoCompanyDetails(registrationID: String)(implicit hc: HeaderCarrier): Future[CohoApiResponse] = {
-    http.GET[CoHoCompanyDetailsModel](s"$coHoAPIUrl/incorporation-frontend-stubs/company/$registrationID") map {
+    http.GET[CoHoCompanyDetailsModel](s"$coHoAPIUrl$coHoAPIUri/company/$registrationID") map {
       res => CohoApiSuccessResponse(res)
     } recover {
       case badRequestErr: BadRequestException =>
@@ -59,7 +61,7 @@ trait CoHoAPIConnect {
   }
 
   def getRegisteredOfficeAddress(transactionId: String)(implicit hc : HeaderCarrier): Future[CHROAddress] = {
-    http.GET[CHROAddress](s"$coHoAPIUrl/incorporation-frontend-stubs/$transactionId/ro-address") recover {
+    http.GET[CHROAddress](s"$coHoAPIUrl$coHoAPIUri/$transactionId/ro-address") recover {
       case badRequestErr: BadRequestException =>
         Logger.error("[CohoAPIConnector] [getRegisteredOfficeAddress] - Received a BadRequest status code when expecting a Registered office address")
         throw badRequestErr
