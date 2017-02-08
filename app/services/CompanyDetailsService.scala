@@ -118,7 +118,7 @@ trait CompanyDetailsSrv extends CommonService {
       apiModel.crn,
       apiModel.companyName,
       tradingNameView,
-      Some(apiModel.address)
+      Some(apiModel.roAddress)
     )
   }
 

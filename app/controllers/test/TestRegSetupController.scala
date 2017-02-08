@@ -69,7 +69,7 @@ trait TestRegSetupCtrl extends FrontendController with Actions with CommonServic
       } yield BadRequest(views.html.pages.test.payeRegistrationSetup(errors, regID)),
 
       success => testPAYERegConnector.addPAYERegistration(success) map {
-        case DownstreamOutcome.Success => Ok("PAYE Registration et up successfully")
+        case DownstreamOutcome.Success => Ok("PAYE Registration set up successfully")
         case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Registration")
       }
     )

@@ -23,6 +23,7 @@ import enums.DownstreamOutcome
 import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.Logger
 import play.api.http.Status
+import play.api.libs.json.Json
 import services.CommonService
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
