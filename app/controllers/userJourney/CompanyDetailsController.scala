@@ -18,6 +18,7 @@ package controllers.userJourney
 
 import auth.PAYERegime
 import javax.inject.{Inject, Singleton}
+
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector}
 import enums.DownstreamOutcome
@@ -25,11 +26,11 @@ import forms.companyDetails.TradingNameForm
 import models.view.TradingName
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{AnyContent, Request, Result}
+import play.api.mvc.{Action, AnyContent, Request, Result}
 import services.{CoHoAPIService, CoHoAPISrv, CompanyDetailsService, CompanyDetailsSrv, S4LService, S4LSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import views.html.pages.companyDetails.{tradingName => TradingNamePage}
+import views.html.pages.companyDetails.{tradingName => TradingNamePage, ConfirmROAddress}
 
 import scala.concurrent.Future
 
@@ -58,7 +59,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
   val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
 
     for {
-      companyDetails <- companyDetailsService.getCompanyDetails()
+      companyDetails <- companyDetailsService.getCompanyDetails
     } yield companyDetails.tradingName match {
       case Some(model) => Ok(TradingNamePage(TradingNameForm.form.fill(model), companyDetails.companyName))
       case _ => Ok(TradingNamePage(TradingNameForm.form, companyDetails.companyName))
@@ -75,7 +76,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
           badRequestResponse(validatedForm)
         } else {
           companyDetailsService.submitTradingName(success) map {
-            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.RegisteredOfficeAddressController.roAddress())
+            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.roAddress())
             case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
           }
         }
@@ -83,10 +84,24 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
     )
   }
 
+  val roAddress : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user =>
+      implicit request =>
+        for {
+          companyDetails <- companyDetailsService.getCompanyDetails
+          address <- companyDetailsService.getROAddress
+        } yield Ok(ConfirmROAddress(companyDetails.companyName, address))
+  }
+
+  val confirmRO : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user =>
+      implicit request =>
+        Future.successful(Redirect(controllers.userJourney.routes.AddressLookupController.redirectToLookup()))
+  }
+
   private def badRequestResponse(form: Form[TradingName])(implicit request: Request[AnyContent]): Future[Result] = {
     cohoService.getStoredCompanyName map {
       cName => BadRequest(TradingNamePage(form, cName))
     }
   }
-
 }

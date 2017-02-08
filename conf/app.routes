@@ -15,8 +15,8 @@ GET         /trading-name                           controllers.userJourney.Comp
 POST        /trading-name                           controllers.userJourney.CompanyDetailsController.submitTradingName
 
 ## CONFIRM RO ADDRESS
-GET         /registered-office-address              controllers.userJourney.RegisteredOfficeAddressController.roAddress
-POST        /registered-office-address              controllers.userJourney.RegisteredOfficeAddressController.confirmRO
+GET         /registered-office-address              controllers.userJourney.CompanyDetailsController.roAddress
+POST        /registered-office-address              controllers.userJourney.CompanyDetailsController.confirmRO
 
 ## ADDRESS LOOKUP
 GET         /address-lookup                         controllers.userJourney.AddressLookupController.redirectToLookup
