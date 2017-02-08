@@ -123,17 +123,7 @@ trait CompanyDetailsSrv extends CommonService {
       tID <- compRegConnector.getTransactionId(regId)
       address <- cohoAPIConnector.getRegisteredOfficeAddress(tID)
     } yield {
-      //address
-      CHROAddress(
-        "12",
-        "Test Road",
-        None,
-        "Test Town",
-        None,
-        None,
-        Some("TS14 7ST"),
-        Some("Test county")
-      )
+      address
     }
   }
 
