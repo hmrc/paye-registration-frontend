@@ -16,6 +16,7 @@
 
 package connectors
 
+import play.api.libs.json.{JsObject, Json}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
 
@@ -32,22 +33,33 @@ class CompanyRegistrationConnectorSpec extends PAYERegSpec {
     implicit val hc = HeaderCarrier()
   }
 
+  val testJson =
+    Json.parse(
+      """
+        |{
+        |    "acknowledgement-reference" : "testRef",
+        |    "transaction-id" : "testTransactionID-001",
+        |    "payment-reference" : "test-pay-ref",
+        |    "payment-amount" : "12"
+        |}
+      """.stripMargin).as[JsObject]
+
   "getTransactionId" should {
     "return a transaction id" in new Setup {
-      mockHttpGet[String](connector.companyRegistrationUri, Future.successful("testTransactionId"))
+      mockHttpGet[JsObject](connector.companyRegistrationUri, Future.successful(testJson))
 
       val result = await(connector.getTransactionId("testRegId"))
-      result shouldBe "testTransactionId"
+      result shouldBe "testTransactionID-001"
     }
 
     "throw a bad request exception" in new Setup {
-      mockHttpGet[String](connector.companyRegistrationUri, Future.failed(new BadRequestException("tstException")))
+      mockHttpGet[JsObject](connector.companyRegistrationUri, Future.failed(new BadRequestException("tstException")))
 
         intercept[BadRequestException](await(connector.getTransactionId("testRegId")))
     }
 
     "throw a RuntimeException" in new Setup {
-      mockHttpGet[String](connector.companyRegistrationUri, Future.failed(new RuntimeException))
+      mockHttpGet[JsObject](connector.companyRegistrationUri, Future.failed(new RuntimeException))
 
       intercept[RuntimeException](await(connector.getTransactionId("testRegId")))
     }

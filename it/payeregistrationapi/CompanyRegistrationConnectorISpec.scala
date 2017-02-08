@@ -20,7 +20,7 @@ import connectors.CompanyRegistrationConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
@@ -42,10 +42,19 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
   val regId = "12345"
   implicit val hc = HeaderCarrier()
 
-  val url = s"/company-registration/$regId/transaction-id"
+  val url = s"/corporation-tax-registration/$regId/confirmation-references"
 
   "getTransactionId" should {
-    val testTransId = "testTransId"
+    val testTransId =
+      Json.parse(
+        """
+          |{
+          |    "acknowledgement-reference" : "testRef",
+          |    "transaction-id" : "testTransactionID-001",
+          |    "payment-reference" : "test-pay-ref",
+          |    "payment-amount" : "12"
+          |}
+        """.stripMargin).as[JsObject]
 
     "get a transaction id" in {
 
@@ -61,7 +70,7 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getResponse) shouldBe testTransId
+      await(getResponse) shouldBe "testTransactionID-001"
     }
   }
 }
