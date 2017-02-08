@@ -185,5 +185,29 @@ class CHROAddressSpec extends PAYERegSpec {
       testImplicitConversion(testCHROAddress) shouldBe testAddress
 
     }
+
+    "convert CHROAddress with minimal data" in {
+      val testCHROAddress = CHROAddress(
+        premises = "12",
+        addressLine1 = "Short Street Name",
+        addressLine2 = None,
+        locality = "Testford",
+        country = Some("UK"),
+        poBox = None,
+        postalCode = Some("TE1 1ST"),
+        region = None
+      )
+
+      val testAddress = Address(
+        line1 = "12 Short Street Name",
+        line2 = "Testford",
+        line3 = None,
+        line4 = None,
+        country = Some("UK"),
+        postCode = Some("TE1 1ST")
+      )
+      testImplicitConversion(testCHROAddress) shouldBe testAddress
+
+    }
   }
 }
