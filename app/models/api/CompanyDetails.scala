@@ -23,7 +23,7 @@ case class CompanyDetails(
                            crn: Option[String],
                            companyName: String,
                            tradingName: Option[String],
-                           address: Address
+                           roAddress: Address
                            )
 
 object CompanyDetails {

@@ -52,7 +52,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
     val validCompanyDetails = CompanyDetails(crn = None,
                                              companyName = "Test Company",
                                              tradingName = Some("Test Company Trading Name"),
-                                             address = Address(
+                                             roAddress = Address(
                                                "14 St Test Walk",
                                                "Testley",
                                                Some("Testford"),
