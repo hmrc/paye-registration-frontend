@@ -193,9 +193,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
         when(mockCompanyDetailsService.getCompanyDetails(Matchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
-        when(mockCompanyDetailsService.getROAddress(Matchers.any[HeaderCarrier]()))
-          .thenReturn(Future.successful(testAddress))
-
         AuthBuilder.showWithAuthorisedUser(controller.roAddress, mockAuthConnector) {
           result =>
             status(result) shouldBe OK

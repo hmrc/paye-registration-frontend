@@ -89,8 +89,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
       implicit request =>
         for {
           companyDetails <- companyDetailsService.getCompanyDetails
-          address <- companyDetailsService.getROAddress
-        } yield Ok(ConfirmROAddress(companyDetails.companyName, address))
+        } yield Ok(ConfirmROAddress(companyDetails.companyName, companyDetails.roAddress.get)) //TODO: refactor out roAddress option
   }
 
   val confirmRO : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {

@@ -69,7 +69,8 @@ trait CompanyDetailsSrv extends CommonService {
       case Some(detailsAPI) => Future.successful(apiToView(detailsAPI))
       case None => for {
         cName   <- cohoService.getStoredCompanyName
-      } yield CompanyDetailsView(None, cName, None, None)
+        roAddress <- retrieveRegisteredOfficeAddress
+      } yield CompanyDetailsView(None, cName, None, Some(roAddress))
     }
   }
 
@@ -97,24 +98,10 @@ trait CompanyDetailsSrv extends CommonService {
     } yield outcome
   }
 
-  private[services] def getStoredROAddress(implicit hc: HeaderCarrier): Future[Option[Address]] = {
+  private[services] def getStoredROAddress(implicit hc: HeaderCarrier): Future[Address] = {
     for {
       details <- getCompanyDetails
-    } yield details.roAddress
-  }
-
-  def getROAddress(implicit hc: HeaderCarrier): Future[Address] = {
-    getStoredROAddress flatMap  {
-      case Some(address) => Future.successful(address)
-      case None => retrieveRegisteredOfficeAddress
-    }
-  }
-
-  def submitROAddress(address: Address)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    for {
-      details <- getCompanyDetails
-      outcome <- saveCompanyDetails(details.copy(roAddress = Some(address)))
-    } yield outcome
+    } yield details.roAddress.get //TODO: refactor out roAddress option
   }
 
   private[services] def retrieveRegisteredOfficeAddress(implicit hc : HeaderCarrier): Future[Address] = {
@@ -126,8 +113,6 @@ trait CompanyDetailsSrv extends CommonService {
       address
     }
   }
-
-
 
   private[services] def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
     val tradingNameView = apiModel.tradingName.map {

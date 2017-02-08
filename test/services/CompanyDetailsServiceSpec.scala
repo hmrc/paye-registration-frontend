@@ -18,7 +18,7 @@ package services
 
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
-import fixtures.{PAYERegistrationFixture, S4LFixture}
+import fixtures.{CoHoAPIFixture, PAYERegistrationFixture, S4LFixture}
 import models.view.{Address, CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import org.mockito.Matchers
@@ -33,7 +33,7 @@ import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, HttpResponse, N
 
 import scala.concurrent.Future
 
-class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistrationFixture {
+class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistrationFixture with CoHoAPIFixture {
 
   implicit val hc = HeaderCarrier()
 
@@ -188,7 +188,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   }
 
   "Calling getCompanyDetails" should {
-    "return the correct View response when Company Details are returned from the S4L" in new APIConverterMockedSetup {
+    "return the correct View response when Company Details are returned from S4L" in new APIConverterMockedSetup {
       when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.CompanyDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(Some(validCompanyDetailsViewModel)))
 
@@ -209,7 +209,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       await(service.getCompanyDetails) shouldBe validCompanyDetailsViewModel
     }
 
-    "return a default View model when no Company Details are returned from the connector" in new Setup {
+    "return a default View model with company name and RO Address when no Company Details are returned from the connector" in new Setup {
       mockFetchRegID("54321")
       when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.CompanyDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(None))
@@ -223,7 +223,13 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockS4LService.saveForm(Matchers.eq(CacheKeys.CompanyDetails.toString),Matchers.any)(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
-      await(service.getCompanyDetails) shouldBe CompanyDetailsView(None, "Tst company name", None, None)
+      when(mockCompRegConnector.getTransactionId(Matchers.eq("54321"))(Matchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful("txID"))
+
+      when(mockCohoAPIConnector.getRegisteredOfficeAddress(Matchers.eq("txID"))(Matchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(validCHROAddress))
+
+      await(service.getCompanyDetails) shouldBe CompanyDetailsView(None, "Tst company name", None, Some(validCHROAddress))
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
@@ -296,51 +302,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         }
       }
 
-      await(service.getStoredROAddress) shouldBe validCompanyDetailsViewModel.roAddress
-    }
-  }
-
-  "Calling getROAddress" should {
-    "return an address successfully" in {
-      val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService, mockCompRegConnector, mockCohoAPIConnector) {
-        override private[services] def getStoredROAddress(implicit hc: HeaderCarrier) = {
-          Future.successful(Some(validROAddress))
-        }
-      }
-      await(service.getROAddress) shouldBe validROAddress
-    }
-
-    "return an address from coho" in {
-
-      val functionAddress =
-        CHROAddress(
-          "12",
-          "Test Road",
-          None,
-          "Test Town",
-          None,
-          None,
-          Some("TS14 7ST"),
-          Some("Test county")
-        )
-
-      val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService, mockCompRegConnector, mockCohoAPIConnector) {
-        override private[services] def getStoredROAddress(implicit hc: HeaderCarrier) = {
-          Future.successful(None)
-        }
-
-        override private[services] def retrieveRegisteredOfficeAddress(implicit hc: HeaderCarrier) = {
-          Future.successful(functionAddress)
-        }
-      }
-      await(service.getROAddress) shouldBe CHROAddress.convertToAddress(functionAddress)
-    }
-  }
-
-  "Calling submitROAddress" should {
-    "return a success response when the address is saved successfully" in new CompanyDetailsMockedSetup {
-      mockFetchRegID("54321")
-      await(service.submitROAddress(validCompanyDetailsViewModel.roAddress.get)) shouldBe DownstreamOutcome.Success
+      await(service.getStoredROAddress) shouldBe validCompanyDetailsViewModel.roAddress.get //TODO: refactor out roAddress option
     }
   }
 

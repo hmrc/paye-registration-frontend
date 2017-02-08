@@ -35,4 +35,15 @@ trait CoHoAPIFixture {
     )
   )
 
+  val validCHROAddress = CHROAddress(
+    premises = "11",
+    addressLine1 = "Test Street",
+    addressLine2 = Some("Test Area"),
+    locality = "Test Town",
+    country = Some("Test Country"),
+    poBox = Some("Test PO BOX"),
+    postalCode = Some("TE1 1ST"),
+    region = Some("Test Region")
+  )
+
 }
