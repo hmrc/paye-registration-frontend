@@ -97,13 +97,13 @@ trait CompanyDetailsSrv extends CommonService {
       regID   <- fetchRegistrationID
       details <- getCompanyDetails
       //TODO: Add connector call for undefined address when connector implemented
-    } yield details.address.get
+    } yield details.roAddress.get
   }
 
   def submitROAddress(address: Address)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
       details <- getCompanyDetails
-      outcome <- saveCompanyDetails(details.copy(address = Some(address)))
+      outcome <- saveCompanyDetails(details.copy(roAddress = Some(address)))
     } yield outcome
   }
 

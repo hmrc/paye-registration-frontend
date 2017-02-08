@@ -22,7 +22,7 @@ case class CompanyDetails(
                            crn: Option[String],
                            companyName: String,
                            tradingName: Option[TradingName],
-                           address: Option[Address]
+                           roAddress: Option[Address]
                            )
 
 case class TradingName (

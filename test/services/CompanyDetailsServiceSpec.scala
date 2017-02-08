@@ -288,14 +288,14 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   "Calling getROAddress" should {
     "return an address successfully" in new CompanyDetailsMockedSetup {
       mockFetchRegID("54321")
-      await(service.getROAddress()) shouldBe validCompanyDetailsViewModel.address.get
+      await(service.getROAddress()) shouldBe validCompanyDetailsViewModel.roAddress.get
     }
   }
 
   "Calling submitROAddress" should {
     "return a success response when the address is saved successfully" in new CompanyDetailsMockedSetup {
       mockFetchRegID("54321")
-      await(service.submitROAddress(validCompanyDetailsViewModel.address.get)) shouldBe DownstreamOutcome.Success
+      await(service.submitROAddress(validCompanyDetailsViewModel.roAddress.get)) shouldBe DownstreamOutcome.Success
     }
   }
 }
