@@ -18,7 +18,7 @@ package controllers.userJourney
 
 import builders.AuthBuilder
 import enums.DownstreamOutcome
-import fixtures.S4LFixture
+import fixtures.{PAYERegistrationFixture, S4LFixture}
 import models.view.{Address, CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import org.jsoup._
 import org.mockito.Matchers
@@ -34,7 +34,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
+class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYERegistrationFixture {
   val mockS4LService = mock[S4LService]
   val mockCompanyDetailsService = mock[CompanyDetailsService]
   val mockCoHoService = mock[CoHoAPIService]
@@ -111,7 +111,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
 
     "show a blank trading name page when no Company Details data has been entered" in new Setup {
       val cName = "Tst Company Name"
-      val defaultCompanyDetailsView = CompanyDetailsView(None, cName, None, None)
+      val defaultCompanyDetailsView = CompanyDetailsView(None, cName, None, validROAddress)
       when(mockCompanyDetailsService.getCompanyDetails(Matchers.any())).thenReturn(Future.successful(defaultCompanyDetailsView))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {

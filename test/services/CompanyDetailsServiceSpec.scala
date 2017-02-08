@@ -53,7 +53,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
     val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService, mockCompRegConnector, mockCohoAPIConnector) {
 
       override def getCompanyDetails(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
-        Future.successful(CompanyDetailsView(None, "test compay name", None, None))
+        Future.successful(CompanyDetailsView(None, "test compay name", None, validROAddress))
       }
 
       override def saveCompanyDetails(detailsView: CompanyDetailsView)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
@@ -99,7 +99,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
           differentName = true,
           tradingName = Some("trading name")
         )),
-        Some(Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")))
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
       )
       service.apiToView(tstModelAPI) shouldBe tstModelView
     }
@@ -118,7 +118,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
           differentName = false,
           tradingName = None
         )),
-        Some(Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")))
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
       )
       service.apiToView(tstModelAPI) shouldBe tstModelView
     }
@@ -139,7 +139,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
           differentName = true,
           tradingName = Some("trading name")
         )),
-        Some(Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")))
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
       )
       service.viewToAPI(tstModelView) shouldBe Right(tstModelAPI)
     }
@@ -158,7 +158,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
           differentName = false,
           tradingName = Some("trading name")
         )),
-        Some(Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")))
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
       )
       service.viewToAPI(tstModelView) shouldBe Right(tstModelAPI)
     }
@@ -168,20 +168,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         Some("tstCRN"),
         "Comp name",
         None,
-        Some(Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")))
-      )
-      service.viewToAPI(tstModelView) shouldBe Left(tstModelView)
-    }
-
-    "return the original view model when address has not been completed" in new Setup {
-      val tstModelView = CompanyDetailsView(
-        Some("tstCRN"),
-        "Comp name",
-        Some(TradingNameView(
-          differentName = false,
-          tradingName = Some("trading name")
-        )),
-        None
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
       )
       service.viewToAPI(tstModelView) shouldBe Left(tstModelView)
     }
@@ -229,7 +216,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockCohoAPIConnector.getRegisteredOfficeAddress(Matchers.eq("txID"))(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCHROAddress))
 
-      await(service.getCompanyDetails) shouldBe CompanyDetailsView(None, "Tst company name", None, Some(validCHROAddress))
+      await(service.getCompanyDetails) shouldBe CompanyDetailsView(None, "Tst company name", None, validCHROAddress)
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
@@ -270,7 +257,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         Some("crn"),
         "Tst Company Name",
         None,
-        Some(Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")))
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
       )
 
       when(mockS4LService.saveForm(Matchers.eq(CacheKeys.CompanyDetails.toString),Matchers.any)(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))
@@ -291,18 +278,6 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       mockFetchRegID("54322")
 
       await(service.submitTradingName(validTradingNameViewModel)) shouldBe DownstreamOutcome.Failure
-    }
-  }
-
-  "Calling getStoredROAddress" should {
-    "return an optional address" in {
-      val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService, mockCompRegConnector, mockCohoAPIConnector) {
-        override def getCompanyDetails(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
-          Future.successful(validCompanyDetailsViewModel)
-        }
-      }
-
-      await(service.getStoredROAddress) shouldBe validCompanyDetailsViewModel.roAddress.get //TODO: refactor out roAddress option
     }
   }
 

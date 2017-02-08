@@ -70,7 +70,7 @@ trait CompanyDetailsSrv extends CommonService {
       case None => for {
         cName   <- cohoService.getStoredCompanyName
         roAddress <- retrieveRegisteredOfficeAddress
-      } yield CompanyDetailsView(None, cName, None, Some(roAddress))
+      } yield CompanyDetailsView(None, cName, None, roAddress)
     }
   }
 
@@ -98,12 +98,6 @@ trait CompanyDetailsSrv extends CommonService {
     } yield outcome
   }
 
-  private[services] def getStoredROAddress(implicit hc: HeaderCarrier): Future[Address] = {
-    for {
-      details <- getCompanyDetails
-    } yield details.roAddress.get //TODO: refactor out roAddress option
-  }
-
   private[services] def retrieveRegisteredOfficeAddress(implicit hc : HeaderCarrier): Future[Address] = {
     for {
       regId <- fetchRegistrationID
@@ -125,12 +119,12 @@ trait CompanyDetailsSrv extends CommonService {
       apiModel.crn,
       apiModel.companyName,
       tradingNameView,
-      Some(apiModel.roAddress)
+      apiModel.roAddress
     )
   }
 
   private[services] def viewToAPI(viewData: CompanyDetailsView): Either[CompanyDetailsView, CompanyDetailsAPI] = viewData match {
-    case CompanyDetailsView(crn, companyName, Some(tradingName), Some(address)) =>
+    case CompanyDetailsView(crn, companyName, Some(tradingName), address) =>
       Right(CompanyDetailsAPI(crn, companyName, tradingNameAPIValue(tradingName), address))
     case _ => Left(viewData)
   }
