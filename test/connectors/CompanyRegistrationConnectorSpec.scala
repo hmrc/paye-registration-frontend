@@ -24,9 +24,13 @@ import scala.concurrent.Future
 
 class CompanyRegistrationConnectorSpec extends PAYERegSpec {
 
+  val crTestUrl = "testUrl"
+  val crTestUri = "testUri"
+
   class Setup {
     val connector = new CompanyRegistrationConnect {
-      val companyRegistrationUri = "testUrl"
+      val companyRegistrationUri = crTestUri
+      val companyRegistrationUrl = crTestUrl
       val http = mockWSHttp
     }
 

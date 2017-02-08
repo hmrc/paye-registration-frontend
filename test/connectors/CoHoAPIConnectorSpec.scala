@@ -28,11 +28,13 @@ import scala.concurrent.Future
 class CoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
 
   val testUrl = "testCohoAPIUrl"
+  val testUri = "testCohoAPIUri"
   implicit val hc = HeaderCarrier()
 
   class Setup {
-    val connector = new CoHoAPIConnector {
-      override val coHoAPIUrl = testUrl
+    val connector = new CoHoAPIConnect {
+      val coHoAPIUrl = testUrl
+      val coHoAPIUri = testUri
       override val http : WSHttp = mockWSHttp
     }
   }

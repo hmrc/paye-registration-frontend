@@ -32,6 +32,7 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
   val additionalConfiguration = Map(
     "microservice.services.company-registration.host" -> s"$mockHost",
     "microservice.services.company-registration.port" -> s"$mockPort",
+    "microservice.services.company-registration.uri" -> "/company-registration",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes"
   )
 
