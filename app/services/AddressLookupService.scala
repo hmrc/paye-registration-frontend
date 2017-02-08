@@ -28,8 +28,8 @@ class AddressLookupService @Inject()(
                                       injFeatureSwitch: PAYEFeatureSwitch,
                                       injAddressConnector: AddressLookupConnector)
   extends AddressLookupSrv with ServicesConfig {
-  val payeRegistrationUrl = baseUrl("paye-registration-frontend")
-  val addressLookupFrontendUrl = baseUrl("address-lookup-frontend")
+  lazy val payeRegistrationUrl = baseUrl("paye-registration-frontend")
+  lazy val addressLookupFrontendUrl = baseUrl("address-lookup-frontend")
   val addressLookupConnector = injAddressConnector
   val featureSwitch = injFeatureSwitch
 }
