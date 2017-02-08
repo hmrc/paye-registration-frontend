@@ -47,7 +47,7 @@ object CHROAddress {
   import scala.language.implicitConversions
 
   implicit def convertToAddress(address: CHROAddress): Address = {
-    val (line1, oLine2) = if(address.premises.length + address.addressLine1.length > 26) {
+    val (line1, oLine2) = if((address.premises + " " + address.addressLine1).length > 26) {
       (address.premises, Some(address.addressLine1))
     } else {
       (address.premises+" "+address.addressLine1, None)
