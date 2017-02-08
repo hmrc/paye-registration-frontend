@@ -16,7 +16,7 @@
 
 package services
 
-import connectors.{CoHoAPIConnect, CoHoAPIConnector, CompanyRegistrationConnect}
+import connectors.{CoHoAPIConnector, CompanyRegistrationConnector}
 import models.external.CHROAddress
 import testHelpers.PAYERegSpec
 import org.mockito.Mockito._
@@ -27,14 +27,11 @@ import scala.concurrent.Future
 
 class RegisteredOfficeAddressSpec extends PAYERegSpec {
 
-  val mockCompRegConnector = mock[CompanyRegistrationConnect]
+  val mockCompRegConnector = mock[CompanyRegistrationConnector]
   val mockCohoAPIConnector = mock[CoHoAPIConnector]
 
   class Setup {
-    val service = new RegisteredOfficeAddressSrv {
-      val compRegConnector: CompanyRegistrationConnect = mockCompRegConnector
-      val cohoAPIConnector: CoHoAPIConnect = mockCohoAPIConnector
-    }
+    val service = new RegisteredOfficeAddressService (mockCompRegConnector, mockCohoAPIConnector)
 
     implicit val hc = HeaderCarrier()
   }

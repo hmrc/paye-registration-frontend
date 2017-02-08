@@ -25,8 +25,6 @@ import services.{AddressLookupService, AddressLookupSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
-import scala.concurrent.Future
-
 @Singleton
 class AddressLookupController @Inject()(
                                          injAddressLookupService: AddressLookupService,
