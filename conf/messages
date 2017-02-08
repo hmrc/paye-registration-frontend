@@ -93,10 +93,12 @@ pages.summary.title                = Check your answers
 pages.summary.heading              = Check your answers
 
 
-pages.summary.tradingName.sectionHeading              = Company information
+pages.summary.companyDetails.sectionHeading           = Company information
 pages.summary.tradingName.question                    = Other trading name
 pages.summary.tradingName.answers.noAnswerGiven       = No
 pages.summary.tradingName.hiddenChangeText            = Change the company's trading name
+
+pages.summary.roAddress.question                      = Registered office address
 
 pages.summary.employees.sectionHeading = Employment information
 

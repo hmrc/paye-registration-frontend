@@ -8,7 +8,7 @@
         <td id="@{row.id}Answer">
             @row.answer.fold(
             messageKey => Messages(s"pages.summary.${row.id}.answers.$messageKey"),
-            answer => answer
+            answer => Html(answer)
             )
         <td>
             @row.changeLink.map { linkLocation =>

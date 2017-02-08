@@ -78,11 +78,22 @@ trait PAYERegistrationSrv extends CommonService {
         )),
         Some(SummaryRow(
           id = "roAddress",
-          answer = Right(companyDetails.address.toString),
+          answer = Right(formatHTMLROAddress(companyDetails.roAddress)),
           changeLink = None
         ))
       ).flatten
     )
+  }
+
+  private[services] def formatHTMLROAddress(address: Address): String = {
+    List(
+      Some(address.line1),
+      Some(address.line2),
+      address.line3,
+      address.line4,
+      address.postCode,
+      address.country
+    ).flatten.mkString("<br />")
   }
 
   private[services] def buildEmploymentSection(employment : Employment) : SummarySection = {
