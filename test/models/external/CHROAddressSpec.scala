@@ -24,7 +24,7 @@ import testHelpers.PAYERegSpec
 class CHROAddressSpec extends PAYERegSpec {
   val tstCHROAddress = CHROAddress(
     premises = "14",
-    addressLine1 = "St Test Walker",
+    addressLine1 = "Test Walker Street",
     addressLine2 = Some("Testley"),
     locality = "Testford",
     country = Some("UK"),
@@ -34,10 +34,10 @@ class CHROAddressSpec extends PAYERegSpec {
   )
 
   val tstAddress = Address(
-    line1 = "14 St Test Walker",
-    line2 = "Testford",
-    line3 = Some("Testley"),
-    line4 = None,
+    line1 = "14 Test Walker Street",
+    line2 = "Testley",
+    line3 = Some("Testford"),
+    line4 = Some("Testshire"),
     country = Some("UK"),
     postCode = Some("TE1 1ST")
   )
@@ -45,7 +45,7 @@ class CHROAddressSpec extends PAYERegSpec {
   val tstCHROAddressJson = Json.parse(
     """{
       |  "premises":"14",
-      |  "address_line_1":"St Test Walker",
+      |  "address_line_1":"Test Walker Street",
       |  "address_line_2":"Testley",
       |  "locality":"Testford",
       |  "country":"UK",
@@ -59,10 +59,155 @@ class CHROAddressSpec extends PAYERegSpec {
     }
   }
 
+  def testImplicitConversion(address: Address) = address
+
   "convertToAddress" should {
     "convert CHROAddress to Address" in {
-      def testImplicitConversion(address: Address) = address
       testImplicitConversion(tstCHROAddress) shouldBe tstAddress
+    }
+
+    "convert CHROAddress with a long first line" in {
+      val testCHROAddress = CHROAddress(
+        premises = "Unit 14234",
+        addressLine1 = "Really Long Street Name",
+        addressLine2 = Some("Testley"),
+        locality = "Testford",
+        country = Some("UK"),
+        poBox = None,
+        postalCode = Some("TE1 1ST"),
+        region = Some("Testshire")
+      )
+
+      val testAddress = Address(
+        line1 = "Unit 14234",
+        line2 = "Really Long Street Name",
+        line3 = Some("Testley"),
+        line4 = Some("Testford"),
+        country = Some("UK"),
+        postCode = Some("TE1 1ST")
+      )
+      testImplicitConversion(testCHROAddress) shouldBe testAddress
+
+    }
+
+    "convert CHROAddress with a PO Box" in {
+      val testCHROAddress = CHROAddress(
+        premises = "Unit 14234",
+        addressLine1 = "Really Long Street Name",
+        addressLine2 = None,
+        locality = "Testford",
+        country = Some("UK"),
+        poBox = Some("PO BOX TST36"),
+        postalCode = Some("TE1 1ST"),
+        region = Some("Testshire")
+      )
+
+      val testAddress = Address(
+        line1 = "Unit 14234",
+        line2 = "Really Long Street Name",
+        line3 = Some("PO BOX TST36"),
+        line4 = Some("Testford"),
+        country = Some("UK"),
+        postCode = Some("TE1 1ST")
+      )
+      testImplicitConversion(testCHROAddress) shouldBe testAddress
+
+    }
+
+    "convert CHROAddress with a PO Box and short address line 1" in {
+      val testCHROAddress = CHROAddress(
+        premises = "12",
+        addressLine1 = "Short Street Name",
+        addressLine2 = None,
+        locality = "Testford",
+        country = Some("UK"),
+        poBox = Some("PO BOX TST36"),
+        postalCode = Some("TE1 1ST"),
+        region = Some("Testshire")
+      )
+
+      val testAddress = Address(
+        line1 = "12 Short Street Name",
+        line2 = "PO BOX TST36",
+        line3 = Some("Testford"),
+        line4 = Some("Testshire"),
+        country = Some("UK"),
+        postCode = Some("TE1 1ST")
+      )
+      testImplicitConversion(testCHROAddress) shouldBe testAddress
+
+    }
+
+    "convert CHROAddress with a PO Box, a line 2 and short address line 1" in {
+      val testCHROAddress = CHROAddress(
+        premises = "12",
+        addressLine1 = "Short Street Name",
+        addressLine2 = Some("Industrial estate"),
+        locality = "Testford",
+        country = Some("UK"),
+        poBox = Some("PO BOX TST36"),
+        postalCode = Some("TE1 1ST"),
+        region = Some("Testshire")
+      )
+
+      val testAddress = Address(
+        line1 = "12 Short Street Name",
+        line2 = "Industrial estate PO BOX TST36",
+        line3 = Some("Testford"),
+        line4 = Some("Testshire"),
+        country = Some("UK"),
+        postCode = Some("TE1 1ST")
+      )
+      testImplicitConversion(testCHROAddress) shouldBe testAddress
+
+    }
+
+    "convert CHROAddress with a PO Box, a line 2 and long address line 1" in {
+      val testCHROAddress = CHROAddress(
+        premises = "Unit 14234",
+        addressLine1 = "Really Long Street Name",
+        addressLine2 = Some("Industrial estate"),
+        locality = "Testford",
+        country = Some("UK"),
+        poBox = Some("PO BOX TST36"),
+        postalCode = Some("TE1 1ST"),
+        region = Some("Testshire")
+      )
+
+      val testAddress = Address(
+        line1 = "Unit 14234",
+        line2 = "Really Long Street Name",
+        line3 = Some("Industrial estate PO BOX TST36"),
+        line4 = Some("Testford"),
+        country = Some("UK"),
+        postCode = Some("TE1 1ST")
+      )
+      testImplicitConversion(testCHROAddress) shouldBe testAddress
+
+    }
+
+    "convert CHROAddress with minimal data" in {
+      val testCHROAddress = CHROAddress(
+        premises = "12",
+        addressLine1 = "Short Street Name",
+        addressLine2 = None,
+        locality = "Testford",
+        country = Some("UK"),
+        poBox = None,
+        postalCode = Some("TE1 1ST"),
+        region = None
+      )
+
+      val testAddress = Address(
+        line1 = "12 Short Street Name",
+        line2 = "Testford",
+        line3 = None,
+        line4 = None,
+        country = Some("UK"),
+        postCode = Some("TE1 1ST")
+      )
+      testImplicitConversion(testCHROAddress) shouldBe testAddress
+
     }
   }
 }
