@@ -38,7 +38,6 @@ sealed trait CohoApiResponse
 case class CohoApiSuccessResponse(response: CoHoCompanyDetailsModel) extends CohoApiResponse
 case object CohoApiBadRequestResponse extends CohoApiResponse
 case class CohoApiErrorResponse(ex: Exception) extends CohoApiResponse
-
 case class CohoApiROAddress(response : CHROAddress) extends CohoApiResponse
 
 trait CoHoAPIConnect {

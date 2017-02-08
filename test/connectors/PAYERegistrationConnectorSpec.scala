@@ -19,6 +19,7 @@ package connectors
 import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
 import models.api.{CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
+import models.view.Address
 import play.api.http.Status
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._

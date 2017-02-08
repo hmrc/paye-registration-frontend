@@ -35,7 +35,8 @@ trait S4LFixture {
   val validCompanyDetailsViewModel = CompanyDetails(
     Some("crn"),
     "Tst Company Name",
-    Some(validTradingNameViewModel)
+    Some(validTradingNameViewModel),
+    Some(Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")))
   )
 
   val validEmploymentViewModel = Employment(

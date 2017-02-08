@@ -19,7 +19,7 @@ package services
 import connectors._
 import enums.DownstreamOutcome
 import models.api.{Employment, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
-import models.view.{Summary, SummaryRow, SummarySection}
+import models.view.{Address, Summary, SummaryRow, SummarySection}
 import fixtures.PAYERegistrationFixture
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -43,7 +43,8 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
     companyDetails = CompanyDetailsAPI(
       crn = None,
       companyName = "Test Company",
-      tradingName = Some("tstTrade")
+      tradingName = Some("tstTrade"),
+      Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
     ),
     employment = validEmploymentAPI
   )
@@ -162,7 +163,8 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
         companyDetails = CompanyDetailsAPI(
           crn = None,
           companyName = "Test Company",
-          tradingName = None
+          tradingName = None,
+          Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
         ),
         employment = validEmploymentAPI
       )

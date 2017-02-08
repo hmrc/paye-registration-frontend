@@ -21,7 +21,7 @@ import models.view.Address
 import play.api.libs.json.{JsSuccess, Json}
 import testHelpers.PAYERegSpec
 
-class CHROAddressSpec extends PAYERegSpec with CoHoAPIFixture {
+class CHROAddressSpec extends PAYERegSpec {
   val tstCHROAddress = CHROAddress(
     premises = "14",
     addressLine1 = "St Test Walker",

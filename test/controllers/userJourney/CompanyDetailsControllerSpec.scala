@@ -19,7 +19,7 @@ package controllers.userJourney
 import builders.AuthBuilder
 import enums.DownstreamOutcome
 import fixtures.S4LFixture
-import models.view.{TradingName => TradingNameView}
+import models.view.{TradingName => TradingNameView, CompanyDetails => CompanyDetailsView}
 import org.jsoup._
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -61,9 +61,8 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
     }
 
     "show the correctly pre-populated trading name page when data has already been entered" in new Setup {
-      val cName = "tst Company Name"
-      when(mockCompanyDetailsService.getCompanyDetails()(Matchers.any())).thenReturn(Future.successful(Some(validCompanyDetailsViewModel)))
-      when(mockCompanyDetailsService.getCompanyName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(cName))
+      val cName = "Tst Company Name"
+      when(mockCompanyDetailsService.getCompanyDetails()(Matchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -77,10 +76,9 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
     }
 
     "show the correctly pre-populated trading name page when negative data has already been entered" in new Setup {
-      val cName = "tst Company Name"
+      val cName = "Tst Company Name"
       val negativeTradingNameCompanyDetails = validCompanyDetailsViewModel.copy(tradingName = Some(negativeTradingNameViewModel))
-      when(mockCompanyDetailsService.getCompanyDetails()(Matchers.any())).thenReturn(Future.successful(Some(negativeTradingNameCompanyDetails)))
-      when(mockCompanyDetailsService.getCompanyName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(cName))
+      when(mockCompanyDetailsService.getCompanyDetails()(Matchers.any())).thenReturn(Future.successful(negativeTradingNameCompanyDetails))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -94,10 +92,9 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
     }
 
     "show a blank trading name page when no Trading Name data has been entered" in new Setup {
-      val cName = "tst Company Name"
+      val cName = "Tst Company Name"
       val noTradingNameCompanyDetails = validCompanyDetailsViewModel.copy(tradingName = None)
-      when(mockCompanyDetailsService.getCompanyDetails()(Matchers.any())).thenReturn(Future.successful(Some(noTradingNameCompanyDetails)))
-      when(mockCompanyDetailsService.getCompanyName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(cName))
+      when(mockCompanyDetailsService.getCompanyDetails()(Matchers.any())).thenReturn(Future.successful(noTradingNameCompanyDetails))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -111,9 +108,9 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
     }
 
     "show a blank trading name page when no Company Details data has been entered" in new Setup {
-      val cName = "tst Company Name"
-      when(mockCompanyDetailsService.getCompanyDetails()(Matchers.any())).thenReturn(Future.successful(None))
-      when(mockCompanyDetailsService.getCompanyName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(cName))
+      val cName = "Tst Company Name"
+      val defaultCompanyDetailsView = CompanyDetailsView(None, cName, None, None)
+      when(mockCompanyDetailsService.getCompanyDetails()(Matchers.any())).thenReturn(Future.successful(defaultCompanyDetailsView))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         response =>

@@ -17,9 +17,11 @@
 package connectors
 
 import javax.inject.{Inject, Singleton}
+
 import config.WSHttp
 import enums.DownstreamOutcome
 import models.api.{CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
+import models.view.Address
 import play.api.Logger
 import play.api.http.Status
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -62,7 +64,7 @@ trait PAYERegistrationConnect {
       details => Some(details)
     } recover {
       case e: NotFoundException => None
-      case e: Exception => throw logResponse(e, "getEmployment", "getting employment")
+      case e: Exception => throw logResponse(e, "getCompanyDetails", "getting company details")
     }
   }
 

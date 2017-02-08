@@ -58,11 +58,10 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
   val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
 
     for {
-      oCompanyDetails   <- companyDetailsService.getCompanyDetails()
-      companyName       <- companyDetailsService.getCompanyName(oCompanyDetails)
-    } yield oCompanyDetails flatMap (_.tradingName) match {
-      case Some(model) => Ok(TradingNamePage(TradingNameForm.form.fill(model), companyName))
-      case _ => Ok(TradingNamePage(TradingNameForm.form, companyName))
+      companyDetails <- companyDetailsService.getCompanyDetails()
+    } yield companyDetails.tradingName match {
+      case Some(model) => Ok(TradingNamePage(TradingNameForm.form.fill(model), companyDetails.companyName))
+      case _ => Ok(TradingNamePage(TradingNameForm.form, companyDetails.companyName))
     }
   }
 
