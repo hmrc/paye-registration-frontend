@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.payeregistrationapi
+package payeregistrationapi
 
 import java.time.LocalDate
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.PAYERegistrationConnector
-import it.itutil.{IntegrationSpecBase, WiremockHelper}
+import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.api.{CompanyDetails, Employment}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder

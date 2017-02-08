@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package it.addresslookup
+package addresslookup
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.AddressLookupConnector
-import it.itutil.{IntegrationSpecBase, WiremockHelper}
+import itutil.{IntegrationSpecBase, WiremockHelper}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json

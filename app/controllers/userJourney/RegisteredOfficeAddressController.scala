@@ -38,13 +38,13 @@ trait RegisteredOfficeAddressCtrl extends FrontendController with Actions with I
 
   val messagesApi : MessagesApi
 
-  def roAddress : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+  val roAddress : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         Future.successful(Ok(ConfirmROAddress("<INSERT NAME HERE>")))
   }
 
-  def confirmRO : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+  val confirmRO : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         Future.successful(Redirect(controllers.userJourney.routes.AddressLookupController.redirectToLookup()))

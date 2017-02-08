@@ -31,6 +31,7 @@ class RegisteredOfficeAddressControllerSpec extends PAYERegSpec {
       val authConnector = mockAuthConnector
       val messagesApi = mockMessages
     }
+
   }
 
   "roAddress" should {
@@ -45,13 +46,16 @@ class RegisteredOfficeAddressControllerSpec extends PAYERegSpec {
 
     "return a forbidden" when {
       "the user is not authorised to view the page" in new Setup {
-        val result = testController.roAddress()(FakeRequest())
-        status(result) shouldBe SEE_OTHER
+        AuthBuilder.showWithAuthorisedUser(testController.confirmRO, mockAuthConnector) {
+          result =>
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.AddressLookupController.redirectToLookup()}")
+        }
       }
     }
 
     "return an internal server error" when {
-      "there is a problem retrieving the users RO Address" in new Setup {
+      "there is a problem retrieving the users RO Address" ignore new Setup {
 
       }
     }
