@@ -21,6 +21,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.PAYERegistrationConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.api.{CompanyDetails, Employment}
+import models.view.Address
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
@@ -50,7 +51,15 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
   "companyDetails" should {
     val validCompanyDetails = CompanyDetails(crn = None,
                                              companyName = "Test Company",
-                                             tradingName = Some("Test Company Trading Name"))
+                                             tradingName = Some("Test Company Trading Name"),
+                                             address = Address(
+                                               "14 St Test Walk",
+                                               "Testley",
+                                               Some("Testford"),
+                                               Some("Testshire"),
+                                               Some("TE1 1ST"), Some("UK")
+                                             )
+    )
 
     "get a model" in {
 

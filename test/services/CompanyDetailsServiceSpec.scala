@@ -26,8 +26,9 @@ import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
 import common.exceptions.DownstreamExceptions.PAYEMicroserviceException
 import common.exceptions.InternalExceptions.APIConversionException
-import play.api.libs.json.Format
-import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, NotFoundException, Upstream4xxResponse}
+import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, HttpResponse, NotFoundException, Upstream4xxResponse}
 
 import scala.concurrent.Future
 
@@ -39,6 +40,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   val mockCoHoService = mock[CoHoAPIService]
   val mockS4LService = mock[S4LService]
 
+  val returnHttpResponse = HttpResponse(200)
+
   class Setup {
     val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService)
   }
@@ -46,16 +49,11 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   class NoCompanyDetailsMockedSetup {
     val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService) {
 
-      override def getCompanyDetails()(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsView]] = {
-        Future.successful(None)
+      override def getCompanyDetails()(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+        Future.successful(CompanyDetailsView(None, "test compay name", None, None))
       }
 
-      override def addTradingNameToCompanyDetails(tradingNameView: TradingNameView, oCompanyDetails: Option[CompanyDetailsView])
-                                                 (implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
-        Future.successful(validCompanyDetailsViewModel)
-      }
-
-      override def submitCompanyDetails(detailsView: CompanyDetailsView, regID:String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+      override def saveCompanyDetails(detailsView: CompanyDetailsView)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
         Future.successful(DownstreamOutcome.Failure)
       }
     }
@@ -64,16 +62,11 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   class CompanyDetailsMockedSetup {
     val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService) {
 
-      override def getCompanyDetails()(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsView]] = {
-        Future.successful(Some(validCompanyDetailsViewModel))
-      }
-
-      override def addTradingNameToCompanyDetails(tradingNameView: TradingNameView, oCompanyDetails: Option[CompanyDetailsView])
-                                                 (implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+      override def getCompanyDetails()(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
         Future.successful(validCompanyDetailsViewModel)
       }
 
-      override def submitCompanyDetails(detailsView: CompanyDetailsView, regID:String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+      override def saveCompanyDetails(detailsView: CompanyDetailsView)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
         Future.successful(DownstreamOutcome.Success)
       }
     }
@@ -85,17 +78,6 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
         validCompanyDetailsViewModel
       }
-    }
-  }
-
-  "Calling getCompanyName" should {
-    "return the name of the company when passed a defined Company Details Option" in new Setup {
-      await(service.getCompanyName(Some(validCompanyDetailsViewModel))) shouldBe validCompanyDetailsViewModel.companyName
-    }
-
-    "fetch the name of the company from Keystore when passed an empty Company Details Option" in new Setup {
-      when(mockCoHoService.getStoredCompanyName()(Matchers.any())).thenReturn(Future.successful("tstName"))
-      await(service.getCompanyName(None)) shouldBe "tstName"
     }
   }
 
@@ -156,7 +138,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         )),
         Some(Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")))
       )
-      service.viewToAPI(tstModelView) shouldBe tstModelAPI
+      service.viewToAPI(tstModelView) shouldBe Right(tstModelAPI)
     }
 
     "correctly produce a Company Details API model from a completed view model with 'trade under different name - no'" in new Setup {
@@ -175,21 +157,40 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         )),
         Some(Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")))
       )
-      service.viewToAPI(tstModelView) shouldBe tstModelAPI
+      service.viewToAPI(tstModelView) shouldBe Right(tstModelAPI)
     }
 
-    "throw an APIConversionException when trying to convert a Company Details with no trading name view model" in new Setup {
+    "return the original view model when tradingName has not been completed" in new Setup {
       val tstModelView = CompanyDetailsView(
         Some("tstCRN"),
         "Comp name",
         None,
         Some(Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")))
       )
-      an[APIConversionException] shouldBe thrownBy(service.viewToAPI(tstModelView))
+      service.viewToAPI(tstModelView) shouldBe Left(tstModelView)
+    }
+
+    "return the original view model when address has not been completed" in new Setup {
+      val tstModelView = CompanyDetailsView(
+        Some("tstCRN"),
+        "Comp name",
+        Some(TradingNameView(
+          differentName = false,
+          tradingName = Some("trading name")
+        )),
+        None
+      )
+      service.viewToAPI(tstModelView) shouldBe Left(tstModelView)
     }
   }
 
   "Calling getCompanyDetails" should {
+    "return the correct View response when Company Details are returned from the S4L" in new APIConverterMockedSetup {
+      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.CompanyDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))
+        .thenReturn(Future.successful(Some(validCompanyDetailsViewModel)))
+
+      await(service.getCompanyDetails()) shouldBe validCompanyDetailsViewModel
+    }
 
     "return the correct View response when Company Details are returned from the connector" in new APIConverterMockedSetup {
       mockFetchRegID("54321")
@@ -199,10 +200,13 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(Some(validCompanyDetailsAPI)))
 
-      await(service.getCompanyDetails()) shouldBe Some(validCompanyDetailsViewModel)
+      when(mockS4LService.saveForm(Matchers.eq(CacheKeys.CompanyDetails.toString),Matchers.any)(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))
+        .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
+
+      await(service.getCompanyDetails()) shouldBe validCompanyDetailsViewModel
     }
 
-    "return an empty option when no Company Details are returned from the connector" in new Setup {
+    "return a default View model when no Company Details are returned from the connector" in new Setup {
       mockFetchRegID("54321")
       when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.CompanyDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(None))
@@ -210,7 +214,13 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(None))
 
-      await(service.getCompanyDetails()) shouldBe None
+      when(mockCoHoService.getStoredCompanyName()(Matchers.any()))
+        .thenReturn(Future.successful("Tst company name"))
+
+      when(mockS4LService.saveForm(Matchers.eq(CacheKeys.CompanyDetails.toString),Matchers.any)(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))
+        .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
+
+      await(service.getCompanyDetails()) shouldBe CompanyDetailsView(None, "Tst company name", None, None)
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
@@ -234,55 +244,30 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
   }
 
-  "Calling addTradingNameToCompanyDetails" should {
-    "return an updated copy when passed a company details model" in new Setup {
-      val tstTName = TradingNameView(differentName = true, tradingName = Some("trad name"))
-      val tstNoTNameDetailsModel = CompanyDetailsView(
-        Some("crn"),
-        "company name",
-        None,
-        None
-      )
-      await(service.addTradingNameToCompanyDetails(tstTName, Some(tstNoTNameDetailsModel))) shouldBe tstNoTNameDetailsModel.copy(tradingName = Some(tstTName))
-    }
-
-    "return a populated copy when passed an empty company details model option" in new Setup {
-      when(mockCoHoService.getStoredCompanyName()(Matchers.any())).thenReturn(Future.successful("Stored Name"))
-
-      val tstTName = TradingNameView(differentName = true, tradingName = Some("trad name"))
-      val outcomeModel = CompanyDetailsView(None, "Stored Name", Some(tstTName), None)
-
-      await(service.addTradingNameToCompanyDetails(tstTName, None)) shouldBe outcomeModel
-    }
-  }
-
-  "Calling submitCompanyDetails" should {
+  "Calling saveCompanyDetails" should {
     "return a success response when the upsert completes successfully" in new Setup {
-      when(mockPAYERegConnector.upsertCompanyDetails(Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any()))
+      mockFetchRegID("54321")
+      when(mockPAYERegConnector.upsertCompanyDetails(Matchers.contains("54321"), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(validCompanyDetailsAPI))
 
-      await(service.submitCompanyDetails(validCompanyDetailsViewModel, "54321")) shouldBe DownstreamOutcome.Success
+      when(mockS4LService.clear()(Matchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(returnHttpResponse))
+
+      await(service.saveCompanyDetails(validCompanyDetailsViewModel)) shouldBe DownstreamOutcome.Success
     }
 
-    "return a failure response when the upsert returns a Not Found response" in new Setup {
-      when(mockPAYERegConnector.upsertCompanyDetails(Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.failed(new NotFoundException("404")))
+    "return a success response when the S4L save completes successfully" in new Setup {
+      val incompleteCompanyDetailsViewModel = CompanyDetailsView(
+        Some("crn"),
+        "Tst Company Name",
+        None,
+        Some(Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")))
+      )
 
-      await(service.submitCompanyDetails(validCompanyDetailsViewModel, "54321")) shouldBe DownstreamOutcome.Failure
-    }
+      when(mockS4LService.saveForm(Matchers.eq(CacheKeys.CompanyDetails.toString),Matchers.any)(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))
+        .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
-    "return a failure response when the upsert returns a Forbidden response" in new Setup {
-      when(mockPAYERegConnector.upsertCompanyDetails(Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.failed(new ForbiddenException("403")))
-
-      await(service.submitCompanyDetails(validCompanyDetailsViewModel, "54321")) shouldBe DownstreamOutcome.Failure
-    }
-
-    "return a failure response when the upsert returns an Error response" in new Setup {
-      when(mockPAYERegConnector.upsertCompanyDetails(Matchers.any(), Matchers.any())(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.failed(new RuntimeException("tst")))
-
-      await(service.submitCompanyDetails(validCompanyDetailsViewModel, "54321")) shouldBe DownstreamOutcome.Failure
+      await(service.saveCompanyDetails(incompleteCompanyDetailsViewModel)) shouldBe DownstreamOutcome.Success
     }
   }
 
@@ -297,6 +282,20 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       mockFetchRegID("54322")
 
       await(service.submitTradingName(validTradingNameViewModel)) shouldBe DownstreamOutcome.Failure
+    }
+  }
+
+  "Calling getROAddress" should {
+    "return an address successfully" in new CompanyDetailsMockedSetup {
+      mockFetchRegID("54321")
+      await(service.getROAddress()) shouldBe validCompanyDetailsViewModel.address.get
+    }
+  }
+
+  "Calling submitROAddress" should {
+    "return a success response when the address is saved successfully" in new CompanyDetailsMockedSetup {
+      mockFetchRegID("54321")
+      await(service.submitROAddress(validCompanyDetailsViewModel.address.get)) shouldBe DownstreamOutcome.Success
     }
   }
 }

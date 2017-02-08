@@ -54,7 +54,8 @@ trait CompanyDetailsSrv extends CommonService {
         regID    <- fetchRegistrationID
         oDetails <- payeRegConnector.getCompanyDetails(regID)
         details  <- convertOrCreateCompanyDetailsView(oDetails)
-      } yield details
+        viewDetails <- saveToS4L(details)
+      } yield viewDetails
     }
   }
 
@@ -63,15 +64,18 @@ trait CompanyDetailsSrv extends CommonService {
       case Some(detailsAPI) => Future.successful(apiToView(detailsAPI))
       case None => for {
         cName   <- cohoService.getStoredCompanyName
-        details <- s4LService.saveForm[CompanyDetailsView](CacheKeys.CompanyDetails.toString, CompanyDetailsView(None, cName, None, None))
-       } yield CompanyDetailsView(None, cName, None, None)
+      } yield CompanyDetailsView(None, cName, None, None)
     }
   }
 
-  private def saveCompanyDetails(viewModel: CompanyDetailsView)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  private def saveToS4L(viewData: CompanyDetailsView)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+    s4LService.saveForm[CompanyDetailsView](CacheKeys.CompanyDetails.toString, viewData).map(_ => viewData)
+  }
+
+  private[services] def saveCompanyDetails(viewModel: CompanyDetailsView)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     viewToAPI(viewModel) fold(
       incompleteView =>
-        s4LService.saveForm[CompanyDetailsView](CacheKeys.CompanyDetails.toString, incompleteView) map {_ => DownstreamOutcome.Success},
+        saveToS4L(incompleteView) map {_ => DownstreamOutcome.Success},
       completeAPI =>
         for {
           regID     <- fetchRegistrationID
