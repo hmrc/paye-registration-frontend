@@ -16,7 +16,6 @@
 
 package models.external
 
-import fixtures.CoHoAPIFixture
 import models.view.Address
 import play.api.libs.json.{JsSuccess, Json}
 import testHelpers.PAYERegSpec
