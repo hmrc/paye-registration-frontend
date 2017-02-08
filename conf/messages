@@ -39,8 +39,7 @@ pages.tradingName.errorQuestion    = Please enter a correct trading name
 
 ##Confirm RO Address
 pages.confirmRO.title              = Confirm the company''s registered office address
-pages.confirmRO.heading.part1      = This is
-pages.confirmRO.heading.part2      = ''s registered office address
+pages.confirmRO.heading            = This is {0}''s registered office address
 pages.confirmRO.lede               = This is the official address of the company. It''s where legal notices and company mail will be sent.
 pages.confirmRO.help.link          = Not the right address?
 pages.confirmRO.help.body          = If the registered office address is incorrect, you''ll need to update it with

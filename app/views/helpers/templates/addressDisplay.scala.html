@@ -2,19 +2,19 @@
 @(address : Address, blockId : String)
     <div class="form-group">
         <p class="lede" id="@blockId">
-            <span class="address-line-1">@{address.line1}</span><br>
-            <span class="address-line-2">@{address.line2}</span><br>
-            @if(address.line3.isDefined) {
-                <span class="address-line-3">@{address.line3}</span><br>
+            <span id="address-line-1">@{address.line1}</span><br>
+            <span id="address-line-2">@{address.line2}</span><br>
+            @address.line3.map { item =>
+                <span id="address-line-3">@item</span><br>
             }
-            @if(address.line4.isDefined) {
-                <span class="address-line-4">@{address.line4}</span><br>
+            @address.line4.map { item =>
+                <span id="address-line-4">@item</span><br>
             }
-            @if(address.postCode.isDefined) {
-                <span class="post-code">@{address.postCode}</span><br>
+            @address.postCode.map { item =>
+                <span id="post-code">@item</span><br>
             }
-            @if(address.country.isDefined) {
-                <span class="country">@{address.country}</span><br>
+            @address.country.map { item =>
+                <span id="country">@item</span><br>
             }
         </p>
     </div>
