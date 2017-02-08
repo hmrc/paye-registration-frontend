@@ -18,7 +18,7 @@ package services
 
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
-import fixtures.{PAYERegistrationFixture, S4LFixture}
+import fixtures.{CoHoAPIFixture, PAYERegistrationFixture, S4LFixture}
 import models.view.{Address, CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import org.mockito.Matchers
@@ -26,30 +26,33 @@ import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
 import common.exceptions.DownstreamExceptions.PAYEMicroserviceException
 import common.exceptions.InternalExceptions.APIConversionException
+import models.external.CHROAddress
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, HttpResponse, NotFoundException, Upstream4xxResponse}
 
 import scala.concurrent.Future
 
-class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistrationFixture {
+class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistrationFixture with CoHoAPIFixture {
 
   implicit val hc = HeaderCarrier()
 
   val mockPAYERegConnector = mock[PAYERegistrationConnector]
+  val mockCompRegConnector = mock[CompanyRegistrationConnector]
+  val mockCohoAPIConnector = mock[CoHoAPIConnector]
   val mockCoHoService = mock[CoHoAPIService]
   val mockS4LService = mock[S4LService]
 
   val returnHttpResponse = HttpResponse(200)
 
   class Setup {
-    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService)
+    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService, mockCompRegConnector, mockCohoAPIConnector)
   }
 
   class NoCompanyDetailsMockedSetup {
-    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService) {
+    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService, mockCompRegConnector, mockCohoAPIConnector) {
 
-      override def getCompanyDetails()(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+      override def getCompanyDetails(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
         Future.successful(CompanyDetailsView(None, "test compay name", None, None))
       }
 
@@ -60,9 +63,9 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   }
 
   class CompanyDetailsMockedSetup {
-    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService) {
+    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService, mockCompRegConnector, mockCohoAPIConnector) {
 
-      override def getCompanyDetails()(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+      override def getCompanyDetails(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
         Future.successful(validCompanyDetailsViewModel)
       }
 
@@ -73,7 +76,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   }
 
   class APIConverterMockedSetup {
-    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService) {
+    val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService, mockCompRegConnector, mockCohoAPIConnector) {
 
       override def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
         validCompanyDetailsViewModel
@@ -185,11 +188,11 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   }
 
   "Calling getCompanyDetails" should {
-    "return the correct View response when Company Details are returned from the S4L" in new APIConverterMockedSetup {
+    "return the correct View response when Company Details are returned from S4L" in new APIConverterMockedSetup {
       when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.CompanyDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(Some(validCompanyDetailsViewModel)))
 
-      await(service.getCompanyDetails()) shouldBe validCompanyDetailsViewModel
+      await(service.getCompanyDetails) shouldBe validCompanyDetailsViewModel
     }
 
     "return the correct View response when Company Details are returned from the connector" in new APIConverterMockedSetup {
@@ -203,10 +206,10 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockS4LService.saveForm(Matchers.eq(CacheKeys.CompanyDetails.toString),Matchers.any)(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
-      await(service.getCompanyDetails()) shouldBe validCompanyDetailsViewModel
+      await(service.getCompanyDetails) shouldBe validCompanyDetailsViewModel
     }
 
-    "return a default View model when no Company Details are returned from the connector" in new Setup {
+    "return a default View model with company name and RO Address when no Company Details are returned from the connector" in new Setup {
       mockFetchRegID("54321")
       when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.CompanyDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(None))
@@ -220,7 +223,13 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockS4LService.saveForm(Matchers.eq(CacheKeys.CompanyDetails.toString),Matchers.any)(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
-      await(service.getCompanyDetails()) shouldBe CompanyDetailsView(None, "Tst company name", None, None)
+      when(mockCompRegConnector.getTransactionId(Matchers.eq("54321"))(Matchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful("txID"))
+
+      when(mockCohoAPIConnector.getRegisteredOfficeAddress(Matchers.eq("txID"))(Matchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(validCHROAddress))
+
+      await(service.getCompanyDetails) shouldBe CompanyDetailsView(None, "Tst company name", None, Some(validCHROAddress))
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
@@ -231,7 +240,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
 
-      an[Upstream4xxResponse] shouldBe thrownBy(await(service.getCompanyDetails()))
+      an[Upstream4xxResponse] shouldBe thrownBy(await(service.getCompanyDetails))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
@@ -239,7 +248,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockPAYERegConnector.getCompanyDetails(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(new ArrayIndexOutOfBoundsException))
 
-      an[Exception] shouldBe thrownBy(await(service.getCompanyDetails()))
+      an[Exception] shouldBe thrownBy(await(service.getCompanyDetails))
     }
 
   }
@@ -285,17 +294,46 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
   }
 
-  "Calling getROAddress" should {
-    "return an address successfully" in new CompanyDetailsMockedSetup {
-      mockFetchRegID("54321")
-      await(service.getROAddress()) shouldBe validCompanyDetailsViewModel.roAddress.get
+  "Calling getStoredROAddress" should {
+    "return an optional address" in {
+      val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService, mockCompRegConnector, mockCohoAPIConnector) {
+        override def getCompanyDetails(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+          Future.successful(validCompanyDetailsViewModel)
+        }
+      }
+
+      await(service.getStoredROAddress) shouldBe validCompanyDetailsViewModel.roAddress.get //TODO: refactor out roAddress option
     }
   }
 
-  "Calling submitROAddress" should {
-    "return a success response when the address is saved successfully" in new CompanyDetailsMockedSetup {
-      mockFetchRegID("54321")
-      await(service.submitROAddress(validCompanyDetailsViewModel.roAddress.get)) shouldBe DownstreamOutcome.Success
+  "Calling retrieveRegisteredOfficeAddress" should {
+    "return an address" in {
+
+      val testAddress =
+        CHROAddress(
+          "12",
+          "Test Road",
+          None,
+          "Test Town",
+          None,
+          None,
+          Some("TS14 7ST"),
+          Some("Test county")
+        )
+
+      val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService, mockCompRegConnector, mockCohoAPIConnector) {
+        override def fetchRegistrationID(implicit hc: HeaderCarrier): Future[String] = {
+          Future.successful("1234567890")
+        }
+      }
+
+      when(mockCompRegConnector.getTransactionId(Matchers.eq("1234567890"))(Matchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful("testTransId"))
+
+      when(mockCohoAPIConnector.getRegisteredOfficeAddress(Matchers.eq("testTransId"))(Matchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(testAddress))
+
+      await(service.retrieveRegisteredOfficeAddress) shouldBe CHROAddress.convertToAddress(testAddress)
     }
   }
 }

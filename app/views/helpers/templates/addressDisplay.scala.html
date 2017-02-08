@@ -1,0 +1,20 @@
+@import models.view.Address
+@(address : Address, blockId : String)
+    <div class="form-group">
+        <p class="lede" id="@blockId">
+            <span id="address-line-1">@{address.line1}</span><br>
+            <span id="address-line-2">@{address.line2}</span><br>
+            @address.line3.map { item =>
+                <span id="address-line-3">@item</span><br>
+            }
+            @address.line4.map { item =>
+                <span id="address-line-4">@item</span><br>
+            }
+            @address.postCode.map { item =>
+                <span id="post-code">@item</span><br>
+            }
+            @address.country.map { item =>
+                <span id="country">@item</span><br>
+            }
+        </p>
+    </div>

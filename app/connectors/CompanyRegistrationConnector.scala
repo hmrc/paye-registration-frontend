@@ -40,7 +40,7 @@ trait CompanyRegistrationConnect {
   val http : WSHttp
 
   def getTransactionId(regId: String)(implicit hc : HeaderCarrier) : Future[String] = {
-    http.GET[JsObject](s"$companyRegistrationUri/corporation-tax-registration/$regId/confirmation-references") map {
+    http.GET[JsObject](s"$companyRegistrationUri/company-registration/corporation-tax-registration/$regId/confirmation-references") map {
       _.\("transaction-id").get.as[String]
     } recover {
       case badRequestErr: BadRequestException =>

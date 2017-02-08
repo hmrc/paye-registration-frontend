@@ -22,21 +22,24 @@ import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import models.view.{Address, CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
+import models.external.CHROAddress
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class CompanyDetailsService @Inject()(
-                                       injKeystoreConnector: KeystoreConnector,
-                                       injPAYERegistrationConnector: PAYERegistrationConnector,
-                                       injCoHoAPIService: CoHoAPIService,
-                                       injS4LService: S4LService
-                                     )
-  extends CompanyDetailsSrv {
+class CompanyDetailsService @Inject()(injKeystoreConnector: KeystoreConnector,
+                                      injPAYERegistrationConnector: PAYERegistrationConnector,
+                                      injCoHoAPIService: CoHoAPIService,
+                                      injS4LService: S4LService,
+                                      injCompRegConnector : CompanyRegistrationConnector,
+                                      injCohoAPIConnector: CoHoAPIConnector) extends CompanyDetailsSrv {
+
   override val keystoreConnector = injKeystoreConnector
   override val payeRegConnector = injPAYERegistrationConnector
+  override val compRegConnector = injCompRegConnector
+  override val cohoAPIConnector = injCohoAPIConnector
   override val cohoService = injCoHoAPIService
   override val s4LService = injS4LService
 }
@@ -44,10 +47,12 @@ class CompanyDetailsService @Inject()(
 trait CompanyDetailsSrv extends CommonService {
 
   val payeRegConnector: PAYERegistrationConnect
+  val compRegConnector: CompanyRegistrationConnect
+  val cohoAPIConnector: CoHoAPIConnect
   val cohoService: CoHoAPISrv
   val s4LService: S4LSrv
 
-  def getCompanyDetails()(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+  def getCompanyDetails(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
     s4LService.fetchAndGet[CompanyDetailsView](CacheKeys.CompanyDetails.toString) flatMap {
       case Some(companyDetails) => Future.successful(companyDetails)
       case None => for {
@@ -64,7 +69,8 @@ trait CompanyDetailsSrv extends CommonService {
       case Some(detailsAPI) => Future.successful(apiToView(detailsAPI))
       case None => for {
         cName   <- cohoService.getStoredCompanyName
-      } yield CompanyDetailsView(None, cName, None, None)
+        roAddress <- retrieveRegisteredOfficeAddress
+      } yield CompanyDetailsView(None, cName, None, Some(roAddress))
     }
   }
 
@@ -92,19 +98,20 @@ trait CompanyDetailsSrv extends CommonService {
     } yield outcome
   }
 
-  def getROAddress()(implicit hc: HeaderCarrier): Future[Address] = {
+  private[services] def getStoredROAddress(implicit hc: HeaderCarrier): Future[Address] = {
     for {
-      regID   <- fetchRegistrationID
       details <- getCompanyDetails
-      //TODO: Add connector call for undefined address when connector implemented
-    } yield details.roAddress.get
+    } yield details.roAddress.get //TODO: refactor out roAddress option
   }
 
-  def submitROAddress(address: Address)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  private[services] def retrieveRegisteredOfficeAddress(implicit hc : HeaderCarrier): Future[Address] = {
     for {
-      details <- getCompanyDetails
-      outcome <- saveCompanyDetails(details.copy(roAddress = Some(address)))
-    } yield outcome
+      regId <- fetchRegistrationID
+      tID <- compRegConnector.getTransactionId(regId)
+      address <- cohoAPIConnector.getRegisteredOfficeAddress(tID)
+    } yield {
+      address
+    }
   }
 
   private[services] def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
@@ -131,5 +138,4 @@ trait CompanyDetailsSrv extends CommonService {
   private def tradingNameAPIValue(tradingNameView: TradingNameView): Option[String] = {
     if (tradingNameView.differentName) tradingNameView.tradingName else None
   }
-
 }

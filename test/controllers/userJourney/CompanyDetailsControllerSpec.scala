@@ -19,7 +19,7 @@ package controllers.userJourney
 import builders.AuthBuilder
 import enums.DownstreamOutcome
 import fixtures.S4LFixture
-import models.view.{TradingName => TradingNameView, CompanyDetails => CompanyDetailsView}
+import models.view.{Address, CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import org.jsoup._
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -27,8 +27,10 @@ import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import services.{CoHoAPIService, CompanyDetailsService, S4LService}
 import testHelpers.PAYERegSpec
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
@@ -62,7 +64,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
 
     "show the correctly pre-populated trading name page when data has already been entered" in new Setup {
       val cName = "Tst Company Name"
-      when(mockCompanyDetailsService.getCompanyDetails()(Matchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -78,7 +80,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
     "show the correctly pre-populated trading name page when negative data has already been entered" in new Setup {
       val cName = "Tst Company Name"
       val negativeTradingNameCompanyDetails = validCompanyDetailsViewModel.copy(tradingName = Some(negativeTradingNameViewModel))
-      when(mockCompanyDetailsService.getCompanyDetails()(Matchers.any())).thenReturn(Future.successful(negativeTradingNameCompanyDetails))
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any())).thenReturn(Future.successful(negativeTradingNameCompanyDetails))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -94,7 +96,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
     "show a blank trading name page when no Trading Name data has been entered" in new Setup {
       val cName = "Tst Company Name"
       val noTradingNameCompanyDetails = validCompanyDetailsViewModel.copy(tradingName = None)
-      when(mockCompanyDetailsService.getCompanyDetails()(Matchers.any())).thenReturn(Future.successful(noTradingNameCompanyDetails))
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any())).thenReturn(Future.successful(noTradingNameCompanyDetails))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -110,7 +112,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
     "show a blank trading name page when no Company Details data has been entered" in new Setup {
       val cName = "Tst Company Name"
       val defaultCompanyDetailsView = CompanyDetailsView(None, cName, None, None)
-      when(mockCompanyDetailsService.getCompanyDetails()(Matchers.any())).thenReturn(Future.successful(defaultCompanyDetailsView))
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any())).thenReturn(Future.successful(defaultCompanyDetailsView))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         response =>
@@ -174,4 +176,38 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture {
     }
   }
 
+  "roAddress" should {
+    "return an ok" when {
+      "the user is authorised to view the page" in new Setup {
+
+        val testAddress =
+          Address(
+            "testL1",
+            "testL2",
+            Some("testL3"),
+            Some("testL4"),
+            Some("testPostCode"),
+            None
+          )
+
+        when(mockCompanyDetailsService.getCompanyDetails(Matchers.any[HeaderCarrier]()))
+          .thenReturn(Future.successful(validCompanyDetailsViewModel))
+
+        AuthBuilder.showWithAuthorisedUser(controller.roAddress, mockAuthConnector) {
+          result =>
+            status(result) shouldBe OK
+        }
+      }
+    }
+
+    "return a forbidden" when {
+      "the user is not authorised to view the page" in new Setup {
+        AuthBuilder.showWithAuthorisedUser(controller.confirmRO, mockAuthConnector) {
+          result =>
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.AddressLookupController.redirectToLookup()}")
+        }
+      }
+    }
+  }
 }
