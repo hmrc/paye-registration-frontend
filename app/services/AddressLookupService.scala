@@ -28,8 +28,10 @@ class AddressLookupService @Inject()(
                                       injFeatureSwitch: PAYEFeatureSwitch,
                                       injAddressConnector: AddressLookupConnector)
   extends AddressLookupSrv with ServicesConfig {
-  lazy val payeRegistrationUrl = baseUrl("paye-registration-frontend")
-  lazy val addressLookupFrontendUrl = baseUrl("address-lookup-frontend")
+  lazy val payeRegistrationUrl = getConfString("paye-registration-frontend.www.url","")
+  lazy val payeRegistrationUri = getConfString("paye-registration-frontend.www.uri","")
+  lazy val addressLookupFrontendUrl = getConfString("address-lookup-frontend.www.url","")
+  lazy val addressLookupFrontendUri = getConfString("address-lookup-frontend.www.uri","")
   val addressLookupConnector = injAddressConnector
   val featureSwitch = injFeatureSwitch
 }
@@ -37,13 +39,15 @@ class AddressLookupService @Inject()(
 trait AddressLookupSrv {
 
   val payeRegistrationUrl : String
+  val payeRegistrationUri : String
   val addressLookupFrontendUrl: String
+  val addressLookupFrontendUri: String
   val addressLookupConnector: AddressLookupConnect
   val featureSwitch: PAYEFeatureSwitches
 
   def buildAddressLookupUrl(query: String = "payereg1") = {
     useAddressLookupFrontend match {
-      case true => addressLookupFrontendUrl + "/lookup-address/uk/addresses/" + query + s"?continue=" + payeRegistrationUrl + "/register-for-paye/return-from-address"
+      case true => addressLookupFrontendUrl + addressLookupFrontendUri + "/uk/addresses/" + query + s"?continue=" + payeRegistrationUrl + payeRegistrationUri + "/return-from-address"
       case false => payeRegistrationUrl + controllers.userJourney.routes.EmploymentController.employingStaff().url
     }
   }

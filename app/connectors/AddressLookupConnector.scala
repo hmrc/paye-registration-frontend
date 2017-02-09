@@ -28,7 +28,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class AddressLookupConnector @Inject()() extends AddressLookupConnect with ServicesConfig {
-  val addressLookupFrontendUrl = baseUrl("address-lookup-frontend")
+  val addressLookupFrontendUrl = baseUrl("address-lookup-frontend.api")
   val http : WSHttp = WSHttp
 }
 
