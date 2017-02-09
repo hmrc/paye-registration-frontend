@@ -30,8 +30,8 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
   val mockUrl = s"http://$mockHost:$mockPort"
 
   val additionalConfiguration = Map(
-    "microservice.services.address-lookup-frontend.host" -> s"$mockHost",
-    "microservice.services.address-lookup-frontend.port" -> s"$mockPort",
+    "microservice.services.address-lookup-frontend.api.host" -> s"$mockHost",
+    "microservice.services.address-lookup-frontend.api.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes"
   )
 
