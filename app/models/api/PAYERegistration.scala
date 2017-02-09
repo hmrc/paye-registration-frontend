@@ -16,11 +16,13 @@
 
 package models.api
 
+import models.BusinessContactDetails
 import play.api.libs.json.Json
 
 case class PAYERegistration (registrationID: String,
                              formCreationTimestamp: String,
                              companyDetails: CompanyDetails,
+                             businessContactDetails: BusinessContactDetails,
                              employment: Employment)
 
 object PAYERegistration {

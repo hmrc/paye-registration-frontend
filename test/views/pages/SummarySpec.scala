@@ -34,7 +34,7 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
   val suffixIdChangeLink = "ChangeLink"
 
   "The summary page" should {
-    val summaryModelNoTradingName = Summary(Seq())
+    lazy val summaryModelNoTradingName = Summary(Seq())
 
     lazy val view = summary(summaryModelNoTradingName)
     lazy val document = Jsoup.parse(view.body)
@@ -46,7 +46,7 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
 
   "The summary page, Company Details section" should {
 
-    val summaryModelNoTradingName = Summary(
+    lazy val summaryModelNoTradingName: Summary = Summary(
       Seq(
         SummarySection(
           id = "companyDetails",
@@ -100,7 +100,7 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
   }
   "The summary page, Employment section" should {
 
-    val summaryModelEmployment = Summary(
+    lazy val summaryModelEmployment = Summary(
       Seq(
         SummarySection(
           id = "employees",
@@ -183,6 +183,64 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
 
     "have the correct change link for First payment" in {
       document.getElementById(s"firstPaymentDate$suffixIdChangeLink").attr("href") shouldBe controllers.userJourney.routes.EmploymentController.firstPayment().toString
+    }
+  }
+
+  "The summary page, Business contact details section" should {
+    lazy val summaryModelEmployment = Summary(
+      Seq(
+        SummarySection(
+          id = "businessContactDetails",
+          Seq(
+            Some(SummaryRow(
+              id = "businessEmail",
+              answer = Right("test@email.com"),
+              changeLink = None
+            )),
+            Some(SummaryRow(
+              id = "mobileNumber",
+              answer = Right("1234567890"),
+              changeLink = None
+            )),
+            Some(SummaryRow(
+              id = "businessTelephone",
+              answer = Right("0987654321"),
+              changeLink = None
+            ))
+          ).flatten
+        )
+      )
+    )
+
+    lazy val view = summary(summaryModelEmployment)
+    lazy val document = Jsoup.parse(view.body)
+
+    "have Business contact details as the summary heading" in {
+      document.getElementById(s"businessContactDetails$suffixIdSectionHeading").text shouldBe messagesApi("pages.summary.businessContactDetails.sectionHeading")
+    }
+
+    "have the correct question text for business email" in {
+      document.getElementById(s"businessEmail$suffixIdQuestion").text shouldBe messagesApi("pages.summary.businessEmail.question")
+    }
+
+    "have the correct question text for mobile phone" in {
+      document.getElementById(s"mobileNumber$suffixIdQuestion").text shouldBe messagesApi("pages.summary.mobileNumber.question")
+    }
+
+    "have the correct question text for business telephone" in {
+      document.getElementById(s"businessTelephone$suffixIdQuestion").text shouldBe messagesApi("pages.summary.businessTelephone.question")
+    }
+
+    "have the correct answer text for business email" in {
+      document.getElementById(s"businessEmail$suffixIdAnswer").text shouldBe "test@email.com"
+    }
+
+    "have the correct answer text for mobile number" in {
+      document.getElementById(s"mobileNumber$suffixIdAnswer").text shouldBe "1234567890"
+    }
+
+    "have the correct answer text for business telephone" in {
+      document.getElementById(s"businessTelephone$suffixIdAnswer").text shouldBe "0987654321"
     }
   }
 }

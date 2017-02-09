@@ -19,6 +19,7 @@ package forms.test
 import java.time.LocalDate
 
 import forms.helpers.{DateForm, RequiredBooleanForm}
+import models.BusinessContactDetails
 import models.api.{CompanyDetails, Employment, PAYERegistration}
 import models.view.Address
 import play.api.data.Form
@@ -46,6 +47,11 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
           "country" -> optional(text)
         )(Address.apply)(Address.unapply)
       )(CompanyDetails.apply)(CompanyDetails.unapply),
+      "businessContactDetails" -> mapping(
+        "businessEmail" -> optional(text),
+        "mobileNumber" -> optional(text),
+        "phoneNumber" -> optional(text)
+      )(BusinessContactDetails.apply)(BusinessContactDetails.unapply),
       "employment" -> mapping(
         "employees" -> requiredBoolean,
         "companyPension" -> optional(requiredBoolean),
