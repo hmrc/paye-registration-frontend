@@ -13,6 +13,10 @@ app.common.day                                          = Day
 app.common.date.invalid                                 = You have not entered a valid date
 app.common.companies-house                              = Companies House
 
+## User error messages
+errors.invalid.email                                    = Please enter a valid email address
+errors.invalid.phoneNumber                              = Please enter a valid phone number
+errors.invalid.mobileNumber                             = Please enter a valid mobile phone number
 
 ## Welcome page
 pages.welcome.title                                     = Register as an employer
@@ -44,6 +48,9 @@ pages.confirmRO.lede                                    = This is the official a
 pages.confirmRO.help.link                               = Not the right address?
 pages.confirmRO.help.body                               = If the registered office address is incorrect, you''ll need to update it with
 pages.confirmRO.help.body.link.url                      = https://ewf.companieshouse.gov.uk//seclogin?tc=1
+
+## Business Contact Details
+pages.businessContact.noFieldsCompleted                 = Please complete at least one field
 
 ## Employing Staff Page
 pages.employingStaff.title                              = Employing Staff

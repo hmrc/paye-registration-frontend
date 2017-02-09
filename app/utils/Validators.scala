@@ -17,11 +17,45 @@
 package utils
 
 import java.time.LocalDate
-import models.view.FirstPayment
-import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
-import scala.util.Try
+import play.api.data.validation._
 
 object Validators extends DateUtil {
+
+  private val emailRegex = """[A-Za-z0-9\-_.@]{1,70}""".r
+  private val phoneRegex = """[0-9 ]{1,20}""".r
+  private val mobileRegex = """[0-9 ]{1,20}""".r
+
+  def optionalValidation(constraint : Constraint[String]): Constraint[Option[String]] = Constraint("constraints.optional")({
+    case Some(text: String) => constraint(text)
+    case _ => Valid
+  })
+
+  val emailValidation: Constraint[String] = Constraint("constraints.emailCheck")({
+    text =>
+      val errors = text match {
+        case emailRegex() => Nil
+        case _ => Seq(ValidationError("errors.invalid.email"))
+      }
+      if (errors.isEmpty) Valid else Invalid(errors)
+  })
+
+  val phoneNumberValidation: Constraint[String] = Constraint("constraints.phoneNumberCheck")({
+    text =>
+      val errors = text match {
+        case phoneRegex() => Nil
+        case _ => Seq(ValidationError("errors.invalid.phoneNumber"))
+      }
+      if (errors.isEmpty) Valid else Invalid(errors)
+  })
+
+  val mobilePhoneNumberValidation: Constraint[String] = Constraint("constraints.mobilePhoneNumberCheck")({
+    text =>
+      val errors = text match {
+        case mobileRegex() => Nil
+        case _ => Seq(ValidationError("errors.invalid.mobileNumber"))
+      }
+      if (errors.isEmpty) Valid else Invalid(errors)
+  })
 
   def firstPaymentDateWithinRange(date: LocalDate): Boolean = {
     lessOrEqualThanXDaysAfter(LocalDate.now(), date, 61)
