@@ -21,6 +21,7 @@ import fixtures.PAYERegistrationFixture
 import models.api.{CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
 import models.view.Address
 import play.api.http.Status
+import play.api.libs.json.{JsObject, Json}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -83,7 +84,9 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
 
   "Calling getRegistration" should {
     "return the correct PAYEResponse when the microservice returns a PAYE Registration model" in new Setup {
-      mockHttpGet[PAYERegistrationAPI]("tst-url", validPAYERegistrationAPI)
+      //mockHttpGet[PAYERegistrationAPI]("tst-url", validPAYERegistrationAPI)
+      //TODO : SCRS-4509 - revert to above once placed together
+      mockHttpGet[JsObject]("tst-url", Json.toJson(validPAYERegistrationAPI).as[JsObject])
 
       await(connector.getRegistration("tstID")) shouldBe validPAYERegistrationAPI
     }
