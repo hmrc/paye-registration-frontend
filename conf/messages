@@ -1,125 +1,136 @@
 ## Global
-app.title                          = Register your company
-app.phaseBannerFeedback            = This is a new service – your <a href= {0}>feedback</a> will help us to improve it.
-app.common.yes                     = Yes
-app.common.no                      = No
-app.common.continue                = Continue
-app.common.saveAndContinue         = Save and continue
-app.common.errorSummaryLabel       = There are errors on this page.
-app.common.change                  = Change
-app.common.year                    = Year
-app.common.month                   = Month
-app.common.day                     = Day
-app.common.date.invalid            = You have not entered a valid date
-app.common.companies-house         = Companies House
+app.title                                               = Register your company
+app.phaseBannerFeedback                                 = This is a new service – your <a href= {0}>feedback</a> will help us to improve it.
+app.common.yes                                          = Yes
+app.common.no                                           = No
+app.common.continue                                     = Continue
+app.common.saveAndContinue                              = Save and continue
+app.common.errorSummaryLabel                            = There are errors on this page.
+app.common.change                                       = Change
+app.common.year                                         = Year
+app.common.month                                        = Month
+app.common.day                                          = Day
+app.common.date.invalid                                 = You have not entered a valid date
+app.common.companies-house                              = Companies House
 
 
 ## Welcome page
-pages.welcome.title                = Register as an employer
-pages.welcome.heading              = Register as an employer
-pages.welcome.heading.register     = You need to register as an employer if you:
-pages.welcome.bullet.pay           = pay any employees £112 or more a week (this is the same as £486 a month or £5,824 a year)
-pages.welcome.bullet.pension       = employ anyone who''s getting a pension or already has another job
-pages.welcome.bullet.car           = provide any employees with expenses or benefits (for example, a company car)
-pages.welcome.director             = You must register if you''re employing yourself (for example, if you''re the only director of a limited company).
-pages.welcome.2months              = You can''t register more than 2 months before you start paying people.
-pages.welcome.nino                 = You''ll need the director''s National Insurance number to complete this registration.
+pages.welcome.title                                     = Register as an employer
+pages.welcome.heading                                   = Register as an employer
+pages.welcome.heading.register                          = You need to register as an employer if you:
+pages.welcome.bullet.pay                                = pay any employees £112 or more a week (this is the same as £486 a month or £5,824 a year)
+pages.welcome.bullet.pension                            = employ anyone who''s getting a pension or already has another job
+pages.welcome.bullet.car                                = provide any employees with expenses or benefits (for example, a company car)
+pages.welcome.director                                  = You must register if you''re employing yourself (for example, if you''re the only director of a limited company).
+pages.welcome.2months                                   = You can''t register more than 2 months before you start paying people.
+pages.welcome.nino                                      = You''ll need the director''s National Insurance number to complete this registration.
 
 ## Trading Name Page
-pages.tradingName.title            = Trading name
-pages.tradingName.heading          = Does the company trade under any other names than {0}?
-pages.tradingName.legend           = Tell us if you do business using a different name to your registered company name.
-pages.tradingName.tradingNameLabel = Trading name
-pages.tradingName.nameRulesSummary = What are the rules for trading names?
-pages.tradingName.nameRulesIntro   = Trading names must not:
-pages.tradingName.nameRules1       = include ''limited'', ''Ltd'', ''limited liability partnership'', ''LLP'', ''public limited company'' or ''plc''
-pages.tradingName.nameRules2       = be the same as an <a href={0}>existing trade mark</a>
-pages.tradingName.nameRules3       = contain a 'sensitive' word or expression unless you <a href={0}>get permission</a>
-pages.tradingName.errorQuestion    = Please enter a correct trading name
+pages.tradingName.title                                 = Trading name
+pages.tradingName.heading                               = Does the company trade under any other names than {0}?
+pages.tradingName.legend                                = Tell us if you do business using a different name to your registered company name.
+pages.tradingName.tradingNameLabel                      = Trading name
+pages.tradingName.nameRulesSummary                      = What are the rules for trading names?
+pages.tradingName.nameRulesIntro                        = Trading names must not:
+pages.tradingName.nameRules1                            = include ''limited'', ''Ltd'', ''limited liability partnership'', ''LLP'', ''public limited company'' or ''plc''
+pages.tradingName.nameRules2                            = be the same as an <a href={0}>existing trade mark</a>
+pages.tradingName.nameRules3                            = contain a 'sensitive' word or expression unless you <a href={0}>get permission</a>
+pages.tradingName.errorQuestion                         = Please enter a correct trading name
 
 ##Confirm RO Address
-pages.confirmRO.title              = Confirm the company''s registered office address
-pages.confirmRO.heading            = This is {0}''s registered office address
-pages.confirmRO.lede               = This is the official address of the company. It''s where legal notices and company mail will be sent.
-pages.confirmRO.help.link          = Not the right address?
-pages.confirmRO.help.body          = If the registered office address is incorrect, you''ll need to update it with
-pages.confirmRO.help.body.link.url = https://ewf.companieshouse.gov.uk//seclogin?tc=1
+pages.confirmRO.title                                   = Confirm the company''s registered office address
+pages.confirmRO.heading                                 = This is {0}''s registered office address
+pages.confirmRO.lede                                    = This is the official address of the company. It''s where legal notices and company mail will be sent.
+pages.confirmRO.help.link                               = Not the right address?
+pages.confirmRO.help.body                               = If the registered office address is incorrect, you''ll need to update it with
+pages.confirmRO.help.body.link.url                      = https://ewf.companieshouse.gov.uk//seclogin?tc=1
 
 ## Employing Staff Page
-pages.employingStaff.title                      = Employing Staff
-pages.employingStaff.heading                    = Will the company employ staff this year?
-pages.employingStaff.legend                     = Will the company employ staff this year?
-pages.employingStaff.employingStaffLabel        = Employing Staff
-pages.employingStaff.employingStaffRulesIntro   = ''Staff'' may be:
-pages.employingStaff.employingStaffRules1       = yourself (for example, as the only director of a limited company)
-pages.employingStaff.employingStaffRules2       = people already employed by the company
-pages.employingStaff.employingStaffRules3       = people the company expects to employ before the end of year
-pages.employingStaff.employingStaffRulesEnd     = This doesn''t include subcontractors doing construction work.
+pages.employingStaff.title                              = Employing Staff
+pages.employingStaff.heading                            = Will the company employ staff this year?
+pages.employingStaff.legend                             = Will the company employ staff this year?
+pages.employingStaff.employingStaffLabel                = Employing Staff
+pages.employingStaff.employingStaffRulesIntro           = ''Staff'' may be:
+pages.employingStaff.employingStaffRules1               = yourself (for example, as the only director of a limited company)
+pages.employingStaff.employingStaffRules2               = people already employed by the company
+pages.employingStaff.employingStaffRules3               = people the company expects to employ before the end of year
+pages.employingStaff.employingStaffRulesEnd             = This doesn''t include subcontractors doing construction work.
 
 ## Subcontractors Page
-pages.subcontractors.title               = Subcontractors
-pages.subcontractors.heading             = Will the company pay subcontractors to do construction work this year?
-pages.subcontractors.legend              = Will the company pay subcontractors to do construction work this year?
-pages.subcontractors.subcontractorsLabel = Subcontractors
-pages.subcontractors.nameRulesIntro      = Companies who pay subcontractors to do construction work will be registered with the <a href={0}>Construction Industry Scheme (CIS)</a>.
+pages.subcontractors.title                              = Subcontractors
+pages.subcontractors.heading                            = Will the company pay subcontractors to do construction work this year?
+pages.subcontractors.legend                             = Will the company pay subcontractors to do construction work this year?
+pages.subcontractors.subcontractorsLabel                = Subcontractors
+pages.subcontractors.nameRulesIntro                     = Companies who pay subcontractors to do construction work will be registered with the <a href={0}>Construction Industry Scheme (CIS)</a>.
 
 ## Company Pension Page
-pages.companyPension.title               = Company Pension Scheme
-pages.companyPension.heading             = Do you want to provide a company pension scheme for your employees?
-pages.companyPension.legend              = Do you want to provide a company pension scheme for your employees?
-pages.companyPension.setUpPensionIntro   = As an employer, you can set up a company pension scheme to provide a pension and benefits to:
-pages.companyPension.setUpPension1       = employees after they retire
-pages.companyPension.setUpPension2       = dependants of deceased employees
+pages.companyPension.title                              = Company Pension Scheme
+pages.companyPension.heading                            = Do you want to provide a company pension scheme for your employees?
+pages.companyPension.legend                             = Do you want to provide a company pension scheme for your employees?
+pages.companyPension.setUpPensionIntro                  = As an employer, you can set up a company pension scheme to provide a pension and benefits to:
+pages.companyPension.setUpPension1                      = employees after they retire
+pages.companyPension.setUpPension2                      = dependants of deceased employees
 
 ## First Payment page
-pages.firstPayment.title                       = First Payment
-pages.firstPayment.heading                     = The company''s PAYE scheme start date
-pages.firstPayment.legend                      = The company''s PAYE scheme start date
-pages.firstPayment.firstPaymentLabel           = First Payment
-pages.firstPayment.intro                       = The company''s PAYE scheme starts when the first payment is made to an employee or subcontractor.
-pages.firstPayment.question                    = Has the company made any payments to employees or subcontractors?
-pages.firstPayment.hint                        = Enter the date the company made their first payment. This can be any date in the past.<br>Or<br>Enter the date the company will make their first payment. This can be up to 2 months in the future.
-pages.firstPayment.date.invalidRange           = Please enter a date up to 61 days in the future
-pages.firstPayment.firstPaymentRulesSummary    = What counts as a payment?
-pages.firstPayment.firstPaymentRulesIntro      = Payments to employees or subcontractors include:
-pages.firstPayment.firstPaymentRules1          = their salary or wages
-pages.firstPayment.firstPaymentRules2          = expenses or benefits
-pages.firstPayment.firstPaymentRules3          = any tips or bonuses
-pages.firstPayment.firstPaymentRulesEnd        = This should include any payments made to yourself (for example, if you''re the only director of a limited company).
+pages.firstPayment.title                                = First Payment
+pages.firstPayment.heading                              = The company''s PAYE scheme start date
+pages.firstPayment.legend                               = The company''s PAYE scheme start date
+pages.firstPayment.firstPaymentLabel                    = First Payment
+pages.firstPayment.intro                                = The company''s PAYE scheme starts when the first payment is made to an employee or subcontractor.
+pages.firstPayment.question                             = Has the company made any payments to employees or subcontractors?
+pages.firstPayment.hint                                 = Enter the date the company made their first payment. This can be any date in the past.<br>Or<br>Enter the date the company will make their first payment. This can be up to 2 months in the future.
+pages.firstPayment.date.invalidRange                    = Please enter a date up to 61 days in the future
+pages.firstPayment.firstPaymentRulesSummary             = What counts as a payment?
+pages.firstPayment.firstPaymentRulesIntro               = Payments to employees or subcontractors include:
+pages.firstPayment.firstPaymentRules1                   = their salary or wages
+pages.firstPayment.firstPaymentRules2                   = expenses or benefits
+pages.firstPayment.firstPaymentRules3                   = any tips or bonuses
+pages.firstPayment.firstPaymentRulesEnd                 = This should include any payments made to yourself (for example, if you''re the only director of a limited company).
 
 ## Summary Page
-pages.summary.title                = Check your answers
-pages.summary.heading              = Check your answers
+pages.summary.title                                     = Check your answers
+pages.summary.heading                                   = Check your answers
 
 
-pages.summary.companyDetails.sectionHeading           = Company information
-pages.summary.tradingName.question                    = Other trading name
-pages.summary.tradingName.answers.noAnswerGiven       = No
-pages.summary.tradingName.hiddenChangeText            = Change the company's trading name
+pages.summary.companyDetails.sectionHeading             = Company information
+pages.summary.tradingName.question                      = Other trading name
+pages.summary.tradingName.answers.noAnswerGiven         = No
+pages.summary.tradingName.hiddenChangeText              = Change the company's trading name
 
-pages.summary.roAddress.question                      = Registered office address
+pages.summary.roAddress.question                        = Registered office address
 
-pages.summary.employees.sectionHeading = Employment information
+pages.summary.businessContactDetails.sectionHeading     = Business contact details
+pages.summary.businessEmail.question                    = Business email
+pages.summary.mobileNumber.question                     = Mobile number
+pages.summary.businessTelephone.question                = Business telephone
+pages.summary.businessEmail.answers.noAnswerGiven       = '
+pages.summary.mobileNumber.answers.noAnswerGiven        = '
+pages.summary.businessTelephone.answers.noAnswerGiven   = '
+pages.summary.businessEmail.hiddenChangeText            = Change the company''s business email
+pages.summary.mobileNumber.hiddenChangeText             = Change the company''s mobile number
+pages.summary.businessTelephone.hiddenChangeText        = Change the company''s business telephone
 
-pages.summary.employees.question = Employing staff
-pages.summary.employees.answers.true = Yes
-pages.summary.employees.answers.false = No
-pages.summary.employees.hiddenChangeText = Change the company''s employment information
 
-pages.summary.companyPension.question = Providing company pension scheme
-pages.summary.companyPension.answers.true = Yes
-pages.summary.companyPension.answers.false = No
-pages.summary.companyPension.hiddenChangeText = Change the company''s pension scheme
+pages.summary.employees.sectionHeading                  = Employment information
+pages.summary.employees.question                        = Employing staff
+pages.summary.employees.answers.true                    = Yes
+pages.summary.employees.answers.false                   = No
+pages.summary.employees.hiddenChangeText                = Change the company''s employment information
 
-pages.summary.subcontractors.question = Paying subcontractors
-pages.summary.subcontractors.answers.true = Yes
-pages.summary.subcontractors.answers.false = No
-pages.summary.subcontractors.hiddenChangeText = Change the company''s subcontractor information
+pages.summary.companyPension.question                   = Providing company pension scheme
+pages.summary.companyPension.answers.true               = Yes
+pages.summary.companyPension.answers.false              = No
+pages.summary.companyPension.hiddenChangeText           = Change the company''s pension scheme
 
-pages.summary.firstPaymentDate.question = PAYE scheme start date
-pages.summary.firstPaymentDate.hiddenChangeText = Change the company''s first payment date
+pages.summary.subcontractors.question                   = Paying subcontractors
+pages.summary.subcontractors.answers.true               = Yes
+pages.summary.subcontractors.answers.false              = No
+pages.summary.subcontractors.hiddenChangeText           = Change the company''s subcontractor information
+
+pages.summary.firstPaymentDate.question                 = PAYE scheme start date
+pages.summary.firstPaymentDate.hiddenChangeText         = Change the company''s first payment date
 
 ## Error Pages
-errorPages.title                   = Something went wrong
-errorPages.restart.heading         = Sorry, we''re having technical issues.
-errorPages.restart.p1              = You can try again by <a href={0}>restarting</a> your PAYE registration.
+errorPages.title                                        = Something went wrong
+errorPages.restart.heading                              = Sorry, we''re having technical issues.
+errorPages.restart.p1                                   = You can try again by <a href={0}>restarting</a> your PAYE registration.

@@ -22,6 +22,7 @@ import javax.inject.{Inject, Singleton}
 import config.{PAYESessionCache, PAYEShortLivedCache}
 import enums.DownstreamOutcome
 import connectors._
+import models.BusinessContactDetails
 import models.api.{CompanyDetails, Employment, PAYERegistration => PAYERegistrationAPI}
 import models.view.{Address, Summary, SummaryRow, SummarySection}
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -59,6 +60,7 @@ trait PAYERegistrationSrv extends CommonService {
     Summary(
       Seq(
         buildCompanyDetailsSection(apiModel.companyDetails),
+        buildBusinessContactDetailsSection(apiModel.businessContactDetails),
         buildEmploymentSection(apiModel.employment)
       )
     )
@@ -79,6 +81,38 @@ trait PAYERegistrationSrv extends CommonService {
         Some(SummaryRow(
           id = "roAddress",
           answer = Right(formatHTMLROAddress(companyDetails.roAddress)),
+          changeLink = None
+        ))
+      ).flatten
+    )
+  }
+
+  private[services] def buildBusinessContactDetailsSection(businessContactDetails: BusinessContactDetails) : SummarySection = {
+    SummarySection(
+      id = "businessContactDetails",
+      Seq(
+        Some(SummaryRow(
+          id = "businessEmail",
+          answer = businessContactDetails.businessEmail match {
+            case Some(email) => Right(email)
+            case _ => Left("noAnswerGiven")
+          },
+          changeLink = None
+        )),
+        Some(SummaryRow(
+          id = "mobileNumber",
+          answer = businessContactDetails.mobileNumber match {
+            case Some(mobile) => Right(mobile)
+            case _ => Left("noAnswerGiven")
+          },
+          changeLink = None
+        )),
+        Some(SummaryRow(
+          id = "businessTelephone",
+          answer = businessContactDetails.phoneNumber match {
+            case Some(bizPhone) => Right(bizPhone)
+            case _ => Left("noAnswerGiven")
+          },
           changeLink = None
         ))
       ).flatten

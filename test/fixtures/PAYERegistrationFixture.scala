@@ -18,6 +18,7 @@ package fixtures
 
 import java.time.LocalDate
 
+import models.BusinessContactDetails
 import models.api.{CompanyDetails, Employment, PAYERegistration}
 import models.view.{Address, Summary, SummaryRow, SummarySection}
 
@@ -36,10 +37,18 @@ trait PAYERegistrationFixture {
                                   subcontractors = true,
                                   firstPayDate = validDate)
 
+  val validBusinessContactDetails =
+    BusinessContactDetails(
+      Some("test@email.com"),
+      Some("1234567890"),
+      Some("0987654321")
+    )
+
   val validPAYERegistrationAPI = PAYERegistration(
     registrationID = "AC123456",
     formCreationTimestamp = "2017-01-11T15:10:12",
     companyDetails = validCompanyDetailsAPI,
+    businessContactDetails = validBusinessContactDetails,
     employment = validEmploymentAPI
   )
 

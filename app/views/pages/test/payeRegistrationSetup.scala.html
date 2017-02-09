@@ -88,6 +88,25 @@
         </div>
 
         <div class="inline form-group">
+        @govHelpers.input(
+            payeForm("businessContactDetails.businessEmail"),
+            '_label -> "Business email (optional)"
+        )
+        </div>
+        <div class="inline form-group">
+        @govHelpers.input(
+            payeForm("businessContactDetails.mobileNumber"),
+            '_label -> "Mobile number (optional)"
+        )
+        </div>
+        <div class="inline form-group">
+        @govHelpers.input(
+            payeForm("businessContactDetails.phoneNumber"),
+            '_label -> "Business telephone (optional)"
+        )
+        </div>
+
+        <div class="inline form-group">
             @govHelpers.input(
             payeForm("employment.employees"),
             '_label -> "Employees"

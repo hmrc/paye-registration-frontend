@@ -24,6 +24,7 @@ import models.api.{CompanyDetails => CompanyDetailsAPI, Employment => Employment
 import models.view.Address
 import play.api.Logger
 import play.api.http.Status
+import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -54,7 +55,20 @@ trait PAYERegistrationConnect {
   }
 
   def getRegistration(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[PAYERegistrationAPI] = {
-    http.GET[PAYERegistrationAPI](s"$payeRegUrl/paye-registration/$regID") recover {
+//    http.GET[PAYERegistrationAPI](s"$payeRegUrl/paye-registration/$regID") recover {
+//      case e: Exception => throw logResponse(e, "getRegistration", "getting registration")
+//    }
+
+    //TODO : SCRS-4509 - revert back to above after putting together
+
+    http.GET[JsObject](s"$payeRegUrl/paye-registration/$regID") map {
+      json => json.++(Json.obj(
+        "businessContactDetails" -> Json.obj(
+          "businessEmail" -> "test@email.com",
+          "mobileNumber" -> "1234567890",
+          "phoneNumber" -> "0987654321"
+        ))).as[PAYERegistrationAPI]
+    } recover {
       case e: Exception => throw logResponse(e, "getRegistration", "getting registration")
     }
   }

@@ -21,6 +21,7 @@ import enums.DownstreamOutcome
 import models.api.{Employment, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
 import models.view.{Address, Summary, SummaryRow, SummarySection}
 import fixtures.PAYERegistrationFixture
+import models.BusinessContactDetails
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
@@ -46,6 +47,7 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
       tradingName = Some("tstTrade"),
       Address("14 St Test Walk", "Testley", None, None, None, None)
     ),
+    businessContactDetails = validBusinessContactDetails,
     employment = validEmploymentAPI
   )
 
@@ -65,6 +67,26 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
             id = "roAddress",
             answer = Right("14 St Test Walk<br />Testley"),
             None
+          )
+        )
+      ),
+      SummarySection(
+        id = "businessContactDetails",
+        Seq(
+          SummaryRow(
+            id = "businessEmail",
+            answer = Right("test@email.com"),
+            changeLink = None
+          ),
+          SummaryRow(
+            id = "mobileNumber",
+            answer = Right("1234567890"),
+            changeLink = None
+          ),
+          SummaryRow(
+            id = "businessTelephone",
+            answer = Right("0987654321"),
+            changeLink = None
           )
         )
       ),
@@ -173,6 +195,7 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
           tradingName = None,
           Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
         ),
+        businessContactDetails = validBusinessContactDetails,
         employment = validEmploymentAPI
       )
 
@@ -192,6 +215,26 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
                 id = "roAddress",
                 answer = Right(formatHMTLROAddress),
                 None
+              )
+            )
+          ),
+          SummarySection(
+            id = "businessContactDetails",
+            Seq(
+              SummaryRow(
+                id = "businessEmail",
+                answer = Right("test@email.com"),
+                changeLink = None
+              ),
+              SummaryRow(
+                id = "mobileNumber",
+                answer = Right("1234567890"),
+                changeLink = None
+              ),
+              SummaryRow(
+                id = "businessTelephone",
+                answer = Right("0987654321"),
+                changeLink = None
               )
             )
           ),
@@ -294,6 +337,74 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
       )
 
       service.buildEmploymentSection(validEmploymentAPIFalse) shouldBe employmentSection
+    }
+  }
+
+  "buildBusinessContactDetails" should {
+    "return a valid buiness contact details block" in new Setup {
+      val businessContactDetailsModel =
+        BusinessContactDetails(
+          Some("test@email.com"),
+          Some("1234567890"),
+          Some("0987654321")
+        )
+
+      val validBCDSection =
+        SummarySection(
+          id = "businessContactDetails",
+          Seq(
+            Some(SummaryRow(
+              id = "businessEmail",
+              answer = Right("test@email.com"),
+              changeLink = None
+            )),
+            Some(SummaryRow(
+              id = "mobileNumber",
+              answer = Right("1234567890"),
+              changeLink = None
+            )),
+            Some(SummaryRow(
+              id = "businessTelephone",
+              answer = Right("0987654321"),
+              changeLink = None
+            ))
+          ).flatten
+        )
+
+      service.buildBusinessContactDetailsSection(businessContactDetailsModel) shouldBe validBCDSection
+    }
+
+    "return a summary section with no provided answers" in new Setup {
+      val businessContactDetailsModel =
+        BusinessContactDetails(
+          None,
+          None,
+          None
+        )
+
+      val validBCDSection =
+        SummarySection(
+          id = "businessContactDetails",
+          Seq(
+            Some(SummaryRow(
+              id = "businessEmail",
+              answer = Left("noAnswerGiven"),
+              changeLink = None
+            )),
+            Some(SummaryRow(
+              id = "mobileNumber",
+              answer = Left("noAnswerGiven"),
+              changeLink = None
+            )),
+            Some(SummaryRow(
+              id = "businessTelephone",
+              answer = Left("noAnswerGiven"),
+              changeLink = None
+            ))
+          ).flatten
+        )
+
+      service.buildBusinessContactDetailsSection(businessContactDetailsModel) shouldBe validBCDSection
     }
   }
 }
