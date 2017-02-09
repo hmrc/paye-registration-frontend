@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
+import models.BusinessContactDetails
 import models.view.{Address, CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import models.external.CHROAddress
@@ -70,7 +71,7 @@ trait CompanyDetailsSrv extends CommonService {
       case None => for {
         cName   <- cohoService.getStoredCompanyName
         roAddress <- retrieveRegisteredOfficeAddress
-      } yield CompanyDetailsView(None, cName, None, roAddress)
+      } yield CompanyDetailsView(None, cName, None, roAddress, None)
     }
   }
 
@@ -108,6 +109,13 @@ trait CompanyDetailsSrv extends CommonService {
     }
   }
 
+  def submitBusinessContact(businessContact: BusinessContactDetails)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    for {
+      details <- getCompanyDetails
+      outcome <- saveCompanyDetails(details.copy(businessContact = Some(businessContact)))
+    } yield outcome
+  }
+
   private[services] def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
     val tradingNameView = apiModel.tradingName.map {
       tName => Some(TradingNameView(differentName = true, Some(tName)))
@@ -119,13 +127,14 @@ trait CompanyDetailsSrv extends CommonService {
       apiModel.crn,
       apiModel.companyName,
       tradingNameView,
-      apiModel.roAddress
+      apiModel.roAddress,
+      None //TODO map with the API model
     )
   }
 
   private[services] def viewToAPI(viewData: CompanyDetailsView): Either[CompanyDetailsView, CompanyDetailsAPI] = viewData match {
-    case CompanyDetailsView(crn, companyName, Some(tradingName), address) =>
-      Right(CompanyDetailsAPI(crn, companyName, tradingNameAPIValue(tradingName), address))
+    case CompanyDetailsView(crn, companyName, Some(tradingName), address, Some(businessContact)) =>
+      Right(CompanyDetailsAPI(crn, companyName, tradingNameAPIValue(tradingName), address)) //TODO include the businessContact to API model
     case _ => Left(viewData)
   }
 

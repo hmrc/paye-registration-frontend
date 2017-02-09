@@ -19,6 +19,7 @@ package services
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, PAYERegistrationFixture, S4LFixture}
+import models.BusinessContactDetails
 import models.view.{Address, CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import org.mockito.Matchers
@@ -53,7 +54,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
     val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService, mockCompRegConnector, mockCohoAPIConnector) {
 
       override def getCompanyDetails(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
-        Future.successful(CompanyDetailsView(None, "test compay name", None, validROAddress))
+        Future.successful(CompanyDetailsView(None, "test compay name", None, validROAddress, None))
       }
 
       override def saveCompanyDetails(detailsView: CompanyDetailsView)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
@@ -99,7 +100,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
           differentName = true,
           tradingName = Some("trading name")
         )),
-        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        None
       )
       service.apiToView(tstModelAPI) shouldBe tstModelView
     }
@@ -118,7 +120,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
           differentName = false,
           tradingName = None
         )),
-        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        None
       )
       service.apiToView(tstModelAPI) shouldBe tstModelView
     }
@@ -139,7 +142,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
           differentName = true,
           tradingName = Some("trading name")
         )),
-        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Some(BusinessContactDetails(Some("test@paye.co.uk"), None, None))
       )
       service.viewToAPI(tstModelView) shouldBe Right(tstModelAPI)
     }
@@ -158,7 +162,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
           differentName = false,
           tradingName = Some("trading name")
         )),
-        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Some(BusinessContactDetails(Some("test@paye.co.uk"), None, None))
       )
       service.viewToAPI(tstModelView) shouldBe Right(tstModelAPI)
     }
@@ -168,7 +173,22 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         Some("tstCRN"),
         "Comp name",
         None,
-        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Some(BusinessContactDetails(Some("test@paye.co.uk"), None, None))
+      )
+      service.viewToAPI(tstModelView) shouldBe Left(tstModelView)
+    }
+
+    "return the original view model when business contact details has not been completed" in new Setup {
+      val tstModelView = CompanyDetailsView(
+        Some("tstCRN"),
+        "Comp name",
+        Some(TradingNameView(
+          differentName = false,
+          tradingName = Some("trading name")
+        )),
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        None
       )
       service.viewToAPI(tstModelView) shouldBe Left(tstModelView)
     }
@@ -216,7 +236,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockCohoAPIConnector.getRegisteredOfficeAddress(Matchers.eq("txID"))(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCHROAddress))
 
-      await(service.getCompanyDetails) shouldBe CompanyDetailsView(None, "Tst company name", None, validCHROAddress)
+      await(service.getCompanyDetails) shouldBe CompanyDetailsView(None, "Tst company name", None, validCHROAddress, None)
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
@@ -257,7 +277,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         Some("crn"),
         "Tst Company Name",
         None,
-        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Some(BusinessContactDetails(Some("test@paye.co.uk"), None, None))
       )
 
       when(mockS4LService.saveForm(Matchers.eq(CacheKeys.CompanyDetails.toString),Matchers.any)(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))
@@ -309,6 +330,20 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         .thenReturn(Future.successful(testAddress))
 
       await(service.retrieveRegisteredOfficeAddress) shouldBe CHROAddress.convertToAddress(testAddress)
+    }
+  }
+
+  "Calling submitBusinessContact" should {
+    "return a success response when submit is completed successfully" in new CompanyDetailsMockedSetup {
+      mockFetchRegID("54322")
+
+      await(service.submitBusinessContact(validBusinessContactModel)) shouldBe DownstreamOutcome.Success
+    }
+
+    "return a failure response when submit is not completed successfully" in new NoCompanyDetailsMockedSetup {
+      mockFetchRegID("54322")
+
+      await(service.submitBusinessContact(validBusinessContactModel)) shouldBe DownstreamOutcome.Failure
     }
   }
 }
