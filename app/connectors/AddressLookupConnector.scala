@@ -16,7 +16,7 @@
 
 package connectors
 
-import com.google.inject.{Inject, Singleton}
+import javax.inject.{Inject, Singleton}
 import config.WSHttp
 import play.api.Logger
 import play.api.libs.json.JsObject
@@ -40,7 +40,7 @@ trait AddressLookupConnect {
   def getAddress(id: String)(implicit hc: HeaderCarrier) = {
     http.GET[JsObject](s"$addressLookupFrontendUrl/lookup-address/outcome/payereg1/$id") map {
       res =>
-        Logger.info(res.toString)
+        Logger.error(res.toString)
         res
     }
   }
