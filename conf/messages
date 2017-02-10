@@ -14,9 +14,9 @@ app.common.date.invalid                                 = You have not entered a
 app.common.companies-house                              = Companies House
 
 ## User error messages
-errors.invalid.email                                    = Please enter a valid email address
-errors.invalid.phoneNumber                              = Please enter a valid phone number
-errors.invalid.mobileNumber                             = Please enter a valid mobile phone number
+errors.invalid.email                                    = The email address you have provided is invalid
+errors.invalid.phoneNumber                              = The phone number you have provided is invalid
+errors.invalid.mobileNumber                             = The mobile phone number you have provided is invalid
 
 ## Welcome page
 pages.welcome.title                                     = Register as an employer
@@ -50,7 +50,14 @@ pages.confirmRO.help.body                               = If the registered offi
 pages.confirmRO.help.body.link.url                      = https://ewf.companieshouse.gov.uk//seclogin?tc=1
 
 ## Business Contact Details
-pages.businessContact.noFieldsCompleted                 = Please complete at least one field
+pages.businessContact.title                             = Company contact details
+pages.businessContact.heading                           = {0} contact details
+pages.businessContact.p1                                = Let us know how we can get in touch if we need more information about the company.
+pages.businessContact.p2                                = You need to provide at least one of the following contact details:
+pages.businessContact.email                             = Business email address
+pages.businessContact.mobile                            = Business mobile number
+pages.businessContact.phone                             = Business telephone number (including area code)
+pages.businessContact.noFieldsCompleted                 = You need to provide at least one contact method so we can get in touch if we need to
 
 ## Employing Staff Page
 pages.employingStaff.title                              = Employing Staff

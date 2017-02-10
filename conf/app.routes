@@ -18,6 +18,10 @@ POST        /trading-name                           controllers.userJourney.Comp
 GET         /registered-office-address              controllers.userJourney.CompanyDetailsController.roAddress
 POST        /registered-office-address              controllers.userJourney.CompanyDetailsController.confirmRO
 
+## BUSINESS CONTACT DETAILS
+GET         /business-contact-details               controllers.userJourney.CompanyDetailsController.businessContactDetails
+POST        /business-contact-details               controllers.userJourney.CompanyDetailsController.submitBusinessContactDetails
+
 ## ADDRESS LOOKUP
 GET         /address-lookup                         controllers.userJourney.AddressLookupController.redirectToLookup
 GET         /return-from-address                    controllers.userJourney.AddressLookupController.returnFromLookup

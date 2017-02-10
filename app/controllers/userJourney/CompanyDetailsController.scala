@@ -22,7 +22,7 @@ import javax.inject.{Inject, Singleton}
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector}
 import enums.DownstreamOutcome
-import forms.companyDetails.TradingNameForm
+import forms.companyDetails.{BusinessContactDetailsForm, TradingNameForm}
 import models.view.TradingName
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -30,7 +30,7 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import services.{CoHoAPIService, CoHoAPISrv, CompanyDetailsService, CompanyDetailsSrv, S4LService, S4LSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import views.html.pages.companyDetails.{tradingName => TradingNamePage, confirmROAddress}
+import views.html.pages.companyDetails.{tradingName => TradingNamePage, confirmROAddress, businessContactDetails => BusinessContactDetailsPage}
 
 import scala.concurrent.Future
 
@@ -102,5 +102,20 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
     cohoService.getStoredCompanyName map {
       cName => BadRequest(TradingNamePage(form, cName))
     }
+  }
+
+  val businessContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
+    implicit user =>
+      implicit request =>
+    Ok(BusinessContactDetailsPage("-Company Name-", BusinessContactDetailsForm.form))
+  }
+
+  val submitBusinessContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
+    implicit user =>
+      implicit request =>
+        BusinessContactDetailsForm.form.bindFromRequest.fold(
+          errs => BadRequest(BusinessContactDetailsPage("-Company Name-", errs)),
+          success => Redirect(controllers.userJourney.routes.AddressLookupController.redirectToLookup())
+        )
   }
 }

@@ -26,7 +26,7 @@ object Validators extends DateUtil {
   private val mobileRegex = """[0-9 ]{1,20}""".r
 
   def optionalValidation(constraint : Constraint[String]): Constraint[Option[String]] = Constraint("constraints.optional")({
-    case Some(text: String) => constraint(text)
+    case Some(text: String)  if text != ""  => constraint(text)
     case _ => Valid
   })
 
