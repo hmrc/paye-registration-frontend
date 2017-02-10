@@ -30,7 +30,7 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import services.{CoHoAPIService, CoHoAPISrv, CompanyDetailsService, CompanyDetailsSrv, S4LService, S4LSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import views.html.pages.companyDetails.{tradingName => TradingNamePage, ConfirmROAddress}
+import views.html.pages.companyDetails.{tradingName => TradingNamePage, confirmROAddress}
 
 import scala.concurrent.Future
 
@@ -89,7 +89,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
       implicit request =>
         for {
           companyDetails <- companyDetailsService.getCompanyDetails
-        } yield Ok(ConfirmROAddress(companyDetails.companyName, companyDetails.roAddress))
+        } yield Ok(confirmROAddress(companyDetails.companyName, companyDetails.roAddress))
   }
 
   val confirmRO : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
