@@ -28,7 +28,8 @@ trait PAYERegistrationFixture {
     crn = None,
     companyName = "Test Company",
     tradingName = Some("Test Company Trading Name"),
-    Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
+    Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+    businessContactDetails = validBusinessContactDetails
   )
 
   val validDate = LocalDate.of(2016,12,20)
@@ -48,7 +49,6 @@ trait PAYERegistrationFixture {
     registrationID = "AC123456",
     formCreationTimestamp = "2017-01-11T15:10:12",
     companyDetails = validCompanyDetailsAPI,
-    businessContactDetails = validBusinessContactDetails,
     employment = validEmploymentAPI
   )
 

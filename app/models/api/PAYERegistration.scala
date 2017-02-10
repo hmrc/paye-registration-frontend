@@ -22,9 +22,10 @@ import play.api.libs.json.Json
 case class PAYERegistration (registrationID: String,
                              formCreationTimestamp: String,
                              companyDetails: CompanyDetails,
-                             businessContactDetails: BusinessContactDetails,
                              employment: Employment)
 
 object PAYERegistration {
+  implicit val companyDetailsFormat = CompanyDetails.format
+  implicit val EmploymentFormat = Employment.formatModel
   implicit val format = Json.format[PAYERegistration]
 }

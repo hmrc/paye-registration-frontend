@@ -112,7 +112,7 @@ trait CompanyDetailsSrv extends CommonService {
   def submitBusinessContact(businessContact: BusinessContactDetails)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
       details <- getCompanyDetails
-      outcome <- saveCompanyDetails(details.copy(businessContact = Some(businessContact)))
+      outcome <- saveCompanyDetails(details.copy(businessContactDetails = Some(businessContact)))
     } yield outcome
   }
 
@@ -128,13 +128,13 @@ trait CompanyDetailsSrv extends CommonService {
       apiModel.companyName,
       tradingNameView,
       apiModel.roAddress,
-      None //TODO map with the API model
+      Some(apiModel.businessContactDetails)
     )
   }
 
   private[services] def viewToAPI(viewData: CompanyDetailsView): Either[CompanyDetailsView, CompanyDetailsAPI] = viewData match {
-    case CompanyDetailsView(crn, companyName, Some(tradingName), address, Some(businessContact)) =>
-      Right(CompanyDetailsAPI(crn, companyName, tradingNameAPIValue(tradingName), address)) //TODO include the businessContact to API model
+    case CompanyDetailsView(crn, companyName, Some(tradingName), address, Some(businessContactDetails)) =>
+      Right(CompanyDetailsAPI(crn, companyName, tradingNameAPIValue(tradingName), address, businessContactDetails))
     case _ => Left(viewData)
   }
 

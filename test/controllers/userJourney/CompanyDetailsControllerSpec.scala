@@ -19,6 +19,7 @@ package controllers.userJourney
 import builders.AuthBuilder
 import enums.DownstreamOutcome
 import fixtures.{PAYERegistrationFixture, S4LFixture}
+import models.BusinessContactDetails
 import models.view.{Address, CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import org.jsoup._
 import org.mockito.Matchers
@@ -60,6 +61,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     "return 303 for an unauthorised user" in new Setup {
       val result = controller.tradingName()(FakeRequest())
       status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result).getOrElse("NO REDIRECT LOCATION!").contains("/gg/sign-in") shouldBe true
     }
 
     "show the correctly pre-populated trading name page when data has already been entered" in new Setup {
@@ -131,6 +133,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     "return 303 for an unauthorised user" in new Setup {
       val result = controller.submitTradingName()(FakeRequest())
       status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result).getOrElse("NO REDIRECT LOCATION!").contains("/gg/sign-in") shouldBe true
     }
     "redirect to the confirm ro address page when a user enters valid data" in new Setup {
       when(mockCompanyDetailsService.submitTradingName(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
@@ -200,13 +203,99 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       }
     }
 
-    "return a forbidden" when {
-      "the user is not authorised to view the page" in new Setup {
+    "return 303 for an unauthorised user" in new Setup {
+      val result = controller.roAddress()(FakeRequest())
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result).getOrElse("NO REDIRECT LOCATION!").contains("/gg/sign-in") shouldBe true
+    }
+  }
+
+  "confirm roAddress" should {
+
+    "return 303 for an unauthorised user" in new Setup {
+      val result = controller.confirmRO()(FakeRequest())
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result).getOrElse("NO REDIRECT LOCATION!").contains("/gg/sign-in") shouldBe true
+    }
+
+    "redirect to next page" when {
+      "the user clicks confirm" in new Setup {
         AuthBuilder.showWithAuthorisedUser(controller.confirmRO, mockAuthConnector) {
           result =>
             status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.AddressLookupController.redirectToLookup()}")
+            redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()}")
         }
+      }
+    }
+  }
+
+  "businessContactDetails" should {
+    val bcd = BusinessContactDetails(None, None, None)
+
+    "return an ok" when {
+      "the user is authorised to view the page and there is a saved buiness contact details model" in new Setup {
+        when(mockCompanyDetailsService.getCompanyDetails(Matchers.any[HeaderCarrier]()))
+          .thenReturn(Future.successful(validCompanyDetailsViewModel.copy(businessContactDetails = Some(bcd))))
+
+        AuthBuilder.showWithAuthorisedUser(controller.businessContactDetails, mockAuthConnector) {
+          result =>
+            status(result) shouldBe OK
+        }
+      }
+    }
+
+    "return an ok" when {
+      "the user is authorised to view the page and there is no business contact details model" in new Setup {
+        when(mockCompanyDetailsService.getCompanyDetails(Matchers.any[HeaderCarrier]()))
+          .thenReturn(Future.successful(validCompanyDetailsViewModel.copy(businessContactDetails = None)))
+
+        AuthBuilder.showWithAuthorisedUser(controller.businessContactDetails, mockAuthConnector) {
+          result =>
+            status(result) shouldBe OK
+        }
+      }
+    }
+
+    "return 303 for an unauthorised user" in new Setup {
+      val result = controller.businessContactDetails()(FakeRequest())
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result).getOrElse("NO REDIRECT LOCATION!").contains("/gg/sign-in") shouldBe true
+    }
+  }
+
+  "submit businessContactDetails" should {
+    "return 303 for an unauthorised user" in new Setup {
+      val result = controller.submitBusinessContactDetails()(FakeRequest())
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result).getOrElse("NO REDIRECT LOCATION!").contains("/gg/sign-in") shouldBe true
+    }
+
+    "show form errors" in new Setup {
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
+      AuthBuilder.submitWithAuthorisedUser(controller.submitBusinessContactDetails(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody()) {
+        result =>
+          status(result) shouldBe BAD_REQUEST
+      }
+    }
+
+    "show error page when there is an internal error" in new Setup {
+      when(mockCompanyDetailsService.submitBusinessContact(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
+      AuthBuilder.submitWithAuthorisedUser(controller.submitBusinessContactDetails(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "mobileNumber" -> "07123456789"
+      )) {
+        result =>
+          status(result) shouldBe INTERNAL_SERVER_ERROR
+      }
+    }
+
+    "redirect to next page when the user submit valid data" in new Setup {
+      when(mockCompanyDetailsService.submitBusinessContact(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      AuthBuilder.submitWithAuthorisedUser(controller.submitBusinessContactDetails(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "mobileNumber" -> "07123456789"
+      )) {
+        result =>
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.AddressLookupController.redirectToLookup()}")
       }
     }
   }

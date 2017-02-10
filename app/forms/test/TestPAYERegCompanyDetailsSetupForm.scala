@@ -16,10 +16,11 @@
 
 package forms.test
 
+import models.BusinessContactDetails
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import models.view.Address
 import play.api.data.Form
-import play.api.data.Forms._
+import play.api.data.Forms.{mapping, _}
 
 object TestPAYERegCompanyDetailsSetupForm {
 
@@ -35,7 +36,12 @@ object TestPAYERegCompanyDetailsSetupForm {
         "line4" -> optional(text),
         "postCode" -> optional(text),
         "country" -> optional(text)
-      )(Address.apply)(Address.unapply)
+      )(Address.apply)(Address.unapply),
+      "businessContactDetails" -> mapping(
+        "businessEmail" -> optional(text),
+        "mobileNumber" -> optional(text),
+        "phoneNumber" -> optional(text)
+      )(BusinessContactDetails.apply)(BusinessContactDetails.unapply)
     )(CompanyDetailsAPI.apply)(CompanyDetailsAPI.unapply)
   )
 }

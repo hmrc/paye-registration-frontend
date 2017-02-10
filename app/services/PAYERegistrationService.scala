@@ -60,7 +60,7 @@ trait PAYERegistrationSrv extends CommonService {
     Summary(
       Seq(
         buildCompanyDetailsSection(apiModel.companyDetails),
-        buildBusinessContactDetailsSection(apiModel.businessContactDetails),
+        buildBusinessContactDetailsSection(apiModel.companyDetails.businessContactDetails),
         buildEmploymentSection(apiModel.employment)
       )
     )
@@ -97,7 +97,7 @@ trait PAYERegistrationSrv extends CommonService {
             case Some(email) => Right(email)
             case _ => Left("noAnswerGiven")
           },
-          changeLink = None
+          changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
         )),
         Some(SummaryRow(
           id = "mobileNumber",
@@ -105,7 +105,7 @@ trait PAYERegistrationSrv extends CommonService {
             case Some(mobile) => Right(mobile)
             case _ => Left("noAnswerGiven")
           },
-          changeLink = None
+          changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
         )),
         Some(SummaryRow(
           id = "businessTelephone",
@@ -113,7 +113,7 @@ trait PAYERegistrationSrv extends CommonService {
             case Some(bizPhone) => Right(bizPhone)
             case _ => Left("noAnswerGiven")
           },
-          changeLink = None
+          changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
         ))
       ).flatten
     )

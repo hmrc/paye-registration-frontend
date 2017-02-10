@@ -91,7 +91,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         Some("tstCRN"),
         "Comp name",
         Some("trading name"),
-        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
       val tstModelView = CompanyDetailsView(
         Some("tstCRN"),
@@ -101,7 +102,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
           tradingName = Some("trading name")
         )),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
-        None
+        Some(BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321")))
       )
       service.apiToView(tstModelAPI) shouldBe tstModelView
     }
@@ -111,7 +112,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         Some("tstCRN"),
         "Comp name",
         None,
-        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
       val tstModelView = CompanyDetailsView(
         Some("tstCRN"),
@@ -121,7 +123,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
           tradingName = None
         )),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
-        None
+        Some(BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321")))
       )
       service.apiToView(tstModelAPI) shouldBe tstModelView
     }
@@ -133,7 +135,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         Some("tstCRN"),
         "Comp name",
         Some("trading name"),
-        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
       val tstModelView = CompanyDetailsView(
         Some("tstCRN"),
@@ -143,7 +146,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
           tradingName = Some("trading name")
         )),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
-        Some(BusinessContactDetails(Some("test@paye.co.uk"), None, None))
+        Some(BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321")))
       )
       service.viewToAPI(tstModelView) shouldBe Right(tstModelAPI)
     }
@@ -153,7 +156,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         Some("tstCRN"),
         "Comp name",
         None,
-        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
       val tstModelView = CompanyDetailsView(
         Some("tstCRN"),
@@ -163,7 +167,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
           tradingName = Some("trading name")
         )),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
-        Some(BusinessContactDetails(Some("test@paye.co.uk"), None, None))
+        Some(BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321")))
       )
       service.viewToAPI(tstModelView) shouldBe Right(tstModelAPI)
     }
