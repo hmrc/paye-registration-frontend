@@ -29,7 +29,8 @@ class OneOfManyFormSpec extends UnitSpec {
   "Binding a form extending OneOfManyForm" should {
     "bind from one field completed" in {
       val data = Map[String, String](
-        "test1" -> "test"
+        "test1" -> "test",
+        "test2" -> ""
         )
       TestForm.multiPartFormatter.bind("test1", data) shouldBe Right(Some("test"))
       TestForm.multiPartFormatter.bind("test2", data) shouldBe Right(None)
@@ -47,6 +48,15 @@ class OneOfManyFormSpec extends UnitSpec {
 
     "fail to bind with no fields completed" in {
       val data = Map[String, String](
+        )
+      TestForm.multiPartFormatter.bind("test1", data) shouldBe Left(Seq(FormError("noFieldsCompleted-test1", "noFieldsErrMsg")))
+    }
+
+    "fail to bind with all fields blank" in {
+      val data = Map[String, String](
+          "test1" -> "",
+          "test2" -> "",
+          "test3" -> ""
         )
       TestForm.multiPartFormatter.bind("test1", data) shouldBe Left(Seq(FormError("noFieldsCompleted-test1", "noFieldsErrMsg")))
     }

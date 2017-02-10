@@ -46,7 +46,9 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
 
     "Bind successfully with minimal data (email)" in {
       val data = Map(
-        "businessEmail" -> "testEmail@testing.com"
+        "businessEmail" -> "testEmail@testing.com",
+        "mobileNumber" -> "",
+        "phoneNumber" -> ""
       )
       val model = BusinessContactDetails(
         businessEmail = Some("testEmail@testing.com"),
@@ -63,7 +65,9 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
 
     "Bind successfully with minimal data (mobile)" in {
       val data = Map(
-        "mobileNumber" -> "01234567987"
+        "businessEmail" -> "",
+        "mobileNumber" -> "01234567987",
+        "phoneNumber" -> ""
       )
       val model = BusinessContactDetails(
         businessEmail = None,
@@ -80,6 +84,8 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
 
     "Bind successfully with minimal data (phone)" in {
       val data = Map(
+        "businessEmail" -> "",
+        "mobileNumber" -> "",
         "phoneNumber" -> "07798123456"
       )
       val model = BusinessContactDetails(
@@ -105,12 +111,18 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
 
     "Have the correct error if email is invalid" in {
       val data: Map[String,String] = Map(
-        "businessEmail" -> "NotAProperEmail!!!!!"
+        "businessEmail" -> "NotAProperEmail!!!!!",
+        "mobileNumber" -> "",
+        "phoneNumber" -> ""
       )
       val boundForm = testForm.bind(data)
       val errForm = Form(
         testForm.mapping,
-        Map("businessEmail" -> "NotAProperEmail!!!!!"),
+        Map(
+          "businessEmail" -> "NotAProperEmail!!!!!",
+          "mobileNumber" -> "",
+          "phoneNumber" -> ""
+        ),
         List(FormError("businessEmail",List("errors.invalid.email"),List())),
         None
       )
@@ -120,12 +132,18 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
 
     "Have the correct error if mobile number is invalid" in {
       val data: Map[String,String] = Map(
-        "mobileNumber" -> "NotAProperMobNumber!!!!!"
+        "businessEmail" -> "",
+        "mobileNumber" -> "NotAProperMobNumber!!!!!",
+        "phoneNumber" -> ""
       )
       val boundForm = testForm.bind(data)
       val errForm = Form(
         testForm.mapping,
-        Map("mobileNumber" -> "NotAProperMobNumber!!!!!"),
+        Map(
+          "businessEmail" -> "",
+          "mobileNumber" -> "NotAProperMobNumber!!!!!",
+          "phoneNumber" -> ""
+        ),
         List(FormError("mobileNumber",List("errors.invalid.mobileNumber"),List())),
         None
       )
@@ -135,13 +153,19 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
 
     "Have the correct error if phone number is invalid" in {
       val data: Map[String,String] = Map(
+        "businessEmail" -> "",
+        "mobileNumber" -> "",
         "phoneNumber" -> "NotAProperNumber!!!!!"
       )
       val boundForm = testForm.bind(data)
 
       val errForm = Form(
         testForm.mapping,
-        Map("phoneNumber" -> "NotAProperNumber!!!!!"),
+        Map(
+          "businessEmail" -> "",
+          "mobileNumber" -> "",
+          "phoneNumber" -> "NotAProperNumber!!!!!"
+        ),
         List(FormError("phoneNumber",List("errors.invalid.phoneNumber"),List())),
         None
       )
