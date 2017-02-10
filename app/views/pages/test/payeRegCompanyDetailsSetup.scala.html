@@ -71,6 +71,25 @@
             )
         </div>
 
+        <div class="inline form-group">
+            @govHelpers.input(
+            detailsForm("businessContactDetails.businessEmail"),
+            '_label -> "Business email (optional)"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            detailsForm("businessContactDetails.mobileNumber"),
+            '_label -> "Mobile number (optional)"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            detailsForm("businessContactDetails.phoneNumber"),
+            '_label -> "Business telephone (optional)"
+            )
+        </div>
+
         <button class="button" type="submit" id="continue" >Submit</button>
 
     }
