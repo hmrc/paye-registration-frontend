@@ -45,13 +45,13 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
           "line4" -> optional(text),
           "postCode" -> optional(text),
           "country" -> optional(text)
-        )(Address.apply)(Address.unapply)
+        )(Address.apply)(Address.unapply),
+        "businessContactDetails" -> mapping(
+          "businessEmail" -> optional(text),
+          "mobileNumber" -> optional(text),
+          "phoneNumber" -> optional(text)
+        )(BusinessContactDetails.apply)(BusinessContactDetails.unapply)
       )(CompanyDetails.apply)(CompanyDetails.unapply),
-      "businessContactDetails" -> mapping(
-        "businessEmail" -> optional(text),
-        "mobileNumber" -> optional(text),
-        "phoneNumber" -> optional(text)
-      )(BusinessContactDetails.apply)(BusinessContactDetails.unapply),
       "employment" -> mapping(
         "employees" -> requiredBoolean,
         "companyPension" -> optional(requiredBoolean),

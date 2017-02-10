@@ -55,20 +55,7 @@ trait PAYERegistrationConnect {
   }
 
   def getRegistration(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[PAYERegistrationAPI] = {
-//    http.GET[PAYERegistrationAPI](s"$payeRegUrl/paye-registration/$regID") recover {
-//      case e: Exception => throw logResponse(e, "getRegistration", "getting registration")
-//    }
-
-    //TODO : SCRS-4509 - revert back to above after putting together
-
-    http.GET[JsObject](s"$payeRegUrl/paye-registration/$regID") map {
-      json => json.++(Json.obj(
-        "businessContactDetails" -> Json.obj(
-          "businessEmail" -> "test@email.com",
-          "mobileNumber" -> "1234567890",
-          "phoneNumber" -> "0987654321"
-        ))).as[PAYERegistrationAPI]
-    } recover {
+    http.GET[PAYERegistrationAPI](s"$payeRegUrl/paye-registration/$regID") recover {
       case e: Exception => throw logResponse(e, "getRegistration", "getting registration")
     }
   }

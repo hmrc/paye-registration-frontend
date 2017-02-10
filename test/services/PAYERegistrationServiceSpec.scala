@@ -45,9 +45,9 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
       crn = None,
       companyName = "Test Company",
       tradingName = Some("tstTrade"),
-      Address("14 St Test Walk", "Testley", None, None, None, None)
+      Address("14 St Test Walk", "Testley", None, None, None, None),
+      businessContactDetails = validBusinessContactDetails
     ),
-    businessContactDetails = validBusinessContactDetails,
     employment = validEmploymentAPI
   )
 
@@ -76,17 +76,17 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
           SummaryRow(
             id = "businessEmail",
             answer = Right("test@email.com"),
-            changeLink = None
+            changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
           ),
           SummaryRow(
             id = "mobileNumber",
             answer = Right("1234567890"),
-            changeLink = None
+            changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
           ),
           SummaryRow(
             id = "businessTelephone",
             answer = Right("0987654321"),
-            changeLink = None
+            changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
           )
         )
       ),
@@ -193,9 +193,9 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
           crn = None,
           companyName = "Test Company",
           tradingName = None,
-          Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
+          Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+          businessContactDetails = validBusinessContactDetails
         ),
-        businessContactDetails = validBusinessContactDetails,
         employment = validEmploymentAPI
       )
 
@@ -224,17 +224,17 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
               SummaryRow(
                 id = "businessEmail",
                 answer = Right("test@email.com"),
-                changeLink = None
+                changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
               ),
               SummaryRow(
                 id = "mobileNumber",
                 answer = Right("1234567890"),
-                changeLink = None
+                changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
               ),
               SummaryRow(
                 id = "businessTelephone",
                 answer = Right("0987654321"),
-                changeLink = None
+                changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
               )
             )
           ),
@@ -276,7 +276,8 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
         crn = None,
         companyName = "Test Company",
         tradingName = Some("Test Company Trading Name"),
-        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
 
       val formatHMTLROAddress = service.formatHTMLROAddress(validCompanyDetailsAPI.roAddress)
@@ -356,17 +357,17 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
             Some(SummaryRow(
               id = "businessEmail",
               answer = Right("test@email.com"),
-              changeLink = None
+              changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
             )),
             Some(SummaryRow(
               id = "mobileNumber",
               answer = Right("1234567890"),
-              changeLink = None
+              changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
             )),
             Some(SummaryRow(
               id = "businessTelephone",
               answer = Right("0987654321"),
-              changeLink = None
+              changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
             ))
           ).flatten
         )
@@ -389,17 +390,17 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
             Some(SummaryRow(
               id = "businessEmail",
               answer = Left("noAnswerGiven"),
-              changeLink = None
+              changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
             )),
             Some(SummaryRow(
               id = "mobileNumber",
               answer = Left("noAnswerGiven"),
-              changeLink = None
+              changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
             )),
             Some(SummaryRow(
               id = "businessTelephone",
               answer = Left("noAnswerGiven"),
-              changeLink = None
+              changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
             ))
           ).flatten
         )

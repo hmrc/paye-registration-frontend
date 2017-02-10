@@ -20,6 +20,7 @@ import java.time.LocalDate
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.PAYERegistrationConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
+import models.BusinessContactDetails
 import models.api.{CompanyDetails, Employment}
 import models.view.Address
 import play.api.Application
@@ -49,6 +50,13 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
   def url(f: String) = s"/paye-registration/$regId$f"
 
   "companyDetails" should {
+    val validBusinessContactDetails =
+      BusinessContactDetails(
+        Some("test@email.com"),
+        Some("1234567890"),
+        Some("0987654321")
+      )
+
     val validCompanyDetails = CompanyDetails(crn = None,
                                              companyName = "Test Company",
                                              tradingName = Some("Test Company Trading Name"),
@@ -58,7 +66,8 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
                                                Some("Testford"),
                                                Some("Testshire"),
                                                Some("TE1 1ST"), Some("UK")
-                                             )
+                                             ),
+                                             businessContactDetails = validBusinessContactDetails
     )
 
     "get a model" in {

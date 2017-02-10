@@ -95,7 +95,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
   val confirmRO : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        Future.successful(Redirect(controllers.userJourney.routes.AddressLookupController.redirectToLookup()))
+        Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
   }
 
   private def badRequestResponse(form: Form[TradingName])(implicit request: Request[AnyContent]): Future[Result] = {
@@ -104,18 +104,26 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
     }
   }
 
-  val businessContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
+  val businessContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-    Ok(BusinessContactDetailsPage("-Company Name-", BusinessContactDetailsForm.form))
+        companyDetailsService.getCompanyDetails map {
+          details => details.businessContactDetails match {
+            case Some(bcd) => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form.fill(bcd)))
+            case _ => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form))
+          }
+        }
   }
 
-  val submitBusinessContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
+  val submitBusinessContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         BusinessContactDetailsForm.form.bindFromRequest.fold(
-          errs => BadRequest(BusinessContactDetailsPage("-Company Name-", errs)),
-          success => Redirect(controllers.userJourney.routes.AddressLookupController.redirectToLookup())
+          errs => companyDetailsService.getCompanyDetails map (details => BadRequest(BusinessContactDetailsPage(details.companyName, errs))),
+          success => companyDetailsService.submitBusinessContact(success) map {
+            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.AddressLookupController.redirectToLookup())
+            case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+          }
         )
   }
 }

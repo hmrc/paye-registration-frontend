@@ -84,9 +84,7 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
 
   "Calling getRegistration" should {
     "return the correct PAYEResponse when the microservice returns a PAYE Registration model" in new Setup {
-      //mockHttpGet[PAYERegistrationAPI]("tst-url", validPAYERegistrationAPI)
-      //TODO : SCRS-4509 - revert to above once placed together
-      mockHttpGet[JsObject]("tst-url", Json.toJson(validPAYERegistrationAPI).as[JsObject])
+      mockHttpGet[PAYERegistrationAPI]("tst-url", validPAYERegistrationAPI)
 
       await(connector.getRegistration("tstID")) shouldBe validPAYERegistrationAPI
     }

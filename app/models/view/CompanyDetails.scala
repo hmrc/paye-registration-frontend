@@ -16,13 +16,15 @@
 
 package models.view
 
+import models.BusinessContactDetails
 import play.api.libs.json.Json
 
 case class CompanyDetails(
                            crn: Option[String],
                            companyName: String,
                            tradingName: Option[TradingName],
-                           roAddress: Address
+                           roAddress: Address,
+                           businessContactDetails: Option[BusinessContactDetails]
                            )
 
 case class TradingName (
@@ -48,5 +50,6 @@ object Address {
 }
 
 object CompanyDetails {
+  implicit val businessContactFormat = BusinessContactDetails.format
   implicit val format = Json.format[CompanyDetails]
 }
