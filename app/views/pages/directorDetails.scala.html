@@ -20,14 +20,14 @@
     </fieldset>
 }
 
-@defining(if(directorNames.size > 1) {"titleMultipleDirectors"} else {"title1Director"}) { titleSuffix =>
-    @main_template(title = messages(s"pages.directorDetails.$titleSuffix")) {
+@defining(if(directorNames.size > 1) {"MultipleDirectors"} else {"1Director"}) { msgSuffix =>
+    @main_template(title = messages(s"pages.directorDetails.title$msgSuffix")) {
 
         @payeErrorSummary(
             messages("app.common.errorSummaryLabel"), ninoForm
         )
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages(s"pages.directorDetails.$titleSuffix"))</h1>
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages(s"pages.directorDetails.heading$msgSuffix"))</h1>
 
     @govHelpers.form(action = controllers.userJourney.routes.DirectorDetailsController.submitDirectorDetails()) {
 

@@ -105,6 +105,8 @@ pages.firstPayment.firstPaymentRulesEnd                 = This should include an
 ## Director Details Page
 pages.directorDetails.title1Director                    = What is the director''s National Insurance number?
 pages.directorDetails.titleMultipleDirectors            = What are the directors'' National Insurance numbers?
+pages.directorDetails.heading1Director                  = What is the director''s National Insurance number?
+pages.directorDetails.headingMultipleDirectors          = What are the directors'' National Insurance numbers?
 pages.directorDetails.errors.noneCompleted              = Enter at least one director''s National Insurance number
 
 ## Summary Page
