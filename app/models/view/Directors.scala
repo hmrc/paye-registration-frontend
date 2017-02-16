@@ -30,7 +30,8 @@ object Directors {
 }
 
 case class UserEnteredNino (
-                           oNino: Option[String]
+                           id: String,
+                           nino: Option[String]
                              )
 
 object UserEnteredNino {
@@ -38,7 +39,7 @@ object UserEnteredNino {
 }
 
 case class Ninos (
-                 ninoMapping: Map[String, UserEnteredNino]
+                 ninoMapping: List[UserEnteredNino]
                    )
 
 object Ninos {
