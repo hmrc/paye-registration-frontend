@@ -19,7 +19,7 @@ package fixtures
 import java.time.LocalDate
 
 import models.BusinessContactDetails
-import models.api.{CompanyDetails, Employment, PAYERegistration}
+import models.api._
 import models.view.{Address, Summary, SummaryRow, SummarySection}
 
 trait PAYERegistrationFixture {
@@ -78,4 +78,8 @@ trait PAYERegistrationFixture {
     country = Some("UK"),
     postCode = Some("TE1 1ST")
   )
+
+  def validName(f: String, m: Option[String], l:String) = Name(Some(f), m, Some(l), None)
+
+  val validDirectorList = Seq(Director(validName("Bob", None, "Smith"), Some("NINO")), Director(validName("Michael", Some("Jay"), "Fudgedybar"), None))
 }

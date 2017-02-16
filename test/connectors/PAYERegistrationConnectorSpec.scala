@@ -18,7 +18,7 @@ package connectors
 
 import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
-import models.api.{CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
+import models.api.{Director, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
 import models.view.Address
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
@@ -204,6 +204,57 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
       mockHttpFailedPATCH[EmploymentAPI, EmploymentAPI]("tst-url", internalServiceException)
 
       intercept[InternalServerException](await(connector.upsertEmployment("tstID", validEmploymentAPI)))
+    }
+  }
+
+  "Calling getDirectors" should {
+    "return the correct PAYEResponse when the microservice returns a list of Directors" in new Setup {
+      mockHttpGet[Seq[Director]]("tst-url", validDirectorList)
+
+      await(connector.getDirectors("tstID")) shouldBe validDirectorList
+    }
+    "return the correct PAYEResponse when a Bad Request response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[Seq[Director]]("tst-url", badRequest)
+
+      intercept[BadRequestException](await(connector.getDirectors("tstID")))
+    }
+    "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[Seq[Director]]("test-url", forbidden)
+
+      intercept[Upstream4xxResponse](await(connector.getDirectors("tstID")))
+    }
+    "return a Not Found PAYEResponse when the microservice returns no Employment API model" in new Setup {
+      mockHttpFailedGET[Seq[Director]]("tst-url", notFound)
+
+      await(connector.getDirectors("tstID")) shouldBe Nil
+    }
+    "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[Seq[Director]]("tst-url", internalServiceException)
+
+      intercept[InternalServerException](await(connector.getDirectors("tstID")))
+    }
+  }
+
+  "Calling upsertDirectors" should {
+    "return the correct PAYEResponse when the microservice completes and returns a list of Directors" in new Setup {
+      mockHttpPATCH[Seq[Director], Seq[Director]]("tst-url", validDirectorList)
+
+      await(connector.upsertDirectors("tstID", validDirectorList)) shouldBe validDirectorList
+    }
+    "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
+      mockHttpFailedPATCH[Seq[Director], Seq[Director]]("tst-url", forbidden)
+
+      intercept[Upstream4xxResponse](await(connector.upsertDirectors("tstID", validDirectorList)))
+    }
+    "return a Not Found PAYEResponse when the microservice returns a NotFound response (No PAYERegistration in database)" in new Setup {
+      mockHttpFailedPATCH[Seq[Director], Seq[Director]]("tst-url", notFound)
+
+      intercept[NotFoundException](await(connector.upsertDirectors("tstID", validDirectorList)))
+    }
+    "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
+      mockHttpFailedPATCH[Seq[Director], Seq[Director]]("tst-url", internalServiceException)
+
+      intercept[InternalServerException](await(connector.upsertDirectors("tstID", validDirectorList)))
     }
   }
 }

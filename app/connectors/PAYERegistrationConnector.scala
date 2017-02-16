@@ -21,10 +21,9 @@ import javax.inject.{Inject, Singleton}
 import config.WSHttp
 import enums.DownstreamOutcome
 import models.api.{CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
-import models.view.Address
+import models.api.Director
 import play.api.Logger
 import play.api.http.Status
-import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -87,6 +86,19 @@ trait PAYERegistrationConnect {
   def upsertEmployment(regID: String, employment: EmploymentAPI)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPI]): Future[EmploymentAPI] = {
     http.PATCH[EmploymentAPI, EmploymentAPI](s"$payeRegUrl/paye-registration/$regID/employment", employment) recover {
       case e: Exception => throw logResponse(e, "upsertEmployment", "upserting employment")
+    }
+  }
+
+  def getDirectors(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPI]): Future[Seq[Director]] = {
+    http.GET[Seq[Director]](s"$payeRegUrl/paye-registration/$regID/directors") recover {
+      case e: NotFoundException => Nil
+      case e: Exception => throw logResponse(e, "getDirectors", "getting directors")
+    }
+  }
+
+  def upsertDirectors(regID: String, directors: Seq[Director])(implicit hc: HeaderCarrier, rds: HttpReads[Seq[Director]]) = {
+    http.PATCH[Seq[Director], Seq[Director]](s"$payeRegUrl/paye-registration/$regID/directors", directors) recover {
+      case e: Exception => throw logResponse(e, "upsertDirectors", "upserting directors")
     }
   }
 
