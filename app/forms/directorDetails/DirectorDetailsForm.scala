@@ -33,7 +33,12 @@ object DirectorDetailsForm {
 
     def bind(key: String, data: Map[String, String]) = {
 
-      if(getIndex(key) == "0" && data.map{case ("csrfToken", v) => "" case (k, v) => v}.forall( _ == "")) {
+      val emptyForm = data.map{
+        case ("csrfToken", v) => ""
+        case (k, v)           => v
+      }.forall( _ == "")
+
+      if(getIndex(key) == "0" && emptyForm) {
         Left(Seq(FormError("noFieldsCompleted-nino[0]", "pages.directorDetails.errors.noneCompleted")))
         // TODO: Add noFieldsCompleted as a string constant as it's used here, in OneOfManyForm and in views
       } else data.getOrElse(key,"") match {
