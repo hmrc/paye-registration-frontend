@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package forms.DirectorDetails
+package forms.directorDetails
 
 import models.view.{UserEnteredNino, Ninos}
 import play.api.data.format.Formatter
@@ -32,16 +32,17 @@ object DirectorDetailsForm {
     }
 
     def bind(key: String, data: Map[String, String]) = {
-      if(getIndex(key) == "0" && data.map{case (k, v) => v}.forall( _ == "")) {
-        //TODO: Add noFieldsCompleted as a val/constant/enum (used here and in OneOfManyForm/associated views)
+
+      if(getIndex(key) == "0" && data.map{case ("csrfToken", v) => "" case (k, v) => v}.forall( _ == "")) {
         Left(Seq(FormError("noFieldsCompleted-nino[0]", "pages.directorDetails.errors.noneCompleted")))
+        // TODO: Add noFieldsCompleted as a string constant as it's used here, in OneOfManyForm and in views
       } else data.getOrElse(key,"") match {
         case ""   => Right(UserEnteredNino(getIndex(key), None))
         case nino => Right(UserEnteredNino(getIndex(key), Some(nino.toUpperCase)))
       }
     }
 
-    def unbind(key: String, value: UserEnteredNino) = Map(key -> value.nino.getOrElse(""))
+    def unbind(key: String, value: UserEnteredNino) = Map(s"nino[${value.id}]" -> value.nino.getOrElse(""))
   }
 
   val userNino: Mapping[UserEnteredNino] = Forms.of[UserEnteredNino](userNinoFormatter)
