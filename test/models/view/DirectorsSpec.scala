@@ -25,17 +25,17 @@ class DirectorsSpec extends UnitSpec {
   "Ninos View Model" should {
 
     val tstModel = Ninos(
-      ninoMapping = Map(
-        "0" -> UserEnteredNino(Some("ZZ123456A")),
-        "1" -> UserEnteredNino(Some("ZZ223456A"))
+      List(
+        UserEnteredNino("0", Some("ZZ123456A")),
+        UserEnteredNino("1", Some("ZZ223456A"))
       )
     )
     val tstJson = Json.parse(
       s"""{
-         |"ninoMapping":{
-         |  "0":{"oNino":"ZZ123456A"},
-         |  "1":{"oNino":"ZZ223456A"}
-         |  }
+         |"ninoMapping":[
+         |  {"id":"0","nino":"ZZ123456A"},
+         |  {"id":"1","nino":"ZZ223456A"}
+         |  ]
          |}""".stripMargin)
 
     "read from json with full data" in {
@@ -46,17 +46,17 @@ class DirectorsSpec extends UnitSpec {
     }
 
     val tstPartialModel = Ninos(
-      ninoMapping = Map(
-        "0" -> UserEnteredNino(Some("ZZ123456A")),
-        "1" -> UserEnteredNino(None)
+      ninoMapping = List(
+        UserEnteredNino("0", Some("ZZ123456A")),
+        UserEnteredNino("1", None)
       )
     )
     val tstPartialJson = Json.parse(
       s"""{
-         |"ninoMapping":{
-         |  "0":{"oNino":"ZZ123456A"},
-         |  "1":{}
-         |  }
+         |"ninoMapping":[
+         |  {"id":"0","nino":"ZZ123456A"},
+         |  {"id":"1"}
+         |  ]
          |}""".stripMargin)
 
     "read from json with partial data" in {
@@ -67,12 +67,11 @@ class DirectorsSpec extends UnitSpec {
     }
 
     val tstEmptyModel = Ninos(
-      ninoMapping = Map.empty
+      ninoMapping = List.empty
     )
     val tstEmptyJson = Json.parse(
       s"""{
-         |"ninoMapping":{
-         |  }
+         |"ninoMapping":[]
          |}""".stripMargin)
 
     "read from json with empty data" in {
