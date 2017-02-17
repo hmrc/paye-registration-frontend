@@ -73,6 +73,7 @@ trait CoHoAPIConnect {
 
   def getOfficerList(transactionId: String)(implicit hc : HeaderCarrier): Future[OfficerList] = {
     http.GET[OfficerList](s"$coHoAPIUrl$coHoAPIUri/$transactionId/officer-list") recover {
+      case e: NotFoundException => OfficerList(items = Nil)
       case badRequestErr: BadRequestException =>
         Logger.error("[CohoAPIConnector] [getOfficerList] - Received a BadRequest status code when expecting an Officer list")
         throw badRequestErr
