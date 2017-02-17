@@ -16,7 +16,8 @@
 
 package fixtures
 
-import models.external.{AreaOfIndustry, CHROAddress, CoHoCompanyDetailsModel}
+import models.api.Name
+import models.external.{AreaOfIndustry, CHROAddress, CoHoCompanyDetailsModel, Officer, OfficerList}
 
 trait CoHoAPIFixture {
 
@@ -44,6 +45,23 @@ trait CoHoAPIFixture {
     poBox = Some("Test PO BOX"),
     postalCode = Some("TE1 1ST"),
     region = Some("Test Region")
+  )
+
+  val validOfficerList = OfficerList(
+    items = Seq(
+      Officer(
+        name = Name(Some("test1"), Some("test11"), Some("testa"), Some("Mr")),
+        role = "cic-manager",
+        resignedOn = None,
+        appointmentLink = None
+      ),
+      Officer(
+        name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
+        role = "corporate-director",
+        resignedOn = None,
+        appointmentLink = None
+      )
+    )
   )
 
 }

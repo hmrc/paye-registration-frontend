@@ -22,7 +22,7 @@ import models.external.{CHROAddress, CoHoCompanyDetailsModel, Officer, OfficerLi
 import play.api.libs.json.{JsValue, Json}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier, HttpResponse, NotFoundException}
 
 import scala.concurrent.Future
 
@@ -123,6 +123,12 @@ class CoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
       mockHttpGet[OfficerList](connector.coHoAPIUrl, Future.successful(tstOfficerList))
 
       await(connector.getOfficerList(testTransId)) shouldBe tstOfficerList
+    }
+
+    "return a successful empty CoHo api response object for a not found request" in new Setup {
+      mockHttpGet[OfficerList](connector.coHoAPIUrl, Future.failed(new NotFoundException("tstException")))
+
+      await(connector.getOfficerList(testTransId)) shouldBe OfficerList(items = Nil)
     }
 
     "return a CoHo Bad Request api response object for a bad request" in new Setup {
