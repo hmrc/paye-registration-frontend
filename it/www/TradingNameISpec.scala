@@ -21,11 +21,11 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import itutil.{IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
-import play.api.libs.json.Json
-import play.api.libs.ws.WS
+import play.api.libs.json.{JsObject, JsString, Json}
 import play.api.test.FakeApplication
 import play.api.http.HeaderNames
-import uk.gov.hmrc.crypto.ApplicationCrypto
+import uk.gov.hmrc.crypto.json.JsonEncryptor
+import uk.gov.hmrc.crypto.{ApplicationCrypto, Protected}
 
 
 class TradingNameISpec extends IntegrationSpecBase with LoginStub with BeforeAndAfterEach with WiremockHelper {
@@ -35,6 +35,8 @@ class TradingNameISpec extends IntegrationSpecBase with LoginStub with BeforeAnd
   val mockUrl = s"http://$mockHost:$mockPort"
 
   override implicit lazy val app = FakeApplication(additionalConfiguration = Map(
+    "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
+    "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
     "auditing.consumer.baseUri.host" -> s"$mockHost",
     "auditing.consumer.baseUri.port" -> s"$mockPort",
     "microservice.services.cachable.session-cache.host" -> s"$mockHost",
@@ -196,48 +198,73 @@ class TradingNameISpec extends IntegrationSpecBase with LoginStub with BeforeAnd
     }
   }
 
-//  "POST Trading Name" should {
-//
-//    implicit val jsonCrypto = ApplicationCrypto.JsonCrypto
-//
-//    "Accept information and send to PR" in {
-//      val regId = "3"
-//      val txId = "12345"
-//      val companyName = "Foo Ltd"
-//      val tradingName = "Foo Trading"
-//
-//      setupSimpleAuthMocks()
-//
-//      val csrfToken = UUID.randomUUID().toString
-//
-//      stubKeystore(SessionId, regId, companyName)
-//
-////      val crResponse = """{"accountingDateStatus":"WHEN_REGISTERED", "links": []}"""
-////      stubPut("/company-registration/corporation-tax-registration/5/accounting-details", 200, crResponse)
-//
-//      val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
-//
-//      val fResponse = buildClient("/trading-name").
-//        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
-//        post(Map(
-//          "csrfToken"->Seq("xxx-ignored-xxx"),
-//          "businessStartDate"->Seq("futureDate"),
-//          "businessStartDate.year"->Seq("2018"),
-//          "businessStartDate.month"->Seq("1"),
-//          "businessStartDate.day"->Seq("2")
-//        ))
-//
-//      val response = await(fResponse)
-//
-//      response.status shouldBe 303
-//      response.header(HeaderNames.LOCATION) shouldBe Some("/register-your-company/trading-details")
-//
-//      val crPuts = findAll(putRequestedFor(urlMatching("/company-registration/corporation-tax-registration/5/accounting-details")))
-//      val captor = crPuts.get(0)
-//      val json = Json.parse(captor.getBodyAsString)
-//      (json \ "accountingDateStatus").as[String] shouldBe "FUTURE_DATE"
-//      (json \ "startDateOfBusiness").as[String] shouldBe "2018-01-02"
-//    }
-//  }
+  "POST Trading Name" should {
+
+    implicit lazy val jsonCrypto = ApplicationCrypto.JsonCrypto
+    implicit lazy val encryptionFormat = new JsonEncryptor[JsObject]()
+
+    "Accept information and send to PR" in {
+      val regId = "3"
+      val txId = "12345"
+      val companyName = "Foo Ltd"
+      val tradingName = "Foo Trading"
+
+      setupSimpleAuthMocks()
+
+      val csrfToken = UUID.randomUUID().toString
+
+      stubKeystore(SessionId, regId, companyName)
+
+      val roDoc = s"""{"line1":"1", "line2":"2", "postCode":"pc"}"""
+      val payeDoc =
+        s"""{
+           |"companyName": "${companyName}",
+           |"tradingName": {"differentName":false},
+           |"roAddress": ${roDoc},
+           |"businessContactDetails": {}
+           |}""".stripMargin
+
+      val s4lCompanyDetails = Json.parse(payeDoc).as[JsObject]
+      val encCompanyDetails = encryptionFormat.writes(Protected(s4lCompanyDetails)).as[JsString]
+
+      val s4LResponse = Json.obj(
+        "id" -> "xxx",
+        "data" -> Json.obj("CompanyDetails"->encCompanyDetails)
+      )
+
+      stubGet(s"/save4later/paye-registration-frontend/${regId}", 200, s4LResponse.toString)
+
+      val updatedPayeDoc =
+        s"""{
+           |"companyName": "${companyName}",
+           |"tradingName": "${tradingName}",
+           |"roAddress": ${roDoc},
+           |"businessContactDetails": {}
+           |}""".stripMargin
+      stubPatch(s"/paye-registration/${regId}/company-details", 200, updatedPayeDoc)
+
+      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+
+      val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
+
+      val fResponse = buildClient("/trading-name").
+        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
+        post(Map(
+          "csrfToken"->Seq("xxx-ignored-xxx"),
+          "differentName"->Seq("true"),
+          "tradingName"->Seq(tradingName)
+        ))
+
+      val response = await(fResponse)
+
+      response.status shouldBe 303
+      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/registered-office-address")
+
+      val crPuts = findAll(patchRequestedFor(urlMatching(s"/paye-registration/${regId}/company-details")))
+      val captor = crPuts.get(0)
+      val json = Json.parse(captor.getBodyAsString)
+      (json \ "tradingName").as[String] shouldBe tradingName
+    }
+  }
 
 }

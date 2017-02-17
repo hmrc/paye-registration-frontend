@@ -74,4 +74,21 @@ trait WiremockHelper {
       )
     )
 
+  def stubPatch(url: String, status: Integer, responseBody: String) =
+    stubFor(patch(urlMatching(url))
+      .willReturn(
+        aResponse().
+          withStatus(status).
+          withBody(responseBody)
+      )
+    )
+
+  def stubDelete(url: String, status: Integer, responseBody: String) =
+    stubFor(delete(urlMatching(url))
+      .willReturn(
+        aResponse().
+          withStatus(status).
+          withBody(responseBody)
+      )
+    )
 }
