@@ -19,7 +19,7 @@ package connectors
 import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
-import models.external.{CHROAddress, CoHoCompanyDetailsModel}
+import models.external.{CHROAddress, CoHoCompanyDetailsModel, OfficerList}
 import play.api.Logger
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
@@ -67,6 +67,17 @@ trait CoHoAPIConnect {
         throw badRequestErr
       case ex: Exception =>
         Logger.error(s"[CohoAPIConnector] [getRegisteredOfficeAddress] - Received an error response when expecting a Registered office address - error: ${ex.getMessage}")
+        throw ex
+    }
+  }
+
+  def getOfficerList(transactionId: String)(implicit hc : HeaderCarrier): Future[OfficerList] = {
+    http.GET[OfficerList](s"$coHoAPIUrl$coHoAPIUri/$transactionId/officer-list") recover {
+      case badRequestErr: BadRequestException =>
+        Logger.error("[CohoAPIConnector] [getOfficerList] - Received a BadRequest status code when expecting an Officer list")
+        throw badRequestErr
+      case ex: Exception =>
+        Logger.error(s"[CohoAPIConnector] [getOfficerList] - Received an error response when expecting an Officer list - error: ${ex.getMessage}")
         throw ex
     }
   }
