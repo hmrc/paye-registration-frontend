@@ -17,6 +17,7 @@ app.common.companies-house                              = Companies House
 errors.invalid.email                                    = The email address you have provided is invalid
 errors.invalid.phoneNumber                              = The phone number you have provided is invalid
 errors.invalid.mobileNumber                             = The mobile phone number you have provided is invalid
+errors.invalid.nino                                     = National Insurance number is in the wrong format
 
 ## Welcome page
 pages.welcome.title                                     = Register as an employer
@@ -85,7 +86,7 @@ pages.companyPension.setUpPensionIntro                  = As an employer, you ca
 pages.companyPension.setUpPension1                      = employees after they retire
 pages.companyPension.setUpPension2                      = dependants of deceased employees
 
-## First Payment page
+## First Payment Page
 pages.firstPayment.title                                = First Payment
 pages.firstPayment.heading                              = The company''s PAYE scheme start date
 pages.firstPayment.legend                               = The company''s PAYE scheme start date
@@ -100,6 +101,13 @@ pages.firstPayment.firstPaymentRules1                   = their salary or wages
 pages.firstPayment.firstPaymentRules2                   = expenses or benefits
 pages.firstPayment.firstPaymentRules3                   = any tips or bonuses
 pages.firstPayment.firstPaymentRulesEnd                 = This should include any payments made to yourself (for example, if you''re the only director of a limited company).
+
+## Director Details Page
+pages.directorDetails.title1Director                    = What is the director''s National Insurance number?
+pages.directorDetails.titleMultipleDirectors            = What is the National Insurance number of each director?
+pages.directorDetails.heading1Director                  = What is the director''s National Insurance number?
+pages.directorDetails.headingMultipleDirectors          = What is the National Insurance number of each director?
+pages.directorDetails.errors.noneCompleted              = Enter at least one director''s National Insurance number
 
 ## Summary Page
 pages.summary.title                                     = Check your answers

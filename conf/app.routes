@@ -42,6 +42,10 @@ POST        /company-pension                        controllers.userJourney.Empl
 GET         /first-payment                          controllers.userJourney.EmploymentController.firstPayment
 POST        /first-payment                          controllers.userJourney.EmploymentController.submitFirstPayment
 
+## DIRECTOR DETAILS
+GET         /director-national-insurance-number     controllers.userJourney.DirectorDetailsController.directorDetails
+POST        /director-national-insurance-number     controllers.userJourney.DirectorDetailsController.submitDirectorDetails
+
 ## SUMMARY
 GET         /summary                                controllers.userJourney.SummaryController.summary
 

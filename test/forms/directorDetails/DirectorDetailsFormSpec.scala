@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package forms.DirectorDetails
+package forms.directorDetails
 
 import models.view.{UserEnteredNino, Ninos}
 import play.api.data.FormError
@@ -33,17 +33,18 @@ class DirectorDetailsFormSpec extends UnitSpec {
       )
       val model = Ninos(
         ninoMapping = List(
-          UserEnteredNino("0", Some("ZY123456A")),
-          UserEnteredNino("1", Some("ZY223456A"))
+          UserEnteredNino("1", Some("ZY223456A")),
+          UserEnteredNino("0", Some("ZY123456A"))
         )
       )
+      val orderedModel = Ninos(model.ninoMapping.sortBy(_.id.toInt))
 
       "Bind successfully" in {
         val boundModel = testForm.bind(data).fold(
           errors => errors,
           success => success
         )
-        boundModel shouldBe model
+        boundModel shouldBe orderedModel
       }
 
       "Unbind successfully" in {
