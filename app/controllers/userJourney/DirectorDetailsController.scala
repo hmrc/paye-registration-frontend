@@ -45,12 +45,18 @@ trait DirectorDetailsCtrl extends FrontendController with Actions with I18nSuppo
   val userNinos = Ninos(
     List(
       UserEnteredNino("1", Some("Nino for ID 1")),
-      UserEnteredNino("0", Some("Nino for ID 0"))
+      UserEnteredNino("0", Some("Nino for ID 0")),
+      UserEnteredNino("4", Some("Nino for ID 4")),
+      UserEnteredNino("3", None),
+      UserEnteredNino("2", None)
     )
   )
   val directorMap = Map(
-    "0" -> "James Director (id 0)",
-    "1" -> "Jimmy Director (id 1)"
+    "0" -> "Henri Lay (id 0)",
+    "1" -> "Chris Walker (id 1)",
+    "2" -> "Tom Stacey (id 2)",
+    "3" -> "Jhansi Tummala (id 3)",
+    "4" -> "Chris Poole (id 4)"
   )
 
   val directorDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
