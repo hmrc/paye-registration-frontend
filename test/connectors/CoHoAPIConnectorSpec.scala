@@ -17,7 +17,8 @@
 package connectors
 
 import fixtures.CoHoAPIFixture
-import models.external.{CHROAddress, CoHoCompanyDetailsModel}
+import models.api.Name
+import models.external.{CHROAddress, CoHoCompanyDetailsModel, Officer, OfficerList}
 import play.api.libs.json.{JsValue, Json}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -94,6 +95,47 @@ class CoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
       mockHttpGet[CHROAddress](connector.coHoAPIUrl, Future.failed(ex))
 
       intercept[RuntimeException](await(connector.getRegisteredOfficeAddress(testTransId)) )
+    }
+  }
+
+  "getOfficerList" should {
+
+    val tstOfficerList = OfficerList(
+      items = Seq(
+        Officer(
+          name = Name(Some("test1"), Some("test11"), Some("testa"), Some("Mr")),
+          role = "cic-manager",
+          resignedOn = None,
+          appointmentLink = None
+        ),
+        Officer(
+          name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
+          role = "corporate-director",
+          resignedOn = None,
+          appointmentLink = None
+        )
+      )
+    )
+
+    val testTransId = "testTransId"
+
+    "return a successful CoHo api response object for valid data" in new Setup {
+      mockHttpGet[OfficerList](connector.coHoAPIUrl, Future.successful(tstOfficerList))
+
+      await(connector.getOfficerList(testTransId)) shouldBe tstOfficerList
+    }
+
+    "return a CoHo Bad Request api response object for a bad request" in new Setup {
+      mockHttpGet[OfficerList](connector.coHoAPIUrl, Future.failed(new BadRequestException("tstException")))
+
+      intercept[BadRequestException](await(connector.getOfficerList(testTransId)))
+    }
+
+    "return a CoHo error api response object for a downstream error" in new Setup {
+      val ex = new RuntimeException("tstException")
+      mockHttpGet[OfficerList](connector.coHoAPIUrl, Future.failed(ex))
+
+      intercept[RuntimeException](await(connector.getOfficerList(testTransId)) )
     }
   }
 

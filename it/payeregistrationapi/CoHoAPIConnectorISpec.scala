@@ -18,7 +18,8 @@ package payeregistrationapi
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.CoHoAPIConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
-import models.external.CHROAddress
+import models.api.Name
+import models.external.{CHROAddress, Officer, OfficerList}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
@@ -42,9 +43,8 @@ class CoHoAPIConnectorISpec extends IntegrationSpecBase {
   val testTransId = "testTransId"
   implicit val hc = HeaderCarrier()
 
-  val url = s"/incorporation-frontend-stubs/$testTransId/ro-address"
-
   "getRegisteredOfficeAddress" should {
+    val url = s"/incorporation-frontend-stubs/$testTransId/ro-address"
 
     val addressModel =
       CHROAddress(
@@ -105,6 +105,92 @@ class CoHoAPIConnectorISpec extends IntegrationSpecBase {
       setupStubResult(500, "")
 
       intercept[Exception](await(coHoAPIConnector.getRegisteredOfficeAddress(testTransId)))
+    }
+  }
+
+  "getOfficerList" should {
+    val url = s"/incorporation-frontend-stubs/$testTransId/officer-list"
+
+    val tstOfficerListModel = OfficerList(
+      items = Seq(
+        Officer(
+          name = Name(Some("test1"), Some("test11"), Some("testa"), Some("Mr")),
+          role = "cic-manager",
+          resignedOn = None,
+          appointmentLink = None
+        ),
+        Officer(
+          name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
+          role = "corporate-director",
+          resignedOn = None,
+          appointmentLink = None
+        )
+      )
+    )
+
+    def setupStubResult(status: Int, body: String) =
+      stubFor(get(urlMatching(url))
+        .willReturn(
+          aResponse()
+            .withStatus(status)
+            .withBody(body)
+        )
+      )
+
+    val tstOfficerListJson =
+      """{
+        |  "items" : [ {
+        |    "name" : "test",
+        |    "name_elements" : {
+        |      "forename" : "test1",
+        |      "honours" : "test",
+        |      "other_forenames" : "test11",
+        |      "surname" : "testa",
+        |      "title" : "Mr"
+        |    },
+        |    "officer_role" : "cic-manager"
+        |  }, {
+        |    "name" : "test",
+        |    "name_elements" : {
+        |      "forename" : "test2",
+        |      "honours" : "test",
+        |      "other_forenames" : "test22",
+        |      "surname" : "testb",
+        |      "title" : "Mr"
+        |    },
+        |    "officer_role" : "corporate-director"
+        |  } ]
+        |}""".stripMargin
+
+    "get an officer list" in {
+
+      val cohoAPIConnector = new CoHoAPIConnector()
+
+      def getResponse = cohoAPIConnector.getOfficerList(testTransId)
+
+      setupStubResult(200, tstOfficerListJson)
+
+      await(getResponse) shouldBe tstOfficerListModel
+    }
+
+    "throw a BadRequestException" in {
+      val coHoAPIConnector = new CoHoAPIConnector()
+
+      def getResponse = coHoAPIConnector.getOfficerList(testTransId)
+
+      setupStubResult(400, "")
+
+      intercept[BadRequestException](await(coHoAPIConnector.getOfficerList(testTransId)))
+    }
+
+    "throw an Exception" in {
+      val coHoAPIConnector = new CoHoAPIConnector()
+
+      def getResponse = coHoAPIConnector.getOfficerList(testTransId)
+
+      setupStubResult(500, "")
+
+      intercept[Exception](await(coHoAPIConnector.getOfficerList(testTransId)))
     }
   }
 }
