@@ -17,7 +17,10 @@ package itutil
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import org.scalatestplus.play.OneServerPerSuite
+import play.api.libs.ws.WS
 
 object WiremockHelper {
   val wiremockPort = 11111
@@ -26,6 +29,7 @@ object WiremockHelper {
 }
 
 trait WiremockHelper {
+  self: OneServerPerSuite =>
 
   import WiremockHelper._
 
@@ -40,5 +44,34 @@ trait WiremockHelper {
   def stopWiremock() = wireMockServer.stop()
 
   def resetWiremock() = WireMock.reset()
+
+  def buildClient(path: String) = WS.url(s"http://localhost:$port/register-for-paye$path").withFollowRedirects(false)
+
+  def stubGet(url: String, status: Integer, body: String) =
+    stubFor(get(urlMatching(url))
+      .willReturn(
+        aResponse().
+          withStatus(status).
+          withBody(body)
+      )
+    )
+
+  def stubPost(url: String, status: Integer, responseBody: String) =
+    stubFor(post(urlMatching(url))
+      .willReturn(
+        aResponse().
+          withStatus(status).
+          withBody(responseBody)
+      )
+    )
+
+  def stubPut(url: String, status: Integer, responseBody: String) =
+    stubFor(put(urlMatching(url))
+      .willReturn(
+        aResponse().
+          withStatus(status).
+          withBody(responseBody)
+      )
+    )
 
 }

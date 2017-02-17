@@ -75,6 +75,7 @@ private object AppDependencies {
         "org.scalatest" %% "scalatest" % scalaTestVersion_it % scope,
         "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusVersion % scope,
         "org.pegdown" % "pegdown" % pegdownVersion % scope,
+        "org.jsoup" % "jsoup" % "1.8.3" % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
         "uk.gov.hmrc" %% "reactivemongo-test" % "1.6.0" % scope,
         "com.github.tomakehurst" % "wiremock" % "2.5.0" % scope
