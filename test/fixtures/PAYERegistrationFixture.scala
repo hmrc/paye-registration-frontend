@@ -49,7 +49,8 @@ trait PAYERegistrationFixture {
     registrationID = "AC123456",
     formCreationTimestamp = "2017-01-11T15:10:12",
     companyDetails = validCompanyDetailsAPI,
-    employment = validEmploymentAPI
+    employment = validEmploymentAPI,
+    directors = Nil
   )
 
   lazy val validSummaryView = Summary(

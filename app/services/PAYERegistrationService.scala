@@ -19,11 +19,10 @@ package services
 import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
 
-import config.{PAYESessionCache, PAYEShortLivedCache}
 import enums.DownstreamOutcome
 import connectors._
 import models.BusinessContactDetails
-import models.api.{CompanyDetails, Employment, PAYERegistration => PAYERegistrationAPI}
+import models.api.{CompanyDetails, Director, Employment, PAYERegistration => PAYERegistrationAPI}
 import models.view.{Address, Summary, SummaryRow, SummarySection}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -61,7 +60,8 @@ trait PAYERegistrationSrv extends CommonService {
       Seq(
         buildCompanyDetailsSection(apiModel.companyDetails),
         buildBusinessContactDetailsSection(apiModel.companyDetails.businessContactDetails),
-        buildEmploymentSection(apiModel.employment)
+        buildEmploymentSection(apiModel.employment),
+        buildDirectorsSection(apiModel.directors)
       )
     )
   }
@@ -167,6 +167,25 @@ trait PAYERegistrationSrv extends CommonService {
           changeLink = Some(controllers.userJourney.routes.EmploymentController.firstPayment())
         ))
       ).flatten
+    )
+  }
+
+  def buildDirectorsSection(directors: Seq[Director]) = {
+    //TODO this needs to be updated to work properly. It also won't look correct without changing the current SummaryRow
+    def directorRow(director: Director) = {
+      SummaryRow(
+        id = director.name.toString,
+        answer = director.nino match {
+          case Some(nino) => Left(nino)
+          case None => Right("")
+        },
+        changeLink = Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails())
+      )
+    }
+
+    SummarySection(
+      id = "directorDetails",
+      for(d <- directors) yield directorRow(d)
     )
   }
 }

@@ -16,16 +16,17 @@
 
 package models.api
 
-import models.BusinessContactDetails
 import play.api.libs.json.Json
 
 case class PAYERegistration (registrationID: String,
                              formCreationTimestamp: String,
                              companyDetails: CompanyDetails,
-                             employment: Employment)
+                             employment: Employment,
+                             directors: List[Director])
 
 object PAYERegistration {
   implicit val companyDetailsFormat = CompanyDetails.format
   implicit val EmploymentFormat = Employment.formatModel
+  implicit val DirectorFormat = Director.format
   implicit val format = Json.format[PAYERegistration]
 }

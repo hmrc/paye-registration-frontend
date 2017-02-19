@@ -48,7 +48,8 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
       Address("14 St Test Walk", "Testley", None, None, None, None),
       businessContactDetails = validBusinessContactDetails
     ),
-    employment = validEmploymentAPI
+    employment = validEmploymentAPI,
+    directors = Nil
   )
 
   lazy val formatHMTLROAddress = ""
@@ -196,7 +197,8 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
           Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
           businessContactDetails = validBusinessContactDetails
         ),
-        employment = validEmploymentAPI
+        employment = validEmploymentAPI,
+        directors = Nil
       )
 
       val formatHMTLROAddress = service.formatHTMLROAddress(apiRegistrationNoTName.companyDetails.roAddress)
