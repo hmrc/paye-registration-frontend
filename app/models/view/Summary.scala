@@ -30,5 +30,6 @@ case class SummarySection(
 case class SummaryRow(
                       id: String,
                       answer: Either[String, String],
-                      changeLink: Option[Call]
+                      changeLink: Option[Call],
+                      questionArgs: Seq[String] = Nil
                       )

@@ -18,7 +18,7 @@ package services
 
 import connectors._
 import enums.DownstreamOutcome
-import models.api.{Employment, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
+import models.api.{Director, Employment, Name, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
 import models.view.{Address, Summary, SummaryRow, SummarySection}
 import fixtures.PAYERegistrationFixture
 import models.BusinessContactDetails
@@ -49,7 +49,17 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
       businessContactDetails = validBusinessContactDetails
     ),
     employment = validEmploymentAPI,
-    directors = Nil
+    directors = List(
+      Director(
+        name = Name(
+          forename = Some("Timothy"),
+          otherForenames = Some("Potterley-Smythe"),
+          surname = Some("Buttersford"),
+          title = Some("Mr")
+        ),
+        nino = Some("ZZ123456A")
+      )
+    )
   )
 
   lazy val formatHMTLROAddress = ""
@@ -113,6 +123,17 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
             id = "firstPaymentDate",
             Right("20/12/2016"),
             Some(controllers.userJourney.routes.EmploymentController.firstPayment())
+          )
+        )
+      ),
+      SummarySection(
+        id = "directorDetails",
+        Seq(
+          SummaryRow(
+            id = "director",
+            answer = Right("ZZ123456A"),
+            Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
+            Seq("Timothy Buttersford")
           )
         )
       )
@@ -198,7 +219,17 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
           businessContactDetails = validBusinessContactDetails
         ),
         employment = validEmploymentAPI,
-        directors = Nil
+        directors = List(
+          Director(
+            name = Name(
+              forename = Some("Timothy"),
+              otherForenames = Some("Potterley-Smythe"),
+              surname = Some("Buttersford"),
+              title = Some("Mr")
+            ),
+            nino = Some("ZZ123456A")
+          )
+        )
       )
 
       val formatHMTLROAddress = service.formatHTMLROAddress(apiRegistrationNoTName.companyDetails.roAddress)
@@ -262,6 +293,17 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
                 id = "firstPaymentDate",
                 Right("20/12/2016"),
                 Some(controllers.userJourney.routes.EmploymentController.firstPayment())
+              )
+            )
+          ),
+          SummarySection(
+            id = "directorDetails",
+            Seq(
+              SummaryRow(
+                id = "director",
+                answer = Right("ZZ123456A"),
+                Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
+                Seq("Timothy Buttersford")
               )
             )
           )

@@ -152,6 +152,9 @@ pages.summary.subcontractors.hiddenChangeText           = Change the company''s 
 pages.summary.firstPaymentDate.question                 = PAYE scheme start date
 pages.summary.firstPaymentDate.hiddenChangeText         = Change the company''s first payment date
 
+pages.summary.directorDetails.sectionHeading            = Director''s details
+pages.summary.director.question                         = Director {0}''s National Insurance number
+
 ## Error Pages
 errorPages.title                                        = Something went wrong
 errorPages.restart.heading                              = Sorry, we''re having technical issues.
