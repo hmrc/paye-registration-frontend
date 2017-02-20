@@ -186,7 +186,6 @@ trait PAYERegistrationSrv extends CommonService {
   }
 
   def buildDirectorsSection(directors: Seq[Director]) = {
-    //TODO this needs to be updated to work properly. It also won't look correct without changing the current SummaryRow
     def directorRow(director: Director) = {
       SummaryRow(
         id = "director",
