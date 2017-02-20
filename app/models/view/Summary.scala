@@ -20,9 +20,7 @@ import play.api.mvc.Call
 
 case class Summary(
                   sections: Seq[SummarySection]
-                  ) {
-
-}
+                  )
 
 case class SummarySection(
                         id: String,
@@ -32,5 +30,6 @@ case class SummarySection(
 case class SummaryRow(
                       id: String,
                       answer: Either[String, String],
-                      changeLink: Option[Call]
+                      changeLink: Option[Call],
+                      questionArgs: Seq[String] = Nil
                       )
