@@ -23,6 +23,7 @@ import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import models.api.Director
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
+import models.view.Directors
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -63,20 +64,20 @@ trait CoHoAPISrv extends CommonService {
     }
   }
 
-  def getDirectorDetails()(implicit hc: HeaderCarrier): Future[Map[Int, Director]] = {
+  def getDirectorDetails()(implicit hc: HeaderCarrier): Future[Directors] = {
     for {
       regID <- fetchRegistrationID
       officerList <- coHoAPIConnector.getOfficerList(regID)
-      directorDetails <- convertOfficerList2DirectorDetails(officerList)
+      directorDetails <- convertOfficerList2Directors(officerList)
     } yield directorDetails
   }
 
-  private def convertOfficerList2DirectorDetails(officerList: OfficerList): Future[Map[Int, Director]] = {
+  private def convertOfficerList2Directors(officerList: OfficerList): Future[Directors] = {
     val directors = officerList.items.collect {
       case officer: Officer if officer.role.contains("director") => Director(name = officer.name, nino = None)
     }
 
-    Future.successful((directors.indices zip directors).toMap)
+    Future.successful(Directors(directorMapping = (directors.indices.map(_.toString) zip directors).toMap))
   }
 
 }
