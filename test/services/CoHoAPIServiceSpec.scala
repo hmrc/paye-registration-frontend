@@ -22,6 +22,7 @@ import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, KeystoreFixture}
 import models.api.{Director, Name}
 import models.external.{CoHoCompanyDetailsModel, CurrentProfile}
+import models.view.Directors
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
@@ -84,13 +85,6 @@ class CoHoAPIServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFi
   }
 
   "Calling getDirectorDetails" should {
-    val validDirectorDetails = Map(
-      0 -> Director(
-        name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
-        nino = None
-      )
-    )
-
     "return the directors details when there is Officer list in CoHo API" in new Setup {
       when(mockCoHoAPIConnector.getOfficerList(Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(validOfficerList))
 

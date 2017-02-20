@@ -19,6 +19,7 @@ package fixtures
 import java.time.LocalDate
 
 import models.BusinessContactDetails
+import models.api.{Director, Name}
 import models.view._
 
 trait S4LFixture {
@@ -59,5 +60,18 @@ trait S4LFixture {
     businessEmail = Some("test@paye.co.uk"),
     mobileNumber = Some("00447123456789"),
     phoneNumber = Some("0044123456789")
+  )
+
+  val validDirectorDetailsViewModel = Directors(
+    directorMapping = Map(
+      "0" -> Director(
+        name = Name(Some("Bob"), None, Some("Smith"), None),
+        nino = Some("NINO")
+      ),
+      "1" -> Director(
+        name = Name(Some("Michael"), Some("Jay"), Some("Fudgedybar"), None),
+        nino = None
+      )
+    )
   )
 }
