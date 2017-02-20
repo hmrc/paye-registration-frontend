@@ -19,11 +19,10 @@ package services
 import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
 
-import config.{PAYESessionCache, PAYEShortLivedCache}
 import enums.DownstreamOutcome
 import connectors._
 import models.BusinessContactDetails
-import models.api.{CompanyDetails, Employment, PAYERegistration => PAYERegistrationAPI}
+import models.api.{CompanyDetails, Director, Employment, Name, PAYERegistration => PAYERegistrationAPI}
 import models.view.{Address, Summary, SummaryRow, SummarySection}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -57,11 +56,27 @@ trait PAYERegistrationSrv extends CommonService {
   }
 
   private[services] def registrationToSummary(apiModel: PAYERegistrationAPI): Summary = {
+
+    //TODO: remove the following block once DirectorsDetails controller is ready
+    val test = List(
+      Director(
+        name = Name(
+          forename = Some("Timothy"),
+          otherForenames = Some("Potterley-Smythe"),
+          surname = Some("Buttersford"),
+          title = Some("Mr")
+        ),
+        nino = Some("ZZ123456A")
+      )
+    )
+
     Summary(
       Seq(
         buildCompanyDetailsSection(apiModel.companyDetails),
         buildBusinessContactDetailsSection(apiModel.companyDetails.businessContactDetails),
-        buildEmploymentSection(apiModel.employment)
+        buildEmploymentSection(apiModel.employment),
+        //buildDirectorsSection(apiModel.directors)
+        buildDirectorsSection(test) //TODO: remove this line and uncomment the previous line once DirectorsDetails controller is ready
       )
     )
   }
@@ -167,6 +182,23 @@ trait PAYERegistrationSrv extends CommonService {
           changeLink = Some(controllers.userJourney.routes.EmploymentController.firstPayment())
         ))
       ).flatten
+    )
+  }
+
+  def buildDirectorsSection(directors: Seq[Director]) = {
+    //TODO this needs to be updated to work properly. It also won't look correct without changing the current SummaryRow
+    def directorRow(director: Director) = {
+      SummaryRow(
+        id = "director",
+        answer = Right(director.nino.get),
+        changeLink = Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
+        questionArgs = Seq(List(director.name.forename, director.name.surname).flatten.mkString(" "))
+      )
+    }
+
+    SummarySection(
+      id = "directorDetails",
+      for(d <- directors if d.nino.isDefined) yield directorRow(d)
     )
   }
 }

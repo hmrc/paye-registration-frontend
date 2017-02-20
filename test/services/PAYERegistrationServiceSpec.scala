@@ -18,7 +18,7 @@ package services
 
 import connectors._
 import enums.DownstreamOutcome
-import models.api.{Employment, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
+import models.api.{Director, Employment, Name, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
 import models.view.{Address, Summary, SummaryRow, SummarySection}
 import fixtures.PAYERegistrationFixture
 import models.BusinessContactDetails
@@ -48,7 +48,18 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
       Address("14 St Test Walk", "Testley", None, None, None, None),
       businessContactDetails = validBusinessContactDetails
     ),
-    employment = validEmploymentAPI
+    employment = validEmploymentAPI,
+    directors = List(
+      Director(
+        name = Name(
+          forename = Some("Timothy"),
+          otherForenames = Some("Potterley-Smythe"),
+          surname = Some("Buttersford"),
+          title = Some("Mr")
+        ),
+        nino = Some("ZZ123456A")
+      )
+    )
   )
 
   lazy val formatHMTLROAddress = ""
@@ -112,6 +123,17 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
             id = "firstPaymentDate",
             Right("20/12/2016"),
             Some(controllers.userJourney.routes.EmploymentController.firstPayment())
+          )
+        )
+      ),
+      SummarySection(
+        id = "directorDetails",
+        Seq(
+          SummaryRow(
+            id = "director",
+            answer = Right("ZZ123456A"),
+            Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
+            Seq("Timothy Buttersford")
           )
         )
       )
@@ -196,7 +218,18 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
           Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
           businessContactDetails = validBusinessContactDetails
         ),
-        employment = validEmploymentAPI
+        employment = validEmploymentAPI,
+        directors = List(
+          Director(
+            name = Name(
+              forename = Some("Timothy"),
+              otherForenames = Some("Potterley-Smythe"),
+              surname = Some("Buttersford"),
+              title = Some("Mr")
+            ),
+            nino = Some("ZZ123456A")
+          )
+        )
       )
 
       val formatHMTLROAddress = service.formatHTMLROAddress(apiRegistrationNoTName.companyDetails.roAddress)
@@ -260,6 +293,17 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
                 id = "firstPaymentDate",
                 Right("20/12/2016"),
                 Some(controllers.userJourney.routes.EmploymentController.firstPayment())
+              )
+            )
+          ),
+          SummarySection(
+            id = "directorDetails",
+            Seq(
+              SummaryRow(
+                id = "director",
+                answer = Right("ZZ123456A"),
+                Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
+                Seq("Timothy Buttersford")
               )
             )
           )
