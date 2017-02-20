@@ -17,15 +17,16 @@
 package services
 
 import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
-import connectors.{CohoApiErrorResponse, CohoApiBadRequestResponse, CohoApiSuccessResponse, CoHoAPIConnector}
-import enums.{DownstreamOutcome, CacheKeys}
+import connectors.{CoHoAPIConnector, CohoApiBadRequestResponse, CohoApiErrorResponse, CohoApiSuccessResponse}
+import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, KeystoreFixture}
-import models.external.{CurrentProfile, CoHoCompanyDetailsModel}
+import models.api.{Director, Name}
+import models.external.{CoHoCompanyDetailsModel, CurrentProfile}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException}
 
 import scala.concurrent.Future
 
@@ -79,6 +80,21 @@ class CoHoAPIServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFi
       mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, None)
 
       a[CompanyDetailsNotFoundException] shouldBe thrownBy(await(service.getStoredCompanyName()))
+    }
+  }
+
+  "Calling getDirectorDetails" should {
+    val validDirectorDetails = Map(
+      0 -> Director(
+        name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
+        nino = None
+      )
+    )
+
+    "return the directors details when there is Officer list in CoHo API" in new Setup {
+      when(mockCoHoAPIConnector.getOfficerList(Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(validOfficerList))
+
+      await(service.getDirectorDetails()) shouldBe validDirectorDetails
     }
   }
 

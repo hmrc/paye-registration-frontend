@@ -173,6 +173,16 @@ class CoHoAPIConnectorISpec extends IntegrationSpecBase {
       await(getResponse) shouldBe tstOfficerListModel
     }
 
+    "get an empty officer list when CoHo API returns a NotFoundException" in {
+      val coHoAPIConnector = new CoHoAPIConnector()
+
+      def getResponse = coHoAPIConnector.getOfficerList(testTransId)
+
+      setupStubResult(404, "")
+
+      await(getResponse) shouldBe OfficerList(items = Nil)
+    }
+
     "throw a BadRequestException" in {
       val coHoAPIConnector = new CoHoAPIConnector()
 
