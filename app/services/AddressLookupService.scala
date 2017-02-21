@@ -48,7 +48,7 @@ trait AddressLookupSrv {
   def buildAddressLookupUrl(query: String = "payereg1") = {
     useAddressLookupFrontend match {
       case true => addressLookupFrontendUrl + addressLookupFrontendUri + "/uk/addresses/" + query + s"?continue=" + payeRegistrationUrl + payeRegistrationUri + "/return-from-address"
-      case false => payeRegistrationUrl + controllers.userJourney.routes.EmploymentController.employingStaff().url
+      case false => payeRegistrationUrl + controllers.userJourney.routes.DirectorDetailsController.directorDetails().url
     }
   }
 

@@ -43,36 +43,33 @@ trait DirectorDetailsCtrl extends FrontendController with Actions with I18nSuppo
 
   val directorDetailsService : DirectorDetailsSrv
 
-  val userNinos = Ninos(
-    List(
-      UserEnteredNino("1", Some("Nino for ID 1")),
-      UserEnteredNino("0", Some("Nino for ID 0")),
-      UserEnteredNino("4", Some("Nino for ID 4")),
-      UserEnteredNino("3", None),
-      UserEnteredNino("2", None)
-    )
-  )
-  val directorMap = Map(
-    "0" -> "Henri Lay (id 0)",
-    "1" -> "Chris Walker (id 1)",
-    "2" -> "Tom Stacey (id 2)",
-    "3" -> "Jhansi Tummala (id 3)",
-    "4" -> "Chris Poole (id 4)"
-  )
-
   val directorDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        
-        Future.successful(Ok(DirectorDetailsPage(DirectorDetailsForm.form.fill(userNinos), directorMap)))
+        directorDetailsService.getDirectorDetails map {
+          directors =>
+            val ninos = directorDetailsService.createDirectorNinos(directors)
+            val names = directorDetailsService.createDisplayNamesMap(directors)
+            Ok(DirectorDetailsPage(DirectorDetailsForm.form.fill(ninos), names))
+        }
   }
 
   val submitDirectorDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         DirectorDetailsForm.form.bindFromRequest.fold(
-          errors => Future.successful(Ok(DirectorDetailsPage(errors, directorMap))),
-          success => Future.successful(Ok(DirectorDetailsPage(DirectorDetailsForm.form.fill(success), directorMap)))
+          errors => {
+            directorDetailsService.getDirectorDetails map {
+              directors =>
+                val names = directorDetailsService.createDisplayNamesMap(directors)
+                BadRequest(DirectorDetailsPage(errors, names))
+            }
+          },
+          success => {
+            directorDetailsService.submitNinos(success) map {
+              _ => Redirect(routes.EmploymentController.employingStaff())
+            }
+          }
         )
   }
 }

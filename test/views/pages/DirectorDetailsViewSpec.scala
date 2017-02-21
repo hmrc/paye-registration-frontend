@@ -66,7 +66,7 @@ class DirectorDetailsViewSpec extends PAYERegSpec with I18nSupport {
     }
 
     "display the directors name and prepopped Nino" in {
-      document.getElementsByClass("form-field").get(0).text shouldBe "Henri Lay (id 0)"
+      document.getElementsByClass("form-field").get(0).text shouldBe "Henri Lay (id 0) For example, QQ 12 34 56 C"
       document.getElementsByAttributeValueContaining("value", "ZY123456A").size shouldBe 1
     }
 
@@ -86,7 +86,7 @@ class DirectorDetailsViewSpec extends PAYERegSpec with I18nSupport {
     "have all directors shown" in {
       val list = document.getElementsByClass("form-field")
       def get(n: Int) = list.get(n).text
-      get(0) shouldBe d1
+      get(0) shouldBe s"$d1 For example, QQ 12 34 56 C"
       get(1) shouldBe d2
       get(2) shouldBe d3
       get(3) shouldBe d4

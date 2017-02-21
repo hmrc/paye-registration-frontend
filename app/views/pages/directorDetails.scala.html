@@ -6,17 +6,18 @@
 
 @(ninoForm: Form[Ninos], directorNames: Map[String, String])(implicit request: Request[_], messages: Messages)
 
-
 @formContent = {
     <fieldset>
-        <legend></legend>
+        <legend>@messages("pages.directorDetails.legend")</legend>
+
         @helper.repeat(ninoForm("nino")) { ninoField =>
-            <div class="form-group">
+            <div class="form-field">
                 @govHelpers.input(
                     ninoField,
                     '_inputClass -> "form-control-1-2 form-control--block",
                     '_labelClass -> "form-label",
-                    '_label -> directorNames.getOrElse(ninoField.name.filter("0123456789".toSet),"Noop")
+                    '_inputHint -> {if(ninoField.name.filter("0123456789".toSet) == "0"){ messages("pages.directorDetails.input.hint-text") } else {""}},
+                    '_label -> directorNames.getOrElse(ninoField.name.filter("0123456789".toSet),"Error fetching name")
                 )
             </div>
         }
