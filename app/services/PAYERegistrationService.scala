@@ -56,29 +56,6 @@ trait PAYERegistrationSrv extends CommonService {
   }
 
   private[services] def registrationToSummary(apiModel: PAYERegistrationAPI): Summary = {
-
-    //TODO: remove the following block once DirectorsDetails controller is ready
-    //val test = List(
-    //  Director(
-    //    name = Name(
-    //      forename = Some("Timothy"),
-    //      otherForenames = Some("Potterley-Smythe"),
-    //      surname = Some("Buttersford"),
-    //      title = Some("Mr")
-    //    ),
-    //    nino = Some("ZZ123456A")
-    //  ),
-    //  Director(
-    //    name = Name(
-    //      forename = Some("Pierre"),
-    //      otherForenames = Some("Paul"),
-    //      surname = Some("Simpson"),
-    //      title = Some("Mr")
-    //    ),
-    //    nino = None
-    //  )
-    //)
-
     Summary(
       Seq(
         buildCompanyDetailsSection(apiModel.companyDetails),
