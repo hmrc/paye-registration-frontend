@@ -24,6 +24,7 @@ import forms.directorDetails.DirectorDetailsForm
 import models.view.{Ninos, UserEnteredNino}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
+import services.{DirectorDetailsService, DirectorDetailsSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import views.html.pages.{directorDetails => DirectorDetailsPage}
@@ -31,16 +32,16 @@ import views.html.pages.{directorDetails => DirectorDetailsPage}
 import scala.concurrent.Future
 
 @Singleton
-class DirectorDetailsController @Inject()(
-                                           injMessagesApi: MessagesApi
-                                           )
-  extends DirectorDetailsCtrl {
+class DirectorDetailsController @Inject()(injMessagesApi: MessagesApi,
+                                          injDirectorDetailsService: DirectorDetailsService) extends DirectorDetailsCtrl {
   val authConnector = FrontendAuthConnector
   val messagesApi = injMessagesApi
-
+  val directorDetailsService = injDirectorDetailsService
 }
 
 trait DirectorDetailsCtrl extends FrontendController with Actions with I18nSupport {
+
+  val directorDetailsService : DirectorDetailsSrv
 
   val userNinos = Ninos(
     List(
@@ -62,6 +63,7 @@ trait DirectorDetailsCtrl extends FrontendController with Actions with I18nSuppo
   val directorDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
+        
         Future.successful(Ok(DirectorDetailsPage(DirectorDetailsForm.form.fill(userNinos), directorMap)))
   }
 

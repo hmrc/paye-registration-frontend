@@ -8,13 +8,13 @@
 
 
 @formContent = {
-    <fieldset class="form-field-single">
+    <fieldset>
         @helper.repeat(ninoForm("nino")) { ninoField =>
-            <div class="form-field">
+            <div class="form-group">
                 @govHelpers.input(
                     ninoField,
-                    '_inputClass -> "form-control-1-2",
-                    '_labelClass -> "form-label cascading",
+                    '_inputClass -> "form-control-1-2 form-control--block",
+                    '_labelClass -> "form-label",
                     '_label -> directorNames.getOrElse(ninoField.name.filter("0123456789".toSet),"Noop")
                 )
             </div>
