@@ -108,6 +108,12 @@ pages.directorDetails.titleMultipleDirectors            = What is the National I
 pages.directorDetails.heading1Director                  = What is the director''s National Insurance number?
 pages.directorDetails.headingMultipleDirectors          = What is the National Insurance number of each director?
 pages.directorDetails.errors.noneCompleted              = Enter at least one director''s National Insurance number
+pages.directorDetails.information.indent                = You can find a National Insurance number on a National Insurance card, benefit letter, payslip or P60.
+pages.directorDetails.information.dropdown.header       = Have the directors changed?
+pages.directorDetails.information.dropdown.body         = If the direct names are incorrect, you can change them with
+pages.directorDetails.input.hint-text                   = For example, QQ 12 34 56 C
+pages.directorDetails.legend                            = What is the National Insurance number of each director?
+
 
 ## Summary Page
 pages.summary.title                                     = Check your answers

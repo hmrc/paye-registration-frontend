@@ -41,9 +41,11 @@ object DirectorDetailsForm {
       if(getIndex(key) == "0" && emptyForm) {
         Left(Seq(FormError("noFieldsCompleted-nino[0]", "pages.directorDetails.errors.noneCompleted")))
         // TODO: Add noFieldsCompleted as a string constant as it's used here, in OneOfManyForm and in views
-      } else data.getOrElse(key,"") match {
-        case ""   => Right(UserEnteredNino(getIndex(key), None))
-        case nino => Right(UserEnteredNino(getIndex(key), Some(nino.toUpperCase)))
+      } else {
+        data.getOrElse(key,"") match {
+          case ""   => Right(UserEnteredNino(getIndex(key), None))
+          case nino => Right(UserEnteredNino(getIndex(key), Some(nino.toUpperCase)))
+        }
       }
     }
 
