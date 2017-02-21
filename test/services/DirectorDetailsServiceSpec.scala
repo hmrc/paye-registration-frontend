@@ -158,33 +158,43 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
     }
   }
 
-  "Calling directorsToTupleView" should {
-    "correctly produce a tuple (Map, Ninos) from a completed view model" in new Setup {
-      val tstModelView = Directors(
-        directorMapping = Map(
-          "0" -> Director(
-            name = Name(Some("Timothy"), Some("Potterley-Smythe"), Some("Buttersford"), Some("Mr")),
-            nino = Some("ZZ123456A")
-          ),
-          "1" -> Director(
-            name = Name(Some("Peter"), Some("Pierre"), Some("Simpson"), Some("Sir")),
-            nino = None
-          )
+  "Creating view models" when {
+
+    val tstDirectors = Directors(
+      directorMapping = Map(
+        "0" -> Director(
+          name = Name(Some("Timothy"), Some("Potterley-Smythe"), Some("Buttersford"), Some("Mr")),
+          nino = Some("ZZ123456A")
+        ),
+        "1" -> Director(
+          name = Name(Some("Peter"), Some("Pierre"), Some("Simpson"), Some("Sir")),
+          nino = None
         )
       )
+    )
 
-      val validResult = (
-        Map(
-          "0" -> "Timothy Buttersford",
-          "1" -> "Peter Simpson"
-        ),
-        Ninos(ninoMapping = List(
-          UserEnteredNino("0", Some("ZZ123456A")),
-          UserEnteredNino("1", None)
-        ))
-      )
+    "Calling createDisplayNamesMap" should {
+      "correctly produce a map of IDs to names from a completed view model" in new Setup {
 
-      await(service.directorsToTupleView(tstModelView)) shouldBe validResult
+        val displayMap = Map(
+            "0" -> "Timothy Buttersford",
+            "1" -> "Peter Simpson"
+          )
+
+        service.createDisplayNamesMap(tstDirectors) shouldBe displayMap
+      }
+    }
+
+    "Calling createDirectorNinos" should {
+      "correctly produce a mapping of ninos to IDs from a completed view model" in new Setup {
+
+        val ninos = Ninos(ninoMapping = List(
+            UserEnteredNino("0", Some("ZZ123456A")),
+            UserEnteredNino("1", None)
+          ))
+
+        service.createDirectorNinos(tstDirectors) shouldBe ninos
+      }
     }
   }
 
@@ -215,72 +225,96 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
     }
   }
 
-  "Calling getNinos" should {
-    "return the correct View response when Director Details are returned from S4L" in new APIConverterMockedSetup {
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
-        .thenReturn(Future.successful(Some(validDirectorDetailsViewModel)))
+  "Calling getDirectorDetails" should {
+    "return the correct View response when Director Details are returned from S4L" in new Setup {
 
-      await(service.getNinos) shouldBe validTupleView
+      val directorDetails = Directors(
+        directorMapping = Map(
+          "0" -> Director(
+            name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
+            nino = None
+          )
+        )
+      )
+
+      mockFetchRegID("54321")
+      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+        .thenReturn(Future.successful(Some(directorDetails)))
+
+      await(service.getDirectorDetails()) shouldBe directorDetails
     }
 
-    "return the correct View response when Director Details are returned from the connector" in new APIConverterMockedSetup {
+    "return the correct View response when Director Details are returned from the microservice" in new Setup {
+
+      val dir = Director(
+        name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
+        nino = None
+      )
+
+      val directorDetails = Directors(
+        directorMapping = Map(
+          "0" -> dir
+        )
+      )
+
       mockFetchRegID("54321")
       when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
 
       when(mockPAYERegConnector.getDirectors(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
-        .thenReturn(Future.successful(validDirectorList))
+        .thenReturn(Future.successful(Seq(dir)))
 
-      when(mockS4LService.saveForm(Matchers.eq(CacheKeys.DirectorDetails.toString),Matchers.any)(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+      when(mockS4LService.saveForm(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.any)(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
-      await(service.getNinos) shouldBe validTupleView
+      await(service.getDirectorDetails()) shouldBe directorDetails
     }
-  }
 
-  "return the correct View response when Director Details are returned from the CoHo service" in new Setup {
-    val expectedResult = (
-      Map(
-        "0" -> "test2 testb"
-      ),
-      Ninos(ninoMapping = List(
-        UserEnteredNino("0", None)
-      ))
-    )
+    "return the correct View response when Director Details are returned from the CoHo service" in new Setup {
 
-    mockFetchRegID("54321")
-    when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
-      .thenReturn(Future.successful(None))
+      val directorDetails = Directors(
+        directorMapping = Map(
+          "0" -> Director(
+            name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
+            nino = None
+          )
+        )
+      )
 
-    when(mockPAYERegConnector.getDirectors(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
-      .thenReturn(Future.successful(Nil))
+      mockFetchRegID("54321")
+      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+        .thenReturn(Future.successful(None))
 
-    when(mockCoHoService.getDirectorDetails()(Matchers.any()))
-      .thenReturn(Future.successful(validDirectorDetails))
+      when(mockPAYERegConnector.getDirectors(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(Nil))
 
-    when(mockS4LService.saveForm(Matchers.eq(CacheKeys.DirectorDetails.toString),Matchers.any)(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
-      .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
+      when(mockCoHoService.getDirectorDetails()(Matchers.any()))
+        .thenReturn(Future.successful(directorDetails))
 
-    await(service.getNinos) shouldBe expectedResult
-  }
+      when(mockS4LService.saveForm(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.any)(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+        .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
-  "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
-    mockFetchRegID("54321")
-    when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
-      .thenReturn(Future.successful(None))
+      await(service.getDirectorDetails()) shouldBe directorDetails
+    }
 
-    when(mockPAYERegConnector.getDirectors(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
-      .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
+    "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
+      mockFetchRegID("54321")
+      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+        .thenReturn(Future.successful(None))
 
-    an[Upstream4xxResponse] shouldBe thrownBy(await(service.getNinos))
-  }
+      when(mockPAYERegConnector.getDirectors(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
 
-  "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
-    mockFetchRegID("54321")
-    when(mockPAYERegConnector.getDirectors(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
-      .thenReturn(Future.failed(new ArrayIndexOutOfBoundsException))
+      an[Upstream4xxResponse] shouldBe thrownBy(await(service.getDirectorDetails()))
+    }
 
-    an[Exception] shouldBe thrownBy(await(service.getNinos))
+    "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
+      mockFetchRegID("54321")
+      when(mockPAYERegConnector.getDirectors(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.failed(new ArrayIndexOutOfBoundsException))
+
+      an[Exception] shouldBe thrownBy(await(service.getDirectorDetails()))
+    }
   }
 
   "Calling saveDirectorDetails" should {

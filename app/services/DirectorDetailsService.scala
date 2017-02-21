@@ -22,7 +22,6 @@ import connectors.{KeystoreConnector, PAYERegistrationConnect, PAYERegistrationC
 import enums.{CacheKeys, DownstreamOutcome}
 import models.api.Director
 import models.view.{Directors, Ninos, UserEnteredNino}
-import play.api.libs.json.Json
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -44,16 +43,7 @@ trait DirectorDetailsSrv extends CommonService {
   val s4LService: S4LSrv
   val coHoAPIService: CoHoAPISrv
 
-  implicit val formatRecordSet = Json.format[Directors]
-
-  private[services] def directorsToTupleView(directors: Directors): Future[(Map[String, String], Ninos)] = {
-    val directorsName = directors.directorMapping.map {
-      case(k, v) => (k, List(v.name.forename, v.name.surname).flatten.mkString(" "))
-    }
-    val ninos = Ninos(ninoMapping = directors.directorMapping.toList.map (list => UserEnteredNino(list._1, list._2.nino)))
-
-    Future.successful((directorsName, ninos))
-  }
+  implicit val formatRecordSet = Directors.directorMappingFormat
 
   private[services] def ninosToDirectorsMap(details: Directors, ninos: Ninos)(implicit hc: HeaderCarrier): Map[String, Director] = {
     details.directorMapping.map {
@@ -107,11 +97,19 @@ trait DirectorDetailsSrv extends CommonService {
     )
   }
 
-  def getNinos()(implicit hc: HeaderCarrier): Future[(Map[String, String], Ninos)] = {
-    for {
-      directors <- getDirectorDetails
-      viewData <- directorsToTupleView(directors)
-    } yield viewData
+  def createDisplayNamesMap(directors: Directors): Map[String, String] = {
+    directors.directorMapping.map {
+      case(k, v) => (k, List(v.name.forename, v.name.surname).flatten.mkString(" "))
+    }
+  }
+
+  def createDirectorNinos(directors: Directors): Ninos = {
+    Ninos((0 until directors.directorMapping.size).map {
+      index => UserEnteredNino(
+        index.toString,
+        directors.directorMapping.get(index.toString).flatMap(_.nino)
+      )
+    }.toList)
   }
 
   def submitNinos(ninos: Ninos)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
