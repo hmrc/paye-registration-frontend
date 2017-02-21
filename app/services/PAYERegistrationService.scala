@@ -56,27 +56,12 @@ trait PAYERegistrationSrv extends CommonService {
   }
 
   private[services] def registrationToSummary(apiModel: PAYERegistrationAPI): Summary = {
-
-    //TODO: remove the following block once DirectorsDetails controller is ready
-    val test = List(
-      Director(
-        name = Name(
-          forename = Some("Timothy"),
-          otherForenames = Some("Potterley-Smythe"),
-          surname = Some("Buttersford"),
-          title = Some("Mr")
-        ),
-        nino = Some("ZZ123456A")
-      )
-    )
-
     Summary(
       Seq(
         buildCompanyDetailsSection(apiModel.companyDetails),
         buildBusinessContactDetailsSection(apiModel.companyDetails.businessContactDetails),
         buildEmploymentSection(apiModel.employment),
-        //buildDirectorsSection(apiModel.directors)
-        buildDirectorsSection(test) //TODO: remove this line and uncomment the previous line once DirectorsDetails controller is ready
+        buildDirectorsSection(apiModel.directors)
       )
     )
   }
@@ -185,19 +170,23 @@ trait PAYERegistrationSrv extends CommonService {
     )
   }
 
-  def buildDirectorsSection(directors: Seq[Director]) = {
-    def directorRow(director: Director) = {
+  private[services] def buildDirectorsSection(directors: Seq[Director]) = {
+    def directorRow(director: Director, i: Int) = {
       SummaryRow(
-        id = "director",
-        answer = Right(director.nino.get),
+        id = "director" + i,
+        answer = director.nino match {
+          case Some(nino) => Right(nino)
+          case None => Right("")
+        },
         changeLink = Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
-        questionArgs = Seq(List(director.name.forename, director.name.surname).flatten.mkString(" "))
+        questionArgs = Some(Seq(List(director.name.forename, director.name.surname).flatten.mkString(" "))),
+        commonQuestionKey = Some("director")
       )
     }
 
     SummarySection(
       id = "directorDetails",
-      for(d <- directors if d.nino.isDefined) yield directorRow(d)
+      for(d <- directors.zipWithIndex) yield directorRow(d._1, d._2)
     )
   }
 }

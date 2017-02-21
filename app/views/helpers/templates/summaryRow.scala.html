@@ -4,7 +4,7 @@
 
 <tbody>
     <tr>
-        <td id="@{row.id}Question">@Html(Messages(s"pages.summary.${row.id}.question", row.questionArgs:_*))</td>
+        <td id="@{row.id}Question">@Html(Messages(s"pages.summary.${row.commonQuestionKey.getOrElse(row.id)}.question", row.questionArgs.getOrElse(Nil):_*))</td>
         <td id="@{row.id}Answer">
             @row.answer.fold(
             messageKey => Messages(s"pages.summary.${row.id}.answers.$messageKey"),

@@ -130,10 +130,11 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
         id = "directorDetails",
         Seq(
           SummaryRow(
-            id = "director",
+            id = "director0",
             answer = Right("ZZ123456A"),
             Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
-            Seq("Timothy Buttersford")
+            Some(Seq("Timothy Buttersford")),
+            Some("director")
           )
         )
       )
@@ -300,10 +301,11 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
             id = "directorDetails",
             Seq(
               SummaryRow(
-                id = "director",
+                id = "director0",
                 answer = Right("ZZ123456A"),
                 Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
-                Seq("Timothy Buttersford")
+                Some(Seq("Timothy Buttersford")),
+                Some("director")
               )
             )
           )
@@ -450,6 +452,55 @@ class PAYERegistrationServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
         )
 
       service.buildBusinessContactDetailsSection(businessContactDetailsModel) shouldBe validBCDSection
+    }
+  }
+
+  "buildDirectorsSection" should {
+    "return a valid director details block" in new Setup {
+      val directorDetailsModel = List(
+        Director(
+          name = Name(
+            forename = Some("Timothy"),
+            otherForenames = Some("Potterley-Smythe"),
+            surname = Some("Buttersford"),
+            title = Some("Mr")
+          ),
+          nino = Some("ZZ123456A")
+        ),
+        Director(
+          name = Name(
+            forename = Some("Pierre"),
+            otherForenames = Some("Paul"),
+            surname = Some("Simpson"),
+            title = Some("Mr")
+          ),
+          nino = None
+        )
+      )
+
+
+      val validDirectorDetailsSection =
+        SummarySection(
+          id = "directorDetails",
+          Seq(
+            Some(SummaryRow(
+              id = "director0",
+              answer = Right("ZZ123456A"),
+              changeLink = Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
+              questionArgs = Some(Seq("Timothy Buttersford")),
+              commonQuestionKey = Some("director")
+            )),
+            Some(SummaryRow(
+              id = "director1",
+              answer = Right(""),
+              changeLink = Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
+              questionArgs = Some(Seq("Pierre Simpson")),
+              commonQuestionKey = Some("director")
+            ))
+          ).flatten
+        )
+
+      service.buildDirectorsSection(directorDetailsModel) shouldBe validDirectorDetailsSection
     }
   }
 }
