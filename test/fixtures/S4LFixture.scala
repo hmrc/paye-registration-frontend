@@ -74,4 +74,22 @@ trait S4LFixture {
       )
     )
   )
+
+  val validTupleView = (
+    Map(
+      "0" -> "Bob Smith",
+      "1" -> "Michael Fudgedybar"
+    ),
+    Ninos(List(
+      UserEnteredNino("0", Some("NINO")),
+      UserEnteredNino("1", None)
+    ))
+  )
+
+  val validNinos = Ninos(
+    List(
+      UserEnteredNino("0", Some("NINO1")),
+      UserEnteredNino("1", Some("NINO2"))
+    )
+  )
 }

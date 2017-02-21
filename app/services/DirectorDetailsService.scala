@@ -21,8 +21,7 @@ import javax.inject.Inject
 import connectors.{KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.{CacheKeys, DownstreamOutcome}
 import models.api.Director
-import models.view.Directors
-import play.api.libs.json.Json
+import models.view.{Directors, Ninos, UserEnteredNino}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -44,7 +43,13 @@ trait DirectorDetailsSrv extends CommonService {
   val s4LService: S4LSrv
   val coHoAPIService: CoHoAPISrv
 
-  implicit val formatRecordSet = Json.format[Directors]
+  implicit val formatRecordSet = Directors.directorMappingFormat
+
+  private[services] def ninosToDirectorsMap(details: Directors, ninos: Ninos)(implicit hc: HeaderCarrier): Map[String, Director] = {
+    details.directorMapping.map {
+      case (k, v) => k -> v.copy(nino = ninos.ninoMapping.filter(_.id == k).map(_.nino).head)
+    }
+  }
 
   private[services] def apiToView(apiData: Seq[Director]): Directors =
     Directors(directorMapping = (apiData.indices.map(_.toString) zip apiData).toMap)
@@ -74,8 +79,8 @@ trait DirectorDetailsSrv extends CommonService {
         regID <- fetchRegistrationID
         regResponse <- payeRegConnector.getDirectors(regID)
         directors <- convertOrRetrieveDirectors(regResponse)
-        res <- saveToS4L(directors)
-      } yield res
+        data <- saveToS4L(directors)
+      } yield data
     }
   }
 
@@ -90,5 +95,27 @@ trait DirectorDetailsSrv extends CommonService {
           clearData <- s4LService.clear
         } yield DownstreamOutcome.Success
     )
+  }
+
+  def createDisplayNamesMap(directors: Directors): Map[String, String] = {
+    directors.directorMapping.map {
+      case(k, v) => (k, List(v.name.forename, v.name.surname).flatten.mkString(" "))
+    }
+  }
+
+  def createDirectorNinos(directors: Directors): Ninos = {
+    Ninos((0 until directors.directorMapping.size).map {
+      index => UserEnteredNino(
+        index.toString,
+        directors.directorMapping.get(index.toString).flatMap(_.nino)
+      )
+    }.toList)
+  }
+
+  def submitNinos(ninos: Ninos)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    for {
+      details <- getDirectorDetails
+      outcome <- saveDirectorDetails(details.copy(directorMapping = ninosToDirectorsMap(details, ninos)))
+    } yield outcome
   }
 }

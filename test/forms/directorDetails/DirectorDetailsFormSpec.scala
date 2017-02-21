@@ -105,6 +105,24 @@ class DirectorDetailsFormSpec extends UnitSpec {
       }
     }
 
+    "Supplied with no data and a csrf token" should {
+      val data = Map(
+        "csrfToken" -> "CSRFCSRF",
+        "nino[0]" -> "",
+        "nino[1]" -> "",
+        "nino[2]" -> ""
+      )
+
+      "Fail to bind with the correct errors" in {
+        val boundForm = testForm.bind(data).fold(
+          errors => errors,
+          success => testForm.fill(success)
+        )
+        boundForm.errors shouldBe Seq(FormError("noFieldsCompleted-nino[0]", "pages.directorDetails.errors.noneCompleted"))
+        boundForm.data shouldBe data
+      }
+    }
+
     "Supplied with incorrectly formatted data" should {
       val data = Map(
         "nino[0]" -> "A",
