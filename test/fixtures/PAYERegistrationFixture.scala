@@ -59,7 +59,9 @@ trait PAYERegistrationFixture {
       Seq(SummaryRow(
         id="tradingName",
         answer = Right("tstTrade"),
-        changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+        changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName()),
+        None,
+        None
       ))
     ))
   )

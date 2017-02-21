@@ -31,5 +31,6 @@ case class SummaryRow(
                       id: String,
                       answer: Either[String, String],
                       changeLink: Option[Call],
-                      questionArgs: Seq[String] = Nil
+                      questionArgs: Option[Seq[String]] = None,
+                      commonQuestionKey: Option[String] = None
                       )

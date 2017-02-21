@@ -243,4 +243,61 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
       document.getElementById(s"businessTelephone$suffixIdAnswer").text shouldBe "0987654321"
     }
   }
+
+  "The summary page, Director details section" should {
+    lazy val summaryModelDirectorDetails = Summary(
+      Seq(
+        SummarySection(
+          id = "directorDetails",
+          Seq(
+            Some(SummaryRow(
+              id = "director0",
+              answer = Right("ZZ123456A"),
+              changeLink = Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
+              questionArgs = Some(Seq("Timothy Buttersford")),
+              commonQuestionKey = Some("director")
+            )),
+            Some(SummaryRow(
+              id = "director1",
+              answer = Right(""),
+              changeLink = Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
+              questionArgs = Some(Seq("Pierre Simpson")),
+              commonQuestionKey = Some("director")
+            ))
+          ).flatten
+        )
+      )
+    )
+
+    lazy val view = summary(summaryModelDirectorDetails)
+    lazy val document = Jsoup.parse(view.body)
+
+    "have Director details as the summary heading" in {
+      document.getElementById(s"directorDetails$suffixIdSectionHeading").text shouldBe messagesApi("pages.summary.directorDetails.sectionHeading")
+    }
+
+    "have the correct question text for director0" in {
+      document.getElementById(s"director0$suffixIdQuestion").text shouldBe messagesApi("pages.summary.director.question", "Timothy Buttersford")
+    }
+
+    "have the correct question text for director1" in {
+      document.getElementById(s"director1$suffixIdQuestion").text shouldBe messagesApi("pages.summary.director.question", "Pierre Simpson")
+    }
+
+    "have the correct answer text for director0" in {
+      document.getElementById(s"director0$suffixIdAnswer").text shouldBe "ZZ123456A"
+    }
+
+    "have the correct answer text for director1" in {
+      document.getElementById(s"director1$suffixIdAnswer").text shouldBe ""
+    }
+
+    "have the correct change link for director0" in {
+      document.getElementById(s"director0$suffixIdChangeLink").attr("href") shouldBe controllers.userJourney.routes.DirectorDetailsController.directorDetails().toString
+    }
+
+    "have the correct change link for director1" in {
+      document.getElementById(s"director1$suffixIdChangeLink").attr("href") shouldBe controllers.userJourney.routes.DirectorDetailsController.directorDetails().toString
+    }
+  }
 }
