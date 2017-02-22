@@ -42,6 +42,10 @@ POST        /company-pension                        controllers.userJourney.Empl
 GET         /first-payment                          controllers.userJourney.EmploymentController.firstPayment
 POST        /first-payment                          controllers.userJourney.EmploymentController.submitFirstPayment
 
+## NATURE OF BUSINESS
+GET         /nature-of-business                     controllers.userJourney.NatureOfBusinessController.show()
+POST        /nature-of-business                     controllers.userJourney.NatureOfBusinessController.submit()
+
 ## DIRECTOR DETAILS
 GET         /director-national-insurance-number     controllers.userJourney.DirectorDetailsController.directorDetails
 POST        /director-national-insurance-number     controllers.userJourney.DirectorDetailsController.submitDirectorDetails

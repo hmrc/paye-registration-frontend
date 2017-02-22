@@ -17,7 +17,10 @@
 package utils
 
 import java.time.LocalDate
+
 import models.view.UserEnteredNino
+import play.api.data.Forms._
+import play.api.data.Mapping
 import play.api.data.validation._
 
 object Validators extends DateUtil {
@@ -67,6 +70,19 @@ object Validators extends DateUtil {
       }.getOrElse(Nil)
       if (errors.isEmpty) Valid else Invalid(errors)
   })
+
+  def natureOfBusinessValidation: Mapping[String] = {
+    val sicConstraint: Constraint[String] = Constraint("constraints.description")({
+      text =>
+        val errors = (text, text.length >= 100) match {
+          case ("", _) => Seq(ValidationError("errors.invalid.sic.noEntry"))
+          case (_, true) => Seq(ValidationError("errors.invalid.sic.overCharLimit"))
+          case (_,_) => Nil
+        }
+        if(errors.isEmpty) Valid else Invalid(errors)
+    })
+    text().verifying(sicConstraint)
+  }
 
   def firstPaymentDateWithinRange(date: LocalDate): Boolean = {
     lessOrEqualThanXDaysAfter(LocalDate.now(), date, 61)

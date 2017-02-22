@@ -1,0 +1,32 @@
+@import models.view.NatureOfBusiness
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import views.html.helpers.templates.payeErrorSummary
+
+@(sicForm: Form[NatureOfBusiness], companyName: String)(implicit request: Request[_], messages: Messages)
+
+@name(id: String) = @{s"""<span id="$id">$companyName</span>"""}
+
+@main_template(title = messages("pages.natureOfBusiness.title")) {
+
+    @govHelpers.errorSummary(
+        messages("app.common.errorSummaryLabel"), sicForm
+    )
+
+    <h1 class="form-title heading-xlarge" id="page-heading">@Html(messages("pages.natureOfBusiness.heading", name("company-title")))</h1>
+
+    <div class="form-group">
+        <p id="lede-paragraph">@Html(messages("pages.natureOfBusiness.lede", name("company-lede")))</p>
+    </div>
+
+    @govHelpers.form(action = controllers.userJourney.routes.NatureOfBusinessController.submit()) {
+
+        <div class="form-group">
+            <span id="hint-text" class="form-hint">@messages("pages.natureOfBusiness.hint")</span>
+            @govHelpers.textArea(sicForm("description"))
+        </div>
+
+        <div class="form-group">
+            <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
+        </div>
+    }
+}
