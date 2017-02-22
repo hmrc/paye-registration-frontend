@@ -16,7 +16,7 @@
 
 package services
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
 import connectors.{KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.{CacheKeys, DownstreamOutcome}
@@ -27,6 +27,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
+@Singleton
 class DirectorDetailsService @Inject()(
                                         keystoreConn: KeystoreConnector,
                                         payeRegistrationConn: PAYERegistrationConnector,

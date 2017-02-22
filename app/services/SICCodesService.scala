@@ -16,7 +16,7 @@
 
 package services
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
 import connectors.{KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.DownstreamOutcome
@@ -27,9 +27,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-/**
-  * Created by henrilay on 22/02/2017.
-  */
+@Singleton
 class SICCodesService @Inject()(
                                  keystoreConn: KeystoreConnector,
                                  payeRegistrationConn: PAYERegistrationConnector
