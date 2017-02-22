@@ -21,7 +21,7 @@ import fixtures.PAYERegistrationFixture
 import org.jsoup.Jsoup
 import play.api.http.Status
 import play.api.mvc.Result
-import services.PAYERegistrationService
+import services.SummaryService
 import testHelpers.PAYERegSpec
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -31,11 +31,11 @@ import scala.concurrent.Future
 
 class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
 
-  val mockPAYERegistrationService = mock[PAYERegistrationService]
+  val mockSummaryService = mock[SummaryService]
 
   class Setup {
     val controller = new SummaryCtrl {
-      override val payeRegistrationService = mockPAYERegistrationService
+      override val summaryService = mockSummaryService
       override val authConnector = mockAuthConnector
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
     }
@@ -45,7 +45,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   "Calling summary to show the summary page" should {
     "show the summary page when a valid model is returned from the microservice" in new Setup {
-      when(mockPAYERegistrationService.getRegistrationSummary()(Matchers.any())).thenReturn(Future.successful(validSummaryView))
+      when(mockSummaryService.getRegistrationSummary()(Matchers.any())).thenReturn(Future.successful(validSummaryView))
 
       AuthBuilder.showWithAuthorisedUser(controller.summary, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -57,7 +57,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
     }
 
     "return an Internal Server Error response when no valid model is returned from the microservice" in new Setup {
-      when(mockPAYERegistrationService.getRegistrationSummary()(Matchers.any())).thenReturn(Future.failed(new InternalError()))
+      when(mockSummaryService.getRegistrationSummary()(Matchers.any())).thenReturn(Future.failed(new InternalError()))
 
       AuthBuilder.showWithAuthorisedUser(controller.summary, mockAuthConnector) {
         (response: Future[Result]) =>
