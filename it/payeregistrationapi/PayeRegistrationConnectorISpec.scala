@@ -21,7 +21,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.PAYERegistrationConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.BusinessContactDetails
-import models.api.{Name, Director, CompanyDetails, Employment}
+import models.api.{CompanyDetails, Director, Employment, Name, SICCode}
 import models.view.Address
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -258,6 +258,72 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       )
 
       await(patchResponse) shouldBe dirList
+    }
+
+  }
+
+  "SICCodes" should {
+    val sicCode1 = SICCode(
+      code = None,
+      description = Some("laundring")
+    )
+    val sicCode2 = SICCode(
+      code = Some("1234"),
+      description = Some("consulting")
+    )
+    val sicCodes = Seq(sicCode1, sicCode2)
+
+
+    "get a list of SICCode models" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+
+      def getResponse = payeRegistrationConnector.getSICCodes(regId)
+      def patchResponse = payeRegistrationConnector.upsertSICCodes(regId, sicCodes)
+
+      stubFor(get(urlMatching(url("/sic-codes")))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(Json.toJson(sicCodes).toString())
+        )
+      )
+
+      await(getResponse) shouldBe sicCodes
+    }
+
+    "get an empty list if no sic codes" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+
+      def getResponse = payeRegistrationConnector.getSICCodes(regId)
+
+      stubFor(get(urlMatching(url("/sic-codes")))
+        .willReturn(
+          aResponse()
+            .withStatus(404)
+        )
+      )
+
+      await(getResponse) shouldBe List.empty
+    }
+
+    "upsert a model" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+
+      def getResponse = payeRegistrationConnector.getSICCodes(regId)
+      def patchResponse = payeRegistrationConnector.upsertSICCodes(regId, sicCodes)
+
+      stubFor(patch(urlMatching(url("/sic-codes")))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(Json.toJson(sicCodes).toString())
+        )
+      )
+
+      await(patchResponse) shouldBe sicCodes
     }
 
   }

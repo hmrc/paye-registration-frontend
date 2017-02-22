@@ -18,7 +18,7 @@ package connectors
 
 import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
-import models.api.{Director, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
+import models.api.{Director, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
 import models.view.Address
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
@@ -226,7 +226,7 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
     "return a Not Found PAYEResponse when the microservice returns no Employment API model" in new Setup {
       mockHttpFailedGET[Seq[Director]]("tst-url", notFound)
 
-      await(connector.getDirectors("tstID")) shouldBe Nil
+      await(connector.getDirectors("tstID")) shouldBe Seq.empty
     }
     "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
       mockHttpFailedGET[Seq[Director]]("tst-url", internalServiceException)
@@ -255,6 +255,57 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
       mockHttpFailedPATCH[Seq[Director], Seq[Director]]("tst-url", internalServiceException)
 
       intercept[InternalServerException](await(connector.upsertDirectors("tstID", validDirectorList)))
+    }
+  }
+
+  "Calling getSICCodes" should {
+    "return the correct PAYEResponse when the microservice returns a list of Directors" in new Setup {
+      mockHttpGet[Seq[SICCode]]("tst-url", validSICCodesList)
+
+      await(connector.getDirectors("tstID")) shouldBe validSICCodesList
+    }
+    "return the correct PAYEResponse when a Bad Request response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[Seq[SICCode]]("tst-url", badRequest)
+
+      intercept[BadRequestException](await(connector.getSICCodes("tstID")))
+    }
+    "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[Seq[SICCode]]("test-url", forbidden)
+
+      intercept[Upstream4xxResponse](await(connector.getSICCodes("tstID")))
+    }
+    "return a Not Found PAYEResponse when the microservice returns no Employment API model" in new Setup {
+      mockHttpFailedGET[Seq[SICCode]]("tst-url", notFound)
+
+      await(connector.getSICCodes("tstID")) shouldBe Seq.empty
+    }
+    "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[Seq[SICCode]]("tst-url", internalServiceException)
+
+      intercept[InternalServerException](await(connector.getSICCodes("tstID")))
+    }
+  }
+
+  "Calling upsertSICCodes" should {
+    "return the correct PAYEResponse when the microservice completes and returns a list of Directors" in new Setup {
+      mockHttpPATCH[Seq[SICCode], Seq[SICCode]]("tst-url", validSICCodesList)
+
+      await(connector.upsertSICCodes("tstID", validSICCodesList)) shouldBe validSICCodesList
+    }
+    "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
+      mockHttpFailedPATCH[Seq[SICCode], Seq[SICCode]]("tst-url", forbidden)
+
+      intercept[Upstream4xxResponse](await(connector.upsertSICCodes("tstID", validSICCodesList)))
+    }
+    "return a Not Found PAYEResponse when the microservice returns a NotFound response (No PAYERegistration in database)" in new Setup {
+      mockHttpFailedPATCH[Seq[SICCode], Seq[SICCode]]("tst-url", notFound)
+
+      intercept[NotFoundException](await(connector.upsertSICCodes("tstID", validSICCodesList)))
+    }
+    "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
+      mockHttpFailedPATCH[Seq[SICCode], Seq[SICCode]]("tst-url", internalServiceException)
+
+      intercept[InternalServerException](await(connector.upsertSICCodes("tstID", validSICCodesList)))
     }
   }
 }

@@ -20,8 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
 import enums.DownstreamOutcome
-import models.api.{CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
-import models.api.Director
+import models.api.{Director, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.Logger
 import play.api.http.Status
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -91,7 +90,7 @@ trait PAYERegistrationConnect {
 
   def getDirectors(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPI]): Future[Seq[Director]] = {
     http.GET[Seq[Director]](s"$payeRegUrl/paye-registration/$regID/directors") recover {
-      case e: NotFoundException => Nil
+      case e: NotFoundException => Seq.empty
       case e: Exception => throw logResponse(e, "getDirectors", "getting directors")
     }
   }
@@ -99,6 +98,19 @@ trait PAYERegistrationConnect {
   def upsertDirectors(regID: String, directors: Seq[Director])(implicit hc: HeaderCarrier, rds: HttpReads[Seq[Director]]) = {
     http.PATCH[Seq[Director], Seq[Director]](s"$payeRegUrl/paye-registration/$regID/directors", directors) recover {
       case e: Exception => throw logResponse(e, "upsertDirectors", "upserting directors")
+    }
+  }
+
+  def getSICCodes(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPI]): Future[Seq[SICCode]] = {
+    http.GET[Seq[SICCode]](s"$payeRegUrl/paye-registration/$regID/sic-codes") recover {
+      case e: NotFoundException => Seq.empty
+      case e: Exception => throw logResponse(e, "getSICCodes", "getting sic codes")
+    }
+  }
+
+  def upsertSICCodes(regID: String, sicCodes: Seq[SICCode])(implicit hc: HeaderCarrier, rds: HttpReads[Seq[SICCode]]) = {
+    http.PATCH[Seq[SICCode], Seq[SICCode]](s"$payeRegUrl/paye-registration/$regID/sic-codes", sicCodes) recover {
+      case e: Exception => throw logResponse(e, "upsertSICCodes", "upserting sic codes")
     }
   }
 

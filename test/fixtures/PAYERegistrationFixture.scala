@@ -85,4 +85,15 @@ trait PAYERegistrationFixture {
   def validName(f: String, m: Option[String], l:String) = Name(Some(f), m, Some(l), None)
 
   val validDirectorList = Seq(Director(validName("Bob", None, "Smith"), Some("NINO")), Director(validName("Michael", Some("Jay"), "Fudgedybar"), None))
+
+  val validSICCodesList = Seq(
+    SICCode(
+      code = None,
+      description = Some("laundring")
+    ),
+    SICCode(
+      code = Some("1234"),
+      description = Some("consulting")
+    )
+  )
 }
