@@ -21,7 +21,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.PAYERegistrationConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.BusinessContactDetails
-import models.api.{CompanyDetails, Employment}
+import models.api.{Name, Director, CompanyDetails, Employment}
 import models.view.Address
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -182,6 +182,82 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       )
 
       await(patchResponse) shouldBe validEmployment
+    }
+
+  }
+
+  "Director Details" should {
+    val director1 = Director(
+      name = Name(
+        forename = Some("Fourname"),
+        otherForenames = None,
+        surname = Some("Sirname"),
+        title = Some("Ms")
+      ),
+      nino = Some("nino")
+    )
+    val director2 = Director(
+      name = Name(
+        forename = Some("FirstName"),
+        otherForenames = Some("MiddleName"),
+        surname = Some("LastName"),
+        title = Some("Mrs")
+      ),
+      nino = Some("nino2")
+    )
+    val dirList = Seq(director1, director2)
+
+
+    "get a list of Director models" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+
+      def getResponse = payeRegistrationConnector.getDirectors(regId)
+      def patchResponse = payeRegistrationConnector.upsertDirectors(regId, dirList)
+
+      stubFor(get(urlMatching(url("/directors")))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(Json.toJson(dirList).toString())
+        )
+      )
+
+      await(getResponse) shouldBe dirList
+    }
+
+    "get an empty list if no directors" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+
+      def getResponse = payeRegistrationConnector.getDirectors(regId)
+
+      stubFor(get(urlMatching(url("/directors")))
+        .willReturn(
+          aResponse()
+            .withStatus(404)
+        )
+      )
+
+      await(getResponse) shouldBe List.empty
+    }
+
+    "upsert a model" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+
+      def getResponse = payeRegistrationConnector.getDirectors(regId)
+      def patchResponse = payeRegistrationConnector.upsertDirectors(regId, dirList)
+
+      stubFor(patch(urlMatching(url("/directors")))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(Json.toJson(dirList).toString())
+        )
+      )
+
+      await(patchResponse) shouldBe dirList
     }
 
   }
