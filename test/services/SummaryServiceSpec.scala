@@ -16,10 +16,11 @@
 
 package services
 
+import common.exceptions.InternalExceptions.APIConversionException
 import connectors.PAYERegistrationConnector
 import fixtures.PAYERegistrationFixture
 import models.BusinessContactDetails
-import models.api.{Director, Employment, Name, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
+import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI, SICCode, Director, Employment, Name}
 import models.view.{SummaryRow, SummarySection, Summary, Address}
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -37,6 +38,8 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
     val service = new SummaryService (mockKeystoreConnector, mockRegConnector)
   }
 
+  val simpleSICCodes = List(SICCode(code = None, description = Some("Firearms")))
+
   val apiRegistration = PAYERegistrationAPI(
     registrationID = "AC123456",
     formCreationTimestamp = "2017-01-11T15:10:12",
@@ -48,6 +51,7 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
       businessContactDetails = validBusinessContactDetails
     ),
     employment = validEmploymentAPI,
+    sicCodes = simpleSICCodes,
     directors = List(
       Director(
         name = Name(
@@ -122,6 +126,16 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
             id = "firstPaymentDate",
             Right("20/12/2016"),
             Some(controllers.userJourney.routes.EmploymentController.firstPayment())
+          )
+        )
+      ),
+      SummarySection(
+        id="natureOfBusiness",
+        Seq(
+          SummaryRow(
+            id = "natureOfBusiness",
+            answer = Right("Firearms"),
+            Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
           )
         )
       ),
@@ -201,6 +215,7 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
           businessContactDetails = validBusinessContactDetails
         ),
         employment = validEmploymentAPI,
+        sicCodes = simpleSICCodes,
         directors = List(
           Director(
             name = Name(
@@ -275,6 +290,16 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
                 id = "firstPaymentDate",
                 Right("20/12/2016"),
                 Some(controllers.userJourney.routes.EmploymentController.firstPayment())
+              )
+            )
+          ),
+          SummarySection(
+            id="natureOfBusiness",
+            Seq(
+              SummaryRow(
+                id = "natureOfBusiness",
+                answer = Right("Firearms"),
+                Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
               )
             )
           ),
@@ -433,6 +458,47 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
         )
 
       service.buildBusinessContactDetailsSection(businessContactDetailsModel) shouldBe validBCDSection
+    }
+  }
+
+  "buildNatureOfBusinessSection" should {
+    "return a valid nature of business block" in new Setup{
+      val sicCodesModel = List(
+        SICCode(
+          code = None,
+          description = Some("Ice cream")
+        )
+      )
+
+      val natOfBusSection = SummarySection(
+        id = "natureOfBusiness",
+        rows = Seq(
+          SummaryRow(
+            id = "natureOfBusiness",
+            answer = Right("Ice cream"),
+            changeLink = Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
+          )
+        )
+      )
+
+      service.buildNatureOfBusinessSection(sicCodesModel) shouldBe natOfBusSection
+    }
+
+    "throw the correct exception when there is no description provided" in new Setup{
+      val sicCodesModel = List(
+        SICCode(
+          code = None,
+          description = None
+        )
+      )
+
+      an[APIConversionException] shouldBe thrownBy(service.buildNatureOfBusinessSection(sicCodesModel))
+    }
+
+    "throw the correct exception when there is no SIC code provided" in new Setup{
+      val sicCodesModel = List.empty
+
+      a[NoSuchElementException] shouldBe thrownBy(service.buildNatureOfBusinessSection(sicCodesModel))
     }
   }
 

@@ -24,6 +24,13 @@ import models.view.{Address, Summary, SummaryRow, SummarySection}
 
 trait PAYERegistrationFixture {
 
+  val validBusinessContactDetails =
+    BusinessContactDetails(
+      Some("test@email.com"),
+      Some("1234567890"),
+      Some("0987654321")
+    )
+
   val validCompanyDetailsAPI = CompanyDetails(
     crn = None,
     companyName = "Test Company",
@@ -38,18 +45,15 @@ trait PAYERegistrationFixture {
                                   subcontractors = true,
                                   firstPayDate = validDate)
 
-  val validBusinessContactDetails =
-    BusinessContactDetails(
-      Some("test@email.com"),
-      Some("1234567890"),
-      Some("0987654321")
-    )
+
+  val validSICCodes = List(SICCode(None, Some("Accounting")))
 
   val validPAYERegistrationAPI = PAYERegistration(
     registrationID = "AC123456",
     formCreationTimestamp = "2017-01-11T15:10:12",
     companyDetails = validCompanyDetailsAPI,
     employment = validEmploymentAPI,
+    sicCodes = validSICCodes,
     directors = Nil
   )
 
@@ -67,9 +71,9 @@ trait PAYERegistrationFixture {
   )
 
   val validEmploymentAPIModel = Employment(
-    true,
-    Some(true),
-    true,
+    employees = true,
+    companyPension = Some(true),
+    subcontractors = true,
     LocalDate.of(2016, 12, 20)
   )
 

@@ -51,17 +51,17 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
         SummarySection(
           id = "companyDetails",
           Seq(
-            Some(SummaryRow(
+            SummaryRow(
               id ="tradingName",
               answer = Left("noAnswerGiven"),
               changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
-            )),
-            Some(SummaryRow(
+            ),
+            SummaryRow(
               id = "roAddress",
               answer = Right("14 St Test Walk<br />Testley"),
               changeLink = None
-            ))
-          ).flatten
+            )
+          )
         )
       )
     )
@@ -192,22 +192,22 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
         SummarySection(
           id = "businessContactDetails",
           Seq(
-            Some(SummaryRow(
+            SummaryRow(
               id = "businessEmail",
               answer = Right("test@email.com"),
               changeLink = None
-            )),
-            Some(SummaryRow(
+            ),
+            SummaryRow(
               id = "mobileNumber",
               answer = Right("1234567890"),
               changeLink = None
-            )),
-            Some(SummaryRow(
+            ),
+            SummaryRow(
               id = "businessTelephone",
               answer = Right("0987654321"),
               changeLink = None
-            ))
-          ).flatten
+            )
+          )
         )
       )
     )
@@ -244,27 +244,61 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
     }
   }
 
+  "The summary page, Nature Of Business section" should {
+    lazy val summaryModelDirectorDetails = Summary(
+      Seq(
+        SummarySection(
+          id = "natureOfBusiness",
+          Seq(
+            SummaryRow(
+              id = "natureOfBusiness",
+              answer = Right("Flower Arranging"),
+              changeLink = Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness()),
+              questionArgs = None,
+              commonQuestionKey = None
+            )
+          )
+        )
+      )
+    )
+
+    lazy val view = summary(summaryModelDirectorDetails)
+    lazy val document = Jsoup.parse(view.body)
+
+    "have Director details as the summary heading" in {
+      document.getElementById(s"natureOfBusiness$suffixIdSectionHeading").text shouldBe messagesApi("pages.summary.natureOfBusiness.sectionHeading")
+    }
+
+    "have the correct question text for director0" in {
+      document.getElementById(s"natureOfBusiness$suffixIdQuestion").text shouldBe messagesApi("pages.summary.natureOfBusiness.question")
+    }
+
+    "have the correct answer text for director0" in {
+      document.getElementById(s"natureOfBusiness$suffixIdAnswer").text shouldBe "Flower Arranging"
+    }
+  }
+
   "The summary page, Director details section" should {
     lazy val summaryModelDirectorDetails = Summary(
       Seq(
         SummarySection(
           id = "directorDetails",
           Seq(
-            Some(SummaryRow(
+            SummaryRow(
               id = "director0",
               answer = Right("ZZ123456A"),
               changeLink = Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
               questionArgs = Some(Seq("Timothy Buttersford")),
               commonQuestionKey = Some("director")
-            )),
-            Some(SummaryRow(
+            ),
+            SummaryRow(
               id = "director1",
               answer = Right(""),
               changeLink = Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
               questionArgs = Some(Seq("Pierre Simpson")),
               commonQuestionKey = Some("director")
-            ))
-          ).flatten
+            )
+          )
         )
       )
     )

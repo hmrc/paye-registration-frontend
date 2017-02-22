@@ -26,7 +26,7 @@ import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import views.html.pages.natureOfBusiness
+import views.html.pages.{natureOfBusiness => NatureOfBusinessPage}
 
 import scala.concurrent.Future
 
@@ -41,18 +41,18 @@ trait NatureOfBusinessCtrl extends FrontendController with Actions with I18nSupp
   val authConnector: AuthConnector
   implicit val messagesApi: MessagesApi
 
-  val show: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+  val natureOfBusiness: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        Future.successful(Ok(natureOfBusiness(NatureOfBusinessForm.form, "Company limited")))
+        Future.successful(Ok(NatureOfBusinessPage(NatureOfBusinessForm.form, "Company limited")))
   }
 
-  val submit: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+  val submitNatureOfBusiness: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         NatureOfBusinessForm.form.bindFromRequest.fold(
-          errors => Future.successful(Ok(natureOfBusiness(errors, "Company Limited"))),
-          valid => Future.successful(Ok(natureOfBusiness(NatureOfBusinessForm.form, "Company Limited")))
+          errors => Future.successful(Ok(NatureOfBusinessPage(errors, "Company Limited"))),
+          valid => Future.successful(Ok(NatureOfBusinessPage(NatureOfBusinessForm.form, "Company Limited")))
         )
   }
 }

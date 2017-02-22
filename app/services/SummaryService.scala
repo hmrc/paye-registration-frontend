@@ -20,8 +20,9 @@ import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
 
 import connectors._
+import common.exceptions.InternalExceptions.APIConversionException
 import models.BusinessContactDetails
-import models.api.{CompanyDetails, Director, Employment, PAYERegistration => PAYERegistrationAPI}
+import models.api.{PAYERegistration => PAYERegistrationAPI, SICCode, CompanyDetails, Director, Employment}
 import models.view.{Address, Summary, SummaryRow, SummarySection}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -51,6 +52,7 @@ trait SummarySrv extends CommonService {
         buildCompanyDetailsSection(apiModel.companyDetails),
         buildBusinessContactDetailsSection(apiModel.companyDetails.businessContactDetails),
         buildEmploymentSection(apiModel.employment),
+        buildNatureOfBusinessSection(apiModel.sicCodes),
         buildDirectorsSection(apiModel.directors)
       )
     )
@@ -157,6 +159,19 @@ trait SummarySrv extends CommonService {
           changeLink = Some(controllers.userJourney.routes.EmploymentController.firstPayment())
         ))
       ).flatten
+    )
+  }
+
+  private[services] def buildNatureOfBusinessSection(sicCodes: List[SICCode]) = {
+    SummarySection(
+      id = "natureOfBusiness",
+      rows = Seq(
+        SummaryRow(
+          id = "natureOfBusiness",
+          answer = Right(sicCodes.head.description.getOrElse{throw new APIConversionException("No nature of business provided for summary")}),
+          changeLink = Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
+        )
+      )
     )
   }
 
