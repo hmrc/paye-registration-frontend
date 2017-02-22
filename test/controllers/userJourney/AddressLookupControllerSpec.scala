@@ -61,7 +61,7 @@ class AddressLookupControllerSpec extends PAYERegSpec {
       AuthBuilder.submitWithAuthorisedUser(controller.returnFromLookup, mockAuthConnector, fakeRequestWithId.withFormUrlEncodedBody()){
         (result: Future[Result]) =>
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.EmploymentController.employingStaff()}")
+          redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness()}")
       }
     }
   }

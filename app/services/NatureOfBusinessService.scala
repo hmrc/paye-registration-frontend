@@ -28,15 +28,15 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class SICCodesService @Inject()(
+class NatureOfBusinessService @Inject()(
                                  keystoreConn: KeystoreConnector,
                                  payeRegistrationConn: PAYERegistrationConnector
-                               ) extends SICCodesSrv {
+                               ) extends NatureOfBusinessSrv {
   override val keystoreConnector = keystoreConn
   override val payeRegConnector = payeRegistrationConn
 }
 
-trait SICCodesSrv extends CommonService {
+trait NatureOfBusinessSrv extends CommonService {
   val payeRegConnector: PAYERegistrationConnect
 
   private[services] def sicCodes2NatureOfBusiness(sicCodes: Seq[SICCode]): NatureOfBusiness =
@@ -45,14 +45,14 @@ trait SICCodesSrv extends CommonService {
   private[services] def natureOfBusiness2SICCodes(nob: NatureOfBusiness): Seq[SICCode] =
     Seq(SICCode(None, Some(nob.natureOfBusiness)))
 
-  def getSICCodes()(implicit hc: HeaderCarrier): Future[NatureOfBusiness] = {
+  def getNatureOfBusiness()(implicit hc: HeaderCarrier): Future[NatureOfBusiness] = {
     for {
       regID <- fetchRegistrationID
       sicCodes <- payeRegConnector.getSICCodes(regID)
     } yield sicCodes2NatureOfBusiness(sicCodes)
   }
 
-  def saveSICCodes(nob: NatureOfBusiness)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def saveNatureOfBusiness(nob: NatureOfBusiness)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
       regID     <- fetchRegistrationID
       details   <- payeRegConnector.upsertSICCodes(regID, natureOfBusiness2SICCodes(nob))
