@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package forms.employmentDetails
+package forms.natureOfBuinessDetails
 
-import forms.helpers.RequiredBooleanForm
-import models.view.EmployingStaff
+import models.view.NatureOfBusiness
 import play.api.data.Form
 import play.api.data.Forms._
+import utils.Validators.natureOfBusinessValidation
 
-object EmployingStaffForm extends RequiredBooleanForm {
+object NatureOfBusinessForm {
   val form = Form(
     mapping(
-      "currentYear" -> requiredBoolean
-    )(EmployingStaff.apply)(EmployingStaff.unapply)
+      "description" -> natureOfBusinessValidation
+    )(NatureOfBusiness.apply)(NatureOfBusiness.unapply)
   )
 }

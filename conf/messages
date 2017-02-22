@@ -18,6 +18,8 @@ errors.invalid.email                                    = The email address you 
 errors.invalid.phoneNumber                              = The phone number you have provided is invalid
 errors.invalid.mobileNumber                             = The mobile phone number you have provided is invalid
 errors.invalid.nino                                     = National Insurance number is in the wrong format
+errors.invalid.sic.noEntry                              = Tell us what the company does
+errors.invalid.sic.overCharLimit                        = Enter a business description using 100 characters or less
 
 ## Welcome page
 pages.welcome.title                                     = Register as an employer
@@ -101,6 +103,12 @@ pages.firstPayment.firstPaymentRules1                   = their salary or wages
 pages.firstPayment.firstPaymentRules2                   = expenses or benefits
 pages.firstPayment.firstPaymentRules3                   = any tips or bonuses
 pages.firstPayment.firstPaymentRulesEnd                 = This should include any payments made to yourself (for example, if you''re the only director of a limited company).
+
+## NATURE OF BUSINESS
+pages.natureOfBusiness.title                            = Describe the business
+pages.natureOfBusiness.heading                          = What does {0} do?
+pages.natureOfBusiness.lede                             = Describe {0}''s main business activities including the type of goods or services it sells.
+pages.natureOfBusiness.hint                             = For example, cleaning services
 
 ## Director Details Page
 pages.directorDetails.title1Director                    = What is the director''s National Insurance number?
