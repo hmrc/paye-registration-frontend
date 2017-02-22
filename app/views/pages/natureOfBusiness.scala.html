@@ -1,6 +1,5 @@
 @import models.view.NatureOfBusiness
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
-@import views.html.helpers.templates.payeErrorSummary
 
 @(sicForm: Form[NatureOfBusiness], companyName: String)(implicit request: Request[_], messages: Messages)
 
@@ -22,7 +21,12 @@
 
         <div class="form-group">
             <span id="hint-text" class="form-hint">@messages("pages.natureOfBusiness.hint")</span>
-            @govHelpers.textArea(sicForm("description"))
+            @govHelpers.textArea(
+                sicForm("description"),
+                '_inputClass -> "form-control-1-2 form-control--block",
+                '_labelClass -> "form-label",
+                '_label -> messages("pages.natureOfBusiness.textArea.label")
+            )
         </div>
 
         <div class="form-group">
