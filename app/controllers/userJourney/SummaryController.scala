@@ -19,7 +19,7 @@ package controllers.userJourney
 import auth.PAYERegime
 import javax.inject.{Inject, Singleton}
 import config.FrontendAuthConnector
-import services.{PAYERegistrationService, PAYERegistrationSrv}
+import services.{SummarySrv, SummaryService, PAYERegistrationService, PAYERegistrationSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import views.html.pages.{summary => SummaryPage}
@@ -27,20 +27,20 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 
 @Singleton
 class SummaryController @Inject()(
-                                   injPayeRegistrationService: PAYERegistrationService,
+                                   injSummaryService: SummaryService,
                                    injMessagesApi: MessagesApi)
   extends SummaryCtrl {
   val authConnector = FrontendAuthConnector
-  val payeRegistrationService = injPayeRegistrationService
+  val summaryService = injSummaryService
   val messagesApi = injMessagesApi
 }
 
 trait SummaryCtrl extends FrontendController with Actions with I18nSupport {
 
-  val payeRegistrationService: PAYERegistrationSrv
+  val summaryService: SummarySrv
 
   val summary = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    payeRegistrationService.getRegistrationSummary map {
+    summaryService.getRegistrationSummary map {
       summaryModel => Ok(SummaryPage(summaryModel))
     } recover {
       case _ => InternalServerError(views.html.pages.error.restart())

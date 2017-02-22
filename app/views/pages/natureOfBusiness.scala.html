@@ -17,7 +17,7 @@
         <p id="lede-paragraph">@Html(messages("pages.natureOfBusiness.lede", name("company-lede")))</p>
     </div>
 
-    @govHelpers.form(action = controllers.userJourney.routes.NatureOfBusinessController.submit()) {
+    @govHelpers.form(action = controllers.userJourney.routes.NatureOfBusinessController.submitNatureOfBusiness()) {
 
         <div class="form-group">
             <span id="hint-text" class="form-hint">@messages("pages.natureOfBusiness.hint")</span>

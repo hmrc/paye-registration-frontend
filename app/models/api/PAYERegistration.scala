@@ -22,6 +22,7 @@ case class PAYERegistration (registrationID: String,
                              formCreationTimestamp: String,
                              companyDetails: CompanyDetails,
                              employment: Employment,
+                             sicCodes: List[SICCode],
                              directors: List[Director])
 
 object PAYERegistration {

@@ -43,8 +43,8 @@ GET         /first-payment                          controllers.userJourney.Empl
 POST        /first-payment                          controllers.userJourney.EmploymentController.submitFirstPayment
 
 ## NATURE OF BUSINESS
-GET         /nature-of-business                     controllers.userJourney.NatureOfBusinessController.show()
-POST        /nature-of-business                     controllers.userJourney.NatureOfBusinessController.submit()
+GET         /nature-of-business                     controllers.userJourney.NatureOfBusinessController.natureOfBusiness
+POST        /nature-of-business                     controllers.userJourney.NatureOfBusinessController.submitNatureOfBusiness
 
 ## DIRECTOR DETAILS
 GET         /director-national-insurance-number     controllers.userJourney.DirectorDetailsController.directorDetails
