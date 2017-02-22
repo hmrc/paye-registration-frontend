@@ -30,7 +30,7 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 
 import scala.concurrent.Future
 
-class SICCodesServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
+class NatureOfBusinessServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
   implicit val hc = HeaderCarrier()
 
 
@@ -38,7 +38,7 @@ class SICCodesServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
   val returnHttpResponse = HttpResponse(200)
 
   class Setup {
-    val service = new SICCodesService(mockKeystoreConnector, mockPAYERegConnector)
+    val service = new NatureOfBusinessService(mockKeystoreConnector, mockPAYERegConnector)
   }
 
   "Calling sicCodes2NatureOfBusiness" should {
@@ -56,7 +56,13 @@ class SICCodesServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
 
       val tstModelView = NatureOfBusiness(natureOfBusiness = "banking")
 
-      service.sicCodes2NatureOfBusiness(tstModelAPI) shouldBe tstModelView
+      service.sicCodes2NatureOfBusiness(tstModelAPI) shouldBe Some(tstModelView)
+    }
+
+    "produce an empty model from an empty list of SICCode API model" in new Setup {
+      val tstModelAPI = Seq.empty
+
+      service.sicCodes2NatureOfBusiness(tstModelAPI) shouldBe None
     }
   }
 
@@ -75,13 +81,13 @@ class SICCodesServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
     }
   }
 
-  "Calling getSICCodes" should {
+  "Calling getNatureOfBusiness" should {
     "return the correct View response when SIC Codes are returned from the microservice" in new Setup {
       mockFetchRegID("54321")
       when(mockPAYERegConnector.getSICCodes(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(validSICCodesList))
 
-      await(service.getSICCodes()) shouldBe NatureOfBusiness(natureOfBusiness = "laundring")
+      await(service.getNatureOfBusiness()) shouldBe Some(NatureOfBusiness(natureOfBusiness = "laundring"))
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
@@ -89,7 +95,7 @@ class SICCodesServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       when(mockPAYERegConnector.getSICCodes(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
 
-      an[Upstream4xxResponse] shouldBe thrownBy(await(service.getSICCodes()))
+      an[Upstream4xxResponse] shouldBe thrownBy(await(service.getNatureOfBusiness()))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
@@ -97,11 +103,11 @@ class SICCodesServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       when(mockPAYERegConnector.getSICCodes(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(new ArrayIndexOutOfBoundsException))
 
-      an[Exception] shouldBe thrownBy(await(service.getSICCodes()))
+      an[Exception] shouldBe thrownBy(await(service.getNatureOfBusiness()))
     }
   }
 
-  "Calling saveSICCodes" should {
+  "Calling saveNatureOfBusiness" should {
     "return a success response when the upsert completes successfully" in new Setup {
       val validNatureOfBusiness = NatureOfBusiness(natureOfBusiness = "laundring")
 
@@ -109,7 +115,7 @@ class SICCodesServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       when(mockPAYERegConnector.upsertSICCodes(Matchers.contains("54321"), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(validSICCodesList))
 
-      await(service.saveSICCodes(validNatureOfBusiness)) shouldBe DownstreamOutcome.Success
+      await(service.saveNatureOfBusiness(validNatureOfBusiness)) shouldBe DownstreamOutcome.Success
     }
   }
 

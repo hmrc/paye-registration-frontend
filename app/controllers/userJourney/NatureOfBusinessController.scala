@@ -20,9 +20,11 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
+import enums.DownstreamOutcome
 import forms.natureOfBuinessDetails.NatureOfBusinessForm
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
+import services.{CompanyDetailsService, CompanyDetailsSrv, NatureOfBusinessService, NatureOfBusinessSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -31,28 +33,50 @@ import views.html.pages.{natureOfBusiness => NatureOfBusinessPage}
 import scala.concurrent.Future
 
 @Singleton
-class NatureOfBusinessController @Inject()(injMessagesApi: MessagesApi) extends NatureOfBusinessCtrl {
+class NatureOfBusinessController @Inject()(injMessagesApi: MessagesApi,
+                                           injNatureOfBusinessService: NatureOfBusinessService,
+                                           injCompanyDetailsService: CompanyDetailsService) extends NatureOfBusinessCtrl {
   val authConnector = FrontendAuthConnector
   implicit val messagesApi = injMessagesApi
+  val natureOfBusinessService = injNatureOfBusinessService
+  val companyDetailsService = injCompanyDetailsService
 }
 
 trait NatureOfBusinessCtrl extends FrontendController with Actions with I18nSupport {
 
   val authConnector: AuthConnector
   implicit val messagesApi: MessagesApi
+  val natureOfBusinessService: NatureOfBusinessSrv
+  val companyDetailsService: CompanyDetailsSrv
 
   val natureOfBusiness: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        Future.successful(Ok(NatureOfBusinessPage(NatureOfBusinessForm.form, "Company limited")))
+        for {
+          companyDetails <- companyDetailsService.getCompanyDetails
+          nob <- natureOfBusinessService.getNatureOfBusiness
+        } yield nob match {
+          case Some(model) => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form.fill(model), companyDetails.companyName))
+          case None => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form, companyDetails.companyName))
+        }
   }
 
   val submitNatureOfBusiness: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         NatureOfBusinessForm.form.bindFromRequest.fold(
-          errors => Future.successful(Ok(NatureOfBusinessPage(errors, "Company Limited"))),
-          valid => Future.successful(Ok(NatureOfBusinessPage(NatureOfBusinessForm.form, "Company Limited")))
+          errors => {
+            companyDetailsService.getCompanyDetails map {
+              details =>
+                BadRequest(NatureOfBusinessPage(errors, details.companyName))
+            }
+          },
+          success => {
+            natureOfBusinessService.saveNatureOfBusiness(success) map {
+              case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.DirectorDetailsController.directorDetails())
+              case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+            }
+          }
         )
   }
 }

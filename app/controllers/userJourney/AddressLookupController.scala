@@ -50,7 +50,7 @@ trait AddressLookupCtrl extends FrontendController with Actions with I18nSupport
         request.getQueryString("id") match {
           case Some(id) => addressLookupService.getAddress(id)
         }
-        Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
+        Redirect(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
   }
 
 }

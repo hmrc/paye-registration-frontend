@@ -167,6 +167,10 @@ pages.summary.subcontractors.hiddenChangeText           = Change the company''s 
 pages.summary.firstPaymentDate.question                 = PAYE scheme start date
 pages.summary.firstPaymentDate.hiddenChangeText         = Change the company''s first payment date
 
+pages.summary.natureOfBusiness.sectionHeading           = Nature of business
+pages.summary.natureOfBusiness.question                 = Main business activities
+pages.summary.natureOfBusiness.hiddenChangeText         = Change the business''s activities
+
 pages.summary.directorDetails.sectionHeading            = Director''s details
 pages.summary.director.question                         = Director {0}''s National Insurance number
 
