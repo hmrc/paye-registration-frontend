@@ -48,6 +48,7 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
       companyName = "Test Company",
       tradingName = Some("tstTrade"),
       Address("14 St Test Walk", "Testley", None, None, None, None),
+      Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK")),
       businessContactDetails = validBusinessContactDetails
     ),
     employment = validEmploymentAPI,
@@ -207,6 +208,7 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
           companyName = "Test Company",
           tradingName = None,
           Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+          Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK")),
           businessContactDetails = validBusinessContactDetails
         ),
         employment = validEmploymentAPI,
@@ -319,6 +321,7 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
         companyName = "Test Company",
         tradingName = Some("Test Company Trading Name"),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK")),
         BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
 

@@ -92,6 +92,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "Comp name",
         Some("trading name"),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK")),
         BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
       val tstModelView = CompanyDetailsView(
@@ -113,6 +114,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "Comp name",
         None,
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK")),
         BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
       val tstModelView = CompanyDetailsView(
@@ -136,6 +138,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "Comp name",
         Some("trading name"),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
       val tstModelView = CompanyDetailsView(
@@ -156,6 +159,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         Some("tstCRN"),
         "Comp name",
         None,
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
