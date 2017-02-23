@@ -75,6 +75,12 @@ trait SummarySrv extends CommonService {
           changeLink = None
         ),
         SummaryRow(
+          id = "ppobAddress",
+          answer = Right(formatHTMLROAddress(companyDetails.ppobAddress)),
+          //TODO: Change to PPOB address route
+          changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.roAddress())
+        ),
+        SummaryRow(
           id = "natureOfBusiness",
           answer = Right(sicCodes.head.description.getOrElse{throw new APIConversionException("No nature of business provided for summary")}),
           changeLink = Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
