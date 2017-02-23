@@ -49,33 +49,37 @@ trait SummarySrv extends CommonService {
   private[services] def registrationToSummary(apiModel: PAYERegistrationAPI): Summary = {
     Summary(
       Seq(
-        buildCompanyDetailsSection(apiModel.companyDetails),
+        buildCompanyDetailsSection(apiModel.companyDetails, apiModel.sicCodes),
         buildBusinessContactDetailsSection(apiModel.companyDetails.businessContactDetails),
         buildEmploymentSection(apiModel.employment),
-        buildNatureOfBusinessSection(apiModel.sicCodes),
         buildDirectorsSection(apiModel.directors)
       )
     )
   }
 
-  private[services] def buildCompanyDetailsSection(companyDetails: CompanyDetails) : SummarySection = {
+  private[services] def buildCompanyDetailsSection(companyDetails: CompanyDetails, sicCodes: List[SICCode]) : SummarySection = {
     SummarySection(
       id = "companyDetails",
       Seq(
-        Some(SummaryRow(
+        SummaryRow(
           id ="tradingName",
           answer = companyDetails.tradingName match {
             case Some(tName) => Right(tName)
             case _ => Left("noAnswerGiven")
           },
           changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
-        )),
-        Some(SummaryRow(
+        ),
+        SummaryRow(
           id = "roAddress",
           answer = Right(formatHTMLROAddress(companyDetails.roAddress)),
           changeLink = None
-        ))
-      ).flatten
+        ),
+        SummaryRow(
+          id = "natureOfBusiness",
+          answer = Right(sicCodes.head.description.getOrElse{throw new APIConversionException("No nature of business provided for summary")}),
+          changeLink = Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
+        )
+      )
     )
   }
 
@@ -159,19 +163,6 @@ trait SummarySrv extends CommonService {
           changeLink = Some(controllers.userJourney.routes.EmploymentController.firstPayment())
         ))
       ).flatten
-    )
-  }
-
-  private[services] def buildNatureOfBusinessSection(sicCodes: List[SICCode]) = {
-    SummarySection(
-      id = "natureOfBusiness",
-      rows = Seq(
-        SummaryRow(
-          id = "natureOfBusiness",
-          answer = Right(sicCodes.head.description.getOrElse{throw new APIConversionException("No nature of business provided for summary")}),
-          changeLink = Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
-        )
-      )
     )
   }
 
