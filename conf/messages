@@ -135,6 +135,8 @@ pages.summary.tradingName.answers.noAnswerGiven         = No
 pages.summary.tradingName.hiddenChangeText              = Change the company's trading name
 
 pages.summary.roAddress.question                        = Registered office address
+pages.summary.ppobAddress.question                      = Principal place of business
+pages.summary.ppobAddress.hiddenChangeText              = Change the company's principal place of business address
 
 pages.summary.businessContactDetails.sectionHeading     = Business contact details
 pages.summary.businessEmail.question                    = Business email
