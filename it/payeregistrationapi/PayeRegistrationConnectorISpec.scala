@@ -67,6 +67,13 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
                                                Some("Testshire"),
                                                Some("TE1 1ST"), Some("UK")
                                              ),
+                                             ppobAddress = Address(
+                                               "15 St Test Avenue",
+                                               "Testpool",
+                                               Some("TestUponAvon"),
+                                               Some("Nowhereshire"),
+                                               Some("LE1 1ST"),
+                                               Some("UK")),
                                              businessContactDetails = validBusinessContactDetails
     )
 

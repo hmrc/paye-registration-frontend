@@ -133,8 +133,9 @@ trait CompanyDetailsSrv extends CommonService {
   }
 
   private[services] def viewToAPI(viewData: CompanyDetailsView): Either[CompanyDetailsView, CompanyDetailsAPI] = viewData match {
-    case CompanyDetailsView(crn, companyName, Some(tradingName), address, Some(businessContactDetails)) =>
-      Right(CompanyDetailsAPI(crn, companyName, tradingNameAPIValue(tradingName), address, businessContactDetails))
+    case CompanyDetailsView(crn, companyName, Some(tradingName), roAddress, Some(businessContactDetails)) =>
+      //TODO: set the correct ppobAddress once View Model is ready
+      Right(CompanyDetailsAPI(crn, companyName, tradingNameAPIValue(tradingName), roAddress, roAddress, businessContactDetails))
     case _ => Left(viewData)
   }
 

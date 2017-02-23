@@ -36,6 +36,7 @@ trait PAYERegistrationFixture {
     companyName = "Test Company",
     tradingName = Some("Test Company Trading Name"),
     Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+    Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK")),
     businessContactDetails = validBusinessContactDetails
   )
 
