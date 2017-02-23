@@ -20,6 +20,7 @@ errors.invalid.mobileNumber                             = The mobile phone numbe
 errors.invalid.nino                                     = National Insurance number is in the wrong format
 errors.invalid.sic.noEntry                              = Tell us what the company does
 errors.invalid.sic.overCharLimit                        = Enter a business description using 100 characters or less
+errors.invalid.addressChoice.noEntry                    = Tell us where you''ll carry out most of your business activities
 
 ## Welcome page
 pages.welcome.title                                     = Register as an employer
@@ -51,6 +52,12 @@ pages.confirmRO.lede                                    = This is the official a
 pages.confirmRO.help.link                               = Not the right address?
 pages.confirmRO.help.body                               = If the registered office address is incorrect, you''ll need to update it with
 pages.confirmRO.help.body.link.url                      = https://ewf.companieshouse.gov.uk//seclogin?tc=1
+
+##PPOB Address
+pages.ppobAddress.title                                 = Tell us where you''ll carry out most of your business activities
+pages.ppobAddress.heading                               = Where will you carry out most of your business activities?
+pages.ppobAddress.roAddress                             = Registered office address:<br>{0}
+pages.ppobAddress.other                                 = A different location
 
 ## Business Contact Details
 pages.businessContact.title                             = Company contact details

@@ -11,7 +11,9 @@
     <p id="lead-paragraph">@messages("pages.confirmRO.lede")</p>
 
     @form(action = controllers.userJourney.routes.CompanyDetailsController.confirmRO()) {
-        @addressDisplay(address, "ro-address")
+        <div class="form-group">
+            @addressDisplay(address, "ro-address")
+        </div>
 
         <div class="form-group">
             @hiddenDetails("incorrect-address-", Messages("pages.confirmRO.help.link"), incorrectAddressContent)

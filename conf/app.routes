@@ -18,6 +18,10 @@ POST        /trading-name                           controllers.userJourney.Comp
 GET         /registered-office-address              controllers.userJourney.CompanyDetailsController.roAddress
 POST        /registered-office-address              controllers.userJourney.CompanyDetailsController.confirmRO
 
+## PPOB ADDRESS
+GET         /principal-place-of-business            controllers.userJourney.CompanyDetailsController.ppobAddress
+POST        /principal-place-of-business            controllers.userJourney.CompanyDetailsController.submitPPOBAddress
+
 ## BUSINESS CONTACT DETAILS
 GET         /business-contact-details               controllers.userJourney.CompanyDetailsController.businessContactDetails
 POST        /business-contact-details               controllers.userJourney.CompanyDetailsController.submitBusinessContactDetails
