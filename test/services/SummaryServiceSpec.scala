@@ -81,6 +81,11 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
             id = "roAddress",
             answer = Right("14 St Test Walk<br />Testley"),
             None
+          ),
+          SummaryRow(
+            id = "natureOfBusiness",
+            answer = Right("Firearms"),
+            Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
           )
         )
       ),
@@ -126,16 +131,6 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
             id = "firstPaymentDate",
             Right("20/12/2016"),
             Some(controllers.userJourney.routes.EmploymentController.firstPayment())
-          )
-        )
-      ),
-      SummarySection(
-        id="natureOfBusiness",
-        Seq(
-          SummaryRow(
-            id = "natureOfBusiness",
-            answer = Right("Firearms"),
-            Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
           )
         )
       ),
@@ -245,6 +240,11 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
                 id = "roAddress",
                 answer = Right(formatHMTLROAddress),
                 None
+              ),
+              SummaryRow(
+                id = "natureOfBusiness",
+                answer = Right("Firearms"),
+                Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
               )
             )
           ),
@@ -294,16 +294,6 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
             )
           ),
           SummarySection(
-            id="natureOfBusiness",
-            Seq(
-              SummaryRow(
-                id = "natureOfBusiness",
-                answer = Right("Firearms"),
-                Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
-              )
-            )
-          ),
-          SummarySection(
             id = "directorDetails",
             Seq(
               SummaryRow(
@@ -332,6 +322,13 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
         BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
 
+      val sicCodes = List(
+        SICCode(
+          code = None,
+          description = Some("Novelty hairbrushes")
+        )
+      )
+
       val formatHMTLROAddress = service.formatHTMLROAddress(validCompanyDetailsAPI.roAddress)
 
       val companyDetailsSection = SummarySection(
@@ -346,11 +343,33 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
             id = "roAddress",
             answer = Right(formatHMTLROAddress),
             None
+          ),
+          SummaryRow(
+            id = "natureOfBusiness",
+            answer = Right("Novelty hairbrushes"),
+            Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
           )
         )
       )
 
-      service.buildCompanyDetailsSection(validCompanyDetailsAPI) shouldBe companyDetailsSection
+      service.buildCompanyDetailsSection(validCompanyDetailsAPI, sicCodes) shouldBe companyDetailsSection
+    }
+
+    "throw the correct exception when there is no description provided" in new Setup{
+      val sicCodesModel = List(
+        SICCode(
+          code = None,
+          description = None
+        )
+      )
+
+      an[APIConversionException] shouldBe thrownBy(service.buildCompanyDetailsSection(validCompanyDetailsAPI, sicCodesModel))
+    }
+
+    "throw the correct exception when there is no SIC code provided" in new Setup{
+      val sicCodesModel = List.empty
+
+      a[NoSuchElementException] shouldBe thrownBy(service.buildCompanyDetailsSection(validCompanyDetailsAPI, sicCodesModel))
     }
   }
 
@@ -458,47 +477,6 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
         )
 
       service.buildBusinessContactDetailsSection(businessContactDetailsModel) shouldBe validBCDSection
-    }
-  }
-
-  "buildNatureOfBusinessSection" should {
-    "return a valid nature of business block" in new Setup{
-      val sicCodesModel = List(
-        SICCode(
-          code = None,
-          description = Some("Ice cream")
-        )
-      )
-
-      val natOfBusSection = SummarySection(
-        id = "natureOfBusiness",
-        rows = Seq(
-          SummaryRow(
-            id = "natureOfBusiness",
-            answer = Right("Ice cream"),
-            changeLink = Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
-          )
-        )
-      )
-
-      service.buildNatureOfBusinessSection(sicCodesModel) shouldBe natOfBusSection
-    }
-
-    "throw the correct exception when there is no description provided" in new Setup{
-      val sicCodesModel = List(
-        SICCode(
-          code = None,
-          description = None
-        )
-      )
-
-      an[APIConversionException] shouldBe thrownBy(service.buildNatureOfBusinessSection(sicCodesModel))
-    }
-
-    "throw the correct exception when there is no SIC code provided" in new Setup{
-      val sicCodesModel = List.empty
-
-      a[NoSuchElementException] shouldBe thrownBy(service.buildNatureOfBusinessSection(sicCodesModel))
     }
   }
 
