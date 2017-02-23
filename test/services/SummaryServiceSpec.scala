@@ -213,7 +213,7 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
           companyName = "Test Company",
           tradingName = None,
           Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
-          Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+          Address("15 St Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE4 1ST"), Some("UK")),
           businessContactDetails = validBusinessContactDetails
         ),
         employment = validEmploymentAPI,
@@ -232,6 +232,7 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
       )
 
       val formatHMTLROAddress = service.formatHTMLROAddress(apiRegistrationNoTName.companyDetails.roAddress)
+      val formatHMTLPPOBAddress = service.formatHTMLROAddress(apiRegistrationNoTName.companyDetails.ppobAddress)
 
       lazy val summaryNoTName = Summary(
         Seq(
@@ -250,7 +251,7 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
               ),
               SummaryRow(
                 id = "ppobAddress",
-                answer = Right(formatHMTLROAddress),
+                answer = Right(formatHMTLPPOBAddress),
                 Some(controllers.userJourney.routes.CompanyDetailsController.roAddress())
               ),
               SummaryRow(
@@ -331,7 +332,7 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
         companyName = "Test Company",
         tradingName = Some("Test Company Trading Name"),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
-        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Address("15 St Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE4 1ST"), Some("UK")),
         BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
 
@@ -343,6 +344,7 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
       )
 
       val formatHMTLROAddress = service.formatHTMLROAddress(validCompanyDetailsAPI.roAddress)
+      val formatHMTLPPOBAddress = service.formatHTMLROAddress(validCompanyDetailsAPI.ppobAddress)
 
       val companyDetailsSection = SummarySection(
         id = "companyDetails",
@@ -359,7 +361,7 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
           ),
           SummaryRow(
             id = "ppobAddress",
-            answer = Right(formatHMTLROAddress),
+            answer = Right(formatHMTLPPOBAddress),
             Some(controllers.userJourney.routes.CompanyDetailsController.roAddress())
           ),
           SummaryRow(
