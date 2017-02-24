@@ -17,3 +17,5 @@ GET        /reg-setup                                    controllers.test.TestRe
 POST       /reg-setup                                    controllers.test.TestRegSetupController.submitRegSetup
 
 GET        /feature-flag/:featureName/:featureStatus     controllers.test.FeatureSwitchController.addressServiceSwitch(featureName: String, featureStatus: String)
+
+GET        /no-lookup-ppob-address                       controllers.test.TestAddressLookupController.noLookupPPOBAddress
