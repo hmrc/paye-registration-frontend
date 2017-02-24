@@ -49,7 +49,7 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
     )
 
   "The PPOB Address screen without PPOB Address" should {
-    lazy val view = PPOBAddressPage(ChooseAddressForm.form, testROAddress, None)
+    lazy val view = PPOBAddressPage(ChooseAddressForm.form, Some(testROAddress), None)
     lazy val document = Jsoup.parse(view.body)
 
     "have the company company in the page title" in {
@@ -82,7 +82,7 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
   }
 
   "The PPOB Address screen with PPOB Address" should {
-    lazy val view = PPOBAddressPage(ChooseAddressForm.form, testROAddress, Some(testPPOBAddress))
+    lazy val view = PPOBAddressPage(ChooseAddressForm.form, Some(testROAddress), Some(testPPOBAddress))
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct name for radio button ppobAddress" in {

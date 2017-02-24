@@ -130,17 +130,22 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
   val ppobAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        for {
-          companyDetails <- companyDetailsService.getCompanyDetails
-        } yield Ok(PPOBAddressPage(ChooseAddressForm.form.fill(ChosenAddress(AddressChoice.ppobAddress)), companyDetails.roAddress, None))
-        //TODO: update to load the correct PPOB Address if existing
+        companyDetailsService.getCompanyDetails.map { companyDetails =>
+          val addressMap = companyDetailsService.getPPOBPageAddresses(companyDetails)
+          Ok(PPOBAddressPage(ChooseAddressForm.form.fill(ChosenAddress(AddressChoice.ppobAddress)), addressMap.get("ro"), addressMap.get("ppob")))
+        }
+    //TODO: update to load the correct PPOB Address if existing
   }
 
   val submitPPOBAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         ChooseAddressForm.form.bindFromRequest.fold(
-          errs => companyDetailsService.getCompanyDetails map (details => BadRequest(PPOBAddressPage(errs, details.roAddress, Some(details.roAddress)))),
+          errs => companyDetailsService.getCompanyDetails map{
+            details =>
+              val addressMap = companyDetailsService.getPPOBPageAddresses(details)
+              BadRequest(PPOBAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob")))
+          },
           success => Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
           //TODO: Call the service and use the result from the service
         )
