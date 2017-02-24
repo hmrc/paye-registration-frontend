@@ -95,7 +95,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
   val confirmRO : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
+        Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.ppobAddress()))
   }
 
   private def badRequestResponse(form: Form[TradingName])(implicit request: Request[AnyContent]): Future[Result] = {

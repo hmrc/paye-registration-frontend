@@ -223,7 +223,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
         AuthBuilder.showWithAuthorisedUser(controller.confirmRO, mockAuthConnector) {
           result =>
             status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()}")
+            redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.ppobAddress()}")
         }
       }
     }
