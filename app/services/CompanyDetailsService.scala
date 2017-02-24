@@ -21,9 +21,8 @@ import javax.inject.{Inject, Singleton}
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import models.BusinessContactDetails
-import models.view.{Address, CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
+import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView, Address}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
-import models.external.CHROAddress
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -71,7 +70,7 @@ trait CompanyDetailsSrv extends CommonService {
       case None => for {
         cName   <- cohoService.getStoredCompanyName
         roAddress <- retrieveRegisteredOfficeAddress
-      } yield CompanyDetailsView(None, cName, None, roAddress, None)
+      } yield CompanyDetailsView(None, cName, None, roAddress, None, None)
     }
   }
 
@@ -109,6 +108,20 @@ trait CompanyDetailsSrv extends CommonService {
     }
   }
 
+  def copyROAddrToPPOBAddr()(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    for {
+      details <- getCompanyDetails
+      outcome <- saveCompanyDetails(details.copy(ppobAddress = Some(details.roAddress)))
+    } yield outcome
+  }
+
+  def submitPPOBAddr(ppobAddr: Address)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    for {
+      details <- getCompanyDetails
+      outcome <- saveCompanyDetails(details.copy(ppobAddress = Some(ppobAddr)))
+    } yield outcome
+  }
+
   def submitBusinessContact(businessContact: BusinessContactDetails)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
       details <- getCompanyDetails
@@ -128,14 +141,14 @@ trait CompanyDetailsSrv extends CommonService {
       apiModel.companyName,
       tradingNameView,
       apiModel.roAddress,
+      Some(apiModel.ppobAddress),
       Some(apiModel.businessContactDetails)
     )
   }
 
   private[services] def viewToAPI(viewData: CompanyDetailsView): Either[CompanyDetailsView, CompanyDetailsAPI] = viewData match {
-    case CompanyDetailsView(crn, companyName, Some(tradingName), roAddress, Some(businessContactDetails)) =>
-      //TODO: set the correct ppobAddress once View Model is ready
-      Right(CompanyDetailsAPI(crn, companyName, tradingNameAPIValue(tradingName), roAddress, roAddress, businessContactDetails))
+    case CompanyDetailsView(crn, companyName, Some(tradingName), roAddress, Some(ppobAddress), Some(businessContactDetails)) =>
+      Right(CompanyDetailsAPI(crn, companyName, tradingNameAPIValue(tradingName), roAddress, ppobAddress, businessContactDetails))
     case _ => Left(viewData)
   }
 
