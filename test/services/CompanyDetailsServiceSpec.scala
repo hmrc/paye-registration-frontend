@@ -363,6 +363,38 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
   }
 
+  "Calling getPPOBPageAddresses" should {
+    def viewModel(roAddr: Address, ppobAddr: Option[Address]): CompanyDetailsView = {
+      CompanyDetailsView(
+        crn = None,
+        companyName = "unimportant",
+        tradingName = None,
+        roAddress = roAddr,
+        ppobAddress = ppobAddr,
+        businessContactDetails = None
+      )
+    }
+
+    "return a single RO Address when there is no PPOOB Address" in new Setup {
+      val roAddr = Address("line1", "line2", None, None, Some("postcode"), None)
+      def model = viewModel(roAddr, None)
+      service.getPPOBPageAddresses(model) shouldBe Map("ro" -> roAddr)
+    }
+
+    "return a single PPOB Address when the RO Address and PPOB Address are the same" in new Setup {
+      val roAddr = Address("line1", "line2", None, None, Some("postcode"), None)
+      def model = viewModel(roAddr, Some(roAddr))
+      service.getPPOBPageAddresses(model) shouldBe Map("ppob" -> roAddr)
+    }
+
+    "return an RO Address and PPOB Address when the RO Address and PPOB Address are different" in new Setup {
+      val roAddr   = Address("line1", "line2", None, None, Some("postcode"), None)
+      val ppobAddr = Address("lineA", "lineB", None, None, Some("postKode"), None)
+      def model = viewModel(roAddr, Some(ppobAddr))
+      service.getPPOBPageAddresses(model) shouldBe Map("ro" -> roAddr, "ppob" -> ppobAddr)
+    }
+  }
+
   "Calling copyROAddrToPPOBAddr" should {
     "return a success response when copied successfully" in new CompanyDetailsMockedSetup {
       mockFetchRegID("54322")

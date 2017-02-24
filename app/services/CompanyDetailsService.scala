@@ -108,6 +108,13 @@ trait CompanyDetailsSrv extends CommonService {
     }
   }
 
+  def getPPOBPageAddresses(companyDetailsView: CompanyDetailsView): (Map[String, Address]) = {
+    companyDetailsView.ppobAddress.map {
+      case companyDetailsView.roAddress => Map("ppob" -> companyDetailsView.roAddress)
+      case addr: Address => Map("ro" -> companyDetailsView.roAddress, "ppob" -> addr)
+      }.getOrElse(Map("ro" -> companyDetailsView.roAddress))
+  }
+
   def copyROAddrToPPOBAddr()(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
       details <- getCompanyDetails
