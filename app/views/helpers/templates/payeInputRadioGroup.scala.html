@@ -45,13 +45,13 @@
                 @if(labelAfter) {
                     @if(elements.args.get('_stackedLabel)) {
                         @if(label.split(" ").length < 2) {
-                            <br>@label
+                            <br>@Html(label)
                         } else {
                             @for( (l, index) <- label.split(" ").zipWithIndex) {
-                                @if(index != 0) {<br>}@l
+                                @if(index != 0) {<br>}@Html(l)
                             }
                         }
-                    } else { @label }
+                    } else { @Html(label) }
                 }
         </label>
         }

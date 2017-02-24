@@ -22,15 +22,15 @@ import javax.inject.{Inject, Singleton}
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector}
 import enums.DownstreamOutcome
-import forms.companyDetails.{BusinessContactDetailsForm, TradingNameForm}
-import models.view.TradingName
+import forms.companyDetails.{BusinessContactDetailsForm, ChooseAddressForm, TradingNameForm}
+import models.view.{AddressChoice, ChosenAddress, TradingName}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import services.{CoHoAPIService, CoHoAPISrv, CompanyDetailsService, CompanyDetailsSrv, S4LService, S4LSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import views.html.pages.companyDetails.{tradingName => TradingNamePage, confirmROAddress, businessContactDetails => BusinessContactDetailsPage}
+import views.html.pages.companyDetails.{confirmROAddress, businessContactDetails => BusinessContactDetailsPage, chooseAddress => PPOBAddressPage, tradingName => TradingNamePage}
 
 import scala.concurrent.Future
 
@@ -124,6 +124,25 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
             case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.AddressLookupController.redirectToLookup())
             case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
           }
+        )
+  }
+
+  val ppobAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user =>
+      implicit request =>
+        for {
+          companyDetails <- companyDetailsService.getCompanyDetails
+        } yield Ok(PPOBAddressPage(ChooseAddressForm.form.fill(ChosenAddress(AddressChoice.ppobAddress)), companyDetails.roAddress, None))
+        //TODO: update to load the correct PPOB Address if existing
+  }
+
+  val submitPPOBAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user =>
+      implicit request =>
+        ChooseAddressForm.form.bindFromRequest.fold(
+          errs => companyDetailsService.getCompanyDetails map (details => BadRequest(PPOBAddressPage(errs, details.roAddress, Some(details.roAddress)))),
+          success => Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
+          //TODO: Call the service and use the result from the service
         )
   }
 }

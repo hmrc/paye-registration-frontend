@@ -1,0 +1,40 @@
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import helpers.templates.{payeInputRadioGroup}
+@import helpers.templates.{addressDisplay}
+@import models.view.{Address, ChosenAddress}
+
+@(chooseAddressForm: Form[ChosenAddress], roAddress: Address, ppobAddress: Option[Address])(implicit request: Request[_], messages: Messages)
+
+@main_template(title = messages("pages.ppobAddress.title")) {
+    @govHelpers.errorSummary(
+        messages("app.common.errorSummaryLabel"),
+        chooseAddressForm
+    )
+
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.ppobAddress.heading")</h1>
+
+    @defining(ppobAddress.map (adr => "ppobAddress" -> addressDisplay(adr, "ppob").toString)) {ppobOptional =>
+        @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.submitPPOBAddress) {
+            <div class="form-group">
+                @payeInputRadioGroup(
+                    field = chooseAddressForm("chosenAddress"),
+                    Seq(
+                        Some("roAddress" -> messages("pages.ppobAddress.roAddress", addressDisplay(roAddress, "ro"))),
+                        ppobOptional,
+                        Some("other" -> messages("pages.ppobAddress.other"))
+                    ).flatten,
+                    '_legend -> messages("pages.ppobAddress.legend"),
+                    '_legendID -> "chosenAddress",
+                    '_helpText -> None,
+                    '_labelAfter -> true,
+                    '_labelClass -> "block-label",
+                    '_groupClass -> "block"
+                )
+            </div>
+
+            <div class="form-group">
+                <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
+            </div>
+        }
+    }
+}
