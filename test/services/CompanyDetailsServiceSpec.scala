@@ -54,7 +54,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
     val service = new CompanyDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService, mockCompRegConnector, mockCohoAPIConnector) {
 
       override def getCompanyDetails(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
-        Future.successful(CompanyDetailsView(None, "test compay name", None, validROAddress, None))
+        Future.successful(CompanyDetailsView(None, "test compay name", None, validROAddress, None, None))
       }
 
       override def saveCompanyDetails(detailsView: CompanyDetailsView)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
@@ -103,6 +103,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
           tradingName = Some("trading name")
         )),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Some(Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK"))),
         Some(BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321")))
       )
       service.apiToView(tstModelAPI) shouldBe tstModelView
@@ -125,6 +126,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
           tradingName = None
         )),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Some(Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK"))),
         Some(BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321")))
       )
       service.apiToView(tstModelAPI) shouldBe tstModelView
@@ -138,7 +140,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "Comp name",
         Some("trading name"),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
-        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
       val tstModelView = CompanyDetailsView(
@@ -149,6 +151,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
           tradingName = Some("trading name")
         )),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Some(Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))),
         Some(BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321")))
       )
       service.viewToAPI(tstModelView) shouldBe Right(tstModelAPI)
@@ -160,7 +163,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "Comp name",
         None,
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
-        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
       val tstModelView = CompanyDetailsView(
@@ -171,6 +174,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
           tradingName = Some("trading name")
         )),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Some(Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))),
         Some(BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321")))
       )
       service.viewToAPI(tstModelView) shouldBe Right(tstModelAPI)
@@ -182,6 +186,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "Comp name",
         None,
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Some(Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))),
         Some(BusinessContactDetails(Some("test@paye.co.uk"), None, None))
       )
       service.viewToAPI(tstModelView) shouldBe Left(tstModelView)
@@ -196,7 +201,23 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
           tradingName = Some("trading name")
         )),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Some(Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))),
         None
+      )
+      service.viewToAPI(tstModelView) shouldBe Left(tstModelView)
+    }
+
+    "return the original view model when PPOB Address has not been completed" in new Setup {
+      val tstModelView = CompanyDetailsView(
+        Some("tstCRN"),
+        "Comp name",
+        Some(TradingNameView(
+          differentName = false,
+          tradingName = Some("trading name")
+        )),
+        Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        None,
+        Some(BusinessContactDetails(Some("test@paye.co.uk"), None, None))
       )
       service.viewToAPI(tstModelView) shouldBe Left(tstModelView)
     }
@@ -244,7 +265,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockCohoAPIConnector.getRegisteredOfficeAddress(Matchers.eq("txID"))(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCHROAddress))
 
-      await(service.getCompanyDetails) shouldBe CompanyDetailsView(None, "Tst company name", None, validCHROAddress, None)
+      await(service.getCompanyDetails) shouldBe CompanyDetailsView(None, "Tst company name", None, validCHROAddress, None, None)
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
@@ -286,6 +307,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "Tst Company Name",
         None,
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+        Some(Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))),
         Some(BusinessContactDetails(Some("test@paye.co.uk"), None, None))
       )
 
@@ -338,6 +360,34 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         .thenReturn(Future.successful(testAddress))
 
       await(service.retrieveRegisteredOfficeAddress) shouldBe CHROAddress.convertToAddress(testAddress)
+    }
+  }
+
+  "Calling copyROAddrToPPOBAddr" should {
+    "return a success response when copied successfully" in new CompanyDetailsMockedSetup {
+      mockFetchRegID("54322")
+
+      await(service.copyROAddrToPPOBAddr()) shouldBe DownstreamOutcome.Success
+    }
+
+    "return a failure response when copy is not completed successfully" in new NoCompanyDetailsMockedSetup {
+      mockFetchRegID("54322")
+
+      await(service.copyROAddrToPPOBAddr()) shouldBe DownstreamOutcome.Failure
+    }
+  }
+
+  "Calling submitPPOBAddr" should {
+    "return a success response when submit is completed successfully" in new CompanyDetailsMockedSetup {
+      mockFetchRegID("54322")
+
+      await(service.submitPPOBAddr(validAddress)) shouldBe DownstreamOutcome.Success
+    }
+
+    "return a failure response when submit is not completed successfully" in new NoCompanyDetailsMockedSetup {
+      mockFetchRegID("54322")
+
+      await(service.submitPPOBAddr(validAddress)) shouldBe DownstreamOutcome.Failure
     }
   }
 

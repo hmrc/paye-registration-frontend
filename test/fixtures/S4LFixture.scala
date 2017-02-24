@@ -34,11 +34,21 @@ trait S4LFixture {
     tradingName = None
   )
 
+  val validAddress = Address(
+    "10 Test Street",
+    "TestTown",
+    Some("Testfordshire"),
+    None,
+    Some("TE1 0ST"),
+    Some("UK")
+  )
+
   val validCompanyDetailsViewModel = CompanyDetails(
     Some("crn"),
     "Tst Company Name",
     Some(validTradingNameViewModel),
     Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
+    Some(Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))),
     Some(BusinessContactDetails(Some("test@paye.co.uk"), None, None))
   )
 

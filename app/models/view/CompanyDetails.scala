@@ -24,6 +24,7 @@ case class CompanyDetails(
                            companyName: String,
                            tradingName: Option[TradingName],
                            roAddress: Address,
+                           ppobAddress: Option[Address],
                            businessContactDetails: Option[BusinessContactDetails]
                            )
 
