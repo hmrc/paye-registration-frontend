@@ -19,7 +19,7 @@ package controllers.userJourney
 import builders.AuthBuilder
 import enums.DownstreamOutcome
 import fixtures.{PAYERegistrationFixture, S4LFixture}
-import models.BusinessContactDetails
+import models.DigitalContactDetails
 import models.view.{Address, CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import org.jsoup._
 import org.mockito.Matchers
@@ -230,7 +230,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
   }
 
   "businessContactDetails" should {
-    val bcd = BusinessContactDetails(None, None, None)
+    val bcd = DigitalContactDetails(None, None, None)
 
     "return an ok" when {
       "the user is authorised to view the page and there is a saved buiness contact details model" in new Setup {

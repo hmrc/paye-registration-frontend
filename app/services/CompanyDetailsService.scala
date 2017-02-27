@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
-import models.BusinessContactDetails
+import models.DigitalContactDetails
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView, Address}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -129,7 +129,7 @@ trait CompanyDetailsSrv extends CommonService {
     } yield outcome
   }
 
-  def submitBusinessContact(businessContact: BusinessContactDetails)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def submitBusinessContact(businessContact: DigitalContactDetails)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
       details <- getCompanyDetails
       outcome <- saveCompanyDetails(details.copy(businessContactDetails = Some(businessContact)))

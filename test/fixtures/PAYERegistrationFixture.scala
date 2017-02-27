@@ -18,14 +18,14 @@ package fixtures
 
 import java.time.LocalDate
 
-import models.BusinessContactDetails
+import models.DigitalContactDetails
 import models.api._
 import models.view.{Address, Summary, SummaryRow, SummarySection}
 
 trait PAYERegistrationFixture {
 
   val validBusinessContactDetails =
-    BusinessContactDetails(
+    DigitalContactDetails(
       Some("test@email.com"),
       Some("1234567890"),
       Some("0987654321")

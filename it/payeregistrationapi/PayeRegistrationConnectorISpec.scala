@@ -20,7 +20,7 @@ import java.time.LocalDate
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.PAYERegistrationConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
-import models.BusinessContactDetails
+import models.DigitalContactDetails
 import models.api.{CompanyDetails, Director, Employment, Name, SICCode}
 import models.view.Address
 import play.api.Application
@@ -51,7 +51,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
   "companyDetails" should {
     val validBusinessContactDetails =
-      BusinessContactDetails(
+      DigitalContactDetails(
         Some("test@email.com"),
         Some("1234567890"),
         Some("0987654321")

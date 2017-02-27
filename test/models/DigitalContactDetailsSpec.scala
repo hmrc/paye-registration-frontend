@@ -19,26 +19,26 @@ package models
 import play.api.libs.json.{JsSuccess, Json}
 import testHelpers.PAYERegSpec
 
-class BusinessContactDetailsSpec extends PAYERegSpec {
+class DigitalContactDetailsSpec extends PAYERegSpec {
 
   "BusinessContactDetails with full data" should {
     val targetJsonMax = Json.parse(
       s"""{
-         |  "businessEmail":"test@email.com",
+         |  "email":"test@email.com",
          |  "mobileNumber":"07943000111",
          |  "phoneNumber":"0161385032"
          |}""".stripMargin)
 
-    val maxModel = BusinessContactDetails(
-      businessEmail = Some("test@email.com"),
+    val maxModel = DigitalContactDetails(
+      email = Some("test@email.com"),
       mobileNumber = Some("07943000111"),
       phoneNumber = Some("0161385032")
     )
     "read from Json" in {
-      Json.fromJson[BusinessContactDetails](targetJsonMax) shouldBe JsSuccess(maxModel)
+      Json.fromJson[DigitalContactDetails](targetJsonMax) shouldBe JsSuccess(maxModel)
     }
     "write to Json" in {
-      Json.toJson[BusinessContactDetails](maxModel) shouldBe targetJsonMax
+      Json.toJson[DigitalContactDetails](maxModel) shouldBe targetJsonMax
     }
   }
 
@@ -46,20 +46,20 @@ class BusinessContactDetailsSpec extends PAYERegSpec {
 
     val tstJson = Json.parse(
       s"""{
-         |  "businessEmail":"test@email.com"
+         |  "email":"test@email.com"
          |}""".stripMargin)
 
-    val tstModel = BusinessContactDetails(
-      businessEmail = Some("test@email.com"),
+    val tstModel = DigitalContactDetails(
+      email = Some("test@email.com"),
       mobileNumber = None,
       phoneNumber = None
     )
 
     "read from Json" in {
-      Json.fromJson[BusinessContactDetails](tstJson) shouldBe JsSuccess(tstModel)
+      Json.fromJson[DigitalContactDetails](tstJson) shouldBe JsSuccess(tstModel)
     }
     "write to Json" in {
-      Json.toJson[BusinessContactDetails](tstModel) shouldBe tstJson
+      Json.toJson[DigitalContactDetails](tstModel) shouldBe tstJson
     }
   }
 
@@ -70,17 +70,17 @@ class BusinessContactDetailsSpec extends PAYERegSpec {
          |  "mobileNumber":"07943000111"
          |}""".stripMargin)
 
-    val tstModel = BusinessContactDetails(
-      businessEmail = None,
+    val tstModel = DigitalContactDetails(
+      email = None,
       mobileNumber = Some("07943000111"),
       phoneNumber = None
     )
 
     "read from Json" in {
-      Json.fromJson[BusinessContactDetails](tstJson) shouldBe JsSuccess(tstModel)
+      Json.fromJson[DigitalContactDetails](tstJson) shouldBe JsSuccess(tstModel)
     }
     "write to Json" in {
-      Json.toJson[BusinessContactDetails](tstModel) shouldBe tstJson
+      Json.toJson[DigitalContactDetails](tstModel) shouldBe tstJson
     }
   }
 
@@ -90,18 +90,18 @@ class BusinessContactDetailsSpec extends PAYERegSpec {
          |  "phoneNumber":"0161385032"
          |}""".stripMargin)
 
-    val tstModel = BusinessContactDetails (
-      businessEmail = None,
+    val tstModel = DigitalContactDetails (
+      email = None,
       mobileNumber = None,
       phoneNumber = Some("0161385032")
     )
 
 
     "read from Json" in {
-      Json.fromJson[BusinessContactDetails](tstJson) shouldBe JsSuccess(tstModel)
+      Json.fromJson[DigitalContactDetails](tstJson) shouldBe JsSuccess(tstModel)
     }
     "write to Json" in {
-      Json.toJson[BusinessContactDetails](tstModel) shouldBe tstJson
+      Json.toJson[DigitalContactDetails](tstModel) shouldBe tstJson
     }
   }
 

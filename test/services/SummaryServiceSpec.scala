@@ -19,7 +19,7 @@ package services
 import common.exceptions.InternalExceptions.APIConversionException
 import connectors.PAYERegistrationConnector
 import fixtures.PAYERegistrationFixture
-import models.BusinessContactDetails
+import models.DigitalContactDetails
 import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI, SICCode, Director, Employment, Name}
 import models.view.{SummaryRow, SummarySection, Summary, Address}
 import org.mockito.Matchers
@@ -333,7 +333,7 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
         tradingName = Some("Test Company Trading Name"),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         Address("15 St Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE4 1ST"), Some("UK")),
-        BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
+        DigitalContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
 
       val sicCodes = List(
@@ -435,7 +435,7 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
   "buildBusinessContactDetails" should {
     "return a valid buiness contact details block" in new Setup {
       val businessContactDetailsModel =
-        BusinessContactDetails(
+        DigitalContactDetails(
           Some("test@email.com"),
           Some("1234567890"),
           Some("0987654321")
@@ -468,7 +468,7 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
 
     "return a summary section with no provided answers" in new Setup {
       val businessContactDetailsModel =
-        BusinessContactDetails(
+        DigitalContactDetails(
           None,
           None,
           None

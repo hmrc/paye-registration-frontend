@@ -19,7 +19,7 @@ package services
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, PAYERegistrationFixture, S4LFixture}
-import models.BusinessContactDetails
+import models.DigitalContactDetails
 import models.view.{Address, CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import org.mockito.Matchers
@@ -93,7 +93,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         Some("trading name"),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK")),
-        BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
+        DigitalContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
       val tstModelView = CompanyDetailsView(
         Some("tstCRN"),
@@ -104,7 +104,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         )),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         Some(Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK"))),
-        Some(BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321")))
+        Some(DigitalContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321")))
       )
       service.apiToView(tstModelAPI) shouldBe tstModelView
     }
@@ -116,7 +116,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         None,
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK")),
-        BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
+        DigitalContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
       val tstModelView = CompanyDetailsView(
         Some("tstCRN"),
@@ -127,7 +127,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         )),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         Some(Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK"))),
-        Some(BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321")))
+        Some(DigitalContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321")))
       )
       service.apiToView(tstModelAPI) shouldBe tstModelView
     }
@@ -141,7 +141,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         Some("trading name"),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
-        BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
+        DigitalContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
       val tstModelView = CompanyDetailsView(
         Some("tstCRN"),
@@ -152,7 +152,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         )),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         Some(Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))),
-        Some(BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321")))
+        Some(DigitalContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321")))
       )
       service.viewToAPI(tstModelView) shouldBe Right(tstModelAPI)
     }
@@ -164,7 +164,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         None,
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
-        BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
+        DigitalContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
       val tstModelView = CompanyDetailsView(
         Some("tstCRN"),
@@ -175,7 +175,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         )),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         Some(Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))),
-        Some(BusinessContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321")))
+        Some(DigitalContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321")))
       )
       service.viewToAPI(tstModelView) shouldBe Right(tstModelAPI)
     }
@@ -187,7 +187,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         None,
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         Some(Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))),
-        Some(BusinessContactDetails(Some("test@paye.co.uk"), None, None))
+        Some(DigitalContactDetails(Some("test@paye.co.uk"), None, None))
       )
       service.viewToAPI(tstModelView) shouldBe Left(tstModelView)
     }
@@ -217,7 +217,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         )),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         None,
-        Some(BusinessContactDetails(Some("test@paye.co.uk"), None, None))
+        Some(DigitalContactDetails(Some("test@paye.co.uk"), None, None))
       )
       service.viewToAPI(tstModelView) shouldBe Left(tstModelView)
     }
@@ -308,7 +308,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         None,
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         Some(Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))),
-        Some(BusinessContactDetails(Some("test@paye.co.uk"), None, None))
+        Some(DigitalContactDetails(Some("test@paye.co.uk"), None, None))
       )
 
       when(mockS4LService.saveForm(Matchers.eq(CacheKeys.CompanyDetails.toString),Matchers.any)(Matchers.any[HeaderCarrier](), Matchers.any[Format[CompanyDetailsView]]()))

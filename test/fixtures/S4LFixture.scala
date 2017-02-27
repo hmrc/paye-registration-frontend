@@ -18,7 +18,7 @@ package fixtures
 
 import java.time.LocalDate
 
-import models.BusinessContactDetails
+import models.DigitalContactDetails
 import models.api.{Director, Name}
 import models.view._
 
@@ -49,7 +49,7 @@ trait S4LFixture {
     Some(validTradingNameViewModel),
     Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
     Some(Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))),
-    Some(BusinessContactDetails(Some("test@paye.co.uk"), None, None))
+    Some(DigitalContactDetails(Some("test@paye.co.uk"), None, None))
   )
 
   val validEmploymentViewModel = Employment(
@@ -66,8 +66,8 @@ trait S4LFixture {
     None
   )
 
-  val validBusinessContactModel = BusinessContactDetails(
-    businessEmail = Some("test@paye.co.uk"),
+  val validBusinessContactModel = DigitalContactDetails(
+    email = Some("test@paye.co.uk"),
     mobileNumber = Some("00447123456789"),
     phoneNumber = Some("0044123456789")
   )

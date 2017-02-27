@@ -18,10 +18,10 @@ package models
 
 import play.api.libs.json.Json
 
-case class BusinessContactDetails(businessEmail : Option[String],
+case class DigitalContactDetails(email : Option[String],
                                   mobileNumber : Option[String],
                                   phoneNumber : Option[String])
 
-object BusinessContactDetails {
-  implicit val format = Json.format[BusinessContactDetails]
+object DigitalContactDetails {
+  implicit val format = Json.format[DigitalContactDetails]
 }
