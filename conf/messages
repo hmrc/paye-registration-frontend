@@ -69,6 +69,10 @@ pages.businessContact.mobile                            = Business mobile number
 pages.businessContact.phone                             = Business telephone number (including area code)
 pages.businessContact.noFieldsCompleted                 = You need to provide at least one contact method so we can get in touch if we need to
 
+## PAYE Contact Details
+pages.payeContact.noFieldsCompleted                     = You need to provide at least one contact method so we can get in touch if we need to
+pages.payeContact.nameMandatory                         = Enter a contact name
+
 ## Employing Staff Page
 pages.employingStaff.title                              = Employing Staff
 pages.employingStaff.heading                            = Will the company employ staff this year?
