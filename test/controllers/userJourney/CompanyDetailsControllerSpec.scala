@@ -29,7 +29,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.{CoHoAPIService, CompanyDetailsService, S4LService}
+import services.{AddressLookupService, CoHoAPIService, CompanyDetailsService, S4LService}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -39,6 +39,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
   val mockS4LService = mock[S4LService]
   val mockCompanyDetailsService = mock[CompanyDetailsService]
   val mockCoHoService = mock[CoHoAPIService]
+  val mockAddressLookupService = mock[AddressLookupService]
 
   class Setup {
     val controller = new CompanyDetailsCtrl {
@@ -48,6 +49,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       override val companyDetailsService = mockCompanyDetailsService
       override val cohoService = mockCoHoService
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+      override val addressLookupService = mockAddressLookupService
     }
   }
 
@@ -295,7 +297,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       )) {
         result =>
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.AddressLookupController.redirectToLookup()}")
+          redirectLocation(result) shouldBe Some(s"${routes.NatureOfBusinessController.natureOfBusiness()}")
       }
     }
   }
