@@ -61,9 +61,9 @@ class AddressLookupServiceSpec extends PAYERegSpec with S4LFixture with PAYERegi
         "?continue=http://localhost:9870/register-for-paye/test-url"
     }
 
-//    "return the Address Lookup stub Url" in new SetupWithProxy(false) {
-//      await(service.buildAddressLookupUrl()) shouldBe "http://localhost:9870/register-for-paye/nature-of-business"
-//    }
+    "return the Address Lookup stub Url" in new SetupWithProxy(false) {
+      await(service.buildAddressLookupUrl("payreg1", Call("GET","/test-uri"))) shouldBe "/no-lookup-ppob-address"
+    }
   }
 
   "Calling getAddress" should {
@@ -105,6 +105,12 @@ class AddressLookupServiceSpec extends PAYERegSpec with S4LFixture with PAYERegi
       implicit val request = FakeRequest("GET", "/test-uri?id=1234567890")
 
       await(service.getAddress) shouldBe expected
+    }
+
+    "return none" in new Setup {
+      implicit val request = FakeRequest("GET", "/test-uri")
+
+      await(service.getAddress) shouldBe None
     }
   }
 

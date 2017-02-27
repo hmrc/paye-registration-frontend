@@ -36,7 +36,6 @@ class AddressLookupService @Inject()(
                                       injAddressConnector: AddressLookupConnector)
   extends AddressLookupSrv with ServicesConfig {
   lazy val payeRegistrationUrl = getConfString("paye-registration-frontend.www.url","")
-  lazy val payeRegistrationUri = getConfString("paye-registration-frontend.www.uri","")
   lazy val addressLookupFrontendUrl = getConfString("address-lookup-frontend.www.url","")
   lazy val addressLookupFrontendUri = getConfString("address-lookup-frontend.www.uri","")
   val addressLookupConnector = injAddressConnector
@@ -46,7 +45,6 @@ class AddressLookupService @Inject()(
 trait AddressLookupSrv {
 
   val payeRegistrationUrl : String
-  val payeRegistrationUri : String
   val addressLookupFrontendUrl: String
   val addressLookupFrontendUri: String
   val addressLookupConnector: AddressLookupConnect
@@ -55,7 +53,7 @@ trait AddressLookupSrv {
   def buildAddressLookupUrl(query: String, call: Call) = {
     useAddressLookupFrontend match {
       case true => s"$addressLookupFrontendUrl$addressLookupFrontendUri/uk/addresses/$query?continue=$payeRegistrationUrl${call.url}"
-      case false => s""
+      case false => controllers.test.routes.TestAddressLookupController.noLookupPPOBAddress().url
     }
   }
 

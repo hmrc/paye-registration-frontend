@@ -26,7 +26,8 @@ import org.mockito.Matchers
 import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.mvc.Result
+import play.api.libs.json.{JsObject, Json}
+import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.{AddressLookupService, CoHoAPIService, CompanyDetailsService, S4LService}
@@ -298,6 +299,126 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
         result =>
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe Some(s"${routes.NatureOfBusinessController.natureOfBusiness()}")
+      }
+    }
+  }
+
+  "ppobAddress" should {
+    "return an OK" in new Setup {
+      val addressMap = Map(
+        "ro" -> validCompanyDetailsViewModel.roAddress,
+        "ppob" -> validCompanyDetailsViewModel.ppobAddress.get
+      )
+
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(validCompanyDetailsViewModel))
+
+      when(mockCompanyDetailsService.getPPOBPageAddresses(Matchers.any()))
+        .thenReturn(addressMap)
+
+      AuthBuilder.showWithAuthorisedUser(controller.ppobAddress, mockAuthConnector) { result =>
+        status(result) shouldBe OK
+      }
+    }
+  }
+
+  "submitPPOBAddress" should {
+    "return a BAD_REQUEST" in new Setup {
+      val request = FakeRequest().withFormUrlEncodedBody(
+        "chosenAddress" -> ""
+      )
+
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(validCompanyDetailsViewModel))
+
+      AuthBuilder.submitWithAuthorisedUser(controller.submitPPOBAddress, mockAuthConnector, request) { result =>
+        status(result) shouldBe BAD_REQUEST
+      }
+    }
+
+    "redirect to business contact details if ppob is chosen" in new Setup {
+      val request = FakeRequest().withFormUrlEncodedBody(
+        "chosenAddress" -> "ppobAddress"
+      )
+
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(validCompanyDetailsViewModel))
+
+      AuthBuilder.submitWithAuthorisedUser(controller.submitPPOBAddress, mockAuthConnector, request) { result =>
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("/register-for-paye/business-contact-details")
+      }
+    }
+
+    "redirect to business contact details if ro is chosen" in new Setup {
+      val request = FakeRequest().withFormUrlEncodedBody(
+        "chosenAddress" -> "roAddress"
+      )
+
+      when(mockCompanyDetailsService.copyROAddrToPPOBAddr()(Matchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(DownstreamOutcome.Success))
+
+      AuthBuilder.submitWithAuthorisedUser(controller.submitPPOBAddress, mockAuthConnector, request) { result =>
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("/register-for-paye/business-contact-details")
+      }
+    }
+
+    "redirect to address lookup frontend" in new Setup {
+      val request = FakeRequest("GET", "/testuri?id=123456789").withFormUrlEncodedBody(
+        "chosenAddress" -> "other"
+      )
+      AuthBuilder.submitWithAuthorisedUser(controller.submitPPOBAddress, mockAuthConnector, request) { result =>
+        status(result) shouldBe SEE_OTHER
+      }
+    }
+  }
+
+  "savePPOBAddress" should {
+
+    implicit val hc = HeaderCarrier()
+
+    "return a DownStreamOutcome SUCCESS" in new Setup {
+      val expected =
+        Some(Address(
+          "L1",
+          "L2",
+          Some("L3"),
+          Some("L4"),
+          Some("testPostcode"),
+          Some("testCode")
+        ))
+
+      when(mockAddressLookupService.getAddress(Matchers.any[HeaderCarrier](), Matchers.any[Request[_]]()))
+        .thenReturn(Future.successful(expected))
+
+      when(mockCompanyDetailsService.submitPPOBAddr(Matchers.any())(Matchers.any()))
+        .thenReturn(Future.successful(DownstreamOutcome.Success))
+
+      AuthBuilder.showWithAuthorisedUser(controller.savePPOBAddress, mockAuthConnector) { result =>
+        status(result) shouldBe SEE_OTHER
+      }
+    }
+
+    "return a DownstreamOutcome FAILURE" in new Setup {
+      val expected =
+        Some(Address(
+          "L1",
+          "L2",
+          Some("L3"),
+          Some("L4"),
+          Some("testPostcode"),
+          Some("testCode")
+        ))
+
+      when(mockAddressLookupService.getAddress(Matchers.any[HeaderCarrier](), Matchers.any[Request[_]]()))
+        .thenReturn(Future.successful(expected))
+
+      when(mockCompanyDetailsService.submitPPOBAddr(Matchers.any())(Matchers.any()))
+        .thenReturn(Future.successful(DownstreamOutcome.Failure))
+
+      AuthBuilder.showWithAuthorisedUser(controller.savePPOBAddress, mockAuthConnector) { result =>
+        status(result) shouldBe INTERNAL_SERVER_ERROR
       }
     }
   }
