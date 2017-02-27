@@ -19,9 +19,16 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import connectors.{AddressLookupConnect, AddressLookupConnector}
+import models.view.Address
+import play.api.Logger
+import play.api.libs.json.{JsArray, JsObject}
+import play.api.mvc.{Call, Request}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.{PAYEFeatureSwitch, PAYEFeatureSwitches}
+
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class AddressLookupService @Inject()(
@@ -29,7 +36,6 @@ class AddressLookupService @Inject()(
                                       injAddressConnector: AddressLookupConnector)
   extends AddressLookupSrv with ServicesConfig {
   lazy val payeRegistrationUrl = getConfString("paye-registration-frontend.www.url","")
-  lazy val payeRegistrationUri = getConfString("paye-registration-frontend.www.uri","")
   lazy val addressLookupFrontendUrl = getConfString("address-lookup-frontend.www.url","")
   lazy val addressLookupFrontendUri = getConfString("address-lookup-frontend.www.uri","")
   val addressLookupConnector = injAddressConnector
@@ -39,25 +45,53 @@ class AddressLookupService @Inject()(
 trait AddressLookupSrv {
 
   val payeRegistrationUrl : String
-  val payeRegistrationUri : String
   val addressLookupFrontendUrl: String
   val addressLookupFrontendUri: String
   val addressLookupConnector: AddressLookupConnect
   val featureSwitch: PAYEFeatureSwitches
 
-  def buildAddressLookupUrl(query: String = "payereg1") = {
+  def buildAddressLookupUrl(query: String, call: Call) = {
     useAddressLookupFrontend match {
-      case true => addressLookupFrontendUrl + addressLookupFrontendUri + "/uk/addresses/" + query + s"?continue=" + payeRegistrationUrl + payeRegistrationUri + "/return-from-address"
-      case false => payeRegistrationUrl + controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness().url
+      case true => s"$addressLookupFrontendUrl$addressLookupFrontendUri/uk/addresses/$query?continue=$payeRegistrationUrl${call.url}"
+      case false => controllers.test.routes.TestAddressLookupController.noLookupPPOBAddress().url
     }
   }
 
-  def getAddress(id: String)(implicit hc: HeaderCarrier) = {
-    addressLookupConnector.getAddress(id)
+  def getAddress(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[Address]] = {
+    request.getQueryString("id") match {
+      case Some(id) =>
+        addressLookupConnector.getAddress(id) map { json =>
+          Some(jsonToAddress(json))
+        }
+      case None => Future.successful(None)
+    }
+  }
+
+  def jsonToAddress(obj: JsObject): Address = {
+    val address = obj.value("address").as[JsObject]
+    val lines = address.value("lines").as[JsArray].as[List[String]]
+    val postcode = address.value("postcode").as[String]
+    val country = address.\("country").get
+    val countryCode = country.\("code").get.as[String]
+
+    val L3 = if(lines.isDefinedAt(2)) Some(lines(2)) else None
+    val L4 = if(lines.isDefinedAt(3)) Some(lines(3)) else None
+
+    val addr = Address(
+      lines.head,
+      lines(1),
+      L3,
+      L4,
+      Some(postcode),
+      Some(countryCode)
+    )
+
+    Logger.debug(s"[AddressLookupService] - [jsonToAddress] - Address: $addr")
+
+    addr
   }
 
   private[services] def useAddressLookupFrontend: Boolean = {
     featureSwitch.addressLookupFrontend.enabled
   }
-
 }

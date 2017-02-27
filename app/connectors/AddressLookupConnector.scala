@@ -38,10 +38,6 @@ trait AddressLookupConnect {
   val http: WSHttp
 
   def getAddress(id: String)(implicit hc: HeaderCarrier) = {
-    http.GET[JsObject](s"$addressLookupFrontendUrl/lookup-address/outcome/payereg1/$id") map {
-      res =>
-        Logger.error(res.toString)
-        res
-    }
+    http.GET[JsObject](s"$addressLookupFrontendUrl/lookup-address/outcome/payereg1/$id")
   }
 }

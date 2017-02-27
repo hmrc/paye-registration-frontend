@@ -27,7 +27,7 @@ import models.view.{AddressChoice, ChosenAddress, TradingName}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
-import services.{CoHoAPIService, CoHoAPISrv, CompanyDetailsService, CompanyDetailsSrv, S4LService, S4LSrv}
+import services._
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import views.html.pages.companyDetails.{confirmROAddress, businessContactDetails => BusinessContactDetailsPage, chooseAddress => PPOBAddressPage, tradingName => TradingNamePage}
@@ -40,7 +40,8 @@ class CompanyDetailsController @Inject()(
                                           injKeystoreConnector: KeystoreConnector,
                                           injCompanyDetailsService: CompanyDetailsService,
                                           injCohoService: CoHoAPIService,
-                                          injMessagesApi: MessagesApi)
+                                          injMessagesApi: MessagesApi,
+                                          injAddressLookupService: AddressLookupService)
   extends CompanyDetailsCtrl {
   val authConnector = FrontendAuthConnector
   val s4LService = injS4LService
@@ -48,6 +49,7 @@ class CompanyDetailsController @Inject()(
   val companyDetailsService = injCompanyDetailsService
   val cohoService = injCohoService
   val messagesApi = injMessagesApi
+  val addressLookupService = injAddressLookupService
 }
 
 trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSupport {
@@ -55,6 +57,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
   val keystoreConnector: KeystoreConnect
   val companyDetailsService: CompanyDetailsSrv
   val cohoService: CoHoAPISrv
+  val addressLookupService: AddressLookupSrv
 
   val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
 
@@ -95,7 +98,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
   val confirmRO : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
+        Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.ppobAddress()))
   }
 
   private def badRequestResponse(form: Form[TradingName])(implicit request: Request[AnyContent]): Future[Result] = {
@@ -121,7 +124,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
         BusinessContactDetailsForm.form.bindFromRequest.fold(
           errs => companyDetailsService.getCompanyDetails map (details => BadRequest(BusinessContactDetailsPage(details.companyName, errs))),
           success => companyDetailsService.submitBusinessContact(success) map {
-            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.AddressLookupController.redirectToLookup())
+            case DownstreamOutcome.Success => Redirect(routes.NatureOfBusinessController.natureOfBusiness())
             case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
           }
         )
@@ -134,7 +137,6 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
           val addressMap = companyDetailsService.getPPOBPageAddresses(companyDetails)
           Ok(PPOBAddressPage(ChooseAddressForm.form.fill(ChosenAddress(AddressChoice.ppobAddress)), addressMap.get("ro"), addressMap.get("ppob")))
         }
-    //TODO: update to load the correct PPOB Address if existing
   }
 
   val submitPPOBAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
@@ -146,8 +148,25 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
               val addressMap = companyDetailsService.getPPOBPageAddresses(details)
               BadRequest(PPOBAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob")))
           },
-          success => Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
-          //TODO: Call the service and use the result from the service
+          success => success.chosenAddress match {
+            case AddressChoice.ppobAddress =>
+              Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
+            case AddressChoice.roAddress =>
+              companyDetailsService.copyROAddrToPPOBAddr() map(_ => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
+            case AddressChoice.other => Future.successful(Redirect(addressLookupService.buildAddressLookupUrl("payereg1", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress())))
+          }
         )
+  }
+
+  val savePPOBAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user =>
+      implicit request =>
+        for {
+          Some(address) <- addressLookupService.getAddress
+          res <- companyDetailsService.submitPPOBAddr(address)
+        } yield res match {
+          case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
+          case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+        }
   }
 }

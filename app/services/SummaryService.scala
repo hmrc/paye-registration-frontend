@@ -78,7 +78,7 @@ trait SummarySrv extends CommonService {
           id = "ppobAddress",
           answer = Right(formatHTMLROAddress(companyDetails.ppobAddress)),
           //TODO: Change to PPOB address route
-          changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.roAddress())
+          changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.ppobAddress())
         ),
         SummaryRow(
           id = "natureOfBusiness",

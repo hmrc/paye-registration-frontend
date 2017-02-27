@@ -21,14 +21,15 @@ POST        /registered-office-address              controllers.userJourney.Comp
 ## PPOB ADDRESS
 GET         /principal-place-of-business            controllers.userJourney.CompanyDetailsController.ppobAddress
 POST        /principal-place-of-business            controllers.userJourney.CompanyDetailsController.submitPPOBAddress
+GET         /return-from-address-for-ppob           controllers.userJourney.CompanyDetailsController.savePPOBAddress
 
 ## BUSINESS CONTACT DETAILS
 GET         /business-contact-details               controllers.userJourney.CompanyDetailsController.businessContactDetails
 POST        /business-contact-details               controllers.userJourney.CompanyDetailsController.submitBusinessContactDetails
 
 ## ADDRESS LOOKUP
-GET         /address-lookup                         controllers.userJourney.AddressLookupController.redirectToLookup
-GET         /return-from-address                    controllers.userJourney.AddressLookupController.returnFromLookup
+#GET         /address-lookup                         controllers.userJourney.AddressLookupController.redirectToLookup
+#GET         /return-from-address                    controllers.userJourney.AddressLookupController.returnFromLookup
 
 ## EMPLOYMENT
 GET         /employing-staff                        controllers.userJourney.EmploymentController.employingStaff
