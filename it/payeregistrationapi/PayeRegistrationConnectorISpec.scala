@@ -20,7 +20,7 @@ import java.time.LocalDate
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.PAYERegistrationConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
-import models.DigitalContactDetails
+import models.{DigitalContactDetails, PAYEContactDetails}
 import models.api.{CompanyDetails, Director, Employment, Name, SICCode}
 import models.view.Address
 import play.api.Application
@@ -333,5 +333,69 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       await(patchResponse) shouldBe sicCodes
     }
 
+  }
+
+  "PAYEContact" should {
+    val validPAYEContact = PAYEContactDetails(
+      name = "Thierry Henry",
+      digitalContact = DigitalContactDetails(
+        Some("testy@tasty.com"),
+        Some("1234"),
+        Some("9874578")
+      )
+    )
+
+    "get a model" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+
+      def getResponse = payeRegistrationConnector.getPAYEContact(regId)
+      def patchResponse = payeRegistrationConnector.upsertPAYEContact(regId, validPAYEContact)
+
+      stubFor(get(urlMatching(url("/contact-paye")))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(Json.toJson(validPAYEContact).toString)
+        )
+      )
+
+      await(getResponse) shouldBe Some(validPAYEContact)
+    }
+
+    "get a None" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+
+      def getResponse = payeRegistrationConnector.getPAYEContact(regId)
+      def patchResponse = payeRegistrationConnector.upsertPAYEContact(regId, validPAYEContact)
+
+      stubFor(get(urlMatching(url("/contact-paye")))
+        .willReturn(
+          aResponse()
+            .withStatus(404)
+        )
+      )
+
+      await(getResponse) shouldBe None
+    }
+
+    "upsert a model" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+
+      def getResponse = payeRegistrationConnector.getPAYEContact(regId)
+      def patchResponse = payeRegistrationConnector.upsertPAYEContact(regId, validPAYEContact)
+
+      stubFor(patch(urlMatching(url("/contact-paye")))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(Json.toJson(validPAYEContact).toString)
+        )
+      )
+
+      await(patchResponse) shouldBe validPAYEContact
+    }
   }
 }

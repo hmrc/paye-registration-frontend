@@ -18,7 +18,7 @@ package fixtures
 
 import java.time.LocalDate
 
-import models.DigitalContactDetails
+import models.{DigitalContactDetails, PAYEContactDetails}
 import models.api._
 import models.view.{Address, Summary, SummaryRow, SummarySection}
 
@@ -99,6 +99,15 @@ trait PAYERegistrationFixture {
     SICCode(
       code = Some("1234"),
       description = Some("consulting")
+    )
+  )
+
+  val validPAYEContactDetails = PAYEContactDetails(
+    name = "Thierry Henry",
+    digitalContact = DigitalContactDetails(
+      Some("speedy@gonzalez.com"),
+      Some("9999"),
+      Some("0986534")
     )
   )
 }
