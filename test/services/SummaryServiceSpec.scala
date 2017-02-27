@@ -86,7 +86,7 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
           SummaryRow(
             id = "ppobAddress",
             answer = Right("15 St Test Avenue<br />Testpool<br />TestUponAvon<br />Nowhereshire<br />LE1 1ST<br />UK"),
-            Some(controllers.userJourney.routes.CompanyDetailsController.roAddress())
+            Some(controllers.userJourney.routes.CompanyDetailsController.ppobAddress())
           ),
           SummaryRow(
             id = "natureOfBusiness",
@@ -252,7 +252,7 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
               SummaryRow(
                 id = "ppobAddress",
                 answer = Right(formatHMTLPPOBAddress),
-                Some(controllers.userJourney.routes.CompanyDetailsController.roAddress())
+                Some(controllers.userJourney.routes.CompanyDetailsController.ppobAddress())
               ),
               SummaryRow(
                 id = "natureOfBusiness",
@@ -362,7 +362,7 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
           SummaryRow(
             id = "ppobAddress",
             answer = Right(formatHMTLPPOBAddress),
-            Some(controllers.userJourney.routes.CompanyDetailsController.roAddress())
+            Some(controllers.userJourney.routes.CompanyDetailsController.ppobAddress())
           ),
           SummaryRow(
             id = "natureOfBusiness",

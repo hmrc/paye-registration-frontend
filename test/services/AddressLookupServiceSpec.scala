@@ -50,13 +50,13 @@ class AddressLookupServiceSpec extends PAYERegSpec with S4LFixture with PAYERegi
 
   "Calling buildAddressLookupUrl" should {
     "return the Address Lookup frontend Url with payereg1 journey" in new SetupWithProxy(true) {
-      await(service.buildAddressLookupUrl("payereg1", Call("GET", "/test-url"))) shouldBe "http://localhost:9028/lookup-address/uk/addresses/" +
+      await(service.buildAddressLookupUrl("payereg1", Call("GET", "/register-for-paye/test-url"))) shouldBe "http://localhost:9028/lookup-address/uk/addresses/" +
         "payereg1" +
         "?continue=http://localhost:9870/register-for-paye/test-url"
     }
 
     "return the Address Lookup frontend Url with a custom tag" in new SetupWithProxy(true) {
-      await(service.buildAddressLookupUrl("myNewTag", Call("GET", "/test-url"))) shouldBe "http://localhost:9028/lookup-address/uk/addresses/" +
+      await(service.buildAddressLookupUrl("myNewTag", Call("GET", "/register-for-paye/test-url"))) shouldBe "http://localhost:9028/lookup-address/uk/addresses/" +
         "myNewTag" +
         "?continue=http://localhost:9870/register-for-paye/test-url"
     }
