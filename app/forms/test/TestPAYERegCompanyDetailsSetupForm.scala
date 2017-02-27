@@ -16,7 +16,7 @@
 
 package forms.test
 
-import models.BusinessContactDetails
+import models.DigitalContactDetails
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import models.view.Address
 import play.api.data.Form
@@ -49,7 +49,7 @@ object TestPAYERegCompanyDetailsSetupForm {
         "businessEmail" -> optional(text),
         "mobileNumber" -> optional(text),
         "phoneNumber" -> optional(text)
-      )(BusinessContactDetails.apply)(BusinessContactDetails.unapply)
+      )(DigitalContactDetails.apply)(DigitalContactDetails.unapply)
     )(CompanyDetailsAPI.apply)(CompanyDetailsAPI.unapply)
   )
 }

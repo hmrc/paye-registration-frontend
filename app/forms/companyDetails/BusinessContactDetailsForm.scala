@@ -17,7 +17,7 @@
 package forms.companyDetails
 
 import forms.helpers.OneOfManyForm
-import models.BusinessContactDetails
+import models.DigitalContactDetails
 import utils.Validators._
 import play.api.data.Form
 import play.api.data.Forms._
@@ -32,7 +32,7 @@ object BusinessContactDetailsForm extends OneOfManyForm {
       "businessEmail" -> oneOfManyErrorTarget.verifying(optionalValidation(emailValidation)),
       "mobileNumber" -> optional(text.verifying(mobilePhoneNumberValidation)),
       "phoneNumber" -> optional(text.verifying(phoneNumberValidation))
-    )(BusinessContactDetails.apply)(BusinessContactDetails.unapply).verifying()
+    )(DigitalContactDetails.apply)(DigitalContactDetails.unapply).verifying()
   )
 
 }

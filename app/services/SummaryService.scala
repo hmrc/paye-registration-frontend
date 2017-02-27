@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 
 import connectors._
 import common.exceptions.InternalExceptions.APIConversionException
-import models.BusinessContactDetails
+import models.DigitalContactDetails
 import models.api.{PAYERegistration => PAYERegistrationAPI, SICCode, CompanyDetails, Director, Employment}
 import models.view.{Address, Summary, SummaryRow, SummarySection}
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -89,13 +89,13 @@ trait SummarySrv extends CommonService {
     )
   }
 
-  private[services] def buildBusinessContactDetailsSection(businessContactDetails: BusinessContactDetails) : SummarySection = {
+  private[services] def buildBusinessContactDetailsSection(businessContactDetails: DigitalContactDetails) : SummarySection = {
     SummarySection(
       id = "businessContactDetails",
       Seq(
         Some(SummaryRow(
           id = "businessEmail",
-          answer = businessContactDetails.businessEmail match {
+          answer = businessContactDetails.email match {
             case Some(email) => Right(email)
             case _ => Left("noAnswerGiven")
           },

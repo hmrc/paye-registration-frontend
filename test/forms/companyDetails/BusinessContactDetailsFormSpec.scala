@@ -16,7 +16,7 @@
 
 package forms.companyDetails
 
-import models.BusinessContactDetails
+import models.DigitalContactDetails
 import play.api.data.{Form, FormError, Mapping}
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -31,8 +31,8 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
         "mobileNumber" -> "01234567987",
         "phoneNumber" -> "07798123456"
       )
-      val model = BusinessContactDetails(
-        businessEmail = Some("testEmail@testing.com"),
+      val model = DigitalContactDetails(
+        email = Some("testEmail@testing.com"),
         mobileNumber = Some("01234567987"),
         phoneNumber = Some("07798123456")
       )
@@ -50,8 +50,8 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
         "mobileNumber" -> "",
         "phoneNumber" -> ""
       )
-      val model = BusinessContactDetails(
-        businessEmail = Some("testEmail@testing.com"),
+      val model = DigitalContactDetails(
+        email = Some("testEmail@testing.com"),
         mobileNumber = None,
         phoneNumber = None
       )
@@ -69,8 +69,8 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
         "mobileNumber" -> "01234567987",
         "phoneNumber" -> ""
       )
-      val model = BusinessContactDetails(
-        businessEmail = None,
+      val model = DigitalContactDetails(
+        email = None,
         mobileNumber = Some("01234567987"),
         phoneNumber = None
       )
@@ -88,8 +88,8 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
         "mobileNumber" -> "",
         "phoneNumber" -> "07798123456"
       )
-      val model = BusinessContactDetails(
-        businessEmail = None,
+      val model = DigitalContactDetails(
+        email = None,
         mobileNumber = None,
         phoneNumber = Some("07798123456")
       )
