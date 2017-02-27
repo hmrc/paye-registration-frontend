@@ -45,15 +45,6 @@ trait LoginStub extends SessionCookieBaker {
 
   def stubSuccessfulLogin(withSignIn: Boolean = false) = {
 
-    if( withSignIn ) {
-      val continueUrl = "/wibble"
-      stubFor(get(urlEqualTo(s"/gg/sign-in?continue=${continueUrl}"))
-        .willReturn(aResponse()
-          .withStatus(303)
-          .withHeader(HeaderNames.SET_COOKIE, getSessionCookie())
-          .withHeader(HeaderNames.LOCATION, continueUrl)))
-    }
-
     stubFor(get(urlEqualTo("/auth/authority"))
       .willReturn(
         aResponse()

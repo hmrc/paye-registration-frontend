@@ -129,6 +129,7 @@ class TradingNameISpec extends IntegrationSpecBase with LoginStub with BeforeAnd
            |"companyName": "${companyName}",
            |"tradingName": "${tradingName}",
            |"roAddress": ${roDoc},
+           |"ppobAddress": ${roDoc},
            |"businessContactDetails": {}
            |}""".stripMargin
       stubGet(s"/paye-registration/${regId}/company-details", 200, payeDoc)
@@ -221,6 +222,7 @@ class TradingNameISpec extends IntegrationSpecBase with LoginStub with BeforeAnd
            |"companyName": "${companyName}",
            |"tradingName": {"differentName":false},
            |"roAddress": ${roDoc},
+           |"ppobAddress": ${roDoc},
            |"businessContactDetails": {}
            |}""".stripMargin
 
@@ -239,6 +241,7 @@ class TradingNameISpec extends IntegrationSpecBase with LoginStub with BeforeAnd
            |"companyName": "${companyName}",
            |"tradingName": "${tradingName}",
            |"roAddress": ${roDoc},
+           |"ppobAddress": ${roDoc},
            |"businessContactDetails": {}
            |}""".stripMargin
       stubPatch(s"/paye-registration/${regId}/company-details", 200, updatedPayeDoc)
