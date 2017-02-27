@@ -19,17 +19,17 @@ package services
 import common.exceptions.InternalExceptions.APIConversionException
 import connectors.PAYERegistrationConnector
 import fixtures.PAYERegistrationFixture
-import models.DigitalContactDetails
-import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI, SICCode, Director, Employment, Name}
-import models.view.{SummaryRow, SummarySection, Summary, Address}
+import models.{DigitalContactDetails, PAYEContactDetails, view}
+import models.api.{Director, Employment, Name, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
+import models.view.{Address, Summary, SummaryRow, SummarySection}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.{NotFoundException, Upstream4xxResponse, HeaderCarrier}
+import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException, Upstream4xxResponse}
 
 import scala.concurrent.Future
 
-class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
+class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   val mockRegConnector = mock[PAYERegistrationConnector]
   val mockS4LService = mock[S4LService]
@@ -62,6 +62,14 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
           title = Some("Mr")
         ),
         nino = Some("ZZ123456A")
+      )
+    ),
+    payeContactDetails = PAYEContactDetails(
+      name = "testName",
+      digitalContact = DigitalContactDetails(
+        email = Some("testEmail"),
+        mobileNumber = Some("1234567890"),
+        phoneNumber = Some("0987654321")
       )
     )
   )
@@ -151,6 +159,31 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
             Some("director")
           )
         )
+      ),
+      SummarySection(
+        id = "payeContactDetails",
+        Seq(
+          SummaryRow(
+            id = "contactName",
+            answer = Right("testName"),
+            changeLink = None
+          ),
+          SummaryRow(
+            id = "email",
+            answer = Right("testEmail"),
+            changeLink = None
+          ),
+          SummaryRow(
+            id = "mobileNumber",
+            answer = Right("1234567890"),
+            changeLink = None
+          ),
+          SummaryRow(
+            id = "phoneNumber",
+            answer = Right("0987654321"),
+            changeLink = None
+          )
+        )
       )
     )
   )
@@ -227,6 +260,14 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
               title = Some("Mr")
             ),
             nino = Some("ZZ123456A")
+          )
+        ),
+        payeContactDetails = PAYEContactDetails(
+          name = "testName",
+          digitalContact = DigitalContactDetails(
+            email = None,
+            mobileNumber = None,
+            phoneNumber = None
           )
         )
       )
@@ -315,6 +356,31 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
                 Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
                 Some(Seq("Timothy Buttersford")),
                 Some("director")
+              )
+            )
+          ),
+          SummarySection(
+            id = "payeContactDetails",
+            Seq(
+              SummaryRow(
+                id = "contactName",
+                answer = Right("testName"),
+                changeLink = None
+              ),
+              SummaryRow(
+                id = "email",
+                answer = Left("noAnswerGiven"),
+                changeLink = None
+              ),
+              SummaryRow(
+                id = "mobileNumber",
+                answer = Left("noAnswerGiven"),
+                changeLink = None
+              ),
+              SummaryRow(
+                id = "phoneNumber",
+                answer = Left("noAnswerGiven"),
+                changeLink = None
               )
             )
           )

@@ -275,6 +275,33 @@
             )
         </div>
 
+        <h3>PAYE Contact Details</h3>
+        <div class="inline form-group">
+            @govHelpers.input(
+                payeForm("PAYEContactDetails.name"),
+                '_label -> "Contact name"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+                payeForm("PAYEContactDetails.digitalContact.email"),
+                '_label -> "Email"
+            )
+        </div>
+        <div class="inline form-group">
+        @govHelpers.input(
+            payeForm("PAYEContactDetails.digitalContact.mobileNumber"),
+            '_label -> "Mobile number"
+        )
+        </div>
+        <div class="inline form-group">
+        @govHelpers.input(
+            payeForm("PAYEContactDetails.digitalContact.phoneNumber"),
+            '_label -> "Phone number"
+        )
+        </div>
+
+
         <button class="button" type="submit" id="continue" >Submit</button>
 
     }
