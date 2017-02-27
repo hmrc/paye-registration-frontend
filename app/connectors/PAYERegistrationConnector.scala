@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
 import enums.DownstreamOutcome
+import models.PAYEContactDetails
 import models.api.{Director, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.Logger
 import play.api.http.Status
@@ -111,6 +112,21 @@ trait PAYERegistrationConnect {
   def upsertSICCodes(regID: String, sicCodes: Seq[SICCode])(implicit hc: HeaderCarrier, rds: HttpReads[Seq[SICCode]]) = {
     http.PATCH[Seq[SICCode], Seq[SICCode]](s"$payeRegUrl/paye-registration/$regID/sic-codes", sicCodes) recover {
       case e: Exception => throw logResponse(e, "upsertSICCodes", "upserting sic codes")
+    }
+  }
+
+  def getPAYEContact(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYEContactDetails]): Future[Option[PAYEContactDetails]] = {
+    http.GET[PAYEContactDetails](s"$payeRegUrl/paye-registration/$regID/contact-paye") map {
+      details => Some(details)
+    } recover {
+      case e: NotFoundException => None
+      case e: Exception => throw logResponse(e, "getPAYEContact", "getting paye contact")
+    }
+  }
+
+  def upsertPAYEContact(regID: String, payeContact: PAYEContactDetails)(implicit hc: HeaderCarrier, rds: HttpReads[PAYEContactDetails]): Future[PAYEContactDetails] = {
+    http.PATCH[PAYEContactDetails, PAYEContactDetails](s"$payeRegUrl/paye-registration/$regID/contact-paye", payeContact) recover {
+      case e: Exception => throw logResponse(e, "upsertPAYEContact", "upserting paye contact")
     }
   }
 
