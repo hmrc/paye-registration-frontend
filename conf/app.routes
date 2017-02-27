@@ -55,6 +55,10 @@ POST        /nature-of-business                     controllers.userJourney.Natu
 GET         /director-national-insurance-number     controllers.userJourney.DirectorDetailsController.directorDetails
 POST        /director-national-insurance-number     controllers.userJourney.DirectorDetailsController.submitDirectorDetails
 
+## PAYE CONTACT DETAILS
+GET         /company-contact                        controllers.userJourney.PAYEContactDetailsController.payeContactDetails
+POST        /company-contact                        controllers.userJourney.PAYEContactDetailsController.submitPAYEContactDetails
+
 ## SUMMARY
 GET         /summary                                controllers.userJourney.SummaryController.summary
 

@@ -1,0 +1,74 @@
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import helpers.templates.{hiddenDetails, addressDisplay, payeErrorSummary, oneOfManyErrorWrapper}
+
+@import models.PAYEContactDetails
+@(companyName: String, contactForm: Form[PAYEContactDetails])(implicit request: Request[_], messages: Messages)
+
+@formContent = {
+    <fieldset>
+        <legend class="visually-hidden">
+            @Html(messages("pages.payeContact.heading", s"<span id='companyName'>$companyName</span>"))
+        </legend>
+        <div class="form-group">
+            @govHelpers.input(
+            contactForm("digitalContact.contactEmail"),
+            '_inputClass -> "form-control-1-2",
+            '_labelClass -> "form-label cascading",
+            '_label -> messages("pages.payeContact.email")
+            )
+        </div>
+
+        <div class="form-group">
+            @govHelpers.input(
+            contactForm("digitalContact.mobileNumber"),
+            '_labelClass -> "form-label cascading",
+            '_inputClass -> "form-control-1-2",
+            '_label -> messages("pages.payeContact.mobile")
+            )
+        </div>
+
+        <div>
+            @govHelpers.input(
+            contactForm("digitalContact.phoneNumber"),
+            '_labelClass -> "form-label cascading",
+            '_inputClass -> "form-control-1-2",
+            '_label -> messages("pages.payeContact.phone")
+            )
+        </div>
+    </fieldset>
+}
+
+@main_template(title = messages("pages.payeContact.title")) {
+
+    @payeErrorSummary(
+        messages("app.common.errorSummaryLabel"), contactForm
+    )
+
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages("pages.payeContact.heading", s"<span>$companyName</span>"))</h1>
+
+    <p id="p1">@messages("pages.payeContact.p1")</p>
+
+    @govHelpers.form(action = controllers.userJourney.routes.PAYEContactDetailsController.submitPAYEContactDetails()) {
+
+        <div class="form-group">
+            <fieldset>
+                <legend class="visually-hidden">
+                    @Html(messages("pages.payeContact.p1"))
+                </legend>
+                <div class="form-group">
+                    @govHelpers.input(
+                    contactForm("name"),
+                    '_inputClass -> "form-control-1-2",
+                    '_labelClass -> "form-label cascading",
+                    '_label -> messages("pages.payeContact.contactName")
+                    )
+                </div>
+            </fieldset>
+            @oneOfManyErrorWrapper(contactForm, formContent)
+        </div>
+
+        <div class="form-group">
+            <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
+        </div>
+    }
+}
