@@ -17,7 +17,13 @@ package itutil
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import org.scalatestplus.play.OneServerPerSuite
+import play.api.libs.json.{JsString, JsObject, Json}
+import play.api.libs.ws.WS
+import uk.gov.hmrc.crypto.{ApplicationCrypto, Protected}
+import uk.gov.hmrc.crypto.json.JsonEncryptor
 
 object WiremockHelper {
   val wiremockPort = 11111
@@ -26,6 +32,7 @@ object WiremockHelper {
 }
 
 trait WiremockHelper {
+  self: OneServerPerSuite =>
 
   import WiremockHelper._
 
@@ -41,4 +48,50 @@ trait WiremockHelper {
 
   def resetWiremock() = WireMock.reset()
 
+  def buildClient(path: String) = WS.url(s"http://localhost:$port/register-for-paye$path").withFollowRedirects(false)
+
+  def stubGet(url: String, status: Integer, body: String) =
+    stubFor(get(urlMatching(url))
+      .willReturn(
+        aResponse().
+          withStatus(status).
+          withBody(body)
+      )
+    )
+
+  def stubPost(url: String, status: Integer, responseBody: String) =
+    stubFor(post(urlMatching(url))
+      .willReturn(
+        aResponse().
+          withStatus(status).
+          withBody(responseBody)
+      )
+    )
+
+  def stubPut(url: String, status: Integer, responseBody: String) =
+    stubFor(put(urlMatching(url))
+      .willReturn(
+        aResponse().
+          withStatus(status).
+          withBody(responseBody)
+      )
+    )
+
+  def stubPatch(url: String, status: Integer, responseBody: String) =
+    stubFor(patch(urlMatching(url))
+      .willReturn(
+        aResponse().
+          withStatus(status).
+          withBody(responseBody)
+      )
+    )
+
+  def stubDelete(url: String, status: Integer, responseBody: String) =
+    stubFor(delete(urlMatching(url))
+      .willReturn(
+        aResponse().
+          withStatus(status).
+          withBody(responseBody)
+      )
+    )
 }

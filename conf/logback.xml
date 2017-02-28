@@ -57,9 +57,9 @@
 
     <logger name="org.apache.http" level="INFO"/>
 
-    <logger name="io.netty.util.internal" level="INFO"/>
+    <logger name="io.netty" level="INFO"/>
 
-    <logger name="connector" level="TRACE">
+    <logger name="connector" level="INFO"> // TRACE
         <appender-ref ref="STDOUT"/>
     </logger>
 
