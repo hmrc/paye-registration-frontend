@@ -46,6 +46,9 @@ trait CompletionCapacityCtrl extends FrontendController with Actions with I18nSu
   val submitCompletionCapacity : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        Future.successful(Redirect(routes.CompanyDetailsController.tradingName()))
+        CompletionCapacityForm.form.bindFromRequest.fold(
+          errors => Future.successful(BadRequest(CompletionCapacityView(errors))),
+          success => Future.successful(Redirect(routes.CompanyDetailsController.tradingName()))
+        )
   }
 }

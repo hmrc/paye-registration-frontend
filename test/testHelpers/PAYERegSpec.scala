@@ -18,6 +18,7 @@ package testHelpers
 
 import mocks.PAYEMocks
 import org.scalatest.mockito.MockitoSugar
+import play.api.i18n.MessagesApi
 import play.api.inject.Injector
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
@@ -25,4 +26,5 @@ trait PAYERegSpec extends UnitSpec with WithFakeApplication with MockitoSugar wi
 
   val injector : Injector = fakeApplication.injector
 
+  lazy val mockMessages = injector.instanceOf[MessagesApi]
 }
