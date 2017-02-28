@@ -19,6 +19,7 @@ package utils
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+import forms.completionCapacity.CompletionCapacityForm
 import forms.employmentDetails.FirstPaymentForm
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -62,6 +63,23 @@ class ValidatorsSpec extends UnitSpec with DateUtil {
         "firstPayDay" -> futureDate._3)
       val boundForm = FirstPaymentForm.form.bind(data)
       boundForm.errors.map(_.message) shouldBe List("pages.firstPayment.date.invalidRange")
+    }
+  }
+
+  "calling nonEmpty" should {
+    "return an error message if the field is empty" in {
+      val data : Map[String, String] = Map(
+        "completionCapacity" -> "other",
+        "completionCapacityOther" -> "")
+      val boundForm = CompletionCapacityForm.form.bind(data)
+      boundForm.errors.map(_.message) shouldBe List("errors.invalid.emptyField")
+    }
+    "pass if the field is completed" in {
+      val data : Map[String, String] = Map(
+        "completionCapacity" -> "other",
+        "completionCapacityOther" -> "summat")
+      val boundForm = CompletionCapacityForm.form.bind(data)
+      boundForm.errors.map(_.message) shouldBe List.empty
     }
   }
 }

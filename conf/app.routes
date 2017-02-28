@@ -10,6 +10,10 @@ GET         /                                       controllers.userJourney.Welc
 GET         /start                                  controllers.userJourney.WelcomeController.show
 POST        /start                                  controllers.userJourney.WelcomeController.submit
 
+## COMPLETION CAPACITY
+GET         /about-you                              controllers.userJourney.CompletionCapacityController.show
+POST        /about-you                              controllers.userJourney.CompletionCapacityController.submit
+
 ## COMPANY DETAILS
 GET         /trading-name                           controllers.userJourney.CompanyDetailsController.tradingName
 POST        /trading-name                           controllers.userJourney.CompanyDetailsController.submitTradingName
@@ -26,10 +30,6 @@ GET         /return-from-address-for-ppob           controllers.userJourney.Comp
 ## BUSINESS CONTACT DETAILS
 GET         /business-contact-details               controllers.userJourney.CompanyDetailsController.businessContactDetails
 POST        /business-contact-details               controllers.userJourney.CompanyDetailsController.submitBusinessContactDetails
-
-## ADDRESS LOOKUP
-#GET         /address-lookup                         controllers.userJourney.AddressLookupController.redirectToLookup
-#GET         /return-from-address                    controllers.userJourney.AddressLookupController.returnFromLookup
 
 ## EMPLOYMENT
 GET         /employing-staff                        controllers.userJourney.EmploymentController.employingStaff

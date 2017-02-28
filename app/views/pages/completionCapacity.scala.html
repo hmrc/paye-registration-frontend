@@ -1,0 +1,49 @@
+@import models.view.CompletionCapacity
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import views.html.helpers.templates.inputRadioGroupHidden
+
+@(completionCapacityForm: Form[CompletionCapacity])(implicit request: Request[_], messages: Messages)
+
+@otherHidden = {
+    <h2>@Messages("____________")</h2>
+    @govHelpers.input(
+        completionCapacityForm("completionCapacityOther"),
+        '_inputClass -> "form-control-1-2",
+        '_labelClass -> "form-control-1-2",
+        '_label -> None
+    )
+}
+
+@main_template(title = messages("pages.completionCapacity.title")) {
+
+    @govHelpers.errorSummary(
+        messages("app.common.errorSummaryLabel"), completionCapacityForm
+    )
+
+    <h1 class="form-title heading-xlarge" id="pageHeading">@messages("pages.completionCapacity.heading"))</h1>
+
+    <div class="form-group">
+        <p id="lede-paragraph">@messages("pages.completionCapacity.lede"))</p>
+    </div>
+
+    @govHelpers.form(action = controllers.userJourney.routes.CompletionCapacityController.submit()) {
+
+        <div class="form-group">
+            <span id="hint-text" class="form-hint">@messages("pages.natureOfBusiness.hint")</span>
+            @inputRadioGroupHidden(
+                completionCapacityForm("completionCapacity"),
+                Seq("director" -> messages("________"),
+                    "agent"    -> messages("________"),
+                    "other"    -> messages("________")),
+                Seq("other" -> otherHidden),
+                '_idHidden -> "other",
+                '_classHidden -> "panel panel-indent",
+                '_labelClass -> "block-label radio-label"
+            )
+        </div>
+
+        <div class="form-group">
+            <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
+        </div>
+    }
+}
