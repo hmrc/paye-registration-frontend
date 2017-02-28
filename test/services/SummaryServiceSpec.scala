@@ -64,9 +64,9 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         nino = Some("ZZ123456A")
       )
     ),
-    payeContactDetails = PAYEContactDetails(
+    payeContact = PAYEContactDetails(
       name = "testName",
-      digitalContact = DigitalContactDetails(
+      digitalContactDetails = DigitalContactDetails(
         email = Some("testEmail"),
         mobileNumber = Some("1234567890"),
         phoneNumber = Some("0987654321")
@@ -166,22 +166,22 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
           SummaryRow(
             id = "contactName",
             answer = Right("testName"),
-            changeLink = None
+            changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
           ),
           SummaryRow(
-            id = "email",
+            id = "emailPAYEContact",
             answer = Right("testEmail"),
-            changeLink = None
+            changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
           ),
           SummaryRow(
-            id = "mobileNumber",
+            id = "mobileNumberPAYEContact",
             answer = Right("1234567890"),
-            changeLink = None
+            changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
           ),
           SummaryRow(
-            id = "phoneNumber",
+            id = "phoneNumberPAYEContact",
             answer = Right("0987654321"),
-            changeLink = None
+            changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
           )
         )
       )
@@ -262,9 +262,9 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             nino = Some("ZZ123456A")
           )
         ),
-        payeContactDetails = PAYEContactDetails(
+        payeContact = PAYEContactDetails(
           name = "testName",
-          digitalContact = DigitalContactDetails(
+          digitalContactDetails = DigitalContactDetails(
             email = None,
             mobileNumber = None,
             phoneNumber = None
@@ -365,22 +365,22 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
               SummaryRow(
                 id = "contactName",
                 answer = Right("testName"),
-                changeLink = None
+                changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
               ),
               SummaryRow(
-                id = "email",
+                id = "emailPAYEContact",
                 answer = Left("noAnswerGiven"),
-                changeLink = None
+                changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
               ),
               SummaryRow(
-                id = "mobileNumber",
+                id = "mobileNumberPAYEContact",
                 answer = Left("noAnswerGiven"),
-                changeLink = None
+                changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
               ),
               SummaryRow(
-                id = "phoneNumber",
+                id = "phoneNumberPAYEContact",
                 answer = Left("noAnswerGiven"),
-                changeLink = None
+                changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
               )
             )
           )

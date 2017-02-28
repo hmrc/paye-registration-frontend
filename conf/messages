@@ -141,7 +141,6 @@ pages.directorDetails.information.dropdown.body         = If the direct names ar
 pages.directorDetails.input.hint-text                   = For example, QQ 12 34 56 C
 pages.directorDetails.legend                            = What is the National Insurance number of each director?
 
-
 ## Summary Page
 pages.summary.title                                     = Check your answers
 pages.summary.heading                                   = Check your answers
@@ -192,6 +191,22 @@ pages.summary.natureOfBusiness.hiddenChangeText         = Change the business''s
 
 pages.summary.directorDetails.sectionHeading            = Director''s details
 pages.summary.director.question                         = Director {0}''s National Insurance number
+
+pages.summary.payeContactDetails.sectionHeading         = PAYE contact details
+pages.summary.contactName.question                      = Contact name
+pages.summary.emailPAYEContact.question                 = Email address
+pages.summary.mobileNumberPAYEContact.question          = Mobile number
+pages.summary.phoneNumberPAYEContact.question           = Daytime telephone
+
+pages.summary.contactName.hiddenChangeText              = Change the PAYE contact name
+pages.summary.emailPAYEContact.hiddenChangeText         = Change the PAYE contact email address
+pages.summary.mobileNumberPAYEContact.hiddenChangeText  = Change the PAYE contact mobile number
+pages.summary.phoneNumberPAYEContact.hiddenChangeText   = Change the PAYE contact daytime telephone number
+
+pages.summary.emailPAYEContact.answers.noAnswerGiven = '
+pages.summary.mobileNumberPAYEContact.answers.noAnswerGiven = '
+pages.summary.phoneNumberPAYEContact.answers.noAnswerGiven = '
+
 
 ## Error Pages
 errorPages.title                                        = Something went wrong

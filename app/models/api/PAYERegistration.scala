@@ -25,7 +25,7 @@ case class PAYERegistration (registrationID: String,
                              employment: Employment,
                              sicCodes: List[SICCode],
                              directors: List[Director],
-                             payeContactDetails: PAYEContactDetails)
+                             payeContact: PAYEContactDetails)
 
 object PAYERegistration {
   implicit val companyDetailsFormat = CompanyDetails.format

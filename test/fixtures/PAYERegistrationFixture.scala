@@ -56,9 +56,9 @@ trait PAYERegistrationFixture {
     employment = validEmploymentAPI,
     sicCodes = validSICCodes,
     directors = Nil,
-    payeContactDetails = PAYEContactDetails(
+    payeContact = PAYEContactDetails(
       name = "testName",
-      digitalContact = DigitalContactDetails(
+      digitalContactDetails = DigitalContactDetails(
         email = Some("testEmail"),
         mobileNumber = Some("1234567890"),
         phoneNumber = Some("0987654321")
@@ -112,7 +112,7 @@ trait PAYERegistrationFixture {
 
   val validPAYEContactDetails = PAYEContactDetails(
     name = "Thierry Henry",
-    digitalContact = DigitalContactDetails(
+    digitalContactDetails = DigitalContactDetails(
       Some("speedy@gonzalez.com"),
       Some("9999"),
       Some("0986534")

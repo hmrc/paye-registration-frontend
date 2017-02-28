@@ -54,7 +54,7 @@ trait SummarySrv extends CommonService {
         buildBusinessContactDetailsSection(apiModel.companyDetails.businessContactDetails),
         buildEmploymentSection(apiModel.employment),
         buildDirectorsSection(apiModel.directors),
-        buildContactDetails(apiModel.payeContactDetails)
+        buildContactDetails(apiModel.payeContact)
       )
     )
   }
@@ -195,7 +195,7 @@ trait SummarySrv extends CommonService {
   }
 
   private[services] def buildContactDetails(PAYEContactDetails: PAYEContactDetails) = {
-    val changeCall: Option[Call] = None
+    val changeCall: Option[Call] = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
     SummarySection(
       id = "payeContactDetails",
       Seq(
@@ -205,24 +205,24 @@ trait SummarySrv extends CommonService {
           changeLink = changeCall
         ),
         SummaryRow(
-          id = "email",
-          answer = PAYEContactDetails.digitalContact.email match {
+          id = "emailPAYEContact",
+          answer = PAYEContactDetails.digitalContactDetails.email match {
             case Some(email) => Right(email)
             case _ => Left("noAnswerGiven")
           },
           changeLink = changeCall
         ),
         SummaryRow(
-          id = "mobileNumber",
-          answer = PAYEContactDetails.digitalContact.mobileNumber match {
+          id = "mobileNumberPAYEContact",
+          answer = PAYEContactDetails.digitalContactDetails.mobileNumber match {
             case Some(mobile) => Right(mobile)
             case _ => Left("noAnswerGiven")
           },
           changeLink = changeCall
         ),
         SummaryRow(
-          id = "phoneNumber",
-          answer = PAYEContactDetails.digitalContact.phoneNumber match {
+          id = "phoneNumberPAYEContact",
+          answer = PAYEContactDetails.digitalContactDetails.phoneNumber match {
             case Some(phone) => Right(phone)
             case _ => Left("noAnswerGiven")
           },

@@ -79,9 +79,9 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
         )(Name.apply)(Name.unapply),
         "nino" -> optional(text)
       )(Director.apply)(Director.unapply)),
-      "payeContactDetails" -> mapping(
+      "payeContact" -> mapping(
         "name" -> nonEmptyText,
-        "digitalContact" -> mapping(
+        "digitalContactDetails" -> mapping(
           "email" -> optional(text),
           "mobileNumber" -> optional(text),
           "phoneNumber" -> optional(text)

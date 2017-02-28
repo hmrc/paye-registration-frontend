@@ -338,7 +338,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
   "PAYEContact" should {
     val validPAYEContact = PAYEContactDetails(
       name = "Thierry Henry",
-      digitalContact = DigitalContactDetails(
+      digitalContactDetails = DigitalContactDetails(
         Some("testy@tasty.com"),
         Some("1234"),
         Some("9874578")
