@@ -20,10 +20,12 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
+import forms.completionCapacity.CompletionCapacityForm
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import views.html.pages.{completionCapacity => CompletionCapacityView}
 
 import scala.concurrent.Future
 
@@ -35,15 +37,15 @@ class CompletionCapacityController @Inject()(injMessagesApi: MessagesApi) extend
 
 trait CompletionCapacityCtrl extends FrontendController with Actions with I18nSupport {
 
-  val show : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+  val completionCapacity : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        Future.successful(Ok(""))
+        Future.successful(Ok(CompletionCapacityView(CompletionCapacityForm.form)))
   }
 
-  val submit : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+  val submitCompletionCapacity : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        Future.successful(Ok(""))
+        Future.successful(Redirect(routes.CompanyDetailsController.tradingName()))
   }
 }

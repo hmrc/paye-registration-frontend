@@ -11,8 +11,8 @@ GET         /start                                  controllers.userJourney.Welc
 POST        /start                                  controllers.userJourney.WelcomeController.submit
 
 ## COMPLETION CAPACITY
-GET         /about-you                              controllers.userJourney.CompletionCapacityController.show
-POST        /about-you                              controllers.userJourney.CompletionCapacityController.submit
+GET         /relationship-to-the-business           controllers.userJourney.CompletionCapacityController.completionCapacity
+POST        /relationship-to-the-business           controllers.userJourney.CompletionCapacityController.submitCompletionCapacity
 
 ## COMPANY DETAILS
 GET         /trading-name                           controllers.userJourney.CompanyDetailsController.tradingName
