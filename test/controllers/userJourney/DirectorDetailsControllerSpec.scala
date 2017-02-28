@@ -115,7 +115,7 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
       }
     }
 
-    "return a SEE_OTHER and redirect to the employing staff page" in new Setup {
+    "return a SEE_OTHER and redirect to the PAYE Contact page" in new Setup {
       val request = FakeRequest().withFormUrlEncodedBody()
 
       when(mockDirectorDetailService.submitNinos(Matchers.any())(Matchers.any[HeaderCarrier]()))
@@ -124,7 +124,7 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
       AuthBuilder.submitWithAuthorisedUser(testController.submitDirectorDetails, mockAuthConnector, request) {
         result =>
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some("/register-for-paye/employing-staff")
+          redirectLocation(result) shouldBe Some("/register-for-paye/company-contact")
       }
     }
   }

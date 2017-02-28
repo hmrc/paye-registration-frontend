@@ -51,8 +51,12 @@ trait PAYEContactDetailsCtrl extends FrontendController with Actions with I18nSu
   val payeContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        companyDetailsService.getCompanyDetails map {
-          details => Ok(PAYEContactDetailsPage(details.companyName, PAYEContactDetailsForm.form))
+        for {
+          companyDetails <- companyDetailsService.getCompanyDetails
+          payeContact <- payeContactService.getPAYEContact
+        } yield payeContact match {
+          case Some(model) => Ok(PAYEContactDetailsPage(companyDetails.companyName, PAYEContactDetailsForm.form.fill(model)))
+          case _ => Ok(PAYEContactDetailsPage(companyDetails.companyName, PAYEContactDetailsForm.form))
         }
   }
 
