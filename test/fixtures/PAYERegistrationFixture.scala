@@ -55,7 +55,15 @@ trait PAYERegistrationFixture {
     companyDetails = validCompanyDetailsAPI,
     employment = validEmploymentAPI,
     sicCodes = validSICCodes,
-    directors = Nil
+    directors = Nil,
+    payeContact = PAYEContactDetails(
+      name = "testName",
+      digitalContactDetails = DigitalContactDetails(
+        email = Some("testEmail"),
+        mobileNumber = Some("1234567890"),
+        phoneNumber = Some("0987654321")
+      )
+    )
   )
 
   lazy val validSummaryView = Summary(
@@ -104,7 +112,7 @@ trait PAYERegistrationFixture {
 
   val validPAYEContactDetails = PAYEContactDetails(
     name = "Thierry Henry",
-    digitalContact = DigitalContactDetails(
+    digitalContactDetails = DigitalContactDetails(
       Some("speedy@gonzalez.com"),
       Some("9999"),
       Some("0986534")

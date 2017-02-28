@@ -21,9 +21,10 @@ import javax.inject.{Inject, Singleton}
 
 import connectors._
 import common.exceptions.InternalExceptions.APIConversionException
-import models.DigitalContactDetails
-import models.api.{PAYERegistration => PAYERegistrationAPI, SICCode, CompanyDetails, Director, Employment}
+import models.{DigitalContactDetails, PAYEContactDetails}
+import models.api.{CompanyDetails, Director, Employment, SICCode, PAYERegistration => PAYERegistrationAPI}
 import models.view.{Address, Summary, SummaryRow, SummarySection}
+import play.api.mvc.Call
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -52,7 +53,8 @@ trait SummarySrv extends CommonService {
         buildCompanyDetailsSection(apiModel.companyDetails, apiModel.sicCodes),
         buildBusinessContactDetailsSection(apiModel.companyDetails.businessContactDetails),
         buildEmploymentSection(apiModel.employment),
-        buildDirectorsSection(apiModel.directors)
+        buildDirectorsSection(apiModel.directors),
+        buildContactDetails(apiModel.payeContact)
       )
     )
   }
@@ -189,6 +191,44 @@ trait SummarySrv extends CommonService {
     SummarySection(
       id = "directorDetails",
       for(d <- directors.zipWithIndex) yield directorRow(d._1, d._2)
+    )
+  }
+
+  private[services] def buildContactDetails(PAYEContactDetails: PAYEContactDetails) = {
+    val changeCall: Option[Call] = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+    SummarySection(
+      id = "payeContactDetails",
+      Seq(
+        SummaryRow(
+          id = "contactName",
+          answer = Right(PAYEContactDetails.name),
+          changeLink = changeCall
+        ),
+        SummaryRow(
+          id = "emailPAYEContact",
+          answer = PAYEContactDetails.digitalContactDetails.email match {
+            case Some(email) => Right(email)
+            case _ => Left("noAnswerGiven")
+          },
+          changeLink = changeCall
+        ),
+        SummaryRow(
+          id = "mobileNumberPAYEContact",
+          answer = PAYEContactDetails.digitalContactDetails.mobileNumber match {
+            case Some(mobile) => Right(mobile)
+            case _ => Left("noAnswerGiven")
+          },
+          changeLink = changeCall
+        ),
+        SummaryRow(
+          id = "phoneNumberPAYEContact",
+          answer = PAYEContactDetails.digitalContactDetails.phoneNumber match {
+            case Some(phone) => Right(phone)
+            case _ => Left("noAnswerGiven")
+          },
+          changeLink = changeCall
+        )
+      )
     )
   }
 }

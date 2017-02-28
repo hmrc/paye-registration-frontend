@@ -25,7 +25,7 @@ class PAYEContactDetailsSpec extends PAYERegSpec {
     val targetJsonMax = Json.parse(
       s"""{
          |  "name":"tstName",
-         |  "digitalContact":{
+         |  "digitalContactDetails":{
          |    "email":"test@email.com",
          |    "mobileNumber":"07943000111",
          |    "phoneNumber":"0161385032"
@@ -54,7 +54,7 @@ class PAYEContactDetailsSpec extends PAYERegSpec {
     val tstJson = Json.parse(
       s"""{
          |  "name":"tstName",
-         |  "digitalContact":{
+         |  "digitalContactDetails":{
          |    "email":"test@email.com"
          |  }
          |}""".stripMargin)
@@ -81,7 +81,7 @@ class PAYEContactDetailsSpec extends PAYERegSpec {
     val tstJson = Json.parse(
       s"""{
          |  "name":"tstName",
-         |  "digitalContact":{
+         |  "digitalContactDetails":{
          |    "mobileNumber":"07943000111"
          |  }
          |}""".stripMargin)
@@ -107,7 +107,7 @@ class PAYEContactDetailsSpec extends PAYERegSpec {
     val tstJson = Json.parse(
       s"""{
          |  "name":"tstName",
-         |  "digitalContact":{
+         |  "digitalContactDetails":{
          |    "phoneNumber":"0161385032"
          |  }
          |}""".stripMargin)

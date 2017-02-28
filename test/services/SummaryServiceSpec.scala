@@ -19,17 +19,17 @@ package services
 import common.exceptions.InternalExceptions.APIConversionException
 import connectors.PAYERegistrationConnector
 import fixtures.PAYERegistrationFixture
-import models.DigitalContactDetails
-import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI, SICCode, Director, Employment, Name}
-import models.view.{SummaryRow, SummarySection, Summary, Address}
+import models.{DigitalContactDetails, PAYEContactDetails, view}
+import models.api.{Director, Employment, Name, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
+import models.view.{Address, Summary, SummaryRow, SummarySection}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.{NotFoundException, Upstream4xxResponse, HeaderCarrier}
+import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException, Upstream4xxResponse}
 
 import scala.concurrent.Future
 
-class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
+class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   val mockRegConnector = mock[PAYERegistrationConnector]
   val mockS4LService = mock[S4LService]
@@ -62,6 +62,14 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
           title = Some("Mr")
         ),
         nino = Some("ZZ123456A")
+      )
+    ),
+    payeContact = PAYEContactDetails(
+      name = "testName",
+      digitalContactDetails = DigitalContactDetails(
+        email = Some("testEmail"),
+        mobileNumber = Some("1234567890"),
+        phoneNumber = Some("0987654321")
       )
     )
   )
@@ -151,6 +159,31 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
             Some("director")
           )
         )
+      ),
+      SummarySection(
+        id = "payeContactDetails",
+        Seq(
+          SummaryRow(
+            id = "contactName",
+            answer = Right("testName"),
+            changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+          ),
+          SummaryRow(
+            id = "emailPAYEContact",
+            answer = Right("testEmail"),
+            changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+          ),
+          SummaryRow(
+            id = "mobileNumberPAYEContact",
+            answer = Right("1234567890"),
+            changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+          ),
+          SummaryRow(
+            id = "phoneNumberPAYEContact",
+            answer = Right("0987654321"),
+            changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+          )
+        )
       )
     )
   )
@@ -227,6 +260,14 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
               title = Some("Mr")
             ),
             nino = Some("ZZ123456A")
+          )
+        ),
+        payeContact = PAYEContactDetails(
+          name = "testName",
+          digitalContactDetails = DigitalContactDetails(
+            email = None,
+            mobileNumber = None,
+            phoneNumber = None
           )
         )
       )
@@ -315,6 +356,31 @@ class SummaryServiceSpec  extends PAYERegSpec with PAYERegistrationFixture {
                 Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
                 Some(Seq("Timothy Buttersford")),
                 Some("director")
+              )
+            )
+          ),
+          SummarySection(
+            id = "payeContactDetails",
+            Seq(
+              SummaryRow(
+                id = "contactName",
+                answer = Right("testName"),
+                changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+              ),
+              SummaryRow(
+                id = "emailPAYEContact",
+                answer = Left("noAnswerGiven"),
+                changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+              ),
+              SummaryRow(
+                id = "mobileNumberPAYEContact",
+                answer = Left("noAnswerGiven"),
+                changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+              ),
+              SummaryRow(
+                id = "phoneNumberPAYEContact",
+                answer = Left("noAnswerGiven"),
+                changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
               )
             )
           )
