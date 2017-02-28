@@ -28,6 +28,9 @@ private object AppDependencies {
   private val scalaTestVersion_it = "2.2.6"
   private val pegdownVersion = "1.6.0"
   private val mockitoCoreVersion = "1.9.5"
+  private val httpCachingVersion = "6.1.0"
+  private val playWhitelistVersion = "2.0.0"
+  private val playConditionalMappingVersion = "0.2.0"
 
 
   val compile = Seq(
@@ -40,8 +43,9 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "govuk-template" % govukTemplateVersion,
     "uk.gov.hmrc" %% "play-health" % playHealthVersion,
     "uk.gov.hmrc" %% "play-ui" % playUiVersion,
-    "uk.gov.hmrc" %% "http-caching-client" % "6.1.0",
-    "uk.gov.hmrc" %% "play-whitelist-filter" % "2.0.0"
+    "uk.gov.hmrc" %% "http-caching-client" % httpCachingVersion,
+    "uk.gov.hmrc" %% "play-whitelist-filter" % playWhitelistVersion,
+    "uk.gov.hmrc" %% "play-conditional-form-mapping" % playConditionalMappingVersion
   )
 
   trait TestDependencies {
