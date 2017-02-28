@@ -18,7 +18,7 @@ package fixtures
 
 import java.time.LocalDate
 
-import models.DigitalContactDetails
+import models.{DigitalContactDetails, PAYEContactDetails}
 import models.api.{Director, Name}
 import models.view._
 
@@ -100,6 +100,15 @@ trait S4LFixture {
     List(
       UserEnteredNino("0", Some("NINO1")),
       UserEnteredNino("1", Some("NINO2"))
+    )
+  )
+
+  val validPAYEContact = PAYEContactDetails(
+    name = "TOTO",
+    digitalContactDetails = DigitalContactDetails(
+      Some("toto@test.com"),
+      Some("1234"),
+      Some("0086554")
     )
   )
 }
