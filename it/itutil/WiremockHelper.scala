@@ -20,7 +20,10 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import org.scalatestplus.play.OneServerPerSuite
+import play.api.libs.json.{JsString, JsObject, Json}
 import play.api.libs.ws.WS
+import uk.gov.hmrc.crypto.{ApplicationCrypto, Protected}
+import uk.gov.hmrc.crypto.json.JsonEncryptor
 
 object WiremockHelper {
   val wiremockPort = 11111

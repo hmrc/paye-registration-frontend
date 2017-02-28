@@ -19,7 +19,7 @@ package itutil
 import java.net.{URLDecoder, URLEncoder}
 import java.util.UUID
 
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, stubFor, urlEqualTo}
+import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.http.HeaderNames
 import play.api.libs.Crypto
 import play.api.libs.ws.WSCookie
@@ -65,6 +65,46 @@ trait LoginStub extends SessionCookieBaker {
                |
             """.stripMargin
           )))
+  }
+
+  val userId = "/auth/oid/1234567890"
+  def setupSimpleAuthMocks() = {
+    stubFor(post(urlMatching("/write/audit"))
+      .willReturn(
+        aResponse().
+          withStatus(200).
+          withBody("""{"x":2}""")
+      )
+    )
+
+    stubFor(get(urlMatching("/auth/authority"))
+      .willReturn(
+        aResponse().
+          withStatus(200).
+          withBody(s"""
+                      |{
+                      |"uri":"${userId}",
+                      |"loggedInAt": "2014-06-09T14:57:09.522Z",
+                      |"previouslyLoggedInAt": "2014-06-09T14:48:24.841Z",
+                      |"credentials":{"gatewayId":"xxx2"},
+                      |"accounts":{},
+                      |"levelOfAssurance": "2",
+                      |"confidenceLevel" : 50,
+                      |"credentialStrength": "strong",
+                      |"legacyOid":"1234567890",
+                      |"userDetailsLink":"xxx3",
+                      |"ids":"/auth/ids"
+                      |}""".stripMargin)
+      )
+    )
+
+    stubFor(get(urlMatching("/auth/ids"))
+      .willReturn(
+        aResponse().
+          withStatus(200).
+          withBody("""{"internalId":"Int-xxx","externalId":"Ext-xxx"}""")
+      )
+    )
   }
 }
 
