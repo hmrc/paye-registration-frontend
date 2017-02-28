@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
+import enums.DownstreamOutcome
 import forms.payeContactDetails.PAYEContactDetailsForm
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
@@ -33,16 +34,19 @@ import scala.concurrent.Future
 @Singleton
 class PAYEContactDetailsController @Inject()(
                                               injCompanyDetailsService: CompanyDetailsService,
+                                              injPAYEContactService: PAYEContactService,
                                               injMessagesApi: MessagesApi)
   extends PAYEContactDetailsCtrl {
   val authConnector = FrontendAuthConnector
   val companyDetailsService = injCompanyDetailsService
+  val payeContactService = injPAYEContactService
   val messagesApi = injMessagesApi
 }
 
 trait PAYEContactDetailsCtrl extends FrontendController with Actions with I18nSupport {
 
   val companyDetailsService: CompanyDetailsSrv
+  val payeContactService: PAYEContactSrv
 
   val payeContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
@@ -57,7 +61,10 @@ trait PAYEContactDetailsCtrl extends FrontendController with Actions with I18nSu
       implicit request =>
         PAYEContactDetailsForm.form.bindFromRequest.fold(
           errs => companyDetailsService.getCompanyDetails map (details => BadRequest(PAYEContactDetailsPage(details.companyName, errs))),
-          success => Future.successful(Ok(Json.toJson(success)))
+          success => payeContactService.submitPAYEContact(success) map {
+            case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+            case DownstreamOutcome.Success => Redirect(routes.EmploymentController.employingStaff())
+          }
         )
   }
 }
