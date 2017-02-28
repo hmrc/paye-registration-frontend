@@ -5,12 +5,12 @@
 @(completionCapacityForm: Form[CompletionCapacity])(implicit request: Request[_], messages: Messages)
 
 @otherHidden = {
-    <h2>@Messages(____________)</h2>
-    @input(
+    <h2>@Messages("____________")</h2>
+    @govHelpers.input(
         completionCapacityForm("completionCapacityOther"),
-        `_inputClass -> "form-control-1-2",
-        `_labelClass -> "form-control-1-2",
-        `_label -> None
+        '_inputClass -> "form-control-1-2",
+        '_labelClass -> "form-control-1-2",
+        '_label -> None
     )
 }
 
@@ -32,9 +32,9 @@
             <span id="hint-text" class="form-hint">@messages("pages.natureOfBusiness.hint")</span>
             @inputRadioGroupHidden(
                 completionCapacityForm("completionCapacity"),
-                Seq("director" -> messages(________),
-                    "agent"    -> messages(________),
-                    "other"    -> messages(________)),
+                Seq("director" -> messages("________"),
+                    "agent"    -> messages("________"),
+                    "other"    -> messages("________")),
                 Seq("other" -> otherHidden),
                 '_idHidden -> "other",
                 '_classHidden -> "panel panel-indent",
