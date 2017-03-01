@@ -16,20 +16,41 @@
 
 package forms.completionCapacity
 
+import enums.UserCapacity
 import models.view.{CompletionCapacity => CompletionCapacityView}
-import play.api.data.{Form, Mapping}
+import play.api.data.format.Formatter
+import play.api.data.{Forms, FormError, Form, Mapping}
 import play.api.data.Forms._
 import uk.gov.voa.play.form.ConditionalMappings._
 import utils.Validators.nonEmpty
+
+import scala.util.{Success, Try}
 
 object CompletionCapacityForm {
 
   private def ifOther(mapping: Mapping[String]): Mapping[String] =
     onlyIf(isEqual("completionCapacity", "other"), mapping)("")
 
+  implicit val completionCapacityFormatter = new Formatter[UserCapacity.Value] {
+
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], UserCapacity.Value] = {
+      Try {
+        UserCapacity.fromString(data.getOrElse(key, ""))
+      } match {
+        case Success(capacity) => Right(capacity)
+        case _                 => Left(Seq(FormError(key, "pages.completionCapacity.incompleteError")))
+      }
+    }
+
+    override def unbind(key: String, value: UserCapacity.Value): Map[String, String] = Map(key -> value.toString)
+  }
+
+  val completionCapacity: Mapping[UserCapacity.Value] = Forms.of[UserCapacity.Value](completionCapacityFormatter)
+
+
   val form = Form(
     mapping(
-      "completionCapacity" -> text,
+      "completionCapacity" -> completionCapacity,
       "completionCapacityOther" -> ifOther(text.verifying(nonEmpty))
     )(CompletionCapacityView.apply)(CompletionCapacityView.unapply)
   )
