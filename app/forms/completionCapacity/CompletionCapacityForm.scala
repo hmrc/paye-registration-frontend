@@ -22,7 +22,6 @@ import play.api.data.format.Formatter
 import play.api.data.{Forms, FormError, Form, Mapping}
 import play.api.data.Forms._
 import uk.gov.voa.play.form.ConditionalMappings._
-import utils.Validators.nonEmpty
 
 import scala.util.{Success, Try}
 
@@ -51,7 +50,7 @@ object CompletionCapacityForm {
   val form = Form(
     mapping(
       "completionCapacity" -> completionCapacity,
-      "completionCapacityOther" -> ifOther(text.verifying(nonEmpty))
+      "completionCapacityOther" -> ifOther(text.verifying("pages.completionCapacity.incompleteError", !_.isEmpty))
     )(CompletionCapacityView.apply)(CompletionCapacityView.unapply)
   )
 }

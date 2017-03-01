@@ -81,6 +81,15 @@ class CompletionCapacityFormSpec extends UnitSpec {
       boundForm.errors shouldBe Seq(FormError("completionCapacity", "pages.completionCapacity.incompleteError"))
     }
 
+    "Fail to bind when other capacity is incomplete" in {
+      val data = Map(
+        "completionCapacity" -> "other",
+        "completionCapacityOther" -> "")
+
+      val boundForm = testForm.bind(data)
+
+      boundForm.errors shouldBe Seq(FormError("completionCapacityOther", "pages.completionCapacity.incompleteError"))
+    }
   }
 
   "Unbinding a Completion Capacity model to a form" should {
