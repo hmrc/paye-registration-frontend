@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-package models.api
+package enums
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Writes, Reads, Format}
 
-case class CompletionCapacity(completionCapacity: String)
+object UserCapacity extends Enumeration {
 
-object CompletionCapacity {
-  implicit val format = Json.format[CompletionCapacity]
+  val director = Value
+  val agent = Value
+  val other = Value
+
+  def fromString(choice: String): Value = choice.toLowerCase match {
+    case "director" => director
+    case "agent"    => agent
+    case "other"    => other
+  }
+
+
+  implicit val format = Format(Reads.enumNameReads(UserCapacity), Writes.enumNameWrites)
 }

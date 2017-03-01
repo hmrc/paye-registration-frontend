@@ -16,7 +16,9 @@
 
 package forms.completionCapacity
 
+import enums.UserCapacity
 import models.view.CompletionCapacity
+import play.api.data.FormError
 import uk.gov.hmrc.play.test.UnitSpec
 
 class CompletionCapacityFormSpec extends UnitSpec {
@@ -29,7 +31,7 @@ class CompletionCapacityFormSpec extends UnitSpec {
         "completionCapacity" -> "director",
         "completionCapacityOther" -> "")
 
-      val model = CompletionCapacity("director", "")
+      val model = CompletionCapacity(UserCapacity.director, "")
 
       val boundModel = testForm.bind(data).fold(
         errs => errs,
@@ -44,7 +46,7 @@ class CompletionCapacityFormSpec extends UnitSpec {
         "completionCapacity" -> "agent",
         "completionCapacityOther" -> "")
 
-      val model = CompletionCapacity("agent", "")
+      val model = CompletionCapacity(UserCapacity.agent, "")
 
       val boundModel = testForm.bind(data).fold(
         errs => errs,
@@ -59,7 +61,7 @@ class CompletionCapacityFormSpec extends UnitSpec {
         "completionCapacity" -> "other",
         "completionCapacityOther" -> "unimportant")
 
-      val model = CompletionCapacity("other", "unimportant")
+      val model = CompletionCapacity(UserCapacity.other, "unimportant")
 
       val boundModel = testForm.bind(data).fold(
         errs => errs,
@@ -67,6 +69,16 @@ class CompletionCapacityFormSpec extends UnitSpec {
       )
 
       boundModel shouldBe model
+    }
+
+    "Fail to bind when capacity is incomplete" in {
+      val data = Map(
+        "completionCapacity" -> "",
+        "completionCapacityOther" -> "unimportant")
+
+      val boundForm = testForm.bind(data)
+
+      boundForm.errors shouldBe Seq(FormError("completionCapacity", "pages.completionCapacity.incompleteError"))
     }
 
   }
@@ -78,7 +90,7 @@ class CompletionCapacityFormSpec extends UnitSpec {
         "completionCapacity" -> "director",
         "completionCapacityOther" -> "")
 
-      val model = CompletionCapacity("director", "")
+      val model = CompletionCapacity(UserCapacity.director, "")
 
       val filledForm = testForm.fill(model)
 
