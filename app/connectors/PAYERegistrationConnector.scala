@@ -130,6 +130,21 @@ trait PAYERegistrationConnect {
     }
   }
 
+  def getCompletionCapacity(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[String]): Future[Option[String]] = {
+    http.GET[String](s"$payeRegUrl/paye-registration/$regID/capacity") map {
+      details => Some(details)
+    } recover {
+      case e: NotFoundException => None
+      case e: Exception => throw logResponse(e, "getCompletionCapacity", "getting completion capacity")
+    }
+  }
+
+  def upsertCompletionCapacity(regID: String, completionCapacity: String)(implicit hc: HeaderCarrier, rds: HttpReads[String]): Future[String] = {
+    http.PATCH[String, String](s"$payeRegUrl/paye-registration/$regID/capacity", completionCapacity) recover {
+      case e: Exception => throw logResponse(e, "upsertCompletionCapacity", "upserting completion capacity")
+    }
+  }
+
   private[connectors] def logResponse(e: Throwable, f: String, m: String): Throwable = {
     def log(s: String) = Logger.warn(s"[PAYERegistrationConnector] [$f] received $s when $m")
     e match {

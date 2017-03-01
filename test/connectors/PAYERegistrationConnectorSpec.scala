@@ -360,4 +360,55 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
       intercept[InternalServerException](await(connector.upsertPAYEContact("tstID", validPAYEContactDetails)))
     }
   }
+
+  "Calling getCompletionCapacity" should {
+    "return the correct PAYEResponse when the microservice returns a PAYE Contact model" in new Setup {
+      mockHttpGet[String]("tst-url", "tst")
+
+      await(connector.getCompletionCapacity("tstID")) shouldBe Some("tst")
+    }
+    "return the correct PAYEResponse when a Bad Request response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[String]("test-url", badRequest)
+
+      intercept[BadRequestException](await(connector.getCompletionCapacity("tstID")))
+    }
+    "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[String]("test-url", forbidden)
+
+      intercept[Upstream4xxResponse](await(connector.getCompletionCapacity("tstID")))
+    }
+    "return a Not Found PAYEResponse when the microservice returns no Completion Capacity String" in new Setup {
+      mockHttpFailedGET[String]("test-url", notFound)
+
+      await(connector.getCompletionCapacity("tstID")) shouldBe None
+    }
+    "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[String]("test-url", internalServiceException)
+
+      intercept[InternalServerException](await(connector.getCompletionCapacity("tstID")))
+    }
+  }
+
+  "Calling upsertCompletionCapacity" should {
+    "return the correct PAYEResponse when the microservice completes and returns a Completion Capacity String" in new Setup {
+      mockHttpPATCH[String, String]("tst-url", "tst")
+
+      await(connector.upsertCompletionCapacity("tstID", "tst")) shouldBe "tst"
+    }
+    "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
+      mockHttpFailedPATCH[String, String]("tst-url", forbidden)
+
+      intercept[Upstream4xxResponse](await(connector.upsertCompletionCapacity("tstID", "tst")))
+    }
+    "return a Not Found PAYEResponse when the microservice returns a NotFound response (No PAYERegistration in database)" in new Setup {
+      mockHttpFailedPATCH[String, String]("tst-url", notFound)
+
+      intercept[NotFoundException](await(connector.upsertCompletionCapacity("tstID", "tst")))
+    }
+    "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
+      mockHttpFailedPATCH[String, String]("tst-url", internalServiceException)
+
+      intercept[InternalServerException](await(connector.upsertCompletionCapacity("tstID", "tst")))
+    }
+  }
 }

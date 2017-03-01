@@ -18,20 +18,42 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import connectors.KeystoreConnector
-import enums.UserCapacity
+import connectors.{PAYERegistrationConnector, PAYERegistrationConnect, KeystoreConnector}
+import enums.{DownstreamOutcome, UserCapacity}
 import models.view.CompletionCapacity
+import uk.gov.hmrc.play.http.HeaderCarrier
+
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class CompletionCapacityService @Inject()(injKeystoreConnector: KeystoreConnector
+class CompletionCapacityService @Inject()(injKeystoreConnector: KeystoreConnector,
+                                          injPAYERegistrationConnector: PAYERegistrationConnector
                                            ) extends CompletionCapacitySrv {
 
   override val keystoreConnector = injKeystoreConnector
+  override val payeRegConnector = injPAYERegistrationConnector
 }
 
 trait CompletionCapacitySrv extends CommonService {
 
-  def viewToAPI(completionCapacity: CompletionCapacity): String = {
+  val payeRegConnector: PAYERegistrationConnect
+
+  def saveCompletionCapacity(completionCapacity: CompletionCapacity)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    for {
+      regId   <- fetchRegistrationID
+      outcome <- payeRegConnector.upsertCompletionCapacity(regId, viewToAPI(completionCapacity))
+    } yield DownstreamOutcome.Success
+  }
+
+  def getCompletionCapacity()(implicit hc: HeaderCarrier): Future[Option[CompletionCapacity]] = {
+    for {
+      regId <- fetchRegistrationID
+      resp  <- payeRegConnector.getCompletionCapacity(regId)
+    } yield resp.map(apiToView)
+  }
+
+  private[services] def viewToAPI(completionCapacity: CompletionCapacity): String = {
     completionCapacity.completionCapacity match {
       case UserCapacity.director => UserCapacity.director.toString
       case UserCapacity.agent    => UserCapacity.agent.toString
@@ -39,7 +61,7 @@ trait CompletionCapacitySrv extends CommonService {
     }
   }
 
-  def apiToView(completionCapacity: String): CompletionCapacity = {
+  private[services] def apiToView(completionCapacity: String): CompletionCapacity = {
     completionCapacity.toLowerCase match {
       case "director" => CompletionCapacity(UserCapacity.director, "")
       case "agent"    => CompletionCapacity(UserCapacity.agent, "")
