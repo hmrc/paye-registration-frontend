@@ -37,7 +37,7 @@ trait WelcomeCtrl extends FrontendController with I18nSupport {
   }
 
   val submit = Action.async { implicit request =>
-    Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.tradingName()))
+    Future.successful(Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity()))
   }
 
 }
