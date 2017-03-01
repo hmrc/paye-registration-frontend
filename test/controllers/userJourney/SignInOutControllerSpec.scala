@@ -91,7 +91,7 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.tradingName()}")
+          redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.CompletionCapacityController.completionCapacity()}")
       }
     }
   }

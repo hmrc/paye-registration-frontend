@@ -51,7 +51,7 @@ class WelcomeControllerSpec extends PAYERegSpec {
     }
     "redirect to trading name page" in new Setup {
       val result = controller.submit(fakeRequest)
-      redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.tradingName()}")
+      redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.CompletionCapacityController.completionCapacity()}")
     }
   }
 

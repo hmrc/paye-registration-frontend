@@ -68,5 +68,4 @@ trait CompletionCapacitySrv extends CommonService {
       case _          => CompletionCapacity(UserCapacity.other, completionCapacity)
     }
   }
-
 }

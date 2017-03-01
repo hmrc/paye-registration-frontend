@@ -33,6 +33,16 @@ pages.welcome.director                                  = You must register if y
 pages.welcome.2months                                   = You can''t register more than 2 months before you start paying people.
 pages.welcome.nino                                      = You''ll need the director''s National Insurance number to complete this registration.
 
+## Completion Capacity page
+pages.completionCapacity.title                          = What is your relationship to the business?
+pages.completionCapacity.heading                        = What is your relationship to the business?
+
+pages.completionCapacity.director                       = Director
+pages.completionCapacity.agent                          = Agent (for example, an accountant)
+pages.completionCapacity.other                          = Other (for example, a friend of the director)
+pages.completionCapacity.other.label                    = Describe your relationship to the business
+pages.completionCapacity.incompleteError                = Tell us your relationship to the business
+
 ## Trading Name Page
 pages.tradingName.title                                 = Trading name
 pages.tradingName.heading                               = Does the company trade under any other names than {0}?

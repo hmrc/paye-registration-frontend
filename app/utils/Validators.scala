@@ -36,16 +36,6 @@ object Validators extends DateUtil {
     case _ => Valid
   })
 
-  val nonEmpty: Constraint[String] = Constraint("constraints.nonEmpty")({
-    text =>
-      val errors = text match {
-        case nonEmptyRegex() => Nil
-        case _ => Seq(ValidationError("errors.invalid.emptyField"))
-      }
-
-      if (errors.isEmpty) Valid else Invalid(errors)
-  })
-
   val emailValidation: Constraint[String] = Constraint("constraints.emailCheck")({
     text =>
       val errors = text match {

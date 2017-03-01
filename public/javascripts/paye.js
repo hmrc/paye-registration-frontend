@@ -1,5 +1,28 @@
 $(document).ready($(function() {
 
+    var director = $("#completionCapacity-director");
+    var agent = $("#completionCapacity-agent");
+    var other = $("#completionCapacity-other");
+    var otherHidden = $("#other-hidden");
+
+    if(other.is(":checked")){
+        otherHidden.show();
+    } else {
+        otherHidden.hide();
+    }
+
+    director.on("change", function () {
+        otherHidden.hide();
+    });
+
+    agent.on("change", function () {
+        otherHidden.hide()
+    });
+
+    other.on("change", function () {
+        otherHidden.show();
+    });
+
     $('*[data-hidden]').each(function() {
 
         var $self = $(this);
