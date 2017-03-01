@@ -82,13 +82,12 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       val payeRegistrationConnector = new PAYERegistrationConnector()
 
       def getResponse = payeRegistrationConnector.getCompanyDetails(regId)
-      def patchResponse = payeRegistrationConnector.upsertCompanyDetails(regId, validCompanyDetails)
 
       stubFor(get(urlMatching(url("/company-details")))
         .willReturn(
           aResponse()
             .withStatus(200)
-            .withBody(Json.toJson(validCompanyDetails).toString)
+            .withBody(Json.toJson(validCompanyDetails).toString())
         )
       )
 
@@ -100,7 +99,6 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       val payeRegistrationConnector = new PAYERegistrationConnector()
 
       def getResponse = payeRegistrationConnector.getCompanyDetails(regId)
-      def patchResponse = payeRegistrationConnector.upsertCompanyDetails(regId, validCompanyDetails)
 
       stubFor(get(urlMatching(url("/company-details")))
         .willReturn(
@@ -116,14 +114,13 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
       val payeRegistrationConnector = new PAYERegistrationConnector()
 
-      def getResponse = payeRegistrationConnector.getCompanyDetails(regId)
       def patchResponse = payeRegistrationConnector.upsertCompanyDetails(regId, validCompanyDetails)
 
       stubFor(patch(urlMatching(url("/company-details")))
         .willReturn(
           aResponse()
             .withStatus(200)
-            .withBody(Json.toJson(validCompanyDetails).toString)
+            .withBody(Json.toJson(validCompanyDetails).toString())
         )
       )
 
@@ -143,13 +140,12 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       val payeRegistrationConnector = new PAYERegistrationConnector()
 
       def getResponse = payeRegistrationConnector.getEmployment(regId)
-      def patchResponse = payeRegistrationConnector.upsertEmployment(regId, validEmployment)
 
       stubFor(get(urlMatching(url("/employment")))
         .willReturn(
           aResponse()
             .withStatus(200)
-            .withBody(Json.toJson(validEmployment).toString)
+            .withBody(Json.toJson(validEmployment).toString())
         )
       )
 
@@ -161,7 +157,6 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       val payeRegistrationConnector = new PAYERegistrationConnector()
 
       def getResponse = payeRegistrationConnector.getEmployment(regId)
-      def patchResponse = payeRegistrationConnector.upsertEmployment(regId, validEmployment)
 
       stubFor(get(urlMatching(url("/employment")))
         .willReturn(
@@ -177,14 +172,13 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
       val payeRegistrationConnector = new PAYERegistrationConnector()
 
-      def getResponse = payeRegistrationConnector.getEmployment(regId)
       def patchResponse = payeRegistrationConnector.upsertEmployment(regId, validEmployment)
 
       stubFor(patch(urlMatching(url("/employment")))
         .willReturn(
           aResponse()
             .withStatus(200)
-            .withBody(Json.toJson(validEmployment).toString)
+            .withBody(Json.toJson(validEmployment).toString())
         )
       )
 
@@ -220,7 +214,6 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       val payeRegistrationConnector = new PAYERegistrationConnector()
 
       def getResponse = payeRegistrationConnector.getDirectors(regId)
-      def patchResponse = payeRegistrationConnector.upsertDirectors(regId, dirList)
 
       stubFor(get(urlMatching(url("/directors")))
         .willReturn(
@@ -253,7 +246,6 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
       val payeRegistrationConnector = new PAYERegistrationConnector()
 
-      def getResponse = payeRegistrationConnector.getDirectors(regId)
       def patchResponse = payeRegistrationConnector.upsertDirectors(regId, dirList)
 
       stubFor(patch(urlMatching(url("/directors")))
@@ -286,7 +278,6 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       val payeRegistrationConnector = new PAYERegistrationConnector()
 
       def getResponse = payeRegistrationConnector.getSICCodes(regId)
-      def patchResponse = payeRegistrationConnector.upsertSICCodes(regId, sicCodes)
 
       stubFor(get(urlMatching(url("/sic-codes")))
         .willReturn(
@@ -319,7 +310,6 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
       val payeRegistrationConnector = new PAYERegistrationConnector()
 
-      def getResponse = payeRegistrationConnector.getSICCodes(regId)
       def patchResponse = payeRegistrationConnector.upsertSICCodes(regId, sicCodes)
 
       stubFor(patch(urlMatching(url("/sic-codes")))
@@ -350,13 +340,12 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       val payeRegistrationConnector = new PAYERegistrationConnector()
 
       def getResponse = payeRegistrationConnector.getPAYEContact(regId)
-      def patchResponse = payeRegistrationConnector.upsertPAYEContact(regId, validPAYEContact)
 
       stubFor(get(urlMatching(url("/contact-paye")))
         .willReturn(
           aResponse()
             .withStatus(200)
-            .withBody(Json.toJson(validPAYEContact).toString)
+            .withBody(Json.toJson(validPAYEContact).toString())
         )
       )
 
@@ -368,7 +357,6 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       val payeRegistrationConnector = new PAYERegistrationConnector()
 
       def getResponse = payeRegistrationConnector.getPAYEContact(regId)
-      def patchResponse = payeRegistrationConnector.upsertPAYEContact(regId, validPAYEContact)
 
       stubFor(get(urlMatching(url("/contact-paye")))
         .willReturn(
@@ -384,18 +372,72 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
       val payeRegistrationConnector = new PAYERegistrationConnector()
 
-      def getResponse = payeRegistrationConnector.getPAYEContact(regId)
       def patchResponse = payeRegistrationConnector.upsertPAYEContact(regId, validPAYEContact)
 
       stubFor(patch(urlMatching(url("/contact-paye")))
         .willReturn(
           aResponse()
             .withStatus(200)
-            .withBody(Json.toJson(validPAYEContact).toString)
+            .withBody(Json.toJson(validPAYEContact).toString())
         )
       )
 
       await(patchResponse) shouldBe validPAYEContact
+    }
+  }
+
+  "Completion Capacity" should {
+
+    "get a string" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val jobTitle = "High Priestess"
+
+      def getResponse = payeRegistrationConnector.getCompletionCapacity(regId)
+
+      stubFor(get(urlMatching(url("/capacity")))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(Json.toJson(jobTitle).toString())
+        )
+      )
+
+      await(getResponse) shouldBe Some(jobTitle)
+    }
+
+    "get a None" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+
+      def getResponse = payeRegistrationConnector.getCompletionCapacity(regId)
+
+      stubFor(get(urlMatching(url("/capacity")))
+        .willReturn(
+          aResponse()
+            .withStatus(404)
+        )
+      )
+
+      await(getResponse) shouldBe None
+    }
+
+    "upsert a model" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector()
+
+      val jobTitle = "High Priestess"
+      def patchResponse = payeRegistrationConnector.upsertCompletionCapacity(regId, jobTitle)
+
+      stubFor(patch(urlMatching(url("/capacity")))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(Json.toJson(jobTitle).toString())
+        )
+      )
+
+      await(patchResponse) shouldBe jobTitle
     }
   }
 }

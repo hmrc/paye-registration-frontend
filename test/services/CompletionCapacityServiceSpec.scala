@@ -16,17 +16,62 @@
 
 package services
 
-import enums.UserCapacity
+import connectors.PAYERegistrationConnector
+import enums.{DownstreamOutcome, UserCapacity}
 import models.view.CompletionCapacity
+import org.mockito.Matchers
+import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
+import uk.gov.hmrc.play.http.HeaderCarrier
+
+import scala.concurrent.Future
 
 
 class CompletionCapacityServiceSpec extends PAYERegSpec {
 
+  implicit val hc = HeaderCarrier()
 
+  val mockPAYERegConnector = mock[PAYERegistrationConnector]
 
   class Setup {
-    val service = new CompletionCapacityService(mockKeystoreConnector)
+    val service = new CompletionCapacityService(mockKeystoreConnector, mockPAYERegConnector)
+  }
+
+  "Calling saveCompletionCapacity" should {
+    "return success for a successful save" in new Setup {
+      mockFetchRegID()
+
+      val jobTitle = "Grand Vizier"
+      val tstCapacity = CompletionCapacity(UserCapacity.other, "Grand Vizier")
+
+      when(mockPAYERegConnector.upsertCompletionCapacity(Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(jobTitle))
+
+      await(service.saveCompletionCapacity(tstCapacity)) shouldBe DownstreamOutcome.Success
+    }
+  }
+
+  "Calling saveCompletionCapacity" should {
+    "return a view model when there is a completion capacity in the database" in new Setup {
+      mockFetchRegID()
+
+      val jobTitle = "director"
+      val tstCapacity = CompletionCapacity(UserCapacity.director, "")
+
+      when(mockPAYERegConnector.getCompletionCapacity(Matchers.anyString())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(Some(jobTitle)))
+
+      await(service.getCompletionCapacity()) shouldBe Some(tstCapacity)
+    }
+
+    "return an empty option when there is no completion capacity in the database" in new Setup {
+      mockFetchRegID()
+
+      when(mockPAYERegConnector.getCompletionCapacity(Matchers.anyString())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(None))
+
+      await(service.getCompletionCapacity()) shouldBe None
+    }
   }
 
   "Calling viewToAPI" should {

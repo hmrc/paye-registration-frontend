@@ -25,12 +25,10 @@ import models.api.{CompanyDetails => CompanyDetailsAPI}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
-import common.exceptions.DownstreamExceptions.PAYEMicroserviceException
-import common.exceptions.InternalExceptions.APIConversionException
 import models.external.CHROAddress
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, HttpResponse, NotFoundException, Upstream4xxResponse}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 
 import scala.concurrent.Future
 
