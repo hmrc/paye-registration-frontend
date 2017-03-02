@@ -16,7 +16,7 @@
 
 package models.api
 
-import models.PAYEContactDetails
+import models.view.PAYEContactDetails
 import play.api.libs.json.Json
 
 case class PAYERegistration (registrationID: String,

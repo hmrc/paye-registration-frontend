@@ -19,8 +19,8 @@ package services
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, PAYERegistrationFixture, S4LFixture}
-import models.DigitalContactDetails
-import models.view.{Address, CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
+import models.{Address, DigitalContactDetails}
+import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import org.mockito.Matchers
 import org.mockito.Mockito._

@@ -30,7 +30,7 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import services._
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import views.html.pages.companyDetails.{confirmROAddress, businessContactDetails => BusinessContactDetailsPage, chooseAddress => PPOBAddressPage, tradingName => TradingNamePage}
+import views.html.pages.companyDetails.{confirmROAddress, businessContactDetails => BusinessContactDetailsPage, ppobAddress => PPOBAddressPage, tradingName => TradingNamePage}
 
 import scala.concurrent.Future
 

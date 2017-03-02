@@ -20,8 +20,8 @@ import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
 import enums.DownstreamOutcome
-import models.PAYEContactDetails
 import models.api.{Director, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
+import models.view.PAYEContactDetails
 import play.api.Logger
 import play.api.http.Status
 import uk.gov.hmrc.play.config.ServicesConfig

@@ -16,7 +16,7 @@
 
 package views.pages.companyDetails
 
-import models.view.Address
+import models.Address
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.test.FakeRequest

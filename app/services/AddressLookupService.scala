@@ -19,7 +19,7 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import connectors.{AddressLookupConnect, AddressLookupConnector}
-import models.view.Address
+import models.Address
 import play.api.Logger
 import play.api.libs.json.{JsArray, JsObject}
 import play.api.mvc.{Call, Request}

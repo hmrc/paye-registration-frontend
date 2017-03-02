@@ -20,8 +20,8 @@ import javax.inject.{Inject, Singleton}
 
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
-import models.DigitalContactDetails
-import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView, Address}
+import models.{DigitalContactDetails, Address}
+import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import uk.gov.hmrc.play.http.HeaderCarrier
 

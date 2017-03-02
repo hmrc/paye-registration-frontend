@@ -23,13 +23,10 @@ import config.FrontendAuthConnector
 import enums.DownstreamOutcome
 import forms.payeContactDetails.PAYEContactDetailsForm
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.Json
 import services._
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import views.html.pages.{payeContactDetails => PAYEContactDetailsPage}
-
-import scala.concurrent.Future
+import views.html.pages.payeContact.{payeContactDetails => PAYEContactDetailsPage}
 
 @Singleton
 class PAYEContactDetailsController @Inject()(

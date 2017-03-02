@@ -16,6 +16,7 @@
 
 package models
 
+import models.view.PAYEContactDetails
 import play.api.libs.json.{JsSuccess, Json}
 import testHelpers.PAYERegSpec
 

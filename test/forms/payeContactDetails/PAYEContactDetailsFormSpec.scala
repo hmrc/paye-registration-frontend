@@ -16,7 +16,8 @@
 
 package forms.payeContactDetails
 
-import models.{PAYEContactDetails, DigitalContactDetails}
+import models.DigitalContactDetails
+import models.view.PAYEContactDetails
 import play.api.data.FormError
 import uk.gov.hmrc.play.test.UnitSpec
 

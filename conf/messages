@@ -66,8 +66,12 @@ pages.confirmRO.help.body.link.url                      = https://ewf.companiesh
 ##PPOB Address
 pages.ppobAddress.title                                 = Tell us where you''ll carry out most of your business activities
 pages.ppobAddress.heading                               = Where will you carry out most of your business activities?
-pages.ppobAddress.roAddress                             = Registered office address:<br>{0}
 pages.ppobAddress.other                                 = A different location
+
+##Correspondence Address
+pages.correspondenceAddress.title                       = What is your company''s correspondence address?
+pages.correspondenceAddress.lede                        = We''ll use this address to send post relating to your PAYE scheme.
+pages.correspondenceAddress.other                       = A different location
 
 ## Business Contact Details
 pages.businessContact.title                             = Company contact details

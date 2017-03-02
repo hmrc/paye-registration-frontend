@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import connectors.{CoHoAPIConnect, CoHoAPIConnector, CompanyRegistrationConnect, CompanyRegistrationConnector, KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.{CacheKeys, DownstreamOutcome}
-import models.PAYEContactDetails
+import models.view.PAYEContactDetails
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future

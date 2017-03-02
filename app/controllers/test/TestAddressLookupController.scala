@@ -21,7 +21,7 @@ import javax.inject.{Singleton, Inject}
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import enums.DownstreamOutcome
-import models.view.Address
+import models.Address
 import services._
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController

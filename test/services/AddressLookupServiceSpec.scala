@@ -18,7 +18,7 @@ package services
 
 import connectors._
 import fixtures.{PAYERegistrationFixture, S4LFixture}
-import models.view.Address
+import models.Address
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import play.api.libs.json.{JsObject, Json}
