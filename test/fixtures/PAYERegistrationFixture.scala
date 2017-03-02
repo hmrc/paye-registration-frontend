@@ -52,6 +52,7 @@ trait PAYERegistrationFixture {
   val validPAYERegistrationAPI = PAYERegistration(
     registrationID = "AC123456",
     formCreationTimestamp = "2017-01-11T15:10:12",
+    completionCapacity = "High Priest",
     companyDetails = validCompanyDetailsAPI,
     employment = validEmploymentAPI,
     sicCodes = validSICCodes,

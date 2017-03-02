@@ -44,6 +44,43 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
     }
   }
 
+  "The summary page, Completion Capacity section" should {
+
+    lazy val summaryModelCompletionCapacity: Summary = Summary(
+      Seq(
+        SummarySection(
+          id = "completionCapacity",
+          Seq(
+            SummaryRow(
+              id ="completionCapacity",
+              answer = Left("director"),
+              changeLink = Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+            )
+          )
+        )
+      )
+    )
+
+    lazy val view = summary(summaryModelCompletionCapacity)
+    lazy val document = Jsoup.parse(view.body)
+
+    "have Applicant in section title" in {
+      document.getElementById(s"completionCapacity$suffixIdSectionHeading").text shouldBe messagesApi("pages.summary.completionCapacity.sectionHeading")
+    }
+
+    "have the correct question text for Completion Capacity" in {
+      document.getElementById(s"completionCapacity$suffixIdQuestion").text shouldBe messagesApi("pages.summary.completionCapacity.question")
+    }
+
+    "have the correct answer text when no Completion Capacity" in {
+      document.getElementById(s"completionCapacity$suffixIdAnswer").text shouldBe messagesApi("pages.summary.completionCapacity.answers.director")
+    }
+
+    "have the correct change link for Completion Capacity" in {
+      document.getElementById(s"completionCapacity$suffixIdChangeLink").attr("href") shouldBe controllers.userJourney.routes.CompletionCapacityController.completionCapacity().toString
+    }
+  }
+
   "The summary page, Company Details section" should {
 
     lazy val summaryModelNoTradingName: Summary = Summary(

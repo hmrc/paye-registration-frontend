@@ -19,7 +19,7 @@ package services
 import common.exceptions.InternalExceptions.APIConversionException
 import connectors.PAYERegistrationConnector
 import fixtures.PAYERegistrationFixture
-import models.{DigitalContactDetails, PAYEContactDetails, view}
+import models.{DigitalContactDetails, PAYEContactDetails}
 import models.api.{Director, Employment, Name, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
 import models.view.{Address, Summary, SummaryRow, SummarySection}
 import org.mockito.Matchers
@@ -43,6 +43,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
   val apiRegistration = PAYERegistrationAPI(
     registrationID = "AC123456",
     formCreationTimestamp = "2017-01-11T15:10:12",
+    completionCapacity = "High Priest",
     companyDetails = CompanyDetailsAPI(
       crn = None,
       companyName = "Test Company",
@@ -78,6 +79,16 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   lazy val summary = Summary(
     Seq(
+      SummarySection(
+        id = "completionCapacity",
+        Seq(
+          SummaryRow(
+            id ="completionCapacity",
+            answer = Right("High Priest"),
+            changeLink = Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+          )
+        )
+      ),
       SummarySection(
         id = "companyDetails",
         Seq(
@@ -241,6 +252,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       val apiRegistrationNoTName = PAYERegistrationAPI(
         registrationID = "AC123456",
         formCreationTimestamp = "2017-01-11T15:10:12",
+        completionCapacity = "High Priestess",
         companyDetails = CompanyDetailsAPI(
           crn = None,
           companyName = "Test Company",
@@ -277,6 +289,16 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
 
       lazy val summaryNoTName = Summary(
         Seq(
+          SummarySection(
+            id = "completionCapacity",
+            Seq(
+              SummaryRow(
+                id ="completionCapacity",
+                answer = Right("High Priestess"),
+                changeLink = Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+              )
+            )
+          ),
           SummarySection(
             id = "companyDetails",
             Seq(
@@ -563,6 +585,56 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         )
 
       service.buildBusinessContactDetailsSection(businessContactDetailsModel) shouldBe validBCDSection
+    }
+  }
+
+  "buildCompletionCapacitySection" should {
+    "return a valid section for director" in new Setup {
+      val capacity = "director"
+      val section = SummarySection(
+        id = "completionCapacity",
+        Seq(
+          SummaryRow(
+            id ="completionCapacity",
+            answer = Left("director"),
+            changeLink = Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+          )
+        )
+      )
+
+      service.buildCompletionCapacitySection(capacity) shouldBe section
+    }
+
+    "return a valid section for agent" in new Setup {
+      val capacity = "agent"
+      val section = SummarySection(
+        id = "completionCapacity",
+        Seq(
+          SummaryRow(
+            id ="completionCapacity",
+            answer = Left("agent"),
+            changeLink = Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+          )
+        )
+      )
+
+      service.buildCompletionCapacitySection(capacity) shouldBe section
+    }
+
+    "return a valid section for other - Executive in charge of helicopters" in new Setup {
+      val capacity = "Executive in charge of helicopters"
+      val section = SummarySection(
+        id = "completionCapacity",
+        Seq(
+          SummaryRow(
+            id ="completionCapacity",
+            answer = Right("Executive in charge of helicopters"),
+            changeLink = Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+          )
+        )
+      )
+
+      service.buildCompletionCapacitySection(capacity) shouldBe section
     }
   }
 
