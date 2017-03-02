@@ -61,6 +61,10 @@ POST        /company-contact                        controllers.userJourney.PAYE
 
 ## SUMMARY
 GET         /summary                                controllers.userJourney.SummaryController.summary
+POST        /summary                                controllers.userJourney.SummaryController.submitRegistration
+
+## CONFIRMATION
+GET         /confirmation                           controllers.userJourney.ConfirmationController.showConfirmation
 
 ## FEEDBACK
 GET         /feedback                               controllers.feedback.FeedbackController.show
