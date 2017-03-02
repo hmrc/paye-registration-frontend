@@ -155,6 +155,11 @@ pages.directorDetails.legend                            = What is the National I
 pages.summary.title                                     = Check your answers
 pages.summary.heading                                   = Check your answers
 
+pages.summary.completionCapacity.sectionHeading         = Applicant
+pages.summary.completionCapacity.question               = Who the application is being made by
+pages.summary.completionCapacity.answers.director       = Director
+pages.summary.completionCapacity.answers.agent          = Agent
+pages.summary.completionCapacity.hiddenChangeText       = Change your relationship to the business
 
 pages.summary.companyDetails.sectionHeading             = Company information
 pages.summary.tradingName.question                      = Other trading name

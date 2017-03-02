@@ -21,6 +21,7 @@ import javax.inject.{Inject, Singleton}
 
 import connectors._
 import common.exceptions.InternalExceptions.APIConversionException
+import enums.UserCapacity
 import models.{DigitalContactDetails, PAYEContactDetails}
 import models.api.{CompanyDetails, Director, Employment, SICCode, PAYERegistration => PAYERegistrationAPI}
 import models.view.{Address, Summary, SummaryRow, SummarySection}
@@ -29,9 +30,12 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.{Try, Success}
 
 @Singleton
-class SummaryService @Inject()(keystoreConn: KeystoreConnector, payeRegistrationConn: PAYERegistrationConnector) extends SummarySrv {
+class SummaryService @Inject()(keystoreConn: KeystoreConnector,
+                               payeRegistrationConn: PAYERegistrationConnector
+                                ) extends SummarySrv {
   override val keystoreConnector = keystoreConn
   override val payeRegistrationConnector = payeRegistrationConn
 }
@@ -50,11 +54,32 @@ trait SummarySrv extends CommonService {
   private[services] def registrationToSummary(apiModel: PAYERegistrationAPI): Summary = {
     Summary(
       Seq(
+        buildCompletionCapacitySection(apiModel.completionCapacity),
         buildCompanyDetailsSection(apiModel.companyDetails, apiModel.sicCodes),
         buildBusinessContactDetailsSection(apiModel.companyDetails.businessContactDetails),
         buildEmploymentSection(apiModel.employment),
         buildDirectorsSection(apiModel.directors),
         buildContactDetails(apiModel.payeContact)
+      )
+    )
+  }
+
+  private[services] def buildCompletionCapacitySection(capacity: String): SummarySection = {
+    val displayCapacity = Try {
+      UserCapacity.fromString(capacity)
+    } match {
+      case Success(UserCapacity.director) => Left("director")
+      case Success(UserCapacity.agent)    => Left("agent")
+      case _ => Right(capacity)
+    }
+    SummarySection(
+      id = "completionCapacity",
+      Seq(
+        SummaryRow(
+          id = "completionCapacity",
+          displayCapacity,
+          changeLink = Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+        )
       )
     )
   }

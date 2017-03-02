@@ -21,6 +21,7 @@ import play.api.libs.json.Json
 
 case class PAYERegistration (registrationID: String,
                              formCreationTimestamp: String,
+                             completionCapacity: String,
                              companyDetails: CompanyDetails,
                              employment: Employment,
                              sicCodes: List[SICCode],
