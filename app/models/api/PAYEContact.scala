@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package models
+package models.api
 
+import models.view.PAYEContactDetails
+import models.{Address, DigitalContactDetails}
 import play.api.libs.json.Json
 
-case class PAYEContactDetails (name: String,
-                               digitalContactDetails: DigitalContactDetails)
 
-object PAYEContactDetails {
+case class PAYEContact(contactDetails: PAYEContactDetails,
+                       correspondenceAddress: Address)
+
+object PAYEContact {
   implicit val digitalContactFormat = DigitalContactDetails.format
   implicit val format = Json.format[PAYEContactDetails]
 }

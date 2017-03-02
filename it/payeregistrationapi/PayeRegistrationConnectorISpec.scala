@@ -20,9 +20,10 @@ import java.time.LocalDate
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.PAYERegistrationConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
-import models.{DigitalContactDetails, PAYEContactDetails}
+import models.DigitalContactDetails
 import models.api.{CompanyDetails, Director, Employment, Name, SICCode}
-import models.view.Address
+import models.Address
+import models.view.PAYEContactDetails
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json

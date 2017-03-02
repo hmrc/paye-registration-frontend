@@ -18,7 +18,7 @@ package fixtures
 
 import java.time.LocalDate
 
-import models.{DigitalContactDetails, PAYEContactDetails}
+import models.{Address, DigitalContactDetails}
 import models.api.{Director, Name}
 import models.view._
 

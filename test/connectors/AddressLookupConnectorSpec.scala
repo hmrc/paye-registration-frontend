@@ -21,7 +21,7 @@ import org.mockito.Matchers
 import org.mockito.Mockito._
 import play.api.libs.json.{JsObject, Json}
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, NotFoundException, Upstream4xxResponse}
+import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, NotFoundException}
 
 import scala.concurrent.Future
 

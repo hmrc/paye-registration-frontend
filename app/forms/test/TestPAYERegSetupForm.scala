@@ -19,9 +19,10 @@ package forms.test
 import java.time.LocalDate
 
 import forms.helpers.{DateForm, RequiredBooleanForm}
-import models.{DigitalContactDetails, PAYEContactDetails}
+import models.DigitalContactDetails
 import models.api._
-import models.view.Address
+import models.Address
+import models.view.PAYEContactDetails
 import play.api.data.Form
 import play.api.data.Forms._
 

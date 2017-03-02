@@ -17,12 +17,13 @@
 package views.pages.companyDetails
 
 import forms.companyDetails.ChooseAddressForm
-import models.view.{Address, AddressChoice, ChosenAddress}
+import models.view.AddressChoice
+import models.Address
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.test.FakeRequest
 import testHelpers.PAYERegSpec
-import views.html.pages.companyDetails.{chooseAddress => PPOBAddressPage}
+import views.html.pages.companyDetails.{ppobAddress => PPOBAddressPage}
 
 class chooseAddressSpec extends PAYERegSpec with I18nSupport {
   implicit val request = FakeRequest()

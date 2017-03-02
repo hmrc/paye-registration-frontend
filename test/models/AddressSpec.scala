@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package models.view
+package models
 
 import play.api.libs.json.{JsSuccess, Json}
-import testHelpers.PAYERegSpec
+import uk.gov.hmrc.play.test.UnitSpec
 
-class AddressSpec extends PAYERegSpec {
+class AddressSpec extends UnitSpec {
   val tstFullAddress = Address(
     line1 = "14 St Test Walker",
     line2 = "Testford",

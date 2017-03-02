@@ -17,7 +17,8 @@
 package forms.payeContactDetails
 
 import forms.helpers.OneOfManyForm
-import models.{DigitalContactDetails, PAYEContactDetails}
+import models.DigitalContactDetails
+import models.view.PAYEContactDetails
 import play.api.data.Form
 import play.api.data.Forms._
 import utils.Validators._

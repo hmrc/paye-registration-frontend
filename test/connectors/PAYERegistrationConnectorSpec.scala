@@ -18,9 +18,9 @@ package connectors
 
 import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
-import models.PAYEContactDetails
 import models.api.{Director, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
-import models.view.Address
+import models.Address
+import models.view.PAYEContactDetails
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import testHelpers.PAYERegSpec

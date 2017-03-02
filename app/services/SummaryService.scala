@@ -22,15 +22,15 @@ import javax.inject.{Inject, Singleton}
 import connectors._
 import common.exceptions.InternalExceptions.APIConversionException
 import enums.UserCapacity
-import models.{DigitalContactDetails, PAYEContactDetails}
+import models.{Address, DigitalContactDetails}
 import models.api.{CompanyDetails, Director, Employment, SICCode, PAYERegistration => PAYERegistrationAPI}
-import models.view.{Address, Summary, SummaryRow, SummarySection}
+import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection}
 import play.api.mvc.Call
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Try, Success}
+import scala.util.{Success, Try}
 
 @Singleton
 class SummaryService @Inject()(keystoreConn: KeystoreConnector,

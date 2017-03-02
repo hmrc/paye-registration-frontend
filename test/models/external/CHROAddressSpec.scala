@@ -16,7 +16,7 @@
 
 package models.external
 
-import models.view.Address
+import models.Address
 import play.api.libs.json.{JsSuccess, Json}
 import testHelpers.PAYERegSpec
 
