@@ -1,0 +1,22 @@
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@()(implicit request: Request[_], messages: Messages)
+
+@main_template(title = messages("pages.confirmation.title")) {
+
+
+    <div class="transaction-banner--complete">
+        <h1 class="form-title heading-xlarge" id="pageHeading">@messages("pages.confirmation.heading")</h1>
+        <p align="center">@messages("pages.confirmation.reference")</p>
+        <p align="center">BRPY-0123456789</p>
+    </div>
+
+    <h2>@messages("pages.confirmation.heading2")</h2>
+
+    <p>@messages("pages.confirmation.p1")</p>
+    <ul class="bullets">
+        <li>@messages("pages.confirmation.bullet1")</li>
+        <li>@messages("pages.confirmation.bullet2")</li>
+    </ul>
+    <p>@messages("pages.confirmation.p2")</p>
+
+}

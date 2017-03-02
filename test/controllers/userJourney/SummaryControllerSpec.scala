@@ -26,6 +26,7 @@ import testHelpers.PAYERegSpec
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import play.api.i18n.MessagesApi
+import play.api.test.Helpers._
 
 import scala.concurrent.Future
 
@@ -62,6 +63,16 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       AuthBuilder.showWithAuthorisedUser(controller.summary, mockAuthConnector) {
         (response: Future[Result]) =>
           status(response) shouldBe Status.INTERNAL_SERVER_ERROR
+      }
+    }
+  }
+
+  "Calling submitRegistration" should {
+    "show the confirmation page" in new Setup {
+      AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
+        (result: Future[Result]) =>
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result).get shouldBe "/register-for-paye/confirmation"
       }
     }
   }

@@ -1,5 +1,6 @@
 @import models.view.Summary
 @import helpers.templates.summaryRow
+@import uk.gov.hmrc.play.views.html.helpers.form
 
 @(summaryModel: Summary)(implicit request: Request[_], messages: Messages)
 
@@ -22,4 +23,9 @@
         }
     </table>
 
+    @form(action = controllers.userJourney.routes.SummaryController.submitRegistration()) {
+        <div class="form-group">
+            <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
+        </div>
+    }
 }

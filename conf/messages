@@ -223,6 +223,16 @@ pages.summary.mobileNumberPAYEContact.answers.noAnswerGiven = '
 pages.summary.phoneNumberPAYEContact.answers.noAnswerGiven = '
 
 
+## Confirmation Page
+pages.confirmation.title                                = Application complete
+pages.confirmation.heading                              = Application submitted
+pages.confirmation.reference                            = Your reference number is
+pages.confirmation.heading2                             = What happens next?
+pages.confirmation.p1                                   = If your application is successful you''ll be sent:
+pages.confirmation.bullet1                              = a letter from HMRC including your PAYE and Accounts Office reference numbers within 5 working days of the company registering with Companies House
+pages.confirmation.bullet2                              = an activation pin for PAYE Online within 10 working days of the company registering with Companies House
+pages.confirmation.p2                                   = You''ll need these to send payroll information to HMRC.
+
 ## Error Pages
 errorPages.title                                        = Something went wrong
 errorPages.restart.heading                              = Sorry, we''re having technical issues.

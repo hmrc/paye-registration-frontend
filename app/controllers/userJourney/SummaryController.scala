@@ -19,7 +19,7 @@ package controllers.userJourney
 import auth.PAYERegime
 import javax.inject.{Inject, Singleton}
 import config.FrontendAuthConnector
-import services.{SummarySrv, SummaryService, PAYERegistrationService, PAYERegistrationSrv}
+import services.{SummarySrv, SummaryService}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import views.html.pages.{summary => SummaryPage}
@@ -45,5 +45,9 @@ trait SummaryCtrl extends FrontendController with Actions with I18nSupport {
     } recover {
       case _ => InternalServerError(views.html.pages.error.restart())
     }
+  }
+
+  val submitRegistration = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) { implicit user => implicit request =>
+     Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation())
   }
 }

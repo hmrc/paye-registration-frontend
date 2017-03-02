@@ -18,26 +18,23 @@ package controllers.userJourney
 
 import javax.inject.{Inject, Singleton}
 
+import auth.PAYERegime
+import config.FrontendAuthConnector
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc._
+import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-
-import scala.concurrent.Future
+import views.html.pages.{confirmation => ConfirmationPage}
 
 @Singleton
-class WelcomeController @Inject()(injMessagesApi: MessagesApi)
-  extends WelcomeCtrl {
+class ConfirmationController @Inject()(injMessagesApi: MessagesApi) extends ConfirmationCtrl {
+  val authConnector = FrontendAuthConnector
   val messagesApi = injMessagesApi
 }
 
-trait WelcomeCtrl extends FrontendController with I18nSupport {
-
-  val show = Action { implicit request =>
-    Ok(views.html.pages.welcome())
+trait ConfirmationCtrl extends FrontendController with Actions with I18nSupport {
+  val showConfirmation = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
+    implicit user =>
+      implicit request =>
+        Ok(ConfirmationPage())
   }
-
-  val submit = Action { implicit request =>
-    Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
-  }
-
 }
