@@ -32,5 +32,5 @@ case class PAYEContact(contactDetails: Option[PAYEContactDetails],
 
 object PAYEContact {
   implicit val digitalContactFormat = DigitalContactDetails.format
-  implicit val format = Json.format[PAYEContactDetails]
+  implicit val format = Json.format[PAYEContact]
 }

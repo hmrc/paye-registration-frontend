@@ -17,7 +17,7 @@
 package models.api
 
 import models.view.PAYEContactDetails
-import models.{Address, DigitalContactDetails}
+import models.Address
 import play.api.libs.json.Json
 
 
@@ -25,6 +25,7 @@ case class PAYEContact(contactDetails: PAYEContactDetails,
                        correspondenceAddress: Address)
 
 object PAYEContact {
-  implicit val digitalContactFormat = DigitalContactDetails.format
-  implicit val format = Json.format[PAYEContactDetails]
+  implicit val payeContactFormat = PAYEContactDetails.format
+  implicit val addressFormat = Address.format
+  implicit val format = Json.format[PAYEContact]
 }

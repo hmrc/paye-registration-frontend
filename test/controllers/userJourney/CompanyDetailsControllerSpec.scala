@@ -19,18 +19,17 @@ package controllers.userJourney
 import builders.AuthBuilder
 import enums.DownstreamOutcome
 import fixtures.{PAYERegistrationFixture, S4LFixture}
-import models.{DigitalContactDetails, Address}
+import models.{Address, DigitalContactDetails}
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import org.jsoup._
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.{AddressLookupService, CoHoAPIService, CompanyDetailsService, S4LService}
+import services._
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
 

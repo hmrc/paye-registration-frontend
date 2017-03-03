@@ -102,13 +102,4 @@ trait S4LFixture {
       UserEnteredNino("1", Some("NINO2"))
     )
   )
-
-  val validPAYEContact = PAYEContactDetails(
-    name = "TOTO",
-    digitalContactDetails = DigitalContactDetails(
-      Some("toto@test.com"),
-      Some("1234"),
-      Some("0086554")
-    )
-  )
 }

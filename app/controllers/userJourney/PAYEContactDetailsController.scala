@@ -22,6 +22,7 @@ import auth.PAYERegime
 import config.FrontendAuthConnector
 import enums.DownstreamOutcome
 import forms.payeContactDetails.PAYEContactDetailsForm
+import models.view.PAYEContact
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services._
 import uk.gov.hmrc.play.frontend.auth.Actions
@@ -52,7 +53,7 @@ trait PAYEContactDetailsCtrl extends FrontendController with Actions with I18nSu
           companyDetails <- companyDetailsService.getCompanyDetails
           payeContact <- payeContactService.getPAYEContact
         } yield payeContact match {
-          case Some(model) => Ok(PAYEContactDetailsPage(companyDetails.companyName, PAYEContactDetailsForm.form.fill(model)))
+          case PAYEContact(Some(contactDetails), _) => Ok(PAYEContactDetailsPage(companyDetails.companyName, PAYEContactDetailsForm.form.fill(contactDetails)))
           case _ => Ok(PAYEContactDetailsPage(companyDetails.companyName, PAYEContactDetailsForm.form))
         }
   }
@@ -62,7 +63,7 @@ trait PAYEContactDetailsCtrl extends FrontendController with Actions with I18nSu
       implicit request =>
         PAYEContactDetailsForm.form.bindFromRequest.fold(
           errs => companyDetailsService.getCompanyDetails map (details => BadRequest(PAYEContactDetailsPage(details.companyName, errs))),
-          success => payeContactService.submitPAYEContact(success) map {
+          success => payeContactService.submitPayeContactDetails(success) map {
             case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
             case DownstreamOutcome.Success => Redirect(routes.EmploymentController.employingStaff())
           }

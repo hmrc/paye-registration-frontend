@@ -6,6 +6,7 @@ app.common.no                                           = No
 app.common.continue                                     = Continue
 app.common.saveAndContinue                              = Save and continue
 app.common.back                                         = Back
+app.common.submit                                       = Submit
 app.common.errorSummaryLabel                            = There are errors on this page.
 app.common.change                                       = Change
 app.common.year                                         = Year

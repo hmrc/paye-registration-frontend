@@ -19,8 +19,8 @@ package fixtures
 import java.time.LocalDate
 
 import models.{Address, DigitalContactDetails}
-import models.api._
-import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection}
+import models.api.{PAYEContact => PAYEContactAPI, _}
+import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection, PAYEContact => PAYEContactView}
 
 
 trait PAYERegistrationFixture {
@@ -50,6 +50,32 @@ trait PAYERegistrationFixture {
 
   val validSICCodes = List(SICCode(None, Some("Accounting")))
 
+  val validPAYEContactAPI = PAYEContactAPI(
+    PAYEContactDetails(
+      name = "testName",
+      digitalContactDetails = DigitalContactDetails(
+        email = Some("testEmail"),
+        mobileNumber = Some("1234567890"),
+        phoneNumber = Some("0987654321")
+      )
+    ),
+    Address("22 Test test","Testerarium",None, None, Some("TE0 0ST"))
+  )
+
+  val validPAYEContactView = PAYEContactView(
+    Some(PAYEContactDetails(
+      name = "testName",
+      digitalContactDetails = DigitalContactDetails(
+        email = Some("testEmail"),
+        mobileNumber = Some("1234567890"),
+        phoneNumber = Some("0987654321")
+      )
+    )),
+    Some(Address("22 Test test","Testerarium",None, None, Some("TE0 0ST")))
+  )
+
+  val emptyPAYEContactView = PAYEContactView(None, None)
+
   val validPAYERegistrationAPI = PAYERegistration(
     registrationID = "AC123456",
     formCreationTimestamp = "2017-01-11T15:10:12",
@@ -58,14 +84,7 @@ trait PAYERegistrationFixture {
     employment = validEmploymentAPI,
     sicCodes = validSICCodes,
     directors = Nil,
-    payeContact = PAYEContactDetails(
-      name = "testName",
-      digitalContactDetails = DigitalContactDetails(
-        email = Some("testEmail"),
-        mobileNumber = Some("1234567890"),
-        phoneNumber = Some("0987654321")
-      )
-    )
+    payeContact = validPAYEContactAPI
   )
 
   lazy val validSummaryView = Summary(

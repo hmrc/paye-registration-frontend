@@ -23,7 +23,7 @@ import connectors._
 import common.exceptions.InternalExceptions.APIConversionException
 import enums.UserCapacity
 import models.{Address, DigitalContactDetails}
-import models.api.{CompanyDetails, Director, Employment, SICCode, PAYERegistration => PAYERegistrationAPI}
+import models.api.{CompanyDetails, Director, Employment, PAYEContact, SICCode, PAYERegistration => PAYERegistrationAPI}
 import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection}
 import play.api.mvc.Call
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -98,12 +98,12 @@ trait SummarySrv extends CommonService {
         ),
         SummaryRow(
           id = "roAddress",
-          answer = Right(formatHTMLROAddress(companyDetails.roAddress)),
+          answer = Right(formatHTMLAddress(companyDetails.roAddress)),
           changeLink = None
         ),
         SummaryRow(
           id = "ppobAddress",
-          answer = Right(formatHTMLROAddress(companyDetails.ppobAddress)),
+          answer = Right(formatHTMLAddress(companyDetails.ppobAddress)),
           //TODO: Change to PPOB address route
           changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.ppobAddress())
         ),
@@ -120,35 +120,35 @@ trait SummarySrv extends CommonService {
     SummarySection(
       id = "businessContactDetails",
       Seq(
-        Some(SummaryRow(
+        SummaryRow(
           id = "businessEmail",
           answer = businessContactDetails.email match {
             case Some(email) => Right(email)
             case _ => Left("noAnswerGiven")
           },
           changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
-        )),
-        Some(SummaryRow(
+        ),
+        SummaryRow(
           id = "mobileNumber",
           answer = businessContactDetails.mobileNumber match {
             case Some(mobile) => Right(mobile)
             case _ => Left("noAnswerGiven")
           },
           changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
-        )),
-        Some(SummaryRow(
+        ),
+        SummaryRow(
           id = "businessTelephone",
           answer = businessContactDetails.phoneNumber match {
             case Some(bizPhone) => Right(bizPhone)
             case _ => Left("noAnswerGiven")
           },
           changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
-        ))
-      ).flatten
+        )
+      )
     )
   }
 
-  private[services] def formatHTMLROAddress(address: Address): String = {
+  private[services] def formatHTMLAddress(address: Address): String = {
     List(
       Some(address.line1),
       Some(address.line2),
@@ -219,19 +219,20 @@ trait SummarySrv extends CommonService {
     )
   }
 
-  private[services] def buildContactDetails(PAYEContactDetails: PAYEContactDetails) = {
+  private[services] def buildContactDetails(payeContactDetails: PAYEContact) = {
     val changeCall: Option[Call] = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+    val digitalContact = payeContactDetails.contactDetails.digitalContactDetails
     SummarySection(
       id = "payeContactDetails",
       Seq(
         SummaryRow(
           id = "contactName",
-          answer = Right(PAYEContactDetails.name),
+          answer = Right(payeContactDetails.contactDetails.name),
           changeLink = changeCall
         ),
         SummaryRow(
           id = "emailPAYEContact",
-          answer = PAYEContactDetails.digitalContactDetails.email match {
+          answer = digitalContact.email match {
             case Some(email) => Right(email)
             case _ => Left("noAnswerGiven")
           },
@@ -239,7 +240,7 @@ trait SummarySrv extends CommonService {
         ),
         SummaryRow(
           id = "mobileNumberPAYEContact",
-          answer = PAYEContactDetails.digitalContactDetails.mobileNumber match {
+          answer = digitalContact.mobileNumber match {
             case Some(mobile) => Right(mobile)
             case _ => Left("noAnswerGiven")
           },
@@ -247,10 +248,15 @@ trait SummarySrv extends CommonService {
         ),
         SummaryRow(
           id = "phoneNumberPAYEContact",
-          answer = PAYEContactDetails.digitalContactDetails.phoneNumber match {
+          answer = digitalContact.phoneNumber match {
             case Some(phone) => Right(phone)
             case _ => Left("noAnswerGiven")
           },
+          changeLink = changeCall
+        ),
+        SummaryRow(
+          id = "correspondenceAddress",
+          answer = Right(formatHTMLAddress(payeContactDetails.correspondenceAddress)),
           changeLink = changeCall
         )
       )

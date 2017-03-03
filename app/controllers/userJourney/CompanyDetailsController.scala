@@ -22,7 +22,8 @@ import javax.inject.{Inject, Singleton}
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector}
 import enums.DownstreamOutcome
-import forms.companyDetails.{BusinessContactDetailsForm, ChooseAddressForm, TradingNameForm}
+import forms.ChooseAddressForm
+import forms.companyDetails.{BusinessContactDetailsForm, TradingNameForm}
 import models.view.{AddressChoice, ChosenAddress, TradingName}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}

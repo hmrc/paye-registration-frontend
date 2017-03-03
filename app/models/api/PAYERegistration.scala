@@ -16,7 +16,6 @@
 
 package models.api
 
-import models.view.PAYEContactDetails
 import play.api.libs.json.Json
 
 case class PAYERegistration (registrationID: String,
@@ -26,11 +25,12 @@ case class PAYERegistration (registrationID: String,
                              employment: Employment,
                              sicCodes: List[SICCode],
                              directors: List[Director],
-                             payeContact: PAYEContactDetails)
+                             payeContact: PAYEContact)
 
 object PAYERegistration {
   implicit val companyDetailsFormat = CompanyDetails.format
   implicit val EmploymentFormat = Employment.formatModel
   implicit val DirectorFormat = Director.format
+  implicit val contactFormat = PAYEContact.format
   implicit val format = Json.format[PAYERegistration]
 }

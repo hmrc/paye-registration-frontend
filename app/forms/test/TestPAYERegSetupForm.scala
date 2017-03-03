@@ -82,13 +82,23 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
         "nino" -> optional(text)
       )(Director.apply)(Director.unapply)),
       "payeContact" -> mapping(
-        "name" -> nonEmptyText,
-        "digitalContactDetails" -> mapping(
-          "email" -> optional(text),
-          "mobileNumber" -> optional(text),
-          "phoneNumber" -> optional(text)
-        )(DigitalContactDetails.apply)(DigitalContactDetails.unapply)
-      )(PAYEContactDetails.apply)(PAYEContactDetails.unapply)
+        "payeContactDetails" -> mapping(
+          "name" -> nonEmptyText,
+          "digitalContactDetails" -> mapping(
+            "email" -> optional(text),
+            "mobileNumber" -> optional(text),
+            "phoneNumber" -> optional(text)
+          )(DigitalContactDetails.apply)(DigitalContactDetails.unapply)
+        )(PAYEContactDetails.apply)(PAYEContactDetails.unapply),
+        "correspondenceAddress" -> mapping(
+          "line1" -> text,
+          "line2" -> text,
+          "line3" -> optional(text),
+          "line4" -> optional(text),
+          "postCode" -> optional(text),
+          "country" -> optional(text)
+        )(Address.apply)(Address.unapply)
+      )(PAYEContact.apply)(PAYEContact.unapply)
     )(PAYERegistration.apply)(PAYERegistration.unapply)
   )
 }

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package forms.companyDetails
+package forms
 
 import models.view.{AddressChoice, ChosenAddress}
-import play.api.data.{Form, FormError, Forms, Mapping}
 import play.api.data.Forms.mapping
 import play.api.data.format.Formatter
+import play.api.data.{Form, FormError, Forms, Mapping}
 
 object ChooseAddressForm {
   implicit def addressChoiceFormatter: Formatter[AddressChoice.Value] = new Formatter[AddressChoice.Value] {

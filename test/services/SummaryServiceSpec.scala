@@ -35,7 +35,10 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
   val mockS4LService = mock[S4LService]
 
   class Setup {
-    val service = new SummaryService (mockKeystoreConnector, mockRegConnector)
+    val service = new SummarySrv {
+      val keystoreConnector = mockKeystoreConnector
+      val payeRegistrationConnector = mockRegConnector
+    }
   }
 
   val simpleSICCodes = List(SICCode(code = None, description = Some("Firearms")))
@@ -65,17 +68,8 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         nino = Some("ZZ123456A")
       )
     ),
-    payeContact = PAYEContactDetails(
-      name = "testName",
-      digitalContactDetails = DigitalContactDetails(
-        email = Some("testEmail"),
-        mobileNumber = Some("1234567890"),
-        phoneNumber = Some("0987654321")
-      )
-    )
+    payeContact = validPAYEContactAPI
   )
-
-  lazy val formatHMTLROAddress = ""
 
   lazy val summary = Summary(
     Seq(
@@ -193,6 +187,11 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             id = "phoneNumberPAYEContact",
             answer = Right("0987654321"),
             changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+          ),
+          SummaryRow(
+            id = "correspondenceAddress",
+            answer = Right("22 Test test<br />Testerarium<br />TE0 0ST"),
+            changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
           )
         )
       )
@@ -274,18 +273,12 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             nino = Some("ZZ123456A")
           )
         ),
-        payeContact = PAYEContactDetails(
-          name = "testName",
-          digitalContactDetails = DigitalContactDetails(
-            email = None,
-            mobileNumber = None,
-            phoneNumber = None
-          )
-        )
+        payeContact = validPAYEContactAPI
       )
 
-      val formatHMTLROAddress = service.formatHTMLROAddress(apiRegistrationNoTName.companyDetails.roAddress)
-      val formatHMTLPPOBAddress = service.formatHTMLROAddress(apiRegistrationNoTName.companyDetails.ppobAddress)
+      val formatHMTLROAddress = service.formatHTMLAddress(apiRegistrationNoTName.companyDetails.roAddress)
+      val formatHMTLPPOBAddress = service.formatHTMLAddress(apiRegistrationNoTName.companyDetails.ppobAddress)
+      val formatHMTLCorrespondenceAddress = service.formatHTMLAddress(validPAYEContactAPI.correspondenceAddress)
 
       lazy val summaryNoTName = Summary(
         Seq(
@@ -391,17 +384,22 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
               ),
               SummaryRow(
                 id = "emailPAYEContact",
-                answer = Left("noAnswerGiven"),
+                answer = Right("testEmail"),
                 changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
               ),
               SummaryRow(
                 id = "mobileNumberPAYEContact",
-                answer = Left("noAnswerGiven"),
+                answer = Right("1234567890"),
                 changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
               ),
               SummaryRow(
                 id = "phoneNumberPAYEContact",
-                answer = Left("noAnswerGiven"),
+                answer = Right("0987654321"),
+                changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+              ),
+              SummaryRow(
+                id = "correspondenceAddress",
+                answer = Right(formatHMTLCorrespondenceAddress),
                 changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
               )
             )
@@ -431,8 +429,8 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         )
       )
 
-      val formatHMTLROAddress = service.formatHTMLROAddress(validCompanyDetailsAPI.roAddress)
-      val formatHMTLPPOBAddress = service.formatHTMLROAddress(validCompanyDetailsAPI.ppobAddress)
+      val formatHMTLROAddress = service.formatHTMLAddress(validCompanyDetailsAPI.roAddress)
+      val formatHMTLPPOBAddress = service.formatHTMLAddress(validCompanyDetailsAPI.ppobAddress)
 
       val companyDetailsSection = SummarySection(
         id = "companyDetails",

@@ -18,11 +18,9 @@ package connectors
 
 import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
-import models.api.{Director, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
-import models.Address
+import models.api.{Director, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
 import models.view.PAYEContactDetails
 import play.api.http.Status
-import play.api.libs.json.{JsObject, Json}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -312,27 +310,27 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
 
   "Calling getPAYEContact" should {
     "return the correct PAYEResponse when the microservice returns a PAYE Contact model" in new Setup {
-      mockHttpGet[PAYEContactDetails]("tst-url", validPAYEContactDetails)
+      mockHttpGet[PAYEContact]("tst-url", validPAYEContactAPI)
 
-      await(connector.getPAYEContact("tstID")) shouldBe Some(validPAYEContactDetails)
+      await(connector.getPAYEContact("tstID")) shouldBe Some(validPAYEContactAPI)
     }
     "return the correct PAYEResponse when a Bad Request response is returned by the microservice" in new Setup {
-      mockHttpFailedGET[PAYEContactDetails]("test-url", badRequest)
+      mockHttpFailedGET[PAYEContact]("test-url", badRequest)
 
       intercept[BadRequestException](await(connector.getPAYEContact("tstID")))
     }
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
-      mockHttpFailedGET[PAYEContactDetails]("test-url", forbidden)
+      mockHttpFailedGET[PAYEContact]("test-url", forbidden)
 
       intercept[Upstream4xxResponse](await(connector.getPAYEContact("tstID")))
     }
     "return a Not Found PAYEResponse when the microservice returns no Company Details API model" in new Setup {
-      mockHttpFailedGET[PAYEContactDetails]("test-url", notFound)
+      mockHttpFailedGET[PAYEContact]("test-url", notFound)
 
       await(connector.getPAYEContact("tstID")) shouldBe None
     }
     "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
-      mockHttpFailedGET[PAYEContactDetails]("test-url", internalServiceException)
+      mockHttpFailedGET[PAYEContact]("test-url", internalServiceException)
 
       intercept[InternalServerException](await(connector.getPAYEContact("tstID")))
     }
@@ -340,24 +338,24 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
 
   "Calling upsertPAYEContact" should {
     "return the correct PAYEResponse when the microservice completes and returns a PAYE Contact model" in new Setup {
-      mockHttpPATCH[PAYEContactDetails, PAYEContactDetails]("tst-url", validPAYEContactDetails)
+      mockHttpPATCH[PAYEContact, PAYEContact]("tst-url", validPAYEContactAPI)
 
-      await(connector.upsertPAYEContact("tstID", validPAYEContactDetails)) shouldBe validPAYEContactDetails
+      await(connector.upsertPAYEContact("tstID", validPAYEContactAPI)) shouldBe validPAYEContactAPI
     }
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
-      mockHttpFailedPATCH[PAYEContactDetails, PAYEContactDetails]("tst-url", forbidden)
+      mockHttpFailedPATCH[PAYEContact, PAYEContact]("tst-url", forbidden)
 
-      intercept[Upstream4xxResponse](await(connector.upsertPAYEContact("tstID", validPAYEContactDetails)))
+      intercept[Upstream4xxResponse](await(connector.upsertPAYEContact("tstID", validPAYEContactAPI)))
     }
     "return a Not Found PAYEResponse when the microservice returns a NotFound response (No PAYERegistration in database)" in new Setup {
-      mockHttpFailedPATCH[PAYEContactDetails, PAYEContactDetails]("tst-url", notFound)
+      mockHttpFailedPATCH[PAYEContact, PAYEContact]("tst-url", notFound)
 
-      intercept[NotFoundException](await(connector.upsertPAYEContact("tstID", validPAYEContactDetails)))
+      intercept[NotFoundException](await(connector.upsertPAYEContact("tstID", validPAYEContactAPI)))
     }
     "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
-      mockHttpFailedPATCH[PAYEContactDetails, PAYEContactDetails]("tst-url", internalServiceException)
+      mockHttpFailedPATCH[PAYEContact, PAYEContact]("tst-url", internalServiceException)
 
-      intercept[InternalServerException](await(connector.upsertPAYEContact("tstID", validPAYEContactDetails)))
+      intercept[InternalServerException](await(connector.upsertPAYEContact("tstID", validPAYEContactAPI)))
     }
   }
 

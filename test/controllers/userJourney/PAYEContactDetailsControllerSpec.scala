@@ -56,8 +56,8 @@ class PAYEContactDetailsControllerSpec extends PAYERegSpec with S4LFixture with 
     "return an OK with data from registration" in new Setup {
       when(mockCompanyDetailsService.getCompanyDetails(Matchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
 
-      when(mockPAYEContactService.getPAYEContact(Matchers.any()))
-        .thenReturn(Some(validPAYEContact))
+      when(mockPAYEContactService.getPAYEContact(Matchers.any[HeaderCarrier]()))
+        .thenReturn(validPAYEContactView)
 
       AuthBuilder.showWithAuthorisedUser(testController.payeContactDetails, mockAuthConnector) {
         (result: Future[Result])  =>
@@ -69,7 +69,7 @@ class PAYEContactDetailsControllerSpec extends PAYERegSpec with S4LFixture with 
       when(mockCompanyDetailsService.getCompanyDetails(Matchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
 
       when(mockPAYEContactService.getPAYEContact(Matchers.any()))
-        .thenReturn(None)
+        .thenReturn(emptyPAYEContactView)
 
       AuthBuilder.showWithAuthorisedUser(testController.payeContactDetails, mockAuthConnector) {
         (result: Future[Result])  =>
@@ -119,7 +119,8 @@ class PAYEContactDetailsControllerSpec extends PAYERegSpec with S4LFixture with 
         "digitalContact.contactEmail" -> "tata@test.com"
       )
 
-      when(mockPAYEContactService.submitPAYEContact(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
+      when(mockPAYEContactService.submitPayeContactDetails(Matchers.any())(Matchers.any()))
+        .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYEContactDetails, mockAuthConnector, request) {
         result =>
@@ -133,7 +134,7 @@ class PAYEContactDetailsControllerSpec extends PAYERegSpec with S4LFixture with 
         "digitalContact.contactEmail" -> "tata@test.com"
       )
 
-      when(mockPAYEContactService.submitPAYEContact(Matchers.any())(Matchers.any[HeaderCarrier]()))
+      when(mockPAYEContactService.submitPayeContactDetails(Matchers.any())(Matchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYEContactDetails, mockAuthConnector, request) {
