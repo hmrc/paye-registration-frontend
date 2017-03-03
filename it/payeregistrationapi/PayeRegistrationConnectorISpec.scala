@@ -21,7 +21,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.PAYERegistrationConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.DigitalContactDetails
-import models.api.{CompanyDetails, Director, Employment, Name, SICCode}
+import models.api._
 import models.Address
 import models.view.PAYEContactDetails
 import play.api.Application
@@ -327,12 +327,21 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
   }
 
   "PAYEContact" should {
-    val validPAYEContact = PAYEContactDetails(
-      name = "Thierry Henry",
-      digitalContactDetails = DigitalContactDetails(
-        Some("testy@tasty.com"),
-        Some("1234"),
-        Some("9874578")
+    val validPAYEContact = PAYEContact(
+      contactDetails = PAYEContactDetails(
+        name = "Thierry Henry",
+        digitalContactDetails = DigitalContactDetails(
+          Some("testy@tasty.com"),
+          Some("1234"),
+          Some("9874578")
+        )
+      ),
+      correspondenceAddress = Address(
+        line1 = "tst1",
+        line2 = "tst2",
+        line3 = None,
+        line4 = None,
+        postCode = Some("tstCode")
       )
     )
 
@@ -342,7 +351,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
       def getResponse = payeRegistrationConnector.getPAYEContact(regId)
 
-      stubFor(get(urlMatching(url("/contact-paye")))
+      stubFor(get(urlMatching(url("/contact-correspond-paye")))
         .willReturn(
           aResponse()
             .withStatus(200)
@@ -359,7 +368,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
       def getResponse = payeRegistrationConnector.getPAYEContact(regId)
 
-      stubFor(get(urlMatching(url("/contact-paye")))
+      stubFor(get(urlMatching(url("/contact-correspond-paye")))
         .willReturn(
           aResponse()
             .withStatus(404)
@@ -375,7 +384,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
       def patchResponse = payeRegistrationConnector.upsertPAYEContact(regId, validPAYEContact)
 
-      stubFor(patch(urlMatching(url("/contact-paye")))
+      stubFor(patch(urlMatching(url("/contact-correspond-paye")))
         .willReturn(
           aResponse()
             .withStatus(200)
