@@ -218,11 +218,13 @@ pages.summary.contactName.question                      = Contact name
 pages.summary.emailPAYEContact.question                 = Email address
 pages.summary.mobileNumberPAYEContact.question          = Mobile number
 pages.summary.phoneNumberPAYEContact.question           = Daytime telephone
+pages.summary.correspondenceAddress.question            = Correspondence address
 
 pages.summary.contactName.hiddenChangeText              = Change the PAYE contact name
 pages.summary.emailPAYEContact.hiddenChangeText         = Change the PAYE contact email address
 pages.summary.mobileNumberPAYEContact.hiddenChangeText  = Change the PAYE contact mobile number
 pages.summary.phoneNumberPAYEContact.hiddenChangeText   = Change the PAYE contact daytime telephone number
+pages.summary.correspondenceAddress.hiddenChangeText    = Change the PAYE contact correspondence address
 
 pages.summary.emailPAYEContact.answers.noAnswerGiven = '
 pages.summary.mobileNumberPAYEContact.answers.noAnswerGiven = '

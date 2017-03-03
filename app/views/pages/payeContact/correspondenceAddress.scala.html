@@ -17,7 +17,7 @@
         <p>@messages("pages.correspondenceAddress.lede")</p>
     </div>
 
-@{/*    @govHelpers.form(action = controllers.userJourney.routes.???.submitCorrespondenceAddress) {
+    @govHelpers.form(action = controllers.userJourney.routes.PAYEContactController.submitPAYECorrespondenceAddress) {
         <div class="form-group">
             @payeInputRadioGroup(
                 field = chooseAddressForm("chosenAddress"),
@@ -38,5 +38,5 @@
         <div class="form-group">
             <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
         </div>
-    } */}
+    }
 }

@@ -171,27 +171,27 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
           SummaryRow(
             id = "contactName",
             answer = Right("testName"),
-            changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+            changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
           ),
           SummaryRow(
             id = "emailPAYEContact",
             answer = Right("testEmail"),
-            changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+            changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
           ),
           SummaryRow(
             id = "mobileNumberPAYEContact",
             answer = Right("1234567890"),
-            changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+            changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
           ),
           SummaryRow(
             id = "phoneNumberPAYEContact",
             answer = Right("0987654321"),
-            changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+            changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
           ),
           SummaryRow(
             id = "correspondenceAddress",
             answer = Right("22 Test test<br />Testerarium<br />TE0 0ST"),
-            changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+            changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress())
           )
         )
       )
@@ -380,27 +380,27 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
               SummaryRow(
                 id = "contactName",
                 answer = Right("testName"),
-                changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+                changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
               ),
               SummaryRow(
                 id = "emailPAYEContact",
                 answer = Right("testEmail"),
-                changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+                changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
               ),
               SummaryRow(
                 id = "mobileNumberPAYEContact",
                 answer = Right("1234567890"),
-                changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+                changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
               ),
               SummaryRow(
                 id = "phoneNumberPAYEContact",
                 answer = Right("0987654321"),
-                changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+                changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
               ),
               SummaryRow(
                 id = "correspondenceAddress",
                 answer = Right(formatHMTLCorrespondenceAddress),
-                changeLink = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+                changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress())
               )
             )
           )

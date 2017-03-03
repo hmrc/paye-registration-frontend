@@ -63,7 +63,7 @@ trait PAYERegistrationFixture {
   )
 
   val validPAYEContactView = PAYEContactView(
-    Some(PAYEContactDetails(
+    contactDetails = Some(PAYEContactDetails(
       name = "testName",
       digitalContactDetails = DigitalContactDetails(
         email = Some("testEmail"),
@@ -71,7 +71,7 @@ trait PAYERegistrationFixture {
         phoneNumber = Some("0987654321")
       )
     )),
-    Some(Address("22 Test test","Testerarium",None, None, Some("TE0 0ST")))
+    correspondenceAddress = Some(Address("22 Test test","Testerarium",None, None, Some("TE0 0ST")))
   )
 
   val emptyPAYEContactView = PAYEContactView(None, None)

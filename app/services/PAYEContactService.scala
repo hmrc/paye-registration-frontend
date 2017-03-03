@@ -64,7 +64,7 @@ trait PAYEContactSrv extends CommonService {
     }
   }
 
-  def getCorrespondenceAddresses(correspondenceAddress: Option[Address], companyDetails: CompanyDetailsView): (Map[String, Address]) = {
+  def getCorrespondenceAddresses(correspondenceAddress: Option[Address], companyDetails: CompanyDetailsView): Map[String, Address] = {
     correspondenceAddress map {
       case address@companyDetails.roAddress => Map("correspondence" -> address)
       case addr: Address => Map("ro" -> companyDetails.roAddress, "correspondence" -> addr)

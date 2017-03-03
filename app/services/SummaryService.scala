@@ -220,7 +220,7 @@ trait SummarySrv extends CommonService {
   }
 
   private[services] def buildContactDetails(payeContactDetails: PAYEContact) = {
-    val changeCall: Option[Call] = Some(controllers.userJourney.routes.PAYEContactDetailsController.payeContactDetails())
+    val changeCall: Option[Call] = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
     val digitalContact = payeContactDetails.contactDetails.digitalContactDetails
     SummarySection(
       id = "payeContactDetails",
@@ -257,7 +257,7 @@ trait SummarySrv extends CommonService {
         SummaryRow(
           id = "correspondenceAddress",
           answer = Right(formatHTMLAddress(payeContactDetails.correspondenceAddress)),
-          changeLink = changeCall
+          changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress())
         )
       )
     )
