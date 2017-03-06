@@ -13,6 +13,9 @@ GET        /reg-teardown                                 controllers.test.TestRe
 GET        /reg-setup-company-details                    controllers.test.TestRegSetupController.regSetupCompanyDetails
 POST       /reg-setup-company-details                    controllers.test.TestRegSetupController.submitRegSetupCompanyDetails
 
+GET        /reg-setup-paye-contact                       controllers.test.TestRegSetupController.regSetupPAYEContact
+POST       /reg-setup-paye-contact                       controllers.test.TestRegSetupController.submitRegSetupPAYEContact
+
 GET        /reg-setup                                    controllers.test.TestRegSetupController.regSetup
 POST       /reg-setup                                    controllers.test.TestRegSetupController.submitRegSetup
 

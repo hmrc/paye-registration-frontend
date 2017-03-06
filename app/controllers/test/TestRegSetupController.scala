@@ -22,7 +22,7 @@ import config.FrontendAuthConnector
 import connectors.KeystoreConnector
 import connectors.test.{TestPAYERegConnect, TestPAYERegConnector}
 import enums.DownstreamOutcome
-import forms.test.{TestPAYERegCompanyDetailsSetupForm, TestPAYERegSetupForm}
+import forms.test.{TestPAYEContactForm, TestPAYERegCompanyDetailsSetupForm, TestPAYERegSetupForm}
 import services.{CommonService, PAYERegistrationService, PAYERegistrationSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -85,6 +85,20 @@ trait TestRegSetupCtrl extends FrontendController with Actions with CommonServic
       success => testPAYERegConnector.addTestCompanyDetails(success) map {
         case DownstreamOutcome.Success => Ok("Company details successfully set up")
         case DownstreamOutcome.Failure => InternalServerError("Error setting up Company Details")
+      }
+    )
+  }
+
+  val regSetupPAYEContact = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+    Future.successful(Ok(views.html.pages.test.payeRegPAYEContactSetup(TestPAYEContactForm.form)))
+  }
+
+  val submitRegSetupPAYEContact = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+    TestPAYEContactForm.form.bindFromRequest.fold (
+      errors => Future.successful(Ok(views.html.pages.test.payeRegPAYEContactSetup(errors))),
+      success => testPAYERegConnector.addTestPAYEContact(success) map {
+        case DownstreamOutcome.Success => Ok("PAYE Contact details successfully set up")
+        case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Contact details")
       }
     )
   }
