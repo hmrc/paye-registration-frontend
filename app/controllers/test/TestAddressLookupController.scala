@@ -28,15 +28,17 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 @Singleton
 class TestAddressLookupController @Inject()(
-                                             injCompanyDetailsService: CompanyDetailsService)
+                                             injCompanyDetailsService: CompanyDetailsService,
+                                             injPAYEContactService: PAYEContactService)
   extends TestAddressLookupCtrl {
   val authConnector = FrontendAuthConnector
   val companyDetailsService = injCompanyDetailsService
+  val payeContactService = injPAYEContactService
 }
 
 trait TestAddressLookupCtrl extends FrontendController with Actions {
   val companyDetailsService: CompanyDetailsSrv
-
+  val payeContactService: PAYEContactSrv
 
   val noLookupPPOBAddress = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
@@ -52,6 +54,24 @@ trait TestAddressLookupCtrl extends FrontendController with Actions {
           )
         ) map {
           case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
+          case DownstreamOutcome.Failure => InternalServerError("Couldn't save mock PPOB Address")
+        }
+  }
+
+  val noLookupCorrespondenceAddress = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user =>
+      implicit request =>
+        payeContactService.submitCorrespondence(
+          Address(
+            line1 = "13 Correspondence Street",
+            line2 = "No Lookup Town",
+            line3 = Some("NoLookupShire"),
+            line4 = None,
+            postCode = Some("TE3 3NL"),
+            country = Some("UK")
+          )
+        ) map {
+          case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
           case DownstreamOutcome.Failure => InternalServerError("Couldn't save mock PPOB Address")
         }
   }

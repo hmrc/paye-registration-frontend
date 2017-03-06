@@ -53,7 +53,12 @@ trait AddressLookupSrv {
   def buildAddressLookupUrl(query: String, call: Call) = {
     useAddressLookupFrontend match {
       case true => s"$addressLookupFrontendUrl$addressLookupFrontendUri/uk/addresses/$query?continue=$payeRegistrationUrl${call.url}"
-      case false => controllers.test.routes.TestAddressLookupController.noLookupPPOBAddress().url
+      case false => {
+        call.url.split('/').last match {
+          case "return-from-address-for-ppob" => controllers.test.routes.TestAddressLookupController.noLookupPPOBAddress().url
+          case "return-from-address-for-corresp-addr" => controllers.test.routes.TestAddressLookupController.noLookupCorrespondenceAddress().url
+        }
+      }
     }
   }
 
