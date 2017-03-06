@@ -82,7 +82,7 @@ trait PAYEContactSrv extends CommonService {
   }
 
   def submitPAYEContact(viewModel: PAYEContactView)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    viewToAPI(viewModel) fold (
+    viewToAPI(viewModel).fold(
       incompleteView =>
         saveToS4L(incompleteView) map {_ => DownstreamOutcome.Success},
       completeAPI =>
@@ -94,16 +94,16 @@ trait PAYEContactSrv extends CommonService {
     )
   }
 
-  def submitPayeContactDetails(viewData: PAYEContactDetails)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] =
+  def submitPayeContactDetails(viewData: PAYEContactDetails)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     getPAYEContact flatMap {
       data => submitPAYEContact(PAYEContactView(Some(viewData), data.correspondenceAddress))
     }
+  }
 
   def submitCorrespondence(correspondenceAddress: Address)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    for {
-      details <- getPAYEContact
-      outcome <- submitPAYEContact(PAYEContactView(details.contactDetails, Some(correspondenceAddress)))
-    } yield outcome
+    getPAYEContact flatMap {
+      data => submitPAYEContact(PAYEContactView(data.contactDetails, Some(correspondenceAddress)))
+    }
   }
 }
 

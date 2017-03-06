@@ -20,7 +20,7 @@ import common.exceptions.InternalExceptions.APIConversionException
 import connectors.PAYERegistrationConnector
 import fixtures.PAYERegistrationFixture
 import models.{Address, DigitalContactDetails}
-import models.api.{Director, Employment, Name, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
+import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI, PAYEContact => PAYEContactAPI, _}
 import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection}
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -583,6 +583,108 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         )
 
       service.buildBusinessContactDetailsSection(businessContactDetailsModel) shouldBe validBCDSection
+    }
+  }
+
+  "buildContactDetails" should {
+    "return a valid PAYE contact details block" in new Setup {
+      val tstAddress = Address("tstLine1", "tstLine2", None, None, Some("pstCode"), Some("UK"))
+      val tstContactDetails = PAYEContactDetails(
+        name = "tstName",
+        digitalContactDetails = DigitalContactDetails(
+          Some("test@email.com"),
+          Some("1234567890"),
+          Some("0987654321")
+        )
+      )
+
+      val tstContactSectionAPI = PAYEContactAPI(
+        tstContactDetails,
+        tstAddress
+      )
+
+      val validPAYEContactDetailsSection =
+        SummarySection(
+          id = "payeContactDetails",
+          Seq(
+            SummaryRow(
+              id = "contactName",
+              answer = Right("tstName"),
+              changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
+            ),
+            SummaryRow(
+              id = "emailPAYEContact",
+              answer = Right("test@email.com"),
+              changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
+            ),
+            SummaryRow(
+              id = "mobileNumberPAYEContact",
+              answer = Right("1234567890"),
+              changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
+            ),
+            SummaryRow(
+              id = "phoneNumberPAYEContact",
+              answer = Right("0987654321"),
+              changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
+            ),
+            SummaryRow(
+              id = "correspondenceAddress",
+              answer = Right("tstLine1<br />tstLine2<br />pstCode<br />UK"),
+              changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress())
+            )
+          )
+        )
+
+      service.buildContactDetails(tstContactSectionAPI) shouldBe validPAYEContactDetailsSection
+    }
+
+    "return a valid PAYE contact details block with empty Digital Contact" in new Setup {
+      val tstAddress = Address("tstLine1", "tstLine2", None, None, Some("pstCode"), Some("UK"))
+      val tstContactDetails = PAYEContactDetails(
+        name = "tstName",
+        digitalContactDetails = DigitalContactDetails(
+          None,None,None
+        )
+      )
+
+      val tstContactSectionAPI = PAYEContactAPI(
+        tstContactDetails,
+        tstAddress
+      )
+
+      val validPAYEContactDetailsSection =
+        SummarySection(
+          id = "payeContactDetails",
+          Seq(
+            SummaryRow(
+              id = "contactName",
+              answer = Right("tstName"),
+              changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
+            ),
+            SummaryRow(
+              id = "emailPAYEContact",
+              answer = Left("noAnswerGiven"),
+              changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
+            ),
+            SummaryRow(
+              id = "mobileNumberPAYEContact",
+              answer = Left("noAnswerGiven"),
+              changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
+            ),
+            SummaryRow(
+              id = "phoneNumberPAYEContact",
+              answer = Left("noAnswerGiven"),
+              changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
+            ),
+            SummaryRow(
+              id = "correspondenceAddress",
+              answer = Right("tstLine1<br />tstLine2<br />pstCode<br />UK"),
+              changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress())
+            )
+          )
+        )
+
+      service.buildContactDetails(tstContactSectionAPI) shouldBe validPAYEContactDetailsSection
     }
   }
 
