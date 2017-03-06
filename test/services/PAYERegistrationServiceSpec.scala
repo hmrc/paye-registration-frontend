@@ -16,11 +16,15 @@
 
 package services
 
+import builders.AuthBuilder
+import config.FrontendAuthConnector
 import connectors._
-import enums.DownstreamOutcome
+import enums.{AccountTypes, DownstreamOutcome}
 import org.mockito.Matchers
 import org.mockito.Mockito._
+import play.api.libs.json.{JsObject, Json}
 import testHelpers.PAYERegSpec
+import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.Future
@@ -31,10 +35,16 @@ class PAYERegistrationServiceSpec extends PAYERegSpec {
   val mockS4LService = mock[S4LService]
 
   class Setup {
-    val service = new PAYERegistrationService (mockKeystoreConnector, mockRegConnector)
+    val service = new PAYERegistrationSrv {
+      override val authConnector = mockAuthConnector
+      override val payeRegistrationConnector = mockRegConnector
+      override val keystoreConnector = mockKeystoreConnector
+    }
   }
 
   implicit val hc = HeaderCarrier()
+  implicit val context = AuthBuilder.createTestUser
+
 
   val forbidden = Upstream4xxResponse("403", 403, 403)
   val notFound = new NotFoundException("404")
@@ -58,4 +68,35 @@ class PAYERegistrationServiceSpec extends PAYERegSpec {
     }
   }
 
+  "Calling getAccountAffinityGroup" should {
+    "return a AccountType.Organisation" when {
+      "the authenticated user has an org account" in new Setup {
+        val userDetails =
+          Json.obj(
+            "affinityGroup" -> "Organisation"
+          )
+
+        when(mockAuthConnector.getUserDetails[JsObject](Matchers.any[AuthContext]())(Matchers.any(), Matchers.any()))
+          .thenReturn(Future.successful(userDetails))
+
+        val result = await(service.getAccountAffinityGroup)
+        result shouldBe AccountTypes.Organisation
+      }
+    }
+
+    "return an AccountType.InvalidAccountType" when {
+      "the authenticated user doesn't have an org account" in new Setup {
+        val userDetails =
+          Json.obj(
+            "affinityGroup" -> "Individual"
+          )
+
+        when(mockAuthConnector.getUserDetails[JsObject](Matchers.any[AuthContext]())(Matchers.any(), Matchers.any()))
+          .thenReturn(Future.successful(userDetails))
+
+        val result = await(service.getAccountAffinityGroup)
+        result shouldBe AccountTypes.InvalidAccountType
+      }
+    }
+  }
 }

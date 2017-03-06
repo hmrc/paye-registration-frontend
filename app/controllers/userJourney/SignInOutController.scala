@@ -18,12 +18,15 @@ package controllers.userJourney
 
 import auth.PAYERegime
 import javax.inject.{Inject, Singleton}
+
 import config.FrontendAuthConnector
-import enums.DownstreamOutcome
+import enums.{AccountTypes, DownstreamOutcome}
+import play.api.Logger
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services._
-import uk.gov.hmrc.play.frontend.auth.Actions
+import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.frontend.auth.{Actions, AuthContext}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -35,12 +38,13 @@ class SignInOutController @Inject()(
                                      injCoHoAPIService: CoHoAPIService,
                                      injPayeRegistrationService: PAYERegistrationService,
                                      injMessagesApi: MessagesApi)
-  extends SignInOutCtrl {
+  extends SignInOutCtrl with ServicesConfig {
   val authConnector = FrontendAuthConnector
   val currentProfileService = injCurrentProfileService
   val coHoAPIService = injCoHoAPIService
   val payeRegistrationService = injPayeRegistrationService
   val messagesApi = injMessagesApi
+  val compRegBaseURL = baseUrl("company-registration-frontend")
 }
 
 trait SignInOutCtrl extends FrontendController with Actions with I18nSupport {
@@ -48,14 +52,17 @@ trait SignInOutCtrl extends FrontendController with Actions with I18nSupport {
   val currentProfileService: CurrentProfileSrv
   val coHoAPIService: CoHoAPISrv
   val payeRegistrationService: PAYERegistrationSrv
+  val compRegBaseURL: String
 
   def postSignIn = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        checkAndStoreCurrentProfile {
-          checkAndStoreCompanyDetails {
-            assertPAYERegistrationFootprint {
-              Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+        hasOrgAffinity {
+          checkAndStoreCurrentProfile {
+            checkAndStoreCompanyDetails {
+              assertPAYERegistrationFootprint {
+                Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+              }
             }
           }
         }
@@ -79,6 +86,15 @@ trait SignInOutCtrl extends FrontendController with Actions with I18nSupport {
     payeRegistrationService.assertRegistrationFootprint map {
       case DownstreamOutcome.Success => f
       case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+    }
+  }
+
+  private def hasOrgAffinity(f: => Future[Result])(implicit hc: HeaderCarrier, authContext: AuthContext): Future[Result] = {
+    payeRegistrationService.getAccountAffinityGroup flatMap {
+      case AccountTypes.Organisation => Logger.info("[SignInOutController] - [hasOrgAffinity] - Authenticated user has ORGANISATION account, proceeding")
+        f
+      case AccountTypes.InvalidAccountType => Logger.info("[SignInOutController] - [hasOrgAffinity] - AUTHENTICATED USER NOT AN ORGANISATION ACCOUNT; redirecting to create new account")
+        Future.successful(Redirect(s"$compRegBaseURL/register-your-company/post-sign-in"))
     }
   }
 }

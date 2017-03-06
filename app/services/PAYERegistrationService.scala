@@ -18,8 +18,12 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import enums.DownstreamOutcome
+import config.FrontendAuthConnector
+import enums.{AccountTypes, DownstreamOutcome}
 import connectors._
+import play.api.libs.json.JsObject
+import uk.gov.hmrc.play.frontend.auth.AuthContext
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -29,16 +33,27 @@ import scala.concurrent.Future
 class PAYERegistrationService @Inject()(keystoreConn: KeystoreConnector, payeRegistrationConn: PAYERegistrationConnector) extends PAYERegistrationSrv {
   override val keystoreConnector = keystoreConn
   override val payeRegistrationConnector = payeRegistrationConn
+  override val authConnector = FrontendAuthConnector
 }
 
 trait PAYERegistrationSrv extends CommonService {
 
   val payeRegistrationConnector: PAYERegistrationConnect
+  val authConnector: AuthConnector
 
   def assertRegistrationFootprint()(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
       regID <- fetchRegistrationID
       regResponse <- payeRegistrationConnector.createNewRegistration(regID)
     } yield regResponse
+  }
+
+  def getAccountAffinityGroup(implicit hc: HeaderCarrier, authContext: AuthContext): Future[AccountTypes.Value] = {
+    authConnector.getUserDetails[JsObject](authContext) flatMap { userDetails =>
+      (userDetails \ "affinityGroup").as[String] match {
+        case "Organisation" => Future.successful(AccountTypes.Organisation)
+        case _              => Future.successful(AccountTypes.InvalidAccountType)
+      }
+    }
   }
 }
