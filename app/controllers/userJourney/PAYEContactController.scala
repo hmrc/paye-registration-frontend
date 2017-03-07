@@ -21,8 +21,7 @@ import javax.inject.{Inject, Singleton}
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import enums.DownstreamOutcome
-import forms.ChooseAddressForm
-import forms.payeContactDetails.PAYEContactDetailsForm
+import forms.payeContactDetails.{CorrespondenceAddressForm, PAYEContactDetailsForm}
 import models.view.PAYEContact
 import models.view.{AddressChoice, ChosenAddress}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -86,14 +85,14 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport {
           companyDetails <- companyDetailsService.getCompanyDetails
         } yield {
           val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
-          Ok(PAYECorrespondenceAddressPage(ChooseAddressForm.form.fill(ChosenAddress(AddressChoice.correspondenceAddress)), addressMap.get("ro"), addressMap.get("correspondence")))
+          Ok(PAYECorrespondenceAddressPage(CorrespondenceAddressForm.form.fill(ChosenAddress(AddressChoice.correspondenceAddress)), addressMap.get("ro"), addressMap.get("correspondence")))
         }
   }
 
   val submitPAYECorrespondenceAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        ChooseAddressForm.form.bindFromRequest.fold(
+        CorrespondenceAddressForm.form.bindFromRequest.fold(
           errs => for {
             payeContact <- payeContactService.getPAYEContact
             companyDetails <- companyDetailsService.getCompanyDetails

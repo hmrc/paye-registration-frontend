@@ -22,7 +22,6 @@ errors.invalid.mobileNumber                             = The mobile phone numbe
 errors.invalid.nino                                     = National Insurance number is in the wrong format
 errors.invalid.sic.noEntry                              = Tell us what the company does
 errors.invalid.sic.overCharLimit                        = Enter a business description using 100 characters or less
-errors.invalid.addressChoice.noEntry                    = Tell us where you''ll carry out most of your business activities
 
 ## Welcome page
 pages.welcome.title                                     = Register as an employer
@@ -69,11 +68,13 @@ pages.confirmRO.help.body.link.url                      = https://ewf.companiesh
 pages.ppobAddress.title                                 = Tell us where you''ll carry out most of your business activities
 pages.ppobAddress.heading                               = Where will you carry out most of your business activities?
 pages.ppobAddress.other                                 = A different location
+pages.ppobAddress.addressChoice.noEntry                 = Tell us where you''ll carry out most of your business activities
 
 ##Correspondence Address
 pages.correspondenceAddress.title                       = What is your company''s correspondence address?
 pages.correspondenceAddress.lede                        = We''ll use this address to send post relating to your PAYE scheme.
 pages.correspondenceAddress.other                       = A different location
+pages.correspondenceAddress.addressChoice.noEntry       = Tell us the company''s correspondence address
 
 ## Business Contact Details
 pages.businessContact.title                             = Company contact details

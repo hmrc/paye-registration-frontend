@@ -22,8 +22,7 @@ import javax.inject.{Inject, Singleton}
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector}
 import enums.DownstreamOutcome
-import forms.ChooseAddressForm
-import forms.companyDetails.{BusinessContactDetailsForm, TradingNameForm}
+import forms.companyDetails.{PPOBForm, BusinessContactDetailsForm, TradingNameForm}
 import models.view.{AddressChoice, ChosenAddress, TradingName}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -136,14 +135,14 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
       implicit request =>
         companyDetailsService.getCompanyDetails.map { companyDetails =>
           val addressMap = companyDetailsService.getPPOBPageAddresses(companyDetails)
-          Ok(PPOBAddressPage(ChooseAddressForm.form.fill(ChosenAddress(AddressChoice.ppobAddress)), addressMap.get("ro"), addressMap.get("ppob")))
+          Ok(PPOBAddressPage(PPOBForm.form.fill(ChosenAddress(AddressChoice.ppobAddress)), addressMap.get("ro"), addressMap.get("ppob")))
         }
   }
 
   val submitPPOBAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        ChooseAddressForm.form.bindFromRequest.fold(
+        PPOBForm.form.bindFromRequest.fold(
           errs => companyDetailsService.getCompanyDetails map{
             details =>
               val addressMap = companyDetailsService.getPPOBPageAddresses(details)

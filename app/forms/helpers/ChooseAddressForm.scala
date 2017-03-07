@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package forms
+package forms.helpers
 
 import models.view.{AddressChoice, ChosenAddress}
 import play.api.data.Forms.mapping
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError, Forms, Mapping}
 
-object ChooseAddressForm {
+trait ChooseAddressForm {
+
+  val errMessage: String
+
   implicit def addressChoiceFormatter: Formatter[AddressChoice.Value] = new Formatter[AddressChoice.Value] {
     def bind(key: String, data: Map[String, String]): Either[Seq[FormError], AddressChoice.Value] = {
       Right(data.getOrElse(key,"")).right.flatMap {
-        case "" => Left(Seq(FormError(key, "errors.invalid.addressChoice.noEntry", Nil)))
+        case "" => Left(Seq(FormError(key, errMessage, Nil)))
         case choice => Right(AddressChoice.fromString(choice))
       }
     }
@@ -34,10 +37,4 @@ object ChooseAddressForm {
   }
 
   val chosenAddress: Mapping[AddressChoice.Value] = Forms.of[AddressChoice.Value](addressChoiceFormatter)
-
-  val form = Form(
-    mapping(
-      "chosenAddress" -> chosenAddress
-    )(ChosenAddress.apply)(ChosenAddress.unapply)
-  )
 }
