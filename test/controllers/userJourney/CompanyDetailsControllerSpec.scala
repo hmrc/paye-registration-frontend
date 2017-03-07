@@ -56,7 +56,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
   val tstTradingNameModel = TradingNameView(differentName = true, tradingName = Some("test trading name"))
 
   val fakeRequest = FakeRequest("GET", "/")
-  implicit val materializer = fakeApplication.materializer
 
   "calling the tradingName action" should {
 

@@ -42,8 +42,6 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
     }
   }
 
-  implicit val materializer = fakeApplication.materializer
-
   "Calling summary to show the summary page" should {
     "show the summary page when a valid model is returned from the microservice" in new Setup {
       when(mockSummaryService.getRegistrationSummary()(Matchers.any())).thenReturn(Future.successful(validSummaryView))

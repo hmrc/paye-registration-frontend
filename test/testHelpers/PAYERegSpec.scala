@@ -27,4 +27,6 @@ trait PAYERegSpec extends UnitSpec with WithFakeApplication with MockitoSugar wi
   val injector : Injector = fakeApplication.injector
 
   lazy val mockMessages = injector.instanceOf[MessagesApi]
+
+  implicit val materializer = fakeApplication.materializer
 }

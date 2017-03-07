@@ -24,13 +24,10 @@ import utils._
 import scala.concurrent.Future
 
 @Singleton
-class FeatureSwitchController @Inject()(
-                                       injFeatureSwitch: FeatureSwitchManager,
-                                       injPayeFeatureSwitch: PAYEFeatureSwitch)
-  extends FeatureSwitchCtrl{
+class FeatureSwitchController @Inject()(injFeatureSwitch: FeatureSwitchManager,
+                                        injPayeFeatureSwitch: PAYEFeatureSwitch) extends FeatureSwitchCtrl{
   val featureManager = injFeatureSwitch
   val PayeFeatureSwitch = injPayeFeatureSwitch
-
 }
 
 trait FeatureSwitchCtrl extends FrontendController {
@@ -51,5 +48,4 @@ trait FeatureSwitchCtrl extends FrontendController {
         case None => Future.successful(BadRequest)
       }
   }
-
 }
