@@ -19,10 +19,15 @@ package connectors.test
 import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
+import models.api.PAYERegistration
+import org.mockito.Matchers
+import org.mockito.Mockito.when
 import play.mvc.Http.Status
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
+
+import scala.concurrent.Future
 
 class TestPAYERegConnectorSpec extends PAYERegSpec with PAYERegistrationFixture {
 
@@ -36,6 +41,53 @@ class TestPAYERegConnectorSpec extends PAYERegSpec with PAYERegistrationFixture 
   }
 
   implicit val hc = HeaderCarrier()
+
+  "Calling addPAYERegistration" should {
+    "return a successful outcome for a successful add of PAYE Registration" in new Setup {
+      mockHttpPOST[PAYERegistration, HttpResponse]("tst-url", HttpResponse(Status.OK))
+
+      await(connector.addPAYERegistration(validPAYERegistrationAPI)) shouldBe DownstreamOutcome.Success
+    }
+    "return a failed outcome for an unsuccessful add of PAYE Registration" in new Setup {
+      mockHttpPOST[PAYERegistration, HttpResponse]("tst-url", HttpResponse(Status.BAD_REQUEST))
+
+      await(connector.addPAYERegistration(validPAYERegistrationAPI)) shouldBe DownstreamOutcome.Failure
+    }
+  }
+
+  "Calling addTestCompanyDetails" should {
+    "return a successful outcome for a successful add of Company Details" in new Setup {
+      mockFetchRegID("54321")
+      when(mockPAYERegConnector.upsertCompanyDetails(Matchers.contains("54321"), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(validCompanyDetailsAPI))
+
+      await(connector.addTestCompanyDetails(validCompanyDetailsAPI)) shouldBe DownstreamOutcome.Success
+    }
+    "return a failed outcome for an unsuccessful add of Company Details" in new Setup {
+      mockFetchRegID("54321")
+      when(mockPAYERegConnector.upsertCompanyDetails(Matchers.contains("54321"), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.failed(new RuntimeException("tst")))
+
+      await(connector.addTestCompanyDetails(validCompanyDetailsAPI)) shouldBe DownstreamOutcome.Failure
+    }
+  }
+
+  "Calling addTestPAYEContact" should {
+    "return a successful outcome for a successful add of PAYE Contact" in new Setup {
+      mockFetchRegID("54321")
+      when(mockPAYERegConnector.upsertPAYEContact(Matchers.contains("54321"), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.successful(validPAYEContactAPI))
+
+      await(connector.addTestPAYEContact(validPAYEContactAPI)) shouldBe DownstreamOutcome.Success
+    }
+    "return a failed outcome for an unsuccessful add of PAYE Contact" in new Setup {
+      mockFetchRegID("54321")
+      when(mockPAYERegConnector.upsertPAYEContact(Matchers.contains("54321"), Matchers.any())(Matchers.any(), Matchers.any()))
+        .thenReturn(Future.failed(new RuntimeException("tst")))
+
+      await(connector.addTestPAYEContact(validPAYEContactAPI)) shouldBe DownstreamOutcome.Failure
+    }
+  }
 
   "Calling testRegistrationTeardown" should {
     "return a successful outcome for a successful teardown" in new Setup {
