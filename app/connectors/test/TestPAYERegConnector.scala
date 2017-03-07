@@ -20,10 +20,9 @@ import javax.inject.{Inject, Singleton}
 import config.WSHttp
 import connectors._
 import enums.DownstreamOutcome
-import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
+import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI, PAYEContact => PAYEContactAPI}
 import play.api.Logger
 import play.api.http.Status
-import play.api.libs.json.Json
 import services.CommonService
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
@@ -63,6 +62,19 @@ trait TestPAYERegConnect extends CommonService {
 
     response map {
         _ => DownstreamOutcome.Success
+    } recover {
+      case _ => DownstreamOutcome.Failure
+    }
+  }
+
+  def addTestPAYEContact(details: PAYEContactAPI)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    val response = for {
+      regID <- fetchRegistrationID
+      resp <- payeRegConnector.upsertPAYEContact(regID,  details)
+    } yield resp
+
+    response map {
+      _ => DownstreamOutcome.Success
     } recover {
       case _ => DownstreamOutcome.Failure
     }

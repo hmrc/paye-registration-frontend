@@ -13,9 +13,13 @@ GET        /reg-teardown                                 controllers.test.TestRe
 GET        /reg-setup-company-details                    controllers.test.TestRegSetupController.regSetupCompanyDetails
 POST       /reg-setup-company-details                    controllers.test.TestRegSetupController.submitRegSetupCompanyDetails
 
+GET        /reg-setup-paye-contact                       controllers.test.TestRegSetupController.regSetupPAYEContact
+POST       /reg-setup-paye-contact                       controllers.test.TestRegSetupController.submitRegSetupPAYEContact
+
 GET        /reg-setup                                    controllers.test.TestRegSetupController.regSetup
 POST       /reg-setup                                    controllers.test.TestRegSetupController.submitRegSetup
 
 GET        /feature-flag/:featureName/:featureStatus     controllers.test.FeatureSwitchController.addressServiceSwitch(featureName: String, featureStatus: String)
 
 GET        /no-lookup-ppob-address                       controllers.test.TestAddressLookupController.noLookupPPOBAddress
+GET        /no-lookup-correspondence-address             controllers.test.TestAddressLookupController.noLookupCorrespondenceAddress

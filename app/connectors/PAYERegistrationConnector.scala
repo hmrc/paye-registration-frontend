@@ -20,8 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
 import enums.DownstreamOutcome
-import models.api.{Director, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
-import models.view.PAYEContactDetails
+import models.api.{Director, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.Logger
 import play.api.http.Status
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -115,8 +114,8 @@ trait PAYERegistrationConnect {
     }
   }
 
-  def getPAYEContact(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYEContactDetails]): Future[Option[PAYEContactDetails]] = {
-    http.GET[PAYEContactDetails](s"$payeRegUrl/paye-registration/$regID/contact-paye") map {
+  def getPAYEContact(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYEContact]): Future[Option[PAYEContact]] = {
+    http.GET[PAYEContact](s"$payeRegUrl/paye-registration/$regID/contact-correspond-paye") map {
       details => Some(details)
     } recover {
       case e: NotFoundException => None
@@ -124,8 +123,8 @@ trait PAYERegistrationConnect {
     }
   }
 
-  def upsertPAYEContact(regID: String, payeContact: PAYEContactDetails)(implicit hc: HeaderCarrier, rds: HttpReads[PAYEContactDetails]): Future[PAYEContactDetails] = {
-    http.PATCH[PAYEContactDetails, PAYEContactDetails](s"$payeRegUrl/paye-registration/$regID/contact-paye", payeContact) recover {
+  def upsertPAYEContact(regID: String, payeContact: PAYEContact)(implicit hc: HeaderCarrier, rds: HttpReads[PAYEContact]): Future[PAYEContact] = {
+    http.PATCH[PAYEContact, PAYEContact](s"$payeRegUrl/paye-registration/$regID/contact-correspond-paye", payeContact) recover {
       case e: Exception => throw logResponse(e, "upsertPAYEContact", "upserting paye contact")
     }
   }

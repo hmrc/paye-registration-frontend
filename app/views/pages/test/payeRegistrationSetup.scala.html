@@ -284,30 +284,69 @@
         </div>
 
         <h3>PAYE Contact Details</h3>
+        <h4>Name and tel etc.</h4>
         <div class="inline form-group">
             @govHelpers.input(
-                payeForm("payeContact.name"),
+                payeForm("payeContact.payeContactDetails.name"),
                 '_label -> "Contact name"
             )
         </div>
         <div class="inline form-group">
             @govHelpers.input(
-                payeForm("payeContact.digitalContactDetails.email"),
+                payeForm("payeContact.payeContactDetails.digitalContactDetails.email"),
                 '_label -> "Email"
             )
         </div>
         <div class="inline form-group">
         @govHelpers.input(
-            payeForm("payeContact.digitalContactDetails.mobileNumber"),
+            payeForm("payeContact.payeContactDetails.digitalContactDetails.mobileNumber"),
             '_label -> "Mobile number"
         )
         </div>
         <div class="inline form-group">
         @govHelpers.input(
-            payeForm("payeContact.digitalContactDetails.phoneNumber"),
+            payeForm("payeContact.payeContactDetails.digitalContactDetails.phoneNumber"),
             '_label -> "Phone number"
         )
         </div>
+        <h4>Address</h4>
+        <div class="inline form-group">
+            @govHelpers.input(
+            payeForm("payeContact.correspondenceAddress.line1"),
+            '_label -> "PAYE Correspondence Address Line 1"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            payeForm("payeContact.correspondenceAddress.line2"),
+            '_label -> "PAYE Correspondence Address Line 2"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            payeForm("payeContact.correspondenceAddress.line3"),
+            '_label -> "PAYE Correspondence Address Line 3 (optional)"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            payeForm("payeContact.correspondenceAddress.line4"),
+            '_label -> "PAYE Correspondence Address Line 4 (optional)"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            payeForm("payeContact.correspondenceAddress.postCode"),
+            '_label -> "PAYE Correspondence Address Postcode (optional)"
+            )
+        </div>
+        <div class="inline form-group">
+            @govHelpers.input(
+            payeForm("payeContact.correspondenceAddress.country"),
+            '_label -> "PAYE Correspondence Address Country (optional)"
+            )
+        </div>
+
 
 
         <button class="button" type="submit" id="continue" >Submit</button>

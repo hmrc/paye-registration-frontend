@@ -67,7 +67,7 @@ trait DirectorDetailsCtrl extends FrontendController with Actions with I18nSuppo
           },
           success => {
             directorDetailsService.submitNinos(success) map {
-              _ => Redirect(routes.PAYEContactDetailsController.payeContactDetails())
+              _ => Redirect(routes.PAYEContactController.payeContactDetails())
             }
           }
         )

@@ -21,14 +21,16 @@ import play.api.libs.json.{Format, Json, Reads, Writes}
 case class ChosenAddress (chosenAddress: AddressChoice.Value)
 
 object AddressChoice extends Enumeration {
-  val roAddress   = Value
-  val ppobAddress = Value
-  val other       = Value
+  val roAddress             = Value
+  val ppobAddress           = Value
+  val correspondenceAddress = Value
+  val other                 = Value
 
   def fromString(choice: String): Value = choice match {
-    case "roAddress"   => roAddress
-    case "ppobAddress" => ppobAddress
-    case "other"       => other
+    case "roAddress"             => roAddress
+    case "ppobAddress"           => ppobAddress
+    case "correspondenceAddress" => correspondenceAddress
+    case "other"                 => other
   }
 
   implicit val format = Format(Reads.enumNameReads(AddressChoice), Writes.enumNameWrites)

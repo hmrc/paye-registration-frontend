@@ -61,8 +61,12 @@ class AddressLookupServiceSpec extends PAYERegSpec with S4LFixture with PAYERegi
         "?continue=http://localhost:9870/register-for-paye/test-url"
     }
 
-    "return the Address Lookup stub Url" in new SetupWithProxy(false) {
-      await(service.buildAddressLookupUrl("payreg1", Call("GET","/test-uri"))) shouldBe "/no-lookup-ppob-address"
+    "return the Address Lookup stub Url for PPOB" in new SetupWithProxy(false) {
+      await(service.buildAddressLookupUrl("payreg1", Call("GET","/return-from-address-for-ppob"))) shouldBe "/no-lookup-ppob-address"
+    }
+
+    "return the Address Lookup stub Url for PAYE Contact" in new SetupWithProxy(false) {
+      await(service.buildAddressLookupUrl("payreg1", Call("GET","/return-from-address-for-corresp-addr"))) shouldBe "/no-lookup-correspondence-address"
     }
   }
 

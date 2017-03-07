@@ -16,7 +16,7 @@
 
 package views.pages.companyDetails
 
-import forms.companyDetails.ChooseAddressForm
+import forms.ChooseAddressForm
 import models.view.AddressChoice
 import models.Address
 import org.jsoup.Jsoup

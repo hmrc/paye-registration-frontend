@@ -56,8 +56,13 @@ GET         /director-national-insurance-number     controllers.userJourney.Dire
 POST        /director-national-insurance-number     controllers.userJourney.DirectorDetailsController.submitDirectorDetails
 
 ## PAYE CONTACT DETAILS
-GET         /company-contact                        controllers.userJourney.PAYEContactDetailsController.payeContactDetails
-POST        /company-contact                        controllers.userJourney.PAYEContactDetailsController.submitPAYEContactDetails
+GET         /company-contact                        controllers.userJourney.PAYEContactController.payeContactDetails
+POST        /company-contact                        controllers.userJourney.PAYEContactController.submitPAYEContactDetails
+
+## PAYE CONTACT DETAILS
+GET         /correspondence-address                 controllers.userJourney.PAYEContactController.payeCorrespondenceAddress
+POST        /correspondence-address                 controllers.userJourney.PAYEContactController.submitPAYECorrespondenceAddress
+GET         /return-from-address-for-corresp-addr   controllers.userJourney.PAYEContactController.savePAYECorrespondenceAddress
 
 ## SUMMARY
 GET         /summary                                controllers.userJourney.SummaryController.summary

@@ -23,6 +23,7 @@ class ChosenAddressSpec extends PAYERegSpec {
   val tstChosenAddressOther = ChosenAddress(chosenAddress = AddressChoice.other)
   val tstChosenAddressROAddress = ChosenAddress(chosenAddress = AddressChoice.roAddress)
   val tstChosenAddressPPOBAddress = ChosenAddress(chosenAddress = AddressChoice.ppobAddress)
+  val tstChosenAddressCorrespondenceAddress = ChosenAddress(chosenAddress = AddressChoice.correspondenceAddress)
 
   val tstChosenAddressOtherJson = Json.parse(
     """{
@@ -42,6 +43,12 @@ class ChosenAddressSpec extends PAYERegSpec {
       |}""".stripMargin
   )
 
+  val tstChosenAddressCorrespondenceAddressJson = Json.parse(
+    """{
+      |  "chosenAddress":"correspondenceAddress"
+      |}""".stripMargin
+  )
+
   val tstWrongChosenAddressJson = Json.parse(
     """{
       |  "chosenAddress":"wrong"
@@ -55,6 +62,10 @@ class ChosenAddressSpec extends PAYERegSpec {
 
     "read from Json with roAddress value" in {
       Json.fromJson[ChosenAddress](tstChosenAddressROAddressJson).asOpt shouldBe Some(tstChosenAddressROAddress)
+    }
+
+    "read from Json with correspondenceAddress value" in {
+      Json.fromJson[ChosenAddress](tstChosenAddressCorrespondenceAddressJson).asOpt shouldBe Some(tstChosenAddressCorrespondenceAddress)
     }
 
     "read from Json with ppobAddress value" in {
@@ -75,6 +86,10 @@ class ChosenAddressSpec extends PAYERegSpec {
 
     "write to json with ppobAddress value" in {
       Json.toJson[ChosenAddress](tstChosenAddressPPOBAddress) shouldBe tstChosenAddressPPOBAddressJson
+    }
+
+    "write to json with correspondenceAddress value" in {
+      Json.toJson[ChosenAddress](tstChosenAddressCorrespondenceAddress) shouldBe tstChosenAddressCorrespondenceAddressJson
     }
   }
 }

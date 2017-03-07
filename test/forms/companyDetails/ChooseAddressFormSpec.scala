@@ -16,6 +16,7 @@
 
 package forms.companyDetails
 
+import forms.ChooseAddressForm
 import models.view.{AddressChoice, ChosenAddress}
 import play.api.data.FormError
 import uk.gov.hmrc.play.test.UnitSpec
