@@ -1,6 +1,7 @@
 @import models.Address
 @import models.view.ChosenAddress
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import views.html.helpers.templates.{payeInputRadioGroup, addressDisplay}
 
 @(chooseAddressForm: Form[ChosenAddress], roAddress: Option[Address], correspondenceAddress: Option[Address])(implicit request: Request[_], messages: Messages)
 

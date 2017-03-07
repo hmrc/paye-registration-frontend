@@ -102,12 +102,11 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
 
   val submitRegSetupPAYEContact = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     TestPAYEContactForm.form.bindFromRequest.fold (
-      errors => Future.successful(Ok(views.html.pages.test.payeRegPAYEContactSetup(errors))),
+      errors => Future.successful(BadRequest(views.html.pages.test.payeRegPAYEContactSetup(errors))),
       success => testPAYERegConnector.addTestPAYEContact(success) map {
         case DownstreamOutcome.Success => Ok("PAYE Contact details successfully set up")
         case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Contact details")
       }
     )
   }
-
 }

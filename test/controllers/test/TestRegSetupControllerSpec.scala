@@ -142,10 +142,16 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
           "directors[2].name.lastName" -> "testLastName",
           "directors[2].name.title" -> "testTitle",
           "directors[2].nino" -> "testNino",
-          "payeContact.name" -> "testName",
-          "payeContact.digitalContactDetails.email" -> "test@email.com",
-          "payeContact.digitalContactDetails.mobileNumber" -> "testNumber",
-          "payeContact.digitalContactDetails.phoneNumber" -> "testNumber"
+          "payeContact.payeContactDetails.name" -> "testName",
+          "payeContact.payeContactDetails.digitalContactDetails.email" -> "test@email.com",
+          "payeContact.payeContactDetails.digitalContactDetails.mobileNumber" -> "testNumber",
+          "payeContact.payeContactDetails.digitalContactDetails.phoneNumber" -> "testNumber",
+          "payeContact.correspondenceAddress.line1" -> "testLine1",
+          "payeContact.correspondenceAddress.line2" -> "testLine2",
+          "payeContact.correspondenceAddress.line3" -> "testLine3",
+          "payeContact.correspondenceAddress.line4" -> "testLine4",
+          "payeContact.correspondenceAddress.postCode" -> "testPostCode",
+          "payeContact.correspondenceAddress.country" -> "testCountry"
         )
 
         when(mockPayeRegConnector.addPAYERegistration(Matchers.any())(Matchers.any[HeaderCarrier]()))
@@ -204,10 +210,16 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
           "directors[2].name.lastName" -> "testLastName",
           "directors[2].name.title" -> "testTitle",
           "directors[2].nino" -> "testNino",
-          "payeContact.name" -> "testName",
-          "payeContact.digitalContactDetails.email" -> "test@email.com",
-          "payeContact.digitalContactDetails.mobileNumber" -> "testNumber",
-          "payeContact.digitalContactDetails.phoneNumber" -> "testNumber"
+          "payeContact.payeContactDetails.name" -> "testName",
+          "payeContact.payeContactDetails.digitalContactDetails.email" -> "test@email.com",
+          "payeContact.payeContactDetails.digitalContactDetails.mobileNumber" -> "testNumber",
+          "payeContact.payeContactDetails.digitalContactDetails.phoneNumber" -> "testNumber",
+          "payeContact.correspondenceAddress.line1" -> "testLine1",
+          "payeContact.correspondenceAddress.line2" -> "testLine2",
+          "payeContact.correspondenceAddress.line3" -> "testLine3",
+          "payeContact.correspondenceAddress.line4" -> "testLine4",
+          "payeContact.correspondenceAddress.postCode" -> "testPostCode",
+          "payeContact.correspondenceAddress.country" -> "testCountry"
         )
 
         when(mockPayeRegConnector.addPAYERegistration(Matchers.any())(Matchers.any[HeaderCarrier]()))
@@ -300,6 +312,76 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupCompanyDetails, mockAuthConnector, request) { result =>
+          status(result) shouldBe INTERNAL_SERVER_ERROR
+        }
+      }
+    }
+  }
+
+  "regSetupPAYEContact" should {
+    "return an OK" when {
+      "the payeRegPAYEContactSetup page has been rendered" in new Setup {
+        AuthBuilder.showWithAuthorisedUser(controller.regSetupPAYEContact, mockAuthConnector) { result =>
+          status(result) shouldBe OK
+        }
+      }
+    }
+  }
+
+  "submitRegSetupPAYEContact" should {
+    "return a BAD_REQUEST" when {
+      "the form data cant be validated" in new Setup {
+        val request = FakeRequest().withFormUrlEncodedBody()
+
+        AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupPAYEContact, mockAuthConnector, request) { result =>
+          status(result) shouldBe BAD_REQUEST
+        }
+      }
+    }
+
+    "return an OK" when {
+      "the form data has been validated and cached" in new Setup {
+        val request = FakeRequest().withFormUrlEncodedBody(
+          "payeContactDetails.name" -> "testName",
+          "payeContactDetails.digitalContactDetails.email" -> "test@email.com",
+          "payeContactDetails.digitalContactDetails.mobileNumber" -> "testNumber",
+          "payeContactDetails.digitalContactDetails.phoneNumber" -> "testNumber",
+          "correspondenceAddress.line1" -> "testLine1",
+          "correspondenceAddress.line2" -> "testLine2",
+          "correspondenceAddress.line3" -> "testLine3",
+          "correspondenceAddress.line4" -> "testLine4",
+          "correspondenceAddress.postCode" -> "testPostCode",
+          "correspondenceAddress.country" -> "testCountry"
+        )
+
+        when(mockPayeRegConnector.addTestPAYEContact(Matchers.any())(Matchers.any[HeaderCarrier]()))
+          .thenReturn(Future.successful(DownstreamOutcome.Success))
+
+        AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupPAYEContact, mockAuthConnector, request) { result =>
+          status(result) shouldBe OK
+        }
+      }
+    }
+
+    "return an INTERNAL_SERVER_ERROR" when {
+      "the form data has been validated but not cached" in new Setup {
+        val request = FakeRequest().withFormUrlEncodedBody(
+          "payeContactDetails.name" -> "testName",
+          "payeContactDetails.digitalContactDetails.email" -> "test@email.com",
+          "payeContactDetails.digitalContactDetails.mobileNumber" -> "testNumber",
+          "payeContactDetails.digitalContactDetails.phoneNumber" -> "testNumber",
+          "correspondenceAddress.line1" -> "testLine1",
+          "correspondenceAddress.line2" -> "testLine2",
+          "correspondenceAddress.line3" -> "testLine3",
+          "correspondenceAddress.line4" -> "testLine4",
+          "correspondenceAddress.postCode" -> "testPostCode",
+          "correspondenceAddress.country" -> "testCountry"
+        )
+
+        when(mockPayeRegConnector.addTestPAYEContact(Matchers.any())(Matchers.any[HeaderCarrier]()))
+          .thenReturn(Future.successful(DownstreamOutcome.Failure))
+
+        AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupPAYEContact, mockAuthConnector, request) { result =>
           status(result) shouldBe INTERNAL_SERVER_ERROR
         }
       }
