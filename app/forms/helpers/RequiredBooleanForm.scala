@@ -16,8 +16,8 @@
 
 package forms.helpers
 
-import play.api.data.{Mapping, FormError, Forms}
 import play.api.data.format.Formatter
+import play.api.data.{FormError, Forms, Mapping}
 
 trait RequiredBooleanForm {
   implicit def requiredBooleanFormatter: Formatter[Boolean] = new Formatter[Boolean] {

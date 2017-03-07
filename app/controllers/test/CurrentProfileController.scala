@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector}
-import connectors.{BusinessRegistrationConnect, BusinessRegistrationConnector, BusinessRegistrationSuccessResponse, KeystoreConnect, KeystoreConnector}
+import connectors._
 import enums.CacheKeys
 import models.external.CurrentProfile
 import uk.gov.hmrc.play.frontend.auth.Actions

@@ -17,12 +17,13 @@
 package connectors.test
 
 import javax.inject.{Inject, Singleton}
+
 import config.WSHttp
 import models.external.{BusinessRegistrationRequest, CurrentProfile}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpPost}
 
 import scala.concurrent.Future
 

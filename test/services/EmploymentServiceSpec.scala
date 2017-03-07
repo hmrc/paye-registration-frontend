@@ -21,10 +21,10 @@ import java.time.LocalDate
 import connectors.PAYERegistrationConnector
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{PAYERegistrationFixture, S4LFixture}
-import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment => EmploymentView, FirstPayment => FirstPaymentView}
 import models.api.{Employment => EmploymentAPI}
+import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment => EmploymentView, FirstPayment => FirstPaymentView}
 import org.mockito.Matchers
-import org.mockito.Mockito.{when, verify, times}
+import org.mockito.Mockito.{times, verify, when}
 import play.api.libs.json.{Format, Json}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap

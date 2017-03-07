@@ -16,17 +16,17 @@
 
 package controllers.test
 
-import auth.PAYERegime
 import javax.inject.{Inject, Singleton}
 
+import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.test.{TestPAYERegConnect, TestPAYERegConnector}
 import enums.DownstreamOutcome
-import forms.test.{TestPAYEContactForm, TestPAYERegCompanyDetailsSetupForm, TestPAYERegSetupForm}
+import forms.test.{TestPAYERegCompanyDetailsSetupForm, TestPAYERegSetupForm, TestPAYEContactForm}
+import play.api.i18n.{I18nSupport, MessagesApi}
 import services.{PAYERegistrationService, PAYERegistrationSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import play.api.i18n.{I18nSupport, MessagesApi}
 
 import scala.concurrent.Future
 

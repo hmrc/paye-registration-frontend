@@ -4,11 +4,8 @@
     hintText: Option[Html],
     args: (Symbol,Any)*)(implicit lang: play.api.i18n.Lang, messages: Messages)
 
-@import uk.gov.hmrc.play.mappers.DateFields._
 @import play.api.i18n._
-@import uk.gov.hmrc.play.mappers.DateFormatSymbols._
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
-@import java.text.SimpleDateFormat
 
 @fieldsetClasses = @{if(formItem.hasErrors && (formItem.errors.find(_.key != "psoAmt").isDefined)) "form-field--error" else "" }
 

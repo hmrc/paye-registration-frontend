@@ -20,7 +20,6 @@ import forms.natureOfBuinessDetails.NatureOfBusinessForm
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.test.FakeRequest
-import play.twirl.api.Html
 import testHelpers.PAYERegSpec
 import views.html.pages.natureOfBusiness
 

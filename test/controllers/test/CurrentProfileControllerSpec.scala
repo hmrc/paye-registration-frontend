@@ -17,14 +17,14 @@
 package controllers.test
 
 import builders.AuthBuilder
-import connectors.{BusinessRegistrationNotFoundResponse, BusinessRegistrationSuccessResponse}
 import connectors.test.TestBusinessRegConnect
+import connectors.{BusinessRegistrationNotFoundResponse, BusinessRegistrationSuccessResponse}
 import fixtures.KeystoreFixture
 import models.external.CurrentProfile
-import testHelpers.PAYERegSpec
-import org.mockito.Mockito._
 import org.mockito.Matchers
+import org.mockito.Mockito._
 import play.api.test.Helpers.OK
+import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpReads}
 
 import scala.concurrent.Future

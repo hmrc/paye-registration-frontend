@@ -19,10 +19,9 @@ package connectors
 import fixtures.CoHoAPIFixture
 import models.api.Name
 import models.external.{CHROAddress, CoHoCompanyDetailsModel, Officer, OfficerList}
-import play.api.libs.json.{JsValue, Json}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier, HttpResponse, NotFoundException}
+import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier, NotFoundException}
 
 import scala.concurrent.Future
 

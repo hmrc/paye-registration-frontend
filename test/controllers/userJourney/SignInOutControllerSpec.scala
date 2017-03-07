@@ -19,15 +19,14 @@ package controllers.userJourney
 import builders.AuthBuilder
 import enums.{AccountTypes, DownstreamOutcome}
 import fixtures.PAYERegistrationFixture
-import org.junit.Before
-import services.{CoHoAPIService, CurrentProfileService, PAYERegistrationService}
-import play.api.http.Status
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import org.scalatest.BeforeAndAfterEach
 import org.mockito.Matchers
 import org.mockito.Mockito._
-import org.scalatest.BeforeAndAfterEach
+import play.api.http.Status
 import play.api.i18n.MessagesApi
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import services.{CoHoAPIService, CurrentProfileService, PAYERegistrationService}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier

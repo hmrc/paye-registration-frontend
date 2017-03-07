@@ -17,12 +17,12 @@
 package controllers.test
 
 import builders.AuthBuilder
-import testHelpers.PAYERegSpec
-import org.mockito.Mockito.when
 import org.mockito.Matchers
-import services.S4LSrv
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
+import org.mockito.Mockito.when
 import play.api.test.Helpers.OK
+import services.S4LSrv
+import testHelpers.PAYERegSpec
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
 

@@ -17,7 +17,7 @@
 package services
 
 import enums.CacheKeys
-import fixtures.{PAYERegistrationFixture, KeystoreFixture}
+import fixtures.{KeystoreFixture, PAYERegistrationFixture}
 import models.external.CurrentProfile
 import models.view.{TradingName => TradingNameView}
 import testHelpers.PAYERegSpec

@@ -19,12 +19,12 @@ package services
 import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
 
-import connectors._
 import common.exceptions.InternalExceptions.APIConversionException
+import connectors._
 import enums.UserCapacity
-import models.{Address, DigitalContactDetails}
 import models.api.{CompanyDetails, Director, Employment, PAYEContact, SICCode, PAYERegistration => PAYERegistrationAPI}
-import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection}
+import models.view.{Summary, SummaryRow, SummarySection}
+import models.{Address, DigitalContactDetails}
 import play.api.mvc.Call
 import uk.gov.hmrc.play.http.HeaderCarrier
 

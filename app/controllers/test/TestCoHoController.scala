@@ -22,10 +22,10 @@ import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.test.{TestCoHoAPIConnect, TestCoHoAPIConnector}
 import forms.test.TestCoHoCompanyDetailsForm
+import play.api.i18n.{I18nSupport, MessagesApi}
 import services.{CoHoAPIService, CoHoAPISrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import play.api.i18n.{I18nSupport, MessagesApi}
 
 import scala.concurrent.Future
 

@@ -22,8 +22,6 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
-import scala.concurrent.Future
-
 @Singleton
 class WelcomeController @Inject()(injMessagesApi: MessagesApi)
   extends WelcomeCtrl {

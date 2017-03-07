@@ -16,8 +16,8 @@
 
 package forms.companyDetails
 
-import uk.gov.hmrc.play.test.UnitSpec
 import common.exceptions.InternalExceptions._
+import uk.gov.hmrc.play.test.UnitSpec
 
 class TradingNameFormSpec extends UnitSpec {
 

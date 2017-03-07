@@ -21,7 +21,9 @@ import connectors.PAYERegistrationConnector
 import fixtures.PAYERegistrationFixture
 import models.{Address, DigitalContactDetails}
 import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI, PAYEContact => PAYEContactAPI, _}
+import models.api.{Director, Employment, Name, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
 import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection}
+import models.{Address, DigitalContactDetails}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec

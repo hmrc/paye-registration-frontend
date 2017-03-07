@@ -16,14 +16,15 @@
 
 package controllers.userJourney
 
-import auth.PAYERegime
 import javax.inject.{Inject, Singleton}
 
-import config.FrontendAuthConnector
-import enums.{AccountTypes, DownstreamOutcome}
+import enums.AccountTypes
 import play.api.Logger
-import play.api.mvc.{AnyContent, Request, Result}
+import auth.PAYERegime
+import config.FrontendAuthConnector
+import enums.DownstreamOutcome
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.{AnyContent, Request, Result}
 import services._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.frontend.auth.{Actions, AuthContext}

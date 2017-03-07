@@ -19,7 +19,6 @@ package utils
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
-import forms.completionCapacity.CompletionCapacityForm
 import forms.employmentDetails.FirstPaymentForm
 import uk.gov.hmrc.play.test.UnitSpec
 

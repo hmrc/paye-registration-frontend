@@ -20,14 +20,12 @@ import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
 import connectors.{CoHoAPIConnector, CohoApiBadRequestResponse, CohoApiErrorResponse, CohoApiSuccessResponse}
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, KeystoreFixture}
-import models.api.{Director, Name}
 import models.external.{CoHoCompanyDetailsModel, CurrentProfile}
-import models.view.Directors
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 

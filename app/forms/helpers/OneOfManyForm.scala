@@ -16,8 +16,8 @@
 
 package forms.helpers
 
-import play.api.data.{Forms, Mapping, FormError}
 import play.api.data.format.Formatter
+import play.api.data.{FormError, Forms, Mapping}
 
 trait OneOfManyForm {
 

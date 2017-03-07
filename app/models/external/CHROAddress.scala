@@ -50,10 +50,10 @@ object CHROAddress {
     val (line1, oLine2) = if((address.premises + " " + address.addressLine1).length > 26) {
       (address.premises, Some(address.addressLine1))
     } else {
-      (address.premises+" "+address.addressLine1, None)
+      (address.premises + " " + address.addressLine1, None)
     }
 
-    val addrLine2POBox: Option[String] = Seq(address.addressLine2, address.poBox).flatten.foldLeft("")(_+" "+_).trim match {
+    val addrLine2POBox: Option[String] = Seq(address.addressLine2, address.poBox).flatten.foldLeft("")(_ + " " + _).trim match {
       case ""  => None
       case str  => Some(str)
     }

@@ -16,7 +16,7 @@
 
 package models.view
 
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.Json
 import testHelpers.PAYERegSpec
 
 class ChosenAddressSpec extends PAYERegSpec {

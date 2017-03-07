@@ -19,13 +19,13 @@ package controllers.test
 import builders.AuthBuilder
 import connectors.test.TestPAYERegConnect
 import enums.DownstreamOutcome
+import org.mockito.Matchers
+import org.mockito.Mockito.when
+import play.api.test.FakeRequest
+import play.api.test.Helpers.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK}
 import services.PAYERegistrationSrv
 import testHelpers.PAYERegSpec
-import org.mockito.Mockito.when
-import org.mockito.Matchers
-import play.api.test.FakeRequest
 import uk.gov.hmrc.play.http.HeaderCarrier
-import play.api.test.Helpers.{INTERNAL_SERVER_ERROR, OK, BAD_REQUEST}
 
 import scala.concurrent.Future
 

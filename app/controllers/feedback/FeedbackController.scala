@@ -17,9 +17,10 @@
 package controllers.feedback
 
 import javax.inject.{Inject, Singleton}
+
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import play.api.i18n.{I18nSupport, MessagesApi}
 
 import scala.concurrent.Future
 

@@ -16,9 +16,9 @@
 
 package controllers.userJourney
 
-import auth.PAYERegime
 import javax.inject.{Inject, Singleton}
 
+import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector}
 import enums.DownstreamOutcome

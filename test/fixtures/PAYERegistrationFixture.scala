@@ -18,10 +18,11 @@ package fixtures
 
 import java.time.LocalDate
 
-import models.{Address, DigitalContactDetails}
 import models.api.{PAYEContact => PAYEContactAPI, _}
-import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection, PAYEContact => PAYEContactView}
-
+import models.view.{PAYEContact => PAYEContactView}
+import models.api._
+import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection}
+import models.{Address, DigitalContactDetails}
 
 trait PAYERegistrationFixture {
 

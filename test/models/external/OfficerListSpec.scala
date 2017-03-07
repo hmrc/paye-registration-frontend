@@ -17,7 +17,7 @@
 package models.external
 
 import models.api.Name
-import play.api.libs.json.{JsPath, JsSuccess, Json}
+import play.api.libs.json.Json
 import testHelpers.PAYERegSpec
 
 class OfficerListSpec extends PAYERegSpec {

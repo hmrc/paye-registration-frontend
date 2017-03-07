@@ -16,21 +16,19 @@
 
 package controllers.userJourney
 
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import config.FrontendAuthConnector
-import auth.PAYERegime
 import javax.inject.{Inject, Singleton}
+
+import auth.PAYERegime
+import config.FrontendAuthConnector
 import enums.DownstreamOutcome
 import forms.employmentDetails._
-
-import scala.concurrent.Future
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.{EmploymentService, EmploymentSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
-import views.html.pages.employmentDetails.{employingStaff => EmployingStaffPage}
-import views.html.pages.employmentDetails.{companyPension => CompanyPensionPage}
-import views.html.pages.employmentDetails.{subcontractors => SubcontractorsPage}
-import views.html.pages.employmentDetails.{firstPayment => FirstPaymentPage}
+import uk.gov.hmrc.play.frontend.controller.FrontendController
+import views.html.pages.employmentDetails.{companyPension => CompanyPensionPage, employingStaff => EmployingStaffPage, firstPayment => FirstPaymentPage, subcontractors => SubcontractorsPage}
+
+import scala.concurrent.Future
 
 @Singleton
 class EmploymentController @Inject()(

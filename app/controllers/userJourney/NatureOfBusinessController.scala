@@ -30,8 +30,6 @@ import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import views.html.pages.{natureOfBusiness => NatureOfBusinessPage}
 
-import scala.concurrent.Future
-
 @Singleton
 class NatureOfBusinessController @Inject()(injMessagesApi: MessagesApi,
                                            injNatureOfBusinessService: NatureOfBusinessService,

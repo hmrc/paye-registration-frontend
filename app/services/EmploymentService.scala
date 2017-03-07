@@ -17,17 +17,17 @@
 package services
 
 import javax.inject.{Inject, Singleton}
-import config.{PAYESessionCache, PAYEShortLivedCache}
-import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment => EmploymentView, FirstPayment => FirstPaymentView}
-import models.api.{Employment => EmploymentAPI}
-import utils.DateUtil
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-import connectors.{PAYERegistrationConnect, KeystoreConnector, PAYERegistrationConnector}
+import connectors.{KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.{CacheKeys, DownstreamOutcome}
+import models.api.{Employment => EmploymentAPI}
+import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment => EmploymentView, FirstPayment => FirstPaymentView}
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.http.HeaderCarrier
+import utils.DateUtil
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 sealed trait SavedResponse
 case object S4LSaved extends SavedResponse

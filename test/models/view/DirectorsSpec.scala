@@ -16,8 +16,8 @@
 
 package models.view
 
-import models.api.{Name, Director}
-import play.api.libs.json.{JsSuccess, Json}
+import models.api.{Director, Name}
+import play.api.libs.json.Json
 import uk.gov.hmrc.play.test.UnitSpec
 
 class DirectorsSpec extends UnitSpec {

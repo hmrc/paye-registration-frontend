@@ -24,8 +24,8 @@ import models.api.Director
 import models.view.{Directors, Ninos, UserEnteredNino}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class DirectorDetailsService @Inject()(

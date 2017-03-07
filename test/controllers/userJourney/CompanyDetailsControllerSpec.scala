@@ -19,8 +19,8 @@ package controllers.userJourney
 import builders.AuthBuilder
 import enums.DownstreamOutcome
 import fixtures.{PAYERegistrationFixture, S4LFixture}
-import models.{Address, DigitalContactDetails}
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
+import models.{Address, DigitalContactDetails}
 import org.jsoup._
 import org.mockito.Matchers
 import org.mockito.Mockito._

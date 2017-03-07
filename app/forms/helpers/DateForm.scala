@@ -18,8 +18,8 @@ package forms.helpers
 
 import java.time.LocalDate
 
-import play.api.data.{Forms, Mapping, FormError}
 import play.api.data.format.Formatter
+import play.api.data.{FormError, Forms, Mapping}
 import utils.DateUtil
 
 import scala.util.Try

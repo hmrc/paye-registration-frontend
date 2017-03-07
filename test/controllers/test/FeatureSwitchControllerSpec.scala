@@ -16,10 +16,10 @@
 
 package controllers.test
 
+import org.mockito.Matchers
+import org.mockito.Mockito.when
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{BAD_REQUEST, OK}
-import org.mockito.Mockito.when
-import org.mockito.Matchers
 import testHelpers.PAYERegSpec
 import utils.{BooleanFeatureSwitch, FeatureManager, PAYEFeatureSwitches}
 

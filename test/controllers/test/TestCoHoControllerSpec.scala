@@ -18,12 +18,12 @@ package controllers.test
 
 import builders.AuthBuilder
 import connectors.test.TestCoHoAPIConnect
+import org.mockito.Matchers
+import org.mockito.Mockito.when
+import play.api.test.FakeRequest
+import play.api.test.Helpers.{BAD_REQUEST, OK}
 import services.CoHoAPISrv
 import testHelpers.PAYERegSpec
-import play.api.test.Helpers.{OK, BAD_REQUEST}
-import org.mockito.Mockito.when
-import org.mockito.Matchers
-import play.api.test.FakeRequest
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
