@@ -16,9 +16,10 @@
 
 package controllers.test
 
-import auth.test.TestPAYERegime
 import javax.inject.{Inject, Singleton}
-import config.{FrontendAuthConnector}
+
+import auth.PAYERegime
+import config.FrontendAuthConnector
 import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector}
 import connectors.{BusinessRegistrationConnect, BusinessRegistrationConnector, BusinessRegistrationSuccessResponse, KeystoreConnect, KeystoreConnector}
 import enums.CacheKeys
@@ -42,7 +43,7 @@ trait CurrentProfileCtrl extends FrontendController with Actions {
   val businessRegConnector: BusinessRegistrationConnect
   val testBusinessRegConnector: TestBusinessRegConnect
 
-  def currentProfileSetup = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async {
+  def currentProfileSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         businessRegConnector.retrieveCurrentProfile flatMap {

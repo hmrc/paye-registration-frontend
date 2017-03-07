@@ -16,8 +16,9 @@
 
 package controllers.test
 
-import auth.test.TestPAYERegime
 import javax.inject.{Inject, Singleton}
+
+import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -41,7 +42,7 @@ trait TestCacheCtrl extends FrontendController with Actions with I18nSupport {
   val keystoreConnector: KeystoreConnect
   val s4LService: S4LSrv
 
-  val tearDownS4L = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async {
+  val tearDownS4L = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         s4LService.clear() map {

@@ -16,14 +16,14 @@
 
 package controllers.test
 
-import auth.test.TestPAYERegime
+import auth.PAYERegime
 import javax.inject.{Inject, Singleton}
+
 import config.FrontendAuthConnector
-import connectors.KeystoreConnector
 import connectors.test.{TestPAYERegConnect, TestPAYERegConnector}
 import enums.DownstreamOutcome
 import forms.test.{TestPAYEContactForm, TestPAYERegCompanyDetailsSetupForm, TestPAYERegSetupForm}
-import services.{CommonService, PAYERegistrationService, PAYERegistrationSrv}
+import services.{PAYERegistrationService, PAYERegistrationSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -46,7 +46,7 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
   val payeRegService: PAYERegistrationSrv
   val testPAYERegConnector: TestPAYERegConnect
 
-  val regTeardown = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async {
+  val regTeardown = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         testPAYERegConnector.testRegistrationTeardown() map {
@@ -55,7 +55,7 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
         }
   }
 
-  val regSetup = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async {
+  val regSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         for {
@@ -63,7 +63,7 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
         } yield Ok(views.html.pages.test.payeRegistrationSetup(TestPAYERegSetupForm.form, regID))
   }
 
-  val submitRegSetup = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async {
+  val submitRegSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         TestPAYERegSetupForm.form.bindFromRequest.fold (
@@ -78,13 +78,13 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
         )
   }
 
-  val regSetupCompanyDetails = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async {
+  val regSetupCompanyDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         Future.successful(Ok(views.html.pages.test.payeRegCompanyDetailsSetup(TestPAYERegCompanyDetailsSetupForm.form)))
   }
 
-  val submitRegSetupCompanyDetails = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async {
+  val submitRegSetupCompanyDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         TestPAYERegCompanyDetailsSetupForm.form.bindFromRequest.fold (
@@ -96,11 +96,11 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
         )
   }
 
-  val regSetupPAYEContact = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+  val regSetupPAYEContact = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     Future.successful(Ok(views.html.pages.test.payeRegPAYEContactSetup(TestPAYEContactForm.form)))
   }
 
-  val submitRegSetupPAYEContact = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+  val submitRegSetupPAYEContact = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     TestPAYEContactForm.form.bindFromRequest.fold (
       errors => Future.successful(Ok(views.html.pages.test.payeRegPAYEContactSetup(errors))),
       success => testPAYERegConnector.addTestPAYEContact(success) map {

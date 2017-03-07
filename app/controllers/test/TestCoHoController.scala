@@ -16,8 +16,9 @@
 
 package controllers.test
 
-import auth.test.TestPAYERegime
 import javax.inject.{Inject, Singleton}
+
+import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.test.{TestCoHoAPIConnect, TestCoHoAPIConnector}
 import forms.test.TestCoHoCompanyDetailsForm
@@ -44,13 +45,13 @@ trait TestCoHoCtrl extends FrontendController with Actions with I18nSupport {
   val testCoHoAPIConnector: TestCoHoAPIConnect
   val coHoAPIService: CoHoAPISrv
 
-  def coHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async {
+  def coHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         Future.successful(Ok(views.html.pages.test.coHoCompanyDetailsSetup(TestCoHoCompanyDetailsForm.form)))
   }
 
-  def submitCoHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async {
+  def submitCoHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         TestCoHoCompanyDetailsForm.form.bindFromRequest.fold(
@@ -62,7 +63,7 @@ trait TestCoHoCtrl extends FrontendController with Actions with I18nSupport {
         )
   }
 
-  def coHoCompanyDetailsTearDown = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async {
+  def coHoCompanyDetailsTearDown = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         testCoHoAPIConnector.tearDownCoHoCompanyDetails().map { result =>
