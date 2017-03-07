@@ -19,19 +19,18 @@ package controllers.userJourney
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
-import testHelpers.PAYERegSpec
-import play.api.http.Status
-import play.api.test.FakeRequest
 import builders.AuthBuilder
 import enums.DownstreamOutcome
-import fixtures.S4LFixture
-import models.view.{CompanyPension, EmployingStaff, Employment, FirstPayment, Subcontractors}
-import play.api.mvc.Result
-import services.EmploymentService
-import utils.DateUtil
+import models.view._
 import org.mockito.Matchers
 import org.mockito.Mockito.when
+import play.api.http.Status
 import play.api.i18n.MessagesApi
+import play.api.mvc.Result
+import play.api.test.FakeRequest
+import services.EmploymentService
+import testHelpers.PAYERegSpec
+import utils.DateUtil
 
 import scala.concurrent.Future
 

@@ -17,8 +17,8 @@
 package views.pages.companyDetails
 
 import forms.companyDetails.PPOBForm
-import models.view.AddressChoice
 import models.Address
+import models.view.AddressChoice
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.test.FakeRequest

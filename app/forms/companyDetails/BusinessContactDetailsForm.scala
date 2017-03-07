@@ -18,9 +18,9 @@ package forms.companyDetails
 
 import forms.helpers.OneOfManyForm
 import models.DigitalContactDetails
-import utils.Validators._
 import play.api.data.Form
 import play.api.data.Forms._
+import utils.Validators._
 
 object BusinessContactDetailsForm extends OneOfManyForm {
 

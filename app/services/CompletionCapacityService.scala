@@ -18,13 +18,13 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import connectors.{PAYERegistrationConnector, PAYERegistrationConnect, KeystoreConnector}
+import connectors.{KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.{DownstreamOutcome, UserCapacity}
 import models.view.CompletionCapacity
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class CompletionCapacityService @Inject()(injKeystoreConnector: KeystoreConnector,

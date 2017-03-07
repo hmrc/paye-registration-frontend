@@ -16,8 +16,9 @@
 
 package controllers.test
 
-import auth.test.TestPAYERegime
 import javax.inject.{Inject, Singleton}
+
+import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -26,10 +27,9 @@ import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 @Singleton
-class TestCacheController @Inject()(
-                                     injKeystoreConnector: KeystoreConnector,
-                                     injS4LService: S4LService,
-                                     injMessagesApi: MessagesApi)
+class TestCacheController @Inject()(injKeystoreConnector: KeystoreConnector,
+                                    injS4LService: S4LService,
+                                    injMessagesApi: MessagesApi)
   extends TestCacheCtrl {
   val authConnector = FrontendAuthConnector
   val keystoreConnector = injKeystoreConnector
@@ -42,10 +42,11 @@ trait TestCacheCtrl extends FrontendController with Actions with I18nSupport {
   val keystoreConnector: KeystoreConnect
   val s4LService: S4LSrv
 
-  val tearDownS4L = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    s4LService.clear() map {
-      response => Ok("Save4Later cleared")
-    }
+  val tearDownS4L = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user =>
+      implicit request =>
+        s4LService.clear() map {
+          response => Ok("Save4Later cleared")
+        }
   }
-
 }

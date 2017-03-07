@@ -16,7 +16,7 @@
 
 package forms.directorDetails
 
-import models.view.{UserEnteredNino, Ninos}
+import models.view.{Ninos, UserEnteredNino}
 import play.api.data.FormError
 import uk.gov.hmrc.play.test.UnitSpec
 

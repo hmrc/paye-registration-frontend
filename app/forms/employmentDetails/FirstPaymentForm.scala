@@ -20,8 +20,8 @@ import java.time.LocalDate
 
 import forms.helpers.DateForm
 import models.view.FirstPayment
-import play.api.data.{Forms, Mapping, FormError, Form}
 import play.api.data.Forms._
+import play.api.data.{Form, FormError}
 import utils.Validators
 
 object FirstPaymentForm extends DateForm {

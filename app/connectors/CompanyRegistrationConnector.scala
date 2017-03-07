@@ -22,11 +22,11 @@ import config.WSHttp
 import play.api.Logger
 import play.api.libs.json._
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class CompanyRegistrationConnector @Inject()() extends CompanyRegistrationConnect with ServicesConfig {

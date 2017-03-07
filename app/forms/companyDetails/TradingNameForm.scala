@@ -26,8 +26,11 @@ object TradingNameForm extends RequiredBooleanForm {
 
   def validateForm(vForm: Form[TradingName]): Form[TradingName] = {
     if(!validationNeeded(vForm)) vForm else {
-      if (tradingNameFieldNotCompleted(vForm)) vForm.withError("tradingName", "pages.tradingName.errorQuestion")
-      else vForm
+      if(tradingNameFieldNotCompleted(vForm)) {
+        vForm.withError("tradingName", "pages.tradingName.errorQuestion")
+      } else {
+        vForm
+      }
     }
   }
 

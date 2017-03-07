@@ -18,9 +18,9 @@ package forms.completionCapacity
 
 import enums.UserCapacity
 import models.view.{CompletionCapacity => CompletionCapacityView}
-import play.api.data.format.Formatter
-import play.api.data.{Forms, FormError, Form, Mapping}
 import play.api.data.Forms._
+import play.api.data.format.Formatter
+import play.api.data.{Form, FormError, Forms, Mapping}
 import uk.gov.voa.play.form.ConditionalMappings._
 
 import scala.util.{Success, Try}

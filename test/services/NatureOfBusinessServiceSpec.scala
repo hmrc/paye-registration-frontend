@@ -17,15 +17,13 @@
 package services
 
 import connectors.PAYERegistrationConnector
-import enums.{CacheKeys, DownstreamOutcome}
+import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
-import models.api.{Director, Name, SICCode}
-import models.view.{Directors, NatureOfBusiness}
+import models.api.SICCode
+import models.view.NatureOfBusiness
 import org.mockito.Matchers
 import org.mockito.Mockito.when
-import play.api.libs.json.{Format, Json}
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 
 import scala.concurrent.Future

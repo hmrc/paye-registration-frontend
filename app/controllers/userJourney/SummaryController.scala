@@ -16,14 +16,15 @@
 
 package controllers.userJourney
 
-import auth.PAYERegime
 import javax.inject.{Inject, Singleton}
+
+import auth.PAYERegime
 import config.FrontendAuthConnector
-import services.{SummarySrv, SummaryService}
+import play.api.i18n.{I18nSupport, MessagesApi}
+import services.{SummaryService, SummarySrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import views.html.pages.{summary => SummaryPage}
-import play.api.i18n.{I18nSupport, MessagesApi}
 
 @Singleton
 class SummaryController @Inject()(

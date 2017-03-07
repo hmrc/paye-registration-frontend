@@ -16,7 +16,6 @@
 
 package connectors.test
 
-import config.WSHttp
 import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture

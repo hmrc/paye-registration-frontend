@@ -19,12 +19,12 @@ package controllers.userJourney
 import builders.AuthBuilder
 import enums.{DownstreamOutcome, UserCapacity}
 import models.view.CompletionCapacity
+import org.mockito.Matchers
+import org.mockito.Mockito._
 import play.api.test.FakeRequest
-import testHelpers.PAYERegSpec
 import play.api.test.Helpers._
 import services.CompletionCapacityService
-import org.mockito.Mockito._
-import org.mockito.Matchers
+import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future

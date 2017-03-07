@@ -19,14 +19,14 @@ package services
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, PAYERegistrationFixture, S4LFixture}
-import models.{Address, DigitalContactDetails}
-import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
+import models.external.CHROAddress
+import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
+import models.{Address, DigitalContactDetails}
 import org.mockito.Matchers
 import org.mockito.Mockito._
-import testHelpers.PAYERegSpec
-import models.external.CHROAddress
 import play.api.libs.json.{Format, Json}
+import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 

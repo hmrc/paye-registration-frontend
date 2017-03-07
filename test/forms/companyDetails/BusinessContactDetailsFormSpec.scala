@@ -17,7 +17,7 @@
 package forms.companyDetails
 
 import models.DigitalContactDetails
-import play.api.data.{Form, FormError, Mapping}
+import play.api.data.{Form, FormError}
 import uk.gov.hmrc.play.test.UnitSpec
 
 class BusinessContactDetailsFormSpec extends UnitSpec {

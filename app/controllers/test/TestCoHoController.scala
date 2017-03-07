@@ -16,23 +16,23 @@
 
 package controllers.test
 
-import auth.test.TestPAYERegime
 import javax.inject.{Inject, Singleton}
+
+import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.test.{TestCoHoAPIConnect, TestCoHoAPIConnector}
 import forms.test.TestCoHoCompanyDetailsForm
+import play.api.i18n.{I18nSupport, MessagesApi}
 import services.{CoHoAPIService, CoHoAPISrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import play.api.i18n.{I18nSupport, MessagesApi}
 
 import scala.concurrent.Future
 
 @Singleton
-class TestCoHoController @Inject()(
-                                    injTestCoHoAPIConnector: TestCoHoAPIConnector,
-                                    injCoHoAPIService: CoHoAPIService,
-                                    injMessagesApi: MessagesApi)
+class TestCoHoController @Inject()(injTestCoHoAPIConnector: TestCoHoAPIConnector,
+                                   injCoHoAPIService: CoHoAPIService,
+                                   injMessagesApi: MessagesApi)
   extends TestCoHoCtrl {
   val authConnector = FrontendAuthConnector
   val testCoHoAPIConnector = injTestCoHoAPIConnector
@@ -45,24 +45,30 @@ trait TestCoHoCtrl extends FrontendController with Actions with I18nSupport {
   val testCoHoAPIConnector: TestCoHoAPIConnect
   val coHoAPIService: CoHoAPISrv
 
-  def coHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    Future.successful(Ok(views.html.pages.test.coHoCompanyDetailsSetup(TestCoHoCompanyDetailsForm.form)))
+  def coHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user =>
+      implicit request =>
+        Future.successful(Ok(views.html.pages.test.coHoCompanyDetailsSetup(TestCoHoCompanyDetailsForm.form)))
   }
 
-  def submitCoHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    TestCoHoCompanyDetailsForm.form.bindFromRequest.fold(
-      errors => Future.successful(Ok(views.html.pages.test.coHoCompanyDetailsSetup(errors))),
-      success => for {
-        regId <- coHoAPIService.fetchRegistrationID
-        resp <- testCoHoAPIConnector.addCoHoCompanyDetails(success.toCoHoCompanyDetailsAPIModel(regId))
-      } yield Ok(s"Company details response status: ${resp.status}")
-    )
+  def submitCoHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user =>
+      implicit request =>
+        TestCoHoCompanyDetailsForm.form.bindFromRequest.fold(
+          errors => Future.successful(BadRequest(views.html.pages.test.coHoCompanyDetailsSetup(errors))),
+          success => for {
+            regId <- coHoAPIService.fetchRegistrationID
+            resp <- testCoHoAPIConnector.addCoHoCompanyDetails(success.toCoHoCompanyDetailsAPIModel(regId))
+          } yield Ok(s"Company details response status: ${resp.status}")
+        )
   }
 
-  def coHoCompanyDetailsTearDown = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    testCoHoAPIConnector.tearDownCoHoCompanyDetails().map { result =>
-      Ok("Company details collection removed")
-    }
+  def coHoCompanyDetailsTearDown = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user =>
+      implicit request =>
+        testCoHoAPIConnector.tearDownCoHoCompanyDetails().map { result =>
+          Ok("Company details collection removed")
+        }
   }
 
 }

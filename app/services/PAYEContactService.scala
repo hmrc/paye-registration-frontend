@@ -19,14 +19,16 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import connectors._
-import enums.{CacheKeys, DownstreamOutcome}
+import enums.CacheKeys
 import models.Address
-import models.view.{CompanyDetails => CompanyDetailsView, PAYEContactDetails, PAYEContact => PAYEContactView}
+import models.view.{CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
 import models.api.{PAYEContact => PAYEContactAPI}
+import enums.DownstreamOutcome
+import models.view.PAYEContactDetails
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class PAYEContactService @Inject()(injKeystoreConnector: KeystoreConnector,

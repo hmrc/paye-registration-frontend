@@ -17,6 +17,7 @@
 package connectors.test
 
 import javax.inject.{Inject, Singleton}
+
 import config.WSHttp
 import connectors._
 import enums.DownstreamOutcome

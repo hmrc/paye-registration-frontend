@@ -16,9 +16,8 @@
 
 package forms.test
 
-import models.DigitalContactDetails
+import models.{Address, DigitalContactDetails}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
-import models.Address
 import play.api.data.Form
 import play.api.data.Forms.{mapping, _}
 

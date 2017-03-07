@@ -17,13 +17,14 @@
 package services
 
 import javax.inject.{Inject, Singleton}
-import connectors.{S4LConnect, KeystoreConnector, S4LConnector}
+
+import connectors.{KeystoreConnector, S4LConnect, S4LConnector}
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class S4LService @Inject()(s4LConn: S4LConnector, keystoreConn: KeystoreConnector) extends S4LSrv {

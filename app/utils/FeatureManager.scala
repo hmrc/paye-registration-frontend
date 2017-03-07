@@ -51,9 +51,7 @@ trait FeatureManager {
 }
 
 @Singleton
-class PAYEFeatureSwitch @Inject()(
-                                   injManager: FeatureSwitchManager)
-  extends PAYEFeatureSwitches {
+class PAYEFeatureSwitch @Inject()(injManager: FeatureSwitchManager) extends PAYEFeatureSwitches {
   val addressLookupUrl = "addressService"
   val manager = injManager
 }
@@ -69,5 +67,4 @@ trait PAYEFeatureSwitches {
     case "addressService" => Some(addressLookupFrontend)
     case _ => None
   }
-
 }

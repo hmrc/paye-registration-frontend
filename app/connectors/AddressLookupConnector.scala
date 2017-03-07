@@ -17,14 +17,12 @@
 package connectors
 
 import javax.inject.{Inject, Singleton}
+
 import config.WSHttp
-import play.api.Logger
 import play.api.libs.json.JsObject
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class AddressLookupConnector @Inject()() extends AddressLookupConnect with ServicesConfig {

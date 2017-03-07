@@ -1,7 +1,6 @@
-@import uk.gov.hmrc.play.views.html.helpers._
-@import helpers.templates.{hiddenDetails, addressDisplay}
-
+@import helpers.templates.{addressDisplay, hiddenDetails}
 @import models.Address
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @(companyName : String, address : Address)(implicit request: Request[_], messages: Messages)
 
 @main_template(title = messages("pages.confirmRO.title")) {
@@ -10,7 +9,7 @@
 
     <p id="lead-paragraph">@messages("pages.confirmRO.lede")</p>
 
-    @form(action = controllers.userJourney.routes.CompanyDetailsController.confirmRO()) {
+    @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.confirmRO()) {
         <div class="form-group">
             @addressDisplay(address, "ro-address")
         </div>

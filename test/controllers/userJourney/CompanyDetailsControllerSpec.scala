@@ -19,8 +19,8 @@ package controllers.userJourney
 import builders.AuthBuilder
 import enums.DownstreamOutcome
 import fixtures.{PAYERegistrationFixture, S4LFixture}
-import models.{Address, DigitalContactDetails}
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
+import models.{Address, DigitalContactDetails}
 import org.jsoup._
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -56,7 +56,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
   val tstTradingNameModel = TradingNameView(differentName = true, tradingName = Some("test trading name"))
 
   val fakeRequest = FakeRequest("GET", "/")
-  implicit val materializer = fakeApplication.materializer
 
   "calling the tradingName action" should {
 

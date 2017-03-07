@@ -20,7 +20,6 @@ import fixtures.BusinessRegistrationFixture
 import models.external.CurrentProfile
 import org.mockito.Matchers
 import org.mockito.Mockito._
-import play.api.libs.json.JsValue
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, NotFoundException}
 

@@ -16,21 +16,21 @@
 
 package controllers.test
 
-import auth.test.TestPAYERegime
 import javax.inject.{Inject, Singleton}
-import config.{FrontendAuthConnector}
+
+import auth.PAYERegime
+import config.FrontendAuthConnector
 import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector}
-import connectors.{BusinessRegistrationConnect, BusinessRegistrationConnector, BusinessRegistrationSuccessResponse, KeystoreConnect, KeystoreConnector}
+import connectors._
 import enums.CacheKeys
 import models.external.CurrentProfile
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 @Singleton
-class CurrentProfileController @Inject()(
-                                          injKeystoreConnector: KeystoreConnector,
-                                          injBusinessRegConnector: BusinessRegistrationConnector,
-                                          injTestBusinessRegConnector: TestBusinessRegConnector)
+class CurrentProfileController @Inject()(injKeystoreConnector: KeystoreConnector,
+                                         injBusinessRegConnector: BusinessRegistrationConnector,
+                                         injTestBusinessRegConnector: TestBusinessRegConnector)
   extends CurrentProfileCtrl {
   val authConnector = FrontendAuthConnector
   val keystoreConnector = injKeystoreConnector
@@ -43,20 +43,20 @@ trait CurrentProfileCtrl extends FrontendController with Actions {
   val businessRegConnector: BusinessRegistrationConnect
   val testBusinessRegConnector: TestBusinessRegConnect
 
-  def currentProfileSetup = AuthorisedFor(taxRegime = new TestPAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    businessRegConnector.retrieveCurrentProfile flatMap {
-      case BusinessRegistrationSuccessResponse(profile) =>
-        keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, profile).map {
-          case x => Ok(s"Profile already set up for reg ID ${profile.registrationID}")
+  def currentProfileSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user =>
+      implicit request =>
+        businessRegConnector.retrieveCurrentProfile flatMap {
+          case BusinessRegistrationSuccessResponse(profile) =>
+            keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, profile).map {
+              x => Ok(s"Profile already set up for reg ID ${profile.registrationID}")
+            }
+          case _ =>
+            testBusinessRegConnector.createCurrentProfileEntry flatMap { newProfile =>
+              keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, newProfile).map {
+                response => Ok(s"Profile set up for reg ID ${newProfile.registrationID}")
+              }
+            }
         }
-      case _ =>
-        testBusinessRegConnector.createCurrentProfileEntry flatMap { newProfile =>
-          keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, newProfile).map {
-            response => Ok(s"Profile set up for reg ID ${newProfile.registrationID}")
-          }
-        }
-    }
-
   }
-
 }

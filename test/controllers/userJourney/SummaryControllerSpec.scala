@@ -19,14 +19,14 @@ package controllers.userJourney
 import builders.AuthBuilder
 import fixtures.PAYERegistrationFixture
 import org.jsoup.Jsoup
-import play.api.http.Status
-import play.api.mvc.Result
-import services.SummaryService
-import testHelpers.PAYERegSpec
 import org.mockito.Matchers
 import org.mockito.Mockito._
+import play.api.http.Status
 import play.api.i18n.MessagesApi
+import play.api.mvc.Result
 import play.api.test.Helpers._
+import services.SummaryService
+import testHelpers.PAYERegSpec
 
 import scala.concurrent.Future
 
@@ -41,8 +41,6 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
     }
   }
-
-  implicit val materializer = fakeApplication.materializer
 
   "Calling summary to show the summary page" should {
     "show the summary page when a valid model is returned from the microservice" in new Setup {

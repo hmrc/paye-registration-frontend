@@ -16,8 +16,7 @@
 
 package models.api
 
-import models.DigitalContactDetails
-import models.Address
+import models.{Address, DigitalContactDetails}
 import play.api.libs.json.Json
 
 case class CompanyDetails(

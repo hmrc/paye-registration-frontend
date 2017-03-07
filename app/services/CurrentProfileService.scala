@@ -17,6 +17,7 @@
 package services
 
 import javax.inject.{Inject, Singleton}
+
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import models.external.CurrentProfile

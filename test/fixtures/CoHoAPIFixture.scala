@@ -17,7 +17,7 @@
 package fixtures
 
 import models.api.{Director, Name}
-import models.external.{AreaOfIndustry, CHROAddress, CoHoCompanyDetailsModel, Officer, OfficerList}
+import models.external._
 import models.view.Directors
 
 trait CoHoAPIFixture {

@@ -16,7 +16,7 @@
 
 package enums
 
-import play.api.libs.json.{Writes, Reads, Format}
+import play.api.libs.json.{Format, Reads, Writes}
 
 object UserCapacity extends Enumeration {
 

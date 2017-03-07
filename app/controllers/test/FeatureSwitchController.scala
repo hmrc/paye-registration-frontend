@@ -17,6 +17,7 @@
 package controllers.test
 
 import javax.inject.{Inject, Singleton}
+
 import play.api.mvc.Action
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils._
@@ -24,13 +25,10 @@ import utils._
 import scala.concurrent.Future
 
 @Singleton
-class FeatureSwitchController @Inject()(
-                                       injFeatureSwitch: FeatureSwitchManager,
-                                       injPayeFeatureSwitch: PAYEFeatureSwitch)
-  extends FeatureSwitchCtrl{
+class FeatureSwitchController @Inject()(injFeatureSwitch: FeatureSwitchManager,
+                                        injPayeFeatureSwitch: PAYEFeatureSwitch) extends FeatureSwitchCtrl{
   val featureManager = injFeatureSwitch
   val PayeFeatureSwitch = injPayeFeatureSwitch
-
 }
 
 trait FeatureSwitchCtrl extends FrontendController {
@@ -51,5 +49,4 @@ trait FeatureSwitchCtrl extends FrontendController {
         case None => Future.successful(BadRequest)
       }
   }
-
 }

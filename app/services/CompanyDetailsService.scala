@@ -20,13 +20,13 @@ import javax.inject.{Inject, Singleton}
 
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
-import models.{DigitalContactDetails, Address}
-import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
+import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
+import models.{Address, DigitalContactDetails}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class CompanyDetailsService @Inject()(injKeystoreConnector: KeystoreConnector,

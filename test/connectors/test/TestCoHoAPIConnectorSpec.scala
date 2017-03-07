@@ -19,7 +19,7 @@ package connectors.test
 import fixtures.CoHoAPIFixture
 import play.api.libs.json.JsValue
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.{HttpResponse, HeaderCarrier}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
 

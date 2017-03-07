@@ -16,10 +16,10 @@
 
 package forms.directorDetails
 
-import models.view.{UserEnteredNino, Ninos}
-import play.api.data.format.Formatter
-import play.api.data.{Mapping, Forms, FormError, Form}
+import models.view.{Ninos, UserEnteredNino}
 import play.api.data.Forms._
+import play.api.data.format.Formatter
+import play.api.data.{Form, FormError, Forms, Mapping}
 import utils.Validators.ninoValidation
 
 object DirectorDetailsForm {

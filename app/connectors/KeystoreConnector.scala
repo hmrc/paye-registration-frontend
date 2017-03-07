@@ -17,6 +17,7 @@
 package connectors
 
 import javax.inject.{Inject, Singleton}
+
 import config.PAYESessionCache
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}

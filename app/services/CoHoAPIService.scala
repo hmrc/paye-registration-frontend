@@ -26,8 +26,8 @@ import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import models.view.Directors
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class CoHoAPIService @Inject()(keystoreConn: KeystoreConnector, coHoAPIConn: CoHoAPIConnector) extends CoHoAPISrv {

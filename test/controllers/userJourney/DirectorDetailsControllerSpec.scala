@@ -20,12 +20,12 @@ import builders.AuthBuilder
 import enums.DownstreamOutcome
 import models.api.{Director, Name}
 import models.view.{Directors, Ninos, UserEnteredNino}
+import org.mockito.Matchers
+import org.mockito.Mockito._
 import play.api.i18n.MessagesApi
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import org.mockito.Mockito._
-import org.mockito.Matchers
-import play.api.mvc.Result
 import services.DirectorDetailsSrv
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.HeaderCarrier

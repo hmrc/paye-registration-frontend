@@ -16,7 +16,7 @@
 
 package services
 
-import connectors.{CoHoAPIConnector, CompanyRegistrationConnector, PAYERegistrationConnector}
+import connectors.PAYERegistrationConnector
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, PAYERegistrationFixture, S4LFixture}
 import models.api.{Director, Name}

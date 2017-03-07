@@ -18,9 +18,9 @@ package fixtures
 
 import java.time.LocalDate
 
-import models.{Address, DigitalContactDetails}
 import models.api.{Director, Name}
 import models.view._
+import models.{Address, DigitalContactDetails}
 
 trait S4LFixture {
 

@@ -19,11 +19,12 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import config.FrontendAuthConnector
-import enums.{AccountTypes, DownstreamOutcome}
-import connectors._
+import enums.AccountTypes
 import play.api.libs.json.JsObject
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import connectors._
+import enums.DownstreamOutcome
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
