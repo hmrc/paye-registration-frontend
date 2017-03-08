@@ -45,7 +45,8 @@ class SignInOutController @Inject()(
   val coHoAPIService = injCoHoAPIService
   val payeRegistrationService = injPayeRegistrationService
   val messagesApi = injMessagesApi
-  val compRegBaseURL = baseUrl("company-registration-frontend")
+  lazy val compRegFEURL = getConfString("company-registration-frontend.www.url", "")
+  lazy val compRegFEURI = getConfString("company-registration-frontend.www.uri", "")
 }
 
 trait SignInOutCtrl extends FrontendController with Actions with I18nSupport {
@@ -53,7 +54,8 @@ trait SignInOutCtrl extends FrontendController with Actions with I18nSupport {
   val currentProfileService: CurrentProfileSrv
   val coHoAPIService: CoHoAPISrv
   val payeRegistrationService: PAYERegistrationSrv
-  val compRegBaseURL: String
+  val compRegFEURL: String
+  val compRegFEURI: String
 
   def postSignIn = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
@@ -95,7 +97,7 @@ trait SignInOutCtrl extends FrontendController with Actions with I18nSupport {
       case AccountTypes.Organisation => Logger.info("[SignInOutController] - [hasOrgAffinity] - Authenticated user has ORGANISATION account, proceeding")
         f
       case AccountTypes.InvalidAccountType => Logger.info("[SignInOutController] - [hasOrgAffinity] - AUTHENTICATED USER NOT AN ORGANISATION ACCOUNT; redirecting to create new account")
-        Future.successful(Redirect(s"$compRegBaseURL/register-your-company/post-sign-in"))
+        Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/post-sign-in"))
     }
   }
 }
