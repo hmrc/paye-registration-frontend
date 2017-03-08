@@ -17,9 +17,11 @@
 package connectors
 
 import fixtures.BusinessRegistrationFixture
+import mocks.MockMetrics
 import models.external.CurrentProfile
 import org.mockito.Matchers
 import org.mockito.Mockito._
+import services.MetricsSrv
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, NotFoundException}
 
@@ -30,9 +32,10 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
   val mockBusRegConnector = mock[BusinessRegistrationConnector]
 
   trait Setup {
-    val connector = new BusinessRegistrationConnector {
+    val connector = new BusinessRegistrationConnect {
       override val businessRegUrl = "testBusinessRegUrl"
       override val http = mockWSHttp
+      override val metricsService = new MockMetrics
     }
   }
 

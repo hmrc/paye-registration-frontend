@@ -31,15 +31,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class AddressLookupService @Inject()(
-                                      injFeatureSwitch: PAYEFeatureSwitch,
-                                      injAddressConnector: AddressLookupConnector)
+class AddressLookupService @Inject()(injFeatureSwitch: PAYEFeatureSwitch,
+                                     injAddressConnector: AddressLookupConnector,
+                                     injMetrics: MetricsService)
   extends AddressLookupSrv with ServicesConfig {
   lazy val payeRegistrationUrl = getConfString("paye-registration-frontend.www.url","")
   lazy val addressLookupFrontendUrl = getConfString("address-lookup-frontend.www.url","")
   lazy val addressLookupFrontendUri = getConfString("address-lookup-frontend.www.uri","")
   val addressLookupConnector = injAddressConnector
   val featureSwitch = injFeatureSwitch
+  val metricsService: MetricsSrv = injMetrics
 }
 
 trait AddressLookupSrv {
@@ -49,6 +50,7 @@ trait AddressLookupSrv {
   val addressLookupFrontendUri: String
   val addressLookupConnector: AddressLookupConnect
   val featureSwitch: PAYEFeatureSwitches
+  val metricsService: MetricsSrv
 
   def buildAddressLookupUrl(query: String, call: Call) = {
     useAddressLookupFrontend match {
@@ -65,8 +67,10 @@ trait AddressLookupSrv {
   def getAddress(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[Address]] = {
     request.getQueryString("id") match {
       case Some(id) =>
+        val addressLookUpTimer = metricsService.addressLookupResponseTimer.time()
         addressLookupConnector.getAddress(id) map { json =>
-          Some(jsonToAddress(json))
+            addressLookUpTimer.stop()
+            Some(jsonToAddress(json))
         }
       case None => Future.successful(None)
     }

@@ -18,9 +18,10 @@ package payeregistrationapi
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.CompanyRegistrationConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
-import play.api.Application
+import play.api.{Application, Play}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
+import services.MetricsService
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
@@ -58,8 +59,8 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
         """.stripMargin).as[JsObject]
 
     "get a transaction id" in {
-
-      val companyRegistrationConnector = new CompanyRegistrationConnector()
+      lazy val metrics = Play.current.injector.instanceOf[MetricsService]
+      val companyRegistrationConnector = new CompanyRegistrationConnector(metrics)
 
       def getResponse = companyRegistrationConnector.getTransactionId(regId)
 

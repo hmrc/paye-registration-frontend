@@ -17,6 +17,7 @@
 package connectors
 
 import config.PAYEShortLivedCache
+import mocks.MockMetrics
 import models.view.{TradingName => TradingNameView}
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -24,6 +25,7 @@ import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeApplication
 import play.api.test.Helpers._
+import services.MetricsSrv
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
@@ -40,7 +42,10 @@ class S4LConnectorSpec  extends UnitSpec with MockitoSugar with WithFakeApplicat
 
   val mockShortLivedCache = mock[PAYEShortLivedCache]
 
-  val S4LConnectorTest = new S4LConnector(mockShortLivedCache)
+  val S4LConnectorTest = new S4LConnect {
+    override val metricsService = new MockMetrics
+    override val shortCache = mockShortLivedCache
+  }
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 

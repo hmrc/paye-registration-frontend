@@ -16,10 +16,12 @@
 
 package connectors
 
+import mocks.MockMetrics
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.Helpers._
+import services.MetricsSrv
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
@@ -28,7 +30,10 @@ import scala.concurrent.Future
 
 class KeystoreConnectorSpec extends PAYERegSpec {
 
-  val connector = new KeystoreConnector(mockSessionCache)
+  val connector = new KeystoreConnect {
+    override val metricsService = new MockMetrics
+    override val sessionCache = mockSessionCache
+  }
 
   implicit val hc : HeaderCarrier = HeaderCarrier()
 

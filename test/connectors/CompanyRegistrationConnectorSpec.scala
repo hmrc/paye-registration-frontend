@@ -16,7 +16,9 @@
 
 package connectors
 
+import mocks.MockMetrics
 import play.api.libs.json.{JsObject, Json}
+import services.MetricsSrv
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
 
@@ -32,6 +34,7 @@ class CompanyRegistrationConnectorSpec extends PAYERegSpec {
       val companyRegistrationUri = crTestUri
       val companyRegistrationUrl = crTestUrl
       val http = mockWSHttp
+      override val metricsService = new MockMetrics
     }
 
     implicit val hc = HeaderCarrier()
