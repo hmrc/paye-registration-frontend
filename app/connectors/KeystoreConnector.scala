@@ -20,32 +20,52 @@ import javax.inject.{Inject, Singleton}
 
 import config.PAYESessionCache
 import play.api.libs.json.Format
+import services.{MetricsService, MetricsSrv}
 import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class KeystoreConnector @Inject()(payeSessionCache: PAYESessionCache) extends KeystoreConnect {
+class KeystoreConnector @Inject()(payeSessionCache: PAYESessionCache, injMetrics: MetricsService) extends KeystoreConnect {
   val sessionCache : SessionCache = payeSessionCache
+  val metricsService = injMetrics
 }
 
 trait KeystoreConnect {
   val sessionCache: SessionCache
+  val metricsService: MetricsSrv
 
   def cache[T](formId: String, body : T)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {
-    sessionCache.cache[T](formId, body)
+    val keystoreTimer = metricsService.keystoreResponseTimer.time()
+    sessionCache.cache[T](formId, body) map { saved =>
+      keystoreTimer.stop()
+      saved
+    }
   }
 
   def fetch()(implicit hc : HeaderCarrier) : Future[Option[CacheMap]] = {
-    sessionCache.fetch()
+    val keystoreTimer = metricsService.keystoreResponseTimer.time()
+    sessionCache.fetch() map { fetched =>
+      keystoreTimer.stop()
+      fetched
+    }
   }
 
   def fetchAndGet[T](key : String)(implicit hc: HeaderCarrier, format: Format[T]): Future[Option[T]] = {
-    sessionCache.fetchAndGetEntry(key)
+    val keystoreTimer = metricsService.keystoreResponseTimer.time()
+    sessionCache.fetchAndGetEntry(key) map { fG =>
+      keystoreTimer.stop()
+      fG
+    }
   }
 
   def remove()(implicit hc : HeaderCarrier) : Future[HttpResponse] = {
-    sessionCache.remove()
+    val keystoreTimer = metricsService.keystoreResponseTimer.time()
+    sessionCache.remove() map { httpResponse =>
+      keystoreTimer.stop()
+      httpResponse
+    }
   }
 }

@@ -18,6 +18,7 @@ package services
 
 import connectors._
 import fixtures.{PAYERegistrationFixture, S4LFixture}
+import mocks.MockMetrics
 import models.Address
 import org.mockito.Matchers
 import org.mockito.Mockito._
@@ -25,25 +26,31 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import testHelpers.PAYERegSpec
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.{BooleanFeatureSwitch, PAYEFeatureSwitch}
 
 import scala.concurrent.Future
 
 
-class AddressLookupServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistrationFixture {
+class AddressLookupServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistrationFixture with ServicesConfig {
 
   implicit val hc = HeaderCarrier()
 
   val mockFeatureSwitch = mock[PAYEFeatureSwitch]
   val mockAddressLookupConnector = mock[AddressLookupConnector]
+  val mockMetrics = mock[MetricsService]
+  val metricsMock = new MockMetrics
 
   class Setup {
-    val service = new AddressLookupService (mockFeatureSwitch, mockAddressLookupConnector)
+    val service = new AddressLookupService(mockFeatureSwitch, mockAddressLookupConnector, mockMetrics) {
+      override val metricsService = metricsMock
+    }
   }
 
   case class SetupWithProxy(boole: Boolean) {
-    val service = new AddressLookupService (mockFeatureSwitch, mockAddressLookupConnector) {
+    val service = new AddressLookupService(mockFeatureSwitch, mockAddressLookupConnector, mockMetrics) {
+      override val metricsService = metricsMock
       override def useAddressLookupFrontend = boole
     }
   }

@@ -18,8 +18,10 @@ package connectors
 
 import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
+import mocks.MockMetrics
 import models.api.{Director, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.http.Status
+import services.MetricsSrv
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -27,9 +29,10 @@ import uk.gov.hmrc.play.http.ws.WSHttp
 class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   class Setup {
-    val connector = new PAYERegistrationConnector {
+    val connector = new PAYERegistrationConnect {
       override val payeRegUrl: String = "tst-url"
       override val http: WSHttp = mockWSHttp
+      override val metricsService = new MockMetrics
     }
   }
 

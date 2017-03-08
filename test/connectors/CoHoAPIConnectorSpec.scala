@@ -17,8 +17,10 @@
 package connectors
 
 import fixtures.CoHoAPIFixture
+import mocks.MockMetrics
 import models.api.Name
 import models.external.{CHROAddress, CoHoCompanyDetailsModel, Officer, OfficerList}
+import services.MetricsSrv
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier, NotFoundException}
@@ -36,6 +38,7 @@ class CoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
       val coHoAPIUrl = testUrl
       val coHoAPIUri = testUri
       override val http : WSHttp = mockWSHttp
+      override val metricsService = new MockMetrics
     }
   }
 

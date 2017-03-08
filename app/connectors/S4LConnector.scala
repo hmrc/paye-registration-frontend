@@ -20,33 +20,53 @@ import javax.inject.{Inject, Singleton}
 
 import config.PAYEShortLivedCache
 import play.api.libs.json.Format
+import services.{MetricsService, MetricsSrv}
 import uk.gov.hmrc.http.cache.client.{CacheMap, ShortLivedCache}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class S4LConnector @Inject()(payeShortLivedCache: PAYEShortLivedCache) extends S4LConnect {
+class S4LConnector @Inject()(payeShortLivedCache: PAYEShortLivedCache, injMetrics: MetricsService) extends S4LConnect {
   val shortCache : ShortLivedCache = payeShortLivedCache
+  val metricsService = injMetrics
 }
 
 trait S4LConnect {
 
   val shortCache : ShortLivedCache
+  val metricsService: MetricsSrv
 
   def saveForm[T](userId: String, formId: String, data: T)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {
-    shortCache.cache[T](userId, formId, data)
+    val s4lTimer = metricsService.s4lResponseTimer.time()
+    shortCache.cache[T](userId, formId, data) map { saved =>
+      s4lTimer.stop()
+      saved
+    }
   }
 
   def fetchAndGet[T](userId: String, formId: String)(implicit hc: HeaderCarrier, format: Format[T]): Future[Option[T]] = {
-    shortCache.fetchAndGetEntry[T](userId, formId)
+    val s4lTimer = metricsService.s4lResponseTimer.time()
+    shortCache.fetchAndGetEntry[T](userId, formId) map { fG =>
+      s4lTimer.stop()
+      fG
+    }
   }
 
   def clear(userId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    shortCache.remove(userId)
+    val s4lTimer = metricsService.s4lResponseTimer.time()
+    shortCache.remove(userId) map { cleared =>
+      s4lTimer.stop()
+      cleared
+    }
   }
 
   def fetchAll(userId: String)(implicit hc: HeaderCarrier): Future[Option[CacheMap]] = {
-    shortCache.fetch(userId)
+    val s4lTimer = metricsService.s4lResponseTimer.time()
+    shortCache.fetch(userId) map { fetched =>
+      s4lTimer.stop()
+      fetched
+    }
   }
 }

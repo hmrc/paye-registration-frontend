@@ -18,15 +18,17 @@ package payeregistrationapi
 import java.time.LocalDate
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.kenshoo.play.metrics.Metrics
 import connectors.PAYERegistrationConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.DigitalContactDetails
 import models.api._
 import models.Address
 import models.view.PAYEContactDetails
-import play.api.Application
+import play.api.{Application, Play}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
+import services.MetricsService
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
@@ -34,6 +36,8 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
+
+  lazy val metrics = Play.current.injector.instanceOf[MetricsService]
 
   val additionalConfiguration = Map(
     "microservice.services.paye-registration.host" -> s"$mockHost",
@@ -80,7 +84,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get a model" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
 
       def getResponse = payeRegistrationConnector.getCompanyDetails(regId)
 
@@ -97,7 +101,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get a None" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
 
       def getResponse = payeRegistrationConnector.getCompanyDetails(regId)
 
@@ -113,7 +117,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "upsert a model" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
 
       def patchResponse = payeRegistrationConnector.upsertCompanyDetails(regId, validCompanyDetails)
 
@@ -138,7 +142,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get a model" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
 
       def getResponse = payeRegistrationConnector.getEmployment(regId)
 
@@ -155,7 +159,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get a None" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
 
       def getResponse = payeRegistrationConnector.getEmployment(regId)
 
@@ -171,7 +175,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "upsert a model" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
 
       def patchResponse = payeRegistrationConnector.upsertEmployment(regId, validEmployment)
 
@@ -212,7 +216,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get a list of Director models" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
 
       def getResponse = payeRegistrationConnector.getDirectors(regId)
 
@@ -229,7 +233,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get an empty list if no directors" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
 
       def getResponse = payeRegistrationConnector.getDirectors(regId)
 
@@ -245,7 +249,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "upsert a model" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
 
       def patchResponse = payeRegistrationConnector.upsertDirectors(regId, dirList)
 
@@ -276,7 +280,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get a list of SICCode models" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
 
       def getResponse = payeRegistrationConnector.getSICCodes(regId)
 
@@ -293,7 +297,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get an empty list if no sic codes" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
 
       def getResponse = payeRegistrationConnector.getSICCodes(regId)
 
@@ -309,7 +313,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "upsert a model" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
 
       def patchResponse = payeRegistrationConnector.upsertSICCodes(regId, sicCodes)
 
@@ -347,7 +351,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get a model" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
 
       def getResponse = payeRegistrationConnector.getPAYEContact(regId)
 
@@ -364,7 +368,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get a None" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
 
       def getResponse = payeRegistrationConnector.getPAYEContact(regId)
 
@@ -380,7 +384,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "upsert a model" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
 
       def patchResponse = payeRegistrationConnector.upsertPAYEContact(regId, validPAYEContact)
 
@@ -400,7 +404,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get a string" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
       val jobTitle = "High Priestess"
 
       def getResponse = payeRegistrationConnector.getCompletionCapacity(regId)
@@ -418,7 +422,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get a None" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
 
       def getResponse = payeRegistrationConnector.getCompletionCapacity(regId)
 
@@ -434,7 +438,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "upsert a model" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector()
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
 
       val jobTitle = "High Priestess"
       def patchResponse = payeRegistrationConnector.upsertCompletionCapacity(regId, jobTitle)
