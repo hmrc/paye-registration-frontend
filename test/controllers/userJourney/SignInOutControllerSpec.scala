@@ -44,7 +44,8 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
       override val coHoAPIService = mockCoHoAPIService
       override val payeRegistrationService = mockPAYERegService
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
-      override val compRegBaseURL: String = "testUrl"
+      override val compRegFEURL: String = "testUrl"
+      override val compRegFEURI: String = "/testUri"
     }
   }
 
@@ -68,7 +69,7 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
       AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controller.compRegBaseURL}/register-your-company/post-sign-in")
+          redirectLocation(result) shouldBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/post-sign-in")
       }
     }
 
