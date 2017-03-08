@@ -2,7 +2,7 @@
 
 [ ![Download](https://api.bintray.com/packages/hmrc/releases/paye-registration-frontend/images/download.svg) ](https://bintray.com/hmrc/releases/paye-registration-frontend/_latestVersion)
 
-This is a placeholder README.md for a new repository
+Source code for the PAYE Registration frontend microservice, part of the SCRS journey.
 
 ### License
 
