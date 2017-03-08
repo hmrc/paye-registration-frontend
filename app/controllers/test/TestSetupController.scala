@@ -22,11 +22,9 @@ import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{BusinessRegistrationConnect, BusinessRegistrationConnector, KeystoreConnect, KeystoreConnector}
 import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector, TestCoHoAPIConnect, TestCoHoAPIConnector, TestPAYERegConnect, TestPAYERegConnector}
-import enums.DownstreamOutcome
 import models.test.CoHoCompanyDetailsFormModel
 import play.api.Logger
 import play.api.i18n.MessagesApi
-import play.api.mvc.Result
 import services.{CoHoAPIService, CoHoAPISrv, PAYERegistrationService, PAYERegistrationSrv, S4LService, S4LSrv}
 
 import scala.concurrent.ExecutionContext.Implicits.global
