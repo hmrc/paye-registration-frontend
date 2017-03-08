@@ -22,7 +22,9 @@ import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.test.{TestCoHoAPIConnect, TestCoHoAPIConnector}
 import forms.test.TestCoHoCompanyDetailsForm
+import models.test.CoHoCompanyDetailsFormModel
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.{AnyContent, Request}
 import services.{CoHoAPIService, CoHoAPISrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -57,18 +59,28 @@ trait TestCoHoCtrl extends FrontendController with Actions with I18nSupport {
         TestCoHoCompanyDetailsForm.form.bindFromRequest.fold(
           errors => Future.successful(BadRequest(views.html.pages.test.coHoCompanyDetailsSetup(errors))),
           success => for {
-            regId <- coHoAPIService.fetchRegistrationID
-            resp <- testCoHoAPIConnector.addCoHoCompanyDetails(success.toCoHoCompanyDetailsAPIModel(regId))
-          } yield Ok(s"Company details response status: ${resp.status}")
+            res <- doAddCoHoCompanyDetails(success)
+          } yield Ok(res)
         )
   }
 
   def coHoCompanyDetailsTearDown = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        testCoHoAPIConnector.tearDownCoHoCompanyDetails().map { result =>
-          Ok("Company details collection removed")
-        }
+        for {
+          res <- doCoHoCompanyDetailsTearDown
+        } yield Ok(res)
+  }
+
+  protected[controllers] def doCoHoCompanyDetailsTearDown(implicit request: Request[AnyContent]): Future[String] = {
+    testCoHoAPIConnector.tearDownCoHoCompanyDetails().map (_ =>"Company details collection removed")
+  }
+
+  protected[controllers] def doAddCoHoCompanyDetails(formModel: CoHoCompanyDetailsFormModel)(implicit request: Request[AnyContent]): Future[String] = {
+    for {
+      regId <- coHoAPIService.fetchRegistrationID
+      resp <- testCoHoAPIConnector.addCoHoCompanyDetails(formModel.toCoHoCompanyDetailsAPIModel(regId))
+    } yield s"Company Name: ${formModel.companyName}, response status: ${resp.status}"
   }
 
 }

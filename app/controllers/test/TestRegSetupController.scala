@@ -22,8 +22,9 @@ import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.test.{TestPAYERegConnect, TestPAYERegConnector}
 import enums.DownstreamOutcome
-import forms.test.{TestPAYERegCompanyDetailsSetupForm, TestPAYERegSetupForm, TestPAYEContactForm}
+import forms.test.{TestPAYEContactForm, TestPAYERegCompanyDetailsSetupForm, TestPAYERegSetupForm}
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.{AnyContent, Request, Result}
 import services.{PAYERegistrationService, PAYERegistrationSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -46,10 +47,16 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
   val payeRegService: PAYERegistrationSrv
   val testPAYERegConnector: TestPAYERegConnect
 
+  protected[controllers] def doRegTeardown(implicit request: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
+    testPAYERegConnector.testRegistrationTeardown()
+  }
+
   val regTeardown = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        testPAYERegConnector.testRegistrationTeardown() map {
+        for {
+          res <- doRegTeardown
+        } yield res match {
           case DownstreamOutcome.Success => Ok("Registration collection successfully cleared")
           case DownstreamOutcome.Failure => InternalServerError("Error clearing registration collection")
         }

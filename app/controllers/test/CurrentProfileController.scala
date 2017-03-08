@@ -24,8 +24,12 @@ import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector}
 import connectors._
 import enums.CacheKeys
 import models.external.CurrentProfile
+import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class CurrentProfileController @Inject()(injKeystoreConnector: KeystoreConnector,
@@ -46,17 +50,23 @@ trait CurrentProfileCtrl extends FrontendController with Actions {
   def currentProfileSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        businessRegConnector.retrieveCurrentProfile flatMap {
-          case BusinessRegistrationSuccessResponse(profile) =>
-            keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, profile).map {
-              x => Ok(s"Profile already set up for reg ID ${profile.registrationID}")
-            }
-          case _ =>
-            testBusinessRegConnector.createCurrentProfileEntry flatMap { newProfile =>
-              keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, newProfile).map {
-                response => Ok(s"Profile set up for reg ID ${newProfile.registrationID}")
-              }
-            }
+        for {
+          res <- doCurrentProfileSetup
+        } yield Ok(res)
+  }
+
+  protected[controllers] def doCurrentProfileSetup(implicit request: Request[AnyContent]): Future[String] = {
+    businessRegConnector.retrieveCurrentProfile flatMap {
+      case BusinessRegistrationSuccessResponse(profile) =>
+        keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, profile).map {
+          x => s"Profile already set up for reg ID ${profile.registrationID}"
         }
+      case _ =>
+        testBusinessRegConnector.createCurrentProfileEntry flatMap { newProfile =>
+          keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, newProfile).map {
+            response => s"Profile set up for reg ID ${newProfile.registrationID}"
+          }
+        }
+    }
   }
 }
