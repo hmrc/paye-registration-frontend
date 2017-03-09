@@ -1,7 +1,7 @@
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @()(implicit request: Request[_], messages: Messages)
 
-@main_template(title = messages("pages.confirmation.title")) {
+@main_template(title = messages("pages.confirmation.title"), backButton = false) {
 
 
     <div class="transaction-banner--complete">

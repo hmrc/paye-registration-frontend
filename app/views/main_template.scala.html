@@ -1,4 +1,5 @@
 @(title: String,
+  backButton: Boolean = true,
   sidebarLinks: Option[Html] = None,
   contentHeader: Option[Html] = None,
   bodyClasses: Option[String] = None,
@@ -25,5 +26,6 @@
                contentHeader = contentHeader,
                mainContent = layouts.article(mainContent),
                serviceInfoContent = serviceInfoContent,
-               pageScripts = scriptElem
+               pageScripts = scriptElem,
+               backEnabled = backButton
 )
