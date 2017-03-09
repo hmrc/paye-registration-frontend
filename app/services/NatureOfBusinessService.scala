@@ -28,15 +28,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class NatureOfBusinessService @Inject()(
-                                 keystoreConn: KeystoreConnector,
-                                 payeRegistrationConn: PAYERegistrationConnector
-                               ) extends NatureOfBusinessSrv {
-  override val keystoreConnector = keystoreConn
+class NatureOfBusinessService @Inject()(payeRegistrationConn: PAYERegistrationConnector) extends NatureOfBusinessSrv {
   override val payeRegConnector = payeRegistrationConn
 }
 
-trait NatureOfBusinessSrv extends CommonService {
+trait NatureOfBusinessSrv {
   val payeRegConnector: PAYERegistrationConnect
 
   private[services] def sicCodes2NatureOfBusiness(sicCodes: Seq[SICCode]): Option[NatureOfBusiness] =
@@ -45,17 +41,15 @@ trait NatureOfBusinessSrv extends CommonService {
   private[services] def natureOfBusiness2SICCodes(nob: NatureOfBusiness): Seq[SICCode] =
     Seq(SICCode(None, Some(nob.natureOfBusiness)))
 
-  def getNatureOfBusiness()(implicit hc: HeaderCarrier): Future[Option[NatureOfBusiness]] = {
+  def getNatureOfBusiness(regId: String)(implicit hc: HeaderCarrier): Future[Option[NatureOfBusiness]] = {
     for {
-      regID <- fetchRegistrationID
-      sicCodes <- payeRegConnector.getSICCodes(regID)
+      sicCodes <- payeRegConnector.getSICCodes(regId)
     } yield sicCodes2NatureOfBusiness(sicCodes)
   }
 
-  def saveNatureOfBusiness(nob: NatureOfBusiness)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def saveNatureOfBusiness(nob: NatureOfBusiness, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
-      regID     <- fetchRegistrationID
-      details   <- payeRegConnector.upsertSICCodes(regID, natureOfBusiness2SICCodes(nob))
+      details   <- payeRegConnector.upsertSICCodes(regId, natureOfBusiness2SICCodes(nob))
     } yield DownstreamOutcome.Success
   }
 }

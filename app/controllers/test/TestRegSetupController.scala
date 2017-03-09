@@ -20,32 +20,37 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
+import connectors.{KeystoreConnect, KeystoreConnector}
 import connectors.test.{TestPAYERegConnect, TestPAYERegConnector}
 import enums.DownstreamOutcome
 import forms.test.{TestPAYEContactForm, TestPAYERegCompanyDetailsSetupForm, TestPAYERegSetupForm}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{AnyContent, Request, Result}
+import play.api.mvc.{AnyContent, Request}
 import services.{PAYERegistrationService, PAYERegistrationSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import utils.SessionProfile
 
 import scala.concurrent.Future
 
 @Singleton
 class TestRegSetupController @Inject()(injPayeRegService:PAYERegistrationService,
                                        injTestPAYERegConnector: TestPAYERegConnector,
+                                       injKeystoreConnector: KeystoreConnector,
                                        injMessagesApi: MessagesApi)
   extends TestRegSetupCtrl {
   val authConnector = FrontendAuthConnector
   val payeRegService = injPayeRegService
   val testPAYERegConnector = injTestPAYERegConnector
   val messagesApi = injMessagesApi
+  val keystoreConnector = injKeystoreConnector
 }
 
-trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport {
+trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
 
   val payeRegService: PAYERegistrationSrv
   val testPAYERegConnector: TestPAYERegConnect
+  val keystoreConnector: KeystoreConnect
 
   protected[controllers] def doRegTeardown(implicit request: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
     testPAYERegConnector.testRegistrationTeardown()
@@ -54,53 +59,57 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
   val regTeardown = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        for {
-          res <- doRegTeardown
-        } yield res match {
-          case DownstreamOutcome.Success => Ok("Registration collection successfully cleared")
-          case DownstreamOutcome.Failure => InternalServerError("Error clearing registration collection")
+        withCurrentProfile { profile =>
+          for {
+            res <- doRegTeardown
+          } yield res match {
+            case DownstreamOutcome.Success => Ok("Registration collection successfully cleared")
+            case DownstreamOutcome.Failure => InternalServerError("Error clearing registration collection")
+          }
         }
   }
 
   val regSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        for {
-          regID <- payeRegService.fetchRegistrationID
-        } yield Ok(views.html.pages.test.payeRegistrationSetup(TestPAYERegSetupForm.form, regID))
+        withCurrentProfile { profile =>
+          Future.successful(Ok(views.html.pages.test.payeRegistrationSetup(TestPAYERegSetupForm.form, profile.registrationID)))
+        }
   }
 
   val submitRegSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        TestPAYERegSetupForm.form.bindFromRequest.fold (
-          errors => for {
-            regID <- payeRegService.fetchRegistrationID
-          } yield BadRequest(views.html.pages.test.payeRegistrationSetup(errors, regID)),
-
-          success => testPAYERegConnector.addPAYERegistration(success) map {
-            case DownstreamOutcome.Success => Ok("PAYE Registration set up successfully")
-            case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Registration")
-          }
-        )
+        withCurrentProfile { profile =>
+          TestPAYERegSetupForm.form.bindFromRequest.fold(
+            errors =>
+              Future.successful(BadRequest(views.html.pages.test.payeRegistrationSetup(errors, profile.registrationID))),
+            success => testPAYERegConnector.addPAYERegistration(success) map {
+              case DownstreamOutcome.Success => Ok("PAYE Registration set up successfully")
+              case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Registration")
+            }
+          )
+        }
   }
 
-  val regSetupCompanyDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+  val regSetupCompanyDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
     implicit user =>
       implicit request =>
-        Future.successful(Ok(views.html.pages.test.payeRegCompanyDetailsSetup(TestPAYERegCompanyDetailsSetupForm.form)))
+        Ok(views.html.pages.test.payeRegCompanyDetailsSetup(TestPAYERegCompanyDetailsSetupForm.form))
   }
 
   val submitRegSetupCompanyDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        TestPAYERegCompanyDetailsSetupForm.form.bindFromRequest.fold (
-          errors => Future.successful(BadRequest(views.html.pages.test.payeRegCompanyDetailsSetup(errors))),
-          success => testPAYERegConnector.addTestCompanyDetails(success) map {
-            case DownstreamOutcome.Success => Ok("Company details successfully set up")
-            case DownstreamOutcome.Failure => InternalServerError("Error setting up Company Details")
-          }
-        )
+        withCurrentProfile { profile =>
+          TestPAYERegCompanyDetailsSetupForm.form.bindFromRequest.fold(
+            errors => Future.successful(BadRequest(views.html.pages.test.payeRegCompanyDetailsSetup(errors))),
+            success => testPAYERegConnector.addTestCompanyDetails(success, profile.registrationID) map {
+              case DownstreamOutcome.Success => Ok("Company details successfully set up")
+              case DownstreamOutcome.Failure => InternalServerError("Error setting up Company Details")
+            }
+          )
+        }
   }
 
   val regSetupPAYEContact = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
@@ -108,12 +117,14 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
   }
 
   val submitRegSetupPAYEContact = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    TestPAYEContactForm.form.bindFromRequest.fold (
-      errors => Future.successful(BadRequest(views.html.pages.test.payeRegPAYEContactSetup(errors))),
-      success => testPAYERegConnector.addTestPAYEContact(success) map {
-        case DownstreamOutcome.Success => Ok("PAYE Contact details successfully set up")
-        case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Contact details")
-      }
-    )
+    withCurrentProfile { profile =>
+      TestPAYEContactForm.form.bindFromRequest.fold(
+        errors => Future.successful(BadRequest(views.html.pages.test.payeRegPAYEContactSetup(errors))),
+        success => testPAYERegConnector.addTestPAYEContact(success, profile.registrationID) map {
+          case DownstreamOutcome.Success => Ok("PAYE Contact details successfully set up")
+          case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Contact details")
+        }
+      )
+    }
   }
 }

@@ -24,7 +24,6 @@ import enums.DownstreamOutcome
 import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI, PAYEContact => PAYEContactAPI}
 import play.api.Logger
 import play.api.http.Status
-import services.CommonService
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -33,14 +32,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class TestPAYERegConnector @Inject()(keystore : KeystoreConnector,payeRegistrationConnector: PAYERegistrationConnector) extends TestPAYERegConnect with ServicesConfig {
+class TestPAYERegConnector @Inject()(payeRegistrationConnector: PAYERegistrationConnector) extends TestPAYERegConnect with ServicesConfig {
   val payeRegUrl = baseUrl("paye-registration")
   val http : WSHttp = WSHttp
-  val keystoreConnector: KeystoreConnect = keystore
   val payeRegConnector: PAYERegistrationConnect = payeRegistrationConnector
 }
 
-trait TestPAYERegConnect extends CommonService {
+trait TestPAYERegConnect {
 
   val payeRegUrl: String
   val http: WSHttp
@@ -55,10 +53,9 @@ trait TestPAYERegConnect extends CommonService {
     }
   }
 
-  def addTestCompanyDetails(details: CompanyDetailsAPI)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def addTestCompanyDetails(details: CompanyDetailsAPI, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     val response = for {
-      regID <- fetchRegistrationID
-      resp <- payeRegConnector.upsertCompanyDetails(regID,  details)
+      resp <- payeRegConnector.upsertCompanyDetails(regId,  details)
     } yield resp
 
     response map {
@@ -68,10 +65,9 @@ trait TestPAYERegConnect extends CommonService {
     }
   }
 
-  def addTestPAYEContact(details: PAYEContactAPI)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def addTestPAYEContact(details: PAYEContactAPI, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     val response = for {
-      regID <- fetchRegistrationID
-      resp <- payeRegConnector.upsertPAYEContact(regID,  details)
+      resp <- payeRegConnector.upsertPAYEContact(regId,  details)
     } yield resp
 
     response map {

@@ -20,21 +20,31 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
+import connectors.{KeystoreConnect, KeystoreConnector}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import utils.SessionProfile
 import views.html.pages.{confirmation => ConfirmationPage}
 
+import scala.concurrent.Future
+
 @Singleton
-class ConfirmationController @Inject()(injMessagesApi: MessagesApi) extends ConfirmationCtrl {
+class ConfirmationController @Inject()(injMessagesApi: MessagesApi, keystoreInj: KeystoreConnector) extends ConfirmationCtrl {
   val authConnector = FrontendAuthConnector
   val messagesApi = injMessagesApi
+  val keystoreConnector = keystoreInj
 }
 
-trait ConfirmationCtrl extends FrontendController with Actions with I18nSupport {
-  val showConfirmation = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
+trait ConfirmationCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
+
+  val keystoreConnector : KeystoreConnect
+
+  val showConfirmation = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        Ok(ConfirmationPage())
+        withCurrentProfile { profile =>
+          Future.successful(Ok(ConfirmationPage()))
+        }
   }
 }

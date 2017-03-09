@@ -22,14 +22,13 @@ import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector}
 import connectors._
-import enums.CacheKeys
-import models.external.CurrentProfile
 import play.api.mvc.{AnyContent, Request}
+import models.external.BusinessProfile
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class CurrentProfileController @Inject()(injKeystoreConnector: KeystoreConnector,
@@ -52,21 +51,11 @@ trait CurrentProfileCtrl extends FrontendController with Actions {
       implicit request =>
         for {
           res <- doCurrentProfileSetup
-        } yield Ok(res)
+        } yield Ok(res.toString)
   }
 
-  protected[controllers] def doCurrentProfileSetup(implicit request: Request[AnyContent]): Future[String] = {
-    businessRegConnector.retrieveCurrentProfile flatMap {
-      case BusinessRegistrationSuccessResponse(profile) =>
-        keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, profile).map {
-          x => s"Profile already set up for reg ID ${profile.registrationID}"
-        }
-      case _ =>
-        testBusinessRegConnector.createCurrentProfileEntry flatMap { newProfile =>
-          keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, newProfile).map {
-            response => s"Profile set up for reg ID ${newProfile.registrationID}"
-          }
-        }
-    }
+  protected[controllers] def doCurrentProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = {
+    businessRegConnector.retrieveCurrentProfile
+      .recoverWith { case _ => testBusinessRegConnector.createCurrentProfileEntry }
   }
 }

@@ -16,7 +16,8 @@
 
 package mocks.internal
 
-import connectors.{BusinessRegistrationConnector, BusinessRegistrationResponse}
+import connectors.BusinessRegistrationConnector
+import models.external.BusinessProfile
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
@@ -28,8 +29,8 @@ trait BusinessRegistrationConnectorMock {
 
     lazy val mockBusinessRegistrationConnector = mock[BusinessRegistrationConnector]
 
-    def mockBusinessRegFetch(response: BusinessRegistrationResponse) = {
+    def mockBusinessRegFetch(response: Future[BusinessProfile]) = {
         when(mockBusinessRegistrationConnector.retrieveCurrentProfile(Matchers.any(), Matchers.any()))
-          .thenReturn(Future.successful(response))
+          .thenReturn(response)
     }
 }

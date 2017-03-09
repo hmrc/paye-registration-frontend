@@ -16,9 +16,10 @@
 
 package services
 
+import connectors.S4LConnect
 import enums.CacheKeys
 import fixtures.{KeystoreFixture, PAYERegistrationFixture}
-import models.external.CurrentProfile
+import models.external.BusinessProfile
 import models.view.{TradingName => TradingNameView}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -27,7 +28,9 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 class S4LServiceSpec extends PAYERegSpec with KeystoreFixture with PAYERegistrationFixture {
 
   trait Setup {
-    val service = new S4LService (mockS4LConnector, mockKeystoreConnector)
+    val service = new S4LSrv {
+      override val s4LConnector: S4LConnect = mockS4LConnector
+    }
   }
 
   implicit val hc = new HeaderCarrier()
@@ -37,31 +40,31 @@ class S4LServiceSpec extends PAYERegSpec with KeystoreFixture with PAYERegistrat
   "S4L Service" should {
 
     "save a form with the correct key" in new Setup {
-      mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
+      mockKeystoreFetchAndGet[BusinessProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
       mockS4LSaveForm[TradingNameView]("tradingName", CacheMap("t-name", Map.empty))
 
-      await(service.saveForm[TradingNameView]("tradingName", tstTradingNameModel)).id shouldBe "t-name"
+      await(service.saveForm[TradingNameView]("tradingName", tstTradingNameModel, "regId")).id shouldBe "t-name"
     }
 
     "fetch a form with the correct key" in new Setup {
-      mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
+      mockKeystoreFetchAndGet[BusinessProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
       mockS4LFetchAndGet[TradingNameView]("tradingName2", Some(tstTradingNameModel))
 
-      await(service.fetchAndGet[TradingNameView]("tradingName2")) shouldBe Some(tstTradingNameModel)
+      await(service.fetchAndGet[TradingNameView]("tradingName2", "regId")) shouldBe Some(tstTradingNameModel)
     }
 
     "clear down S4L data" in new Setup {
-      mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
+      mockKeystoreFetchAndGet[BusinessProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
       mockS4LClear()
 
-      await(service.clear()).status shouldBe 200
+      await(service.clear("regId")).status shouldBe 200
     }
 
     "fetch all data" in new Setup {
-      mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
+      mockKeystoreFetchAndGet[BusinessProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
       mockS4LFetchAll(Some(CacheMap("allData", Map.empty)))
 
-      await(service.fetchAll()) shouldBe Some(CacheMap("allData", Map.empty))
+      await(service.fetchAll("regId")) shouldBe Some(CacheMap("allData", Map.empty))
     }
 
   }

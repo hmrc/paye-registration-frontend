@@ -19,11 +19,11 @@ package connectors.test
 import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
-import models.external.{BusinessRegistrationRequest, CurrentProfile}
+import models.external.{BusinessRegistrationRequest, BusinessProfile}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
@@ -38,9 +38,9 @@ trait TestBusinessRegConnect {
   val businessRegUrl: String
   val http: WSHttp
 
-  def createCurrentProfileEntry(implicit hc: HeaderCarrier): Future[CurrentProfile] = {
+  def createCurrentProfileEntry(implicit hc: HeaderCarrier): Future[BusinessProfile] = {
     val json = Json.toJson[BusinessRegistrationRequest](BusinessRegistrationRequest("ENG"))
-    http.POST[JsValue, CurrentProfile](s"$businessRegUrl/business-registration/business-tax-registration", json)
+    http.POST[JsValue, BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration", json)
   }
 
 }

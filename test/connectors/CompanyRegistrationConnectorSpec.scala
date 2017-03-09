@@ -17,8 +17,8 @@
 package connectors
 
 import mocks.MockMetrics
+import models.external.CompanyProfile
 import play.api.libs.json.{JsObject, Json}
-import services.MetricsSrv
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
 
@@ -40,35 +40,49 @@ class CompanyRegistrationConnectorSpec extends PAYERegSpec {
     implicit val hc = HeaderCarrier()
   }
 
-  val testJson =
+  val status = "submitted"
+  val transactionId = "submitted"
+
+  val profileJson =
     Json.parse(
-      """
+      s"""
         |{
-        |    "acknowledgement-reference" : "testRef",
-        |    "transaction-id" : "testTransactionID-001",
-        |    "payment-reference" : "test-pay-ref",
-        |    "payment-amount" : "12"
+        |    "registration-id" : "testRegId",
+        |    "status" : "$status",
+        |    "confirmationReferences" : {
+        |       "acknowledgement-reference" : "BRCT-0123456789",
+        |       "transaction-id" : "$transactionId"
+        |    }
         |}
       """.stripMargin).as[JsObject]
 
-  "getTransactionId" should {
-    "return a transaction id" in new Setup {
-      mockHttpGet[JsObject](connector.companyRegistrationUri, Future.successful(testJson))
+  val profileJsonMin =
+    Json.parse(
+      s"""
+        |{
+        |    "registration-id" : "testRegId",
+        |    "status" : "$status"
+        |}
+      """.stripMargin).as[JsObject]
 
-      val result = await(connector.getTransactionId("testRegId"))
-      result shouldBe "testTransactionID-001"
+  "getCompanyRegistrationDetails" should {
+    "return a CompanyProfile" in new Setup {
+      mockHttpGet[JsObject](connector.companyRegistrationUri, Future.successful(profileJson))
+
+      val result = await(connector.getCompanyRegistrationDetails("testRegId"))
+      result shouldBe CompanyProfile(status, transactionId)
     }
 
     "throw a bad request exception" in new Setup {
       mockHttpGet[JsObject](connector.companyRegistrationUri, Future.failed(new BadRequestException("tstException")))
 
-        intercept[BadRequestException](await(connector.getTransactionId("testRegId")))
+      intercept[BadRequestException](await(connector.getCompanyRegistrationDetails("testRegId")))
     }
 
-    "throw a RuntimeException" in new Setup {
+    "throw any other exception" in new Setup {
       mockHttpGet[JsObject](connector.companyRegistrationUri, Future.failed(new RuntimeException))
 
-      intercept[RuntimeException](await(connector.getTransactionId("testRegId")))
+      intercept[RuntimeException](await(connector.getCompanyRegistrationDetails("testRegId")))
     }
   }
 }

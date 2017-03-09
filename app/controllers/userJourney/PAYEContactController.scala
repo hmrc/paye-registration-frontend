@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
+import connectors.{KeystoreConnect, KeystoreConnector}
 import enums.DownstreamOutcome
 import forms.payeContactDetails.{CorrespondenceAddressForm, PAYEContactDetailsForm}
 import models.view.PAYEContact
@@ -29,102 +30,117 @@ import play.api.mvc.{Action, AnyContent}
 import services._
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import utils.SessionProfile
 import views.html.pages.payeContact.{correspondenceAddress => PAYECorrespondenceAddressPage, payeContactDetails => PAYEContactDetailsPage}
 
 import scala.concurrent.Future
 
 @Singleton
 class PAYEContactController @Inject()(
-                                              injCompanyDetailsService: CompanyDetailsService,
-                                              injPAYEContactService: PAYEContactService,
-                                              injAddressLookupService: AddressLookupService,
-                                              injMessagesApi: MessagesApi)
+                                       injCompanyDetailsService: CompanyDetailsService,
+                                       injPAYEContactService: PAYEContactService,
+                                       injAddressLookupService: AddressLookupService,
+                                       injKeystoreConnector: KeystoreConnector,
+                                       injMessagesApi: MessagesApi)
   extends PAYEContactCtrl {
   val authConnector = FrontendAuthConnector
   val companyDetailsService = injCompanyDetailsService
   val payeContactService = injPAYEContactService
   val addressLookupService = injAddressLookupService
+  val keystoreConnector = injKeystoreConnector
   val messagesApi = injMessagesApi
 }
 
-trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport {
+trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
 
   val companyDetailsService: CompanyDetailsSrv
   val payeContactService: PAYEContactSrv
   val addressLookupService: AddressLookupSrv
+  val keystoreConnector: KeystoreConnect
 
   val payeContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        for {
-          companyDetails <- companyDetailsService.getCompanyDetails
-          payeContact <- payeContactService.getPAYEContact
-        } yield payeContact match {
-          case PAYEContact(Some(contactDetails), _) => Ok(PAYEContactDetailsPage(companyDetails.companyName, PAYEContactDetailsForm.form.fill(contactDetails)))
-          case _ => Ok(PAYEContactDetailsPage(companyDetails.companyName, PAYEContactDetailsForm.form))
+        withCurrentProfile { profile =>
+          for {
+            companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+            payeContact <- payeContactService.getPAYEContact(profile.registrationID)
+          } yield payeContact match {
+            case PAYEContact(Some(contactDetails), _) => Ok(PAYEContactDetailsPage(companyDetails.companyName, PAYEContactDetailsForm.form.fill(contactDetails)))
+            case _ => Ok(PAYEContactDetailsPage(companyDetails.companyName, PAYEContactDetailsForm.form))
+          }
         }
   }
 
   val submitPAYEContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        PAYEContactDetailsForm.form.bindFromRequest.fold(
-          errs => companyDetailsService.getCompanyDetails map (details => BadRequest(PAYEContactDetailsPage(details.companyName, errs))),
-          success => payeContactService.submitPayeContactDetails(success) map {
-            case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-            case DownstreamOutcome.Success => Redirect(routes.PAYEContactController.payeCorrespondenceAddress())
-          }
-        )
+        withCurrentProfile { profile =>
+          PAYEContactDetailsForm.form.bindFromRequest.fold(
+            errs => companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+              .map (details => BadRequest(PAYEContactDetailsPage(details.companyName, errs))),
+            success => payeContactService.submitPayeContactDetails(success, profile.registrationID) map {
+              case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+              case DownstreamOutcome.Success => Redirect(routes.PAYEContactController.payeCorrespondenceAddress())
+            }
+          )
+        }
   }
 
   val payeCorrespondenceAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        for {
-          payeContact <- payeContactService.getPAYEContact
-          companyDetails <- companyDetailsService.getCompanyDetails
-        } yield {
-          val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
-          Ok(PAYECorrespondenceAddressPage(CorrespondenceAddressForm.form.fill(ChosenAddress(AddressChoice.correspondenceAddress)), addressMap.get("ro"), addressMap.get("correspondence")))
+        withCurrentProfile { profile =>
+          for {
+            payeContact <- payeContactService.getPAYEContact(profile.registrationID)
+            companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+          } yield {
+            val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
+            Ok(PAYECorrespondenceAddressPage(CorrespondenceAddressForm.form.fill(ChosenAddress(AddressChoice.correspondenceAddress)), addressMap.get("ro"), addressMap.get("correspondence")))
+          }
         }
   }
 
   val submitPAYECorrespondenceAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        CorrespondenceAddressForm.form.bindFromRequest.fold(
-          errs => for {
-            payeContact <- payeContactService.getPAYEContact
-            companyDetails <- companyDetailsService.getCompanyDetails
-          } yield {
-            val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
-            BadRequest(PAYECorrespondenceAddressPage(errs, addressMap.get("ro"), addressMap.get("correspondence")))
-          },
-          success => success.chosenAddress match {
-            case AddressChoice.correspondenceAddress =>
-              Future.successful(Redirect(controllers.userJourney.routes.EmploymentController.employingStaff()))
-            case AddressChoice.roAddress => for {
-              companyDetails <- companyDetailsService.getCompanyDetails
-              res <- payeContactService.submitCorrespondence(companyDetails.roAddress)
-            } yield res match {
-              case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
-              case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+        withCurrentProfile { profile =>
+          CorrespondenceAddressForm.form.bindFromRequest.fold(
+            errs => for {
+              payeContact <- payeContactService.getPAYEContact(profile.registrationID)
+              companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+            } yield {
+              val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
+              BadRequest(PAYECorrespondenceAddressPage(errs, addressMap.get("ro"), addressMap.get("correspondence")))
+            },
+            success => success.chosenAddress match {
+              case AddressChoice.correspondenceAddress =>
+                Future.successful(Redirect(controllers.userJourney.routes.EmploymentController.employingStaff()))
+              case AddressChoice.roAddress => for {
+                companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+                res <- payeContactService.submitCorrespondence(companyDetails.roAddress, profile.registrationID)
+              } yield res match {
+                case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
+                case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+              }
+              case AddressChoice.other =>
+                Future.successful(Redirect(addressLookupService.buildAddressLookupUrl("payereg1", controllers.userJourney.routes.PAYEContactController.savePAYECorrespondenceAddress())))
             }
-            case AddressChoice.other =>
-              Future.successful(Redirect(addressLookupService.buildAddressLookupUrl("payereg1", controllers.userJourney.routes.PAYEContactController.savePAYECorrespondenceAddress())))
-          }
-        )
+          )
+        }
   }
 
   val savePAYECorrespondenceAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        for {
-          Some(address) <- addressLookupService.getAddress
-          res <- payeContactService.submitCorrespondence(address)
-        } yield res match {
-          case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
-          case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+        withCurrentProfile { profile =>
+          for {
+            Some(address) <- addressLookupService.getAddress
+            res <- payeContactService.submitCorrespondence(address, profile.registrationID)
+          } yield res match {
+            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
+            case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+          }
         }
-      }
+  }
 }

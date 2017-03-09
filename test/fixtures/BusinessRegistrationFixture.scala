@@ -16,11 +16,11 @@
 
 package fixtures
 
-import models.external.CurrentProfile
+import models.external.BusinessProfile
 
 trait BusinessRegistrationFixture {
 
-  lazy val validBusinessRegistrationResponse = CurrentProfile(
+  lazy val validBusinessRegistrationResponse = BusinessProfile(
     "12345",
     Some("director"),
     "ENG"

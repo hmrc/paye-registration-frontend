@@ -31,16 +31,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class PAYEContactService @Inject()(injKeystoreConnector: KeystoreConnector,
-                                   injPAYERegistrationConnector: PAYERegistrationConnector,
+class PAYEContactService @Inject()(injPAYERegistrationConnector: PAYERegistrationConnector,
                                    injS4LService: S4LService) extends PAYEContactSrv {
-
-  override val keystoreConnector = injKeystoreConnector
   override val payeRegConnector = injPAYERegistrationConnector
   override val s4LService = injS4LService
 }
 
-trait PAYEContactSrv extends CommonService {
+trait PAYEContactSrv  {
   val payeRegConnector: PAYERegistrationConnect
   val s4LService: S4LSrv
 
@@ -55,8 +52,8 @@ trait PAYEContactSrv extends CommonService {
     PAYEContactView(Some(apiData.contactDetails), Some(apiData.correspondenceAddress))
   }
 
-  private def saveToS4L(viewData: PAYEContactView)(implicit hc: HeaderCarrier): Future[PAYEContactView] = {
-    s4LService.saveForm[PAYEContactView](CacheKeys.PAYEContact.toString, viewData).map(_ => viewData)
+  private def saveToS4L(viewData: PAYEContactView, regId: String)(implicit hc: HeaderCarrier): Future[PAYEContactView] = {
+    s4LService.saveForm[PAYEContactView](CacheKeys.PAYEContact.toString, viewData, regId).map(_ => viewData)
   }
 
   private[services] def convertOrCreatePAYEContactView(oAPI: Option[PAYEContactAPI])(implicit hc: HeaderCarrier): PAYEContactView = {
@@ -73,38 +70,36 @@ trait PAYEContactSrv extends CommonService {
     } getOrElse Map("ro" -> companyDetails.roAddress)
   }
 
-  def getPAYEContact(implicit hc: HeaderCarrier): Future[PAYEContactView] = {
-    s4LService.fetchAndGet[PAYEContactView](CacheKeys.PAYEContact.toString) flatMap {
+  def getPAYEContact(regId: String)(implicit hc: HeaderCarrier): Future[PAYEContactView] = {
+    s4LService.fetchAndGet[PAYEContactView](CacheKeys.PAYEContact.toString, regId) flatMap {
       case Some(contactDetails) => Future.successful(contactDetails)
       case None => for {
-        regId <- fetchRegistrationID
         oDetails <- payeRegConnector.getPAYEContact(regId)
       } yield convertOrCreatePAYEContactView(oDetails)
     }
   }
 
-  def submitPAYEContact(viewModel: PAYEContactView)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def submitPAYEContact(viewModel: PAYEContactView, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     viewToAPI(viewModel).fold(
       incompleteView =>
-        saveToS4L(incompleteView) map {_ => DownstreamOutcome.Success},
+        saveToS4L(incompleteView, regId) map {_ => DownstreamOutcome.Success},
       completeAPI =>
         for {
-          regID     <- fetchRegistrationID
-          details   <- payeRegConnector.upsertPAYEContact(regID, completeAPI)
-          clearData <- s4LService.clear
+          details   <- payeRegConnector.upsertPAYEContact(regId, completeAPI)
+          clearData <- s4LService.clear(regId)
         } yield DownstreamOutcome.Success
     )
   }
 
-  def submitPayeContactDetails(viewData: PAYEContactDetails)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    getPAYEContact flatMap {
-      data => submitPAYEContact(PAYEContactView(Some(viewData), data.correspondenceAddress))
+  def submitPayeContactDetails(viewData: PAYEContactDetails, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    getPAYEContact(regId) flatMap {
+      data => submitPAYEContact(PAYEContactView(Some(viewData), data.correspondenceAddress), regId)
     }
   }
 
-  def submitCorrespondence(correspondenceAddress: Address)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    getPAYEContact flatMap {
-      data => submitPAYEContact(PAYEContactView(data.contactDetails, Some(correspondenceAddress)))
+  def submitCorrespondence(correspondenceAddress: Address, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    getPAYEContact(regId) flatMap {
+      data => submitPAYEContact(PAYEContactView(data.contactDetails, Some(correspondenceAddress)), regId)
     }
   }
 }

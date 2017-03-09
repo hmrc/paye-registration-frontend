@@ -19,6 +19,7 @@ package controllers.userJourney
 import javax.inject.{Inject, Singleton}
 
 import enums.AccountTypes
+import models.external.CurrentProfile
 import play.api.Logger
 import auth.PAYERegime
 import config.FrontendAuthConnector
@@ -62,31 +63,34 @@ trait SignInOutCtrl extends FrontendController with Actions with I18nSupport {
       implicit request =>
         hasOrgAffinity {
           checkAndStoreCurrentProfile {
-            checkAndStoreCompanyDetails {
-              assertPAYERegistrationFootprint {
-                Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+            profile =>
+              checkAndStoreCompanyDetails(profile.registrationID) {
+                assertPAYERegistrationFootprint(profile.registrationID){
+                  Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+                }
               }
-            }
           }
         }
   }
 
-  private def checkAndStoreCurrentProfile(f: => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+  private def checkAndStoreCurrentProfile(f: => CurrentProfile => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
     currentProfileService.fetchAndStoreCurrentProfile flatMap {
+      case CurrentProfile(_, _, profile, _) if profile.status equals "draft" => Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/start"))
+      case currentProfile => f(currentProfile)
+    } recover {
+      case _ => InternalServerError(views.html.pages.error.restart())
+    }
+  }
+
+  private def checkAndStoreCompanyDetails(regId: String)(f: => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+    coHoAPIService.fetchAndStoreCoHoCompanyDetails(regId) flatMap {
       case DownstreamOutcome.Success => f
       case DownstreamOutcome.Failure => Future.successful(InternalServerError(views.html.pages.error.restart()))
     }
   }
 
-  private def checkAndStoreCompanyDetails(f: => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
-    coHoAPIService.fetchAndStoreCoHoCompanyDetails flatMap {
-      case DownstreamOutcome.Success => f
-      case DownstreamOutcome.Failure => Future.successful(InternalServerError(views.html.pages.error.restart()))
-    }
-  }
-
-  private def assertPAYERegistrationFootprint(f: => Result)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
-    payeRegistrationService.assertRegistrationFootprint map {
+  private def assertPAYERegistrationFootprint(regId: String)(f: => Result)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+    payeRegistrationService.assertRegistrationFootprint(regId) map {
       case DownstreamOutcome.Success => f
       case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
     }

@@ -38,13 +38,15 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
     val controller = new SummaryCtrl {
       override val summaryService = mockSummaryService
       override val authConnector = mockAuthConnector
+      override val keystoreConnector = mockKeystoreConnector
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
     }
   }
 
   "Calling summary to show the summary page" should {
     "show the summary page when a valid model is returned from the microservice" in new Setup {
-      when(mockSummaryService.getRegistrationSummary()(Matchers.any())).thenReturn(Future.successful(validSummaryView))
+      mockFetchCurrentProfile()
+      when(mockSummaryService.getRegistrationSummary(Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(validSummaryView))
 
       AuthBuilder.showWithAuthorisedUser(controller.summary, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -56,7 +58,8 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
     }
 
     "return an Internal Server Error response when no valid model is returned from the microservice" in new Setup {
-      when(mockSummaryService.getRegistrationSummary()(Matchers.any())).thenReturn(Future.failed(new InternalError()))
+      mockFetchCurrentProfile()
+      when(mockSummaryService.getRegistrationSummary(Matchers.anyString())(Matchers.any())).thenReturn(Future.failed(new InternalError()))
 
       AuthBuilder.showWithAuthorisedUser(controller.summary, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -67,6 +70,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   "Calling submitRegistration" should {
     "show the confirmation page" in new Setup {
+      mockFetchCurrentProfile()
       AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
         (result: Future[Result]) =>
           status(result) shouldBe Status.SEE_OTHER

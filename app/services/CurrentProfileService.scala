@@ -19,7 +19,7 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import connectors._
-import enums.{CacheKeys, DownstreamOutcome}
+import enums.CacheKeys
 import models.external.CurrentProfile
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -27,26 +27,29 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class CurrentProfileService @Inject()(keystoreConn: KeystoreConnector, businessRegistrationConn: BusinessRegistrationConnector) extends CurrentProfileSrv {
-  override val keystoreConnector = keystoreConn
-  override val businessRegistrationConnector = businessRegistrationConn
+class CurrentProfileService @Inject()(injBusinessRegistrationConnector: BusinessRegistrationConnector,
+                                      injKeystoreConnector: KeystoreConnector,
+                                      injCompanyRegistrationConnector: CompanyRegistrationConnector) extends CurrentProfileSrv {
+
+  override val businessRegistrationConnector = injBusinessRegistrationConnector
+  override val companyRegistrationConnector = injCompanyRegistrationConnector
+  override val keystoreConnector = injKeystoreConnector
 }
 
 trait CurrentProfileSrv {
 
-  val keystoreConnector: KeystoreConnect
   val businessRegistrationConnector: BusinessRegistrationConnect
+  val companyRegistrationConnector: CompanyRegistrationConnect
+  val keystoreConnector: KeystoreConnect
 
-  def fetchAndStoreCurrentProfile(implicit hc: HeaderCarrier) : Future[DownstreamOutcome.Value] = {
-    businessRegistrationConnector.retrieveCurrentProfile flatMap {
-      case BusinessRegistrationSuccessResponse(profile) =>
-        val currentProfile = CurrentProfile(profile.registrationID, profile.completionCapacity, profile.language)
-        keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, currentProfile).map { cacheMap =>
-          DownstreamOutcome.Success
-        } recover {
-          case e => DownstreamOutcome.Failure
-        }
-      case _ => Future.successful(DownstreamOutcome.Failure)
+  def fetchAndStoreCurrentProfile(implicit hc: HeaderCarrier) : Future[CurrentProfile] = {
+    for {
+      businessProfile <- businessRegistrationConnector.retrieveCurrentProfile
+      companyProfile  <- companyRegistrationConnector.getCompanyRegistrationDetails(businessProfile.registrationID)
+      currentProfile = CurrentProfile(businessProfile.registrationID, businessProfile.completionCapacity, companyProfile, businessProfile.language)
+      _ <- keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, currentProfile)
+    } yield {
+      currentProfile
     }
   }
 

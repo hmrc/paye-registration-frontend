@@ -20,52 +20,61 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
+import connectors.{KeystoreConnect, KeystoreConnector}
 import forms.directorDetails.DirectorDetailsForm
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.{DirectorDetailsService, DirectorDetailsSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import utils.SessionProfile
 import views.html.pages.{directorDetails => DirectorDetailsPage}
 
 @Singleton
 class DirectorDetailsController @Inject()(injMessagesApi: MessagesApi,
-                                          injDirectorDetailsService: DirectorDetailsService) extends DirectorDetailsCtrl {
+                                          injDirectorDetailsService: DirectorDetailsService,
+                                          injKeystoreConnector: KeystoreConnector) extends DirectorDetailsCtrl {
   val authConnector = FrontendAuthConnector
   val messagesApi = injMessagesApi
   val directorDetailsService = injDirectorDetailsService
+  val keystoreConnector = injKeystoreConnector
 }
 
-trait DirectorDetailsCtrl extends FrontendController with Actions with I18nSupport {
+trait DirectorDetailsCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
 
   val directorDetailsService : DirectorDetailsSrv
+  val keystoreConnector : KeystoreConnect
 
   val directorDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        directorDetailsService.getDirectorDetails map {
-          directors =>
-            val ninos = directorDetailsService.createDirectorNinos(directors)
-            val names = directorDetailsService.createDisplayNamesMap(directors)
-            Ok(DirectorDetailsPage(DirectorDetailsForm.form.fill(ninos), names))
+        withCurrentProfile { profile =>
+          directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+            directors =>
+              val ninos = directorDetailsService.createDirectorNinos(directors)
+              val names = directorDetailsService.createDisplayNamesMap(directors)
+              Ok(DirectorDetailsPage(DirectorDetailsForm.form.fill(ninos), names))
+          }
         }
   }
 
   val submitDirectorDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        DirectorDetailsForm.form.bindFromRequest.fold(
-          errors => {
-            directorDetailsService.getDirectorDetails map {
-              directors =>
-                val names = directorDetailsService.createDisplayNamesMap(directors)
-                BadRequest(DirectorDetailsPage(errors, names))
+        withCurrentProfile { profile =>
+          DirectorDetailsForm.form.bindFromRequest.fold(
+            errors => {
+              directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+                directors =>
+                  val names = directorDetailsService.createDisplayNamesMap(directors)
+                  BadRequest(DirectorDetailsPage(errors, names))
+              }
+            },
+            success => {
+              directorDetailsService.submitNinos(success, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+                _ => Redirect(routes.PAYEContactController.payeContactDetails())
+              }
             }
-          },
-          success => {
-            directorDetailsService.submitNinos(success) map {
-              _ => Redirect(routes.PAYEContactController.payeContactDetails())
-            }
-          }
-        )
+          )
+        }
   }
 }

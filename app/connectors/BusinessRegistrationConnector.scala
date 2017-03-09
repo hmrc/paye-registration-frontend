@@ -19,7 +19,7 @@ package connectors
 import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
-import models.external.CurrentProfile
+import models.external.BusinessProfile
 import play.api.Logger
 import services.{MetricsService, MetricsSrv}
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -36,37 +36,27 @@ class BusinessRegistrationConnector @Inject()(injMetrics: MetricsService) extend
   val metricsService = injMetrics
 }
 
-sealed trait BusinessRegistrationResponse
-case class BusinessRegistrationSuccessResponse(response: CurrentProfile) extends BusinessRegistrationResponse
-case object BusinessRegistrationNotFoundResponse extends BusinessRegistrationResponse
-case object BusinessRegistrationForbiddenResponse extends BusinessRegistrationResponse
-case class BusinessRegistrationErrorResponse(err: Exception) extends BusinessRegistrationResponse
-
 trait BusinessRegistrationConnect {
 
   val businessRegUrl: String
   val http: WSHttp
   val metricsService: MetricsSrv
 
-  def retrieveCurrentProfile(implicit hc: HeaderCarrier, rds: HttpReads[CurrentProfile]): Future[BusinessRegistrationResponse] = {
+  def retrieveCurrentProfile(implicit hc: HeaderCarrier, rds: HttpReads[BusinessProfile]): Future[BusinessProfile] = {
     val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
-    http.GET[CurrentProfile](s"$businessRegUrl/business-registration/business-tax-registration") map {
-      currentProfile =>
-        businessRegistrationTimer.stop()
-        BusinessRegistrationSuccessResponse(currentProfile)
-    } recover {
+    http.GET[BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration") recover {
       case e: NotFoundException =>
+        businessRegistrationTimer.stop()
         Logger.error(s"[BusinessRegistrationConnector] [retrieveCurrentProfile] - Received a NotFound status code when expecting current profile from Business-Registration")
-        businessRegistrationTimer.stop()
-        BusinessRegistrationNotFoundResponse
+        throw e
       case e: ForbiddenException =>
+        businessRegistrationTimer.stop()
         Logger.error(s"[BusinessRegistrationConnector] [retrieveCurrentProfile] - Received a Forbidden status code when expecting current profile from Business-Registration")
-        businessRegistrationTimer.stop()
-        BusinessRegistrationForbiddenResponse
+        throw e
       case e: Exception =>
-        Logger.error(s"[BusinessRegistrationConnector] [retrieveCurrentProfile] - Received error when expecting current profile from Business-Registration - Error ${e.getMessage}")
         businessRegistrationTimer.stop()
-        BusinessRegistrationErrorResponse(e)
+        Logger.error(s"[BusinessRegistrationConnector] [retrieveCurrentProfile] - Received error when expecting current profile from Business-Registration - Error ${e.getMessage}")
+        throw e
     }
   }
 }

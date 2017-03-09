@@ -17,7 +17,7 @@
 package mocks
 
 import connectors._
-import models.external.CurrentProfile
+import models.external.{BusinessProfile, CompanyProfile, CurrentProfile}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
@@ -53,11 +53,12 @@ trait KeystoreMock {
       .thenReturn(Future.successful(HttpResponse(200)))
   }
 
-  def mockFetchRegID(regID: String = "12345"): OngoingStubbing[Future[Option[CurrentProfile]]] = {
+  def mockFetchCurrentProfile(regID: String = "12345"): OngoingStubbing[Future[Option[CurrentProfile]]] = {
     when(mockKeystoreConnector.fetchAndGet[CurrentProfile](Matchers.any())(Matchers.any[HeaderCarrier](), Matchers.any[Format[CurrentProfile]]()))
         .thenReturn(Future.successful(Some(CurrentProfile(
           regID,
           Some("Director"),
+          CompanyProfile("held", "txId"),
           "ENG"
         ))))
   }

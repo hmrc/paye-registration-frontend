@@ -40,6 +40,7 @@ class TestCoHoControllerSpec extends PAYERegSpec {
   class Setup {
     val controller = new TestCoHoCtrl {
       override val testCoHoAPIConnector = mockTestAPIConnector
+      override val keystoreConnector = mockKeystoreConnector
       override val coHoAPIService = mockCoHoAPIService
       override val messagesApi = mockMessages
       override val authConnector = mockAuthConnector
@@ -49,6 +50,7 @@ class TestCoHoControllerSpec extends PAYERegSpec {
   "coHoCompanyDetailsSetup" should {
     "return an OK" when {
       "the company details page has been rendered" in new Setup {
+        mockFetchCurrentProfile()
         AuthBuilder.showWithAuthorisedUser(controller.coHoCompanyDetailsSetup, mockAuthConnector) { result =>
           status(result) shouldBe OK
         }
@@ -72,10 +74,7 @@ class TestCoHoControllerSpec extends PAYERegSpec {
           "sicCodes[4]" -> "",
           "descriptions[4]" -> ""
         )
-
-        when(mockCoHoAPIService.fetchRegistrationID(Matchers.any[HeaderCarrier]()))
-          .thenReturn(Future.successful("testRegId"))
-
+        mockFetchCurrentProfile()
         when(mockTestAPIConnector.addCoHoCompanyDetails(Matchers.any())(Matchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testHttpResponse))
 
@@ -89,7 +88,7 @@ class TestCoHoControllerSpec extends PAYERegSpec {
     "return a BAD_REQUEST" when {
       "the form values are invalid" in new Setup {
         val request = FakeRequest().withFormUrlEncodedBody("invalidKey" -> "invalidValue")
-
+        mockFetchCurrentProfile()
         AuthBuilder.submitWithAuthorisedUser(controller.submitCoHoCompanyDetailsSetup, mockAuthConnector, request) {
           result =>
             status(result) shouldBe BAD_REQUEST
@@ -101,6 +100,7 @@ class TestCoHoControllerSpec extends PAYERegSpec {
   "coHoCompanyDetailsTearDown" should {
     "return an OK" when {
       "the company details have been torn down" in new Setup {
+        mockFetchCurrentProfile()
         when(mockTestAPIConnector.tearDownCoHoCompanyDetails()(Matchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testHttpResponse))
 

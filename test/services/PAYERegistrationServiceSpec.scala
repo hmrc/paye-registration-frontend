@@ -38,7 +38,6 @@ class PAYERegistrationServiceSpec extends PAYERegSpec {
     val service = new PAYERegistrationSrv {
       override val authConnector = mockAuthConnector
       override val payeRegistrationConnector = mockRegConnector
-      override val keystoreConnector = mockKeystoreConnector
     }
   }
 
@@ -52,19 +51,17 @@ class PAYERegistrationServiceSpec extends PAYERegSpec {
 
   "Calling assertRegistrationFootprint" should {
     "return a success response when the Registration is successfully created" in new Setup {
-      mockFetchRegID()
       when(mockRegConnector.createNewRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      await(service.assertRegistrationFootprint()) shouldBe DownstreamOutcome.Success
+      await(service.assertRegistrationFootprint("123")) shouldBe DownstreamOutcome.Success
     }
 
     "return a failure response when the Registration can't be created" in new Setup {
-      mockFetchRegID()
       when(mockRegConnector.createNewRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-      await(service.assertRegistrationFootprint()) shouldBe DownstreamOutcome.Failure
+      await(service.assertRegistrationFootprint("123")) shouldBe DownstreamOutcome.Failure
     }
   }
 

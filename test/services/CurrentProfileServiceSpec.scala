@@ -16,57 +16,79 @@
 
 package services
 
-import connectors.{BusinessRegistrationErrorResponse, BusinessRegistrationForbiddenResponse, BusinessRegistrationNotFoundResponse, BusinessRegistrationSuccessResponse}
+import connectors.{BusinessRegistrationConnect, CompanyRegistrationConnect, KeystoreConnect}
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.BusinessRegistrationFixture
-import models.external.CurrentProfile
+import models.external.{BusinessProfile, CompanyProfile, CurrentProfile}
+import org.mockito.Matchers
+import org.mockito.Mockito.when
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, NotFoundException}
+
+import scala.concurrent.Future
 
 class CurrentProfileServiceSpec extends PAYERegSpec with BusinessRegistrationFixture {
 
+  val mockCompanyRegistrationConnector = mock[CompanyRegistrationConnect]
 
-  trait Setup {
-    val service = new CurrentProfileService (mockKeystoreConnector, mockBusinessRegistrationConnector)
+  class Setup {
+    val service = new CurrentProfileSrv {
+      override val businessRegistrationConnector: BusinessRegistrationConnect = mockBusinessRegistrationConnector
+      override val companyRegistrationConnector: CompanyRegistrationConnect = mockCompanyRegistrationConnector
+      override val keystoreConnector = mockKeystoreConnector
+    }
   }
 
   implicit val hc = HeaderCarrier()
+  val validBusinessProfile = validBusinessRegistrationResponse
+  val validCompanyProfile = CompanyProfile("held", "txId")
+
+  val validCurrentProfile = CurrentProfile(
+                              validBusinessProfile.registrationID,
+                              validBusinessProfile.completionCapacity,
+                              validCompanyProfile,
+                              validBusinessProfile.language
+                            )
 
   "fetchAndStoreCurrentProfile" should {
 
     "Return a successful outcome after successfully storing a valid Business Registration response" in new Setup {
-      val validResponse = BusinessRegistrationSuccessResponse(validBusinessRegistrationResponse)
-      mockBusinessRegFetch(validResponse)
-      mockKeystoreCache[CurrentProfile](CacheKeys.CurrentProfile.toString, CacheMap("", Map.empty))
+      mockBusinessRegFetch(Future.successful(validBusinessProfile))
 
-      await(service.fetchAndStoreCurrentProfile) shouldBe DownstreamOutcome.Success
+      when(mockCompanyRegistrationConnector.getCompanyRegistrationDetails(Matchers.anyString())(Matchers.any()))
+        .thenReturn(Future.successful(validCompanyProfile))
+
+      mockKeystoreCache[BusinessProfile](CacheKeys.CurrentProfile.toString, CacheMap("", Map.empty))
+
+      await(service.fetchAndStoreCurrentProfile) shouldBe validCurrentProfile
     }
 
     "Return an unsuccessful outcome when there is no record in Business Registration" in new Setup {
-      mockBusinessRegFetch(BusinessRegistrationNotFoundResponse)
+      mockBusinessRegFetch(Future.failed(new NotFoundException("")))
 
-      await(service.fetchAndStoreCurrentProfile) shouldBe DownstreamOutcome.Failure
+      when(mockCompanyRegistrationConnector.getCompanyRegistrationDetails(Matchers.anyString())(Matchers.any()))
+        .thenReturn(Future.successful(validCompanyProfile))
+
+      intercept[NotFoundException](await(service.fetchAndStoreCurrentProfile))
     }
 
     "Return an unsuccessful outcome when the user is not authorised for Business Registration" in new Setup {
-      mockBusinessRegFetch(BusinessRegistrationForbiddenResponse)
+      mockBusinessRegFetch(Future.failed(new ForbiddenException("")))
 
-      await(service.fetchAndStoreCurrentProfile) shouldBe DownstreamOutcome.Failure
+      when(mockCompanyRegistrationConnector.getCompanyRegistrationDetails(Matchers.anyString())(Matchers.any()))
+        .thenReturn(Future.successful(validCompanyProfile))
+
+      intercept[ForbiddenException](await(service.fetchAndStoreCurrentProfile))
     }
 
     "Return an unsuccessful outcome when Business Registration returns an error response" in new Setup {
-      mockBusinessRegFetch(BusinessRegistrationErrorResponse(new RuntimeException))
+      mockBusinessRegFetch(Future.failed(new RuntimeException("")))
 
-      await(service.fetchAndStoreCurrentProfile) shouldBe DownstreamOutcome.Failure
-    }
+      when(mockCompanyRegistrationConnector.getCompanyRegistrationDetails(Matchers.anyString())(Matchers.any()))
+        .thenReturn(Future.successful(validCompanyProfile))
 
-    "Return an unsuccessful outcome when Keystore returns an error response" in new Setup {
-      val validResponse = BusinessRegistrationSuccessResponse(validBusinessRegistrationResponse)
-      mockBusinessRegFetch(validResponse)
-      mockKeystoreCacheError[CurrentProfile](CacheKeys.CurrentProfile.toString, new RuntimeException)
-
-      await(service.fetchAndStoreCurrentProfile) shouldBe DownstreamOutcome.Failure
+      intercept[RuntimeException](await(service.fetchAndStoreCurrentProfile))
     }
   }
 

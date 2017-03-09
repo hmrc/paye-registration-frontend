@@ -27,40 +27,35 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class S4LService @Inject()(s4LConn: S4LConnector, keystoreConn: KeystoreConnector) extends S4LSrv {
+class S4LService @Inject()(s4LConn: S4LConnector) extends S4LSrv {
   override val s4LConnector = s4LConn
-  override val keystoreConnector = keystoreConn
 }
 
-trait S4LSrv extends CommonService {
+trait S4LSrv {
 
   val s4LConnector: S4LConnect
 
-  def saveForm[T](formId: String, data: T)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {
+  def saveForm[T](formId: String, data: T, regId: String)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {
     for {
-      regId    <- fetchRegistrationID
       cacheMap <- s4LConnector.saveForm[T](regId, formId, data)
     } yield cacheMap
   }
 
-  def fetchAndGet[T](formId: String)(implicit hc: HeaderCarrier, format: Format[T]): Future[Option[T]] = {
+  def fetchAndGet[T](formId: String, regId: String)(implicit hc: HeaderCarrier, format: Format[T]): Future[Option[T]] = {
     for {
-      regId <- fetchRegistrationID
       data  <- s4LConnector.fetchAndGet[T](regId, formId)
     } yield data
   }
 
 
-  def clear()(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def clear(regId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     for {
-      regId <- fetchRegistrationID
       resp <- s4LConnector.clear(regId)
     } yield resp
   }
 
-  def fetchAll()(implicit hc: HeaderCarrier): Future[Option[CacheMap]] = {
+  def fetchAll(regId: String)(implicit hc: HeaderCarrier): Future[Option[CacheMap]] = {
     for {
-      regId <- fetchRegistrationID
       cacheMap <- s4LConnector.fetchAll(regId)
     } yield cacheMap
   }

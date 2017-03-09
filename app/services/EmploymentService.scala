@@ -34,13 +34,12 @@ case object S4LSaved extends SavedResponse
 case object MongoSaved extends SavedResponse
 
 @Singleton
-class EmploymentService @Inject()(keystoreConn: KeystoreConnector, payeRegistrationConn: PAYERegistrationConnector, s4LServ: S4LService) extends EmploymentSrv {
-  override val keystoreConnector = keystoreConn
+class EmploymentService @Inject()(payeRegistrationConn: PAYERegistrationConnector, s4LServ: S4LService) extends EmploymentSrv {
   override val payeRegConnector = payeRegistrationConn
   override val s4LService = s4LServ
 }
 
-trait EmploymentSrv extends CommonService with DateUtil {
+trait EmploymentSrv extends DateUtil {
 
   val payeRegConnector: PAYERegistrationConnect
   val s4LService: S4LSrv
@@ -62,58 +61,56 @@ trait EmploymentSrv extends CommonService with DateUtil {
       EmploymentView(Some(EmployingStaff(false)), None, Some(Subcontractors(hasContractors)), Some(FirstPaymentView(apiData.firstPayDate)))
   }
 
-  def fetchEmploymentView()(implicit hc: HeaderCarrier): Future[EmploymentView] =
-    s4LService.fetchAndGet(CacheKeys.Employment.toString) flatMap {
+  def fetchEmploymentView(regId: String)(implicit hc: HeaderCarrier): Future[EmploymentView] =
+    s4LService.fetchAndGet(CacheKeys.Employment.toString, regId) flatMap {
       case Some(employment) => Future.successful(employment)
       case None => for {
-        regID <- fetchRegistrationID
-        regResponse <- payeRegConnector.getEmployment(regID)
+        regResponse <- payeRegConnector.getEmployment(regId)
       } yield regResponse match {
         case Some(employment) => apiToView(employment)
         case None => EmploymentView(None, None, None, None)
       }
     }
 
-  def saveEmploymentView(viewData: EmploymentView)(implicit hc: HeaderCarrier): Future[SavedResponse] =
+  def saveEmploymentView(viewData: EmploymentView, regId: String)(implicit hc: HeaderCarrier): Future[SavedResponse] =
     viewToAPI(viewData) match {
-      case Left(view) => s4LService.saveForm[EmploymentView](CacheKeys.Employment.toString, view) map(_ => S4LSaved)
+      case Left(view) => s4LService.saveForm[EmploymentView](CacheKeys.Employment.toString, view, regId) map(_ => S4LSaved)
       case Right(api) => for {
-        regID <- fetchRegistrationID
-        regResponse <- payeRegConnector.upsertEmployment(regID, api)
+        regResponse <- payeRegConnector.upsertEmployment(regId, api)
       } yield MongoSaved
     }
 
-  def saveEmployment(viewData: EmploymentView)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] =
-    saveEmploymentView(viewData) flatMap {
-      case MongoSaved => s4LService.clear() map (_ => DownstreamOutcome.Success)
+  def saveEmployment(viewData: EmploymentView, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] =
+    saveEmploymentView(viewData, regId) flatMap {
+      case MongoSaved => s4LService.clear(regId) map (_ => DownstreamOutcome.Success)
       case _ => Future.successful(DownstreamOutcome.Success)
     }
 
-  def saveEmployingStaff(viewData: EmployingStaff)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] =
-    fetchEmploymentView() flatMap {
+  def saveEmployingStaff(viewData: EmployingStaff, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] =
+    fetchEmploymentView(regId) flatMap {
       case employment => {
-        saveEmployment(EmploymentView(Some(viewData), employment.companyPension, employment.subcontractors, employment.firstPayment))
+        saveEmployment(EmploymentView(Some(viewData), employment.companyPension, employment.subcontractors, employment.firstPayment), regId)
       }
     }
 
-  def saveCompanyPension(viewData: CompanyPension)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] =
-    fetchEmploymentView() flatMap {
+  def saveCompanyPension(viewData: CompanyPension, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] =
+    fetchEmploymentView(regId) flatMap {
       case employment => {
-        saveEmployment(EmploymentView(employment.employing, Some(viewData), employment.subcontractors, employment.firstPayment))
+        saveEmployment(EmploymentView(employment.employing, Some(viewData), employment.subcontractors, employment.firstPayment), regId)
       }
     }
 
-  def saveSubcontractors(viewData: Subcontractors)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] =
-    fetchEmploymentView() flatMap {
+  def saveSubcontractors(viewData: Subcontractors, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] =
+    fetchEmploymentView(regId) flatMap {
       case employment => {
-        saveEmployment(EmploymentView(employment.employing, employment.companyPension, Some(viewData), employment.firstPayment))
+        saveEmployment(EmploymentView(employment.employing, employment.companyPension, Some(viewData), employment.firstPayment), regId)
       }
     }
 
-  def saveFirstPayment(viewData: FirstPaymentView)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] =
-    fetchEmploymentView() flatMap {
+  def saveFirstPayment(viewData: FirstPaymentView, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] =
+    fetchEmploymentView(regId) flatMap {
       case employment => {
-        saveEmployment(EmploymentView(employment.employing, employment.companyPension, employment.subcontractors, Some(viewData)))
+        saveEmployment(EmploymentView(employment.employing, employment.companyPension, employment.subcontractors, Some(viewData)), regId)
       }
     }
 }

@@ -17,7 +17,7 @@
 package connectors.test
 
 import fixtures.BusinessRegistrationFixture
-import models.external.CurrentProfile
+import models.external.BusinessProfile
 import play.api.libs.json.JsValue
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -35,7 +35,7 @@ class TestBusinessRegConnectorSpec extends PAYERegSpec with BusinessRegistration
 
   "createMetadataEntry" should {
     "make a http POST request to business registration micro-service to create a CurrentProfile entry" in new Setup {
-      mockHttpPOST[JsValue, CurrentProfile](connector.businessRegUrl, validBusinessRegistrationResponse)
+      mockHttpPOST[JsValue, BusinessProfile](connector.businessRegUrl, validBusinessRegistrationResponse)
 
       await(connector.createCurrentProfileEntry) shouldBe validBusinessRegistrationResponse
     }

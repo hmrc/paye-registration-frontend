@@ -44,6 +44,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val companyDetailsService = mockCompanyDetailsService
       override val payeContactService = mockPAYEContactService
       override val addressLookupService = mockAddressLookupService
+      override val keystoreConnector = mockKeystoreConnector
       override val messagesApi = fakeApplication.injector.instanceOf[MessagesApi]
       override val authConnector = mockAuthConnector
     }
@@ -57,9 +58,11 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
 
     "return an OK with data from registration" in new Setup {
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
+      mockFetchCurrentProfile()
 
-      when(mockPAYEContactService.getPAYEContact(Matchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
+
+      when(mockPAYEContactService.getPAYEContact(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(validPAYEContactView)
 
       AuthBuilder.showWithAuthorisedUser(testController.payeContactDetails, mockAuthConnector) {
@@ -69,9 +72,10 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
 
     "return an OK without data" in new Setup {
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
+      mockFetchCurrentProfile()
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
 
-      when(mockPAYEContactService.getPAYEContact(Matchers.any()))
+      when(mockPAYEContactService.getPAYEContact(Matchers.anyString())(Matchers.any()))
         .thenReturn(emptyPAYEContactView)
 
       AuthBuilder.showWithAuthorisedUser(testController.payeContactDetails, mockAuthConnector) {
@@ -89,11 +93,12 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
 
     "return a BAD_REQUEST if there is problem with the submitted form, no name" in new Setup {
+      mockFetchCurrentProfile()
       val request = FakeRequest().withFormUrlEncodedBody(
         "name" -> ""
       )
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any()))
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYEContactDetails, mockAuthConnector, request) {
@@ -103,11 +108,12 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
 
     "return a BAD_REQUEST if there is problem with the submitted form, no contact details" in new Setup {
+      mockFetchCurrentProfile()
       val request = FakeRequest().withFormUrlEncodedBody(
         "name" -> "teeeeeeest"
       )
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any()))
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYEContactDetails, mockAuthConnector, request) {
@@ -117,12 +123,13 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
 
     "show an error page when there is an error response from the microservice" in new Setup {
+      mockFetchCurrentProfile()
       val request = FakeRequest().withFormUrlEncodedBody(
         "name" -> "tata",
         "digitalContact.contactEmail" -> "tata@test.com"
       )
 
-      when(mockPAYEContactService.submitPayeContactDetails(Matchers.any())(Matchers.any()))
+      when(mockPAYEContactService.submitPayeContactDetails(Matchers.any(), Matchers.anyString())(Matchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYEContactDetails, mockAuthConnector, request) {
@@ -132,12 +139,13 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
 
     "return a SEE_OTHER and redirect to the Employing Staff page" in new Setup {
+      mockFetchCurrentProfile()
       val request = FakeRequest().withFormUrlEncodedBody(
         "name" -> "tata",
         "digitalContact.contactEmail" -> "tata@test.com"
       )
 
-      when(mockPAYEContactService.submitPayeContactDetails(Matchers.any())(Matchers.any()))
+      when(mockPAYEContactService.submitPayeContactDetails(Matchers.any(), Matchers.anyString())(Matchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYEContactDetails, mockAuthConnector, request) {
@@ -154,11 +162,12 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "ro" -> validCompanyDetailsViewModel.roAddress,
         "correspondence" -> validCompanyDetailsViewModel.ppobAddress.get
       )
+      mockFetchCurrentProfile()
 
-      when(mockPAYEContactService.getPAYEContact(Matchers.any[HeaderCarrier]()))
+      when(mockPAYEContactService.getPAYEContact(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validPAYEContactView))
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
       when(mockPAYEContactService.getCorrespondenceAddresses(Matchers.any(), Matchers.any()))
@@ -180,11 +189,12 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "ro" -> validCompanyDetailsViewModel.roAddress,
         "correspondence" -> validCompanyDetailsViewModel.ppobAddress.get
       )
+      mockFetchCurrentProfile()
 
-      when(mockPAYEContactService.getPAYEContact(Matchers.any[HeaderCarrier]()))
+      when(mockPAYEContactService.getPAYEContact(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validPAYEContactView))
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
       when(mockPAYEContactService.getCorrespondenceAddresses(Matchers.any(), Matchers.any()))
@@ -200,6 +210,8 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "chosenAddress" -> "correspondenceAddress"
       )
 
+      mockFetchCurrentProfile()
+
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/register-for-paye/employing-staff")
@@ -211,10 +223,12 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "chosenAddress" -> "roAddress"
       )
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any[HeaderCarrier]()))
+      mockFetchCurrentProfile()
+
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
-      when(mockPAYEContactService.submitCorrespondence(Matchers.any[Address]())(Matchers.any[HeaderCarrier]()))
+      when(mockPAYEContactService.submitCorrespondence(Matchers.any[Address](), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
@@ -227,11 +241,12 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       val request = FakeRequest().withFormUrlEncodedBody(
         "chosenAddress" -> "roAddress"
       )
+      mockFetchCurrentProfile()
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
-      when(mockPAYEContactService.submitCorrespondence(Matchers.any[Address]())(Matchers.any[HeaderCarrier]()))
+      when(mockPAYEContactService.submitCorrespondence(Matchers.any[Address](), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
@@ -243,6 +258,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       val request = FakeRequest("GET", "/testuri?id=123456789").withFormUrlEncodedBody(
         "chosenAddress" -> "other"
       )
+      mockFetchCurrentProfile()
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
         status(result) shouldBe SEE_OTHER
       }
@@ -263,11 +279,12 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
           Some("testPostcode"),
           Some("testCode")
         ))
+      mockFetchCurrentProfile()
 
       when(mockAddressLookupService.getAddress(Matchers.any[HeaderCarrier](), Matchers.any[Request[_]]()))
         .thenReturn(Future.successful(expected))
 
-      when(mockPAYEContactService.submitCorrespondence(Matchers.any())(Matchers.any()))
+      when(mockPAYEContactService.submitCorrespondence(Matchers.any(), Matchers.anyString())(Matchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.showWithAuthorisedUser(testController.savePAYECorrespondenceAddress, mockAuthConnector) { result =>
@@ -289,7 +306,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockAddressLookupService.getAddress(Matchers.any[HeaderCarrier](), Matchers.any[Request[_]]()))
         .thenReturn(Future.successful(expected))
 
-      when(mockPAYEContactService.submitCorrespondence(Matchers.any())(Matchers.any()))
+      when(mockPAYEContactService.submitCorrespondence(Matchers.any(), Matchers.anyString())(Matchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthBuilder.showWithAuthorisedUser(testController.savePAYECorrespondenceAddress, mockAuthConnector) { result =>

@@ -19,6 +19,7 @@ package connectors
 import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
+import models.external.CompanyProfile
 import play.api.Logger
 import play.api.libs.json._
 import services.{MetricsService, MetricsSrv}
@@ -44,19 +45,18 @@ trait CompanyRegistrationConnect {
   val http : WSHttp
   val metricsService: MetricsSrv
 
-  def getTransactionId(regId: String)(implicit hc : HeaderCarrier) : Future[String] = {
-    val compRegTimer = metricsService.companyRegistrationResponseTimer.time()
-    http.GET[JsObject](s"$companyRegistrationUrl$companyRegistrationUri/corporation-tax-registration/$regId/confirmation-references") map {
-      compRegTimer.stop()
-      _.\("transaction-id").get.as[String]
+  def getCompanyRegistrationDetails(regId: String)(implicit hc : HeaderCarrier) : Future[CompanyProfile] = {
+    http.GET[JsObject](s"$companyRegistrationUrl$companyRegistrationUri/$regId") map {
+      response =>
+        val status = (response \ "status").as[String]
+        val txId = (response \ "confirmationReferences" \ "transaction-id").as[String]
+        CompanyProfile(status, txId)
     } recover {
       case badRequestErr: BadRequestException =>
-        Logger.error("[CompanyRegistrationConnect] [getTransactionId] - Received a BadRequest status code when expecting a transaction Id")
-        compRegTimer.stop()
+        Logger.error("[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received a BadRequest status code when expecting a Company Registration document")
         throw badRequestErr
       case ex: Exception =>
-        Logger.error(s"[CompanyRegistrationConnect] [getTransactionId] - Received an error response when expecting a transaction Id - error: ${ex.getMessage}")
-        compRegTimer.stop()
+        Logger.error(s"[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received an error response when expecting a Company Registration document - error: ${ex.getMessage}")
         throw ex
     }
   }

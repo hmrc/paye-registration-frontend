@@ -26,6 +26,7 @@ import models.test.CoHoCompanyDetailsFormModel
 import play.api.Logger
 import play.api.i18n.MessagesApi
 import services.{CoHoAPIService, CoHoAPISrv, PAYERegistrationService, PAYERegistrationSrv, S4LService, S4LSrv}
+import utils.SessionProfile
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -72,12 +73,13 @@ trait TestSetupCtrl extends CurrentProfileCtrl with TestCoHoCtrl with TestRegSet
   def testSetup(companyName: String) = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        for {
-          _ <- log("CurrentProfileSetup", doCurrentProfileSetup)
-          _ <- log("CoHoCompanyDetailsTeardown", doCoHoCompanyDetailsTearDown)
-          _ <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(CoHoCompanyDetailsFormModel(companyName, List.empty, List.empty)))
-          _ <- log("RegTeardown", doRegTeardown)
-          _ <- log("S4LTeardown", doTearDownS4L)
-        } yield Redirect(controllers.userJourney.routes.SignInOutController.postSignIn())
+          for {
+            profile <- log("CurrentProfileSetup", doCurrentProfileSetup)
+            _ <- log("CoHoCompanyDetailsTeardown", doCoHoCompanyDetailsTearDown)
+            _ <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(CoHoCompanyDetailsFormModel(companyName, List.empty, List.empty), profile.registrationID))
+            _ <- log("RegTeardown", doRegTeardown)
+            _ <- log("S4LTeardown", doTearDownS4L(profile.registrationID))
+          } yield Redirect(controllers.userJourney.routes.SignInOutController.postSignIn())
+
   }
 }

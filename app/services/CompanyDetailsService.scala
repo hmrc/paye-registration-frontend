@@ -29,14 +29,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class CompanyDetailsService @Inject()(injKeystoreConnector: KeystoreConnector,
-                                      injPAYERegistrationConnector: PAYERegistrationConnector,
+class CompanyDetailsService @Inject()(injPAYERegistrationConnector: PAYERegistrationConnector,
                                       injCoHoAPIService: CoHoAPIService,
                                       injS4LService: S4LService,
                                       injCompRegConnector : CompanyRegistrationConnector,
                                       injCohoAPIConnector: CoHoAPIConnector) extends CompanyDetailsSrv {
 
-  override val keystoreConnector = injKeystoreConnector
   override val payeRegConnector = injPAYERegistrationConnector
   override val compRegConnector = injCompRegConnector
   override val cohoAPIConnector = injCohoAPIConnector
@@ -44,7 +42,7 @@ class CompanyDetailsService @Inject()(injKeystoreConnector: KeystoreConnector,
   override val s4LService = injS4LService
 }
 
-trait CompanyDetailsSrv extends CommonService {
+trait CompanyDetailsSrv {
 
   val payeRegConnector: PAYERegistrationConnect
   val compRegConnector: CompanyRegistrationConnect
@@ -52,57 +50,53 @@ trait CompanyDetailsSrv extends CommonService {
   val cohoService: CoHoAPISrv
   val s4LService: S4LSrv
 
-  def getCompanyDetails(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
-    s4LService.fetchAndGet[CompanyDetailsView](CacheKeys.CompanyDetails.toString) flatMap {
+  def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+    s4LService.fetchAndGet[CompanyDetailsView](CacheKeys.CompanyDetails.toString, regId) flatMap {
       case Some(companyDetails) => Future.successful(companyDetails)
       case None => for {
-        regID    <- fetchRegistrationID
-        oDetails <- payeRegConnector.getCompanyDetails(regID)
-        details  <- convertOrCreateCompanyDetailsView(oDetails)
-        viewDetails <- saveToS4L(details)
+        oDetails <- payeRegConnector.getCompanyDetails(regId)
+        details  <- convertOrCreateCompanyDetailsView(oDetails, txId)
+        viewDetails <- saveToS4L(details, regId)
       } yield viewDetails
     }
   }
 
-  private[services] def convertOrCreateCompanyDetailsView(oAPI: Option[CompanyDetailsAPI])(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+  private[services] def convertOrCreateCompanyDetailsView(oAPI: Option[CompanyDetailsAPI], txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
     oAPI match {
       case Some(detailsAPI) => Future.successful(apiToView(detailsAPI))
       case None => for {
         cName   <- cohoService.getStoredCompanyName
-        roAddress <- retrieveRegisteredOfficeAddress
+        roAddress <- retrieveRegisteredOfficeAddress(txId)
       } yield CompanyDetailsView(None, cName, None, roAddress, None, None)
     }
   }
 
-  private def saveToS4L(viewData: CompanyDetailsView)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
-    s4LService.saveForm[CompanyDetailsView](CacheKeys.CompanyDetails.toString, viewData).map(_ => viewData)
+  private def saveToS4L(viewData: CompanyDetailsView, regId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+    s4LService.saveForm[CompanyDetailsView](CacheKeys.CompanyDetails.toString, viewData, regId).map(_ => viewData)
   }
 
-  private[services] def saveCompanyDetails(viewModel: CompanyDetailsView)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  private[services] def saveCompanyDetails(viewModel: CompanyDetailsView, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     viewToAPI(viewModel) fold(
       incompleteView =>
-        saveToS4L(incompleteView) map {_ => DownstreamOutcome.Success},
+        saveToS4L(incompleteView, regId) map {_ => DownstreamOutcome.Success},
       completeAPI =>
         for {
-          regID     <- fetchRegistrationID
-          details   <- payeRegConnector.upsertCompanyDetails(regID, completeAPI)
-          clearData <- s4LService.clear
+          details   <- payeRegConnector.upsertCompanyDetails(regId, completeAPI)
+          clearData <- s4LService.clear(regId)
         } yield DownstreamOutcome.Success
       )
   }
 
-  def submitTradingName(tradingNameView: TradingNameView)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def submitTradingName(tradingNameView: TradingNameView, regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
-      details <- getCompanyDetails
-      outcome <- saveCompanyDetails(details.copy(tradingName = Some(tradingNameView)))
+      details <- getCompanyDetails(regId, txId)
+      outcome <- saveCompanyDetails(details.copy(tradingName = Some(tradingNameView)), regId)
     } yield outcome
   }
 
-  private[services] def retrieveRegisteredOfficeAddress(implicit hc : HeaderCarrier): Future[Address] = {
+  private[services] def retrieveRegisteredOfficeAddress(txId: String)(implicit hc : HeaderCarrier): Future[Address] = {
     for {
-      regId <- fetchRegistrationID
-      tID <- compRegConnector.getTransactionId(regId)
-      address <- cohoAPIConnector.getRegisteredOfficeAddress(tID)
+      address <- cohoAPIConnector.getRegisteredOfficeAddress(txId)
     } yield {
       address
     }
@@ -115,24 +109,24 @@ trait CompanyDetailsSrv extends CommonService {
       }.getOrElse(Map("ro" -> companyDetailsView.roAddress))
   }
 
-  def copyROAddrToPPOBAddr()(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def copyROAddrToPPOBAddr(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
-      details <- getCompanyDetails
-      outcome <- saveCompanyDetails(details.copy(ppobAddress = Some(details.roAddress)))
+      details <- getCompanyDetails(regId, txId)
+      outcome <- saveCompanyDetails(details.copy(ppobAddress = Some(details.roAddress)), regId)
     } yield outcome
   }
 
-  def submitPPOBAddr(ppobAddr: Address)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def submitPPOBAddr(ppobAddr: Address, regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
-      details <- getCompanyDetails
-      outcome <- saveCompanyDetails(details.copy(ppobAddress = Some(ppobAddr)))
+      details <- getCompanyDetails(regId, txId)
+      outcome <- saveCompanyDetails(details.copy(ppobAddress = Some(ppobAddr)), regId)
     } yield outcome
   }
 
-  def submitBusinessContact(businessContact: DigitalContactDetails)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def submitBusinessContact(businessContact: DigitalContactDetails, regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
-      details <- getCompanyDetails
-      outcome <- saveCompanyDetails(details.copy(businessContactDetails = Some(businessContact)))
+      details <- getCompanyDetails(regId, txId)
+      outcome <- saveCompanyDetails(details.copy(businessContactDetails = Some(businessContact)), regId)
     } yield outcome
   }
 

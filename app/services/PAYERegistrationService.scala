@@ -31,22 +31,18 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class PAYERegistrationService @Inject()(keystoreConn: KeystoreConnector, payeRegistrationConn: PAYERegistrationConnector) extends PAYERegistrationSrv {
-  override val keystoreConnector = keystoreConn
+class PAYERegistrationService @Inject()(payeRegistrationConn: PAYERegistrationConnector) extends PAYERegistrationSrv {
   override val payeRegistrationConnector = payeRegistrationConn
   override val authConnector = FrontendAuthConnector
 }
 
-trait PAYERegistrationSrv extends CommonService {
+trait PAYERegistrationSrv {
 
   val payeRegistrationConnector: PAYERegistrationConnect
   val authConnector: AuthConnector
 
-  def assertRegistrationFootprint()(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    for {
-      regID <- fetchRegistrationID
-      regResponse <- payeRegistrationConnector.createNewRegistration(regID)
-    } yield regResponse
+  def assertRegistrationFootprint(regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    payeRegistrationConnector.createNewRegistration(regId)
   }
 
   def getAccountAffinityGroup(implicit hc: HeaderCarrier, authContext: AuthContext): Future[AccountTypes.Value] = {

@@ -174,46 +174,41 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   "Calling getPAYEContact" should {
     "return the correct View response when PAYE Contact are returned from s4l" in new Setup {
-      mockFetchRegID(testRegId)
-      when(mockS4LService.fetchAndGet[PAYEContactView](Matchers.anyString())(Matchers.any(), Matchers.any()))
+      when(mockS4LService.fetchAndGet[PAYEContactView](Matchers.anyString(), Matchers.anyString())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(Some(validPAYEContactView)))
 
-      await(service.getPAYEContact) shouldBe validPAYEContactView
+      await(service.getPAYEContact(testRegId)) shouldBe validPAYEContactView
     }
     "return the correct View response when PAYE Contact are returned from the connector" in new Setup {
-      mockFetchRegID("54321")
-      when(mockS4LService.fetchAndGet[PAYEContactView](Matchers.anyString())(Matchers.any(), Matchers.any()))
+      when(mockS4LService.fetchAndGet[PAYEContactView](Matchers.anyString(), Matchers.anyString())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(None))
       when(mockPAYERegConnector.getPAYEContact(Matchers.anyString())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(Some(validPAYEContactAPI)))
 
-      await(service.getPAYEContact) shouldBe validPAYEContactView
+      await(service.getPAYEContact(testRegId)) shouldBe validPAYEContactView
     }
 
     "return None when no PAYE Contact are returned from the connector" in new Setup {
-      mockFetchRegID("54321")
-      when(mockS4LService.fetchAndGet[PAYEContactView](Matchers.anyString())(Matchers.any(), Matchers.any()))
+      when(mockS4LService.fetchAndGet[PAYEContactView](Matchers.anyString(), Matchers.anyString())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(None))
       when(mockPAYERegConnector.getPAYEContact(Matchers.anyString())(Matchers.any(), Matchers.any()))
       .thenReturn(Future.successful(None))
 
-      await(service.getPAYEContact) shouldBe emptyPAYEContactView
+      await(service.getPAYEContact(testRegId)) shouldBe emptyPAYEContactView
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
-      mockFetchRegID("54321")
       when(mockPAYERegConnector.getPAYEContact(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
       .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
 
-      an[Upstream4xxResponse] shouldBe thrownBy(await(service.getPAYEContact))
+      an[Upstream4xxResponse] shouldBe thrownBy(await(service.getPAYEContact(testRegId)))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
-      mockFetchRegID("54321")
       when(mockPAYERegConnector.getPAYEContact(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
       .thenReturn(Future.failed(new RuntimeException))
 
-      an[Exception] shouldBe thrownBy(await(service.getPAYEContact))
+      an[Exception] shouldBe thrownBy(await(service.getPAYEContact(testRegId)))
     }
 
   }
@@ -237,21 +232,21 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
     )
 
     "return a success response when the upsert completes successfully" in new Setup {
-      mockFetchRegID("54321")
       when(mockPAYERegConnector.upsertPAYEContact(Matchers.contains("54321"), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(validPAYEContactAPI))
-      when(mockS4LService.clear()(Matchers.any[HeaderCarrier]))
+      when(mockS4LService.clear(Matchers.anyString())(Matchers.any[HeaderCarrier]))
         .thenReturn(Future.successful(returnHttpResponse))
 
-      await(service.submitPAYEContact(PAYEContactView(Some(tstContactDetails), Some(tstCorrespondenceAddress)))).
+      await(service.submitPAYEContact(PAYEContactView(Some(tstContactDetails), Some(tstCorrespondenceAddress)), "54321")).
         shouldBe(DownstreamOutcome.Success)
     }
 
     "return a success response when successfully saving to S4L" in new Setup {
-      when(mockS4LService.saveForm[PAYEContactView](Matchers.contains(CacheKeys.PAYEContact.toString), Matchers.any())(Matchers.any[HeaderCarrier](), Matchers.any[Format[PAYEContactView]]()))
+      when(mockS4LService.saveForm[PAYEContactView](Matchers.contains(CacheKeys.PAYEContact.toString), Matchers.any(), Matchers.anyString())
+        (Matchers.any[HeaderCarrier](), Matchers.any[Format[PAYEContactView]]()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
-      await(service.submitPAYEContact(PAYEContactView(Some(tstContactDetails), None))).
+      await(service.submitPAYEContact(PAYEContactView(Some(tstContactDetails), None), "54321")).
         shouldBe(DownstreamOutcome.Success)
     }
   }
@@ -268,12 +263,12 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
     )
 
     "save a copy of paye contact" in new Setup {
-      when(mockS4LService.fetchAndGet[PAYEContactView](Matchers.contains(CacheKeys.PAYEContact.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[PAYEContactView]]()))
+      when(mockS4LService.fetchAndGet[PAYEContactView](Matchers.contains(CacheKeys.PAYEContact.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[PAYEContactView]]()))
         .thenReturn(Future.successful(Some(PAYEContactView(None, None))))
-      when(mockS4LService.saveForm[PAYEContactView](Matchers.contains(CacheKeys.PAYEContact.toString), Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockS4LService.saveForm[PAYEContactView](Matchers.contains(CacheKeys.PAYEContact.toString), Matchers.any(), Matchers.anyString())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
-      await(service.submitPayeContactDetails(tstContactDetails)) shouldBe DownstreamOutcome.Success
+      await(service.submitPayeContactDetails(tstContactDetails, "54321")) shouldBe DownstreamOutcome.Success
     }
   }
 
@@ -288,12 +283,12 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
     )
 
     "save a copy of paye contact" in new Setup {
-      when(mockS4LService.fetchAndGet[PAYEContactView](Matchers.contains(CacheKeys.PAYEContact.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[PAYEContactView]]()))
+      when(mockS4LService.fetchAndGet[PAYEContactView](Matchers.contains(CacheKeys.PAYEContact.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[PAYEContactView]]()))
         .thenReturn(Future.successful(Some(PAYEContactView(None, None))))
-      when(mockS4LService.saveForm[PAYEContactView](Matchers.contains(CacheKeys.PAYEContact.toString), Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockS4LService.saveForm[PAYEContactView](Matchers.contains(CacheKeys.PAYEContact.toString), Matchers.any(), Matchers.anyString())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
-      await(service.submitCorrespondence(tstCorrespondenceAddress)) shouldBe DownstreamOutcome.Success
+      await(service.submitCorrespondence(tstCorrespondenceAddress, "54321")) shouldBe DownstreamOutcome.Success
     }
   }
 }

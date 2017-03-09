@@ -29,12 +29,14 @@ class ConfirmationControllerSpec extends PAYERegSpec {
   class Setup {
     val controller = new ConfirmationCtrl {
       override val authConnector = mockAuthConnector
+      override val keystoreConnector = mockKeystoreConnector
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
     }
   }
 
   "showConfirmation" should {
     "display the confirmation page" in new Setup {
+      mockFetchCurrentProfile()
       AuthBuilder.showWithAuthorisedUser(controller.showConfirmation, mockAuthConnector) {
         (result: Future[Result]) =>
           status(result) shouldBe OK

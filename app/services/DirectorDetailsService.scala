@@ -29,17 +29,16 @@ import scala.concurrent.Future
 
 @Singleton
 class DirectorDetailsService @Inject()(
-                                        keystoreConn: KeystoreConnector,
                                         payeRegistrationConn: PAYERegistrationConnector,
                                         coHoAPIServ: CoHoAPIService,
                                         s4LServ: S4LService) extends DirectorDetailsSrv {
-  override val keystoreConnector = keystoreConn
+
   override val payeRegConnector = payeRegistrationConn
   override val coHoAPIService = coHoAPIServ
   override val s4LService = s4LServ
 }
 
-trait DirectorDetailsSrv extends CommonService {
+trait DirectorDetailsSrv {
   val payeRegConnector: PAYERegistrationConnect
   val s4LService: S4LSrv
   val coHoAPIService: CoHoAPISrv
@@ -60,40 +59,38 @@ trait DirectorDetailsSrv extends CommonService {
     case _ => Left(viewData)
   }
 
-  private[services] def convertOrRetrieveDirectors(directorList: Seq[Director])(implicit hc: HeaderCarrier): Future[Directors] = {
+  private[services] def convertOrRetrieveDirectors(directorList: Seq[Director], transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
     directorList match {
       case Nil => for {
-        directors <- coHoAPIService.getDirectorDetails()
+        directors <- coHoAPIService.getDirectorDetails(transactionId)
       } yield directors
       case dirList => Future.successful(apiToView(dirList))
     }
   }
 
-  private def saveToS4L(viewData: Directors)(implicit hc: HeaderCarrier): Future[Directors] = {
-    s4LService.saveForm[Directors](CacheKeys.DirectorDetails.toString, viewData).map(_ => viewData)
+  private def saveToS4L(viewData: Directors, regId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
+    s4LService.saveForm[Directors](CacheKeys.DirectorDetails.toString, viewData, regId).map(_ => viewData)
   }
 
-  def getDirectorDetails()(implicit hc: HeaderCarrier): Future[Directors] = {
-    s4LService.fetchAndGet(CacheKeys.DirectorDetails.toString) flatMap {
+  def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
+    s4LService.fetchAndGet(CacheKeys.DirectorDetails.toString, regId) flatMap {
       case Some(directors) => Future.successful(directors)
       case None => for {
-        regID <- fetchRegistrationID
-        regResponse <- payeRegConnector.getDirectors(regID)
-        directors <- convertOrRetrieveDirectors(regResponse)
-        data <- saveToS4L(directors)
+        regResponse <- payeRegConnector.getDirectors(regId)
+        directors <- convertOrRetrieveDirectors(regResponse, transactionId)
+        data <- saveToS4L(directors, regId)
       } yield data
     }
   }
 
-  private[services] def saveDirectorDetails(viewModel: Directors)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  private[services] def saveDirectorDetails(viewModel: Directors, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     viewToAPI(viewModel) fold(
       incompleteView =>
-        saveToS4L(incompleteView) map {_ => DownstreamOutcome.Success},
+        saveToS4L(incompleteView, regId) map {_ => DownstreamOutcome.Success},
       completeAPI =>
         for {
-          regID     <- fetchRegistrationID
-          details   <- payeRegConnector.upsertDirectors(regID, completeAPI)
-          clearData <- s4LService.clear
+          details   <- payeRegConnector.upsertDirectors(regId, completeAPI)
+          clearData <- s4LService.clear(regId)
         } yield DownstreamOutcome.Success
     )
   }
@@ -113,10 +110,10 @@ trait DirectorDetailsSrv extends CommonService {
     }.toList)
   }
 
-  def submitNinos(ninos: Ninos)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def submitNinos(ninos: Ninos, regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
-      details <- getDirectorDetails
-      outcome <- saveDirectorDetails(details.copy(directorMapping = ninosToDirectorsMap(details, ninos)))
+      details <- getDirectorDetails(regId, transactionId)
+      outcome <- saveDirectorDetails(details.copy(directorMapping = ninosToDirectorsMap(details, ninos)), regId)
     } yield outcome
   }
 }

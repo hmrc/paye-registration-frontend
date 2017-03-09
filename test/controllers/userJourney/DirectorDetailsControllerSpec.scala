@@ -42,6 +42,7 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
       override val directorDetailsService = mockDirectorDetailService
       override val messagesApi = fakeApplication.injector.instanceOf[MessagesApi]
       override val authConnector = mockAuthConnector
+      override val keystoreConnector = mockKeystoreConnector
     }
   }
 
@@ -75,7 +76,8 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
     }
 
     "return an OK" in new Setup {
-      when(mockDirectorDetailService.getDirectorDetails()(Matchers.any[HeaderCarrier]()))
+      mockFetchCurrentProfile()
+      when(mockDirectorDetailService.getDirectorDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(testDirectors))
 
       when(mockDirectorDetailService.createDirectorNinos(Matchers.any()))
@@ -102,8 +104,8 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
       val request = FakeRequest().withFormUrlEncodedBody(
         "nino[0]" -> ""
       )
-
-      when(mockDirectorDetailService.getDirectorDetails()(Matchers.any[HeaderCarrier]()))
+      mockFetchCurrentProfile()
+      when(mockDirectorDetailService.getDirectorDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(testDirectors))
 
       when(mockDirectorDetailService.createDisplayNamesMap(Matchers.any()))
@@ -117,8 +119,8 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
 
     "return a SEE_OTHER and redirect to the PAYE Contact page" in new Setup {
       val request = FakeRequest().withFormUrlEncodedBody()
-
-      when(mockDirectorDetailService.submitNinos(Matchers.any())(Matchers.any[HeaderCarrier]()))
+      mockFetchCurrentProfile()
+      when(mockDirectorDetailService.submitNinos(Matchers.any(), Matchers.anyString(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitDirectorDetails, mockAuthConnector, request) {
