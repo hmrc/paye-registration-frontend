@@ -1,10 +1,20 @@
-@(phaseId: String)(implicit messages: Messages)
+@(enabled: Boolean)(implicit messages: Messages)
 
+@backButton = {
+    @if(enabled) {
+        <div style="width:40%; display: inline-block" align="left" class="form-group-compound">
+            <a id="back" class="back-link" href="javascript:history.back()">@Messages("app.common.back")</a>
+        </div>
+    }
+}
 <div class="service-info">
-    <div class="phase-banner">
+    <div class="beta-banner">
         <p>
-            <strong id="phase" class="phase-tag">@phaseId</strong>
-            <span>@Html(Messages("app.phaseBannerFeedback", controllers.feedback.routes.FeedbackController.show))</span>
+            <strong class="phase-tag">BETA</strong>
+            <span>@Messages("app.common.feedbackFirst")<a href="@controllers.feedback.routes.FeedbackController.show"> @Messages("app.common.feedbackSecond")</a></span>
         </p>
     </div>
 </div>
+
+@backButton
+

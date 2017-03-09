@@ -14,6 +14,9 @@ app.common.month                                        = Month
 app.common.day                                          = Day
 app.common.date.invalid                                 = You have not entered a valid date
 app.common.companies-house                              = Companies House
+app.common.feedbackFirst=This is a new service. Help us improve it - send your
+app.common.feedbackSecond=feedback.
+app.common.feedbackLinkText=feedback
 
 ## User error messages
 errors.invalid.email                                    = The email address you have provided is invalid

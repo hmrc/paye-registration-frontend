@@ -7,7 +7,8 @@
   contentHeader: Option[Html] = None,
   mainContent: Html = HtmlFormat.empty,
   serviceInfoContent: Html = HtmlFormat.empty,
-  pageScripts: Option[Html] = None)(implicit request: Request[_], messages: Messages)
+  pageScripts: Option[Html] = None,
+  backEnabled : Boolean)(implicit request: Request[_], messages: Messages)
 
 @import layouts.{govuk_template => hmrcGovUkTemplate}
 @import uk.gov.hmrc.play.views.html.{helpers => uiHelpers, layouts => uiLayouts}
@@ -70,7 +71,7 @@
       article = mainContent,
       mainClass = mainClass,
       mainDataAttributes = mainDataAttributes,
-      mainContentHeader = phaseBanner("ALPHA"),
+      mainContentHeader = phaseBanner(backEnabled),
       serviceInfo = serviceInfo,
       getHelpForm = getHelpForm,
       sidebar = sidebar)
