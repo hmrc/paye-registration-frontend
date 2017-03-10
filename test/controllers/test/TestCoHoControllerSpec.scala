@@ -50,7 +50,6 @@ class TestCoHoControllerSpec extends PAYERegSpec {
   "coHoCompanyDetailsSetup" should {
     "return an OK" when {
       "the company details page has been rendered" in new Setup {
-        mockFetchCurrentProfile()
         AuthBuilder.showWithAuthorisedUser(controller.coHoCompanyDetailsSetup, mockAuthConnector) { result =>
           status(result) shouldBe OK
         }
@@ -100,7 +99,6 @@ class TestCoHoControllerSpec extends PAYERegSpec {
   "coHoCompanyDetailsTearDown" should {
     "return an OK" when {
       "the company details have been torn down" in new Setup {
-        mockFetchCurrentProfile()
         when(mockTestAPIConnector.tearDownCoHoCompanyDetails()(Matchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testHttpResponse))
 
