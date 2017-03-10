@@ -27,30 +27,25 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class CompletionCapacityService @Inject()(injKeystoreConnector: KeystoreConnector,
-                                          injPAYERegistrationConnector: PAYERegistrationConnector
-                                           ) extends CompletionCapacitySrv {
+class CompletionCapacityService @Inject()(injPAYERegistrationConnector: PAYERegistrationConnector) extends CompletionCapacitySrv {
 
-  override val keystoreConnector = injKeystoreConnector
   override val payeRegConnector = injPAYERegistrationConnector
 }
 
-trait CompletionCapacitySrv extends CommonService {
+trait CompletionCapacitySrv {
 
   val payeRegConnector: PAYERegistrationConnect
 
-  def saveCompletionCapacity(completionCapacity: CompletionCapacity)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    for {
-      regId   <- fetchRegistrationID
-      outcome <- payeRegConnector.upsertCompletionCapacity(regId, viewToAPI(completionCapacity))
-    } yield DownstreamOutcome.Success
+  def saveCompletionCapacity(completionCapacity: CompletionCapacity, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    payeRegConnector.upsertCompletionCapacity(regId, viewToAPI(completionCapacity)) map {
+      _ => DownstreamOutcome.Success
+    }
   }
 
-  def getCompletionCapacity()(implicit hc: HeaderCarrier): Future[Option[CompletionCapacity]] = {
-    for {
-      regId <- fetchRegistrationID
-      resp  <- payeRegConnector.getCompletionCapacity(regId)
-    } yield resp.map(apiToView)
+  def getCompletionCapacity(regId: String)(implicit hc: HeaderCarrier): Future[Option[CompletionCapacity]] = {
+    for{
+      capacity <- payeRegConnector.getCompletionCapacity(regId)
+    } yield capacity.map (apiToView)
   }
 
   private[services] def viewToAPI(completionCapacity: CompletionCapacity): String = {

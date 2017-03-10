@@ -20,35 +20,46 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
+import connectors.{KeystoreConnect, KeystoreConnector}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.{SummaryService, SummarySrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import utils.SessionProfile
 import views.html.pages.{summary => SummaryPage}
+
+import scala.concurrent.Future
 
 @Singleton
 class SummaryController @Inject()(
                                    injSummaryService: SummaryService,
+                                   injKeystoreConnector: KeystoreConnector,
                                    injMessagesApi: MessagesApi)
   extends SummaryCtrl {
   val authConnector = FrontendAuthConnector
   val summaryService = injSummaryService
+  val keystoreConnector = injKeystoreConnector
   val messagesApi = injMessagesApi
 }
 
-trait SummaryCtrl extends FrontendController with Actions with I18nSupport {
+trait SummaryCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
 
   val summaryService: SummarySrv
+  val keystoreConnector: KeystoreConnect
 
   val summary = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    summaryService.getRegistrationSummary map {
-      summaryModel => Ok(SummaryPage(summaryModel))
-    } recover {
-      case _ => InternalServerError(views.html.pages.error.restart())
+    withCurrentProfile { profile =>
+      summaryService.getRegistrationSummary(profile.registrationID) map {
+        summaryModel => Ok(SummaryPage(summaryModel))
+      } recover {
+        case _ => InternalServerError(views.html.pages.error.restart())
+      }
     }
   }
 
-  val submitRegistration = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) { implicit user => implicit request =>
-     Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation())
+  val submitRegistration = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+    withCurrentProfile { profile =>
+      Future.successful(Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation()))
+    }
   }
 }

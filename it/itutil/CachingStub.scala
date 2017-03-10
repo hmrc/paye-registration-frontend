@@ -23,6 +23,10 @@ trait CachingStub {
                | "CurrentProfile": {
                |   "registrationID": "${regId}",
                |   "completionCapacity": "Director",
+               |   "companyTaxRegistration": {
+               |      "status": "submitted",
+               |      "transactionId": "12345"
+               |   },
                |   "language": "ENG"
                |  },
                |  "CoHoCompanyDetails": {

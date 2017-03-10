@@ -14,28 +14,26 @@
  * limitations under the License.
  */
 
-package services
+package utils
 
-import common.exceptions.DownstreamExceptions._
 import connectors.KeystoreConnect
 import enums.CacheKeys
 import models.external.CurrentProfile
-import play.api.Logger
+import play.api.mvc.Result
+import play.api.mvc.Results.Redirect
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
-trait CommonService {
+trait SessionProfile {
 
   val keystoreConnector: KeystoreConnect
 
-  def fetchRegistrationID(implicit hc: HeaderCarrier): Future[String] = {
-    keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString).map {
-      case Some(profile) => profile.registrationID
-      case None =>
-        Logger.error(s"[CommonService] [fetchRegistrationID] - Could not find a Current Profile in keystore")
-        throw new CurrentProfileNotFoundException
+  def withCurrentProfile(f: => CurrentProfile => Future[Result])(implicit hc: HeaderCarrier): Future[Result] = {
+    keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString) flatMap {
+      case Some(currentProfile) => f(currentProfile)
+      case None => Future.successful(Redirect(controllers.userJourney.routes.SignInOutController.postSignIn()))
     }
   }
 

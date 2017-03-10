@@ -20,59 +20,71 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
+import connectors.{KeystoreConnect, KeystoreConnector}
 import enums.DownstreamOutcome
 import models.Address
 import services._
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import utils.SessionProfile
 
 @Singleton
 class TestAddressLookupController @Inject()(
                                              injCompanyDetailsService: CompanyDetailsService,
+                                             injKeystoreConnector: KeystoreConnector,
                                              injPAYEContactService: PAYEContactService)
   extends TestAddressLookupCtrl {
   val authConnector = FrontendAuthConnector
   val companyDetailsService = injCompanyDetailsService
   val payeContactService = injPAYEContactService
+  val keystoreConnector = injKeystoreConnector
 }
 
-trait TestAddressLookupCtrl extends FrontendController with Actions {
+trait TestAddressLookupCtrl extends FrontendController with Actions with SessionProfile {
   val companyDetailsService: CompanyDetailsSrv
   val payeContactService: PAYEContactSrv
+  val keystoreConnector: KeystoreConnect
 
   val noLookupPPOBAddress = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        companyDetailsService.submitPPOBAddr(
-          Address(
-            line1 = "13 Test Street",
-            line2 = "No Lookup Town",
-            line3 = Some("NoLookupShire"),
-            line4 = None,
-            postCode = Some("TE3 3NL"),
-            country = Some("UK")
-          )
-        ) map {
-          case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
-          case DownstreamOutcome.Failure => InternalServerError("Couldn't save mock PPOB Address")
+        withCurrentProfile { profile =>
+          companyDetailsService.submitPPOBAddr(
+            Address(
+              line1 = "13 Test Street",
+              line2 = "No Lookup Town",
+              line3 = Some("NoLookupShire"),
+              line4 = None,
+              postCode = Some("TE3 3NL"),
+              country = Some("UK")
+            ),
+            profile.registrationID,
+            profile.companyTaxRegistration.transactionId
+          ) map {
+            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
+            case DownstreamOutcome.Failure => InternalServerError("Couldn't save mock PPOB Address")
+          }
         }
   }
 
   val noLookupCorrespondenceAddress = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        payeContactService.submitCorrespondence(
-          Address(
-            line1 = "13 Correspondence Street",
-            line2 = "No Lookup Town",
-            line3 = Some("NoLookupShire"),
-            line4 = None,
-            postCode = Some("TE3 3NL"),
-            country = Some("UK")
-          )
-        ) map {
-          case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
-          case DownstreamOutcome.Failure => InternalServerError("Couldn't save mock PPOB Address")
+        withCurrentProfile { profile =>
+          payeContactService.submitCorrespondence(
+            Address(
+              line1 = "13 Correspondence Street",
+              line2 = "No Lookup Town",
+              line3 = Some("NoLookupShire"),
+              line4 = None,
+              postCode = Some("TE3 3NL"),
+              country = Some("UK")
+            ),
+            profile.registrationID
+          ) map {
+            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
+            case DownstreamOutcome.Failure => InternalServerError("Couldn't save mock PPOB Address")
+          }
         }
   }
 }

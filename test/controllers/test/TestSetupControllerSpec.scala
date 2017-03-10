@@ -19,6 +19,7 @@ package controllers.test
 import builders.AuthBuilder
 import connectors.test.{TestBusinessRegConnect, TestCoHoAPIConnect, TestPAYERegConnect}
 import enums.DownstreamOutcome
+import models.external.BusinessProfile
 import models.test.CoHoCompanyDetailsFormModel
 import org.mockito.Matchers
 import org.mockito.Mockito.when
@@ -51,17 +52,18 @@ class TestSetupControllerSpec extends PAYERegSpec {
       override val testPAYERegConnector = mockPayeRegConnector
       override val s4LService = mockS4LService
 
-      override def doCurrentProfileSetup(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
+      override def doCurrentProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = Future.successful(BusinessProfile("regId", None, "en"))
       override def doCoHoCompanyDetailsTearDown(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
-      override def doAddCoHoCompanyDetails(formModel: CoHoCompanyDetailsFormModel)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
+      override def doAddCoHoCompanyDetails(formModel: CoHoCompanyDetailsFormModel, regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
       override def doRegTeardown(implicit request: Request[AnyContent]): Future[DownstreamOutcome.Value] = Future.successful(DownstreamOutcome.Success)
-      override def doTearDownS4L(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
+      override def doTearDownS4L(regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
 
     }
   }
 
   "setup" should {
     "redirect to post sign in" in new Setup {
+      mockFetchCurrentProfile()
       AuthBuilder.showWithAuthorisedUser(controller.testSetup("TESTLTD"), mockAuthConnector) {
         result =>
           status(result) shouldBe Status.SEE_OTHER

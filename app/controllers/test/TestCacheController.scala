@@ -26,6 +26,7 @@ import play.api.mvc.{AnyContent, Request}
 import services.{S4LService, S4LSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import utils.SessionProfile
 
 import scala.concurrent.Future
 
@@ -40,7 +41,7 @@ class TestCacheController @Inject()(injKeystoreConnector: KeystoreConnector,
   val messagesApi = injMessagesApi
 }
 
-trait TestCacheCtrl extends FrontendController with Actions with I18nSupport {
+trait TestCacheCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
 
   val keystoreConnector: KeystoreConnect
   val s4LService: S4LSrv
@@ -48,12 +49,14 @@ trait TestCacheCtrl extends FrontendController with Actions with I18nSupport {
   val tearDownS4L = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        for {
-          res <- doTearDownS4L
-        } yield Ok(res)
+        withCurrentProfile { profile =>
+          for {
+            res <- doTearDownS4L(profile.registrationID)
+          } yield Ok(res)
+        }
   }
 
-  protected[controllers] def doTearDownS4L(implicit request: Request[AnyContent]): Future[String] = {
-    s4LService.clear() map (_ => "Save4Later cleared")
+  protected[controllers] def doTearDownS4L(regId: String)(implicit request: Request[AnyContent]): Future[String] = {
+    s4LService.clear(regId: String) map (_ => "Save4Later cleared")
   }
 }

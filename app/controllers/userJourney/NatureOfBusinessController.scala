@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
+import connectors.{KeystoreConnect, KeystoreConnector}
 import enums.DownstreamOutcome
 import forms.natureOfBuinessDetails.NatureOfBusinessForm
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -28,53 +29,61 @@ import services.{CompanyDetailsService, CompanyDetailsSrv, NatureOfBusinessServi
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import utils.SessionProfile
 import views.html.pages.{natureOfBusiness => NatureOfBusinessPage}
 
 @Singleton
 class NatureOfBusinessController @Inject()(injMessagesApi: MessagesApi,
                                            injNatureOfBusinessService: NatureOfBusinessService,
+                                           injKeystoreConnector: KeystoreConnector,
                                            injCompanyDetailsService: CompanyDetailsService) extends NatureOfBusinessCtrl {
   val authConnector = FrontendAuthConnector
   implicit val messagesApi = injMessagesApi
   val natureOfBusinessService = injNatureOfBusinessService
   val companyDetailsService = injCompanyDetailsService
+  val keystoreConnector = injKeystoreConnector
 }
 
-trait NatureOfBusinessCtrl extends FrontendController with Actions with I18nSupport {
+trait NatureOfBusinessCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
 
   val authConnector: AuthConnector
   implicit val messagesApi: MessagesApi
   val natureOfBusinessService: NatureOfBusinessSrv
   val companyDetailsService: CompanyDetailsSrv
+  val keystoreConnector: KeystoreConnect
 
   val natureOfBusiness: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        for {
-          companyDetails <- companyDetailsService.getCompanyDetails
-          nob <- natureOfBusinessService.getNatureOfBusiness
-        } yield nob match {
-          case Some(model) => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form.fill(model), companyDetails.companyName))
-          case None => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form, companyDetails.companyName))
+        withCurrentProfile { profile =>
+          for {
+            companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+            nob <- natureOfBusinessService.getNatureOfBusiness(profile.registrationID)
+          } yield nob match {
+            case Some(model) => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form.fill(model), companyDetails.companyName))
+            case None => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form, companyDetails.companyName))
+          }
         }
   }
 
   val submitNatureOfBusiness: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        NatureOfBusinessForm.form.bindFromRequest.fold(
-          errors => {
-            companyDetailsService.getCompanyDetails map {
-              details =>
-                BadRequest(NatureOfBusinessPage(errors, details.companyName))
+        withCurrentProfile { profile =>
+          NatureOfBusinessForm.form.bindFromRequest.fold(
+            errors => {
+              companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+                details =>
+                  BadRequest(NatureOfBusinessPage(errors, details.companyName))
+              }
+            },
+            success => {
+              natureOfBusinessService.saveNatureOfBusiness(success, profile.registrationID) map {
+                case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.DirectorDetailsController.directorDetails())
+                case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+              }
             }
-          },
-          success => {
-            natureOfBusinessService.saveNatureOfBusiness(success) map {
-              case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.DirectorDetailsController.directorDetails())
-              case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-            }
-          }
-        )
+          )
+        }
   }
 }

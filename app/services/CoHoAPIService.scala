@@ -30,19 +30,20 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class CoHoAPIService @Inject()(keystoreConn: KeystoreConnector, coHoAPIConn: CoHoAPIConnector) extends CoHoAPISrv {
-  override val keystoreConnector = keystoreConn
-  override val coHoAPIConnector = coHoAPIConn
+class CoHoAPIService @Inject()(injkeystoreConnector: KeystoreConnector,
+                               injCoHoAPIConnector: CoHoAPIConnector) extends CoHoAPISrv {
+  override val keystoreConnector = injkeystoreConnector
+  override val coHoAPIConnector = injCoHoAPIConnector
 }
 
-trait CoHoAPISrv extends CommonService {
+trait CoHoAPISrv {
 
-  val coHoAPIConnector: CoHoAPIConnect
+  val coHoAPIConnector : CoHoAPIConnect
+  val keystoreConnector : KeystoreConnect
 
-  def fetchAndStoreCoHoCompanyDetails(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def fetchAndStoreCoHoCompanyDetails(regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
-      regID <- fetchRegistrationID
-      coHoResp <- coHoAPIConnector.getCoHoCompanyDetails(regID)
+      coHoResp <- coHoAPIConnector.getCoHoCompanyDetails(regId)
       outcome <- processCoHoResponse(coHoResp)
     } yield outcome
   }
@@ -64,10 +65,9 @@ trait CoHoAPISrv extends CommonService {
     }
   }
 
-  def getDirectorDetails()(implicit hc: HeaderCarrier): Future[Directors] = {
+  def getDirectorDetails(txId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
     for {
-      regID <- fetchRegistrationID
-      officerList <- coHoAPIConnector.getOfficerList(regID)
+      officerList <- coHoAPIConnector.getOfficerList(txId)
       directorDetails <- convertOfficerList2Directors(officerList)
     } yield directorDetails
   }

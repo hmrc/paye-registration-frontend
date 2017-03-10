@@ -38,13 +38,16 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
       override val authConnector = mockAuthConnector
       override val messagesApi = mockMessages
       override val completionCapacityService = mockCompletionCapacityService
+      override val keystoreConnector = mockKeystoreConnector
     }
   }
   "completionCapacity" should {
     "return an OK if a capacity has been found" in new Setup {
       val capacity = CompletionCapacity(UserCapacity.director, "")
 
-      when(mockCompletionCapacityService.getCompletionCapacity()(Matchers.any[HeaderCarrier]()))
+      mockFetchCurrentProfile()
+
+      when(mockCompletionCapacityService.getCompletionCapacity(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Some(capacity)))
 
       AuthBuilder.showWithAuthorisedUser(testController.completionCapacity, mockAuthConnector) { result =>
@@ -53,7 +56,8 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
     }
 
     "return an OK if a capacity has not been found" in new Setup {
-      when(mockCompletionCapacityService.getCompletionCapacity()(Matchers.any[HeaderCarrier]()))
+      mockFetchCurrentProfile()
+      when(mockCompletionCapacityService.getCompletionCapacity(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(None))
 
       AuthBuilder.showWithAuthorisedUser(testController.completionCapacity, mockAuthConnector) { result =>
@@ -68,6 +72,7 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
         "" -> ""
       )
 
+      mockFetchCurrentProfile()
       AuthBuilder.submitWithAuthorisedUser(testController.submitCompletionCapacity, mockAuthConnector, request) { result =>
         status(result) shouldBe BAD_REQUEST
       }
@@ -80,8 +85,9 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
         "completionCapacity" -> "director",
         "completionCapacityOther" -> ""
       )
+      mockFetchCurrentProfile()
 
-      when(mockCompletionCapacityService.saveCompletionCapacity(Matchers.any[CompletionCapacity]())(Matchers.any[HeaderCarrier]()))
+      when(mockCompletionCapacityService.saveCompletionCapacity(Matchers.any[CompletionCapacity](), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitCompletionCapacity, mockAuthConnector, request) { result =>

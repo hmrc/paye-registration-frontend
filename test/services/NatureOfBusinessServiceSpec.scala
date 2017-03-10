@@ -16,7 +16,7 @@
 
 package services
 
-import connectors.PAYERegistrationConnector
+import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.DownstreamOutcome
 import fixtures.PAYERegistrationFixture
 import models.api.SICCode
@@ -36,7 +36,9 @@ class NatureOfBusinessServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
   val returnHttpResponse = HttpResponse(200)
 
   class Setup {
-    val service = new NatureOfBusinessService(mockKeystoreConnector, mockPAYERegConnector)
+    val service = new NatureOfBusinessSrv {
+      override val payeRegConnector = mockPAYERegConnector
+    }
   }
 
   "Calling sicCodes2NatureOfBusiness" should {
@@ -81,27 +83,24 @@ class NatureOfBusinessServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
 
   "Calling getNatureOfBusiness" should {
     "return the correct View response when SIC Codes are returned from the microservice" in new Setup {
-      mockFetchRegID("54321")
       when(mockPAYERegConnector.getSICCodes(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(validSICCodesList))
 
-      await(service.getNatureOfBusiness()) shouldBe Some(NatureOfBusiness(natureOfBusiness = "laundring"))
+      await(service.getNatureOfBusiness("54321")) shouldBe Some(NatureOfBusiness(natureOfBusiness = "laundring"))
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
-      mockFetchRegID("54321")
       when(mockPAYERegConnector.getSICCodes(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
 
-      an[Upstream4xxResponse] shouldBe thrownBy(await(service.getNatureOfBusiness()))
+      an[Upstream4xxResponse] shouldBe thrownBy(await(service.getNatureOfBusiness("54321")))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
-      mockFetchRegID("54321")
       when(mockPAYERegConnector.getSICCodes(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(new ArrayIndexOutOfBoundsException))
 
-      an[Exception] shouldBe thrownBy(await(service.getNatureOfBusiness()))
+      an[Exception] shouldBe thrownBy(await(service.getNatureOfBusiness("54321")))
     }
   }
 
@@ -109,11 +108,10 @@ class NatureOfBusinessServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
     "return a success response when the upsert completes successfully" in new Setup {
       val validNatureOfBusiness = NatureOfBusiness(natureOfBusiness = "laundring")
 
-      mockFetchRegID("54321")
       when(mockPAYERegConnector.upsertSICCodes(Matchers.contains("54321"), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(validSICCodesList))
 
-      await(service.saveNatureOfBusiness(validNatureOfBusiness)) shouldBe DownstreamOutcome.Success
+      await(service.saveNatureOfBusiness(validNatureOfBusiness, "54321")) shouldBe DownstreamOutcome.Success
     }
   }
 

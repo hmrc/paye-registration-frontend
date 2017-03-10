@@ -16,7 +16,7 @@
 
 package services
 
-import connectors.PAYERegistrationConnector
+import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, PAYERegistrationFixture, S4LFixture}
 import models.api.{Director, Name}
@@ -41,37 +41,50 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
   val returnHttpResponse = HttpResponse(200)
 
   class Setup {
-    val service = new DirectorDetailsService(mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService)
+    val service = new DirectorDetailsSrv {
+      override val payeRegConnector = mockPAYERegConnector
+      override val coHoAPIService = mockCoHoService
+      override val s4LService = mockS4LService
+    }
   }
 
   class NoDirectorDetailsMockedSetup {
-    val service = new DirectorDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService) {
+    val service = new DirectorDetailsSrv {
+      override val payeRegConnector = mockPAYERegConnector
+      override val coHoAPIService = mockCoHoService
+      override val s4LService = mockS4LService
 
-      override def getDirectorDetails()(implicit hc: HeaderCarrier): Future[Directors] = {
+      override def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
         Future.successful(validDirectorDetailsViewModel)
       }
 
-      override def saveDirectorDetails(detailsView: Directors)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+      override def saveDirectorDetails(detailsView: Directors, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
         Future.successful(DownstreamOutcome.Failure)
       }
     }
   }
 
   class DirectorDetailsMockedSetup {
-    val service = new DirectorDetailsService(mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService) {
+    val service = new DirectorDetailsSrv {
+      override val payeRegConnector = mockPAYERegConnector
+      override val coHoAPIService = mockCoHoService
+      override val s4LService = mockS4LService
 
-      override def getDirectorDetails()(implicit hc: HeaderCarrier): Future[Directors] = {
+      override def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
         Future.successful(validDirectorDetailsViewModel)
       }
 
-      override def saveDirectorDetails(detailsView: Directors)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+      override def saveDirectorDetails(detailsView: Directors, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
         Future.successful(DownstreamOutcome.Success)
       }
     }
   }
 
   class APIConverterMockedSetup {
-    val service = new DirectorDetailsService (mockKeystoreConnector, mockPAYERegConnector, mockCoHoService, mockS4LService) {
+    val service = new DirectorDetailsSrv {
+      override val payeRegConnector = mockPAYERegConnector
+      override val coHoAPIService = mockCoHoService
+      override val s4LService = mockS4LService
 
       override def apiToView(apiModel: Seq[Director]): Directors = {
         validDirectorDetailsViewModel
@@ -218,7 +231,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
         )
       )
 
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(Some(validDirectorDetailsViewModel)))
 
       await(service.ninosToDirectorsMap(validDirectorDetailsViewModel, validNinos)) shouldBe expectedDirectorDetailsViewModel
@@ -237,11 +250,10 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
         )
       )
 
-      mockFetchRegID("54321")
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(Some(directorDetails)))
 
-      await(service.getDirectorDetails()) shouldBe directorDetails
+      await(service.getDirectorDetails("12345", "txId")) shouldBe directorDetails
     }
 
     "return the correct View response when Director Details are returned from the microservice" in new Setup {
@@ -257,17 +269,16 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
         )
       )
 
-      mockFetchRegID("54321")
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getDirectors(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
+      when(mockPAYERegConnector.getDirectors(Matchers.contains("12345"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(Seq(dir)))
 
-      when(mockS4LService.saveForm(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.any)(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+      when(mockS4LService.saveForm(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.any, Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
-      await(service.getDirectorDetails()) shouldBe directorDetails
+      await(service.getDirectorDetails("12345", "txId")) shouldBe directorDetails
     }
 
     "return the correct View response when Director Details are returned from the CoHo service" in new Setup {
@@ -280,76 +291,67 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
           )
         )
       )
-
-      mockFetchRegID("54321")
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getDirectors(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
+      when(mockPAYERegConnector.getDirectors(Matchers.contains("12345"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(Nil))
 
-      when(mockCoHoService.getDirectorDetails()(Matchers.any()))
+      when(mockCoHoService.getDirectorDetails(Matchers.anyString())(Matchers.any()))
         .thenReturn(Future.successful(directorDetails))
 
-      when(mockS4LService.saveForm(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.any)(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+      when(mockS4LService.saveForm(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.any, Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
-      await(service.getDirectorDetails()) shouldBe directorDetails
+      await(service.getDirectorDetails("12345", "txId")) shouldBe directorDetails
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
-      mockFetchRegID("54321")
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString))(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getDirectors(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
+      when(mockPAYERegConnector.getDirectors(Matchers.contains("12345"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
 
-      an[Upstream4xxResponse] shouldBe thrownBy(await(service.getDirectorDetails()))
+      an[Upstream4xxResponse] shouldBe thrownBy(await(service.getDirectorDetails("12345", "txId")))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
-      mockFetchRegID("54321")
-      when(mockPAYERegConnector.getDirectors(Matchers.contains("54321"))(Matchers.any(), Matchers.any()))
+      when(mockPAYERegConnector.getDirectors(Matchers.contains("12345"))(Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(new ArrayIndexOutOfBoundsException))
 
-      an[Exception] shouldBe thrownBy(await(service.getDirectorDetails()))
+      an[Exception] shouldBe thrownBy(await(service.getDirectorDetails("12345", "txId")))
     }
   }
 
   "Calling saveDirectorDetails" should {
     "return a success response when the upsert completes successfully" in new Setup {
-      mockFetchRegID("54321")
-      when(mockPAYERegConnector.upsertDirectors(Matchers.contains("54321"), Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockPAYERegConnector.upsertDirectors(Matchers.contains("12345"), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(validDirectorList))
 
-      when(mockS4LService.clear()(Matchers.any[HeaderCarrier]()))
+      when(mockS4LService.clear(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(returnHttpResponse))
 
-      await(service.saveDirectorDetails(validDirectorDetailsViewModel)) shouldBe DownstreamOutcome.Success
+      await(service.saveDirectorDetails(validDirectorDetailsViewModel, "12345")) shouldBe DownstreamOutcome.Success
     }
 
     "return a success response when the S4L save completes successfully" in new Setup {
       val incompleteCompanyDetailsViewModel = Directors(directorMapping = Map())
 
-      when(mockS4LService.saveForm(Matchers.eq(CacheKeys.DirectorDetails.toString),Matchers.any)(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+      when(mockS4LService.saveForm(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.any, Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
-      await(service.saveDirectorDetails(incompleteCompanyDetailsViewModel)) shouldBe DownstreamOutcome.Success
+      await(service.saveDirectorDetails(incompleteCompanyDetailsViewModel, "12345")) shouldBe DownstreamOutcome.Success
     }
   }
 
   "Calling submitNinos" should {
     "return a success response when submit is completed successfully" in new DirectorDetailsMockedSetup {
-      mockFetchRegID("54322")
-
-      await(service.submitNinos(validNinos)) shouldBe DownstreamOutcome.Success
+      await(service.submitNinos(validNinos, "54322", "txId")) shouldBe DownstreamOutcome.Success
     }
 
     "return a failure response when submit is not completed successfully" in new NoDirectorDetailsMockedSetup {
-      mockFetchRegID("54322")
-
-      await(service.submitNinos(validNinos)) shouldBe DownstreamOutcome.Failure
+      await(service.submitNinos(validNinos, "54322", "txId")) shouldBe DownstreamOutcome.Failure
     }
   }
 }

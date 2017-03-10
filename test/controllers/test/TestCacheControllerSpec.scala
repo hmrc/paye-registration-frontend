@@ -44,7 +44,9 @@ class TestCacheControllerSpec extends PAYERegSpec {
   "tearDownS4L" should {
     "return an OK" when {
       "Save4Later has been cleared" in new Setup {
-        when(mockS4LService.clear()(Matchers.any[HeaderCarrier]()))
+        mockFetchCurrentProfile()
+
+        when(mockS4LService.clear(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testHttpResponse))
 
         AuthBuilder.showWithAuthorisedUser(controller.tearDownS4L, mockAuthConnector) { result =>

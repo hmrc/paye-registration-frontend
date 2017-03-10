@@ -16,12 +16,12 @@
 
 package fixtures
 
-import models.external.CurrentProfile
+import models.external.BusinessProfile
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 trait KeystoreFixture {
 
-  lazy val validCurrentProfileResponse = CurrentProfile(
+  lazy val validCurrentProfileResponse = BusinessProfile(
     "12345",
     Some("Director"),
     "ENG"

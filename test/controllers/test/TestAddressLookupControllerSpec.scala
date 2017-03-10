@@ -40,6 +40,7 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
       override val authConnector = mockAuthConnector
       override val companyDetailsService = mockCompanyDetailsService
       override val payeContactService = mockPAYEContactService
+      override val keystoreConnector = mockKeystoreConnector
     }
   }
 
@@ -52,7 +53,9 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
     }
 
     "return 500 when the mocked address can't be submitted" in new Setup {
-      when(mockCompanyDetailsService.submitPPOBAddr(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
+      mockFetchCurrentProfile()
+      when(mockCompanyDetailsService.submitPPOBAddr(Matchers.any(), Matchers.anyString(), Matchers.anyString())(Matchers.any()))
+        .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthBuilder.showWithAuthorisedUser(controller.noLookupPPOBAddress, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -61,7 +64,9 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
     }
 
     "return 303 when the mocked address is successfully submitted" in new Setup {
-      when(mockCompanyDetailsService.submitPPOBAddr(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      mockFetchCurrentProfile()
+      when(mockCompanyDetailsService.submitPPOBAddr(Matchers.any(), Matchers.anyString(), Matchers.anyString())(Matchers.any()))
+        .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.showWithAuthorisedUser(controller.noLookupPPOBAddress, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -80,7 +85,8 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
     }
 
     "return 500 when the mocked address can't be submitted" in new Setup {
-      when(mockPAYEContactService.submitCorrespondence(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
+      mockFetchCurrentProfile()
+      when(mockPAYEContactService.submitCorrespondence(Matchers.any(), Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthBuilder.showWithAuthorisedUser(controller.noLookupCorrespondenceAddress, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -89,7 +95,8 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
     }
 
     "return 303 when the mocked address is successfully submitted" in new Setup {
-      when(mockPAYEContactService.submitCorrespondence(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      mockFetchCurrentProfile()
+      when(mockPAYEContactService.submitCorrespondence(Matchers.any(), Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.showWithAuthorisedUser(controller.noLookupCorrespondenceAddress, mockAuthConnector) {
         (response: Future[Result]) =>

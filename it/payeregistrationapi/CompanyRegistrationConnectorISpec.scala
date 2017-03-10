@@ -33,7 +33,7 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
   val additionalConfiguration = Map(
     "microservice.services.company-registration.host" -> s"$mockHost",
     "microservice.services.company-registration.port" -> s"$mockPort",
-    "microservice.services.company-registration.uri" -> "/company-registration",
+    "microservice.services.company-registration.uri" -> "/corporation-tax-registration",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes"
   )
 
@@ -44,25 +44,25 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
   val regId = "12345"
   implicit val hc = HeaderCarrier()
 
-  val url = s"/company-registration/corporation-tax-registration/$regId/confirmation-references"
+  val url = s"/corporation-tax-registration/$regId"
 
-  "getTransactionId" should {
+  "getCompanyRegistrationDetails" should {
     val testTransId =
       Json.parse(
         """
           |{
-          |    "acknowledgement-reference" : "testRef",
-          |    "transaction-id" : "testTransactionID-001",
-          |    "payment-reference" : "test-pay-ref",
-          |    "payment-amount" : "12"
+          |    "status" : "testStatus",
+          |    "confirmationReferences" : {
+          |      "transaction-id" : "testTransactionID-001"
+          |    }
           |}
         """.stripMargin).as[JsObject]
 
-    "get a transaction id" in {
+    "get a status and a transaction id" in {
       lazy val metrics = Play.current.injector.instanceOf[MetricsService]
       val companyRegistrationConnector = new CompanyRegistrationConnector(metrics)
 
-      def getResponse = companyRegistrationConnector.getTransactionId(regId)
+      def getResponse = companyRegistrationConnector.getCompanyRegistrationDetails(regId)
 
       stubFor(get(urlMatching(url))
         .willReturn(
@@ -72,7 +72,9 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getResponse) shouldBe "testTransactionID-001"
+      val result = await(getResponse)
+      result.status shouldBe "testStatus"
+      result.transactionId shouldBe "testTransactionID-001"
     }
   }
 }

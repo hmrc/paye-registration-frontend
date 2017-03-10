@@ -42,6 +42,7 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
       override val authConnector = mockAuthConnector
       override val natureOfBusinessService = mockNatureOfBusinessService
       override val companyDetailsService = mockCompanyDetailsService
+      override val keystoreConnector = mockKeystoreConnector
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
     }
   }
@@ -56,10 +57,11 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
     }
 
     "return an OK when there is a nature of business in the microservice" in new Setup {
-      when(mockNatureOfBusinessService.getNatureOfBusiness()(Matchers.any[HeaderCarrier]()))
+      mockFetchCurrentProfile()
+      when(mockNatureOfBusinessService.getNatureOfBusiness(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Some(testNOB)))
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any()))
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any()))
         .thenReturn(validCompanyDetailsViewModel)
 
       AuthBuilder.showWithAuthorisedUser(testController.natureOfBusiness, mockAuthConnector) {
@@ -69,10 +71,11 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
     }
 
     "return an OK when there is no nature of business in the microservice" in new Setup {
-      when(mockNatureOfBusinessService.getNatureOfBusiness()(Matchers.any[HeaderCarrier]()))
+      mockFetchCurrentProfile()
+      when(mockNatureOfBusinessService.getNatureOfBusiness(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(None))
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any()))
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any()))
         .thenReturn(validCompanyDetailsViewModel)
 
       AuthBuilder.showWithAuthorisedUser(testController.natureOfBusiness, mockAuthConnector) {
@@ -93,8 +96,9 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
       val request = FakeRequest().withFormUrlEncodedBody(
         "description" -> ""
       )
+      mockFetchCurrentProfile()
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any()))
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any()))
         .thenReturn(validCompanyDetailsViewModel)
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitNatureOfBusiness, mockAuthConnector, request) {
@@ -107,8 +111,9 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
       val request = FakeRequest().withFormUrlEncodedBody(
         "description" -> "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       )
+      mockFetchCurrentProfile()
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any()))
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any()))
         .thenReturn(validCompanyDetailsViewModel)
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitNatureOfBusiness, mockAuthConnector, request) {
@@ -118,7 +123,8 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
     }
 
     "show an error page when there is an error response from the microservice" in new Setup {
-      when(mockNatureOfBusinessService.saveNatureOfBusiness(Matchers.any())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
+      mockFetchCurrentProfile()
+      when(mockNatureOfBusinessService.saveNatureOfBusiness(Matchers.any(), Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
       AuthBuilder.submitWithAuthorisedUser(testController.submitNatureOfBusiness(), mockAuthConnector, FakeRequest().withFormUrlEncodedBody(
         "description" -> "testing"
       )) {
@@ -131,11 +137,11 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
       val request = FakeRequest().withFormUrlEncodedBody(
         "description" -> "computing"
       )
-
-      when(mockNatureOfBusinessService.saveNatureOfBusiness(Matchers.any())(Matchers.any[HeaderCarrier]()))
+      mockFetchCurrentProfile()
+      when(mockNatureOfBusinessService.saveNatureOfBusiness(Matchers.any(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.any()))
+      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any()))
         .thenReturn(validCompanyDetailsViewModel)
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitNatureOfBusiness, mockAuthConnector, request) {

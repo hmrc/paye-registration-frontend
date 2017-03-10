@@ -33,21 +33,17 @@ import scala.concurrent.Future
 import scala.util.{Success, Try}
 
 @Singleton
-class SummaryService @Inject()(keystoreConn: KeystoreConnector,
-                               payeRegistrationConn: PAYERegistrationConnector
-                                ) extends SummarySrv {
-  override val keystoreConnector = keystoreConn
+class SummaryService @Inject()(payeRegistrationConn: PAYERegistrationConnector) extends SummarySrv {
   override val payeRegistrationConnector = payeRegistrationConn
 }
 
-trait SummarySrv extends CommonService {
+trait SummarySrv {
 
   val payeRegistrationConnector: PAYERegistrationConnect
 
-  def getRegistrationSummary()(implicit hc: HeaderCarrier): Future[Summary] = {
+  def getRegistrationSummary(regId: String)(implicit hc: HeaderCarrier): Future[Summary] = {
     for {
-      regID <- fetchRegistrationID
-      regResponse <- payeRegistrationConnector.getRegistration(regID)
+      regResponse <- payeRegistrationConnector.getRegistration(regId)
     } yield registrationToSummary(regResponse)
   }
 

@@ -18,14 +18,13 @@ package controllers.test
 
 import builders.AuthBuilder
 import connectors.test.TestBusinessRegConnect
-import connectors.{BusinessRegistrationNotFoundResponse, BusinessRegistrationSuccessResponse}
 import fixtures.KeystoreFixture
-import models.external.CurrentProfile
+import models.external.{BusinessProfile, CurrentProfile}
 import org.mockito.Matchers
 import org.mockito.Mockito._
 import play.api.test.Helpers.OK
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpReads}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpReads, NotFoundException}
 
 import scala.concurrent.Future
 
@@ -33,7 +32,7 @@ class CurrentProfileControllerSpec extends PAYERegSpec with KeystoreFixture {
 
   val mockTestBusRegConnector = mock[TestBusinessRegConnect]
 
-  val testProfile = CurrentProfile("testRegId", Some("testCapacity"), "testLang")
+  val testProfile = BusinessProfile("testRegId", Some("testCapacity"), "testLang")
 
   class Setup {
     val controller = new CurrentProfileCtrl {
@@ -47,8 +46,8 @@ class CurrentProfileControllerSpec extends PAYERegSpec with KeystoreFixture {
   "currentProfileSetup" should {
     "return an OK" when {
       "the current profile has been returned and has been cached in keystore" in new Setup {
-        when(mockBusinessRegistrationConnector.retrieveCurrentProfile(Matchers.any[HeaderCarrier](), Matchers.any[HttpReads[CurrentProfile]]()))
-          .thenReturn(Future.successful(BusinessRegistrationSuccessResponse(testProfile)))
+        when(mockBusinessRegistrationConnector.retrieveCurrentProfile(Matchers.any[HeaderCarrier](), Matchers.any[HttpReads[BusinessProfile]]()))
+          .thenReturn(Future.successful(testProfile))
 
         when(mockKeystoreConnector.cache[CurrentProfile](Matchers.any(), Matchers.any[CurrentProfile]())(Matchers.any[HeaderCarrier](), Matchers.any()))
           .thenReturn(Future.successful(blankCacheMap))
@@ -59,8 +58,8 @@ class CurrentProfileControllerSpec extends PAYERegSpec with KeystoreFixture {
       }
 
       "the current profile hasn't been found, but has then proceeded to create one and cache it in keystore" in new Setup {
-        when(mockBusinessRegistrationConnector.retrieveCurrentProfile(Matchers.any[HeaderCarrier](), Matchers.any[HttpReads[CurrentProfile]]()))
-          .thenReturn(Future.successful(BusinessRegistrationNotFoundResponse))
+        when(mockBusinessRegistrationConnector.retrieveCurrentProfile(Matchers.any[HeaderCarrier](), Matchers.any[HttpReads[BusinessProfile]]()))
+          .thenReturn(Future.failed(new NotFoundException("")))
 
         when(mockTestBusRegConnector.createCurrentProfileEntry(Matchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testProfile))

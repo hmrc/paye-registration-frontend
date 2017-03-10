@@ -34,7 +34,8 @@ class TestPAYERegConnectorSpec extends PAYERegSpec with PAYERegistrationFixture 
   val mockPAYERegConnector = mock[PAYERegistrationConnector]
 
   class Setup {
-    val connector = new TestPAYERegConnector(mockKeystoreConnector, mockPAYERegConnector) {
+    val connector = new TestPAYERegConnect {
+      override val payeRegConnector = mockPAYERegConnector
       override val http: WSHttp = mockWSHttp
       override val payeRegUrl: String = "tst-url"
     }
@@ -57,35 +58,35 @@ class TestPAYERegConnectorSpec extends PAYERegSpec with PAYERegistrationFixture 
 
   "Calling addTestCompanyDetails" should {
     "return a successful outcome for a successful add of Company Details" in new Setup {
-      mockFetchRegID("54321")
+      mockFetchCurrentProfile("54321")
       when(mockPAYERegConnector.upsertCompanyDetails(Matchers.contains("54321"), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(validCompanyDetailsAPI))
 
-      await(connector.addTestCompanyDetails(validCompanyDetailsAPI)) shouldBe DownstreamOutcome.Success
+      await(connector.addTestCompanyDetails(validCompanyDetailsAPI, "54321")) shouldBe DownstreamOutcome.Success
     }
     "return a failed outcome for an unsuccessful add of Company Details" in new Setup {
-      mockFetchRegID("54321")
+      mockFetchCurrentProfile("54321")
       when(mockPAYERegConnector.upsertCompanyDetails(Matchers.contains("54321"), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(new RuntimeException("tst")))
 
-      await(connector.addTestCompanyDetails(validCompanyDetailsAPI)) shouldBe DownstreamOutcome.Failure
+      await(connector.addTestCompanyDetails(validCompanyDetailsAPI, "54321")) shouldBe DownstreamOutcome.Failure
     }
   }
 
   "Calling addTestPAYEContact" should {
     "return a successful outcome for a successful add of PAYE Contact" in new Setup {
-      mockFetchRegID("54321")
+      mockFetchCurrentProfile("54321")
       when(mockPAYERegConnector.upsertPAYEContact(Matchers.contains("54321"), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(validPAYEContactAPI))
 
-      await(connector.addTestPAYEContact(validPAYEContactAPI)) shouldBe DownstreamOutcome.Success
+      await(connector.addTestPAYEContact(validPAYEContactAPI, "54321")) shouldBe DownstreamOutcome.Success
     }
     "return a failed outcome for an unsuccessful add of PAYE Contact" in new Setup {
-      mockFetchRegID("54321")
+      mockFetchCurrentProfile("54321")
       when(mockPAYERegConnector.upsertPAYEContact(Matchers.contains("54321"), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.failed(new RuntimeException("tst")))
 
-      await(connector.addTestPAYEContact(validPAYEContactAPI)) shouldBe DownstreamOutcome.Failure
+      await(connector.addTestPAYEContact(validPAYEContactAPI, "54321")) shouldBe DownstreamOutcome.Failure
     }
   }
 

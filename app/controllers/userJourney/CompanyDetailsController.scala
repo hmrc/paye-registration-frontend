@@ -22,7 +22,7 @@ import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector}
 import enums.DownstreamOutcome
-import forms.companyDetails.{PPOBForm, BusinessContactDetailsForm, TradingNameForm}
+import forms.companyDetails.{BusinessContactDetailsForm, PPOBForm, TradingNameForm}
 import models.view.{AddressChoice, ChosenAddress, TradingName}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -30,6 +30,7 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import services._
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import utils.SessionProfile
 import views.html.pages.companyDetails.{confirmROAddress, businessContactDetails => BusinessContactDetailsPage, ppobAddress => PPOBAddressPage, tradingName => TradingNamePage}
 
 import scala.concurrent.Future
@@ -52,47 +53,52 @@ class CompanyDetailsController @Inject()(
   val addressLookupService = injAddressLookupService
 }
 
-trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSupport {
+trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
   val s4LService: S4LSrv
   val keystoreConnector: KeystoreConnect
   val companyDetailsService: CompanyDetailsSrv
   val cohoService: CoHoAPISrv
   val addressLookupService: AddressLookupSrv
 
-  val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-
-    for {
-      companyDetails <- companyDetailsService.getCompanyDetails
-    } yield companyDetails.tradingName match {
-      case Some(model) => Ok(TradingNamePage(TradingNameForm.form.fill(model), companyDetails.companyName))
-      case _ => Ok(TradingNamePage(TradingNameForm.form, companyDetails.companyName))
-    }
+  val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user => implicit request =>
+      withCurrentProfile { profile =>
+          for {
+            companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+          } yield companyDetails.tradingName match {
+            case Some(model) => Ok(TradingNamePage(TradingNameForm.form.fill(model), companyDetails.companyName))
+            case _ => Ok(TradingNamePage(TradingNameForm.form, companyDetails.companyName))
+          }
+        }
   }
 
   val submitTradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-
-    TradingNameForm.form.bindFromRequest.fold(
-      errors => badRequestResponse(errors),
-      success => {
-        val validatedForm = TradingNameForm.validateForm(TradingNameForm.form.fill(success))
-        if (validatedForm.hasErrors) {
-          badRequestResponse(validatedForm)
-        } else {
-          companyDetailsService.submitTradingName(success) map {
-            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.roAddress())
-            case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+    withCurrentProfile { profile =>
+      TradingNameForm.form.bindFromRequest.fold(
+        errors => badRequestResponse(errors),
+        success => {
+          val validatedForm = TradingNameForm.validateForm(TradingNameForm.form.fill(success))
+          if (validatedForm.hasErrors) {
+            badRequestResponse(validatedForm)
+          } else {
+            companyDetailsService.submitTradingName(success, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+              case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.roAddress())
+              case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+            }
           }
         }
-      }
-    )
+      )
+    }
   }
 
   val roAddress : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        for {
-          companyDetails <- companyDetailsService.getCompanyDetails
-        } yield Ok(confirmROAddress(companyDetails.companyName, companyDetails.roAddress))
+        withCurrentProfile { profile =>
+          for {
+            companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+          } yield Ok(confirmROAddress(companyDetails.companyName, companyDetails.roAddress))
+        }
   }
 
   val confirmRO : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
@@ -110,10 +116,13 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
   val businessContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        companyDetailsService.getCompanyDetails map {
-          details => details.businessContactDetails match {
-            case Some(bcd) => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form.fill(bcd)))
-            case _ => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form))
+        withCurrentProfile { profile =>
+          companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+            details =>
+              details.businessContactDetails match {
+                case Some(bcd) => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form.fill(bcd)))
+                case _ => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form))
+              }
           }
         }
   }
@@ -121,52 +130,63 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
   val submitBusinessContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        BusinessContactDetailsForm.form.bindFromRequest.fold(
-          errs => companyDetailsService.getCompanyDetails map (details => BadRequest(BusinessContactDetailsPage(details.companyName, errs))),
-          success => companyDetailsService.submitBusinessContact(success) map {
-            case DownstreamOutcome.Success => Redirect(routes.NatureOfBusinessController.natureOfBusiness())
-            case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-          }
-        )
+        withCurrentProfile { profile =>
+          BusinessContactDetailsForm.form.bindFromRequest.fold(
+            errs => companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map (
+                      details => BadRequest(BusinessContactDetailsPage(details.companyName, errs))
+                    ),
+            success => companyDetailsService.submitBusinessContact(success, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+              case DownstreamOutcome.Success => Redirect(routes.NatureOfBusinessController.natureOfBusiness())
+              case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+            }
+          )
+        }
   }
 
   val ppobAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        companyDetailsService.getCompanyDetails.map { companyDetails =>
-          val addressMap = companyDetailsService.getPPOBPageAddresses(companyDetails)
-          Ok(PPOBAddressPage(PPOBForm.form.fill(ChosenAddress(AddressChoice.ppobAddress)), addressMap.get("ro"), addressMap.get("ppob")))
+        withCurrentProfile { profile =>
+          companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId).map { companyDetails =>
+            val addressMap = companyDetailsService.getPPOBPageAddresses(companyDetails)
+            Ok(PPOBAddressPage(PPOBForm.form.fill(ChosenAddress(AddressChoice.ppobAddress)), addressMap.get("ro"), addressMap.get("ppob")))
+          }
         }
   }
 
   val submitPPOBAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        PPOBForm.form.bindFromRequest.fold(
-          errs => companyDetailsService.getCompanyDetails map{
-            details =>
-              val addressMap = companyDetailsService.getPPOBPageAddresses(details)
-              BadRequest(PPOBAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob")))
-          },
-          success => success.chosenAddress match {
-            case AddressChoice.ppobAddress =>
-              Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
-            case AddressChoice.roAddress =>
-              companyDetailsService.copyROAddrToPPOBAddr() map(_ => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
-            case AddressChoice.other => Future.successful(Redirect(addressLookupService.buildAddressLookupUrl("payereg1", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress())))
-          }
-        )
+        withCurrentProfile { profile =>
+          PPOBForm.form.bindFromRequest.fold(
+            errs => companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+              details =>
+                val addressMap = companyDetailsService.getPPOBPageAddresses(details)
+                BadRequest(PPOBAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob")))
+            },
+            success => success.chosenAddress match {
+              case AddressChoice.ppobAddress =>
+                Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
+              case AddressChoice.roAddress =>
+                companyDetailsService.copyROAddrToPPOBAddr(profile.registrationID, profile.companyTaxRegistration.transactionId)
+                  .map (_ => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
+              case AddressChoice.other => Future.successful(Redirect(addressLookupService.buildAddressLookupUrl("payereg1", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress())))
+            }
+          )
+        }
   }
 
   val savePPOBAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        for {
-          Some(address) <- addressLookupService.getAddress
-          res <- companyDetailsService.submitPPOBAddr(address)
-        } yield res match {
-          case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
-          case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+        withCurrentProfile { profile =>
+          for {
+            Some(address) <- addressLookupService.getAddress
+            res <- companyDetailsService.submitPPOBAddr(address, profile.registrationID, profile.companyTaxRegistration.transactionId)
+          } yield res match {
+            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
+            case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+          }
         }
   }
 }

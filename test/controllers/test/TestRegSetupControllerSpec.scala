@@ -40,12 +40,14 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
       override val payeRegService = mockPayeRegService
       override val messagesApi = mockMessages
       override val authConnector = mockAuthConnector
+      override val keystoreConnector = mockKeystoreConnector
     }
   }
 
   "regTeardown" should {
     "return an OK" when {
       "the registration document has been successfully torn down" in new Setup {
+        mockFetchCurrentProfile()
         when(mockPayeRegConnector.testRegistrationTeardown()(Matchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
@@ -57,6 +59,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
 
     "return an INTERNAL_SERVER_ERROR" when {
       "there was a problem tearing down the registration document" in new Setup {
+        mockFetchCurrentProfile()
         when(mockPayeRegConnector.testRegistrationTeardown()(Matchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
@@ -70,8 +73,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
   "regSetup" should {
     "return an OK" when {
       "the reg setup has been rendered with the form and the regId fetched" in new Setup {
-        when(mockPayeRegService.fetchRegistrationID(Matchers.any[HeaderCarrier]()))
-          .thenReturn(Future.successful("testRegId"))
+        mockFetchCurrentProfile()
 
         AuthBuilder.showWithAuthorisedUser(controller.regSetup, mockAuthConnector) { result =>
           status(result) shouldBe OK
@@ -83,11 +85,8 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
   "submitRegSetup" should {
     "return a BAD_REQUEST" when {
       "there was a problem validating the form values" in new Setup {
-
+        mockFetchCurrentProfile()
         val request = FakeRequest().withFormUrlEncodedBody()
-
-        when(mockPayeRegService.fetchRegistrationID(Matchers.any[HeaderCarrier]()))
-          .thenReturn(Future.successful("testRegId"))
 
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetup, mockAuthConnector, request) { result =>
           status(result) shouldBe BAD_REQUEST
@@ -154,6 +153,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
           "payeContact.correspondenceAddress.country" -> "testCountry"
         )
 
+        mockFetchCurrentProfile()
         when(mockPayeRegConnector.addPAYERegistration(Matchers.any())(Matchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
@@ -221,7 +221,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
           "payeContact.correspondenceAddress.postCode" -> "testPostCode",
           "payeContact.correspondenceAddress.country" -> "testCountry"
         )
-
+        mockFetchCurrentProfile()
         when(mockPayeRegConnector.addPAYERegistration(Matchers.any())(Matchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
@@ -235,6 +235,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
   "regSetupCompanyDetails" should {
     "return an OK" when {
       "the payeRegCompanyDetailsSetup page has been rendered" in new Setup {
+        mockFetchCurrentProfile()
         AuthBuilder.showWithAuthorisedUser(controller.regSetupCompanyDetails, mockAuthConnector) { result =>
           status(result) shouldBe OK
         }
@@ -246,7 +247,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
     "return a BAD_REQUEST" when {
       "the form values cannot be validated" in new Setup {
         val request = FakeRequest().withFormUrlEncodedBody()
-
+        mockFetchCurrentProfile()
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupCompanyDetails, mockAuthConnector, request) { result =>
           status(result) shouldBe BAD_REQUEST
         }
@@ -275,8 +276,8 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
           "businessContactDetails.mobileNumber" -> "testNumber",
           "businessContactDetails.phoneNumber" -> "testNumber"
         )
-
-        when(mockPayeRegConnector.addTestCompanyDetails(Matchers.any())(Matchers.any[HeaderCarrier]()))
+        mockFetchCurrentProfile()
+        when(mockPayeRegConnector.addTestCompanyDetails(Matchers.any(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupCompanyDetails, mockAuthConnector, request) { result =>
@@ -307,8 +308,8 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
           "businessContactDetails.mobileNumber" -> "testNumber",
           "businessContactDetails.phoneNumber" -> "testNumber"
         )
-
-        when(mockPayeRegConnector.addTestCompanyDetails(Matchers.any())(Matchers.any[HeaderCarrier]()))
+        mockFetchCurrentProfile()
+        when(mockPayeRegConnector.addTestCompanyDetails(Matchers.any(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupCompanyDetails, mockAuthConnector, request) { result =>
@@ -321,6 +322,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
   "regSetupPAYEContact" should {
     "return an OK" when {
       "the payeRegPAYEContactSetup page has been rendered" in new Setup {
+        mockFetchCurrentProfile()
         AuthBuilder.showWithAuthorisedUser(controller.regSetupPAYEContact, mockAuthConnector) { result =>
           status(result) shouldBe OK
         }
@@ -332,7 +334,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
     "return a BAD_REQUEST" when {
       "the form data cant be validated" in new Setup {
         val request = FakeRequest().withFormUrlEncodedBody()
-
+        mockFetchCurrentProfile()
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupPAYEContact, mockAuthConnector, request) { result =>
           status(result) shouldBe BAD_REQUEST
         }
@@ -353,8 +355,8 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
           "correspondenceAddress.postCode" -> "testPostCode",
           "correspondenceAddress.country" -> "testCountry"
         )
-
-        when(mockPayeRegConnector.addTestPAYEContact(Matchers.any())(Matchers.any[HeaderCarrier]()))
+        mockFetchCurrentProfile()
+        when(mockPayeRegConnector.addTestPAYEContact(Matchers.any(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupPAYEContact, mockAuthConnector, request) { result =>
@@ -377,8 +379,8 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
           "correspondenceAddress.postCode" -> "testPostCode",
           "correspondenceAddress.country" -> "testCountry"
         )
-
-        when(mockPayeRegConnector.addTestPAYEContact(Matchers.any())(Matchers.any[HeaderCarrier]()))
+        mockFetchCurrentProfile()
+        when(mockPayeRegConnector.addTestPAYEContact(Matchers.any(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupPAYEContact, mockAuthConnector, request) { result =>

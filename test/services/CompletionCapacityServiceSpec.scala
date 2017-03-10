@@ -16,7 +16,7 @@
 
 package services
 
-import connectors.PAYERegistrationConnector
+import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.{DownstreamOutcome, UserCapacity}
 import models.view.CompletionCapacity
 import org.mockito.Matchers
@@ -34,26 +34,25 @@ class CompletionCapacityServiceSpec extends PAYERegSpec {
   val mockPAYERegConnector = mock[PAYERegistrationConnector]
 
   class Setup {
-    val service = new CompletionCapacityService(mockKeystoreConnector, mockPAYERegConnector)
+    val service = new CompletionCapacitySrv {
+      override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
+    }
   }
 
   "Calling saveCompletionCapacity" should {
     "return success for a successful save" in new Setup {
-      mockFetchRegID()
-
       val jobTitle = "Grand Vizier"
       val tstCapacity = CompletionCapacity(UserCapacity.other, "Grand Vizier")
 
       when(mockPAYERegConnector.upsertCompletionCapacity(Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(jobTitle))
 
-      await(service.saveCompletionCapacity(tstCapacity)) shouldBe DownstreamOutcome.Success
+      await(service.saveCompletionCapacity(tstCapacity, "12345")) shouldBe DownstreamOutcome.Success
     }
   }
 
   "Calling saveCompletionCapacity" should {
     "return a view model when there is a completion capacity in the database" in new Setup {
-      mockFetchRegID()
 
       val jobTitle = "director"
       val tstCapacity = CompletionCapacity(UserCapacity.director, "")
@@ -61,16 +60,15 @@ class CompletionCapacityServiceSpec extends PAYERegSpec {
       when(mockPAYERegConnector.getCompletionCapacity(Matchers.anyString())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(Some(jobTitle)))
 
-      await(service.getCompletionCapacity()) shouldBe Some(tstCapacity)
+      await(service.getCompletionCapacity("12345")) shouldBe Some(tstCapacity)
     }
 
     "return an empty option when there is no completion capacity in the database" in new Setup {
-      mockFetchRegID()
 
       when(mockPAYERegConnector.getCompletionCapacity(Matchers.anyString())(Matchers.any(), Matchers.any()))
         .thenReturn(Future.successful(None))
 
-      await(service.getCompletionCapacity()) shouldBe None
+      await(service.getCompletionCapacity("12345")) shouldBe None
     }
   }
 
