@@ -27,6 +27,7 @@ import models.view.{Summary, SummaryRow, SummarySection}
 import models.{Address, DigitalContactDetails}
 import play.api.mvc.Call
 import uk.gov.hmrc.play.http.HeaderCarrier
+import utils.Formatters
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -200,7 +201,7 @@ trait SummarySrv {
       SummaryRow(
         id = "director" + i,
         answer = director.nino match {
-          case Some(nino) => Right(nino)
+          case Some(nino) => Right(Formatters.ninoFormatter(nino))
           case None => Right("")
         },
         changeLink = Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),

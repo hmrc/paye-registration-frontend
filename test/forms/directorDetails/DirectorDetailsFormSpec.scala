@@ -50,15 +50,15 @@ class DirectorDetailsFormSpec extends UnitSpec {
       "Unbind successfully" in {
         val form = testForm.fill(model)
         form.data shouldBe Map(
-          "nino[0]" -> "ZY123456A",
-          "nino[1]" -> "ZY223456A"
+          "nino[0]" -> "ZY 12 34 56 A",
+          "nino[1]" -> "ZY 22 34 56 A"
         )
       }
     }
 
     "Supplied with partial data" should {
       val data = Map(
-        "nino[0]" -> "ZY123456A",
+        "nino[0]" -> "ZY 12 34 56 A",
         "nino[1]" -> "",
         "nino[2]" -> "ZY323456A"
       )
@@ -81,9 +81,9 @@ class DirectorDetailsFormSpec extends UnitSpec {
       "Unbind successfully" in {
         val form = testForm.fill(model)
         form.data shouldBe Map(
-          "nino[0]" -> "ZY123456A",
+          "nino[0]" -> "ZY 12 34 56 A",
           "nino[1]" -> "",
-          "nino[2]" -> "ZY323456A"
+          "nino[2]" -> "ZY 32 34 56 A"
         )
       }
     }
@@ -129,14 +129,28 @@ class DirectorDetailsFormSpec extends UnitSpec {
         "nino[1]" -> "AA123456A",
         "nino[2]" -> "BI876392B",
         "nino[3]" -> "AA123456E",
-        "nino[4]" -> "AA123456AD"
+        "nino[4]" -> "AA123456AD",
+        "nino[5]" -> "SR  12 11 34 C",
+        "nino[6]" -> "ZZ 12 11 34 C",
+        "nino[7]" -> "SR 15 33 66 Q",
+        "nino[8]" -> "SR 15 33 66 QW",
+        "nino[9]" -> "DR 15 33 66 C",
+        "nino[10]" -> "SD 15 33 66 C",
+        "nino[11]" -> "S  R 15 33 66 C"
       )
 
       val errs = Seq(
         FormError("nino[0]", "errors.invalid.nino"),
         FormError("nino[2]", "errors.invalid.nino"),
         FormError("nino[3]", "errors.invalid.nino"),
-        FormError("nino[4]", "errors.invalid.nino")
+        FormError("nino[4]", "errors.invalid.nino"),
+        FormError("nino[5]", "errors.invalid.nino"),
+        FormError("nino[6]", "errors.invalid.nino"),
+        FormError("nino[7]", "errors.invalid.nino"),
+        FormError("nino[8]", "errors.invalid.nino"),
+        FormError("nino[9]", "errors.invalid.nino"),
+        FormError("nino[10]", "errors.invalid.nino"),
+        FormError("nino[11]", "errors.invalid.nino")
       )
 
       "Fail to bind with the correct errors" in {

@@ -206,6 +206,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
             UserEnteredNino("1", None)
           ))
 
+
         service.createDirectorNinos(tstDirectors) shouldBe ninos
       }
     }
