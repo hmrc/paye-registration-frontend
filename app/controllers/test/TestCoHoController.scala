@@ -55,9 +55,7 @@ trait TestCoHoCtrl extends FrontendController with Actions with I18nSupport with
   def coHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        withCurrentProfile { profile =>
-          Future.successful(Ok(views.html.pages.test.coHoCompanyDetailsSetup(TestCoHoCompanyDetailsForm.form)))
-        }
+        Future.successful(Ok(views.html.pages.test.coHoCompanyDetailsSetup(TestCoHoCompanyDetailsForm.form)))
   }
 
   def submitCoHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
@@ -76,11 +74,9 @@ trait TestCoHoCtrl extends FrontendController with Actions with I18nSupport with
   def coHoCompanyDetailsTearDown = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        withCurrentProfile { profile =>
-          for {
-            res <- doCoHoCompanyDetailsTearDown
-          } yield Ok(res)
-        }
+        for {
+          res <- doCoHoCompanyDetailsTearDown
+        } yield Ok(res)
   }
 
   protected[controllers] def doCoHoCompanyDetailsTearDown(implicit request: Request[AnyContent]): Future[String] = {

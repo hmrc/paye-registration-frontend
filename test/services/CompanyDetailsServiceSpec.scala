@@ -344,28 +344,6 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
   }
 
-  "Calling retrieveRegisteredOfficeAddress" should {
-    "return an address" in new Setup {
-
-      val testAddress =
-        CHROAddress(
-          "12",
-          "Test Road",
-          None,
-          "Test Town",
-          None,
-          None,
-          Some("TS14 7ST"),
-          Some("Test county")
-        )
-
-      when(mockCohoAPIConnector.getRegisteredOfficeAddress(Matchers.eq("testTransId"))(Matchers.any[HeaderCarrier]()))
-        .thenReturn(Future.successful(testAddress))
-
-      await(service.retrieveRegisteredOfficeAddress("testTransId")) shouldBe CHROAddress.convertToAddress(testAddress)
-    }
-  }
-
   "Calling getPPOBPageAddresses" should {
     def viewModel(roAddr: Address, ppobAddr: Option[Address]): CompanyDetailsView = {
       CompanyDetailsView(

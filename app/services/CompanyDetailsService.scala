@@ -66,7 +66,7 @@ trait CompanyDetailsSrv {
       case Some(detailsAPI) => Future.successful(apiToView(detailsAPI))
       case None => for {
         cName   <- cohoService.getStoredCompanyName
-        roAddress <- retrieveRegisteredOfficeAddress(txId)
+        roAddress <- cohoAPIConnector.getRegisteredOfficeAddress(txId)
       } yield CompanyDetailsView(None, cName, None, roAddress, None, None)
     }
   }
@@ -92,14 +92,6 @@ trait CompanyDetailsSrv {
       details <- getCompanyDetails(regId, txId)
       outcome <- saveCompanyDetails(details.copy(tradingName = Some(tradingNameView)), regId)
     } yield outcome
-  }
-
-  private[services] def retrieveRegisteredOfficeAddress(txId: String)(implicit hc : HeaderCarrier): Future[Address] = {
-    for {
-      address <- cohoAPIConnector.getRegisteredOfficeAddress(txId)
-    } yield {
-      address
-    }
   }
 
   def getPPOBPageAddresses(companyDetailsView: CompanyDetailsView): (Map[String, Address]) = {
