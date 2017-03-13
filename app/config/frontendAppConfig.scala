@@ -32,7 +32,6 @@ trait AppConfig {
   val reportAProblemNonJSUrl: String
 
   val contactFrontendPartialBaseUrl : String
-  val serviceId : String
 }
 
 object FrontendAppConfig extends AppConfig with ServicesConfig {
@@ -42,7 +41,6 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   private val contactFormServiceIdentifier = "SCRS"
 
   override lazy val contactFrontendPartialBaseUrl = baseUrl("contact-frontend")
-  override lazy val serviceId = contactFormServiceIdentifier
 
   override lazy val analyticsToken = loadConfig(s"google-analytics.token")
   override lazy val analyticsHost = loadConfig(s"google-analytics.host")
