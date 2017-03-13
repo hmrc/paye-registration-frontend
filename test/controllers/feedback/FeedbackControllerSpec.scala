@@ -76,7 +76,7 @@ class FeedbackControllerSpec extends PAYERegSpec {
 
   "POST /feedback" should {
     val fakeRequest = FakeRequest("GET", "/")
-    val fakePostRequest = FakeRequest("POST", "/calculate-your-capital-gains/feedback").withFormUrlEncodedBody("test" -> "test")
+    val fakePostRequest = FakeRequest("POST", "/register-for-paye/feedback").withFormUrlEncodedBody("test" -> "test")
     "return form with thank you for valid selections" in new Setup {
       when(mockWSHttp.POSTForm[HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
         Future.successful(HttpResponse(Status.OK, responseString = Some("1234"))))
