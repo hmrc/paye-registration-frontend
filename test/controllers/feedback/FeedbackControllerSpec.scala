@@ -16,7 +16,6 @@
 
 package controllers.feedback
 
-import config.ApplicationConfig
 import org.mockito.Mockito._
 import org.mockito.{Matchers => ArgumentMatchers}
 import play.api.http.Status
@@ -36,11 +35,9 @@ class FeedbackControllerSpec extends PAYERegSpec {
 
   class Setup {
     val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
-    val config = fakeApplication.injector.instanceOf[ApplicationConfig]
 
-    val controller = new FeedbackController(config, messagesApi) {
-
-      override val httpPost: WSHttp = mockWSHttp
+    val controller = new FeedbackController(messagesApi) {
+      override val http: WSHttp = mockWSHttp
 
       override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = new CachedStaticHtmlPartialRetriever {
         override def httpGet: HttpGet = mockWSHttp

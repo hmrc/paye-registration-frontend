@@ -19,7 +19,7 @@ package controllers.feedback
 import java.net.URLEncoder
 import javax.inject.{Inject, Singleton}
 
-import config.{AppConfig, WSHttp}
+import config.{FrontendAppConfig, WSHttp}
 import play.api.Logger
 import play.api.http.{Status => HttpStatus}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -35,11 +35,10 @@ import views.html.feedback_thankyou
 import scala.concurrent.Future
 
 @Singleton
-class FeedbackController @Inject()(val appConfig: AppConfig, val messagesApi: MessagesApi) extends FrontendController with PartialRetriever with I18nSupport {
-  override val httpGet: WSHttp = WSHttp
-  val httpPost: WSHttp = WSHttp
+class FeedbackController @Inject()(val messagesApi: MessagesApi) extends FrontendController  with I18nSupport {
+  val http: WSHttp = WSHttp
 
-  val applicationConfig = appConfig
+  val applicationConfig = FrontendAppConfig
 
   private val TICKET_ID = "ticketId"
 
@@ -82,7 +81,7 @@ class FeedbackController @Inject()(val appConfig: AppConfig, val messagesApi: Me
   def submitFeedback: Action[AnyContent] = UnauthorisedAction.async {
     implicit request =>
       request.body.asFormUrlEncoded.map { formData =>
-        httpPost.POSTForm[HttpResponse](feedbackHmrcSubmitPartialUrl, formData)(rds = readPartialsForm, hc = partialsReadyHeaderCarrier).map {
+        http.POSTForm[HttpResponse](feedbackHmrcSubmitPartialUrl, formData)(rds = readPartialsForm, hc = partialsReadyHeaderCarrier).map {
           resp =>
             resp.status match {
               case HttpStatus.OK => Redirect(routes.FeedbackController.thankyou()).withSession(request.session + (TICKET_ID -> resp.body))
