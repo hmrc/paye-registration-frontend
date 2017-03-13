@@ -62,7 +62,7 @@ class FeedbackController @Inject()(val messagesApi: MessagesApi) extends Fronten
 
   private def feedbackFormPartialUrl(implicit request: Request[AnyContent]) =
     s"${applicationConfig.contactFrontendPartialBaseUrl}/contact/beta-feedback/form/?submitUrl=${urlEncode(localSubmitUrl)}" +
-      s"&service=${urlEncode(applicationConfig.serviceId)}&referer=${urlEncode(contactFormReferrer)}"
+      s"&service=${urlEncode(applicationConfig.contactFormServiceIdentifier)}&referer=${urlEncode(contactFormReferrer)}"
 
   private def feedbackHmrcSubmitPartialUrl(implicit request: Request[AnyContent]) =
     s"${applicationConfig.contactFrontendPartialBaseUrl}/contact/beta-feedback/form?resubmitUrl=${urlEncode(localSubmitUrl)}"

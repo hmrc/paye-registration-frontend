@@ -38,7 +38,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
-  private val contactFormServiceIdentifier = "SCRS"
+  val contactFormServiceIdentifier = "SCRS"
 
   override lazy val contactFrontendPartialBaseUrl = baseUrl("contact-frontend")
 
