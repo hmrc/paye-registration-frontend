@@ -67,7 +67,7 @@ class DirectorDetailsViewSpec extends PAYERegSpec with I18nSupport {
 
     "display the directors name and prepopped Nino" in {
       document.getElementsByClass("form-field").get(0).text shouldBe "Henri Lay (id 0) For example, QQ 12 34 56 C"
-      document.getElementsByAttributeValueContaining("value", "ZY123456A").size shouldBe 1
+      document.getElementsByAttributeValueContaining("value", "ZY 12 34 56 A").size shouldBe 1
     }
 
     "show no more directors" in {
@@ -96,7 +96,7 @@ class DirectorDetailsViewSpec extends PAYERegSpec with I18nSupport {
     }
 
     "only prepop the 3 fields that have data" in {
-      document.getElementsByAttributeValueContaining("value", "Nino").size shouldBe 3
+      document.getElementsByAttributeValueContaining("value", "Ni no").size shouldBe 3
     }
   }
 

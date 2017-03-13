@@ -160,7 +160,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         Seq(
           SummaryRow(
             id = "director0",
-            answer = Right("ZZ123456A"),
+            answer = Right("ZZ 12 34 56 A"),
             Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
             Some(Seq("Timothy Buttersford")),
             Some("director")
@@ -365,7 +365,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             Seq(
               SummaryRow(
                 id = "director0",
-                answer = Right("ZZ123456A"),
+                answer = Right("ZZ 12 34 56 A"),
                 Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
                 Some(Seq("Timothy Buttersford")),
                 Some("director")
@@ -766,7 +766,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
           Seq(
             Some(SummaryRow(
               id = "director0",
-              answer = Right("ZZ123456A"),
+              answer = Right("ZZ 12 34 56 A"),
               changeLink = Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
               questionArgs = Some(Seq("Timothy Buttersford")),
               commonQuestionKey = Some("director")

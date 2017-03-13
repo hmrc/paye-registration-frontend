@@ -20,7 +20,8 @@ import models.view.{Ninos, UserEnteredNino}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError, Forms, Mapping}
-import utils.Validators.ninoValidation
+import utils.Formatters
+import utils.Validators.isValidNino
 
 object DirectorDetailsForm {
 
@@ -44,12 +45,13 @@ object DirectorDetailsForm {
       } else {
         data.getOrElse(key,"") match {
           case ""   => Right(UserEnteredNino(getIndex(key), None))
-          case nino => Right(UserEnteredNino(getIndex(key), Some(nino.toUpperCase)))
+          case nino if isValidNino(nino) => Right(UserEnteredNino(getIndex(key), Some(nino.replaceAll("\\s", "").toUpperCase)))
+          case _ => Left(Seq(FormError(key, "errors.invalid.nino")))
         }
       }
     }
 
-    def unbind(key: String, value: UserEnteredNino) = Map(s"nino[${value.id}]" -> value.nino.getOrElse(""))
+    def unbind(key: String, value: UserEnteredNino) = Map(s"nino[${value.id}]" -> Formatters.ninoFormatter(value.nino.getOrElse("")))
   }
 
   val userNino: Mapping[UserEnteredNino] = Forms.of[UserEnteredNino](userNinoFormatter)
@@ -57,7 +59,7 @@ object DirectorDetailsForm {
 
   val form = Form(
     mapping(
-      "nino" -> list(userNino.verifying(ninoValidation))
+      "nino" -> list(userNino)
     )(Ninos.apply)(Ninos.unapply)
   )
 
