@@ -251,5 +251,6 @@ errorPages.restart.heading                              = Sorry, we''re having t
 errorPages.restart.p1                                   = You can try again by <a href={0}>restarting</a> your PAYE registration.
 
 ## Feedback page
-page.feedback.title=Feedback
-page.feedback.heading=Send your feedback
+page.feedback.title                                     = Feedback
+page.feedback.thank-you.title                           = Thank you
+page.feedback.heading                                   = Send your feedback
