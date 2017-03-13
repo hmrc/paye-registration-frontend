@@ -16,29 +16,103 @@
 
 package controllers.feedback
 
+import config.ApplicationConfig
+import org.mockito.Mockito._
+import org.mockito.{Matchers => ArgumentMatchers}
 import play.api.http.Status
 import play.api.i18n.MessagesApi
+import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import play.twirl.api.Html
 import testHelpers.PAYERegSpec
+import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.hmrc.play.http.{HttpGet, HttpResponse}
+import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
+
+import scala.concurrent.Future
 
 class FeedbackControllerSpec extends PAYERegSpec {
 
-  val fakeRequest = FakeRequest("GET", "/")
-
   class Setup {
-    val controller = new FeedbackCtrl {
-      implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+    val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+    val config = fakeApplication.injector.instanceOf[ApplicationConfig]
+
+    val controller = new FeedbackController(config, messagesApi) {
+
+      override val httpPost: WSHttp = mockWSHttp
+
+      override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = new CachedStaticHtmlPartialRetriever {
+        override def httpGet: HttpGet = mockWSHttp
+
+        override def getPartialContent(url: String, templateParameters: Map[String, String], errorMessage: Html)(implicit request: RequestHeader): Html =
+          Html("")
+      }
+      override implicit val formPartialRetriever: FormPartialRetriever = new FormPartialRetriever {
+        override def crypto: (String) => String = ???
+
+        override def httpGet: HttpGet = mockWSHttp
+
+        override def getPartialContent(url: String,
+                                       templateParameters: Map[String, String],
+                                       errorMessage: Html)(implicit request: RequestHeader): Html = Html("")
+      }
     }
   }
 
-  "GET /start" should {
-    "return 200" in new Setup {
-      val result = controller.show(fakeRequest)
+  "GET /feedback" should {
+    val fakeRequest = FakeRequest("GET", "/")
+
+    "return feedback page" in new Setup {
+      val result = controller.feedbackShow(fakeRequest)
       status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+    }
+
+    "capture the referrer in the session on initial session on the feedback load" in new Setup {
+      val result = controller.feedbackShow(fakeRequest.withHeaders("Referer" -> "Blah"))
+      status(result) shouldBe Status.OK
     }
   }
 
+  "POST /feedback" should {
+    val fakeRequest = FakeRequest("GET", "/")
+    val fakePostRequest = FakeRequest("POST", "/calculate-your-capital-gains/feedback").withFormUrlEncodedBody("test" -> "test")
+    "return form with thank you for valid selections" in new Setup {
+      when(mockWSHttp.POSTForm[HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
+        Future.successful(HttpResponse(Status.OK, responseString = Some("1234"))))
+
+      val result = controller.submitFeedback(fakePostRequest)
+      redirectLocation(result) shouldBe Some(routes.FeedbackController.thankyou().url)
+    }
+
+    "return form with errors for invalid selections" in new Setup {
+      when(mockWSHttp.POSTForm[HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
+        Future.successful(HttpResponse(Status.BAD_REQUEST, responseString = Some("<p>:^(</p>"))))
+      val result = controller.submitFeedback(fakePostRequest)
+      status(result) shouldBe Status.BAD_REQUEST
+    }
+
+    "return error for other http code back from contact-frontend" in new Setup {
+      when(mockWSHttp.POSTForm[HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
+        Future.successful(HttpResponse(418))) // 418 - I'm a teapot
+      val result = controller.submitFeedback(fakePostRequest)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+    }
+
+    "return internal server error when there is an empty form" in new Setup {
+      when(mockWSHttp.POSTForm[HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
+        Future.successful(HttpResponse(Status.OK, responseString = Some("1234"))))
+
+      val result = controller.submitFeedback(fakeRequest)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+    }
+  }
+
+  "GET /feedback/thankyou" should {
+    "should return the thank you page" in new Setup {
+      val fakeRequest = FakeRequest("GET", "/")
+      val result = controller.thankyou(fakeRequest)
+      status(result) shouldBe Status.OK
+    }
+  }
 }

@@ -249,3 +249,7 @@ pages.confirmation.p2                                   = You''ll need these to 
 errorPages.title                                        = Something went wrong
 errorPages.restart.heading                              = Sorry, we''re having technical issues.
 errorPages.restart.p1                                   = You can try again by <a href={0}>restarting</a> your PAYE registration.
+
+## Feedback page
+page.feedback.title=Feedback
+page.feedback.heading=Send your feedback

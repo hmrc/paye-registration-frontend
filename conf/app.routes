@@ -72,4 +72,6 @@ POST        /summary                                controllers.userJourney.Summ
 GET         /confirmation                           controllers.userJourney.ConfirmationController.showConfirmation
 
 ## FEEDBACK
-GET         /feedback                               controllers.feedback.FeedbackController.show
+GET        /feedback                                controllers.feedback.FeedbackController.feedbackShow
+POST       /feedback                                controllers.feedback.FeedbackController.submitFeedback
+GET        /thankyou                                controllers.feedback.FeedbackController.thankyou
