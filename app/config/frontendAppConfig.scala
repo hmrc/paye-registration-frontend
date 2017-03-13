@@ -17,23 +17,59 @@
 package config
 
 import java.util.Base64
+import javax.inject.{Inject, Singleton}
 
+import com.google.inject.ImplementedBy
+import config.FrontendAppConfig.baseUrl
+import play.api.Configuration
 import play.api.Play.{configuration, current}
 import uk.gov.hmrc.play.config.ServicesConfig
 
+@ImplementedBy(classOf[ApplicationConfig])
 trait AppConfig {
   val analyticsToken: String
   val analyticsHost: String
   val reportAProblemPartialUrl: String
   val reportAProblemNonJSUrl: String
+
+  val contactFrontendPartialBaseUrl : String
+  val serviceId : String
 }
 
 object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
-  private val contactHost = configuration.getString(s"contact-frontend.host").getOrElse("")
-  private val contactFormServiceIdentifier = "MyService"
+  private val contactHost = baseUrl("contact-frontend")
+  private val contactFormServiceIdentifier = "SCRS"
+
+  override lazy val contactFrontendPartialBaseUrl = baseUrl("contact-frontend")
+  override lazy val serviceId = contactFormServiceIdentifier
+
+  override lazy val analyticsToken = loadConfig(s"google-analytics.token")
+  override lazy val analyticsHost = loadConfig(s"google-analytics.host")
+  override lazy val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
+  override lazy val reportAProblemNonJSUrl = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+
+  private def whiteListConfig(key : String) : Seq[String] = {
+    Some(new String(Base64.getDecoder
+      .decode(configuration.getString(key).getOrElse("")), "UTF-8"))
+      .map(_.split(",")).getOrElse(Array.empty).toSeq
+  }
+
+  lazy val whitelist = whiteListConfig("whitelist")
+  lazy val whitelistExcluded = whiteListConfig("whitelist-excluded")
+}
+
+@Singleton
+class ApplicationConfig @Inject()(configuration: Configuration) extends AppConfig with ServicesConfig {
+  private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
+
+  private val contactHost = baseUrl("contact-frontend")
+  private val contactFormServiceIdentifier = "SCRS"
+
+  override lazy val contactFrontendPartialBaseUrl = baseUrl("contact-frontend")
+  override lazy val serviceId = contactFormServiceIdentifier
 
   override lazy val analyticsToken = loadConfig(s"google-analytics.token")
   override lazy val analyticsHost = loadConfig(s"google-analytics.host")
