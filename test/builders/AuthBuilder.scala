@@ -16,7 +16,7 @@
 
 package builders
 
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.mvc._
 import play.api.test.FakeRequest
@@ -31,7 +31,7 @@ object AuthBuilder extends AuthBuilder {}
 trait AuthBuilder {
 
   def mockAuthorisedUser(userId: String, mockAuthConnector : AuthConnector, accounts: Accounts = Accounts()) {
-    when(mockAuthConnector.currentAuthority(Matchers.any())) thenReturn {
+    when(mockAuthConnector.currentAuthority(ArgumentMatchers.any())) thenReturn {
       Future.successful(Some(createUserAuthority(userId, accounts)))
     }
   }

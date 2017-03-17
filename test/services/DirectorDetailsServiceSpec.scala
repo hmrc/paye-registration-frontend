@@ -21,7 +21,7 @@ import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, PAYERegistrationFixture, S4LFixture}
 import models.api.{Director, Name}
 import models.view.{Directors, Ninos, UserEnteredNino}
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.{Format, Json}
 import testHelpers.PAYERegSpec
@@ -232,7 +232,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
         )
       )
 
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(Some(validDirectorDetailsViewModel)))
 
       await(service.ninosToDirectorsMap(validDirectorDetailsViewModel, validNinos)) shouldBe expectedDirectorDetailsViewModel
@@ -251,7 +251,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
         )
       )
 
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(Some(directorDetails)))
 
       await(service.getDirectorDetails("12345", "txId")) shouldBe directorDetails
@@ -270,13 +270,13 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
         )
       )
 
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getDirectors(Matchers.contains("12345"))(Matchers.any(), Matchers.any()))
+      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Seq(dir)))
 
-      when(mockS4LService.saveForm(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.any, Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
       await(service.getDirectorDetails("12345", "txId")) shouldBe directorDetails
@@ -292,33 +292,33 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
           )
         )
       )
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getDirectors(Matchers.contains("12345"))(Matchers.any(), Matchers.any()))
+      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Nil))
 
-      when(mockCoHoService.getDirectorDetails(Matchers.anyString())(Matchers.any()))
+      when(mockCoHoService.getDirectorDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(directorDetails))
 
-      when(mockS4LService.saveForm(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.any, Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
       await(service.getDirectorDetails("12345", "txId")) shouldBe directorDetails
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getDirectors(Matchers.contains("12345"))(Matchers.any(), Matchers.any()))
+      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
 
       an[Upstream4xxResponse] shouldBe thrownBy(await(service.getDirectorDetails("12345", "txId")))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
-      when(mockPAYERegConnector.getDirectors(Matchers.contains("12345"))(Matchers.any(), Matchers.any()))
+      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new ArrayIndexOutOfBoundsException))
 
       an[Exception] shouldBe thrownBy(await(service.getDirectorDetails("12345", "txId")))
@@ -327,10 +327,10 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
 
   "Calling saveDirectorDetails" should {
     "return a success response when the upsert completes successfully" in new Setup {
-      when(mockPAYERegConnector.upsertDirectors(Matchers.contains("12345"), Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockPAYERegConnector.upsertDirectors(ArgumentMatchers.contains("12345"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validDirectorList))
 
-      when(mockS4LService.clear(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+      when(mockS4LService.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(returnHttpResponse))
 
       await(service.saveDirectorDetails(validDirectorDetailsViewModel, "12345")) shouldBe DownstreamOutcome.Success
@@ -339,7 +339,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
     "return a success response when the S4L save completes successfully" in new Setup {
       val incompleteCompanyDetailsViewModel = Directors(directorMapping = Map())
 
-      when(mockS4LService.saveForm(Matchers.eq(CacheKeys.DirectorDetails.toString), Matchers.any, Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[Directors]]()))
+      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
       await(service.saveDirectorDetails(incompleteCompanyDetailsViewModel, "12345")) shouldBe DownstreamOutcome.Success

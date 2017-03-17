@@ -16,7 +16,7 @@
 
 package controllers.test
 
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{BAD_REQUEST, OK}
@@ -43,10 +43,10 @@ class FeatureSwitchControllerSpec extends PAYERegSpec {
   "addressServiceSwitch" should {
     "enable the addressService feature switch and return an OK" when {
       "addressService and addressLookUpFrontend are passed in the url" in new Setup {
-        when(mockPAYEFeatureSwitch(Matchers.any()))
+        when(mockPAYEFeatureSwitch(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(testFeatureSwitch)))
 
-        when(mockFeatureManager.enable(Matchers.any()))
+        when(mockFeatureManager.enable(ArgumentMatchers.any()))
           .thenReturn(testFeatureSwitch)
 
         val result = controller.addressServiceSwitch("addressService","addressLookupFrontend")(FakeRequest())
@@ -56,10 +56,10 @@ class FeatureSwitchControllerSpec extends PAYERegSpec {
 
     "disable the addressServiceFeature switch and return an OK" when {
       "addressService and some other featureState is passed into the URL" in new Setup {
-        when(mockPAYEFeatureSwitch(Matchers.any()))
+        when(mockPAYEFeatureSwitch(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(testFeatureSwitch)))
 
-        when(mockFeatureManager.disable(Matchers.any()))
+        when(mockFeatureManager.disable(ArgumentMatchers.any()))
           .thenReturn(testDisabledSwitch)
 
         val result = await(controller.addressServiceSwitch("addressService","someOtherState")(FakeRequest()))
@@ -69,7 +69,7 @@ class FeatureSwitchControllerSpec extends PAYERegSpec {
 
     "return a bad request" when {
       "an unknown feature is trying to be enabled" in new Setup {
-        when(mockPAYEFeatureSwitch(Matchers.any()))
+        when(mockPAYEFeatureSwitch(ArgumentMatchers.any()))
           .thenReturn(Future.successful(None))
 
         val result = controller.addressServiceSwitch("invalidName","invalidState")(FakeRequest())

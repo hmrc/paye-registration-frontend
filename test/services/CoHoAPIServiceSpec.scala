@@ -21,7 +21,7 @@ import connectors.{CoHoAPIConnector, CohoApiBadRequestResponse, CohoApiErrorResp
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, KeystoreFixture}
 import models.external.{CoHoCompanyDetailsModel, BusinessProfile}
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -47,7 +47,7 @@ class CoHoAPIServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFi
 
     "return a successful DownstreamOutcome for a successful response from the CoHo API" in new Setup {
       mockKeystoreFetchAndGet[BusinessProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
-      when(mockCoHoAPIConnector.getCoHoCompanyDetails(Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(tstSuccessResult))
+      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(tstSuccessResult))
       mockKeystoreCache[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, CacheMap("map", Map.empty))
 
       await(service.fetchAndStoreCoHoCompanyDetails("123")) shouldBe DownstreamOutcome.Success
@@ -55,14 +55,14 @@ class CoHoAPIServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFi
 
     "return a failed DownstreamOutcome for a Bad Request response from the CoHo API" in new Setup {
       mockKeystoreFetchAndGet[BusinessProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
-      when(mockCoHoAPIConnector.getCoHoCompanyDetails(Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(tstBadRequestResult))
+      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(tstBadRequestResult))
 
       await(service.fetchAndStoreCoHoCompanyDetails("123")) shouldBe DownstreamOutcome.Failure
     }
 
     "return a failed DownstreamOutcome for an Internal Exception response from the CoHo API" in new Setup {
       mockKeystoreFetchAndGet[BusinessProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
-      when(mockCoHoAPIConnector.getCoHoCompanyDetails(Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(tstInternalErrorResult))
+      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(tstInternalErrorResult))
 
       await(service.fetchAndStoreCoHoCompanyDetails("123")) shouldBe DownstreamOutcome.Failure
     }
@@ -84,7 +84,7 @@ class CoHoAPIServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFi
 
   "Calling getDirectorDetails" should {
     "return the directors details when there is Officer list in CoHo API" in new Setup {
-      when(mockCoHoAPIConnector.getOfficerList(Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(validOfficerList))
+      when(mockCoHoAPIConnector.getOfficerList(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(validOfficerList))
 
       await(service.getDirectorDetails("testTransactionId")) shouldBe validDirectorDetails
     }

@@ -20,7 +20,7 @@ import builders.AuthBuilder
 import enums.DownstreamOutcome
 import fixtures.S4LFixture
 import models.view.NatureOfBusiness
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
@@ -58,10 +58,10 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
 
     "return an OK when there is a nature of business in the microservice" in new Setup {
       mockFetchCurrentProfile()
-      when(mockNatureOfBusinessService.getNatureOfBusiness(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+      when(mockNatureOfBusinessService.getNatureOfBusiness(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Some(testNOB)))
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(validCompanyDetailsViewModel)
 
       AuthBuilder.showWithAuthorisedUser(testController.natureOfBusiness, mockAuthConnector) {
@@ -72,10 +72,10 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
 
     "return an OK when there is no nature of business in the microservice" in new Setup {
       mockFetchCurrentProfile()
-      when(mockNatureOfBusinessService.getNatureOfBusiness(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+      when(mockNatureOfBusinessService.getNatureOfBusiness(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(None))
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(validCompanyDetailsViewModel)
 
       AuthBuilder.showWithAuthorisedUser(testController.natureOfBusiness, mockAuthConnector) {
@@ -98,7 +98,7 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
       )
       mockFetchCurrentProfile()
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(validCompanyDetailsViewModel)
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitNatureOfBusiness, mockAuthConnector, request) {
@@ -113,7 +113,7 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
       )
       mockFetchCurrentProfile()
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(validCompanyDetailsViewModel)
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitNatureOfBusiness, mockAuthConnector, request) {
@@ -124,7 +124,7 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
 
     "show an error page when there is an error response from the microservice" in new Setup {
       mockFetchCurrentProfile()
-      when(mockNatureOfBusinessService.saveNatureOfBusiness(Matchers.any(), Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
+      when(mockNatureOfBusinessService.saveNatureOfBusiness(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
       AuthBuilder.submitWithAuthorisedUser(testController.submitNatureOfBusiness(), mockAuthConnector, FakeRequest().withFormUrlEncodedBody(
         "description" -> "testing"
       )) {
@@ -138,10 +138,10 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
         "description" -> "computing"
       )
       mockFetchCurrentProfile()
-      when(mockNatureOfBusinessService.saveNatureOfBusiness(Matchers.any(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+      when(mockNatureOfBusinessService.saveNatureOfBusiness(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(validCompanyDetailsViewModel)
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitNatureOfBusiness, mockAuthConnector, request) {

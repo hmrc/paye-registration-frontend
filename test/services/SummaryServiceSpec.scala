@@ -24,7 +24,7 @@ import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYE
 import models.api.{Director, Employment, Name, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
 import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection}
 import models.{Address, DigitalContactDetails}
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException, Upstream4xxResponse}
@@ -209,28 +209,28 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
   "Calling getRegistrationSummary" should {
     "return a defined Summary when the connector returns a valid PAYE Registration response" in new Setup {
 
-      when(mockRegConnector.getRegistration(Matchers.contains("45632"))(Matchers.any(), Matchers.any()))
+      when(mockRegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(apiRegistration))
 
       await(service.getRegistrationSummary("45632")) shouldBe summary
     }
 
     "return None when the connector returns a Forbidden response" in new Setup {
-      when(mockRegConnector.getRegistration(Matchers.contains("45632"))(Matchers.any(), Matchers.any()))
+      when(mockRegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(forbidden))
 
       intercept[Upstream4xxResponse](await(service.getRegistrationSummary("45632")))
     }
 
     "return None when the connector returns a Not Found response" in new Setup {
-      when(mockRegConnector.getRegistration(Matchers.contains("45632"))(Matchers.any(), Matchers.any()))
+      when(mockRegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(notFound))
 
       intercept[NotFoundException](await(service.getRegistrationSummary("45632")))
     }
 
     "return None when the connector returns an exception response" in new Setup {
-      when(mockRegConnector.getRegistration(Matchers.contains("45632"))(Matchers.any(), Matchers.any()))
+      when(mockRegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(runTimeException))
 
       intercept[RuntimeException](await(service.getRegistrationSummary("45632")))

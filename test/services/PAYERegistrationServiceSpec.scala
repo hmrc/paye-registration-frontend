@@ -20,7 +20,7 @@ import builders.AuthBuilder
 import config.FrontendAuthConnector
 import connectors._
 import enums.{AccountTypes, DownstreamOutcome}
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.{JsObject, Json}
 import testHelpers.PAYERegSpec
@@ -51,14 +51,14 @@ class PAYERegistrationServiceSpec extends PAYERegSpec {
 
   "Calling assertRegistrationFootprint" should {
     "return a success response when the Registration is successfully created" in new Setup {
-      when(mockRegConnector.createNewRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockRegConnector.createNewRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       await(service.assertRegistrationFootprint("123")) shouldBe DownstreamOutcome.Success
     }
 
     "return a failure response when the Registration can't be created" in new Setup {
-      when(mockRegConnector.createNewRegistration(Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockRegConnector.createNewRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       await(service.assertRegistrationFootprint("123")) shouldBe DownstreamOutcome.Failure
@@ -73,7 +73,7 @@ class PAYERegistrationServiceSpec extends PAYERegSpec {
             "affinityGroup" -> "Organisation"
           )
 
-        when(mockAuthConnector.getUserDetails[JsObject](Matchers.any[AuthContext]())(Matchers.any(), Matchers.any()))
+        when(mockAuthConnector.getUserDetails[JsObject](ArgumentMatchers.any[AuthContext]())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(userDetails))
 
         val result = await(service.getAccountAffinityGroup)
@@ -88,7 +88,7 @@ class PAYERegistrationServiceSpec extends PAYERegSpec {
             "affinityGroup" -> "Individual"
           )
 
-        when(mockAuthConnector.getUserDetails[JsObject](Matchers.any[AuthContext]())(Matchers.any(), Matchers.any()))
+        when(mockAuthConnector.getUserDetails[JsObject](ArgumentMatchers.any[AuthContext]())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(userDetails))
 
         val result = await(service.getAccountAffinityGroup)

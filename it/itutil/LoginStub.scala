@@ -35,7 +35,8 @@ trait LoginStub extends SessionCookieBaker {
       SessionKeys.sessionId -> SessionId,
       SessionKeys.userId -> "/auth/oid/1234567890",
       SessionKeys.token -> "token",
-      SessionKeys.authProvider -> "GGW"
+      SessionKeys.authProvider -> "GGW",
+      SessionKeys.lastRequestTimestamp -> new java.util.Date().getTime.toString
     ) ++ additionalData
   }
 

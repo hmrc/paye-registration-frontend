@@ -18,7 +18,7 @@ package mocks
 
 import connectors._
 import models.external.{BusinessProfile, CompanyProfile, CurrentProfile}
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatest.mockito.MockitoSugar
@@ -34,27 +34,27 @@ trait KeystoreMock {
   lazy val mockKeystoreConnector = mock[KeystoreConnector]
 
   def mockKeystoreFetchAndGet[T](key: String, model: Option[T]): OngoingStubbing[Future[Option[T]]] = {
-    when(mockKeystoreConnector.fetchAndGet[T](Matchers.contains(key))(Matchers.any[HeaderCarrier](), Matchers.any[Format[T]]()))
+    when(mockKeystoreConnector.fetchAndGet[T](ArgumentMatchers.contains(key))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[T]]()))
       .thenReturn(Future.successful(model))
   }
 
   def mockKeystoreCache[T](key: String, cacheMap: CacheMap): OngoingStubbing[Future[CacheMap]] = {
-    when(mockKeystoreConnector.cache(Matchers.contains(key), Matchers.any[T]())(Matchers.any[HeaderCarrier](), Matchers.any[Format[T]]()))
+    when(mockKeystoreConnector.cache(ArgumentMatchers.contains(key), ArgumentMatchers.any[T]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[T]]()))
       .thenReturn(Future.successful(cacheMap))
   }
 
   def mockKeystoreCacheError[T](key: String, err: Exception): OngoingStubbing[Future[CacheMap]] = {
-    when(mockKeystoreConnector.cache(Matchers.contains(key), Matchers.any[T]())(Matchers.any[HeaderCarrier](), Matchers.any[Format[T]]()))
+    when(mockKeystoreConnector.cache(ArgumentMatchers.contains(key), ArgumentMatchers.any[T]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[T]]()))
       .thenReturn(Future.failed(err))
   }
 
   def mockKeystoreClear(): OngoingStubbing[Future[HttpResponse]] = {
-    when(mockKeystoreConnector.remove()(Matchers.any()))
+    when(mockKeystoreConnector.remove()(ArgumentMatchers.any()))
       .thenReturn(Future.successful(HttpResponse(200)))
   }
 
   def mockFetchCurrentProfile(regID: String = "12345"): OngoingStubbing[Future[Option[CurrentProfile]]] = {
-    when(mockKeystoreConnector.fetchAndGet[CurrentProfile](Matchers.any())(Matchers.any[HeaderCarrier](), Matchers.any[Format[CurrentProfile]]()))
+    when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CurrentProfile]]()))
         .thenReturn(Future.successful(Some(CurrentProfile(
           regID,
           Some("Director"),

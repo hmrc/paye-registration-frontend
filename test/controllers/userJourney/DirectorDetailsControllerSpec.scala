@@ -20,7 +20,7 @@ import builders.AuthBuilder
 import enums.DownstreamOutcome
 import models.api.{Director, Name}
 import models.view.{Directors, Ninos, UserEnteredNino}
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
@@ -77,13 +77,13 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
 
     "return an OK" in new Setup {
       mockFetchCurrentProfile()
-      when(mockDirectorDetailService.getDirectorDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+      when(mockDirectorDetailService.getDirectorDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(testDirectors))
 
-      when(mockDirectorDetailService.createDirectorNinos(Matchers.any()))
+      when(mockDirectorDetailService.createDirectorNinos(ArgumentMatchers.any()))
         .thenReturn(userNinos)
 
-      when(mockDirectorDetailService.createDisplayNamesMap(Matchers.any()))
+      when(mockDirectorDetailService.createDisplayNamesMap(ArgumentMatchers.any()))
         .thenReturn(directorMap)
 
       AuthBuilder.showWithAuthorisedUser(testController.directorDetails, mockAuthConnector) {
@@ -105,10 +105,10 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
         "nino[0]" -> ""
       )
       mockFetchCurrentProfile()
-      when(mockDirectorDetailService.getDirectorDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+      when(mockDirectorDetailService.getDirectorDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(testDirectors))
 
-      when(mockDirectorDetailService.createDisplayNamesMap(Matchers.any()))
+      when(mockDirectorDetailService.createDisplayNamesMap(ArgumentMatchers.any()))
         .thenReturn(directorMap)
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitDirectorDetails, mockAuthConnector, request) {
@@ -120,7 +120,7 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
     "return a SEE_OTHER and redirect to the PAYE Contact page" in new Setup {
       val request = FakeRequest().withFormUrlEncodedBody()
       mockFetchCurrentProfile()
-      when(mockDirectorDetailService.submitNinos(Matchers.any(), Matchers.anyString(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+      when(mockDirectorDetailService.submitNinos(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitDirectorDetails, mockAuthConnector, request) {

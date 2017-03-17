@@ -19,7 +19,7 @@ package controllers.test
 import builders.AuthBuilder
 import connectors.test.TestPAYERegConnect
 import enums.DownstreamOutcome
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK}
@@ -48,7 +48,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
     "return an OK" when {
       "the registration document has been successfully torn down" in new Setup {
         mockFetchCurrentProfile()
-        when(mockPayeRegConnector.testRegistrationTeardown()(Matchers.any[HeaderCarrier]()))
+        when(mockPayeRegConnector.testRegistrationTeardown()(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
         AuthBuilder.showWithAuthorisedUser(controller.regTeardown, mockAuthConnector) { result =>
@@ -60,7 +60,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
     "return an INTERNAL_SERVER_ERROR" when {
       "there was a problem tearing down the registration document" in new Setup {
         mockFetchCurrentProfile()
-        when(mockPayeRegConnector.testRegistrationTeardown()(Matchers.any[HeaderCarrier]()))
+        when(mockPayeRegConnector.testRegistrationTeardown()(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
         AuthBuilder.showWithAuthorisedUser(controller.regTeardown, mockAuthConnector) { result =>
@@ -154,7 +154,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
         )
 
         mockFetchCurrentProfile()
-        when(mockPayeRegConnector.addPAYERegistration(Matchers.any())(Matchers.any[HeaderCarrier]()))
+        when(mockPayeRegConnector.addPAYERegistration(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetup, mockAuthConnector, request) { result =>
@@ -222,7 +222,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
           "payeContact.correspondenceAddress.country" -> "testCountry"
         )
         mockFetchCurrentProfile()
-        when(mockPayeRegConnector.addPAYERegistration(Matchers.any())(Matchers.any[HeaderCarrier]()))
+        when(mockPayeRegConnector.addPAYERegistration(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetup, mockAuthConnector, request) { result =>
@@ -277,7 +277,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
           "businessContactDetails.phoneNumber" -> "testNumber"
         )
         mockFetchCurrentProfile()
-        when(mockPayeRegConnector.addTestCompanyDetails(Matchers.any(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+        when(mockPayeRegConnector.addTestCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupCompanyDetails, mockAuthConnector, request) { result =>
@@ -309,7 +309,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
           "businessContactDetails.phoneNumber" -> "testNumber"
         )
         mockFetchCurrentProfile()
-        when(mockPayeRegConnector.addTestCompanyDetails(Matchers.any(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+        when(mockPayeRegConnector.addTestCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupCompanyDetails, mockAuthConnector, request) { result =>
@@ -356,7 +356,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
           "correspondenceAddress.country" -> "testCountry"
         )
         mockFetchCurrentProfile()
-        when(mockPayeRegConnector.addTestPAYEContact(Matchers.any(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+        when(mockPayeRegConnector.addTestPAYEContact(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupPAYEContact, mockAuthConnector, request) { result =>
@@ -380,7 +380,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
           "correspondenceAddress.country" -> "testCountry"
         )
         mockFetchCurrentProfile()
-        when(mockPayeRegConnector.addTestPAYEContact(Matchers.any(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+        when(mockPayeRegConnector.addTestPAYEContact(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupPAYEContact, mockAuthConnector, request) { result =>

@@ -17,7 +17,7 @@
 package controllers.test
 
 import builders.AuthBuilder
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.test.Helpers.OK
 import services.S4LSrv
@@ -46,7 +46,7 @@ class TestCacheControllerSpec extends PAYERegSpec {
       "Save4Later has been cleared" in new Setup {
         mockFetchCurrentProfile()
 
-        when(mockS4LService.clear(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+        when(mockS4LService.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testHttpResponse))
 
         AuthBuilder.showWithAuthorisedUser(controller.tearDownS4L, mockAuthConnector) { result =>
