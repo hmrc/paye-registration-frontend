@@ -60,8 +60,28 @@ trait PAYERegistrationConnect {
   }
 
   def getRegistration(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[PAYERegistrationAPI] = {
-    http.GET[PAYERegistrationAPI](s"$payeRegUrl/paye-registration/$regID") recover {
-      case e: Exception => throw logResponse(e, "getRegistration", "getting registration")
+    val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
+    http.GET[PAYERegistrationAPI](s"$payeRegUrl/paye-registration/$regID") map {
+      res =>
+        payeRegTimer.stop()
+        res
+    } recover {
+      case e: Exception =>
+        payeRegTimer.stop()
+        throw logResponse(e, "getRegistration", "getting registration")
+    }
+  }
+
+  def submitRegistration(regId: String)(implicit hc: HeaderCarrier): Future[String] = {
+    val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
+    http.PUT[String, String](s"$payeRegUrl/paye-registration/$regId/submit-registration", "") map {
+      res =>
+        payeRegTimer.stop()
+        res
+    } recover {
+      case e: Exception =>
+        payeRegTimer.stop()
+        throw logResponse(e, "submitRegistration", "submitting registration")
     }
   }
 
@@ -130,8 +150,12 @@ trait PAYERegistrationConnect {
         payeRegTimer.stop()
         resp
     } recover {
-      case e: NotFoundException => Seq.empty
-      case e: Exception => throw logResponse(e, "getDirectors", "getting directors")
+      case e: NotFoundException =>
+        payeRegTimer.stop()
+        Seq.empty
+      case e: Exception =>
+        payeRegTimer.stop()
+        throw logResponse(e, "getDirectors", "getting directors")
     }
   }
 
@@ -142,7 +166,9 @@ trait PAYERegistrationConnect {
         payeRegTimer.stop()
         resp
     } recover {
-      case e: Exception => throw logResponse(e, "upsertDirectors", "upserting directors")
+      case e: Exception =>
+        payeRegTimer.stop()
+        throw logResponse(e, "upsertDirectors", "upserting directors")
     }
   }
 
@@ -153,8 +179,12 @@ trait PAYERegistrationConnect {
         payeRegTimer.stop()
         resp
     } recover {
-      case e: NotFoundException => Seq.empty
-      case e: Exception => throw logResponse(e, "getSICCodes", "getting sic codes")
+      case e: NotFoundException =>
+        payeRegTimer.stop()
+        Seq.empty
+      case e: Exception =>
+        payeRegTimer.stop()
+        throw logResponse(e, "getSICCodes", "getting sic codes")
     }
   }
 
@@ -165,7 +195,9 @@ trait PAYERegistrationConnect {
         payeRegTimer.stop()
         resp
     } recover {
-      case e: Exception => throw logResponse(e, "upsertSICCodes", "upserting sic codes")
+      case e: Exception =>
+        payeRegTimer.stop()
+        throw logResponse(e, "upsertSICCodes", "upserting sic codes")
     }
   }
 
@@ -221,7 +253,25 @@ trait PAYERegistrationConnect {
         payeRegTimer.stop()
         resp
     } recover {
-      case e: Exception => throw logResponse(e, "upsertCompletionCapacity", "upserting completion capacity")
+      case e: Exception =>
+        payeRegTimer.stop()
+        throw logResponse(e, "upsertCompletionCapacity", "upserting completion capacity")
+    }
+  }
+
+  def getAcknowledgementReference(regID: String)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
+    http.GET[String](s"$payeRegUrl/paye-registration/$regID/acknowledgement-reference") map {
+      ackRef =>
+        payeRegTimer.stop()
+        Some(ackRef)
+    } recover {
+      case e: NotFoundException =>
+        payeRegTimer.stop()
+        None
+      case e: Exception =>
+        payeRegTimer.stop()
+        throw logResponse(e, "getAcknowledgementReference", "getting acknowledgement reference")
     }
   }
 

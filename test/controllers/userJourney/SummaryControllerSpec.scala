@@ -71,6 +71,9 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
   "Calling submitRegistration" should {
     "show the confirmation page" in new Setup {
       mockFetchCurrentProfile()
+
+      when(mockSummaryService.submitRegistration(Matchers.anyString())(Matchers.any())).thenReturn(Future.successful("ackRef"))
+
       AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
         (result: Future[Result]) =>
           status(result) shouldBe Status.SEE_OTHER

@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector}
+import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.{SummaryService, SummarySrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
@@ -28,13 +28,10 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.SessionProfile
 import views.html.pages.{summary => SummaryPage}
 
-import scala.concurrent.Future
-
 @Singleton
-class SummaryController @Inject()(
-                                   injSummaryService: SummaryService,
-                                   injKeystoreConnector: KeystoreConnector,
-                                   injMessagesApi: MessagesApi)
+class SummaryController @Inject()(injSummaryService: SummaryService,
+                                  injKeystoreConnector: KeystoreConnector,
+                                  injMessagesApi: MessagesApi)
   extends SummaryCtrl {
   val authConnector = FrontendAuthConnector
   val summaryService = injSummaryService
@@ -59,7 +56,9 @@ trait SummaryCtrl extends FrontendController with Actions with I18nSupport with 
 
   val submitRegistration = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     withCurrentProfile { profile =>
-      Future.successful(Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation()))
+      summaryService.submitRegistration(profile.registrationID) map {
+        _ => Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation)
+      }
     }
   }
 }

@@ -454,4 +454,41 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       await(patchResponse) shouldBe jobTitle
     }
   }
+
+  "Acknowledgement Reference" should {
+
+    "get a string" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      val jobTitle = "High Priestess"
+
+      def getResponse = payeRegistrationConnector.getAcknowledgementReference(regId)
+
+      stubFor(get(urlMatching(url("/acknowledgement-reference")))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(Json.toJson(jobTitle).toString())
+        )
+      )
+
+      await(getResponse) shouldBe Some(jobTitle)
+    }
+
+    "get a None" in {
+
+      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+
+      def getResponse = payeRegistrationConnector.getAcknowledgementReference(regId)
+
+      stubFor(get(urlMatching(url("/acknowledgement-reference")))
+        .willReturn(
+          aResponse()
+            .withStatus(404)
+        )
+      )
+
+      await(getResponse) shouldBe None
+    }
+  }
 }
