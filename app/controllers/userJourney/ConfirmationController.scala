@@ -22,6 +22,7 @@ import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector}
 import play.api.i18n.{I18nSupport, MessagesApi}
+import services.{ConfirmationService, ConfirmationSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.SessionProfile
@@ -30,21 +31,28 @@ import views.html.pages.{confirmation => ConfirmationPage}
 import scala.concurrent.Future
 
 @Singleton
-class ConfirmationController @Inject()(injMessagesApi: MessagesApi, keystoreInj: KeystoreConnector) extends ConfirmationCtrl {
+class ConfirmationController @Inject()(injMessagesApi: MessagesApi,
+                                       injKeystore: KeystoreConnector,
+                                       injConfirmationService: ConfirmationService) extends ConfirmationCtrl {
   val authConnector = FrontendAuthConnector
   val messagesApi = injMessagesApi
-  val keystoreConnector = keystoreInj
+  val keystoreConnector = injKeystore
+  val confirmationService = injConfirmationService
 }
 
 trait ConfirmationCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
 
   val keystoreConnector : KeystoreConnect
+  val confirmationService: ConfirmationSrv
 
   val showConfirmation = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         withCurrentProfile { profile =>
-          Future.successful(Ok(ConfirmationPage()))
+          confirmationService.getAcknowledgementReference(profile.registrationID) flatMap {
+              case Some(ref) => Future.successful(Ok(ConfirmationPage(ref)))
+              case None => Future.successful(InternalServerError(views.html.pages.error.restart()))
+            }
         }
   }
 }

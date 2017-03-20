@@ -411,4 +411,32 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
       intercept[InternalServerException](await(connector.upsertCompletionCapacity("tstID", "tst")))
     }
   }
+
+  "Calling getAcknowledgementReference" should {
+    "return the correct PAYEResponse when the microservice returns an acknowledgement reference" in new Setup {
+      mockHttpGet[String]("tst-url", "tst")
+
+      await(connector.getAcknowledgementReference("tstID")) shouldBe Some("tst")
+    }
+    "return the correct PAYEResponse when a Bad Request response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[String]("test-url", badRequest)
+
+      intercept[BadRequestException](await(connector.getAcknowledgementReference("tstID")))
+    }
+    "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[String]("test-url", forbidden)
+
+      intercept[Upstream4xxResponse](await(connector.getAcknowledgementReference("tstID")))
+    }
+    "return a Not Found PAYEResponse when the microservice returns no Completion Capacity String" in new Setup {
+      mockHttpFailedGET[String]("test-url", notFound)
+
+      await(connector.getAcknowledgementReference("tstID")) shouldBe None
+    }
+    "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[String]("test-url", internalServiceException)
+
+      intercept[InternalServerException](await(connector.getAcknowledgementReference("tstID")))
+    }
+  }
 }

@@ -1,5 +1,5 @@
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
-@()(implicit request: Request[_], messages: Messages)
+@(ackRef: String)(implicit request: Request[_], messages: Messages)
 
 @main_template(title = messages("pages.confirmation.title"), backButton = false) {
 
@@ -7,7 +7,7 @@
     <div class="transaction-banner--complete">
         <h1 class="form-title heading-xlarge" id="pageHeading">@messages("pages.confirmation.heading")</h1>
         <p align="center">@messages("pages.confirmation.reference")</p>
-        <p align="center">BRPY-0123456789</p>
+        <p align="center">@ackRef</p>
     </div>
 
     <h2>@messages("pages.confirmation.heading2")</h2>

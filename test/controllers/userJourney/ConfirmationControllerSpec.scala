@@ -17,29 +17,51 @@
 package controllers.userJourney
 
 import builders.AuthBuilder
+import org.mockito.Matchers
+import org.mockito.Mockito.when
+import play.api.http.Status
 import play.api.http.Status.OK
 import play.api.i18n.MessagesApi
-import play.api.mvc.Result
+import services.ConfirmationService
 import testHelpers.PAYERegSpec
 
 import scala.concurrent.Future
 
 class ConfirmationControllerSpec extends PAYERegSpec {
 
+  val mockConfirmationService = mock[ConfirmationService]
+
   class Setup {
     val controller = new ConfirmationCtrl {
       override val authConnector = mockAuthConnector
       override val keystoreConnector = mockKeystoreConnector
+      override val confirmationService = mockConfirmationService
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
     }
   }
 
   "showConfirmation" should {
-    "display the confirmation page" in new Setup {
+    "display the confirmation page with an acknowledgement reference retrieved from backend" in new Setup {
       mockFetchCurrentProfile()
+
+      when(mockConfirmationService.getAcknowledgementReference(Matchers.contains("12345"))(Matchers.any()))
+        .thenReturn(Future.successful(Some("BRPY00000000001")))
+
       AuthBuilder.showWithAuthorisedUser(controller.showConfirmation, mockAuthConnector) {
-        (result: Future[Result]) =>
+        result =>
           status(result) shouldBe OK
+      }
+    }
+
+    "show an error page when there is no acknowledgement reference returned from the backend" in new Setup {
+      mockFetchCurrentProfile()
+
+      when(mockConfirmationService.getAcknowledgementReference(Matchers.contains("12345"))(Matchers.any()))
+        .thenReturn(Future.successful(None))
+
+      AuthBuilder.showWithAuthorisedUser(controller.showConfirmation, mockAuthConnector) {
+        result =>
+          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
       }
     }
   }
