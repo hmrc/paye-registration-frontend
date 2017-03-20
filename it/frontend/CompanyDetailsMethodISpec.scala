@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package controllers
+package frontend
 
 import java.util.UUID
 
@@ -21,14 +21,12 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
-import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeApplication
 import play.api.http.HeaderNames
-import uk.gov.hmrc.crypto.Decrypter
-import uk.gov.hmrc.crypto.{ApplicationCrypto, Protected}
 
 
-class CompanyDetailsControllerISpec extends IntegrationSpecBase
+class CompanyDetailsMethodISpec extends IntegrationSpecBase
                                     with LoginStub
                                     with CachingStub
                                     with BeforeAndAfterEach
@@ -412,8 +410,5 @@ class CompanyDetailsControllerISpec extends IntegrationSpecBase
       response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/business-contact-details")
 
     }
-
   }
-
-
 }
