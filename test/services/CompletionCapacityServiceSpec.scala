@@ -19,7 +19,7 @@ package services
 import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.{DownstreamOutcome, UserCapacity}
 import models.view.CompletionCapacity
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -44,7 +44,7 @@ class CompletionCapacityServiceSpec extends PAYERegSpec {
       val jobTitle = "Grand Vizier"
       val tstCapacity = CompletionCapacity(UserCapacity.other, "Grand Vizier")
 
-      when(mockPAYERegConnector.upsertCompletionCapacity(Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockPAYERegConnector.upsertCompletionCapacity(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(jobTitle))
 
       await(service.saveCompletionCapacity(tstCapacity, "12345")) shouldBe DownstreamOutcome.Success
@@ -57,7 +57,7 @@ class CompletionCapacityServiceSpec extends PAYERegSpec {
       val jobTitle = "director"
       val tstCapacity = CompletionCapacity(UserCapacity.director, "")
 
-      when(mockPAYERegConnector.getCompletionCapacity(Matchers.anyString())(Matchers.any(), Matchers.any()))
+      when(mockPAYERegConnector.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(jobTitle)))
 
       await(service.getCompletionCapacity("12345")) shouldBe Some(tstCapacity)
@@ -65,7 +65,7 @@ class CompletionCapacityServiceSpec extends PAYERegSpec {
 
     "return an empty option when there is no completion capacity in the database" in new Setup {
 
-      when(mockPAYERegConnector.getCompletionCapacity(Matchers.anyString())(Matchers.any(), Matchers.any()))
+      when(mockPAYERegConnector.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
       await(service.getCompletionCapacity("12345")) shouldBe None

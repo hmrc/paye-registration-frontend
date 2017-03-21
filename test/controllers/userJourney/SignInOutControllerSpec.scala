@@ -21,7 +21,7 @@ import enums.{AccountTypes, DownstreamOutcome}
 import fixtures.PAYERegistrationFixture
 import models.external.{CompanyProfile, CurrentProfile}
 import org.scalatest.BeforeAndAfterEach
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
@@ -68,7 +68,7 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
     }
 
     "force the user to create a new account" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(Matchers.any[HeaderCarrier](), Matchers.any[AuthContext]()))
+      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]()))
         .thenReturn(AccountTypes.InvalidAccountType)
 
       AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
@@ -79,10 +79,10 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
     }
 
     "show an Error page for an authorised user without a registration ID" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(Matchers.any[HeaderCarrier](), Matchers.any[AuthContext]()))
+      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]()))
         .thenReturn(AccountTypes.Organisation)
 
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any()))
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("held")))
 
       AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
@@ -92,13 +92,13 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
     }
 
     "show an Error page for an authorised user with a registration ID but no CoHo Company Details" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(Matchers.any[HeaderCarrier](), Matchers.any[AuthContext]()))
+      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]()))
         .thenReturn(AccountTypes.Organisation)
 
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any()))
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("held")))
 
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(Matchers.anyString())(Matchers.any()))
+      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(DownstreamOutcome.Failure)
 
       AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
@@ -108,16 +108,16 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
     }
 
     "show an Error page for an authorised user with a registration ID and CoHo Company Details, with an error response from the microservice" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(Matchers.any[HeaderCarrier](), Matchers.any[AuthContext]()))
+      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]()))
         .thenReturn(AccountTypes.Organisation)
 
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any()))
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("held")))
 
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(Matchers.anyString())(Matchers.any()))
+      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(DownstreamOutcome.Success)
 
-      when(mockPAYERegService.assertRegistrationFootprint(Matchers.anyString())(Matchers.any()))
+      when(mockPAYERegService.assertRegistrationFootprint(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(DownstreamOutcome.Failure)
 
       AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
@@ -127,15 +127,15 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
     }
 
     "redirect to the Trading Name page for an authorised user with a registration ID and CoHo Company Details, with PAYE Footprint correctly asserted" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(Matchers.any[HeaderCarrier](), Matchers.any[AuthContext]())).thenReturn(AccountTypes.Organisation)
+      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]())).thenReturn(AccountTypes.Organisation)
 
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any()))
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("held")))
 
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(Matchers.anyString())(Matchers.any()))
+      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(DownstreamOutcome.Success)
 
-      when(mockPAYERegService.assertRegistrationFootprint(Matchers.anyString())(Matchers.any()))
+      when(mockPAYERegService.assertRegistrationFootprint(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(DownstreamOutcome.Success)
 
       AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
@@ -146,9 +146,9 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
     }
 
     "redirect the user to the start of Incorporation and Corporation Tax if their Company Registration document has a status of 'draft'" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(Matchers.any[HeaderCarrier](), Matchers.any[AuthContext]())).thenReturn(AccountTypes.Organisation)
+      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]())).thenReturn(AccountTypes.Organisation)
 
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(Matchers.any()))
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("draft")))
 
       AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {

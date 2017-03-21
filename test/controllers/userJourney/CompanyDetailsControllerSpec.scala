@@ -22,7 +22,7 @@ import fixtures.{PAYERegistrationFixture, S4LFixture}
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.{Address, DigitalContactDetails}
 import org.jsoup._
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
@@ -68,7 +68,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     "show the correctly pre-populated trading name page when data has already been entered" in new Setup {
       val cName = "Tst Company Name"
       mockFetchCurrentProfile()
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -85,7 +85,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       val cName = "Tst Company Name"
       mockFetchCurrentProfile()
       val negativeTradingNameCompanyDetails = validCompanyDetailsViewModel.copy(tradingName = Some(negativeTradingNameViewModel))
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(negativeTradingNameCompanyDetails))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(negativeTradingNameCompanyDetails))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -102,7 +102,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       val cName = "Tst Company Name"
       mockFetchCurrentProfile()
       val noTradingNameCompanyDetails = validCompanyDetailsViewModel.copy(tradingName = None)
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(noTradingNameCompanyDetails))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(noTradingNameCompanyDetails))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -119,7 +119,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       val cName = "Tst Company Name"
       mockFetchCurrentProfile()
       val defaultCompanyDetailsView = CompanyDetailsView(None, cName, None, validROAddress, None, None)
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(defaultCompanyDetailsView))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(defaultCompanyDetailsView))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         response =>
@@ -142,7 +142,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
     "redirect to the confirm ro address page when a user enters valid data" in new Setup {
       mockFetchCurrentProfile()
-      when(mockCompanyDetailsService.submitTradingName(Matchers.any(), Matchers.anyString(), Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "differentName" -> "true",
         "tradingName" -> "Tradez R us"
@@ -155,7 +155,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
     "show an error page when there is an error response from the microservice" in new Setup {
       mockFetchCurrentProfile()
-      when(mockCompanyDetailsService.submitTradingName(Matchers.any(), Matchers.anyString(), Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
+      when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "differentName" -> "true",
         "tradingName" -> "Tradez R us"
@@ -167,8 +167,8 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
     "return 400 when a user enters no data" in new Setup {
       mockFetchCurrentProfile()
-      when(mockCompanyDetailsService.submitTradingName(Matchers.any(), Matchers.anyString(), Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
-      when(mockCoHoService.getStoredCompanyName()(Matchers.any())).thenReturn(Future.successful("tst Name"))
+      when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      when(mockCoHoService.getStoredCompanyName()(ArgumentMatchers.any())).thenReturn(Future.successful("tst Name"))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
       )) {
         result =>
@@ -178,7 +178,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
     "return 400 when a user enters invalid data" in new Setup {
       mockFetchCurrentProfile()
-      when(mockCoHoService.getStoredCompanyName()(Matchers.any())).thenReturn(Future.successful("tst Name"))
+      when(mockCoHoService.getStoredCompanyName()(ArgumentMatchers.any())).thenReturn(Future.successful("tst Name"))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "differentName" -> "true"
       )) {
@@ -203,7 +203,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
           )
         mockFetchCurrentProfile()
 
-        when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+        when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
         AuthBuilder.showWithAuthorisedUser(controller.roAddress, mockAuthConnector) {
@@ -246,7 +246,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     "return an ok" when {
       "the user is authorised to view the page and there is a saved buiness contact details model" in new Setup {
         mockFetchCurrentProfile()
-        when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+        when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(validCompanyDetailsViewModel.copy(businessContactDetails = Some(bcd))))
 
         AuthBuilder.showWithAuthorisedUser(controller.businessContactDetails, mockAuthConnector) {
@@ -259,7 +259,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     "return an ok" when {
       "the user is authorised to view the page and there is no business contact details model" in new Setup {
         mockFetchCurrentProfile()
-        when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+        when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(validCompanyDetailsViewModel.copy(businessContactDetails = None)))
 
         AuthBuilder.showWithAuthorisedUser(controller.businessContactDetails, mockAuthConnector) {
@@ -285,7 +285,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
     "show form errors" in new Setup {
       mockFetchCurrentProfile()
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitBusinessContactDetails(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody()) {
@@ -296,7 +296,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
     "show error page when there is an internal error" in new Setup {
       mockFetchCurrentProfile()
-      when(mockCompanyDetailsService.submitBusinessContact(Matchers.any(), Matchers.anyString(), Matchers.anyString())(Matchers.any()))
+      when(mockCompanyDetailsService.submitBusinessContact(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitBusinessContactDetails(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
@@ -309,7 +309,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
     "redirect to next page when the user submit valid data" in new Setup {
       mockFetchCurrentProfile()
-      when(mockCompanyDetailsService.submitBusinessContact(Matchers.any(), Matchers.anyString(), Matchers.anyString())(Matchers.any()))
+      when(mockCompanyDetailsService.submitBusinessContact(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitBusinessContactDetails(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
@@ -330,10 +330,10 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       )
       mockFetchCurrentProfile()
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
-      when(mockCompanyDetailsService.getPPOBPageAddresses(Matchers.any()))
+      when(mockCompanyDetailsService.getPPOBPageAddresses(ArgumentMatchers.any()))
         .thenReturn(addressMap)
 
       AuthBuilder.showWithAuthorisedUser(controller.ppobAddress, mockAuthConnector) { result =>
@@ -350,7 +350,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
       mockFetchCurrentProfile()
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitPPOBAddress, mockAuthConnector, request) { result =>
@@ -364,7 +364,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       )
       mockFetchCurrentProfile()
 
-      when(mockCompanyDetailsService.getCompanyDetails(Matchers.anyString(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitPPOBAddress, mockAuthConnector, request) { result =>
@@ -380,7 +380,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
       mockFetchCurrentProfile()
 
-      when(mockCompanyDetailsService.copyROAddrToPPOBAddr(Matchers.anyString(), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.copyROAddrToPPOBAddr(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitPPOBAddress, mockAuthConnector, request) { result =>
@@ -416,10 +416,10 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
       mockFetchCurrentProfile()
 
-      when(mockAddressLookupService.getAddress(Matchers.any[HeaderCarrier](), Matchers.any[Request[_]]()))
+      when(mockAddressLookupService.getAddress(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[_]]()))
         .thenReturn(Future.successful(expected))
 
-      when(mockCompanyDetailsService.submitPPOBAddr(Matchers.any(), Matchers.anyString(), Matchers.anyString())(Matchers.any()))
+      when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.showWithAuthorisedUser(controller.savePPOBAddress, mockAuthConnector) { result =>
@@ -440,10 +440,10 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
       mockFetchCurrentProfile()
 
-      when(mockAddressLookupService.getAddress(Matchers.any[HeaderCarrier](), Matchers.any[Request[_]]()))
+      when(mockAddressLookupService.getAddress(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[_]]()))
         .thenReturn(Future.successful(expected))
 
-      when(mockCompanyDetailsService.submitPPOBAddr(Matchers.any(), Matchers.anyString(), Matchers.anyString())(Matchers.any()))
+      when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthBuilder.showWithAuthorisedUser(controller.savePPOBAddress, mockAuthConnector) { result =>

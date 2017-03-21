@@ -19,7 +19,7 @@ package controllers.userJourney
 import builders.AuthBuilder
 import fixtures.PAYERegistrationFixture
 import org.jsoup.Jsoup
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
@@ -46,7 +46,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
   "Calling summary to show the summary page" should {
     "show the summary page when a valid model is returned from the microservice" in new Setup {
       mockFetchCurrentProfile()
-      when(mockSummaryService.getRegistrationSummary(Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(validSummaryView))
+      when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(validSummaryView))
 
       AuthBuilder.showWithAuthorisedUser(controller.summary, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -59,7 +59,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
 
     "return an Internal Server Error response when no valid model is returned from the microservice" in new Setup {
       mockFetchCurrentProfile()
-      when(mockSummaryService.getRegistrationSummary(Matchers.anyString())(Matchers.any())).thenReturn(Future.failed(new InternalError()))
+      when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalError()))
 
       AuthBuilder.showWithAuthorisedUser(controller.summary, mockAuthConnector) {
         (response: Future[Result]) =>

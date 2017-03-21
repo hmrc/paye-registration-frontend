@@ -30,17 +30,22 @@ trait LoginStub extends SessionCookieBaker {
 
   val SessionId = s"stubbed-${UUID.randomUUID}"
 
-  private def cookieData(additionalData: Map[String, String]): Map[String, String] = {
+  private def cookieData(additionalData: Map[String, String], timeStampRollback: Long): Map[String, String] = {
+
+    val timeStamp = new java.util.Date().getTime
+    val rollbackTimestamp = (timeStamp - timeStampRollback).toString
+
     Map(
       SessionKeys.sessionId -> SessionId,
       SessionKeys.userId -> "/auth/oid/1234567890",
       SessionKeys.token -> "token",
-      SessionKeys.authProvider -> "GGW"
+      SessionKeys.authProvider -> "GGW",
+      SessionKeys.lastRequestTimestamp -> rollbackTimestamp
     ) ++ additionalData
   }
 
-  def getSessionCookie(additionalData: Map[String, String] = Map()) = {
-    cookieValue(cookieData(additionalData))
+  def getSessionCookie(additionalData: Map[String, String] = Map(), timeStampRollback: Long = 0) = {
+    cookieValue(cookieData(additionalData, timeStampRollback))
   }
 
   def stubSuccessfulLogin(withSignIn: Boolean = false) = {

@@ -19,7 +19,7 @@ package connectors
 import fixtures.BusinessRegistrationFixture
 import mocks.MockMetrics
 import models.external.BusinessProfile
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, NotFoundException}
@@ -48,21 +48,21 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
     }
 
     "return a Not Found response when a CurrentProfile record can not be found" in new Setup {
-      when(mockWSHttp.GET[BusinessProfile](Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new NotFoundException("Bad request")))
 
       intercept[NotFoundException](await(connector.retrieveCurrentProfile))
     }
 
     "return a Forbidden response when a CurrentProfile record can not be accessed by the user" in new Setup {
-      when(mockWSHttp.GET[BusinessProfile](Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new ForbiddenException("Forbidden")))
 
       intercept[ForbiddenException](await(connector.retrieveCurrentProfile))
     }
 
     "return an Exception response when an unspecified error has occurred" in new Setup {
-      when(mockWSHttp.GET[BusinessProfile](Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new RuntimeException("Runtime Exception")))
 
       intercept[RuntimeException](await(connector.retrieveCurrentProfile))

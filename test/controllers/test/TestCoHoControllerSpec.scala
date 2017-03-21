@@ -18,7 +18,7 @@ package controllers.test
 
 import builders.AuthBuilder
 import connectors.test.TestCoHoAPIConnect
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{BAD_REQUEST, OK}
@@ -74,7 +74,7 @@ class TestCoHoControllerSpec extends PAYERegSpec {
           "descriptions[4]" -> ""
         )
         mockFetchCurrentProfile()
-        when(mockTestAPIConnector.addCoHoCompanyDetails(Matchers.any())(Matchers.any[HeaderCarrier]()))
+        when(mockTestAPIConnector.addCoHoCompanyDetails(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testHttpResponse))
 
         AuthBuilder.submitWithAuthorisedUser(controller.submitCoHoCompanyDetailsSetup, mockAuthConnector, request) {
@@ -99,7 +99,7 @@ class TestCoHoControllerSpec extends PAYERegSpec {
   "coHoCompanyDetailsTearDown" should {
     "return an OK" when {
       "the company details have been torn down" in new Setup {
-        when(mockTestAPIConnector.tearDownCoHoCompanyDetails()(Matchers.any[HeaderCarrier]()))
+        when(mockTestAPIConnector.tearDownCoHoCompanyDetails()(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testHttpResponse))
 
         AuthBuilder.showWithAuthorisedUser(controller.coHoCompanyDetailsTearDown, mockAuthConnector) { result =>

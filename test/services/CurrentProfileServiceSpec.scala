@@ -20,7 +20,7 @@ import connectors.{BusinessRegistrationConnect, CompanyRegistrationConnect, Keys
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.BusinessRegistrationFixture
 import models.external.{BusinessProfile, CompanyProfile, CurrentProfile}
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -56,7 +56,7 @@ class CurrentProfileServiceSpec extends PAYERegSpec with BusinessRegistrationFix
     "Return a successful outcome after successfully storing a valid Business Registration response" in new Setup {
       mockBusinessRegFetch(Future.successful(validBusinessProfile))
 
-      when(mockCompanyRegistrationConnector.getCompanyRegistrationDetails(Matchers.anyString())(Matchers.any()))
+      when(mockCompanyRegistrationConnector.getCompanyRegistrationDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCompanyProfile))
 
       mockKeystoreCache[BusinessProfile](CacheKeys.CurrentProfile.toString, CacheMap("", Map.empty))
@@ -67,7 +67,7 @@ class CurrentProfileServiceSpec extends PAYERegSpec with BusinessRegistrationFix
     "Return an unsuccessful outcome when there is no record in Business Registration" in new Setup {
       mockBusinessRegFetch(Future.failed(new NotFoundException("")))
 
-      when(mockCompanyRegistrationConnector.getCompanyRegistrationDetails(Matchers.anyString())(Matchers.any()))
+      when(mockCompanyRegistrationConnector.getCompanyRegistrationDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCompanyProfile))
 
       intercept[NotFoundException](await(service.fetchAndStoreCurrentProfile))
@@ -76,7 +76,7 @@ class CurrentProfileServiceSpec extends PAYERegSpec with BusinessRegistrationFix
     "Return an unsuccessful outcome when the user is not authorised for Business Registration" in new Setup {
       mockBusinessRegFetch(Future.failed(new ForbiddenException("")))
 
-      when(mockCompanyRegistrationConnector.getCompanyRegistrationDetails(Matchers.anyString())(Matchers.any()))
+      when(mockCompanyRegistrationConnector.getCompanyRegistrationDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCompanyProfile))
 
       intercept[ForbiddenException](await(service.fetchAndStoreCurrentProfile))
@@ -85,7 +85,7 @@ class CurrentProfileServiceSpec extends PAYERegSpec with BusinessRegistrationFix
     "Return an unsuccessful outcome when Business Registration returns an error response" in new Setup {
       mockBusinessRegFetch(Future.failed(new RuntimeException("")))
 
-      when(mockCompanyRegistrationConnector.getCompanyRegistrationDetails(Matchers.anyString())(Matchers.any()))
+      when(mockCompanyRegistrationConnector.getCompanyRegistrationDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCompanyProfile))
 
       intercept[RuntimeException](await(service.fetchAndStoreCurrentProfile))

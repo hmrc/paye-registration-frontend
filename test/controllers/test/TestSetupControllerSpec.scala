@@ -21,13 +21,10 @@ import connectors.test.{TestBusinessRegConnect, TestCoHoAPIConnect, TestPAYERegC
 import enums.DownstreamOutcome
 import models.external.BusinessProfile
 import models.test.CoHoCompanyDetailsFormModel
-import org.mockito.Matchers
-import org.mockito.Mockito.when
 import play.api.http.Status
 import play.api.mvc.{AnyContent, Request}
 import services.{CoHoAPISrv, PAYERegistrationSrv, S4LSrv}
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.HttpResponse
 
 import scala.concurrent.Future
 

@@ -19,7 +19,7 @@ package controllers.userJourney
 import builders.AuthBuilder
 import enums.{DownstreamOutcome, UserCapacity}
 import models.view.CompletionCapacity
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -47,7 +47,7 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
 
       mockFetchCurrentProfile()
 
-      when(mockCompletionCapacityService.getCompletionCapacity(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+      when(mockCompletionCapacityService.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Some(capacity)))
 
       AuthBuilder.showWithAuthorisedUser(testController.completionCapacity, mockAuthConnector) { result =>
@@ -57,7 +57,7 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
 
     "return an OK if a capacity has not been found" in new Setup {
       mockFetchCurrentProfile()
-      when(mockCompletionCapacityService.getCompletionCapacity(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+      when(mockCompletionCapacityService.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(None))
 
       AuthBuilder.showWithAuthorisedUser(testController.completionCapacity, mockAuthConnector) { result =>
@@ -87,7 +87,7 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
       )
       mockFetchCurrentProfile()
 
-      when(mockCompletionCapacityService.saveCompletionCapacity(Matchers.any[CompletionCapacity](), Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+      when(mockCompletionCapacityService.saveCompletionCapacity(ArgumentMatchers.any[CompletionCapacity](), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitCompletionCapacity, mockAuthConnector, request) { result =>

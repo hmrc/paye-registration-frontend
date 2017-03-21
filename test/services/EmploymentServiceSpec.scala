@@ -23,7 +23,7 @@ import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{PAYERegistrationFixture, S4LFixture}
 import models.api.{Employment => EmploymentAPI}
 import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment => EmploymentView, FirstPayment => FirstPaymentView}
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.{times, verify, when}
 import play.api.libs.json.{Format, Json}
 import testHelpers.PAYERegSpec
@@ -95,27 +95,27 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
 
   "calling fetchEmploymentView" should {
     "return the Employment VIEW model if found in S4L" in new Setup {
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.Employment.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(Some(validEmploymentViewModel)))
 
       await(service.fetchEmploymentView("54321")) shouldBe validEmploymentViewModel
     }
 
     "return the Employment VIEW model from the connector if not found in S4L" in new Setup {
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.Employment.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getEmployment(Matchers.contains("54321"))(Matchers.any[HeaderCarrier](), Matchers.any()))
+      when(mockPAYERegConnector.getEmployment(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(validEmploymentAPIModel)))
 
       await(service.fetchEmploymentView("54321")) shouldBe service.apiToView(validEmploymentAPIModel)
     }
 
     "return an empty Employment VIEW model if not found in S4L or in connector" in new Setup {
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.Employment.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getEmployment(Matchers.contains("54321"))(Matchers.any[HeaderCarrier](), Matchers.any()))
+      when(mockPAYERegConnector.getEmployment(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
       await(service.fetchEmploymentView("54321")) shouldBe EmploymentView(None, None, None, None)
@@ -124,40 +124,40 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
 
   "calling saveEmploymentView" should {
     "save the Employment VIEW model in S4L if the model is incomplete" in new Setup {
-      when(mockS4LService.saveForm[EmploymentView](Matchers.eq(CacheKeys.Employment.toString), Matchers.any(), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+      when(mockS4LService.saveForm[EmploymentView](ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(returnCacheMap))
 
       await(service.saveEmploymentView(incompleteEmploymentViewModel, "54321")) shouldBe S4LSaved
     }
 
     "save the Employment VIEW model in BE if the model is complete" in new Setup {
-      when(mockPAYERegConnector.upsertEmployment(Matchers.eq("54321"), Matchers.eq(validEmploymentAPIModel))(Matchers.any[HeaderCarrier](), Matchers.any()))
+      when(mockPAYERegConnector.upsertEmployment(ArgumentMatchers.eq("54321"), ArgumentMatchers.eq(validEmploymentAPIModel))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validEmploymentAPIModel))
 
-      when(mockS4LService.clear(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+      when(mockS4LService.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(returnHttpResponse))
 
       await(service.saveEmploymentView(validEmploymentViewModel, "54321")) shouldBe MongoSaved
     }
 
     "clear S4L data if the Employment VIEW model is saved in BE" in new Setup {
-      when(mockPAYERegConnector.upsertEmployment(Matchers.eq("54321"), Matchers.eq(validEmploymentAPIModel))(Matchers.any[HeaderCarrier](), Matchers.any()))
+      when(mockPAYERegConnector.upsertEmployment(ArgumentMatchers.eq("54321"), ArgumentMatchers.eq(validEmploymentAPIModel))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validEmploymentAPIModel))
 
-      when(mockS4LService.clear(Matchers.anyString())(Matchers.any[HeaderCarrier]()))
+      when(mockS4LService.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(returnHttpResponse))
 
       await(service.saveEmployment(validEmploymentViewModel, "54321"))
-      verify(mockS4LService, times(1)).clear(Matchers.anyString())(Matchers.any[HeaderCarrier]())
+      verify(mockS4LService, times(1)).clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]())
     }
   }
 
   "calling saveEmployingStaff" should {
     "update the Employment VIEW model" in new Setup {
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.Employment.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(Some(incompleteEmploymentViewModel)))
 
-      when(mockS4LService.saveForm[EmploymentView](Matchers.eq(CacheKeys.Employment.toString), Matchers.any(), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+      when(mockS4LService.saveForm[EmploymentView](ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(returnCacheMap))
 
       await(service.saveEmployingStaff(EmployingStaff(false), "54321")) shouldBe DownstreamOutcome.Success
@@ -166,10 +166,10 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
 
   "calling saveCompanyPension" should {
     "update the Employment VIEW model" in new Setup {
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.Employment.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(Some(incompleteEmploymentViewModel)))
 
-      when(mockS4LService.saveForm[EmploymentView](Matchers.eq(CacheKeys.Employment.toString), Matchers.any(), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+      when(mockS4LService.saveForm[EmploymentView](ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(returnCacheMap))
 
       await(service.saveCompanyPension(CompanyPension(false), "54321")) shouldBe DownstreamOutcome.Success
@@ -178,10 +178,10 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
 
   "calling saveSubcontractors" should {
     "update the Employment VIEW model" in new Setup {
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.Employment.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(Some(incompleteEmploymentViewModel)))
 
-      when(mockS4LService.saveForm[EmploymentView](Matchers.eq(CacheKeys.Employment.toString), Matchers.any(), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+      when(mockS4LService.saveForm[EmploymentView](ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(returnCacheMap))
 
       await(service.saveSubcontractors(Subcontractors(false), "54321")) shouldBe DownstreamOutcome.Success
@@ -190,10 +190,10 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
 
   "calling saveFirstPayment" should {
     "update the Employment VIEW model" in new Setup {
-      when(mockS4LService.fetchAndGet(Matchers.eq(CacheKeys.Employment.toString), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(Some(incompleteEmploymentViewModel)))
 
-      when(mockS4LService.saveForm[EmploymentView](Matchers.eq(CacheKeys.Employment.toString), Matchers.any(), Matchers.anyString())(Matchers.any[HeaderCarrier](), Matchers.any[Format[EmploymentView]]()))
+      when(mockS4LService.saveForm[EmploymentView](ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(returnCacheMap))
 
       await(service.saveFirstPayment(FirstPaymentView(LocalDate.of(2016, 12, 1)), "54321")) shouldBe DownstreamOutcome.Success

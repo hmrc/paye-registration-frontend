@@ -20,7 +20,7 @@ import builders.AuthBuilder
 import connectors.test.TestBusinessRegConnect
 import fixtures.KeystoreFixture
 import models.external.{BusinessProfile, CurrentProfile}
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.test.Helpers.OK
 import testHelpers.PAYERegSpec
@@ -46,10 +46,10 @@ class CurrentProfileControllerSpec extends PAYERegSpec with KeystoreFixture {
   "currentProfileSetup" should {
     "return an OK" when {
       "the current profile has been returned and has been cached in keystore" in new Setup {
-        when(mockBusinessRegistrationConnector.retrieveCurrentProfile(Matchers.any[HeaderCarrier](), Matchers.any[HttpReads[BusinessProfile]]()))
+        when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[HttpReads[BusinessProfile]]()))
           .thenReturn(Future.successful(testProfile))
 
-        when(mockKeystoreConnector.cache[CurrentProfile](Matchers.any(), Matchers.any[CurrentProfile]())(Matchers.any[HeaderCarrier](), Matchers.any()))
+        when(mockKeystoreConnector.cache[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(blankCacheMap))
 
         AuthBuilder.showWithAuthorisedUser(controller.currentProfileSetup, mockAuthConnector) { result =>
@@ -58,13 +58,13 @@ class CurrentProfileControllerSpec extends PAYERegSpec with KeystoreFixture {
       }
 
       "the current profile hasn't been found, but has then proceeded to create one and cache it in keystore" in new Setup {
-        when(mockBusinessRegistrationConnector.retrieveCurrentProfile(Matchers.any[HeaderCarrier](), Matchers.any[HttpReads[BusinessProfile]]()))
+        when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[HttpReads[BusinessProfile]]()))
           .thenReturn(Future.failed(new NotFoundException("")))
 
-        when(mockTestBusRegConnector.createCurrentProfileEntry(Matchers.any[HeaderCarrier]()))
+        when(mockTestBusRegConnector.createCurrentProfileEntry(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testProfile))
 
-        when(mockKeystoreConnector.cache[CurrentProfile](Matchers.any(), Matchers.any[CurrentProfile]())(Matchers.any[HeaderCarrier](), Matchers.any()))
+        when(mockKeystoreConnector.cache[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(blankCacheMap))
 
         AuthBuilder.showWithAuthorisedUser(controller.currentProfileSetup, mockAuthConnector) { result =>

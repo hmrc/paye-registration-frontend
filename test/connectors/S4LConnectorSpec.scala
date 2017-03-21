@@ -19,7 +19,7 @@ package connectors
 import config.PAYEShortLivedCache
 import mocks.MockMetrics
 import models.view.{TradingName => TradingNameView}
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
@@ -55,7 +55,7 @@ class S4LConnectorSpec  extends UnitSpec with MockitoSugar with WithFakeApplicat
   "Fetching from save4later" should {
     "return the correct model" in {
 
-      when(mockShortLivedCache.fetchAndGetEntry[TradingNameView](Matchers.anyString(), Matchers.anyString())(Matchers.any(), Matchers.any()))
+      when(mockShortLivedCache.fetchAndGetEntry[TradingNameView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Option(tNameModel)))
 
       val result = S4LConnectorTest.fetchAndGet[TradingNameView]("", "")
@@ -67,7 +67,7 @@ class S4LConnectorSpec  extends UnitSpec with MockitoSugar with WithFakeApplicat
     "save the model" in {
       val returnCacheMap = CacheMap("", Map("" -> Json.toJson(tNameModel)))
 
-      when(mockShortLivedCache.cache[TradingNameView](Matchers.anyString(), Matchers.anyString(), Matchers.any())(Matchers.any(), Matchers.any()))
+      when(mockShortLivedCache.cache[TradingNameView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(returnCacheMap))
 
       val result = S4LConnectorTest.saveForm[TradingNameView]("", "", tNameModel)
@@ -77,7 +77,7 @@ class S4LConnectorSpec  extends UnitSpec with MockitoSugar with WithFakeApplicat
 
   "clearing an entry using save4later" should {
     "clear the entry given the user id" in {
-      when(mockShortLivedCache.remove(Matchers.anyString())(Matchers.any()))
+      when(mockShortLivedCache.remove(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
 
       val result = S4LConnectorTest.clear("test")
@@ -87,7 +87,7 @@ class S4LConnectorSpec  extends UnitSpec with MockitoSugar with WithFakeApplicat
 
   "fetchAll" should {
     "fetch all entries in S4L" in {
-      when(mockShortLivedCache.fetch(Matchers.any())(Matchers.any()))
+      when(mockShortLivedCache.fetch(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(cacheMap)))
 
       val result = S4LConnectorTest.fetchAll("testUserId")

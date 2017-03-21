@@ -20,7 +20,7 @@ import connectors._
 import fixtures.{PAYERegistrationFixture, S4LFixture}
 import mocks.MockMetrics
 import models.Address
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
@@ -110,7 +110,7 @@ class AddressLookupServiceSpec extends PAYERegSpec with S4LFixture with PAYERegi
           Some("testCode")
         ))
 
-      when(mockAddressLookupConnector.getAddress(Matchers.anyString())(Matchers.any[HeaderCarrier]))
+      when(mockAddressLookupConnector.getAddress(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]))
         .thenReturn(Future.successful(mockAddress))
 
       implicit val request = FakeRequest("GET", "/test-uri?id=1234567890")

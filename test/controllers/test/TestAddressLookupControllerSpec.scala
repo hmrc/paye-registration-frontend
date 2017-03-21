@@ -18,7 +18,7 @@ package controllers.test
 
 import builders.AuthBuilder
 import enums.DownstreamOutcome
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.mvc.Result
@@ -54,7 +54,7 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
 
     "return 500 when the mocked address can't be submitted" in new Setup {
       mockFetchCurrentProfile()
-      when(mockCompanyDetailsService.submitPPOBAddr(Matchers.any(), Matchers.anyString(), Matchers.anyString())(Matchers.any()))
+      when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthBuilder.showWithAuthorisedUser(controller.noLookupPPOBAddress, mockAuthConnector) {
@@ -65,7 +65,7 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
 
     "return 303 when the mocked address is successfully submitted" in new Setup {
       mockFetchCurrentProfile()
-      when(mockCompanyDetailsService.submitPPOBAddr(Matchers.any(), Matchers.anyString(), Matchers.anyString())(Matchers.any()))
+      when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.showWithAuthorisedUser(controller.noLookupPPOBAddress, mockAuthConnector) {
@@ -86,7 +86,7 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
 
     "return 500 when the mocked address can't be submitted" in new Setup {
       mockFetchCurrentProfile()
-      when(mockPAYEContactService.submitCorrespondence(Matchers.any(), Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthBuilder.showWithAuthorisedUser(controller.noLookupCorrespondenceAddress, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -96,7 +96,7 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
 
     "return 303 when the mocked address is successfully submitted" in new Setup {
       mockFetchCurrentProfile()
-      when(mockPAYEContactService.submitCorrespondence(Matchers.any(), Matchers.anyString())(Matchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.showWithAuthorisedUser(controller.noLookupCorrespondenceAddress, mockAuthConnector) {
         (response: Future[Result]) =>

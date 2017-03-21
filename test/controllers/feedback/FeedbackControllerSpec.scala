@@ -17,7 +17,7 @@
 package controllers.feedback
 
 import org.mockito.Mockito._
-import org.mockito.{Matchers => ArgumentMatchers}
+import org.mockito.ArgumentMatchers
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.mvc.RequestHeader
