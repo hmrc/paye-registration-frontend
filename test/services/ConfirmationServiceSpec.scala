@@ -17,7 +17,7 @@
 package services
 
 import connectors.PAYERegistrationConnector
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -38,7 +38,7 @@ class ConfirmationServiceSpec extends PAYERegSpec {
   "Calling getAcknowledgementReference" should {
     "return an acknowledgment reference" in new Setup {
 
-      when(mockRegConnector.getAcknowledgementReference(Matchers.contains("45632"))(Matchers.any()))
+      when(mockRegConnector.getAcknowledgementReference(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("BRPY00000000001")))
 
       await(service.getAcknowledgementReference("45632")) shouldBe Some("BRPY00000000001")

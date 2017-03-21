@@ -17,7 +17,7 @@
 package controllers.userJourney
 
 import builders.AuthBuilder
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.http.Status
 import play.api.http.Status.OK
@@ -44,7 +44,7 @@ class ConfirmationControllerSpec extends PAYERegSpec {
     "display the confirmation page with an acknowledgement reference retrieved from backend" in new Setup {
       mockFetchCurrentProfile()
 
-      when(mockConfirmationService.getAcknowledgementReference(Matchers.contains("12345"))(Matchers.any()))
+      when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("BRPY00000000001")))
 
       AuthBuilder.showWithAuthorisedUser(controller.showConfirmation, mockAuthConnector) {
@@ -56,7 +56,7 @@ class ConfirmationControllerSpec extends PAYERegSpec {
     "show an error page when there is no acknowledgement reference returned from the backend" in new Setup {
       mockFetchCurrentProfile()
 
-      when(mockConfirmationService.getAcknowledgementReference(Matchers.contains("12345"))(Matchers.any()))
+      when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
       AuthBuilder.showWithAuthorisedUser(controller.showConfirmation, mockAuthConnector) {
