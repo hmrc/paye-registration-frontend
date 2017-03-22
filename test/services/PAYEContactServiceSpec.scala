@@ -148,7 +148,6 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       postCode = Some("RO1 1RO")
     )
     val detailsWithROAddress = CompanyDetailsView(
-      crn = None,
       companyName = "Tst Company",
       tradingName = None,
       roAddress = roAddress,

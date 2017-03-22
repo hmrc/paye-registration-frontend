@@ -63,7 +63,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val cohoAPIConnector: CoHoAPIConnect = mockCohoAPIConnector
 
       override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
-        Future.successful(CompanyDetailsView(None, "test compay name", None, validROAddress, None, None))
+        Future.successful(CompanyDetailsView("test compay name", None, validROAddress, None, None))
       }
 
       override def saveCompanyDetails(detailsView: CompanyDetailsView, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
@@ -109,7 +109,6 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   "Calling apiToView" should {
     "correctly produce a view model from a Company Details API model with a completed trading name" in new Setup {
       val tstModelAPI = CompanyDetailsAPI(
-        Some("tstCRN"),
         "Comp name",
         Some("trading name"),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
@@ -117,7 +116,6 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         DigitalContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
       val tstModelView = CompanyDetailsView(
-        Some("tstCRN"),
         "Comp name",
         Some(TradingNameView(
           differentName = true,
@@ -132,7 +130,6 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
     "correctly produce a view model from a Company Details API model without a completed trading name" in new Setup {
       val tstModelAPI = CompanyDetailsAPI(
-        Some("tstCRN"),
         "Comp name",
         None,
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
@@ -140,7 +137,6 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         DigitalContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
       val tstModelView = CompanyDetailsView(
-        Some("tstCRN"),
         "Comp name",
         Some(TradingNameView(
           differentName = false,
@@ -157,7 +153,6 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   "Calling viewToAPI" should {
     "correctly produce a Company Details API model from a completed view model" in new Setup {
       val tstModelAPI = CompanyDetailsAPI(
-        Some("tstCRN"),
         "Comp name",
         Some("trading name"),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
@@ -165,7 +160,6 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         DigitalContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
       val tstModelView = CompanyDetailsView(
-        Some("tstCRN"),
         "Comp name",
         Some(TradingNameView(
           differentName = true,
@@ -180,7 +174,6 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
     "correctly produce a Company Details API model from a completed view model with 'trade under different name - no'" in new Setup {
       val tstModelAPI = CompanyDetailsAPI(
-        Some("tstCRN"),
         "Comp name",
         None,
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
@@ -188,7 +181,6 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         DigitalContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
       val tstModelView = CompanyDetailsView(
-        Some("tstCRN"),
         "Comp name",
         Some(TradingNameView(
           differentName = false,
@@ -203,7 +195,6 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
     "return the original view model when tradingName has not been completed" in new Setup {
       val tstModelView = CompanyDetailsView(
-        Some("tstCRN"),
         "Comp name",
         None,
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
@@ -215,7 +206,6 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
     "return the original view model when business contact details has not been completed" in new Setup {
       val tstModelView = CompanyDetailsView(
-        Some("tstCRN"),
         "Comp name",
         Some(TradingNameView(
           differentName = false,
@@ -230,7 +220,6 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
     "return the original view model when PPOB Address has not been completed" in new Setup {
       val tstModelView = CompanyDetailsView(
-        Some("tstCRN"),
         "Comp name",
         Some(TradingNameView(
           differentName = false,
@@ -284,7 +273,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockCohoAPIConnector.getRegisteredOfficeAddress(ArgumentMatchers.eq("txId"))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCHROAddress))
 
-      await(service.getCompanyDetails("54321", "txId")) shouldBe CompanyDetailsView(None, "Tst company name", None, validCHROAddress, None, None)
+      await(service.getCompanyDetails("54321", "txId")) shouldBe CompanyDetailsView("Tst company name", None, validCHROAddress, None, None)
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
@@ -319,7 +308,6 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
     "return a success response when the S4L save completes successfully" in new Setup {
       val incompleteCompanyDetailsViewModel = CompanyDetailsView(
-        Some("crn"),
         "Tst Company Name",
         None,
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
@@ -347,7 +335,6 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   "Calling getPPOBPageAddresses" should {
     def viewModel(roAddr: Address, ppobAddr: Option[Address]): CompanyDetailsView = {
       CompanyDetailsView(
-        crn = None,
         companyName = "unimportant",
         tradingName = None,
         roAddress = roAddr,

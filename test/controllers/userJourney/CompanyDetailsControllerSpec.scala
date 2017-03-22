@@ -118,7 +118,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     "show a blank trading name page when no Company Details data has been entered" in new Setup {
       val cName = "Tst Company Name"
       mockFetchCurrentProfile()
-      val defaultCompanyDetailsView = CompanyDetailsView(None, cName, None, validROAddress, None, None)
+      val defaultCompanyDetailsView = CompanyDetailsView(cName, None, validROAddress, None, None)
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(defaultCompanyDetailsView))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {

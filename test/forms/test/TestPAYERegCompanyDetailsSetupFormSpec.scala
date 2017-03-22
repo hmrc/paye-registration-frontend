@@ -27,7 +27,6 @@ class TestPAYERegCompanyDetailsSetupFormSpec extends UnitSpec {
   "Binding TestPAYERegCompanyDetailsSetupForm to a model" when {
     "Bind successfully with full data" should {
       val data = Map(
-        "crn" -> "abc",
         "companyName" -> "TEST LTD",
         "tradingName" -> "NEWTEST LTD",
         "roAddress.line1" -> "Testing Bld",
@@ -48,7 +47,6 @@ class TestPAYERegCompanyDetailsSetupFormSpec extends UnitSpec {
       )
 
       val model = CompanyDetails(
-        crn = Some("abc"),
         companyName = "TEST LTD",
         tradingName = Some("NEWTEST LTD"),
         roAddress = Address(
@@ -85,7 +83,6 @@ class TestPAYERegCompanyDetailsSetupFormSpec extends UnitSpec {
       "Unbind successfully" in {
         val form = testForm.fill(model)
         form.data shouldBe Map(
-          "crn" -> "abc",
           "companyName" -> "TEST LTD",
           "tradingName" -> "NEWTEST LTD",
           "roAddress.line1" -> "Testing Bld",
@@ -109,7 +106,6 @@ class TestPAYERegCompanyDetailsSetupFormSpec extends UnitSpec {
 
     "Bind successfully with not full data" should {
       val data = Map(
-        "crn" -> "",
         "companyName" -> "TEST LTD",
         "tradingName" -> "",
         "roAddress.line1" -> "Testing Bld",
@@ -130,7 +126,6 @@ class TestPAYERegCompanyDetailsSetupFormSpec extends UnitSpec {
       )
 
       val model = CompanyDetails(
-        crn = None,
         companyName = "TEST LTD",
         tradingName = None,
         roAddress = Address(
