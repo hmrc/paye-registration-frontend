@@ -33,7 +33,6 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
         "registrationID" -> "54321",
         "formCreationTimestamp" -> "01/01/2017",
         "completionCapacity" -> "Director",
-        "companyDetails.crn" -> "abc",
         "companyDetails.companyName" -> "TEST LTD",
         "companyDetails.tradingName" -> "NEWTEST LTD",
         "companyDetails.roAddress.line1" -> "Testing Bld",
@@ -88,7 +87,6 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
         formCreationTimestamp = "01/01/2017",
         completionCapacity = "Director",
         companyDetails = CompanyDetails(
-          crn = Some("abc"),
           companyName = "TEST LTD",
           tradingName = Some("NEWTEST LTD"),
           roAddress = Address(
@@ -161,7 +159,6 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
           "registrationID" -> "54321",
           "formCreationTimestamp" -> "01/01/2017",
           "completionCapacity" -> "Director",
-          "companyDetails.crn" -> "abc",
           "companyDetails.companyName" -> "TEST LTD",
           "companyDetails.tradingName" -> "NEWTEST LTD",
           "companyDetails.roAddress.line1" -> "Testing Bld",
@@ -218,7 +215,6 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
         "registrationID" -> "54321",
         "formCreationTimestamp" -> "01/01/2017",
         "completionCapacity" -> "Director",
-        "companyDetails.crn" -> "",
         "companyDetails.companyName" -> "TEST LTD",
         "companyDetails.tradingName" -> "",
         "companyDetails.roAddress.line1" -> "Testing Bld",
@@ -273,7 +269,6 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
         formCreationTimestamp = "01/01/2017",
         completionCapacity = "Director",
         companyDetails = CompanyDetails(
-          crn = None,
           companyName = "TEST LTD",
           tradingName = None,
           roAddress = Address(

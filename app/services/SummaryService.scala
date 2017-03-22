@@ -101,7 +101,6 @@ trait SummarySrv {
         SummaryRow(
           id = "ppobAddress",
           answer = Right(formatHTMLAddress(companyDetails.ppobAddress)),
-          //TODO: Change to PPOB address route
           changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.ppobAddress())
         ),
         SummaryRow(

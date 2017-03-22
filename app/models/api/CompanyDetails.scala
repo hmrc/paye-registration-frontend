@@ -20,7 +20,6 @@ import models.{Address, DigitalContactDetails}
 import play.api.libs.json.Json
 
 case class CompanyDetails(
-                           crn: Option[String],
                            companyName: String,
                            tradingName: Option[String],
                            roAddress: Address,

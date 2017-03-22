@@ -67,7 +67,7 @@ trait CompanyDetailsSrv {
       case None => for {
         cName   <- cohoService.getStoredCompanyName
         roAddress <- cohoAPIConnector.getRegisteredOfficeAddress(txId)
-      } yield CompanyDetailsView(None, cName, None, roAddress, None, None)
+      } yield CompanyDetailsView(cName, None, roAddress, None, None)
     }
   }
 
@@ -130,7 +130,6 @@ trait CompanyDetailsSrv {
     }
 
     CompanyDetailsView(
-      apiModel.crn,
       apiModel.companyName,
       tradingNameView,
       apiModel.roAddress,
@@ -140,8 +139,8 @@ trait CompanyDetailsSrv {
   }
 
   private[services] def viewToAPI(viewData: CompanyDetailsView): Either[CompanyDetailsView, CompanyDetailsAPI] = viewData match {
-    case CompanyDetailsView(crn, companyName, Some(tradingName), roAddress, Some(ppobAddress), Some(businessContactDetails)) =>
-      Right(CompanyDetailsAPI(crn, companyName, tradingNameAPIValue(tradingName), roAddress, ppobAddress, businessContactDetails))
+    case CompanyDetailsView(companyName, Some(tradingName), roAddress, Some(ppobAddress), Some(businessContactDetails)) =>
+      Right(CompanyDetailsAPI(companyName, tradingNameAPIValue(tradingName), roAddress, ppobAddress, businessContactDetails))
     case _ => Left(viewData)
   }
 

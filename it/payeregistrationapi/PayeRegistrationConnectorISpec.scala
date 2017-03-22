@@ -18,7 +18,6 @@ package payeregistrationapi
 import java.time.LocalDate
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import com.kenshoo.play.metrics.Metrics
 import connectors.PAYERegistrationConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.DigitalContactDetails
@@ -62,8 +61,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         Some("0987654321")
       )
 
-    val validCompanyDetails = CompanyDetails(crn = None,
-                                             companyName = "Test Company",
+    val validCompanyDetails = CompanyDetails(companyName = "Test Company",
                                              tradingName = Some("Test Company Trading Name"),
                                              roAddress = Address(
                                                "14 St Test Walk",

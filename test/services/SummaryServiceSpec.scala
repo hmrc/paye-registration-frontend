@@ -19,8 +19,7 @@ package services
 import common.exceptions.InternalExceptions.APIConversionException
 import connectors.PAYERegistrationConnector
 import fixtures.PAYERegistrationFixture
-import models.{Address, DigitalContactDetails}
-import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI, PAYEContact => PAYEContactAPI, _}
+import models.api.{PAYEContact => PAYEContactAPI}
 import models.api.{Director, Employment, Name, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
 import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection}
 import models.{Address, DigitalContactDetails}
@@ -50,7 +49,6 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
     formCreationTimestamp = "2017-01-11T15:10:12",
     completionCapacity = "High Priest",
     companyDetails = CompanyDetailsAPI(
-      crn = None,
       companyName = "Test Company",
       tradingName = Some("tstTrade"),
       Address("14 St Test Walk", "Testley", None, None, None, None),
@@ -251,7 +249,6 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         formCreationTimestamp = "2017-01-11T15:10:12",
         completionCapacity = "High Priestess",
         companyDetails = CompanyDetailsAPI(
-          crn = None,
           companyName = "Test Company",
           tradingName = None,
           Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
@@ -412,7 +409,6 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
     "return a valid summary section" in new Setup {
 
       val validCompanyDetailsAPI = CompanyDetailsAPI(
-        crn = None,
         companyName = "Test Company",
         tradingName = Some("Test Company Trading Name"),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),

@@ -36,7 +36,6 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
       "formCreationTimestamp" -> text,
       "completionCapacity" -> text,
       "companyDetails" -> mapping(
-        "crn" -> optional(text),
         "companyName" -> text,
         "tradingName" -> optional(text),
         "roAddress" -> mapping(

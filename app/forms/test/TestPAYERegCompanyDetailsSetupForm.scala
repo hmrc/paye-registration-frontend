@@ -25,7 +25,6 @@ object TestPAYERegCompanyDetailsSetupForm {
 
   val form = Form(
     mapping(
-      "crn" -> optional(text),
       "companyName" -> text,
       "tradingName" -> optional(text),
       "roAddress" -> mapping(

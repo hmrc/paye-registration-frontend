@@ -12,13 +12,6 @@
 
 @govHelpers.form(action = controllers.test.routes.TestRegSetupController.submitRegSetupCompanyDetails) {
 
-
-    <div class="inline form-group">
-        @govHelpers.input(
-        detailsForm("crn"),
-        '_label -> "CRN (optional)"
-        )
-    </div>
     <div class="inline form-group">
         @govHelpers.input(
         detailsForm("companyName"),

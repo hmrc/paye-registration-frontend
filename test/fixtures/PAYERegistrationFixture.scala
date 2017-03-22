@@ -18,7 +18,7 @@ package fixtures
 
 import java.time.LocalDate
 
-import models.api.{PAYEContact => PAYEContactAPI, _}
+import models.api.{PAYEContact => PAYEContactAPI}
 import models.view.{PAYEContact => PAYEContactView}
 import models.api._
 import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection}
@@ -34,7 +34,6 @@ trait PAYERegistrationFixture {
     )
 
   val validCompanyDetailsAPI = CompanyDetails(
-    crn = None,
     companyName = "Test Company",
     tradingName = Some("Test Company Trading Name"),
     Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
