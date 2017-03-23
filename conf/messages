@@ -217,7 +217,7 @@ pages.summary.employees.answers.true                    = Yes
 pages.summary.employees.answers.false                   = No
 pages.summary.employees.hiddenChangeText                = Change the company''s employment information
 
-pages.summary.companyPension.question                   = Providing company pension scheme
+pages.summary.companyPension.question                   = Paying out a company pension in the next 2 months
 pages.summary.companyPension.answers.true               = Yes
 pages.summary.companyPension.answers.false              = No
 pages.summary.companyPension.hiddenChangeText           = Change the company''s pension scheme

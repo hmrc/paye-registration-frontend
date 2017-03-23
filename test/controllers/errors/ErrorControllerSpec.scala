@@ -16,11 +16,15 @@
 
 package controllers.errors
 
+import builders.AuthBuilder
 import play.api.http.Status
 import play.api.i18n.MessagesApi
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testHelpers.PAYERegSpec
+
+import scala.concurrent.Future
 
 class ErrorControllerSpec extends PAYERegSpec {
 
@@ -29,6 +33,7 @@ class ErrorControllerSpec extends PAYERegSpec {
   class Setup {
     val controller = new ErrorCtrl {
       override val keystoreConnector = mockKeystoreConnector
+      override val authConnector = mockAuthConnector
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
     }
   }
@@ -36,16 +41,18 @@ class ErrorControllerSpec extends PAYERegSpec {
   "GET /start" should {
     "return 200" in new Setup {
       mockFetchCurrentProfile()
-
-      val result = controller.ineligible(fakeRequest)
-      status(result) shouldBe Status.OK
+      AuthBuilder.showWithAuthorisedUser(controller.ineligible, mockAuthConnector) {
+        (result: Future[Result]) =>
+          status(result) shouldBe Status.OK
+      }
     }
     "return HTML" in new Setup {
       mockFetchCurrentProfile()
-
-      val result = controller.ineligible(fakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+      AuthBuilder.showWithAuthorisedUser(controller.ineligible, mockAuthConnector) {
+        (result: Future[Result]) =>
+          contentType(result) shouldBe Some("text/html")
+          charset(result) shouldBe Some("utf-8")
+      }
     }
   }
 

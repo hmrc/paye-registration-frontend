@@ -160,6 +160,14 @@ trait SummarySrv {
       id = "employees",
       Seq(
         Some(SummaryRow(
+          id = "subcontractors",
+          answer = employment.subcontractors match {
+            case true => Left("true")
+            case false => Left("false")
+          },
+          changeLink = Some(controllers.userJourney.routes.EmploymentController.subcontractors())
+        )),
+        Some(SummaryRow(
           id = "employees",
           answer = employment.employees match {
             case true => Left("true")
@@ -178,14 +186,6 @@ trait SummarySrv {
               changeLink = Some(controllers.userJourney.routes.EmploymentController.companyPension())
             )
         },
-        Some(SummaryRow(
-          id = "subcontractors",
-          answer = employment.subcontractors match {
-            case true => Left("true")
-            case false => Left("false")
-          },
-          changeLink = Some(controllers.userJourney.routes.EmploymentController.subcontractors())
-        )),
         Some(SummaryRow(
           id = "firstPaymentDate",
           answer = Right(DateTimeFormatter.ofPattern("dd/MM/yyyy").format(employment.firstPayDate)),
