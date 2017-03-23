@@ -10,7 +10,8 @@
     )
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.subcontractors.heading")</h1>
     @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitSubcontractors) {
-        <p>@Html(Messages("pages.subcontractors.nameRulesIntro", "https://www.gov.uk/what-is-the-construction-industry-scheme"))</p>
+        <p>@Messages("pages.subcontractors.nameRulesIntro")</p>
+        <p>@Messages("pages.subcontractors.nameRulesIntro2")</p>
         <div class="inline form-group">
             @payeInputRadioGroup(
                 subcontractorsForm("hasContractors"),
@@ -26,6 +27,38 @@
                 '_groupClass -> "inline"
             )
         </div>
+        <details>
+            <summary class="summary">@Messages("pages.subcontractors.detailsSummary")</summary>
+            <div class="panel-indent">
+                <div class="form-group">
+                    <p>@Messages("pages.subcontractors.detailsList1")</p>
+                    <ul class="list list-bullet">
+                        <li>@Messages("pages.subcontractors.detailsList1Element1")</li>
+                        <li>@Messages("pages.subcontractors.detailsList1Element2")</li>
+                    </ul>
+                </div>
+                <div class="form-group">
+                    <p>@Messages("pages.subcontractors.detailsList2")</p>
+                    <ul class="list list-bullet">
+                        <li>@Messages("pages.subcontractors.detailsList2Element1")</li>
+                        <li>@Messages("pages.subcontractors.detailsList2Element2")</li>
+                        <li>@Messages("pages.subcontractors.detailsList2Element3")</li>
+                        <li>@Messages("pages.subcontractors.detailsList2Element4")</li>
+                        <li>@Messages("pages.subcontractors.detailsList2Element5")</li>
+                        <li>@Messages("pages.subcontractors.detailsList2Element6")</li>
+                    </ul>
+                </div>
+                <p>@Messages("pages.subcontractors.detailsList3")</p>
+                <ul class="list list-bullet">
+                    <li>@Messages("pages.subcontractors.detailsList3Element1")</li>
+                    <li>@Messages("pages.subcontractors.detailsList3Element2")</li>
+                    <li>@Messages("pages.subcontractors.detailsList3Element3")</li>
+                    <li>@Messages("pages.subcontractors.detailsList3Element4")</li>
+                    <li>@Messages("pages.subcontractors.detailsList3Element5")</li>
+                    <li>@Messages("pages.subcontractors.detailsList3Element6")</li>
+                </ul>
+            </div>
+        </details>
         <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
     }
 }

@@ -101,7 +101,7 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
       AuthBuilder.showWithAuthorisedUser(controller.noLookupCorrespondenceAddress, mockAuthConnector) {
         (response: Future[Result]) =>
           status(response) shouldBe Status.SEE_OTHER
-          redirectLocation(response) shouldBe Some(s"${controllers.userJourney.routes.EmploymentController.employingStaff()}")
+          redirectLocation(response) shouldBe Some(s"${controllers.userJourney.routes.EmploymentController.subcontractors()}")
       }
     }
   }

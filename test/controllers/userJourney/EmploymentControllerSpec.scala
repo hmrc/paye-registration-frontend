@@ -20,8 +20,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 import builders.AuthBuilder
-import enums.DownstreamOutcome
-import models.view._
+import models.view.{CompanyPension, EmployingStaff, FirstPayment, Subcontractors, Employment => EmploymentView}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.http.Status
@@ -37,8 +36,10 @@ import scala.concurrent.Future
 class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
   val mockEmploymentService = mock[EmploymentService]
 
-  val validEmploymentViewModel = Employment(Some(EmployingStaff(true)), Some(CompanyPension(true)), Some(Subcontractors(true)), Some(FirstPayment(LocalDate.of(2016, 12, 1))))
-  val nonValidEmploymentViewModel = Employment(None, None, None, None)
+  val ineligible = EmploymentView(Some(EmployingStaff(false)), None, Some(Subcontractors(false)), None)
+  val validEmploymentViewModel = EmploymentView(Some(EmployingStaff(true)), Some(CompanyPension(true)), Some(Subcontractors(true)), Some(FirstPayment(LocalDate.of(2016, 12, 1))))
+  val validEmploymentViewModel2 = EmploymentView(Some(EmployingStaff(false)), Some(CompanyPension(true)), Some(Subcontractors(true)), Some(FirstPayment(LocalDate.of(2016, 12, 1))))
+  val nonValidEmploymentViewModel = EmploymentView(None, None, None, None)
 
   class Setup {
     val controller = new EmploymentCtrl {
@@ -76,6 +77,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
     }
   }
 
+  //TODO
   "calling the submitEmployingStaff action" should {
     "return 303 for an unauthorised user" in new Setup {
       val result = controller.submitEmployingStaff()(FakeRequest())
@@ -92,7 +94,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
 
     "redirect to the Company Pension page when a user enters YES answer" in new Setup {
       mockFetchCurrentProfile()
-      when(mockEmploymentService.saveEmployingStaff(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      when(mockEmploymentService.saveEmployingStaff(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(validEmploymentViewModel)
       AuthBuilder.submitWithAuthorisedUser(controller.submitEmployingStaff(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "currentYear" -> "true"
       )) {
@@ -102,15 +104,27 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       }
     }
 
-    "redirect to the Subcontractors page when a user enters NO answer" in new Setup {
+    "redirect to the First Payment page when a user enters NO answer" in new Setup {
       mockFetchCurrentProfile()
-      when(mockEmploymentService.saveEmployingStaff(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      when(mockEmploymentService.saveEmployingStaff(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(validEmploymentViewModel2)
       AuthBuilder.submitWithAuthorisedUser(controller.submitEmployingStaff(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "currentYear" -> "false"
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/subcontractors"
+          result.header.headers("Location") shouldBe "/register-for-paye/first-payment"
+      }
+    }
+
+    "redirect to the Ineligible page when a user enters NO answer while also having a NO for Subcontractors" in new Setup {
+      mockFetchCurrentProfile()
+      when(mockEmploymentService.saveEmployingStaff(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(ineligible)
+      AuthBuilder.submitWithAuthorisedUser(controller.submitEmployingStaff(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "currentYear" -> "false"
+      )) {
+        result =>
+          status(result) shouldBe Status.SEE_OTHER
+          result.header.headers("Location") shouldBe "/register-for-paye/ineligible-for-paye"
       }
     }
   }
@@ -154,27 +168,15 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       }
     }
 
-    "redirect to the Subcontractors page when a user enters YES answer" in new Setup {
+    "redirect to the First Payment page when a user enters NO answer" in new Setup {
       mockFetchCurrentProfile()
-      when(mockEmploymentService.saveCompanyPension(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
-      AuthBuilder.submitWithAuthorisedUser(controller.submitCompanyPension(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
-        "pensionProvided" -> "true"
-      )) {
-        result =>
-          status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/subcontractors"
-      }
-    }
-
-    "redirect to the Subcontractors page when a user enters NO answer" in new Setup {
-      mockFetchCurrentProfile()
-      when(mockEmploymentService.saveCompanyPension(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      when(mockEmploymentService.saveCompanyPension(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(validEmploymentViewModel)
       AuthBuilder.submitWithAuthorisedUser(controller.submitCompanyPension(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "pensionProvided" -> "false"
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/subcontractors"
+          result.header.headers("Location") shouldBe "/register-for-paye/first-payment"
       }
     }
   }
@@ -204,6 +206,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
     }
   }
 
+  //TODO
   "calling the submitSubcontractors action" should {
     "return 303 for an unauthorised user" in new Setup {
       val result = controller.submitSubcontractors()(FakeRequest())
@@ -218,27 +221,27 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       }
     }
 
-    "redirect to the First Payment page when a user enters YES answer" in new Setup {
+    "redirect to the Employment page when a user enters an answer" in new Setup {
       mockFetchCurrentProfile()
-      when(mockEmploymentService.saveSubcontractors(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
-      AuthBuilder.submitWithAuthorisedUser(controller.submitSubcontractors(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
-        "hasContractors" -> "true"
-      )) {
-        result =>
-          status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/first-payment"
-      }
-    }
-
-    "redirect to the First Payment page when a user enters NO answer" in new Setup {
-      mockFetchCurrentProfile()
-      when(mockEmploymentService.saveSubcontractors(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      when(mockEmploymentService.saveSubcontractors(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(validEmploymentViewModel)
       AuthBuilder.submitWithAuthorisedUser(controller.submitSubcontractors(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "hasContractors" -> "false"
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/first-payment"
+          result.header.headers("Location") shouldBe "/register-for-paye/employing-staff"
+      }
+    }
+
+    "redirect to the Ineligible page when a user enters NO answer while also having a NO for Employment" in new Setup {
+      mockFetchCurrentProfile()
+      when(mockEmploymentService.saveSubcontractors(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(ineligible)
+      AuthBuilder.submitWithAuthorisedUser(controller.submitSubcontractors(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "hasContractors" -> "false"
+      )) {
+        result =>
+          status(result) shouldBe Status.SEE_OTHER
+          result.header.headers("Location") shouldBe "/register-for-paye/ineligible-for-paye"
       }
     }
   }
@@ -362,7 +365,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
 
     "redirect to the Summary page when a user enters a valid past date" in new Setup {
       mockFetchCurrentProfile()
-      when(mockEmploymentService.saveFirstPayment(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      when(mockEmploymentService.saveFirstPayment(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(validEmploymentViewModel)
       AuthBuilder.submitWithAuthorisedUser(controller.submitFirstPayment(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "firstPayYear" -> "2016",
         "firstPayMonth" -> "12",
@@ -378,7 +381,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       mockFetchCurrentProfile()
       val today = LocalDate.now()
       val futureDate = fromDate(today.plus(1, ChronoUnit.MONTHS))
-      when(mockEmploymentService.saveFirstPayment(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      when(mockEmploymentService.saveFirstPayment(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(validEmploymentViewModel)
       AuthBuilder.submitWithAuthorisedUser(controller.submitFirstPayment(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "firstPayYear" -> futureDate._1,
         "firstPayMonth" -> futureDate._2,

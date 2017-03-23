@@ -22,18 +22,38 @@
     )
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.firstPayment.heading")</h1>
     <p>@Messages("pages.firstPayment.intro")</p>
+    <div class="form-group">
+        <p>@Messages("pages.firstPayment.list")</p>
+        <ul class="list list-bullet">
+            <li>@Messages("pages.firstPayment.listElement1")</li>
+            <li>@Messages("pages.firstPayment.listElement2")</li>
+        </ul>
+        <p class="indent">@Messages("pages.firstPayment.detail")</p>
+    </div>
+
+
     @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitFirstPayment) {
-        <div class="inline form-group">
-            @inlineDateInput(
-            firstPaymentForm,
-            "firstPay",
-            Messages("pages.firstPayment.question"),
-            Some(Html(Messages("pages.firstPayment.hint")))
-            )
-        </div>
+        @inlineDateInput(
+        firstPaymentForm,
+        "firstPay",
+        Some(Html(Messages("pages.firstPayment.hint")))
+        )
 
+        <details>
+            <summary class="summary">@Messages("pages.firstPayment.firstPaymentRulesSummary")</summary>
+            <div class="panel-indent">
+                <div class="form-group">
+                    <p>@Messages("pages.firstPayment.firstPaymentRulesIntro")</p>
+                    <ul class="list list-bullet">
+                        <li>@Messages("pages.firstPayment.firstPaymentRules1")</li>
+                        <li>@Messages("pages.firstPayment.firstPaymentRules2")</li>
+                        <li>@Messages("pages.firstPayment.firstPaymentRules3")</li>
+                    </ul>
+                </div>
+                <p>@Messages("pages.firstPayment.detail")</p>
+            </div>
+        </details>
 
-        @hiddenDetails("firstPaymentRules", Messages("pages.firstPayment.firstPaymentRulesSummary"), hiddenDetailsContent)
         <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
     }
 }

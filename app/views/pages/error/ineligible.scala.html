@@ -1,0 +1,17 @@
+@()(implicit request: Request[_], messages: Messages)
+
+@main_template(title = Messages("errorPages.ineligible.title")) {
+
+  <h1 class="heading-xlarge">@Messages("errorPages.ineligible.heading")</h1>
+
+  <p>@Messages("errorPages.ineligible.p1")</p>
+
+  <p>@Messages("errorPages.ineligible.p2")</p>
+
+  <ul class="list-bullet">
+    <li>@Messages("errorPages.ineligible.l1")</li>
+    <li>@Messages("errorPages.ineligible.l2")</li>
+    <li>@Messages("errorPages.ineligible.l3")</li>
+  </ul>
+
+}

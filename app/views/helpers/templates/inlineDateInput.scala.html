@@ -1,6 +1,5 @@
 @(formItem:Form[_],
     fieldName: String,
-    questionText: String,
     hintText: Option[Html],
     args: (Symbol,Any)*)(implicit lang: play.api.i18n.Lang, messages: Messages)
 
@@ -10,10 +9,6 @@
 @fieldsetClasses = @{if(formItem.hasErrors && (formItem.errors.find(_.key != "psoAmt").isDefined)) "form-field--error" else "" }
 
 <fieldset class="form-group form-date @fieldsetClasses" id="@fieldName-fieldset">
-
-    <h2>
-        @questionText
-    </h2>
 
     @if(formItem.hasErrors) {
     @formItem.errors.filter(_.key.contains(fieldName)).map { error => <span class="error-notification" id='@{s"${error.key}-error-message"}'>@Messages(s"${error.message}")</span>}
