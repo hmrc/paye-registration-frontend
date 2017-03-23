@@ -137,7 +137,7 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
       when(mockS4LService.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(returnHttpResponse))
 
-      await(service.saveEmploymentView(validEmploymentViewModel, "54321")) shouldBe MongoSaved
+      await(service.saveEmploymentView(validEmploymentViewModel, "54321")) shouldBe MongoSaved(validEmploymentViewModel)
     }
 
     "clear S4L data if the Employment VIEW model is saved in BE" in new Setup {
@@ -160,7 +160,7 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
       when(mockS4LService.saveForm[EmploymentView](ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(returnCacheMap))
 
-      await(service.saveEmployingStaff(EmployingStaff(false), "54321")) shouldBe DownstreamOutcome.Success
+      await(service.saveEmployingStaff(EmployingStaff(false), "54321")) shouldBe incompleteEmploymentViewModel.copy(employing = Some(EmployingStaff(false)))
     }
   }
 
@@ -172,7 +172,7 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
       when(mockS4LService.saveForm[EmploymentView](ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(returnCacheMap))
 
-      await(service.saveCompanyPension(CompanyPension(false), "54321")) shouldBe DownstreamOutcome.Success
+      await(service.saveCompanyPension(CompanyPension(false), "54321")) shouldBe incompleteEmploymentViewModel.copy(companyPension = Some(CompanyPension(false)))
     }
   }
 
@@ -184,7 +184,7 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
       when(mockS4LService.saveForm[EmploymentView](ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(returnCacheMap))
 
-      await(service.saveSubcontractors(Subcontractors(false), "54321")) shouldBe DownstreamOutcome.Success
+      await(service.saveSubcontractors(Subcontractors(false), "54321")) shouldBe incompleteEmploymentViewModel.copy(subcontractors = Some(Subcontractors(false)))
     }
   }
 
@@ -196,7 +196,9 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
       when(mockS4LService.saveForm[EmploymentView](ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(returnCacheMap))
 
-      await(service.saveFirstPayment(FirstPaymentView(LocalDate.of(2016, 12, 1)), "54321")) shouldBe DownstreamOutcome.Success
+      val date = LocalDate.of(2016, 12, 1)
+
+      await(service.saveFirstPayment(FirstPaymentView(date), "54321")) shouldBe incompleteEmploymentViewModel.copy(firstPayment = Some(FirstPaymentView(date)))
     }
   }
 }

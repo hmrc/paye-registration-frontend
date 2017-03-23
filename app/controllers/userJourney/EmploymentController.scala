@@ -21,8 +21,8 @@ import javax.inject.{Inject, Singleton}
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector}
-import enums.DownstreamOutcome
 import forms.employmentDetails._
+import models.view.{EmployingStaff, Subcontractors}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.{EmploymentService, EmploymentSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
@@ -48,6 +48,32 @@ trait EmploymentCtrl extends FrontendController with Actions with I18nSupport wi
   val employmentService: EmploymentSrv
   val keystoreConnector: KeystoreConnect
 
+  // SUBCONTRACTORS
+  val subcontractors = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+    withCurrentProfile { profile =>
+      for {
+        employment <- employmentService.fetchEmploymentView(profile.registrationID)
+      } yield employment.subcontractors match {
+        case Some(model) => Ok(SubcontractorsPage(SubcontractorsForm.form.fill(model)))
+        case _ => Ok(SubcontractorsPage(SubcontractorsForm.form))
+      }
+    }
+  }
+
+  val submitSubcontractors = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
+    withCurrentProfile { profile =>
+      SubcontractorsForm.form.bindFromRequest.fold(
+        errors => Future.successful(BadRequest(SubcontractorsPage(errors))),
+        model => employmentService.saveSubcontractors(model, profile.registrationID) map { model =>
+          (model.employing, model.subcontractors) match {
+            case (Some(EmployingStaff(false)), Some(Subcontractors(false))) => Redirect(controllers.errors.routes.ErrorController.ineligible())
+            case _ => Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
+          }
+        }
+      )
+    }
+  }
+
   // EMPLOYING STAFF
   val employingStaff = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     withCurrentProfile { profile =>
@@ -64,10 +90,11 @@ trait EmploymentCtrl extends FrontendController with Actions with I18nSupport wi
     withCurrentProfile { profile =>
       EmployingStaffForm.form.bindFromRequest.fold(
         errors => Future.successful(BadRequest(EmployingStaffPage(errors))),
-        model => employmentService.saveEmployingStaff(model, profile.registrationID) map {
-          case DownstreamOutcome.Success => model.currentYear match {
-            case true => Redirect(controllers.userJourney.routes.EmploymentController.companyPension())
-            case false => Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
+        model => employmentService.saveEmployingStaff(model, profile.registrationID) map { model =>
+          (model.employing, model.subcontractors) match {
+            case (Some(EmployingStaff(false)), Some(Subcontractors(false))) => Redirect(controllers.errors.routes.ErrorController.ineligible())
+            case (Some(EmployingStaff(true)), _) => Redirect(controllers.userJourney.routes.EmploymentController.companyPension())
+            case _ => Redirect(controllers.userJourney.routes.EmploymentController.firstPayment())
           }
         }
       )
@@ -91,36 +118,7 @@ trait EmploymentCtrl extends FrontendController with Actions with I18nSupport wi
       CompanyPensionForm.form.bindFromRequest.fold(
         errors => Future.successful(BadRequest(CompanyPensionPage(errors))),
         model => employmentService.saveCompanyPension(model, profile.registrationID) map {
-          case DownstreamOutcome.Success => model.pensionProvided match {
-            case true => Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
-            case false => Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
-          }
-        }
-      )
-    }
-  }
-
-  // SUBCONTRACTORS
-  val subcontractors = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    withCurrentProfile { profile =>
-      for {
-        employment <- employmentService.fetchEmploymentView(profile.registrationID)
-      } yield employment.subcontractors match {
-        case Some(model) => Ok(SubcontractorsPage(SubcontractorsForm.form.fill(model)))
-        case _ => Ok(SubcontractorsPage(SubcontractorsForm.form))
-      }
-    }
-  }
-
-  val submitSubcontractors = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    withCurrentProfile { profile =>
-      SubcontractorsForm.form.bindFromRequest.fold(
-        errors => Future.successful(BadRequest(SubcontractorsPage(errors))),
-        model => employmentService.saveSubcontractors(model, profile.registrationID) map {
-          case DownstreamOutcome.Success => model.hasContractors match {
-            case true => Redirect(controllers.userJourney.routes.EmploymentController.firstPayment())
-            case false => Redirect(controllers.userJourney.routes.EmploymentController.firstPayment())
-          }
+          _ => Redirect(controllers.userJourney.routes.EmploymentController.firstPayment())
         }
       )
     }
@@ -144,8 +142,8 @@ trait EmploymentCtrl extends FrontendController with Actions with I18nSupport wi
         FirstPaymentForm.form.bindFromRequest.fold(
           errors => Future.successful(BadRequest(FirstPaymentPage(errors))),
           model => employmentService.saveFirstPayment(model, profile.registrationID) map (
-                     _ => Redirect(controllers.userJourney.routes.SummaryController.summary())
-                   )
+             _ => Redirect(controllers.userJourney.routes.SummaryController.summary())
+           )
         )
       }
   }

@@ -4,7 +4,7 @@
 
 @(companyPensionForm: Form[CompanyPension])(implicit request: Request[_], messages: Messages)
 
-@main_template(title = Messages("pages.employingStaff.title")) {
+@main_template(title = Messages("pages.companyPension.title")) {
     @govHelpers.errorSummary(
         Messages("app.common.errorSummaryLabel"), companyPensionForm
     )
@@ -19,6 +19,7 @@
             <li>@Messages("pages.companyPension.setUpPension1")</li>
             <li>@Messages("pages.companyPension.setUpPension2")</li>
         </ul>
+        <p>@Messages("pages.companyPension.setUpPensionIntro2")</p>
 
         <div class="inline form-group">
             @payeInputRadioGroup(

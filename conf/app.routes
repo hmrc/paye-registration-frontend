@@ -75,3 +75,7 @@ GET         /confirmation                           controllers.userJourney.Conf
 GET        /feedback                                controllers.feedback.FeedbackController.feedbackShow
 POST       /feedback                                controllers.feedback.FeedbackController.submitFeedback
 GET        /thankyou                                controllers.feedback.FeedbackController.thankyou
+
+## ERRORS
+
+GET        /ineligible-for-paye                     controllers.errors.ErrorController.ineligible

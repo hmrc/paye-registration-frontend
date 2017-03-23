@@ -115,12 +115,12 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
             },
             success => success.chosenAddress match {
               case AddressChoice.correspondenceAddress =>
-                Future.successful(Redirect(controllers.userJourney.routes.EmploymentController.employingStaff()))
+                Future.successful(Redirect(controllers.userJourney.routes.EmploymentController.subcontractors()))
               case AddressChoice.roAddress => for {
                 companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
                 res <- payeContactService.submitCorrespondence(companyDetails.roAddress, profile.registrationID)
               } yield res match {
-                case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
+                case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
                 case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
               }
               case AddressChoice.other =>
@@ -138,7 +138,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
             Some(address) <- addressLookupService.getAddress
             res <- payeContactService.submitCorrespondence(address, profile.registrationID)
           } yield res match {
-            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
+            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
             case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
           }
         }

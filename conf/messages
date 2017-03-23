@@ -101,46 +101,65 @@ pages.payeContact.noFieldsCompleted                     = You need to provide at
 pages.payeContact.nameMandatory                         = Enter a contact name
 
 ## Employing Staff Page
-pages.employingStaff.title                              = Employing Staff
+pages.employingStaff.title                              = Will the company employ staff this year?
 pages.employingStaff.heading                            = Will the company employ staff this year?
 pages.employingStaff.legend                             = Will the company employ staff this year?
-pages.employingStaff.employingStaffLabel                = Employing Staff
 pages.employingStaff.employingStaffRulesIntro           = ''Staff'' may be:
 pages.employingStaff.employingStaffRules1               = yourself (for example, as the only director of a limited company)
 pages.employingStaff.employingStaffRules2               = people already employed by the company
 pages.employingStaff.employingStaffRules3               = people the company expects to employ before the end of year
-pages.employingStaff.employingStaffRulesEnd             = This doesn''t include subcontractors doing construction work.
 
 ## Subcontractors Page
-pages.subcontractors.title                              = Subcontractors
-pages.subcontractors.heading                            = Will the company pay subcontractors to do construction work this year?
-pages.subcontractors.legend                             = Will the company pay subcontractors to do construction work this year?
-pages.subcontractors.subcontractorsLabel                = Subcontractors
-pages.subcontractors.nameRulesIntro                     = Companies who pay subcontractors to do construction work will be registered with the <a href={0}>Construction Industry Scheme (CIS)</a>.
+pages.subcontractors.title                              = Will the company be employing subcontractors in the construction industry?
+pages.subcontractors.heading                            = Will the company be employing subcontractors in the construction industry?
+pages.subcontractors.legend                             = Will the company be employing subcontractors in the construction industry?
+pages.subcontractors.nameRulesIntro                     = Companies who pay subcontractors to do construction work will be registered with the Construction Industry Scheme (CIS).
+pages.subcontractors.nameRulesIntro2                    = Under the CIS, contractors deduct money from a subcontractor''s payments and pass it to HMRC. The deductions count as advance payments towards the subcontractor''s tax and National Insurance.
+pages.subcontractors.detailsSummary                     = What work is covered by the CIS?
+pages.subcontractors.detailsList1                       = The CIS covers most construction work to:
+pages.subcontractors.detailsList2                       = Under the CIS, construction work includes:
+pages.subcontractors.detailsList3                       = It doesn''t include:
+pages.subcontractors.detailsList1Element1               = a permanent or temporary building or structure
+pages.subcontractors.detailsList1Element2               = civil engineering work like roads and bridges
+pages.subcontractors.detailsList2Element1               = preparing the site - for example, laying foundations and providing access works
+pages.subcontractors.detailsList2Element2               = demolition and dismantling
+pages.subcontractors.detailsList2Element3               = building work
+pages.subcontractors.detailsList2Element4               = alterations, repairs and decorating
+pages.subcontractors.detailsList2Element5               = installing systems for heating, lighting, power, water and ventilation
+pages.subcontractors.detailsList2Element6               = cleaning the inside of buildings after construction work
+pages.subcontractors.detailsList3Element1               = architecture and surveying
+pages.subcontractors.detailsList3Element2               = scaffolding hire (with no labour)
+pages.subcontractors.detailsList3Element3               = carpet fitting
+pages.subcontractors.detailsList3Element4               = making materials used in construction including plant and machinery
+pages.subcontractors.detailsList3Element5               = delivering materials
+pages.subcontractors.detailsList3Element6               = work on construction sites that''s clearly not construction - for example running a canteen or site facilities
 
 ## Company Pension Page
-pages.companyPension.title                              = Company Pension Scheme
-pages.companyPension.heading                            = Do you want to provide a company pension scheme for your employees?
-pages.companyPension.legend                             = Do you want to provide a company pension scheme for your employees?
-pages.companyPension.setUpPensionIntro                  = As an employer, you can set up a company pension scheme to provide a pension and benefits to:
-pages.companyPension.setUpPension1                      = employees after they retire
-pages.companyPension.setUpPension2                      = dependants of deceased employees
+pages.companyPension.title                              = Will you be paying out a company pension in the next 2 months?
+pages.companyPension.heading                            = Will you be paying out a company pension in the next 2 months?
+pages.companyPension.legend                             = Will you be paying out a company pension in the next 2 months?
+pages.companyPension.setUpPensionIntro                  = Tell us if you''ll be paying out a company pension in the next 2 months to:
+pages.companyPension.setUpPension1                      = an employee who''s retired
+pages.companyPension.setUpPension2                      = a dependant of an employee who''s died
+pages.companyPension.setUpPensionIntro2                 = This doesn''t include payments you make into a workplace pension scheme for your employees.
 
 ## First Payment Page
-pages.firstPayment.title                                = First Payment
-pages.firstPayment.heading                              = The company''s PAYE scheme start date
-pages.firstPayment.legend                               = The company''s PAYE scheme start date
+pages.firstPayment.title                                = First payment to employees or subcontractors
+pages.firstPayment.heading                              = First payment to employees or subcontractors
+pages.firstPayment.legend                               = First payment to employees or subcontractors
 pages.firstPayment.firstPaymentLabel                    = First Payment
-pages.firstPayment.intro                                = The company''s PAYE scheme starts when the first payment is made to an employee or subcontractor.
-pages.firstPayment.question                             = Has the company made any payments to employees or subcontractors?
-pages.firstPayment.hint                                 = Enter the date the company made their first payment. This can be any date in the past.<br>Or<br>Enter the date the company will make their first payment. This can be up to 2 months in the future.
+pages.firstPayment.intro                                = Enter the date of the first payment you made or will make to an employee or subcontractor.
+pages.firstPayment.hint                                 = For example, 22 4 2017
 pages.firstPayment.date.invalidRange                    = Please enter a date up to 61 days in the future
 pages.firstPayment.firstPaymentRulesSummary             = What counts as a payment?
 pages.firstPayment.firstPaymentRulesIntro               = Payments to employees or subcontractors include:
 pages.firstPayment.firstPaymentRules1                   = their salary or wages
 pages.firstPayment.firstPaymentRules2                   = expenses or benefits
 pages.firstPayment.firstPaymentRules3                   = any tips or bonuses
-pages.firstPayment.firstPaymentRulesEnd                 = This should include any payments made to yourself (for example, if you''re the only director of a limited company).
+pages.firstPayment.list                                 = This can be a date:
+pages.firstPayment.listElement1                         = in the past
+pages.firstPayment.listElement2                         = within the next 2 months
+pages.firstPayment.detail                               = Include any payments to yourself (for example, if you''re the only director of a limited company).
 
 ## NATURE OF BUSINESS
 pages.natureOfBusiness.title                            = Describe the business
@@ -249,6 +268,13 @@ pages.confirmation.p2                                   = You''ll need these to 
 errorPages.title                                        = Something went wrong
 errorPages.restart.heading                              = Sorry, we''re having technical issues.
 errorPages.restart.p1                                   = You can try again by <a href={0}>restarting</a> your PAYE registration.
+errorPages.ineligible.title                             = You don''t need to register as an employer
+errorPages.ineligible.heading                           = You don''t need to register as an employer
+errorPages.ineligible.p1                                = If you''re not going to employ staff or subcontractors this year you don''t need to register as an employer.
+errorPages.ineligible.p2                                = However, you will have to register if your plans change and you start paying:
+errorPages.ineligible.l1                                = employees
+errorPages.ineligible.l2                                = subcontractors
+errorPages.ineligible.l3                                = yourself if you''re a director of a company
 
 ## Feedback page
 page.feedback.title                                     = Feedback
