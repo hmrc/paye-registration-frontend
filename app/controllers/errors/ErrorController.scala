@@ -18,9 +18,11 @@ package controllers.errors
 
 import javax.inject.{Inject, Singleton}
 
-import connectors.{KeystoreConnector, KeystoreConnect}
+import auth.PAYERegime
+import config.FrontendAuthConnector
+import connectors.{KeystoreConnect, KeystoreConnector}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Action
+import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.SessionProfile
 
@@ -30,15 +32,17 @@ import scala.concurrent.Future
 class ErrorController @Inject()(injMessagesApi: MessagesApi,
                                 injKeystoreConnector: KeystoreConnector)
                                 extends ErrorCtrl{
+  val authConnector = FrontendAuthConnector
   val messagesApi = injMessagesApi
   val keystoreConnector = injKeystoreConnector
 }
 
-trait ErrorCtrl extends FrontendController with I18nSupport with SessionProfile {
+trait ErrorCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
 
   val keystoreConnector : KeystoreConnect
 
-  val ineligible = Action.async { implicit request =>
+  val ineligible = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user => implicit request =>
     withCurrentProfile { _ =>
       Future.successful(Ok(views.html.pages.error.ineligible()))
     }

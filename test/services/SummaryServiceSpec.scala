@@ -132,6 +132,11 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         id = "employees",
         Seq(
           SummaryRow(
+            id = "subcontractors",
+            answer = Left("true"),
+            Some(controllers.userJourney.routes.EmploymentController.subcontractors())
+          ),
+          SummaryRow(
             id = "employees",
             answer = Left("true"),
             Some(controllers.userJourney.routes.EmploymentController.employingStaff())
@@ -140,11 +145,6 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             id = "companyPension",
             answer = Left("true"),
             Some(controllers.userJourney.routes.EmploymentController.companyPension())
-          ),
-          SummaryRow(
-            id = "subcontractors",
-            answer = Left("true"),
-            Some(controllers.userJourney.routes.EmploymentController.subcontractors())
           ),
           SummaryRow(
             id = "firstPaymentDate",
@@ -336,6 +336,11 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             id = "employees",
             Seq(
               SummaryRow(
+                id = "subcontractors",
+                answer = Left("true"),
+                Some(controllers.userJourney.routes.EmploymentController.subcontractors())
+              ),
+              SummaryRow(
                 id = "employees",
                 answer = Left("true"),
                 Some(controllers.userJourney.routes.EmploymentController.employingStaff())
@@ -344,11 +349,6 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
                 id = "companyPension",
                 answer = Left("true"),
                 Some(controllers.userJourney.routes.EmploymentController.companyPension())
-              ),
-              SummaryRow(
-                id = "subcontractors",
-                answer = Left("true"),
-                Some(controllers.userJourney.routes.EmploymentController.subcontractors())
               ),
               SummaryRow(
                 id = "firstPaymentDate",
@@ -486,6 +486,11 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         id = "employees",
         Seq(
           SummaryRow(
+            id = "subcontractors",
+            answer = Left("false"),
+            Some(controllers.userJourney.routes.EmploymentController.subcontractors())
+          ),
+          SummaryRow(
             id = "employees",
             answer = Left("false"),
             Some(controllers.userJourney.routes.EmploymentController.employingStaff())
@@ -494,11 +499,6 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             id = "companyPension",
             answer = Left("false"),
             Some(controllers.userJourney.routes.EmploymentController.companyPension())
-          ),
-          SummaryRow(
-            id = "subcontractors",
-            answer = Left("false"),
-            Some(controllers.userJourney.routes.EmploymentController.subcontractors())
           ),
           SummaryRow(
             id = "firstPaymentDate",
