@@ -47,6 +47,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   val apiRegistration = PAYERegistrationAPI(
     registrationID = "AC123456",
+    transactionID = "10-1028374",
     formCreationTimestamp = "2017-01-11T15:10:12",
     status = PAYEStatus.draft,
     completionCapacity = "High Priest",
@@ -248,6 +249,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
 
       val apiRegistrationNoTName = PAYERegistrationAPI(
         registrationID = "AC123456",
+        transactionID = "10-1028374",
         formCreationTimestamp = "2017-01-11T15:10:12",
         status = PAYEStatus.draft,
         completionCapacity = "High Priestess",

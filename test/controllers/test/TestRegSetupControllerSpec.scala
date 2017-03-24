@@ -98,6 +98,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
       "the form has been validated and the PAYE Reg document has been cached" in new Setup {
         val request = FakeRequest().withFormUrlEncodedBody(
           "registrationID" -> "testRegId",
+          "transactionID" -> "10-1028374",
           "formCreationTimestamp" -> "2017-10-10T12:00:00Z",
           "completionCapacity" -> "testCapacity",
           "companyDetails.crn" -> "testCRN",
@@ -167,6 +168,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
       "the form has been validated but there was a problem caching the document" in new Setup {
         val request = FakeRequest().withFormUrlEncodedBody(
           "registrationID" -> "testRegId",
+          "transactionID" -> "10-1028374",
           "formCreationTimestamp" -> "2017-10-10T12:00:00Z",
           "completionCapacity" -> "testCapacity",
           "companyDetails.crn" -> "testCRN",

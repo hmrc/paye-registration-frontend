@@ -41,8 +41,8 @@ trait PAYERegistrationSrv {
   val payeRegistrationConnector: PAYERegistrationConnect
   val authConnector: AuthConnector
 
-  def assertRegistrationFootprint(regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    payeRegistrationConnector.createNewRegistration(regId)
+  def assertRegistrationFootprint(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    payeRegistrationConnector.createNewRegistration(regId, txId)
   }
 
   def getAccountAffinityGroup(implicit hc: HeaderCarrier, authContext: AuthContext): Future[AccountTypes.Value] = {

@@ -17,7 +17,6 @@
 package services
 
 import builders.AuthBuilder
-import config.FrontendAuthConnector
 import connectors._
 import enums.{AccountTypes, DownstreamOutcome}
 import org.mockito.ArgumentMatchers
@@ -51,17 +50,17 @@ class PAYERegistrationServiceSpec extends PAYERegSpec {
 
   "Calling assertRegistrationFootprint" should {
     "return a success response when the Registration is successfully created" in new Setup {
-      when(mockRegConnector.createNewRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockRegConnector.createNewRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      await(service.assertRegistrationFootprint("123")) shouldBe DownstreamOutcome.Success
+      await(service.assertRegistrationFootprint("123", "txID")) shouldBe DownstreamOutcome.Success
     }
 
     "return a failure response when the Registration can't be created" in new Setup {
-      when(mockRegConnector.createNewRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockRegConnector.createNewRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-      await(service.assertRegistrationFootprint("123")) shouldBe DownstreamOutcome.Failure
+      await(service.assertRegistrationFootprint("123", "txID")) shouldBe DownstreamOutcome.Failure
     }
   }
 

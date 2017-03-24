@@ -73,7 +73,7 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
     implicit user =>
       implicit request =>
         withCurrentProfile { profile =>
-          Future.successful(Ok(views.html.pages.test.payeRegistrationSetup(TestPAYERegSetupForm.form, profile.registrationID)))
+          Future.successful(Ok(views.html.pages.test.payeRegistrationSetup(TestPAYERegSetupForm.form, profile.registrationID, profile.companyTaxRegistration.transactionId)))
         }
   }
 
@@ -83,7 +83,7 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
         withCurrentProfile { profile =>
           TestPAYERegSetupForm.form.bindFromRequest.fold(
             errors =>
-              Future.successful(BadRequest(views.html.pages.test.payeRegistrationSetup(errors, profile.registrationID))),
+              Future.successful(BadRequest(views.html.pages.test.payeRegistrationSetup(errors, profile.registrationID, profile.companyTaxRegistration.transactionId))),
             success => testPAYERegConnector.addPAYERegistration(success) map {
               case DownstreamOutcome.Success => Ok("PAYE Registration set up successfully")
               case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Registration")

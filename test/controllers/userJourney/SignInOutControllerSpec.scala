@@ -117,7 +117,7 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
       when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(DownstreamOutcome.Success)
 
-      when(mockPAYERegService.assertRegistrationFootprint(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockPAYERegService.assertRegistrationFootprint(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(DownstreamOutcome.Failure)
 
       AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
@@ -135,7 +135,7 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
       when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(DownstreamOutcome.Success)
 
-      when(mockPAYERegService.assertRegistrationFootprint(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockPAYERegService.assertRegistrationFootprint(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(DownstreamOutcome.Success)
 
       AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {

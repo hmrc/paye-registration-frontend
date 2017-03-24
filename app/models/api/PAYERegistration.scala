@@ -22,6 +22,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json.{OFormat, __}
 
 case class PAYERegistration (registrationID: String,
+                             transactionID: String,
                              formCreationTimestamp: String,
                              status: PAYEStatus.Value,
                              completionCapacity: String,

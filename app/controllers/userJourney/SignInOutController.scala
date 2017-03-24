@@ -65,7 +65,7 @@ trait SignInOutCtrl extends FrontendController with Actions with I18nSupport {
           checkAndStoreCurrentProfile {
             profile =>
               checkAndStoreCompanyDetails(profile.registrationID) {
-                assertPAYERegistrationFootprint(profile.registrationID){
+                assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId){
                   Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
                 }
               }
@@ -89,8 +89,8 @@ trait SignInOutCtrl extends FrontendController with Actions with I18nSupport {
     }
   }
 
-  private def assertPAYERegistrationFootprint(regId: String)(f: => Result)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
-    payeRegistrationService.assertRegistrationFootprint(regId) map {
+  private def assertPAYERegistrationFootprint(regId: String, txId: String)(f: => Result)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+    payeRegistrationService.assertRegistrationFootprint(regId, txId) map {
       case DownstreamOutcome.Success => f
       case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
     }
