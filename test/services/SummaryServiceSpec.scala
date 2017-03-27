@@ -18,6 +18,7 @@ package services
 
 import common.exceptions.InternalExceptions.APIConversionException
 import connectors.PAYERegistrationConnector
+import enums.PAYEStatus
 import fixtures.PAYERegistrationFixture
 import models.api.{PAYEContact => PAYEContactAPI}
 import models.api.{Director, Employment, Name, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
@@ -47,6 +48,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
   val apiRegistration = PAYERegistrationAPI(
     registrationID = "AC123456",
     formCreationTimestamp = "2017-01-11T15:10:12",
+    status = PAYEStatus.draft,
     completionCapacity = "High Priest",
     companyDetails = CompanyDetailsAPI(
       companyName = "Test Company",
@@ -247,6 +249,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       val apiRegistrationNoTName = PAYERegistrationAPI(
         registrationID = "AC123456",
         formCreationTimestamp = "2017-01-11T15:10:12",
+        status = PAYEStatus.draft,
         completionCapacity = "High Priestess",
         companyDetails = CompanyDetailsAPI(
           companyName = "Test Company",

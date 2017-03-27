@@ -16,10 +16,14 @@
 
 package models.api
 
-import play.api.libs.json.Json
+import enums.PAYEStatus
+import models._
+import play.api.libs.functional.syntax._
+import play.api.libs.json.{OFormat, __}
 
 case class PAYERegistration (registrationID: String,
                              formCreationTimestamp: String,
+                             status: PAYEStatus.Value,
                              completionCapacity: String,
                              companyDetails: CompanyDetails,
                              employment: Employment,
@@ -28,9 +32,15 @@ case class PAYERegistration (registrationID: String,
                              payeContact: PAYEContact)
 
 object PAYERegistration {
-  implicit val companyDetailsFormat = CompanyDetails.format
-  implicit val EmploymentFormat = Employment.formatModel
-  implicit val DirectorFormat = Director.format
-  implicit val contactFormat = PAYEContact.format
-  implicit val format = Json.format[PAYERegistration]
+  implicit val format: OFormat[PAYERegistration] = (
+    (__ \ "registrationID").format[String] and
+      (__ \ "formCreationTimestamp").format[String] and
+      (__ \ "status").format[PAYEStatus.Value] and
+      (__ \ "completionCapacity").format[String] and
+      (__ \ "companyDetails").format[CompanyDetails] and
+      (__ \ "employment").format[Employment] and
+      (__ \ "sicCodes").format[List[SICCode]] and
+      (__ \ "directors").format[List[Director]] and
+      (__ \ "payeContact").format[PAYEContact]
+    )(PAYERegistration.apply, unlift(PAYERegistration.unapply))
 }

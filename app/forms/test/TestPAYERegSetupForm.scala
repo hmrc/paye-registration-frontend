@@ -18,22 +18,42 @@ package forms.test
 
 import java.time.LocalDate
 
+import enums.PAYEStatus
 import forms.helpers.{DateForm, RequiredBooleanForm}
 import models.{Address, DigitalContactDetails}
 import models.api._
 import models.view.PAYEContactDetails
-import play.api.data.Form
+import play.api.data.{Form, FormError, Forms, Mapping}
 import play.api.data.Forms._
+import play.api.data.format.Formatter
 
 object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
 
   override val prefix = "employment.firstPayDate"
   override def validation(dt: LocalDate) = Right(dt)
 
+  implicit def payeStatusFormatter: Formatter[PAYEStatus.Value] = new Formatter[PAYEStatus.Value] {
+    def bind(key: String, data: Map[String, String]) = {
+      Right(data.getOrElse(key,"")).right.flatMap {
+        case "draft" => Right(PAYEStatus.draft)
+        case "" => Right(PAYEStatus.draft)
+        case "held" => Right(PAYEStatus.held)
+        case "submitted" => Right(PAYEStatus.submitted)
+        case "invalid" => Right(PAYEStatus.invalid)
+        case "rejected" => Right(PAYEStatus.rejected)
+        case _ => Left(Seq(FormError(key, "error.required", Nil)))
+      }
+    }
+    def unbind(key: String, value: PAYEStatus.Value) = Map(key -> value.toString)
+  }
+
+  val payeStatus: Mapping[PAYEStatus.Value] = Forms.of[PAYEStatus.Value](payeStatusFormatter)
+
   val form = Form(
     mapping(
       "registrationID" -> text,
       "formCreationTimestamp" -> text,
+      "status" -> payeStatus,
       "completionCapacity" -> text,
       "companyDetails" -> mapping(
         "companyName" -> text,
