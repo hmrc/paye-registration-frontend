@@ -18,6 +18,7 @@ package fixtures
 
 import java.time.LocalDate
 
+import enums.PAYEStatus
 import models.api.{PAYEContact => PAYEContactAPI}
 import models.view.{PAYEContact => PAYEContactView}
 import models.api._
@@ -79,6 +80,7 @@ trait PAYERegistrationFixture {
   val validPAYERegistrationAPI = PAYERegistration(
     registrationID = "AC123456",
     formCreationTimestamp = "2017-01-11T15:10:12",
+    status = PAYEStatus.draft,
     completionCapacity = "High Priest",
     companyDetails = validCompanyDetailsAPI,
     employment = validEmploymentAPI,

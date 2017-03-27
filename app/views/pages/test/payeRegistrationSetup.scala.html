@@ -29,6 +29,13 @@
     </div>
 
     <div class="inline form-group">
+    @govHelpers.input(
+        payeForm("status"),
+        '_label -> "Status"
+    )
+    </div>
+
+    <div class="inline form-group">
         @govHelpers.input(
         payeForm("completionCapacity"),
         '_label -> "Completion capacity"

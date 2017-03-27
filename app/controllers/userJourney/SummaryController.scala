@@ -21,21 +21,29 @@ import javax.inject.{Inject, Singleton}
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
+import enums.PAYEStatus
+import models.external.CurrentProfile
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.Result
 import services.{SummaryService, SummarySrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.SessionProfile
 import views.html.pages.{summary => SummaryPage}
+
+import scala.concurrent.Future
 
 @Singleton
 class SummaryController @Inject()(injSummaryService: SummaryService,
                                   injKeystoreConnector: KeystoreConnector,
+                                  injPayeRegistrationConnector: PAYERegistrationConnector,
                                   injMessagesApi: MessagesApi)
   extends SummaryCtrl {
   val authConnector = FrontendAuthConnector
   val summaryService = injSummaryService
   val keystoreConnector = injKeystoreConnector
+  val payeRegistrationConnector = injPayeRegistrationConnector
   val messagesApi = injMessagesApi
 }
 
@@ -43,21 +51,38 @@ trait SummaryCtrl extends FrontendController with Actions with I18nSupport with 
 
   val summaryService: SummarySrv
   val keystoreConnector: KeystoreConnect
+  val payeRegistrationConnector: PAYERegistrationConnect
 
   val summary = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     withCurrentProfile { profile =>
-      summaryService.getRegistrationSummary(profile.registrationID) map {
-        summaryModel => Ok(SummaryPage(summaryModel))
-      } recover {
-        case _ => InternalServerError(views.html.pages.error.restart())
+      invalidSubmissionGuard(profile) {
+        summaryService.getRegistrationSummary(profile.registrationID) map {
+          summaryModel => Ok(SummaryPage(summaryModel))
+        } recover {
+          case _ => InternalServerError(views.html.pages.error.restart())
+        }
       }
     }
   }
 
   val submitRegistration = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     withCurrentProfile { profile =>
-      summaryService.submitRegistration(profile.registrationID) map {
-        _ => Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation)
+      invalidSubmissionGuard(profile) {
+        summaryService.submitRegistration(profile.registrationID) map {
+          _ => Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation())
+        }
+      }
+    }
+  }
+
+  private[controllers] def invalidSubmissionGuard(profile: CurrentProfile)(f: => Future[Result])(implicit hc: HeaderCarrier) = {
+    payeRegistrationConnector.getRegistration(profile.registrationID) flatMap { regDoc =>
+      regDoc.status match {
+        case PAYEStatus.draft => f
+        case PAYEStatus.held | PAYEStatus.submitted => Future.successful(Redirect(routes.ConfirmationController.showConfirmation()))
+        case PAYEStatus.invalid => Future.successful(Redirect(controllers.errors.routes.ErrorController.ineligible()))
+          //TODO: Potentially need a new view to better demonstrate the problem
+        case PAYEStatus.rejected => Future.successful(Redirect(controllers.errors.routes.ErrorController.ineligible()))
       }
     }
   }

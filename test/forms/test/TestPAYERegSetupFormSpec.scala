@@ -18,6 +18,7 @@ package forms.test
 
 import java.time.LocalDate
 
+import enums.PAYEStatus
 import models.{Address, DigitalContactDetails}
 import models.api.{CompanyDetails, Director, Employment, Name, PAYEContact, PAYERegistration, SICCode}
 import models.view.PAYEContactDetails
@@ -32,6 +33,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val data = Map(
         "registrationID" -> "54321",
         "formCreationTimestamp" -> "01/01/2017",
+        "status" -> "draft",
         "completionCapacity" -> "Director",
         "companyDetails.companyName" -> "TEST LTD",
         "companyDetails.tradingName" -> "NEWTEST LTD",
@@ -85,6 +87,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val model = PAYERegistration(
         registrationID = "54321",
         formCreationTimestamp = "01/01/2017",
+        status = PAYEStatus.draft,
         completionCapacity = "Director",
         companyDetails = CompanyDetails(
           companyName = "TEST LTD",
@@ -158,6 +161,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
         form.data shouldBe Map(
           "registrationID" -> "54321",
           "formCreationTimestamp" -> "01/01/2017",
+          "status" -> "draft",
           "completionCapacity" -> "Director",
           "companyDetails.companyName" -> "TEST LTD",
           "companyDetails.tradingName" -> "NEWTEST LTD",
@@ -214,6 +218,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val data = Map(
         "registrationID" -> "54321",
         "formCreationTimestamp" -> "01/01/2017",
+        "status" -> "draft",
         "completionCapacity" -> "Director",
         "companyDetails.companyName" -> "TEST LTD",
         "companyDetails.tradingName" -> "",
@@ -267,6 +272,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val model = PAYERegistration(
         registrationID = "54321",
         formCreationTimestamp = "01/01/2017",
+        status = PAYEStatus.draft,
         completionCapacity = "Director",
         companyDetails = CompanyDetails(
           companyName = "TEST LTD",
@@ -340,6 +346,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
         form.data shouldBe Map(
           "registrationID" -> "54321",
           "formCreationTimestamp" -> "01/01/2017",
+          "status" -> "draft",
           "completionCapacity" -> "Director",
           "companyDetails.companyName" -> "TEST LTD",
           "companyDetails.roAddress.line1" -> "Testing Bld",
@@ -382,6 +389,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val data: Map[String, String] = Map(
         "formCreationTimestamp" -> "01/01/2017",
         "completionCapacity" -> "Director",
+        "status" -> "draft",
         "companyDetails.companyName" -> "TEST LTD",
         "companyDetails.roAddress.line1" -> "Testing Bld",
         "companyDetails.roAddress.line2" -> "1 Test Street",
@@ -425,6 +433,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
         "completionCapacity" -> "Director",
+        "status" -> "draft",
         "companyDetails.companyName" -> "TEST LTD",
         "companyDetails.roAddress.line1" -> "Testing Bld",
         "companyDetails.roAddress.line2" -> "1 Test Street",
@@ -468,6 +477,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
         "formCreationTimestamp" -> "01/01/2017",
+        "status" -> "draft",
         "companyDetails.companyName" -> "TEST LTD",
         "companyDetails.roAddress.line1" -> "Testing Bld",
         "companyDetails.roAddress.line2" -> "1 Test Street",
@@ -511,6 +521,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
         "formCreationTimestamp" -> "01/01/2017",
+        "status" -> "draft",
         "completionCapacity" -> "Director",
         "companyDetails.roAddress.line1" -> "Testing Bld",
         "companyDetails.roAddress.line2" -> "1 Test Street",
@@ -554,6 +565,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
         "formCreationTimestamp" -> "01/01/2017",
+        "status" -> "draft",
         "completionCapacity" -> "Director",
         "companyDetails.companyName" -> "TEST LTD",
         "companyDetails.roAddress.postCode" -> "TE1 1ST",
@@ -598,6 +610,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
         "formCreationTimestamp" -> "01/01/2017",
+        "status" -> "draft",
         "completionCapacity" -> "Director",
         "companyDetails.companyName" -> "TEST LTD",
         "companyDetails.roAddress.line1" -> "Testing Bld",
@@ -642,6 +655,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
         "formCreationTimestamp" -> "01/01/2017",
+        "status" -> "draft",
         "completionCapacity" -> "Director",
         "companyDetails.companyName" -> "TEST LTD",
         "companyDetails.roAddress.line1" -> "Testing Bld",
@@ -685,6 +699,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
         "formCreationTimestamp" -> "01/01/2017",
+        "status" -> "draft",
         "completionCapacity" -> "Director",
         "companyDetails.companyName" -> "TEST LTD",
         "companyDetails.roAddress.line1" -> "Testing Bld",
@@ -728,6 +743,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
         "formCreationTimestamp" -> "01/01/2017",
+        "status" -> "draft",
         "completionCapacity" -> "Director",
         "companyDetails.companyName" -> "TEST LTD",
         "companyDetails.roAddress.line1" -> "Testing Bld",
@@ -771,6 +787,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
         "formCreationTimestamp" -> "01/01/2017",
+        "status" -> "draft",
         "completionCapacity" -> "Director",
         "companyDetails.companyName" -> "TEST LTD",
         "companyDetails.roAddress.line1" -> "Testing Bld",
@@ -814,6 +831,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
         "formCreationTimestamp" -> "01/01/2017",
+        "status" -> "draft",
         "completionCapacity" -> "Director",
         "companyDetails.companyName" -> "TEST LTD",
         "companyDetails.roAddress.line1" -> "Testing Bld",
@@ -857,6 +875,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
         "formCreationTimestamp" -> "01/01/2017",
+        "status" -> "draft",
         "completionCapacity" -> "Director",
         "companyDetails.companyName" -> "TEST LTD",
         "companyDetails.roAddress.line1" -> "Testing Bld",
@@ -900,6 +919,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
         "formCreationTimestamp" -> "01/01/2017",
+        "status" -> "draft",
         "completionCapacity" -> "Director",
         "companyDetails.companyName" -> "TEST LTD",
         "companyDetails.roAddress.line1" -> "Testing Bld",
