@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector}
+import connectors.{BusinessRegistrationConnector, BusinessRegistrationConnect, KeystoreConnect, KeystoreConnector}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{AnyContent, Request}
 import services.{S4LService, S4LSrv}
@@ -31,25 +31,25 @@ import utils.SessionProfile
 import scala.concurrent.Future
 
 @Singleton
-class TestCacheController @Inject()(injKeystoreConnector: KeystoreConnector,
+class TestCacheController @Inject()(injBusinessRegistrationConnector: BusinessRegistrationConnector,
                                     injS4LService: S4LService,
                                     injMessagesApi: MessagesApi)
   extends TestCacheCtrl {
   val authConnector = FrontendAuthConnector
-  val keystoreConnector = injKeystoreConnector
+  val businessRegConnector = injBusinessRegistrationConnector
   val s4LService = injS4LService
   val messagesApi = injMessagesApi
 }
 
-trait TestCacheCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
+trait TestCacheCtrl extends FrontendController with Actions with I18nSupport {
 
-  val keystoreConnector: KeystoreConnect
+  val businessRegConnector: BusinessRegistrationConnect
   val s4LService: S4LSrv
 
   val tearDownS4L = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        withCurrentProfile { profile =>
+        businessRegConnector.retrieveCurrentProfile flatMap { profile =>
           for {
             res <- doTearDownS4L(profile.registrationID)
           } yield Ok(res)
