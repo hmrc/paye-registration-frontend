@@ -21,7 +21,6 @@ import fixtures.PAYERegistrationFixture
 import mocks.MockMetrics
 import models.api.{Director, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.http.Status
-import services.MetricsSrv
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -49,37 +48,37 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
     "return a successful outcome when the microservice successfully creates a new PAYE Registration" in new Setup {
       mockHttpPATCH[String, HttpResponse]("tst-url", HttpResponse(Status.OK))
 
-      await(connector.createNewRegistration("tstID")) shouldBe DownstreamOutcome.Success
+      await(connector.createNewRegistration("tstID", "tstTXID")) shouldBe DownstreamOutcome.Success
     }
     "return a failed outcome when the microservice returns a 2xx response other than OK" in new Setup {
       mockHttpPATCH[String, HttpResponse]("tst-url", HttpResponse(Status.ACCEPTED))
 
-      await(connector.createNewRegistration("tstID")) shouldBe DownstreamOutcome.Failure
+      await(connector.createNewRegistration("tstID", "tstTXID")) shouldBe DownstreamOutcome.Failure
     }
     "return a Bad Request response" in new Setup {
       mockHttpFailedPATCH[String, HttpResponse]("tst-url", badRequest)
 
-      await(connector.createNewRegistration("tstID")) shouldBe DownstreamOutcome.Failure
+      await(connector.createNewRegistration("tstID", "tstTXID")) shouldBe DownstreamOutcome.Failure
     }
     "return a Forbidden response" in new Setup {
       mockHttpFailedPATCH[String, HttpResponse]("tst-url", forbidden)
 
-      await(connector.createNewRegistration("tstID")) shouldBe DownstreamOutcome.Failure
+      await(connector.createNewRegistration("tstID", "tstTXID")) shouldBe DownstreamOutcome.Failure
     }
     "return an Upstream4xxResponse" in new Setup {
       mockHttpFailedPATCH[String, HttpResponse]("tst-url", upstream4xx)
 
-      await(connector.createNewRegistration("tstID")) shouldBe DownstreamOutcome.Failure
+      await(connector.createNewRegistration("tstID", "tstTXID")) shouldBe DownstreamOutcome.Failure
     }
     "return Upstream5xxResponse" in new Setup {
       mockHttpFailedPATCH[String, HttpResponse]("tst-url", upstream5xx)
 
-      await(connector.createNewRegistration("tstID")) shouldBe DownstreamOutcome.Failure
+      await(connector.createNewRegistration("tstID", "tstTXID")) shouldBe DownstreamOutcome.Failure
     }
     "return a Internal Server Error" in new Setup {
       mockHttpFailedPATCH[String, HttpResponse]("tst-url", internalServiceException)
 
-      await(connector.createNewRegistration("tstID")) shouldBe DownstreamOutcome.Failure
+      await(connector.createNewRegistration("tstID", "tstTXID")) shouldBe DownstreamOutcome.Failure
     }
   }
 

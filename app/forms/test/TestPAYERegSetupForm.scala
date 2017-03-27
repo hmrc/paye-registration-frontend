@@ -52,6 +52,7 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
   val form = Form(
     mapping(
       "registrationID" -> text,
+      "transactionID" -> text,
       "formCreationTimestamp" -> text,
       "status" -> payeStatus,
       "completionCapacity" -> text,

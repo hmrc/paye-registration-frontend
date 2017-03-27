@@ -32,6 +32,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
     "Bind successfully with full data" should {
       val data = Map(
         "registrationID" -> "54321",
+        "transactionID" -> "10-1028374",
         "formCreationTimestamp" -> "01/01/2017",
         "status" -> "draft",
         "completionCapacity" -> "Director",
@@ -86,6 +87,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
 
       val model = PAYERegistration(
         registrationID = "54321",
+        transactionID = "10-1028374",
         formCreationTimestamp = "01/01/2017",
         status = PAYEStatus.draft,
         completionCapacity = "Director",
@@ -160,6 +162,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
         val form = testForm.fill(model)
         form.data shouldBe Map(
           "registrationID" -> "54321",
+          "transactionID" -> "10-1028374",
           "formCreationTimestamp" -> "01/01/2017",
           "status" -> "draft",
           "completionCapacity" -> "Director",
@@ -217,6 +220,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
     "Bind successfully with not full data" should {
       val data = Map(
         "registrationID" -> "54321",
+        "transactionID" -> "10-1028374",
         "formCreationTimestamp" -> "01/01/2017",
         "status" -> "draft",
         "completionCapacity" -> "Director",
@@ -271,6 +275,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
 
       val model = PAYERegistration(
         registrationID = "54321",
+        transactionID = "10-1028374",
         formCreationTimestamp = "01/01/2017",
         status = PAYEStatus.draft,
         completionCapacity = "Director",
@@ -345,6 +350,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
         val form = testForm.fill(model)
         form.data shouldBe Map(
           "registrationID" -> "54321",
+          "transactionID" -> "10-1028374",
           "formCreationTimestamp" -> "01/01/2017",
           "status" -> "draft",
           "completionCapacity" -> "Director",
@@ -387,6 +393,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
   "Have the correct error" when {
     "registrationID is not completed" in {
       val data: Map[String, String] = Map(
+        "transactionID" -> "10-1028374",
         "formCreationTimestamp" -> "01/01/2017",
         "completionCapacity" -> "Director",
         "status" -> "draft",
@@ -432,6 +439,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
     "formCreationTimestamp is not completed" in {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
+        "transactionID" -> "10-1028374",
         "completionCapacity" -> "Director",
         "status" -> "draft",
         "companyDetails.companyName" -> "TEST LTD",
@@ -476,6 +484,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
     "completionCapacity is not completed" in {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
+        "transactionID" -> "10-1028374",
         "formCreationTimestamp" -> "01/01/2017",
         "status" -> "draft",
         "companyDetails.companyName" -> "TEST LTD",
@@ -520,6 +529,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
     "company name is not completed" in {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
+        "transactionID" -> "10-1028374",
         "formCreationTimestamp" -> "01/01/2017",
         "status" -> "draft",
         "completionCapacity" -> "Director",
@@ -564,6 +574,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
     "roAddress line1 and line2 are not completed" in {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
+        "transactionID" -> "10-1028374",
         "formCreationTimestamp" -> "01/01/2017",
         "status" -> "draft",
         "completionCapacity" -> "Director",
@@ -609,6 +620,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
     "ppobAddress line1 and line2 are not completed" in {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
+        "transactionID" -> "10-1028374",
         "formCreationTimestamp" -> "01/01/2017",
         "status" -> "draft",
         "completionCapacity" -> "Director",
@@ -654,6 +666,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
     "employees is not completed" in {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
+        "transactionID" -> "10-1028374",
         "formCreationTimestamp" -> "01/01/2017",
         "status" -> "draft",
         "completionCapacity" -> "Director",
@@ -698,6 +711,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
     "subcontractors is not completed" in {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
+        "transactionID" -> "10-1028374",
         "formCreationTimestamp" -> "01/01/2017",
         "status" -> "draft",
         "completionCapacity" -> "Director",
@@ -742,6 +756,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
     "firstPayment Day is not completed" in {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
+        "transactionID" -> "10-1028374",
         "formCreationTimestamp" -> "01/01/2017",
         "status" -> "draft",
         "completionCapacity" -> "Director",
@@ -786,6 +801,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
     "firstPayment Month is not completed" in {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
+        "transactionID" -> "10-1028374",
         "formCreationTimestamp" -> "01/01/2017",
         "status" -> "draft",
         "completionCapacity" -> "Director",
@@ -830,6 +846,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
     "firstPayment Year is not completed" in {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
+        "transactionID" -> "10-1028374",
         "formCreationTimestamp" -> "01/01/2017",
         "status" -> "draft",
         "completionCapacity" -> "Director",
@@ -874,6 +891,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
     "paye contact name is not completed" in {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
+        "transactionID" -> "10-1028374",
         "formCreationTimestamp" -> "01/01/2017",
         "status" -> "draft",
         "completionCapacity" -> "Director",
@@ -918,6 +936,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
     "correspondenceAddress line1 and line2 are not completed" in {
       val data: Map[String, String] = Map(
         "registrationID" -> "54321",
+        "transactionID" -> "10-1028374",
         "formCreationTimestamp" -> "01/01/2017",
         "status" -> "draft",
         "completionCapacity" -> "Director",

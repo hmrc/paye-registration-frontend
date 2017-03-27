@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector}
+import connectors.{BusinessRegistrationConnector, BusinessRegistrationConnect, KeystoreConnect, KeystoreConnector}
 import connectors.test.{TestCoHoAPIConnect, TestCoHoAPIConnector}
 import forms.test.TestCoHoCompanyDetailsForm
 import models.test.CoHoCompanyDetailsFormModel
@@ -37,18 +37,21 @@ import scala.concurrent.Future
 class TestCoHoController @Inject()(injTestCoHoAPIConnector: TestCoHoAPIConnector,
                                    injCoHoAPIService: CoHoAPIService,
                                    injKeystoreConnector: KeystoreConnector,
+                                   injBusinessRegConnector: BusinessRegistrationConnector,
                                    injMessagesApi: MessagesApi)
   extends TestCoHoCtrl {
   val authConnector = FrontendAuthConnector
   val testCoHoAPIConnector = injTestCoHoAPIConnector
   val coHoAPIService = injCoHoAPIService
   val keystoreConnector = injKeystoreConnector
+  val businessRegConnector = injBusinessRegConnector
   val messagesApi = injMessagesApi
 }
 
-trait TestCoHoCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
+trait TestCoHoCtrl extends FrontendController with Actions with I18nSupport {
 
   val testCoHoAPIConnector: TestCoHoAPIConnect
+  val businessRegConnector: BusinessRegistrationConnect
   val keystoreConnector : KeystoreConnect
   val coHoAPIService: CoHoAPISrv
 
@@ -61,7 +64,7 @@ trait TestCoHoCtrl extends FrontendController with Actions with I18nSupport with
   def submitCoHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        withCurrentProfile { profile =>
+        businessRegConnector.retrieveCurrentProfile flatMap { profile =>
           TestCoHoCompanyDetailsForm.form.bindFromRequest.fold(
             errors => Future.successful(BadRequest(views.html.pages.test.coHoCompanyDetailsSetup(errors))),
             success => for {

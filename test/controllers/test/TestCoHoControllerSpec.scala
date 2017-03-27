@@ -18,6 +18,7 @@ package controllers.test
 
 import builders.AuthBuilder
 import connectors.test.TestCoHoAPIConnect
+import models.external.BusinessProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.test.FakeRequest
@@ -41,6 +42,7 @@ class TestCoHoControllerSpec extends PAYERegSpec {
     val controller = new TestCoHoCtrl {
       override val testCoHoAPIConnector = mockTestAPIConnector
       override val keystoreConnector = mockKeystoreConnector
+      override val businessRegConnector = mockBusinessRegistrationConnector
       override val coHoAPIService = mockCoHoAPIService
       override val messagesApi = mockMessages
       override val authConnector = mockAuthConnector
@@ -74,6 +76,11 @@ class TestCoHoControllerSpec extends PAYERegSpec {
           "descriptions[4]" -> ""
         )
         mockFetchCurrentProfile()
+        mockBusinessRegFetch(
+          BusinessProfile(registrationID = "1",
+            completionCapacity = Some("director"),
+            language = "EN")
+        )
         when(mockTestAPIConnector.addCoHoCompanyDetails(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testHttpResponse))
 

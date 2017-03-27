@@ -3,7 +3,7 @@
 @import pages.test.testHelpers.manualPrePopulatedInput
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
-@(payeForm: Form[PAYERegistrationAPI], regID: String)(implicit request: Request[_], messages: Messages)
+@(payeForm: Form[PAYERegistrationAPI], regID: String, txID: String)(implicit request: Request[_], messages: Messages)
 
 @govHelpers.errorSummary(
     Messages("app.common.errorSummaryLabel"), payeForm
@@ -19,6 +19,13 @@
         payeForm("registrationID"),
         '_label -> "Registration ID",
         '_value -> regID
+        )
+    </div>
+    <div class="inline form-group">
+        @manualPrePopulatedInput(
+        payeForm("transactionID"),
+        '_label -> "transaction ID",
+        '_value -> txID
         )
     </div>
     <div class="inline form-group">

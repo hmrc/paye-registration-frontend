@@ -44,9 +44,9 @@ trait PAYERegistrationConnect {
   val http: WSHttp
   val metricsService: MetricsSrv
 
-  def createNewRegistration(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[DownstreamOutcome.Value] = {
+  def createNewRegistration(regID: String, txID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[DownstreamOutcome.Value] = {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
-    http.PATCH[String, HttpResponse](s"$payeRegUrl/paye-registration/$regID/new", regID) map {
+    http.PATCH[String, HttpResponse](s"$payeRegUrl/paye-registration/$regID/new", txID) map {
       response => response.status match {
         case Status.OK =>
           payeRegTimer.stop()

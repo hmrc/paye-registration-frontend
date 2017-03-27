@@ -17,6 +17,7 @@
 package controllers.test
 
 import builders.AuthBuilder
+import models.external.BusinessProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.test.Helpers.OK
@@ -35,7 +36,7 @@ class TestCacheControllerSpec extends PAYERegSpec {
   class Setup {
     val controller = new TestCacheCtrl {
       override val s4LService = mockS4LService
-      override val keystoreConnector = mockKeystoreConnector
+      override val businessRegConnector = mockBusinessRegistrationConnector
       override val messagesApi = mockMessages
       override val authConnector = mockAuthConnector
     }
@@ -45,6 +46,11 @@ class TestCacheControllerSpec extends PAYERegSpec {
     "return an OK" when {
       "Save4Later has been cleared" in new Setup {
         mockFetchCurrentProfile()
+        mockBusinessRegFetch(
+          BusinessProfile(registrationID = "1",
+                          completionCapacity = Some("director"),
+                          language = "EN")
+        )
 
         when(mockS4LService.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testHttpResponse))
