@@ -29,13 +29,18 @@ errors.invalid.sic.overCharLimit                        = Enter a business descr
 ## Welcome page
 pages.welcome.title                                     = Register as an employer
 pages.welcome.heading                                   = Register as an employer
-pages.welcome.heading.register                          = You need to register as an employer if you:
-pages.welcome.bullet.pay                                = pay any employees £112 or more a week (this is the same as £486 a month or £5,824 a year)
-pages.welcome.bullet.pension                            = employ anyone who''s getting a pension or already has another job
-pages.welcome.bullet.car                                = provide any employees with expenses or benefits (for example, a company car)
+pages.welcome.heading.register                          = You normally need to register as an employer with HM Revenue and Customs (HMRC) when you start:
+pages.welcome.bullet.pay                                = paying any employees £112 or more a week (this is the same as £486 a month or £5,824 a year)
+pages.welcome.bullet.subcontractors                     = using subcontractors for construction work
+pages.welcome.bullet.pension                            = employing anyone who''s getting a pension or already has another job
+pages.welcome.otherWaysToRegister                       = If you''re providing any employees with expenses or benefits (for example, a company car) or reclaiming deductions taken from Construction Industry Scheme (CIS) payments, you need to <a href={0}>register using the correct online form</a>.
 pages.welcome.director                                  = You must register if you''re employing yourself (for example, if you''re the only director of a limited company).
+pages.welcome.beforeStart                               = Before you start
+pages.welcome.yourApplication                           = Your application:
+pages.welcome.bullet.timeToComplete                     = shouldn''t take more than 15 minutes to complete
+pages.welcome.bullet.timeToProcess                      = can take up to 2 weeks for HMRC to process
 pages.welcome.2months                                   = You can''t register more than 2 months before you start paying people.
-pages.welcome.nino                                      = You''ll need the director''s National Insurance number to complete this registration.
+pages.welcome.nino                                      = You''ll need the National Insurance number of at least one company director to register.
 
 ## Completion Capacity page
 pages.completionCapacity.title                          = What is your relationship to the business?
