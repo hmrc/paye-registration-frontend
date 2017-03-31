@@ -77,7 +77,7 @@ trait TestSetupCtrl extends CurrentProfileCtrl with TestCoHoCtrl with TestRegSet
             profile <- log("CurrentProfileSetup", doCurrentProfileSetup)
             _ <- log("CoHoCompanyDetailsTeardown", doCoHoCompanyDetailsTearDown)
             _ <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(CoHoCompanyDetailsFormModel(companyName, List.empty, List.empty), profile.registrationID))
-            _ <- log("RegTeardown", doRegTeardown)
+            _ <- log("RegTeardown", doIndividualRegTeardown(profile.registrationID))
             _ <- log("S4LTeardown", doTearDownS4L(profile.registrationID))
           } yield Redirect(controllers.userJourney.routes.SignInOutController.postSignIn())
 

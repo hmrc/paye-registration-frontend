@@ -86,4 +86,14 @@ trait TestPAYERegConnect {
         DownstreamOutcome.Failure
     }
   }
+
+  def tearDownIndividualRegistration(regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    http.GET[HttpResponse](s"$payeRegUrl/paye-registration/test-only/delete-registration/$regId") map {
+      resp => DownstreamOutcome.Success
+    } recover {
+      case e: Exception =>
+        Logger.warn(s"[PAYERegistrationConnector] [tearDownIndividualRegistration] received error when clearing registration details - Error: ${e.getMessage}")
+        DownstreamOutcome.Failure
+    }
+  }
 }

@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector}
+import connectors.{BusinessRegistrationConnector, BusinessRegistrationConnect, KeystoreConnect, KeystoreConnector}
 import connectors.test.{TestPAYERegConnect, TestPAYERegConnector}
 import enums.DownstreamOutcome
 import forms.test.{TestPAYEContactForm, TestPAYERegCompanyDetailsSetupForm, TestPAYERegSetupForm}
@@ -52,21 +52,30 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
   val testPAYERegConnector: TestPAYERegConnect
   val keystoreConnector: KeystoreConnect
 
-  protected[controllers] def doRegTeardown(implicit request: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
-    testPAYERegConnector.testRegistrationTeardown()
-  }
-
   val regTeardown = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         withCurrentProfile { profile =>
           for {
-            res <- doRegTeardown
+            res <- testPAYERegConnector.testRegistrationTeardown()
           } yield res match {
             case DownstreamOutcome.Success => Ok("Registration collection successfully cleared")
             case DownstreamOutcome.Failure => InternalServerError("Error clearing registration collection")
           }
         }
+  }
+
+  protected[controllers] def doIndividualRegTeardown(regId: String)(implicit request: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
+    testPAYERegConnector.tearDownIndividualRegistration(regId)
+  }
+
+  def individualRegTeardown(regId: String) = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user =>
+      implicit request =>
+          doIndividualRegTeardown(regId) map {
+            case DownstreamOutcome.Success => Ok(s"Registration successfully cleared for regID $regId")
+            case DownstreamOutcome.Failure => InternalServerError(s"Error clearing registration for regID $regId")
+          }
   }
 
   val regSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
