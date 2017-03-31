@@ -103,4 +103,18 @@ class TestPAYERegConnectorSpec extends PAYERegSpec with PAYERegistrationFixture 
       await(connector.testRegistrationTeardown()) shouldBe DownstreamOutcome.Failure
     }
   }
+
+  "Calling tearDownIndividualRegistration" should {
+    "return a successful outcome for a successful teardown" in new Setup {
+      mockHttpGet[HttpResponse]("tst-url", HttpResponse(Status.OK))
+
+      await(connector.tearDownIndividualRegistration("regId")) shouldBe DownstreamOutcome.Success
+    }
+    "return a failed outcome for an unsuccessful teardown" in new Setup {
+      val e = new RuntimeException("tst")
+      mockHttpFailedGET[HttpResponse]("tst-url", e)
+
+      await(connector.tearDownIndividualRegistration("regId")) shouldBe DownstreamOutcome.Failure
+    }
+  }
 }

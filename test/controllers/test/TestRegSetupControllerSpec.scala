@@ -17,8 +17,10 @@
 package controllers.test
 
 import builders.AuthBuilder
+import connectors.BusinessRegistrationConnect
 import connectors.test.TestPAYERegConnect
 import enums.DownstreamOutcome
+import fixtures.BusinessRegistrationFixture
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.test.FakeRequest
@@ -29,7 +31,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class TestRegSetupControllerSpec extends PAYERegSpec {
+class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFixture {
 
   val mockPayeRegConnector = mock[TestPAYERegConnect]
   val mockPayeRegService = mock[PAYERegistrationSrv]
@@ -46,7 +48,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
 
   "regTeardown" should {
     "return an OK" when {
-      "the registration document has been successfully torn down" in new Setup {
+      "the registration collection has been successfully torn down" in new Setup {
         mockFetchCurrentProfile()
         when(mockPayeRegConnector.testRegistrationTeardown()(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
@@ -58,12 +60,36 @@ class TestRegSetupControllerSpec extends PAYERegSpec {
     }
 
     "return an INTERNAL_SERVER_ERROR" when {
-      "there was a problem tearing down the registration document" in new Setup {
+      "there was a problem tearing down the registration collection" in new Setup {
         mockFetchCurrentProfile()
         when(mockPayeRegConnector.testRegistrationTeardown()(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
         AuthBuilder.showWithAuthorisedUser(controller.regTeardown, mockAuthConnector) { result =>
+          status(result) shouldBe INTERNAL_SERVER_ERROR
+        }
+      }
+    }
+  }
+
+  "individualRegTeardown" should {
+    "return an OK" when {
+      "An existing registration is successfully deleted" in new Setup {
+        when(mockPayeRegConnector.tearDownIndividualRegistration(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+          .thenReturn(Future.successful(DownstreamOutcome.Success))
+
+        AuthBuilder.showWithAuthorisedUser(controller.individualRegTeardown("regID"), mockAuthConnector) { result =>
+          status(result) shouldBe OK
+        }
+      }
+    }
+
+    "return an INTERNAL_SERVER_ERROR" when {
+      "there was a problem deleting the registration document" in new Setup {
+        when(mockPayeRegConnector.tearDownIndividualRegistration(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+          .thenReturn(Future.successful(DownstreamOutcome.Failure))
+
+        AuthBuilder.showWithAuthorisedUser(controller.individualRegTeardown("regID"), mockAuthConnector) { result =>
           status(result) shouldBe INTERNAL_SERVER_ERROR
         }
       }

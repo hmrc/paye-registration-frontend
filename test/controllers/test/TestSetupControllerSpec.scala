@@ -52,7 +52,7 @@ class TestSetupControllerSpec extends PAYERegSpec {
       override def doCurrentProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = Future.successful(BusinessProfile("regId", None, "en"))
       override def doCoHoCompanyDetailsTearDown(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
       override def doAddCoHoCompanyDetails(formModel: CoHoCompanyDetailsFormModel, regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
-      override def doRegTeardown(implicit request: Request[AnyContent]): Future[DownstreamOutcome.Value] = Future.successful(DownstreamOutcome.Success)
+      override def doIndividualRegTeardown(regId: String) (implicit request: Request[AnyContent]): Future[DownstreamOutcome.Value] = Future.successful(DownstreamOutcome.Success)
       override def doTearDownS4L(regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
 
     }
