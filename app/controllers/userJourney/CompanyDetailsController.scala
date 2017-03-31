@@ -170,7 +170,10 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
               case AddressChoice.roAddress =>
                 companyDetailsService.copyROAddrToPPOBAddr(profile.registrationID, profile.companyTaxRegistration.transactionId)
                   .map (_ => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
-              case AddressChoice.other => Future.successful(Redirect(addressLookupService.buildAddressLookupUrl("payereg1", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress())))
+              case AddressChoice.other =>
+                addressLookupService.buildAddressLookupUrl("payereg1", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()) map {
+                  redirectUrl => Redirect(redirectUrl)
+                }
             }
           )
         }
