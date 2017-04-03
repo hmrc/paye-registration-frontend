@@ -28,39 +28,39 @@ import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.control.NoStackTrace
 
 @Singleton
 class AddressLookupConnector @Inject()() extends AddressLookupConnect with ServicesConfig {
-  val addressLookupFrontendUrl = baseUrl("address-lookup-frontend.api")
-  lazy val addressLookupFrontendUri = getConfString("address-lookup-frontend.www.uri","")
+  val addressLookupFrontendUrl = baseUrl("address-lookup-frontend")
   lazy val payeRegistrationUrl = getConfString("paye-registration-frontend.www.url","")
   val http : WSHttp = WSHttp
 }
 
+class ALFLocationHeaderNotSetException extends NoStackTrace
+
 trait AddressLookupConnect {
 
+
   val addressLookupFrontendUrl: String
-  val addressLookupFrontendUri: String
   val payeRegistrationUrl: String
   val http: WSHttp
 
   def getAddress(id: String)(implicit hc: HeaderCarrier) = {
-    http.GET[JsObject](s"$addressLookupFrontendUrl/lookup-address/outcome/payereg1/$id")
+    http.GET[JsObject](s"$addressLookupFrontendUrl/api/confirmed?id=$id")
   }
 
   def getOnRampUrl(query: String, call: Call)(implicit hc: HeaderCarrier): Future[String] = {
-    val postUrl = s"$addressLookupFrontendUrl$addressLookupFrontendUri/init/$query"
+    val postUrl = s"$addressLookupFrontendUrl/api/init/$query"
     val continue = s"$payeRegistrationUrl${call.url}"
-    val continueJson =
-      Json.parse(s"""
-       |{
-       |   "continueUrl" : "$continue"
-       |}
-      """.stripMargin)
+    val continueJson = Json.obj("continueUrl" -> s"$continue")
 
-    http.POST[JsValue, String](postUrl, continueJson, Seq("CsrfToken" -> "noCheck")) map { resp =>
-      Logger.debug(s"URL FROM ALF $resp")
-      resp
+    http.POST[JsObject, HttpResponse](postUrl, continueJson) map { resp =>
+      Logger.debug(s"Response from ALF: $resp")
+      resp.header("Location").getOrElse {
+        Logger.warn("[AddressLookupConnector] [getOnRampUrl] - ERROR: Location header not set in ALF response")
+        throw new ALFLocationHeaderNotSetException
+      }
     }
   }
 }
