@@ -24,7 +24,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Request, Result}
+import play.api.mvc.{Call, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.{AddressLookupService, CompanyDetailsService, PAYEContactService}
@@ -259,6 +259,10 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "chosenAddress" -> "other"
       )
       mockFetchCurrentProfile()
+
+      when(mockAddressLookupService.buildAddressLookupUrl(ArgumentMatchers.any[String](), ArgumentMatchers.any[Call]())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful("testUrl"))
+
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
         status(result) shouldBe SEE_OTHER
       }

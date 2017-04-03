@@ -36,8 +36,6 @@ class AddressLookupService @Inject()(injFeatureSwitch: PAYEFeatureSwitch,
                                      injMetrics: MetricsService)
   extends AddressLookupSrv with ServicesConfig {
   lazy val payeRegistrationUrl = getConfString("paye-registration-frontend.www.url","")
-  lazy val addressLookupFrontendUrl = getConfString("address-lookup-frontend.www.url","")
-  lazy val addressLookupFrontendUri = getConfString("address-lookup-frontend.www.uri","")
   val addressLookupConnector = injAddressConnector
   val featureSwitch = injFeatureSwitch
   val metricsService: MetricsSrv = injMetrics
@@ -46,21 +44,18 @@ class AddressLookupService @Inject()(injFeatureSwitch: PAYEFeatureSwitch,
 trait AddressLookupSrv {
 
   val payeRegistrationUrl : String
-  val addressLookupFrontendUrl: String
-  val addressLookupFrontendUri: String
   val addressLookupConnector: AddressLookupConnect
   val featureSwitch: PAYEFeatureSwitches
   val metricsService: MetricsSrv
 
-  def buildAddressLookupUrl(query: String, call: Call) = {
+  def buildAddressLookupUrl(query: String, call: Call)(implicit hc: HeaderCarrier): Future[String] = {
     useAddressLookupFrontend match {
-      case true => s"$addressLookupFrontendUrl$addressLookupFrontendUri/uk/addresses/$query?continue=$payeRegistrationUrl${call.url}"
-      case false => {
+      case true => addressLookupConnector.getOnRampUrl(query, call)
+      case false =>
         call.url.split('/').last match {
-          case "return-from-address-for-ppob" => controllers.test.routes.TestAddressLookupController.noLookupPPOBAddress().url
-          case "return-from-address-for-corresp-addr" => controllers.test.routes.TestAddressLookupController.noLookupCorrespondenceAddress().url
+          case "return-from-address-for-ppob" => Future.successful(controllers.test.routes.TestAddressLookupController.noLookupPPOBAddress().url)
+          case "return-from-address-for-corresp-addr" => Future.successful(controllers.test.routes.TestAddressLookupController.noLookupCorrespondenceAddress().url)
         }
-      }
     }
   }
 

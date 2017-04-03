@@ -26,7 +26,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Request, Result}
+import play.api.mvc.{Call, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services._
@@ -393,6 +393,11 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       val request = FakeRequest("GET", "/testuri?id=123456789").withFormUrlEncodedBody(
         "chosenAddress" -> "other"
       )
+      mockFetchCurrentProfile()
+
+      when(mockAddressLookupService.buildAddressLookupUrl(ArgumentMatchers.any[String](), ArgumentMatchers.any[Call]())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful("testUrl"))
+
       AuthBuilder.submitWithAuthorisedUser(controller.submitPPOBAddress, mockAuthConnector, request) { result =>
         status(result) shouldBe SEE_OTHER
       }

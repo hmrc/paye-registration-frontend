@@ -16,11 +16,12 @@
 package addresslookup
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import connectors.AddressLookupConnector
+import connectors.{ALFLocationHeaderNotSetException, AddressLookupConnector}
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
+import play.api.libs.json.{JsString, Json}
+import play.api.mvc.Call
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 class AddressLookupConnectorISpec extends IntegrationSpecBase {
@@ -29,15 +30,18 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
+  val mockPAYEFrontendUrl = "/paye-frontend-test-url"
+
   val additionalConfiguration = Map(
-    "microservice.services.address-lookup-frontend.api.host" -> s"$mockHost",
-    "microservice.services.address-lookup-frontend.api.port" -> s"$mockPort",
+    "microservice.services.address-lookup-frontend.host" -> s"$mockHost",
+    "microservice.services.address-lookup-frontend.port" -> s"$mockPort",
+    "microservice.services.paye-registration-frontend.www.url" -> s"$mockPAYEFrontendUrl",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes"
   )
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
     .configure(additionalConfiguration)
-    .build
+    .build()
 
   val testId = "12345"
 
@@ -51,16 +55,60 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
 
       def getAddress = addressLookupConnector.getAddress(testId)
 
-      stubFor(get(urlMatching(s"/lookup-address/outcome/payereg1/$testId"))
+      stubFor(get(urlMatching(s"/api/confirmed\\?id\\=$testId"))
         .willReturn(
           aResponse()
             .withStatus(200)
-            .withBody(testAddress.toString)
+            .withBody(testAddress.toString())
         )
       )
 
       await(getAddress) shouldBe testAddress
     }
   }
+
+  "getOnRampUrl" should {
+
+    "get an address lookup start url" in {
+      val query = "tst-query"
+      lazy val call: Call = controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()
+      val tstALFUrl = """/test-alf/start-url"""
+
+      val addressLookupConnector = new AddressLookupConnector()
+
+      def getOnRamp = addressLookupConnector.getOnRampUrl(query, call)
+
+      stubFor(post(urlMatching(s"/api/init/$query"))
+        .withRequestBody(matchingJsonPath(s"[?(@.continueUrl == '$mockPAYEFrontendUrl${call.url}')]"))
+          .willReturn(
+            aResponse()
+              .withStatus(202)
+              .withHeader("Location", tstALFUrl)
+          )
+      )
+
+      await(getOnRamp) shouldBe tstALFUrl
+    }
+
+    "throw the correct exception when no url is returned from ALF" in {
+      val query = "tst-query"
+      lazy val call: Call = controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()
+      val tstALFUrl = """/test-alf/start-url"""
+
+      val addressLookupConnector = new AddressLookupConnector()
+
+      def getOnRamp = addressLookupConnector.getOnRampUrl(query, call)
+
+      stubFor(post(urlMatching(s"/api/init/$query"))
+        .withRequestBody(matchingJsonPath(s"[?(@.continueUrl == '$mockPAYEFrontendUrl${call.url}')]"))
+        .willReturn(
+          aResponse()
+            .withStatus(202)
+        )
+      )
+
+      intercept[ALFLocationHeaderNotSetException]( await(getOnRamp) )
+    }
+}
 
 }
