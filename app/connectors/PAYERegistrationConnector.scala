@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
 import enums.DownstreamOutcome
-import models.api.{Director, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
+import models.api.{Director, Eligibility, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.Logger
 import play.api.http.Status
 import services.{MetricsService, MetricsSrv}
@@ -256,6 +256,35 @@ trait PAYERegistrationConnect {
       case e: Exception =>
         payeRegTimer.stop()
         throw logResponse(e, "upsertCompletionCapacity", "upserting completion capacity")
+    }
+  }
+
+  def getEligibility(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[String]): Future[Option[Eligibility]] = {
+    val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
+    http.GET[Eligibility](s"$payeRegUrl/paye-registration/$regID/eligibility") map {
+      details =>
+        payeRegTimer.stop()
+        Some(details)
+    } recover {
+      case e: NotFoundException =>
+        payeRegTimer.stop()
+        None
+      case e: Exception =>
+        payeRegTimer.stop()
+        throw logResponse(e, "getEligibility", "getting eligibility")
+    }
+  }
+
+  def upsertEligibility(regID: String, data: Eligibility)(implicit hc: HeaderCarrier, rds: HttpReads[String]): Future[Eligibility] = {
+    val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
+    http.PATCH[Eligibility, Eligibility](s"$payeRegUrl/paye-registration/$regID/eligibility", data) map {
+      resp =>
+        payeRegTimer.stop()
+        resp
+    } recover {
+      case e: Exception =>
+        payeRegTimer.stop()
+        throw logResponse(e, "upsertEligibility", "upserting eligibility")
     }
   }
 

@@ -28,8 +28,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class NatureOfBusinessService @Inject()(payeRegistrationConn: PAYERegistrationConnector) extends NatureOfBusinessSrv {
-  override val payeRegConnector = payeRegistrationConn
+class NatureOfBusinessService @Inject()(injPayeRegConnector: PAYERegistrationConnector) extends NatureOfBusinessSrv {
+  override val payeRegConnector = injPayeRegConnector
 }
 
 trait NatureOfBusinessSrv {

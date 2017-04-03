@@ -1,0 +1,29 @@
+@()(implicit request: Request[_], messages: Messages)
+
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+
+@main_template(title = Messages("pages.ineligible.title")) {
+
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.ineligible.heading")</h1>
+
+    <p>@Messages("pages.ineligible.p1")</p>
+
+    <p>@Html(Messages("pages.ineligible.p2", "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/employer-enquiries-support-for-new-employers"))</p>
+
+    <p>@Messages("pages.ineligible.p3")</p>
+
+    <div class="spaced-below">
+        <ul class="list list-bullet">
+            <li>@Messages("pages.ineligible.l1")</li>
+            <li>@Messages("pages.ineligible.l2")</li>
+            <li>@Messages("pages.ineligible.l3")</li>
+            <li>@Messages("pages.ineligible.l4")</li>
+            <li>@Messages("pages.ineligible.l5")</li>
+            <li>@Messages("pages.ineligible.l6")</li>
+        </ul>
+    </div>
+
+    @govHelpers.form(action = controllers.userJourney.routes.EligibilityController.questionnaire()) {
+        <button class="button" type="submit" id="continue" >@Messages("app.common.next")</button>
+    }
+}

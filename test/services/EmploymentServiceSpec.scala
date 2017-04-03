@@ -18,8 +18,8 @@ package services
 
 import java.time.LocalDate
 
-import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
-import enums.{CacheKeys, DownstreamOutcome}
+import connectors.PAYERegistrationConnector
+import enums.CacheKeys
 import fixtures.{PAYERegistrationFixture, S4LFixture}
 import models.api.{Employment => EmploymentAPI}
 import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment => EmploymentView, FirstPayment => FirstPaymentView}

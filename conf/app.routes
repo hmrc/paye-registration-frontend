@@ -10,6 +10,14 @@ GET         /                                       controllers.userJourney.Welc
 GET         /start                                  controllers.userJourney.WelcomeController.show
 POST        /start                                  controllers.userJourney.WelcomeController.submit
 
+## COMPANY ELIGIBILITY
+GET         /is-the-company-any-of-the-following    controllers.userJourney.EligibilityController.companyEligibility
+POST        /is-the-company-any-of-the-following    controllers.userJourney.EligibilityController.submitCompanyEligibility
+
+## DIRECTOR ELIGIBILITY
+GET         /do-any-of-the-following-apply          controllers.userJourney.EligibilityController.directorEligibility
+POST        /do-any-of-the-following-apply          controllers.userJourney.EligibilityController.submitDirectorEligibility
+
 ## COMPLETION CAPACITY
 GET         /relationship-to-the-business           controllers.userJourney.CompletionCapacityController.completionCapacity
 POST        /relationship-to-the-business           controllers.userJourney.CompletionCapacityController.submitCompletionCapacity
@@ -79,3 +87,8 @@ GET        /thankyou                                controllers.feedback.Feedbac
 ## ERRORS
 
 GET        /ineligible-for-paye                     controllers.errors.ErrorController.ineligible
+GET        /you-cant-register-online                controllers.userJourney.EligibilityController.ineligible
+
+## Questionnaire
+
+POST       /questionnaire                           controllers.userJourney.EligibilityController.questionnaire

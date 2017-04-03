@@ -1,0 +1,51 @@
+@import helpers.templates.payeInputRadioGroup
+@import models.view.DirectorEligibility
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+
+@(directorEligibilityForm: Form[DirectorEligibility])(implicit request: Request[_], messages: Messages)
+
+@main_template(title = Messages("pages.directorEligibility.title")) {
+    @govHelpers.errorSummary(
+        Messages("app.common.errorSummaryLabel"), directorEligibilityForm
+    )
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.directorEligibility.heading")</h1>
+
+    <div class="spaced-below">
+        <ul class="list list-bullet">
+            <li>@Messages("pages.directorEligibility.list1")</li>
+            <li>@Messages("pages.directorEligibility.list2")</li>
+        </ul>
+    </div>
+
+    <details>
+        <summary class="summary">@Messages("pages.directorEligibility.details")</summary>
+        <div class="panel-indent">
+            @Messages("pages.directorEligibility.dropdown")
+            <ul class="list list-bullet">
+                <li>@Messages("pages.directorEligibility.detailsList1")</li>
+                <li>@Messages("pages.directorEligibility.detailsList2")</li>
+                <li>@Messages("pages.directorEligibility.detailsList3")</li>
+                <li>@Messages("pages.directorEligibility.detailsList4")</li>
+            </ul>
+        </div>
+    </details>
+
+    @govHelpers.form(action = controllers.userJourney.routes.EligibilityController.submitDirectorEligibility()) {
+        <div class="inline form-group">
+        @payeInputRadioGroup(
+            directorEligibilityForm("isEligible"),
+            Seq(
+                "true"->Messages("app.common.yes"),
+                "false"->Messages("app.common.no")
+            ),
+            '_legend -> Messages("pages.directorEligibility.heading"),
+            '_legendID -> "directorEligibility",
+            '_helpText -> None,
+            '_labelAfter -> true,
+            '_labelClass -> "block-label",
+            '_groupClass -> "inline"
+        )
+        </div>
+        <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
+    }
+}

@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package enums
+package forms.eligibility
 
-object CacheKeys extends Enumeration {
+import forms.helpers.RequiredBooleanForm
+import models.view.DirectorEligibility
+import play.api.data.Form
+import play.api.data.Forms.mapping
 
-  val CurrentProfile = Value
-  val CoHoCompanyDetails = Value
-  val TradingName = Value
-  val Employment = Value
-  val CompanyDetails = Value
-  val DirectorDetails = Value
-  val PAYEContact = Value
-  val Eligibility = Value
+object DirectorEligibilityForm extends RequiredBooleanForm {
+  val form = Form(
+    mapping(
+      "isEligible" -> requiredBoolean
+    )(DirectorEligibility.apply)(DirectorEligibility.unapply)
+  )
 }

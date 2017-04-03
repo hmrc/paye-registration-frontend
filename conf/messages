@@ -5,6 +5,7 @@ app.common.yes                                          = Yes
 app.common.no                                           = No
 app.common.continue                                     = Continue
 app.common.saveAndContinue                              = Save and continue
+app.common.next                                         = Next
 app.common.back                                         = Back
 app.common.submit                                       = Submit
 app.common.errorSummaryLabel                            = There are errors on this page.
@@ -14,9 +15,9 @@ app.common.month                                        = Month
 app.common.day                                          = Day
 app.common.date.invalid                                 = You have not entered a valid date
 app.common.companies-house                              = Companies House
-app.common.feedbackFirst=This is a new service. Help us improve it - send your
-app.common.feedbackSecond=feedback.
-app.common.feedbackLinkText=feedback
+app.common.feedbackFirst                                = This is a new service. Help us improve it - send your
+app.common.feedbackSecond                               = feedback.
+app.common.feedbackLinkText                             = feedback
 
 ## User error messages
 errors.invalid.email                                    = The email address you have provided is invalid
@@ -41,6 +42,27 @@ pages.welcome.bullet.timeToComplete                     = shouldn''t take more t
 pages.welcome.bullet.timeToProcess                      = can take up to 2 weeks for HMRC to process
 pages.welcome.2months                                   = You can''t register more than 2 months before you start paying people.
 pages.welcome.nino                                      = You''ll need the National Insurance number of at least one company director to register.
+
+## Company Eligibility
+pages.companyEligibility.title                          = Is the company any of the following?
+pages.companyEligibility.heading                        = Is the company any of the following?
+pages.companyEligibility.list1                          = An insurance company, or other business responsible for paying back sick pay to the employees of more than one employer?
+pages.companyEligibility.list2                          = A receiver paying employees of companies in receivership
+pages.companyEligibility.list3                          = An offshore employer outside of the European Economic Area or Isle of Man that isn''t liable for UK National Insurance
+pages.companyEligibility.details                        = What is a receiver?
+pages.companyEligibility.dropdown                       = A receiver is appointed by a bank or other creditor to take over the management of a company that can''t pay its debts. The aim of the receiver is to recover money owed to the creditor. This process is known as receivership.
+
+## Director Eligibility
+pages.directorEligibility.title                         = Do any of the following apply to you?
+pages.directorEligibility.heading                       = Do any of the following apply to you?
+pages.directorEligibility.list1                         = You''re responsible for deducting your own tax or National Insurance (this includes registrars, Roman Catholic priests and certain other employees  of foreign embassies and consulates)
+pages.directorEligibility.list2                         = You provide non-cash incentive rewards using a taxed award scheme to pay the tax due
+pages.directorEligibility.details                       = What are non-cash incentive awards?
+pages.directorEligibility.dropdown                      = Non-cash incentive awards could be:
+pages.directorEligibility.detailsList1                  = gift vouchers
+pages.directorEligibility.detailsList2                  = travel
+pages.directorEligibility.detailsList3                  = prizes for employer-run competitions
+pages.directorEligibility.detailsList4                  = holidays you pay for
 
 ## Completion Capacity page
 pages.completionCapacity.title                          = What is your relationship to the business?
@@ -268,6 +290,19 @@ pages.confirmation.p1                                   = If your application is
 pages.confirmation.bullet1                              = a letter from HMRC including your PAYE and Accounts Office reference numbers within 5 working days of the company registering with Companies House
 pages.confirmation.bullet2                              = an activation pin for PAYE Online within 10 working days of the company registering with Companies House
 pages.confirmation.p2                                   = You''ll need these to send payroll information to HMRC.
+
+## Ineligible
+pages.ineligible.title                                  = You can''t register as an employer online
+pages.ineligible.heading                                = You can''t register as an employer online
+pages.ineligible.p1                                     = You should register by phone or post.
+pages.ineligible.p2                                     = <a href="{0}">Contact HMRC</a> - they''ll arrange for someone to call you back to help you register.
+pages.ineligible.p3                                     = You''ll need to provide the following details about the company.
+pages.ineligible.l1                                     = company name, registered address and phone number
+pages.ineligible.l2                                     = trading name if this is different
+pages.ineligible.l3                                     = business activities - for example, electrical engineering
+pages.ineligible.l4                                     = Unique Taxpayer Reference (UTR)
+pages.ineligible.l5                                     = company registration number
+pages.ineligible.l6                                     = the names and National Insurance numbers of every company director
 
 ## Error Pages
 errorPages.title                                        = Something went wrong
