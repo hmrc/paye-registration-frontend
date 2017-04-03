@@ -35,7 +35,7 @@ trait WelcomeCtrl extends FrontendController with I18nSupport {
   }
 
   val submit = Action { implicit request =>
-    Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+    Redirect(controllers.userJourney.routes.EligibilityController.companyEligibility())
   }
 
 }

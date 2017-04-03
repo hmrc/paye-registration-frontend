@@ -66,7 +66,7 @@ trait SignInOutCtrl extends FrontendController with Actions with I18nSupport {
             profile =>
               checkAndStoreCompanyDetails(profile.registrationID) {
                 assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId){
-                  Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+                  Redirect(controllers.userJourney.routes.EligibilityController.companyEligibility())
                 }
               }
           }

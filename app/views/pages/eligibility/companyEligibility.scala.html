@@ -1,0 +1,46 @@
+@import helpers.templates.payeInputRadioGroup
+@import models.view.CompanyEligibility
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+
+@(companyEligibilityForm: Form[CompanyEligibility])(implicit request: Request[_], messages: Messages)
+
+@main_template(title = Messages("pages.companyEligibility.title")) {
+    @govHelpers.errorSummary(
+        Messages("app.common.errorSummaryLabel"), companyEligibilityForm
+    )
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.companyEligibility.heading")</h1>
+
+    <div class="spaced-below">
+        <ul class="list list-bullet">
+            <li>@Messages("pages.companyEligibility.list1")</li>
+            <li>@Messages("pages.companyEligibility.list2")</li>
+            <li>@Messages("pages.companyEligibility.list3")</li>
+        </ul>
+    </div>
+
+    <details>
+        <summary class="summary">@Messages("pages.companyEligibility.details")</summary>
+        <div class="panel-indent">
+            @Messages("pages.companyEligibility.dropdown")
+        </div>
+    </details>
+
+    @govHelpers.form(action = controllers.userJourney.routes.EligibilityController.submitCompanyEligibility()) {
+        <div class="inline form-group">
+            @payeInputRadioGroup(
+                companyEligibilityForm("isEligible"),
+                Seq(
+                    "true"->Messages("app.common.yes"),
+                    "false"->Messages("app.common.no")
+                ),
+                '_legend -> Messages("pages.companyEligibility.heading"),
+                '_legendID -> "companyEligibility",
+                '_helpText -> None,
+                '_labelAfter -> true,
+                '_labelClass -> "block-label",
+                '_groupClass -> "inline"
+            )
+        </div>
+        <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
+    }
+}

@@ -126,7 +126,7 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
       }
     }
 
-    "redirect to the Trading Name page for an authorised user with a registration ID and CoHo Company Details, with PAYE Footprint correctly asserted" in new Setup {
+    "redirect to the first eligibility page for an authorised user with a registration ID and CoHo Company Details, with PAYE Footprint correctly asserted" in new Setup {
       when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]())).thenReturn(AccountTypes.Organisation)
 
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
@@ -141,7 +141,7 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
       AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.CompletionCapacityController.completionCapacity()}")
+          redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.EligibilityController.companyEligibility()}")
       }
     }
 

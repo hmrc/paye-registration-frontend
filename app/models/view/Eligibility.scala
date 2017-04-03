@@ -14,16 +14,30 @@
  * limitations under the License.
  */
 
-package enums
+package models.view
 
-object CacheKeys extends Enumeration {
+import play.api.libs.json.Json
 
-  val CurrentProfile = Value
-  val CoHoCompanyDetails = Value
-  val TradingName = Value
-  val Employment = Value
-  val CompanyDetails = Value
-  val DirectorDetails = Value
-  val PAYEContact = Value
-  val Eligibility = Value
+
+case class CompanyEligibility(ineligible: Boolean)
+
+object CompanyEligibility {
+  implicit val format = Json.format[CompanyEligibility]
+}
+
+
+case class DirectorEligibility(eligible: Boolean)
+
+object DirectorEligibility {
+  implicit val format = Json.format[DirectorEligibility]
+}
+
+
+case class Eligibility(
+                        companyEligible: Option[CompanyEligibility],
+                        directorEligible: Option[DirectorEligibility]
+                      )
+
+object Eligibility {
+  implicit val format = Json.format[Eligibility]
 }
