@@ -47,8 +47,8 @@ trait PAYERegistrationSrv {
 
   def getAccountAffinityGroup(implicit hc: HeaderCarrier, authContext: AuthContext): Future[AccountTypes.Value] = {
     authConnector.getUserDetails[JsObject](authContext) flatMap { userDetails =>
-      (userDetails \ "affinityGroup").as[String] match {
-        case "Organisation" => Future.successful(AccountTypes.Organisation)
+      (userDetails \ "affinityGroup").as[String].toLowerCase match {
+        case "organisation" => Future.successful(AccountTypes.Organisation)
         case _              => Future.successful(AccountTypes.InvalidAccountType)
       }
     }
