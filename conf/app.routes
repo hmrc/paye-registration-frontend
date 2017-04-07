@@ -89,6 +89,12 @@ GET        /thankyou                                controllers.feedback.Feedbac
 GET        /ineligible-for-paye                     controllers.errors.ErrorController.ineligible
 GET        /you-cant-register-online                controllers.userJourney.EligibilityController.ineligible
 
+GET        /something-went-wrong-send-your-details  controllers.errors.ErrorController.failedSubmission
+POST       /something-went-wrong-send-your-details  controllers.errors.ErrorController.submitTicket
+GET        /ticket-submitted                        controllers.errors.ErrorController.submittedTicket
+
+GET        /submission-failure                      controllers.errors.ErrorController.retrySubmission
+
 ## Questionnaire
 
 POST       /questionnaire                           controllers.userJourney.EligibilityController.questionnaire

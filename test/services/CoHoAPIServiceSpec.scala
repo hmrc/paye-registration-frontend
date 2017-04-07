@@ -17,10 +17,10 @@
 package services
 
 import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
-import connectors.{CoHoAPIConnector, CohoApiBadRequestResponse, CohoApiErrorResponse, CohoApiSuccessResponse}
+import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, KeystoreFixture}
-import models.external.{CoHoCompanyDetailsModel, BusinessProfile}
+import models.external.{BusinessProfile, CoHoCompanyDetailsModel}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
@@ -34,7 +34,10 @@ class CoHoAPIServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFi
   val mockCoHoAPIConnector = mock[CoHoAPIConnector]
 
   trait Setup {
-    val service = new CoHoAPIService (mockKeystoreConnector, mockCoHoAPIConnector)
+    val service = new CoHoAPISrv {
+      override val coHoAPIConnector: CoHoAPIConnect = mockCoHoAPIConnector
+      override val keystoreConnector: KeystoreConnect = mockKeystoreConnector
+    }
   }
 
   val tstSuccessResult = CohoApiSuccessResponse(validCoHoCompanyDetailsResponse)

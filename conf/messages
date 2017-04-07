@@ -320,3 +320,26 @@ errorPages.ineligible.l3                                = yourself if you''re a 
 page.feedback.title                                     = Feedback
 page.feedback.thank-you.title                           = Thank you
 page.feedback.heading                                   = Send your feedback
+
+## Retry Submission
+errorPages.retrySubmission.title                        = We couldn''t process your application
+errorPages.retrySubmission.p1                           = Sorry, there is a technical problem and we couldn''t process your application. Any details you entered have been saved.
+errorPages.retrySubmission.p2                           = Please resend your application.
+errorPages.retrySubmission.button                       = Resend
+
+## Failed Submission
+errorPages.failedSubmission.title                        = We couldn''t process your application
+errorPages.failedSubmission.p1                           = Sorry, there is a technical problem and we couldn''t process your application. Any details you entered have been saved.
+errorPages.failedSubmission.p2                           = Fill out the form below so we can help you complete your application.
+errorPages.failedSubmission.header                       = Your details
+errorPages.failedSubmission.detail                       = Don''t include any personal or financial information. For example, your National Insurance or credit card numbers.
+errorPages.failedSubmission.q1                           = Name
+errorPages.failedSubmission.q2                           = Email
+errorPages.failedSubmission.q3                           = What were you doing?
+errorPages.failedSubmission.button                       = Send
+
+## Deskpro Submitedd
+errorPages.deskproSubmitted.title                        = Thank you
+errorPages.deskproSubmitted.heading                      = Thank you
+errorPages.deskproSubmitted.p1                           = Your submission has been received.
+errorPages.deskproSubmitted.p2                           = We''ll be in touch as soon as we can to help you complete your application.

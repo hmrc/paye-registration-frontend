@@ -21,7 +21,10 @@ import javax.inject.{Inject, Singleton}
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector}
+import forms.errors.DeskproForm
+import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
+import services.{DeskproService, DeskproSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.SessionProfile
@@ -30,22 +33,59 @@ import scala.concurrent.Future
 
 @Singleton
 class ErrorController @Inject()(injMessagesApi: MessagesApi,
-                                injKeystoreConnector: KeystoreConnector)
+                                injKeystoreConnector: KeystoreConnector,
+                                injDeskproService: DeskproService)
                                 extends ErrorCtrl{
   val authConnector = FrontendAuthConnector
   val messagesApi = injMessagesApi
   val keystoreConnector = injKeystoreConnector
+  val deskproService = injDeskproService
 }
 
 trait ErrorCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
 
   val keystoreConnector : KeystoreConnect
+  val deskproService : DeskproSrv
 
   val ineligible = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user => implicit request =>
     withCurrentProfile { _ =>
       Future.successful(Ok(views.html.pages.error.ineligible()))
     }
+  }
+
+  val retrySubmission = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user => implicit request =>
+    withCurrentProfile { _ =>
+      Future.successful(Ok(views.html.pages.error.submissionTimeout()))
+    }
+  }
+
+  val failedSubmission = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user => implicit request =>
+    withCurrentProfile { _ =>
+      Future.successful(Ok(views.html.pages.error.submissionFailed(DeskproForm.form)))
+    }
+  }
+
+  val submitTicket = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user => implicit request =>
+    withCurrentProfile { profile =>
+      DeskproForm.form.bindFromRequest.fold(
+        errors => Future.successful(BadRequest(views.html.pages.error.submissionFailed(errors))),
+        success =>  deskproService.submitTicket(profile.registrationID, success) map {
+          ticket => Logger.info(s"Ticket id: $ticket")
+            Redirect(controllers.errors.routes.ErrorController.submittedTicket)
+        }
+      )
+    }
+  }
+
+  val submittedTicket = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user => implicit request =>
+      withCurrentProfile { _ =>
+        Future.successful(Ok(views.html.pages.error.deskproSubmitted()))
+      }
   }
 
 }

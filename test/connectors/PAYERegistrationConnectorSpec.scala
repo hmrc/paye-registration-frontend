@@ -492,4 +492,23 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
       intercept[InternalServerException](await(connector.getAcknowledgementReference("tstID")))
     }
   }
+
+  "calling submitRegistration" should {
+    "return a Success" in new Setup {
+      mockHttpPUT[String, String]("test-url", "")
+
+      await(connector.submitRegistration("tstID")) shouldBe Success
+    }
+    "return a Failed" in new Setup {
+      mockHttpFailedPUT[String, String]("test-url", badRequest)
+
+      await(connector.submitRegistration("tstID")) shouldBe Failed
+    }
+    "return a TimedOut" in new Setup {
+      mockHttpFailedPUT[String, String]("test-url", upstream5xx)
+
+      await(connector.submitRegistration("tstID")) shouldBe TimedOut
+
+    }
+  }
 }

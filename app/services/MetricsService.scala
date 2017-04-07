@@ -30,6 +30,7 @@ class MetricsService @Inject()(injMetrics: Metrics) extends MetricsSrv {
   override val companyRegistrationResponseTimer = injMetrics.defaultRegistry.timer("company-registration-call-timer")
   override val keystoreResponseTimer = injMetrics.defaultRegistry.timer("keystore-call-timer")
   override val s4lResponseTimer = injMetrics.defaultRegistry.timer("s4l-call-timer")
+  override val deskproResponseTimer = injMetrics.defaultRegistry.timer("deskpro-call-timer")
 }
 
 trait MetricsSrv {
@@ -40,4 +41,5 @@ trait MetricsSrv {
   val companyRegistrationResponseTimer: Timer
   val keystoreResponseTimer: Timer
   val s4lResponseTimer: Timer
+  val deskproResponseTimer: Timer
 }

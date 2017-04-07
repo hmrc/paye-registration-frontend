@@ -71,4 +71,9 @@ trait WSHTTPMock {
     when(mockWSHttp.PATCH[I, O](ArgumentMatchers.anyString(), ArgumentMatchers.any[I]())(ArgumentMatchers.any[Writes[I]](), ArgumentMatchers.any[HttpReads[O]](), ArgumentMatchers.any[HeaderCarrier]()))
       .thenReturn(Future.failed(exception))
   }
+
+  def mockHttpFailedPUT[I, O](url: String, exception: Exception, mockWSHttp: WSHttp = mockWSHttp): OngoingStubbing[Future[O]] = {
+    when(mockWSHttp.PUT[I, O](ArgumentMatchers.anyString(), ArgumentMatchers.any[I]())(ArgumentMatchers.any[Writes[I]](), ArgumentMatchers.any[HttpReads[O]](), ArgumentMatchers.any[HeaderCarrier]()))
+      .thenReturn(Future.failed(exception))
+  }
 }

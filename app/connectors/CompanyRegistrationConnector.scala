@@ -46,16 +46,20 @@ trait CompanyRegistrationConnect {
   val metricsService: MetricsSrv
 
   def getCompanyRegistrationDetails(regId: String)(implicit hc : HeaderCarrier) : Future[CompanyProfile] = {
+    val companyRegTimer = metricsService.companyRegistrationResponseTimer.time()
     http.GET[JsObject](s"$companyRegistrationUrl$companyRegistrationUri/$regId") map {
       response =>
+        companyRegTimer.stop()
         val status = (response \ "status").as[String]
         val txId = (response \ "confirmationReferences" \ "transaction-id").as[String]
         CompanyProfile(status, txId)
     } recover {
       case badRequestErr: BadRequestException =>
+        companyRegTimer.stop()
         Logger.error("[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received a BadRequest status code when expecting a Company Registration document")
         throw badRequestErr
       case ex: Exception =>
+        companyRegTimer.stop()
         Logger.error(s"[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received an error response when expecting a Company Registration document - error: ${ex.getMessage}")
         throw ex
     }

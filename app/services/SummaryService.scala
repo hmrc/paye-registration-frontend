@@ -258,8 +258,4 @@ trait SummarySrv {
       )
     )
   }
-
-  def submitRegistration(regId: String)(implicit hc: HeaderCarrier): Future[String] = {
-    payeRegistrationConnector.submitRegistration(regId)
-  }
 }
