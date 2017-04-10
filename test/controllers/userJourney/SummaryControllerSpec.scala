@@ -17,7 +17,7 @@
 package controllers.userJourney
 
 import builders.AuthBuilder
-import connectors.PAYERegistrationConnector
+import connectors.{Failed, PAYERegistrationConnector, Success, TimedOut}
 import enums.PAYEStatus
 import fixtures.PAYERegistrationFixture
 import org.jsoup.Jsoup
@@ -27,7 +27,7 @@ import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.Helpers._
-import services.SummaryService
+import services.{SubmissionService, SummaryService}
 import testHelpers.PAYERegSpec
 
 import scala.concurrent.Future
@@ -36,6 +36,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   val mockSummaryService = mock[SummaryService]
   val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
+  val mockSubmissionService = mock[SubmissionService]
 
   class Setup {
     val controller = new SummaryCtrl {
@@ -43,6 +44,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       override val authConnector = mockAuthConnector
       override val keystoreConnector = mockKeystoreConnector
       override val payeRegistrationConnector = mockPayeRegistrationConnector
+      override val submissionService = mockSubmissionService
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
     }
   }
@@ -150,12 +152,39 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validPAYERegistrationAPI))
 
-      when(mockSummaryService.submitRegistration(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful("ackRef"))
+      when(mockSubmissionService.submitRegistration(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(Success))
 
       AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
         (result: Future[Result]) =>
           status(result) shouldBe Status.SEE_OTHER
           redirectLocation(result).get shouldBe "/register-for-paye/confirmation"
+      }
+    }
+    "show the retry page" in new Setup {
+      mockFetchCurrentProfile()
+
+      when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validPAYERegistrationAPI))
+
+      when(mockSubmissionService.submitRegistration(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(TimedOut))
+
+      AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
+        (result: Future[Result]) =>
+          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      }
+    }
+    "show the deskpro page" in new Setup {
+      mockFetchCurrentProfile()
+
+      when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validPAYERegistrationAPI))
+
+      when(mockSubmissionService.submitRegistration(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(Failed))
+
+      AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
+        (result: Future[Result]) =>
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result).get shouldBe "/register-for-paye/something-went-wrong-send-your-details"
       }
     }
   }

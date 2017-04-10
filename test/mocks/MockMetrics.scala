@@ -33,4 +33,5 @@ class MockMetrics extends MetricsSrv with MockitoSugar {
   override val companyRegistrationResponseTimer = mockTimer
   override val keystoreResponseTimer = mockTimer
   override val s4lResponseTimer = mockTimer
+  override val deskproResponseTimer = mockTimer
 }

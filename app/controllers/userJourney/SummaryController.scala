@@ -20,12 +20,12 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
+import connectors._
 import enums.PAYEStatus
 import models.external.CurrentProfile
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Result
-import services.{SummaryService, SummarySrv}
+import services.{SubmissionService, SubmissionSrv, SummaryService, SummarySrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -36,12 +36,14 @@ import scala.concurrent.Future
 
 @Singleton
 class SummaryController @Inject()(injSummaryService: SummaryService,
+                                  injSubmissionService: SubmissionService,
                                   injKeystoreConnector: KeystoreConnector,
                                   injPayeRegistrationConnector: PAYERegistrationConnector,
                                   injMessagesApi: MessagesApi)
   extends SummaryCtrl {
   val authConnector = FrontendAuthConnector
   val summaryService = injSummaryService
+  val submissionService = injSubmissionService
   val keystoreConnector = injKeystoreConnector
   val payeRegistrationConnector = injPayeRegistrationConnector
   val messagesApi = injMessagesApi
@@ -50,6 +52,7 @@ class SummaryController @Inject()(injSummaryService: SummaryService,
 trait SummaryCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
 
   val summaryService: SummarySrv
+  val submissionService: SubmissionSrv
   val keystoreConnector: KeystoreConnect
   val payeRegistrationConnector: PAYERegistrationConnect
 
@@ -68,8 +71,10 @@ trait SummaryCtrl extends FrontendController with Actions with I18nSupport with 
   val submitRegistration = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     withCurrentProfile { profile =>
       invalidSubmissionGuard(profile) {
-        summaryService.submitRegistration(profile.registrationID) map {
-          _ => Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation())
+        submissionService.submitRegistration(profile.registrationID) map {
+          case Success => Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation())
+          case Failed => Redirect(controllers.errors.routes.ErrorController.failedSubmission())
+          case TimedOut => InternalServerError(views.html.pages.error.submissionTimeout())
         }
       }
     }

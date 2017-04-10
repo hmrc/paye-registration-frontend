@@ -31,6 +31,11 @@ import uk.gov.hmrc.play.http.ws.WSHttp
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+sealed trait DESResponse
+object Success extends DESResponse
+object Failed extends DESResponse
+object TimedOut extends DESResponse
+
 @Singleton
 class PAYERegistrationConnector @Inject()(injMetrics: MetricsService) extends PAYERegistrationConnect with ServicesConfig {
   val payeRegUrl = baseUrl("paye-registration")
@@ -72,16 +77,19 @@ trait PAYERegistrationConnect {
     }
   }
 
-  def submitRegistration(regId: String)(implicit hc: HeaderCarrier): Future[String] = {
+  def submitRegistration(regId: String)(implicit hc: HeaderCarrier): Future[DESResponse] = {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
     http.PUT[String, String](s"$payeRegUrl/paye-registration/$regId/submit-registration", "") map {
       res =>
         payeRegTimer.stop()
-        res
+        Success
     } recover {
       case e: Exception =>
-        payeRegTimer.stop()
-        throw logResponse(e, "submitRegistration", "submitting registration")
+        logResponse(e, "submitRegistration", "submitting PAYE Registration to DES")
+        e match {
+          case _ : Upstream5xxResponse => TimedOut
+          case _ => Failed
+        }
     }
   }
 

@@ -1,0 +1,17 @@
+@()(implicit request: Request[_], messages: Messages)
+
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+
+@main_template(title = Messages("errorPages.retrySubmission.title")) {
+
+    <h1 class="heading-xlarge">@Messages("errorPages.retrySubmission.title")</h1>
+
+    <p>@Messages("errorPages.retrySubmission.p1")</p>
+
+    <p class="spaced-below">@Messages("errorPages.retrySubmission.p2")</p>
+
+    @govHelpers.form(action = controllers.userJourney.routes.SummaryController.submitRegistration()) {
+        <button class="button" type="submit" id="continue" >@Messages("errorPages.retrySubmission.button")</button>
+    }
+
+}
