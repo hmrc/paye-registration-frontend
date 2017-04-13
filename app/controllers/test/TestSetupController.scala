@@ -75,7 +75,7 @@ trait TestSetupCtrl extends CurrentProfileCtrl with TestCoHoCtrl with TestRegSet
       implicit request =>
           for {
             profile <- log("CurrentProfileSetup", doCurrentProfileSetup)
-            _ <- log("CoHoCompanyDetailsTeardown", doCoHoCompanyDetailsTearDown)
+            _ <- log("CoHoCompanyDetailsTeardown", doCoHoCompanyDetailsTearDown(profile.registrationID))
             _ <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(CoHoCompanyDetailsFormModel(companyName, List.empty, List.empty), profile.registrationID))
             _ <- log("RegTeardown", doIndividualRegTeardown(profile.registrationID))
             _ <- log("S4LTeardown", doTearDownS4L(profile.registrationID))
