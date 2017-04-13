@@ -43,7 +43,7 @@ trait TestCoHoAPIConnect {
     http.POST[JsValue, HttpResponse](s"$coHoAPIUrl/incorporation-frontend-stubs/test-only/insert-company-details", json)
   }
 
-  def tearDownCoHoCompanyDetails()(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    http.GET[HttpResponse](s"$coHoAPIUrl/incorporation-frontend-stubs/test-only/wipe-company-details")
+  def tearDownCoHoCompanyDetails(regId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    http.GET[HttpResponse](s"$coHoAPIUrl/incorporation-frontend-stubs/test-only/wipe-individual-company-details/$regId")
   }
 }

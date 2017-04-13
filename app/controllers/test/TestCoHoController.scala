@@ -77,13 +77,15 @@ trait TestCoHoCtrl extends FrontendController with Actions with I18nSupport {
   def coHoCompanyDetailsTearDown = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        for {
-          res <- doCoHoCompanyDetailsTearDown
-        } yield Ok(res)
+        businessRegConnector.retrieveCurrentProfile flatMap { profile =>
+          for {
+            res <- doCoHoCompanyDetailsTearDown(profile.registrationID)
+          } yield Ok(res)
+        }
   }
 
-  protected[controllers] def doCoHoCompanyDetailsTearDown(implicit request: Request[AnyContent]): Future[String] = {
-    testCoHoAPIConnector.tearDownCoHoCompanyDetails().map (_ =>"Company details collection removed")
+  protected[controllers] def doCoHoCompanyDetailsTearDown(regId: String)(implicit request: Request[AnyContent]): Future[String] = {
+    testCoHoAPIConnector.tearDownCoHoCompanyDetails(regId).map (_ =>"Company details collection removed")
   }
 
   protected[controllers] def doAddCoHoCompanyDetails(formModel: CoHoCompanyDetailsFormModel, regId: String)(implicit request: Request[AnyContent]): Future[String] = {
