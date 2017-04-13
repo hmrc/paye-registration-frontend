@@ -106,7 +106,7 @@ class TestCoHoControllerSpec extends PAYERegSpec {
   "coHoCompanyDetailsTearDown" should {
     "return an OK" when {
       "the company details have been torn down" in new Setup {
-        when(mockTestAPIConnector.tearDownCoHoCompanyDetails()(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestAPIConnector.tearDownCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testHttpResponse))
 
         AuthBuilder.showWithAuthorisedUser(controller.coHoCompanyDetailsTearDown, mockAuthConnector) { result =>

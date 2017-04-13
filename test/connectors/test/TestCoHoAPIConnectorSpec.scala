@@ -49,7 +49,7 @@ class TestCoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
       val resp = HttpResponse(responseStatus = 200)
       mockHttpGet[HttpResponse](connector.coHoAPIUrl, Future.successful(resp))
 
-      await(connector.tearDownCoHoCompanyDetails()) shouldBe resp
+      await(connector.tearDownCoHoCompanyDetails("tstRegID")) shouldBe resp
     }
   }
 
