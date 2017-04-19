@@ -30,40 +30,44 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class CoHoAPIConnector @Inject()(injMetrics: MetricsService) extends CoHoAPIConnect with ServicesConfig {
+class IncorporationInformationConnector @Inject()(injMetrics: MetricsService) extends IncorporationInformationConnect with ServicesConfig {
   lazy val coHoAPIUrl = baseUrl("coho-api")
   lazy val coHoAPIUri = getConfString("coho-api.uri","")
+  lazy val incorpInfoUrl = baseUrl("incorporation-information")
+  lazy val incorpInfoUri = getConfString("incorporation-information.uri","")
   val http : WSHttp = WSHttp
   val metricsService = injMetrics
 }
 
-sealed trait CohoApiResponse
-case class CohoApiSuccessResponse(response: CoHoCompanyDetailsModel) extends CohoApiResponse
-case object CohoApiBadRequestResponse extends CohoApiResponse
-case class CohoApiErrorResponse(ex: Exception) extends CohoApiResponse
-case class CohoApiROAddress(response : CHROAddress) extends CohoApiResponse
+sealed trait IncorpInfoResponse
+case class IncorpInfoSuccessResponse(response: CoHoCompanyDetailsModel) extends IncorpInfoResponse
+case object IncorpInfoBadRequestResponse extends IncorpInfoResponse
+case class IncorpInfoErrorResponse(ex: Exception) extends IncorpInfoResponse
+case class IncorpInfoROAddress(response : CHROAddress) extends IncorpInfoResponse
 
-trait CoHoAPIConnect {
+trait IncorporationInformationConnect {
 
   val coHoAPIUrl: String
   val coHoAPIUri: String
+  val incorpInfoUrl: String
+  val incorpInfoUri: String
   val http: WSHttp
   val metricsService: MetricsSrv
 
-  def getCoHoCompanyDetails(registrationID: String)(implicit hc: HeaderCarrier): Future[CohoApiResponse] = {
+  def getCoHoCompanyDetails(registrationID: String)(implicit hc: HeaderCarrier): Future[IncorpInfoResponse] = {
     val cohoApiTimer = metricsService.cohoAPIResponseTimer.time()
     http.GET[CoHoCompanyDetailsModel](s"$coHoAPIUrl$coHoAPIUri/company/$registrationID") map { res =>
         cohoApiTimer.stop()
-        CohoApiSuccessResponse(res)
+        IncorpInfoSuccessResponse(res)
     } recover {
       case badRequestErr: BadRequestException =>
         Logger.error("[CohoAPIConnector] [getCoHoCompanyDetails] - Received a BadRequest status code when expecting company details")
         cohoApiTimer.stop()
-        CohoApiBadRequestResponse
+        IncorpInfoBadRequestResponse
       case ex: Exception =>
         Logger.error(s"[CohoAPIConnector] [getIncorporationStatus] - Received an error response when expecting company details - error: ${ex.getMessage}")
         cohoApiTimer.stop()
-        CohoApiErrorResponse(ex)
+        IncorpInfoErrorResponse(ex)
     }
   }
 
@@ -86,7 +90,7 @@ trait CoHoAPIConnect {
 
   def getOfficerList(transactionId: String)(implicit hc : HeaderCarrier): Future[OfficerList] = {
     val cohoApiTimer = metricsService.cohoAPIResponseTimer.time()
-    http.GET[OfficerList](s"$coHoAPIUrl$coHoAPIUri/$transactionId/officer-list") map { list =>
+    http.GET[OfficerList](s"$incorpInfoUrl$incorpInfoUri/$transactionId/officer-list") map { list =>
       cohoApiTimer.stop()
       list
     } recover {

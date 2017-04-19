@@ -65,7 +65,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         name = Name(
           forename = Some("Timothy"),
           otherForenames = Some("Potterley-Smythe"),
-          surname = Some("Buttersford"),
+          surname = "Buttersford",
           title = Some("Mr")
         ),
         nino = Some("ZZ123456A")
@@ -267,7 +267,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             name = Name(
               forename = Some("Timothy"),
               otherForenames = Some("Potterley-Smythe"),
-              surname = Some("Buttersford"),
+              surname = "Buttersford",
               title = Some("Mr")
             ),
             nino = Some("ZZ123456A")
@@ -744,7 +744,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
           name = Name(
             forename = Some("Timothy"),
             otherForenames = Some("Potterley-Smythe"),
-            surname = Some("Buttersford"),
+            surname = "Buttersford",
             title = Some("Mr")
           ),
           nino = Some("ZZ123456A")
@@ -753,7 +753,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
           name = Name(
             forename = Some("Pierre"),
             otherForenames = Some("Paul"),
-            surname = Some("Simpson"),
+            surname = "Simpson",
             title = Some("Mr")
           ),
           nino = None

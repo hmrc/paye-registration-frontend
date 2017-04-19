@@ -38,29 +38,29 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
   val mockPAYERegConnector = mock[PAYERegistrationConnector]
   val mockCompRegConnector = mock[CompanyRegistrationConnector]
-  val mockCohoAPIConnector = mock[CoHoAPIConnector]
-  val mockCoHoService = mock[CoHoAPIService]
+  val mockCohoAPIConnector = mock[IncorporationInformationConnector]
+  val mockCoHoService = mock[IncorporationInformationService]
   val mockS4LService = mock[S4LService]
 
   val returnHttpResponse = HttpResponse(200)
 
   class Setup {
     val service = new CompanyDetailsSrv {
-      override val cohoService: CoHoAPISrv = mockCoHoService
+      override val cohoService: IncorporationInformationSrv = mockCoHoService
       override val compRegConnector: CompanyRegistrationConnect = mockCompRegConnector
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
       override val s4LService: S4LSrv = mockS4LService
-      override val cohoAPIConnector: CoHoAPIConnect = mockCohoAPIConnector
+      override val cohoAPIConnector: IncorporationInformationConnect = mockCohoAPIConnector
     }
   }
 
   class NoCompanyDetailsMockedSetup {
     val service = new CompanyDetailsSrv {
-      override val cohoService: CoHoAPISrv = mockCoHoService
+      override val cohoService: IncorporationInformationSrv = mockCoHoService
       override val compRegConnector: CompanyRegistrationConnect = mockCompRegConnector
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
       override val s4LService: S4LSrv = mockS4LService
-      override val cohoAPIConnector: CoHoAPIConnect = mockCohoAPIConnector
+      override val cohoAPIConnector: IncorporationInformationConnect = mockCohoAPIConnector
 
       override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
         Future.successful(CompanyDetailsView("test compay name", None, validROAddress, None, None))
@@ -74,11 +74,11 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
   class CompanyDetailsMockedSetup {
     val service = new CompanyDetailsSrv {
-      override val cohoService: CoHoAPISrv = mockCoHoService
+      override val cohoService: IncorporationInformationSrv = mockCoHoService
       override val compRegConnector: CompanyRegistrationConnect = mockCompRegConnector
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
       override val s4LService: S4LSrv = mockS4LService
-      override val cohoAPIConnector: CoHoAPIConnect = mockCohoAPIConnector
+      override val cohoAPIConnector: IncorporationInformationConnect = mockCohoAPIConnector
 
       override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
         Future.successful(validCompanyDetailsViewModel)
@@ -92,11 +92,11 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
   class APIConverterMockedSetup {
     val service = new CompanyDetailsSrv {
-      override val cohoService: CoHoAPISrv = mockCoHoService
+      override val cohoService: IncorporationInformationSrv = mockCoHoService
       override val compRegConnector: CompanyRegistrationConnect = mockCompRegConnector
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
       override val s4LService: S4LSrv = mockS4LService
-      override val cohoAPIConnector: CoHoAPIConnect = mockCohoAPIConnector
+      override val cohoAPIConnector: IncorporationInformationConnect = mockCohoAPIConnector
 
       override def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
         validCompanyDetailsViewModel

@@ -53,7 +53,7 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
           Name(
             Some("testName"),
             Some("testName"),
-            Some("testName"),
+            "testName",
             Some("testName")
           ),
           Some("testNino")

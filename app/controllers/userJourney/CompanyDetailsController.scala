@@ -40,7 +40,7 @@ class CompanyDetailsController @Inject()(
                                           injS4LService: S4LService,
                                           injKeystoreConnector: KeystoreConnector,
                                           injCompanyDetailsService: CompanyDetailsService,
-                                          injCohoService: CoHoAPIService,
+                                          injCohoService: IncorporationInformationService,
                                           injMessagesApi: MessagesApi,
                                           injAddressLookupService: AddressLookupService)
   extends CompanyDetailsCtrl {
@@ -57,7 +57,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
   val s4LService: S4LSrv
   val keystoreConnector: KeystoreConnect
   val companyDetailsService: CompanyDetailsSrv
-  val cohoService: CoHoAPISrv
+  val cohoService: IncorporationInformationSrv
   val addressLookupService: AddressLookupSrv
 
   val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {

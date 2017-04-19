@@ -26,16 +26,18 @@ import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier, NotFoundExcept
 
 import scala.concurrent.Future
 
-class CoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
+class IncorporationInformationConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
 
   val testUrl = "testCohoAPIUrl"
   val testUri = "testCohoAPIUri"
   implicit val hc = HeaderCarrier()
 
   class Setup {
-    val connector = new CoHoAPIConnect {
+    val connector = new IncorporationInformationConnect {
       val coHoAPIUrl = testUrl
       val coHoAPIUri = testUri
+      val incorpInfoUrl = testUrl
+      val incorpInfoUri = testUri
       override val http : WSHttp = mockWSHttp
       override val metricsService = new MockMetrics
     }
@@ -46,20 +48,20 @@ class CoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
     "return a successful CoHo api response object for valid data" in new Setup {
       mockHttpGet[CoHoCompanyDetailsModel](connector.coHoAPIUrl, Future.successful(validCoHoCompanyDetailsResponse))
 
-      await(connector.getCoHoCompanyDetails("testRegID")) shouldBe CohoApiSuccessResponse(validCoHoCompanyDetailsResponse)
+      await(connector.getCoHoCompanyDetails("testRegID")) shouldBe IncorpInfoSuccessResponse(validCoHoCompanyDetailsResponse)
     }
 
     "return a CoHo Bad Request api response object for a bad request" in new Setup {
       mockHttpGet[CoHoCompanyDetailsModel](connector.coHoAPIUrl, Future.failed(new BadRequestException("tstException")))
 
-      await(connector.getCoHoCompanyDetails("testRegID")) shouldBe CohoApiBadRequestResponse
+      await(connector.getCoHoCompanyDetails("testRegID")) shouldBe IncorpInfoBadRequestResponse
     }
 
     "return a CoHo error api response object for a downstream error" in new Setup {
       val ex = new RuntimeException("tstException")
       mockHttpGet[CoHoCompanyDetailsModel](connector.coHoAPIUrl, Future.failed(ex))
 
-      await(connector.getCoHoCompanyDetails("testRegID")) shouldBe CohoApiErrorResponse(ex)
+      await(connector.getCoHoCompanyDetails("testRegID")) shouldBe IncorpInfoErrorResponse(ex)
     }
   }
 
@@ -104,13 +106,13 @@ class CoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
     val tstOfficerList = OfficerList(
       items = Seq(
         Officer(
-          name = Name(Some("test1"), Some("test11"), Some("testa"), Some("Mr")),
+          name = Name(Some("test1"), Some("test11"), "testa", Some("Mr")),
           role = "cic-manager",
           resignedOn = None,
           appointmentLink = None
         ),
         Officer(
-          name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
+          name = Name(Some("test2"), Some("test22"), "testb", Some("Mr")),
           role = "corporate-director",
           resignedOn = None,
           appointmentLink = None

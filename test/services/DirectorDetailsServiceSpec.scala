@@ -35,7 +35,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
   implicit val hc = HeaderCarrier()
 
   val mockPAYERegConnector = mock[PAYERegistrationConnector]
-  val mockCoHoService = mock[CoHoAPIService]
+  val mockCoHoService = mock[IncorporationInformationService]
   val mockS4LService = mock[S4LService]
 
   val returnHttpResponse = HttpResponse(200)
@@ -99,7 +99,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
           name = Name(
             forename = Some("Timothy"),
             otherForenames = Some("Potterley-Smythe"),
-            surname = Some("Buttersford"),
+            surname = "Buttersford",
             title = Some("Mr")
           ),
           nino = Some("ZZ123456A")
@@ -108,7 +108,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
           name = Name(
             forename = Some("Peter"),
             otherForenames = Some("Pierre"),
-            surname = Some("Simpson"),
+            surname = "Simpson",
             title = Some("Sir")
           ),
           nino = None
@@ -117,11 +117,11 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
       val tstModelView = Directors(
         directorMapping = Map(
           "0" -> Director(
-            name = Name(Some("Timothy"), Some("Potterley-Smythe"), Some("Buttersford"), Some("Mr")),
+            name = Name(Some("Timothy"), Some("Potterley-Smythe"), "Buttersford", Some("Mr")),
             nino = Some("ZZ123456A")
           ),
           "1" -> Director(
-            name = Name(Some("Peter"), Some("Pierre"), Some("Simpson"), Some("Sir")),
+            name = Name(Some("Peter"), Some("Pierre"), "Simpson", Some("Sir")),
             nino = None
           )
         )
@@ -138,7 +138,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
           name = Name(
             forename = Some("Timothy"),
             otherForenames = Some("Potterley-Smythe"),
-            surname = Some("Buttersford"),
+            surname = "Buttersford",
             title = Some("Mr")
           ),
           nino = Some("ZZ123456A")
@@ -147,7 +147,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
           name = Name(
             forename = Some("Peter"),
             otherForenames = Some("Pierre"),
-            surname = Some("Simpson"),
+            surname = "Simpson",
             title = Some("Sir")
           ),
           nino = None
@@ -157,11 +157,11 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
       val tstModelView = Directors(
         directorMapping = Map(
           "0" -> Director(
-            name = Name(Some("Timothy"), Some("Potterley-Smythe"), Some("Buttersford"), Some("Mr")),
+            name = Name(Some("Timothy"), Some("Potterley-Smythe"), "Buttersford", Some("Mr")),
             nino = Some("ZZ123456A")
           ),
           "1" -> Director(
-            name = Name(Some("Peter"), Some("Pierre"), Some("Simpson"), Some("Sir")),
+            name = Name(Some("Peter"), Some("Pierre"), "Simpson", Some("Sir")),
             nino = None
           )
         )
@@ -176,11 +176,11 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
     val tstDirectors = Directors(
       directorMapping = Map(
         "0" -> Director(
-          name = Name(Some("Timothy"), Some("Potterley-Smythe"), Some("Buttersford"), Some("Mr")),
+          name = Name(Some("Timothy"), Some("Potterley-Smythe"), "Buttersford", Some("Mr")),
           nino = Some("ZZ123456A")
         ),
         "1" -> Director(
-          name = Name(Some("Peter"), Some("Pierre"), Some("Simpson"), Some("Sir")),
+          name = Name(Some("Peter"), Some("Pierre"), "Simpson", Some("Sir")),
           nino = None
         )
       )
@@ -223,11 +223,11 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
 
       val expectedDirectorDetailsViewModel = Map(
         "0" -> Director(
-          name = Name(Some("Bob"), None, Some("Smith"), None),
+          name = Name(Some("Bob"), None, "Smith", None),
           nino = Some("AA123456Z")
         ),
         "1" -> Director(
-          name = Name(Some("Michael"), Some("Jay"), Some("Fudgedybar"), None),
+          name = Name(Some("Michael"), Some("Jay"), "Fudgedybar", None),
           nino = Some("ZZ123456A")
         )
       )
@@ -245,7 +245,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
       val directorDetails = Directors(
         directorMapping = Map(
           "0" -> Director(
-            name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
+            name = Name(Some("test2"), Some("test22"), "testb", Some("Mr")),
             nino = None
           )
         )
@@ -260,7 +260,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
     "return the correct View response when Director Details are returned from the microservice" in new Setup {
 
       val dir = Director(
-        name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
+        name = Name(Some("test2"), Some("test22"), "testb", Some("Mr")),
         nino = None
       )
 
@@ -287,7 +287,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
       val directorDetails = Directors(
         directorMapping = Map(
           "0" -> Director(
-            name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
+            name = Name(Some("test2"), Some("test22"), "testb", Some("Mr")),
             nino = None
           )
         )

@@ -30,10 +30,10 @@ import scala.concurrent.Future
 
 @Singleton
 class CompanyDetailsService @Inject()(injPAYERegistrationConnector: PAYERegistrationConnector,
-                                      injCoHoAPIService: CoHoAPIService,
+                                      injCoHoAPIService: IncorporationInformationService,
                                       injS4LService: S4LService,
                                       injCompRegConnector : CompanyRegistrationConnector,
-                                      injCohoAPIConnector: CoHoAPIConnector) extends CompanyDetailsSrv {
+                                      injCohoAPIConnector: IncorporationInformationConnector) extends CompanyDetailsSrv {
 
   override val payeRegConnector = injPAYERegistrationConnector
   override val compRegConnector = injCompRegConnector
@@ -46,8 +46,8 @@ trait CompanyDetailsSrv {
 
   val payeRegConnector: PAYERegistrationConnect
   val compRegConnector: CompanyRegistrationConnect
-  val cohoAPIConnector: CoHoAPIConnect
-  val cohoService: CoHoAPISrv
+  val cohoAPIConnector: IncorporationInformationConnect
+  val cohoService: IncorporationInformationSrv
   val s4LService: S4LSrv
 
   def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {

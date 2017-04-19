@@ -46,4 +46,101 @@ trait TestCoHoAPIConnect {
   def tearDownCoHoCompanyDetails(regId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     http.GET[HttpResponse](s"$coHoAPIUrl/incorporation-frontend-stubs/test-only/wipe-individual-company-details/$regId")
   }
+
+  def setupOfficers(regId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    val officers = Json.parse(
+      s"""
+         |{
+         |    "transaction_id" : "000-434-$regId",
+         |    "company_name" : "MOOO LIMITED",
+         |    "company_type" : "ltd",
+         |    "registered_office_address" : {
+         |        "premises" : "98",
+         |        "address_line_1" : "LIMBRICK LANE",
+         |        "address_line_2" : "GORING-BY-SEA",
+         |        "locality" : "WORTHING",
+         |        "country" : "United Kingdom",
+         |        "postal_code" : "BN12 6AG"
+         |    },
+         |    "officers" : [
+         |        {
+         |            "name_elements" : {
+         |                "forename" : "Bob",
+         |                "other_forenames" : "Bimbly Bobblous",
+         |                "surname" : "Bobbings"
+         |            },
+         |            "date_of_birth" : {
+         |                "day" : "12",
+         |                "month" : "11",
+         |                "year" : "1973"
+         |            },
+         |            "address" : {
+         |                "premises" : "98",
+         |                "address_line_1" : "LIMBRICK LANE",
+         |                "address_line_2" : "GORING-BY-SEA",
+         |                "locality" : "WORTHING",
+         |                "country" : "United Kingdom",
+         |                "postal_code" : "BN12 6AG"
+         |            },
+         |            "officer_role" : "director"
+         |        },
+         |        {
+         |            "name_elements" : {
+         |                "title" : "Mx",
+         |                "forename" : "Jingly",
+         |                "surname" : "Jingles"
+         |            },
+         |            "date_of_birth" : {
+         |                "day" : "12",
+         |                "month" : "07",
+         |                "year" : "1988"
+         |            },
+         |            "address" : {
+         |                "premises" : "713",
+         |                "address_line_1" : "ST. JAMES GATE",
+         |                "locality" : "NEWCASTLE UPON TYNE",
+         |                "country" : "England",
+         |                "postal_code" : "NE1 4BB"
+         |            },
+         |            "officer_role" : "director"
+         |        },
+         |        {
+         |            "name_elements" : {
+         |                "forename" : "Jorge",
+         |                "surname" : "Freshwater"
+         |            },
+         |            "date_of_birth" : {
+         |                "day" : "10",
+         |                "month" : "06",
+         |                "year" : "1994"
+         |            },
+         |            "address" : {
+         |                "premises" : "1",
+         |                "address_line_1" : "L ST",
+         |                "locality" : "TYNE",
+         |                "country" : "England",
+         |                "postal_code" : "AA1 4AA"
+         |            },
+         |            "officer_role" : "director"
+         |        }
+         |    ],
+         |    "sic_codes" : [
+         |        {
+         |            "sic_description" : "Public order and safety activities",
+         |            "sic_code" : "84240"
+         |        },
+         |        {
+         |            "sic_description" : "Raising of dairy cattle",
+         |            "sic_code" : "01410"
+         |        }
+         |    ]
+         |}
+    """.stripMargin)
+
+    http.POST[JsValue, HttpResponse](s"$coHoAPIUrl/incorporation-frontend-stubs/insert-data", officers)
+  }
+
+  def teardownOfficers()(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    http.PUT[String, HttpResponse](s"$coHoAPIUrl/incorporation-frontend-stubs/wipe-data", "")
+  }
 }

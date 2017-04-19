@@ -25,8 +25,7 @@ import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector, TestCo
 import models.test.CoHoCompanyDetailsFormModel
 import play.api.Logger
 import play.api.i18n.MessagesApi
-import services.{CoHoAPIService, CoHoAPISrv, PAYERegistrationService, PAYERegistrationSrv, S4LService, S4LSrv}
-import utils.SessionProfile
+import services.{IncorporationInformationService, IncorporationInformationSrv, PAYERegistrationService, PAYERegistrationSrv, S4LService, S4LSrv}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -36,7 +35,7 @@ class TestSetupController @Inject()(injKeystoreConnector: KeystoreConnector,
                                     injBusinessRegConnector: BusinessRegistrationConnector,
                                     injTestBusinessRegConnector: TestBusinessRegConnector,
                                     injTestCoHoAPIConnector: TestCoHoAPIConnector,
-                                    injCoHoAPIService: CoHoAPIService,
+                                    injCoHoAPIService: IncorporationInformationService,
                                     injMessagesApi: MessagesApi,
                                     injTestPAYERegConnector: TestPAYERegConnector,
                                     injPayeRegService:PAYERegistrationService,
@@ -58,7 +57,7 @@ trait TestSetupCtrl extends CurrentProfileCtrl with TestCoHoCtrl with TestRegSet
   val businessRegConnector: BusinessRegistrationConnect
   val testBusinessRegConnector: TestBusinessRegConnect
   val testCoHoAPIConnector: TestCoHoAPIConnect
-  val coHoAPIService: CoHoAPISrv
+  val coHoAPIService: IncorporationInformationSrv
   val payeRegService: PAYERegistrationSrv
   val testPAYERegConnector: TestPAYERegConnect
   val s4LService: S4LSrv
@@ -79,6 +78,8 @@ trait TestSetupCtrl extends CurrentProfileCtrl with TestCoHoCtrl with TestRegSet
             _ <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(CoHoCompanyDetailsFormModel(companyName, List.empty, List.empty), profile.registrationID))
             _ <- log("RegTeardown", doIndividualRegTeardown(profile.registrationID))
             _ <- log("S4LTeardown", doTearDownS4L(profile.registrationID))
+            _ <- log("OfficersTeardown", doTeardownOfficers())
+            _ <- log("OfficersSetup", doSetupOfficers(profile.registrationID))
           } yield Redirect(controllers.userJourney.routes.SignInOutController.postSignIn())
 
   }

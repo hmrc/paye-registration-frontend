@@ -22,7 +22,7 @@ import play.api.libs.json._
 case class Name(
                  forename: Option[String],
                  otherForenames: Option[String],
-                 surname: Option[String],
+                 surname: String,
                  title: Option[String]
                  )
 
@@ -30,7 +30,7 @@ object Name {
   implicit val format = (
     (__ \ "forename").formatNullable[String] and
       (__ \ "other_forenames").formatNullable[String] and
-      (__ \ "surname").formatNullable[String] and
+      (__ \ "surname").format[String] and
       (__ \ "title").formatNullable[String]
   )(Name.apply, unlift(Name.unapply))
 }

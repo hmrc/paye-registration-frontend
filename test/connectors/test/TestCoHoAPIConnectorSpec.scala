@@ -53,4 +53,22 @@ class TestCoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
     }
   }
 
+  "setupOfficers" should {
+    "return a valid response when successfully set up" in new Setup {
+      val resp = HttpResponse(responseStatus = 200)
+      mockHttpPOST[JsValue, HttpResponse](connector.coHoAPIUrl, Future.successful(resp))
+
+      await(connector.setupOfficers("123")) shouldBe resp
+    }
+  }
+
+  "teardownOfficers" should {
+    "return a valid response when successfully set up" in new Setup {
+      val resp = HttpResponse(responseStatus = 200)
+      mockHttpPUT[String, HttpResponse](connector.coHoAPIUrl, Future.successful(resp))
+
+      await(connector.teardownOfficers()) shouldBe resp
+    }
+  }
+
 }

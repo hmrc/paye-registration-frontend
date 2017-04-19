@@ -18,7 +18,7 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import connectors.{KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
+import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.{CacheKeys, DownstreamOutcome}
 import models.api.Director
 import models.view.{Directors, Ninos, UserEnteredNino}
@@ -30,7 +30,7 @@ import scala.concurrent.Future
 @Singleton
 class DirectorDetailsService @Inject()(
                                         payeRegistrationConn: PAYERegistrationConnector,
-                                        coHoAPIServ: CoHoAPIService,
+                                        coHoAPIServ: IncorporationInformationService,
                                         s4LServ: S4LService) extends DirectorDetailsSrv {
 
   override val payeRegConnector = payeRegistrationConn
@@ -41,7 +41,7 @@ class DirectorDetailsService @Inject()(
 trait DirectorDetailsSrv {
   val payeRegConnector: PAYERegistrationConnect
   val s4LService: S4LSrv
-  val coHoAPIService: CoHoAPISrv
+  val coHoAPIService: IncorporationInformationSrv
 
   implicit val formatRecordSet = Directors.directorMappingFormat
 
@@ -97,7 +97,7 @@ trait DirectorDetailsSrv {
 
   def createDisplayNamesMap(directors: Directors): Map[String, String] = {
     directors.directorMapping.map {
-      case(k, v) => (k, List(v.name.forename, v.name.surname).flatten.mkString(" "))
+      case(k, v) => (k, List(v.name.forename, Some(v.name.surname)).flatten.mkString(" "))
     }
   }
 

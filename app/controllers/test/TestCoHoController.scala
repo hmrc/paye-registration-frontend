@@ -26,7 +26,7 @@ import forms.test.TestCoHoCompanyDetailsForm
 import models.test.CoHoCompanyDetailsFormModel
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{AnyContent, Request}
-import services.{CoHoAPIService, CoHoAPISrv}
+import services.{IncorporationInformationService, IncorporationInformationSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.SessionProfile
@@ -35,7 +35,7 @@ import scala.concurrent.Future
 
 @Singleton
 class TestCoHoController @Inject()(injTestCoHoAPIConnector: TestCoHoAPIConnector,
-                                   injCoHoAPIService: CoHoAPIService,
+                                   injCoHoAPIService: IncorporationInformationService,
                                    injKeystoreConnector: KeystoreConnector,
                                    injBusinessRegConnector: BusinessRegistrationConnector,
                                    injMessagesApi: MessagesApi)
@@ -53,7 +53,7 @@ trait TestCoHoCtrl extends FrontendController with Actions with I18nSupport {
   val testCoHoAPIConnector: TestCoHoAPIConnect
   val businessRegConnector: BusinessRegistrationConnect
   val keystoreConnector : KeystoreConnect
-  val coHoAPIService: CoHoAPISrv
+  val coHoAPIService: IncorporationInformationSrv
 
   def coHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
@@ -92,6 +92,18 @@ trait TestCoHoCtrl extends FrontendController with Actions with I18nSupport {
     for {
       resp <- testCoHoAPIConnector.addCoHoCompanyDetails(formModel.toCoHoCompanyDetailsAPIModel(regId))
     } yield s"Company Name: ${formModel.companyName}, response status: ${resp.status}"
+  }
+
+  protected[controllers] def doTeardownOfficers()(implicit request: Request[AnyContent]): Future[String] = {
+    testCoHoAPIConnector.teardownOfficers() map {
+      resp => s"[Teardown Officers] response status: ${resp.status}"
+    }
+  }
+
+  protected[controllers] def doSetupOfficers(regId: String)(implicit request: Request[AnyContent]): Future[String] = {
+    testCoHoAPIConnector.setupOfficers(regId) map {
+      resp => s"[Setup Officers] response status: ${resp.status}"
+    }
   }
 
 }

@@ -24,14 +24,20 @@ class OfficerListSpec extends PAYERegSpec {
   val tstOfficerList = OfficerList(
     items = Seq(
       Officer(
-        name = Name(Some("test1"), Some("test11"), Some("testa"), Some("Mr")),
-        role = "cic-manager",
+        name = Name(Some("Bob"), Some("Bimbly Bobblous"), "Bobbings", None),
+        role = "director",
         resignedOn = None,
         appointmentLink = None
       ),
       Officer(
-        name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
-        role = "corporate-director",
+        name = Name(Some("Jingly"), None, "Jingles", Some("Mx")),
+        role = "director",
+        resignedOn = None,
+        appointmentLink = None
+      ),
+      Officer(
+        name = Name(Some("Jorge"), None, "Freshwater", None),
+        role = "legend",
         resignedOn = None,
         appointmentLink = None
       )
@@ -39,29 +45,68 @@ class OfficerListSpec extends PAYERegSpec {
   )
 
   val tstOfficerListJson = Json.parse(
-    """{
-      |  "items" : [ {
-      |    "name" : "test",
-      |    "name_elements" : {
-      |      "forename" : "test1",
-      |      "honours" : "test",
-      |      "other_forenames" : "test11",
-      |      "surname" : "testa",
-      |      "title" : "Mr"
-      |    },
-      |    "officer_role" : "cic-manager"
-      |  }, {
-      |    "name" : "test",
-      |    "name_elements" : {
-      |      "forename" : "test2",
-      |      "honours" : "test",
-      |      "other_forenames" : "test22",
-      |      "surname" : "testb",
-      |      "title" : "Mr"
-      |    },
-      |    "officer_role" : "corporate-director"
-      |  } ]
-      |}""".stripMargin
+    """[
+      |   {
+      |      "name_elements":{
+      |         "forename":"Bob",
+      |         "other_forenames":"Bimbly Bobblous",
+      |         "surname":"Bobbings"
+      |      },
+      |      "date_of_birth":{
+      |         "day":"12",
+      |         "month":"11",
+      |         "year":"1973"
+      |      },
+      |      "address":{
+      |         "premises":"98",
+      |         "address_line_1":"LIMBRICK LANE",
+      |         "address_line_2":"GORING-BY-SEA",
+      |         "locality":"WORTHING",
+      |         "country":"United Kingdom",
+      |         "postal_code":"BN12 6AG"
+      |      },
+      |      "officer_role":"director"
+      |   },
+      |   {
+      |      "name_elements":{
+      |         "title":"Mx",
+      |         "forename":"Jingly",
+      |         "surname":"Jingles"
+      |      },
+      |      "date_of_birth":{
+      |         "day":"12",
+      |         "month":"07",
+      |         "year":"1988"
+      |      },
+      |      "address":{
+      |         "premises":"713",
+      |         "address_line_1":"ST. JAMES GATE",
+      |         "locality":"NEWCASTLE UPON TYNE",
+      |         "country":"England",
+      |         "postal_code":"NE1 4BB"
+      |      },
+      |      "officer_role":"director"
+      |   },
+      |   {
+      |      "name_elements":{
+      |         "forename":"Jorge",
+      |         "surname":"Freshwater"
+      |      },
+      |      "date_of_birth":{
+      |         "day":"10",
+      |         "month":"06",
+      |         "year":"1994"
+      |      },
+      |      "address":{
+      |         "premises":"1",
+      |         "address_line_1":"L ST",
+      |         "locality":"TYNE",
+      |         "country":"England",
+      |         "postal_code":"AA1 4AA"
+      |      },
+      |      "officer_role":"legend"
+      |   }
+      |]""".stripMargin
   )
 
   "OfficerList" should {

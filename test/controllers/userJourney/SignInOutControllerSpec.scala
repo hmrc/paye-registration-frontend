@@ -27,7 +27,7 @@ import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.{CoHoAPIService, CurrentProfileService, PAYERegistrationService}
+import services.{IncorporationInformationService, CurrentProfileService, PAYERegistrationService}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -37,7 +37,7 @@ import scala.concurrent.Future
 class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture with BeforeAndAfterEach {
 
   val mockCurrentProfileService = mock[CurrentProfileService]
-  val mockCoHoAPIService = mock[CoHoAPIService]
+  val mockCoHoAPIService = mock[IncorporationInformationService]
   val mockPAYERegService = mock[PAYERegistrationService]
 
   class Setup {
