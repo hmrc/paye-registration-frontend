@@ -33,7 +33,7 @@ class DirectorsSpec extends UnitSpec {
     val tstModel = Name(
       forename = Some("Timothy"),
       otherForenames = Some("Potterley-Smythe"),
-      surname = Some("Buttersford"),
+      surname = "Buttersford",
       title = Some("Mr")
     )
 
@@ -44,8 +44,8 @@ class DirectorsSpec extends UnitSpec {
       Json.toJson[Name](tstModel) shouldBe tstJson
     }
 
-    val tstEmptyJson = Json.parse(s"""{}""".stripMargin)
-    val tstEmptyModel = Name(None, None, None, None)
+    val tstEmptyJson = Json.parse(s"""{"surname":""}""".stripMargin)
+    val tstEmptyModel = Name(None, None, "", None)
 
     "read from json with empty data" in {
       Json.fromJson[Name](tstEmptyJson) shouldBe JsSuccess(tstEmptyModel)
@@ -73,7 +73,7 @@ class DirectorsSpec extends UnitSpec {
       name = Name(
         forename = Some("Timothy"),
         otherForenames = Some("Potterley-Smythe"),
-        surname = Some("Buttersford"),
+        surname = "Buttersford",
         title = Some("Mr")
       ),
       nino = Some("ZZ123456A")
@@ -90,14 +90,14 @@ class DirectorsSpec extends UnitSpec {
 
     val tstEmptyJson = Json.parse(
       s"""{
-         |  "director":{}
+         |  "director":{"surname":""}
          |}""".stripMargin)
 
     val tstEmptyModel = Director(
       name = Name(
         forename = None,
         otherForenames = None,
-        surname = None,
+        surname = "",
         title = None
       ),
       nino = None

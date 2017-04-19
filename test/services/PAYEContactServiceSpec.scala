@@ -36,8 +36,8 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   val mockPAYERegConnector = mock[PAYERegistrationConnector]
   val mockCompRegConnector = mock[CompanyRegistrationConnector]
-  val mockCohoAPIConnector = mock[CoHoAPIConnector]
-  val mockCoHoService = mock[CoHoAPIService]
+  val mockCohoAPIConnector = mock[IncorporationInformationConnector]
+  val mockCoHoService = mock[IncorporationInformationService]
   val mockS4LService = mock[S4LService]
 
   val returnHttpResponse = HttpResponse(200)

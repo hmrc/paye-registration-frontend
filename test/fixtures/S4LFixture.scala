@@ -74,11 +74,11 @@ trait S4LFixture {
   val validDirectorDetailsViewModel = Directors(
     directorMapping = Map(
       "0" -> Director(
-        name = Name(Some("Bob"), None, Some("Smith"), None),
+        name = Name(Some("Bob"), None, "Smith", None),
         nino = Some("NINO")
       ),
       "1" -> Director(
-        name = Name(Some("Michael"), Some("Jay"), Some("Fudgedybar"), None),
+        name = Name(Some("Michael"), Some("Jay"), "Fudgedybar", None),
         nino = None
       )
     )

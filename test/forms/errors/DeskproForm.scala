@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package forms.erros
+package forms.errors
 
-import forms.errors.DeskproForm
 import models.view.Ticket
 import testHelpers.PAYERegSpec
 
-class DeskproForm extends PAYERegSpec{
+class DeskproFormSpec extends PAYERegSpec{
 
   val name = "Valid Name"
   val email = "abc@cba.abc"

@@ -37,7 +37,7 @@ import scala.concurrent.Future
 @Singleton
 class SignInOutController @Inject()(
                                      injCurrentProfileService: CurrentProfileService,
-                                     injCoHoAPIService: CoHoAPIService,
+                                     injCoHoAPIService: IncorporationInformationService,
                                      injPayeRegistrationService: PAYERegistrationService,
                                      injMessagesApi: MessagesApi)
   extends SignInOutCtrl with ServicesConfig {
@@ -53,7 +53,7 @@ class SignInOutController @Inject()(
 trait SignInOutCtrl extends FrontendController with Actions with I18nSupport {
 
   val currentProfileService: CurrentProfileSrv
-  val coHoAPIService: CoHoAPISrv
+  val coHoAPIService: IncorporationInformationSrv
   val payeRegistrationService: PAYERegistrationSrv
   val compRegFEURL: String
   val compRegFEURI: String

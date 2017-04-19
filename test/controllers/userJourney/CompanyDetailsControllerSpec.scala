@@ -38,7 +38,7 @@ import scala.concurrent.Future
 class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYERegistrationFixture {
   val mockS4LService = mock[S4LService]
   val mockCompanyDetailsService = mock[CompanyDetailsService]
-  val mockCoHoService = mock[CoHoAPIService]
+  val mockCoHoService = mock[IncorporationInformationService]
   val mockAddressLookupService = mock[AddressLookupService]
 
   class Setup {

@@ -23,7 +23,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{BAD_REQUEST, OK}
-import services.CoHoAPISrv
+import services.IncorporationInformationSrv
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
@@ -31,7 +31,7 @@ import scala.concurrent.Future
 
 class TestCoHoControllerSpec extends PAYERegSpec {
 
-  val mockCoHoAPIService = mock[CoHoAPISrv]
+  val mockCoHoAPIService = mock[IncorporationInformationSrv]
   val mockTestAPIConnector = mock[TestCoHoAPIConnect]
 
   val testHttpResponse = new HttpResponse {

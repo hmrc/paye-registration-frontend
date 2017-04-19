@@ -40,5 +40,5 @@ object Officer {
 case class OfficerList(items: Seq[Officer])
 
 object OfficerList {
-  implicit val formatModel: Reads[OfficerList] = (__ \ "items").read[Seq[Officer]] map OfficerList.apply
+  implicit val formatModel: Reads[OfficerList] = __.read[Seq[Officer]] map OfficerList.apply
 }

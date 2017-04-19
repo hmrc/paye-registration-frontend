@@ -23,14 +23,14 @@ import models.external.BusinessProfile
 import models.test.CoHoCompanyDetailsFormModel
 import play.api.http.Status
 import play.api.mvc.{AnyContent, Request}
-import services.{CoHoAPISrv, PAYERegistrationSrv, S4LSrv}
+import services.{IncorporationInformationSrv, PAYERegistrationSrv, S4LSrv}
 import testHelpers.PAYERegSpec
 
 import scala.concurrent.Future
 
 class TestSetupControllerSpec extends PAYERegSpec {
   val mockTestBusRegConnector = mock[TestBusinessRegConnect]
-  val mockCoHoAPIService = mock[CoHoAPISrv]
+  val mockCoHoAPIService = mock[IncorporationInformationSrv]
   val mockTestAPIConnector = mock[TestCoHoAPIConnect]
   val mockPayeRegConnector = mock[TestPAYERegConnect]
   val mockPayeRegService = mock[PAYERegistrationSrv]
@@ -54,10 +54,11 @@ class TestSetupControllerSpec extends PAYERegSpec {
       override def doAddCoHoCompanyDetails(formModel: CoHoCompanyDetailsFormModel, regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
       override def doIndividualRegTeardown(regId: String) (implicit request: Request[AnyContent]): Future[DownstreamOutcome.Value] = Future.successful(DownstreamOutcome.Success)
       override def doTearDownS4L(regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
-
+      override def doTeardownOfficers()(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
+      override def doSetupOfficers(regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
     }
   }
-
+  
   "setup" should {
     "redirect to post sign in" in new Setup {
       mockFetchCurrentProfile()
