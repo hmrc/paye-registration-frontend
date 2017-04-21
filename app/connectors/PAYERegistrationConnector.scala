@@ -33,6 +33,7 @@ import scala.concurrent.Future
 
 sealed trait DESResponse
 object Success extends DESResponse
+object Cancelled extends DESResponse
 object Failed extends DESResponse
 object TimedOut extends DESResponse
 
@@ -79,10 +80,13 @@ trait PAYERegistrationConnect {
 
   def submitRegistration(regId: String)(implicit hc: HeaderCarrier): Future[DESResponse] = {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
-    http.PUT[String, String](s"$payeRegUrl/paye-registration/$regId/submit-registration", "") map {
-      res =>
+    http.PUT[String, HttpResponse](s"$payeRegUrl/paye-registration/$regId/submit-registration", "") map {
+      response =>
         payeRegTimer.stop()
-        Success
+        response.status match {
+          case Status.OK         => Success
+          case Status.NO_CONTENT => Cancelled
+        }
     } recover {
       case e: Exception =>
         logResponse(e, "submitRegistration", "submitting PAYE Registration to DES")

@@ -17,7 +17,7 @@
 package controllers.userJourney
 
 import builders.AuthBuilder
-import connectors.{Failed, PAYERegistrationConnector, Success, TimedOut}
+import connectors._
 import enums.PAYEStatus
 import fixtures.PAYERegistrationFixture
 import org.jsoup.Jsoup
@@ -45,6 +45,8 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       override val keystoreConnector = mockKeystoreConnector
       override val payeRegistrationConnector = mockPayeRegistrationConnector
       override val submissionService = mockSubmissionService
+      override val companyRegUrl = "testUrl"
+      override val companyRegUri = "testUri"
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
     }
   }
@@ -158,6 +160,20 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
         (result: Future[Result]) =>
           status(result) shouldBe Status.SEE_OTHER
           redirectLocation(result).get shouldBe "/register-for-paye/confirmation"
+      }
+    }
+    "show the dashboard" in new Setup {
+      mockFetchCurrentProfile()
+
+      when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validPAYERegistrationAPI))
+
+      when(mockSubmissionService.submitRegistration(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(Cancelled))
+
+      AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
+        (result: Future[Result]) =>
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result).get shouldBe "testUrl/testUri/dashboard"
       }
     }
     "show the retry page" in new Setup {

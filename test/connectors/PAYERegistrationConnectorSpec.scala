@@ -37,6 +37,8 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
 
   implicit val hc = HeaderCarrier()
 
+  val ok = HttpResponse(200)
+  val noContent = HttpResponse(204)
   val badRequest = new BadRequestException("400")
   val forbidden = Upstream4xxResponse("403", 403, 403)
   val upstream4xx = Upstream4xxResponse("418", 418, 418)
@@ -495,17 +497,22 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
 
   "calling submitRegistration" should {
     "return a Success" in new Setup {
-      mockHttpPUT[String, String]("test-url", "")
+      mockHttpPUT[String, HttpResponse]("test-url", ok)
 
       await(connector.submitRegistration("tstID")) shouldBe Success
     }
+    "return a NoContent" in new Setup {
+      mockHttpPUT[String, HttpResponse]("test-url", noContent)
+
+      await(connector.submitRegistration("tstID")) shouldBe Cancelled
+    }
     "return a Failed" in new Setup {
-      mockHttpFailedPUT[String, String]("test-url", badRequest)
+      mockHttpFailedPUT[String, HttpResponse]("test-url", badRequest)
 
       await(connector.submitRegistration("tstID")) shouldBe Failed
     }
     "return a TimedOut" in new Setup {
-      mockHttpFailedPUT[String, String]("test-url", upstream5xx)
+      mockHttpFailedPUT[String, HttpResponse]("test-url", upstream5xx)
 
       await(connector.submitRegistration("tstID")) shouldBe TimedOut
 
