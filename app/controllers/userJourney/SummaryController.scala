@@ -26,6 +26,7 @@ import models.external.CurrentProfile
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Result
 import services.{SubmissionService, SubmissionSrv, SummaryService, SummarySrv}
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -47,14 +48,19 @@ class SummaryController @Inject()(injSummaryService: SummaryService,
   val keystoreConnector = injKeystoreConnector
   val payeRegistrationConnector = injPayeRegistrationConnector
   val messagesApi = injMessagesApi
+  override lazy val companyRegUrl = getConfString("company-registration-frontend.www.url", "Could not find Company Registration Frontend URL")
+  override lazy val companyRegUri = getConfString("company-registration-frontend.www.uri", "Could not find Company Registration Frontend URI")
 }
 
-trait SummaryCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
+trait SummaryCtrl extends FrontendController with Actions with I18nSupport with SessionProfile with ServicesConfig {
 
   val summaryService: SummarySrv
   val submissionService: SubmissionSrv
   val keystoreConnector: KeystoreConnect
   val payeRegistrationConnector: PAYERegistrationConnect
+
+  val companyRegUrl : String
+  val companyRegUri : String
 
   val summary = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     withCurrentProfile { profile =>
@@ -73,6 +79,7 @@ trait SummaryCtrl extends FrontendController with Actions with I18nSupport with 
       invalidSubmissionGuard(profile) {
         submissionService.submitRegistration(profile.registrationID) map {
           case Success => Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation())
+          case Cancelled => Redirect(s"$companyRegUrl/$companyRegUri/dashboard")
           case Failed => Redirect(controllers.errors.routes.ErrorController.failedSubmission())
           case TimedOut => InternalServerError(views.html.pages.error.submissionTimeout())
         }
