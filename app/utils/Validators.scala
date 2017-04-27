@@ -33,7 +33,7 @@ object Validators extends DateUtil {
   private val invalidPrefixes = List("BG", "GB", "NK", "KN", "TN", "NT", "ZZ")
   private def hasValidPrefix(nino: String) = !invalidPrefixes.exists(nino.startsWith)
 
-  def isValidNino(nino: String) = nino.nonEmpty && hasValidPrefix(nino) && nino.matches(validNinoFormat)
+  def isValidNino(nino: String): Boolean = nino.nonEmpty && hasValidPrefix(nino) && nino.matches(validNinoFormat)
 
   def optionalValidation(constraint : Constraint[String]): Constraint[Option[String]] = Constraint("constraints.optional")({
     case Some(text: String)  if text != ""  => constraint(text)

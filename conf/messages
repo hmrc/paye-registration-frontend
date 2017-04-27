@@ -72,7 +72,7 @@ pages.completionCapacity.director                       = Director
 pages.completionCapacity.agent                          = Agent (for example, an accountant)
 pages.completionCapacity.other                          = Other (for example, a friend of the director)
 pages.completionCapacity.other.label                    = Describe your relationship to the business
-pages.completionCapacity.incompleteError                = Tell us your relationship to the business
+pages.completionCapacity.other.error                    = Enter your relationship to the business using 100 characters or less
 
 ## Trading Name Page
 pages.tradingName.title                                 = Trading name
