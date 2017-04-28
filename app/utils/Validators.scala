@@ -30,6 +30,7 @@ object Validators extends DateUtil {
   private val nonEmptyRegex = """^(?=\s*\S).*$""".r
   private val validNinoFormat = "[[A-Z]&&[^DFIQUV]][[A-Z]&&[^DFIQUVO]] ?\\d{2} ?\\d{2} ?\\d{2} ?[A-D]{1}"
   private val invalidPrefixes = List("BG", "GB", "NK", "KN", "TN", "NT", "ZZ")
+  private val natureOfBusinessRegex = """^[A-Za-z 0-9\-,/&']{1,100}$""".r
   private def hasValidPrefix(nino: String) = !invalidPrefixes.exists(nino.startsWith)
 
   def isValidNino(nino: String): Boolean = nino.nonEmpty && hasValidPrefix(nino) && nino.matches(validNinoFormat)
@@ -70,10 +71,14 @@ object Validators extends DateUtil {
   def natureOfBusinessValidation: Mapping[String] = {
     val sicConstraint: Constraint[String] = Constraint("constraints.description")({
       text =>
-        val errors = (text, text.length >= 100) match {
-          case ("", _) => Seq(ValidationError("errors.invalid.sic.noEntry"))
-          case (_, true) => Seq(ValidationError("errors.invalid.sic.overCharLimit"))
-          case (_,_) => Nil
+        val errors = if(text.length >= 100) {
+          Seq(ValidationError("errors.invalid.sic.overCharLimit"))
+        } else {
+          text.trim match {
+            case natureOfBusinessRegex()  => Nil
+            case ""                       => Seq(ValidationError("errors.invalid.sic.noEntry"))
+            case _                        => Seq(ValidationError("errors.invalid.sic.invalidChars"))
+          }
         }
         if(errors.isEmpty) Valid else Invalid(errors)
     })
