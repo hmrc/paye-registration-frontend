@@ -82,6 +82,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
             success => {
               val trimmed = success.copy(
                 digitalContactDetails = success.digitalContactDetails.copy(
+                  email         = success.digitalContactDetails.email map(_.trim),
                   phoneNumber   = success.digitalContactDetails.phoneNumber map(_.trim),
                   mobileNumber  = success.digitalContactDetails.mobileNumber map(_.trim)
                 )

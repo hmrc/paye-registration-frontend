@@ -36,13 +36,13 @@ object Validators extends DateUtil {
   def isValidNino(nino: String): Boolean = nino.nonEmpty && hasValidPrefix(nino) && nino.matches(validNinoFormat)
 
   def optionalValidation(constraint : Constraint[String]): Constraint[Option[String]] = Constraint("constraints.optional")({
-    case Some(text: String)  if text != ""  => constraint(text)
+    case Some(text: String)  if text.trim != ""  => constraint(text)
     case _ => Valid
   })
 
   val emailValidation: Constraint[String] = Constraint("constraints.emailCheck")({
     text =>
-      val errors = text match {
+      val errors = text.trim match {
         case tooLong if text.length > 70 => Seq(ValidationError("pages.businessContact.email.tooLong"))
         case wrong if !text.matches(emailRegex) => Seq(ValidationError("errors.invalid.email"))
         case _ => Nil
