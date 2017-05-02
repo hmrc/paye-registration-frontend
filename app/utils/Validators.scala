@@ -36,7 +36,7 @@ object Validators extends DateUtil {
   def isValidNino(nino: String): Boolean = nino.nonEmpty && hasValidPrefix(nino) && nino.matches(validNinoFormat)
 
   def optionalValidation(constraint : Constraint[String]): Constraint[Option[String]] = Constraint("constraints.optional")({
-    case Some(text: String)  if text.trim != ""  => constraint(text)
+    case Some(text: String)  if text != ""  => constraint(text)
     case _ => Valid
   })
 
