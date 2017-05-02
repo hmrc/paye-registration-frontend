@@ -22,7 +22,6 @@ import mocks.MockMetrics
 import models.Address
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import testHelpers.PAYERegSpec
@@ -74,43 +73,23 @@ class AddressLookupServiceSpec extends PAYERegSpec with S4LFixture with PAYERegi
 
   "Calling getAddress" should {
     "return an address" in new Setup {
-      val mockAddress = Json.parse(
-        """
-          |{
-          |   "id" : "testId",
-          |   "address" : {
-          |     "lines" : [
-          |       "L1",
-          |       "L2",
-          |       "L3",
-          |       "L4"
-          |     ],
-          |     "postcode" : "testPostcode",
-          |     "country" : {
-          |       "code" : "testCode",
-          |       "name" : "testName"
-          |     }
-          |   }
-          |}
-        """.stripMargin
-      ).as[JsObject]
 
       val expected =
-        Some(Address(
+        Address(
           "L1",
           "L2",
           Some("L3"),
           Some("L4"),
           Some("testPostcode"),
           Some("testCode")
-        ))
+        )
 
       when(mockAddressLookupConnector.getAddress(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]))
-        .thenReturn(Future.successful(mockAddress))
+        .thenReturn(Future.successful(expected))
 
       implicit val request = FakeRequest("GET", "/test-uri?id=1234567890")
 
-      await(service.getAddress) shouldBe expected
+      await(service.getAddress) shouldBe Some(expected)
     }
 
     "return none" in new Setup {
@@ -133,110 +112,4 @@ class AddressLookupServiceSpec extends PAYERegSpec with S4LFixture with PAYERegi
     }
   }
 
-  "jsonToAddress" should {
-    "convert an address with all four lines present" in new Setup {
-      val jsObject = Json.parse(
-        """
-          |{
-          |   "id" : "testId",
-          |   "address" : {
-          |     "lines" : [
-          |       "L1",
-          |       "L2",
-          |       "L3",
-          |       "L4"
-          |     ],
-          |     "postcode" : "testPostcode",
-          |     "country" : {
-          |       "code" : "testCode",
-          |       "name" : "testName"
-          |     }
-          |   }
-          |}
-        """.stripMargin
-      ).as[JsObject]
-
-      val address =
-        Address(
-          "L1",
-          "L2",
-          Some("L3"),
-          Some("L4"),
-          Some("testPostcode"),
-          Some("testCode")
-        )
-
-      val result = service.jsonToAddress(jsObject)
-      result shouldBe address
-    }
-
-    "convert an address with only three lines present" in new Setup {
-      val jsObject = Json.parse(
-        """
-          |{
-          |   "id" : "testId",
-          |   "address" : {
-          |     "lines" : [
-          |       "L1",
-          |       "L2",
-          |       "L3"
-          |     ],
-          |     "postcode" : "testPostcode",
-          |     "country" : {
-          |       "code" : "testCode",
-          |       "name" : "testName"
-          |     }
-          |   }
-          |}
-        """.stripMargin
-      ).as[JsObject]
-
-      val address =
-        Address(
-          "L1",
-          "L2",
-          Some("L3"),
-          None,
-          Some("testPostcode"),
-          Some("testCode")
-        )
-
-      val result = service.jsonToAddress(jsObject)
-      result shouldBe address
-    }
-
-    "convert an address with only two lines present" in new Setup {
-      val jsObject = Json.parse(
-        """
-          |{
-          |   "id" : "testId",
-          |   "address" : {
-          |     "lines" : [
-          |       "L1",
-          |       "L2"
-          |     ],
-          |     "postcode" : "testPostcode",
-          |     "country" : {
-          |       "code" : "testCode",
-          |       "name" : "testName"
-          |     }
-          |   }
-          |}
-        """.stripMargin
-      ).as[JsObject]
-
-      val address =
-        Address(
-          "L1",
-          "L2",
-          None,
-          None,
-          Some("testPostcode"),
-          Some("testCode")
-        )
-
-      val result = service.jsonToAddress(jsObject)
-      result shouldBe address
-    }
-  }
 }

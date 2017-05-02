@@ -37,7 +37,7 @@ class CHROAddressSpec extends PAYERegSpec {
     line2 = "Testley",
     line3 = Some("Testford"),
     line4 = Some("Testshire"),
-    country = Some("UK"),
+    country = None,
     postCode = Some("TE1 1ST")
   )
 
@@ -71,7 +71,7 @@ class CHROAddressSpec extends PAYERegSpec {
         addressLine1 = "Really Long Street Name",
         addressLine2 = Some("Testley"),
         locality = "Testford",
-        country = Some("UK"),
+        country = None,
         poBox = None,
         postalCode = Some("TE1 1ST"),
         region = Some("Testshire")
@@ -82,7 +82,7 @@ class CHROAddressSpec extends PAYERegSpec {
         line2 = "Really Long Street Name",
         line3 = Some("Testley"),
         line4 = Some("Testford"),
-        country = Some("UK"),
+        country = None,
         postCode = Some("TE1 1ST")
       )
       testImplicitConversion(testCHROAddress) shouldBe testAddress
@@ -106,7 +106,7 @@ class CHROAddressSpec extends PAYERegSpec {
         line2 = "Really Long Street Name",
         line3 = Some("PO BOX TST36"),
         line4 = Some("Testford"),
-        country = Some("UK"),
+        country = None,
         postCode = Some("TE1 1ST")
       )
       testImplicitConversion(testCHROAddress) shouldBe testAddress
@@ -121,7 +121,7 @@ class CHROAddressSpec extends PAYERegSpec {
         locality = "Testford",
         country = Some("UK"),
         poBox = Some("PO BOX TST36"),
-        postalCode = Some("TE1 1ST"),
+        postalCode = None,
         region = Some("Testshire")
       )
 
@@ -131,7 +131,7 @@ class CHROAddressSpec extends PAYERegSpec {
         line3 = Some("Testford"),
         line4 = Some("Testshire"),
         country = Some("UK"),
-        postCode = Some("TE1 1ST")
+        postCode = None
       )
       testImplicitConversion(testCHROAddress) shouldBe testAddress
 
@@ -143,7 +143,7 @@ class CHROAddressSpec extends PAYERegSpec {
         addressLine1 = "Short Street Name",
         addressLine2 = Some("Industrial estate"),
         locality = "Testford",
-        country = Some("UK"),
+        country = None,
         poBox = Some("PO BOX TST36"),
         postalCode = Some("TE1 1ST"),
         region = Some("Testshire")
@@ -154,7 +154,7 @@ class CHROAddressSpec extends PAYERegSpec {
         line2 = "Industrial estate PO BOX TST36",
         line3 = Some("Testford"),
         line4 = Some("Testshire"),
-        country = Some("UK"),
+        country = None,
         postCode = Some("TE1 1ST")
       )
       testImplicitConversion(testCHROAddress) shouldBe testAddress
@@ -178,7 +178,7 @@ class CHROAddressSpec extends PAYERegSpec {
         line2 = "Really Long Street Name",
         line3 = Some("Industrial estate PO BOX TST36"),
         line4 = Some("Testford"),
-        country = Some("UK"),
+        country = None,
         postCode = Some("TE1 1ST")
       )
       testImplicitConversion(testCHROAddress) shouldBe testAddress
@@ -202,7 +202,7 @@ class CHROAddressSpec extends PAYERegSpec {
         line2 = "Testford",
         line3 = None,
         line4 = None,
-        country = Some("UK"),
+        country = None,
         postCode = Some("TE1 1ST")
       )
       testImplicitConversion(testCHROAddress) shouldBe testAddress

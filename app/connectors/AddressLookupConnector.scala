@@ -19,6 +19,7 @@ package connectors
 import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
+import models.Address
 import play.api.Logger
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.Call
@@ -47,7 +48,8 @@ trait AddressLookupConnect {
   val http: WSHttp
 
   def getAddress(id: String)(implicit hc: HeaderCarrier) = {
-    http.GET[JsObject](s"$addressLookupFrontendUrl/api/confirmed?id=$id")
+    implicit val reads = Address.adressLookupReads
+    http.GET[Address](s"$addressLookupFrontendUrl/api/confirmed?id=$id")
   }
 
   def getOnRampUrl(query: String, call: Call)(implicit hc: HeaderCarrier): Future[String] = {

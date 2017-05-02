@@ -16,10 +16,11 @@
 
 package models
 
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.data.validation.ValidationError
+import play.api.libs.json.{JsPath, JsSuccess, Json}
 import uk.gov.hmrc.play.test.UnitSpec
 
-class AddressSpec extends UnitSpec {
+class AddressSpec extends UnitSpec with JsonFormValidation {
   val tstFullAddress = Address(
     line1 = "14 St Test Walker",
     line2 = "Testford",
@@ -42,6 +43,153 @@ class AddressSpec extends UnitSpec {
   "Address" should {
     "read from Json" in {
       Json.fromJson[Address](tstFullAddressJson) shouldBe JsSuccess(tstFullAddress)
+    }
+  }
+
+  "Reading address from address-lookup-frontend" should {
+
+    def outcomeAddress(line3: Option[String] = None,
+                       line4: Option[String] = None,
+                       country: Option[String] = None,
+                       postcode: Option[String] = None
+                        ) = Address(
+                          "14 St Test Walker",
+                          "Testford",
+                          line3,
+                          line4,
+                          postcode,
+                          country
+                        )
+    "succeed" when {
+      "all lines are defined" in {
+        val tstJson = Json.parse(
+        """{
+          |  "address":{
+          |    "lines":[
+          |      "14 St Test Walker",
+          |      "Testford",
+          |      "Testley",
+          |      "Testshire"
+          |    ],
+          |    "postcode":"TE1 1ST",
+          |    "country":{
+          |      "code":"UK",
+          |      "name":"United Kingdom"
+          |    }
+          |  }
+          |}""".stripMargin)
+
+        val res = outcomeAddress(line3 = Some("Testley"), line4 = Some("Testshire"), postcode = Some("TE1 1ST"))
+
+        Json.fromJson[Address](tstJson)(Address.adressLookupReads) shouldBe JsSuccess(res)
+      }
+      "three lines are defined" in {
+        val tstJson = Json.parse(
+          """{
+            |  "address":{
+            |    "lines":[
+            |      "14 St Test Walker",
+            |      "Testford",
+            |      "Testley"
+            |    ],
+            |    "postcode":"TE1 1ST",
+            |    "country":{
+            |      "code":"UK",
+            |      "name":"United Kingdom"
+            |    }
+            |  }
+            |}""".stripMargin)
+
+        val res = outcomeAddress(line3 = Some("Testley"), postcode = Some("TE1 1ST"))
+
+        Json.fromJson[Address](tstJson)(Address.adressLookupReads) shouldBe JsSuccess(res)
+      }
+      "two lines are defined" in {
+        val tstJson = Json.parse(
+          """{
+            |  "address":{
+            |    "lines":[
+            |      "14 St Test Walker",
+            |      "Testford"
+            |    ],
+            |    "postcode":"TE1 1ST",
+            |    "country":{
+            |      "code":"UK",
+            |      "name":"United Kingdom"
+            |    }
+            |  }
+            |}""".stripMargin)
+
+        val res = outcomeAddress(postcode = Some("TE1 1ST"))
+
+        Json.fromJson[Address](tstJson)(Address.adressLookupReads) shouldBe JsSuccess(res)
+      }
+      "postcode is not completed" in {
+        val tstJson = Json.parse(
+          """{
+            |  "address":{
+            |    "lines":[
+            |      "14 St Test Walker",
+            |      "Testford"
+            |    ],
+            |    "country":{
+            |      "code":"UK",
+            |      "name":"United Kingdom"
+            |    }
+            |  }
+            |}""".stripMargin)
+
+        val res = outcomeAddress(country = Some("UK"))
+
+        Json.fromJson[Address](tstJson)(Address.adressLookupReads) shouldBe JsSuccess(res)
+      }
+      "country is not completed" in {
+        val tstJson = Json.parse(
+          """{
+            |  "address":{
+            |    "lines":[
+            |      "14 St Test Walker",
+            |      "Testford"
+            |    ],
+            |    "postcode":"TE1 1ST"
+            |  }
+            |}""".stripMargin)
+
+        val res = outcomeAddress(postcode = Some("TE1 1ST"))
+
+        Json.fromJson[Address](tstJson)(Address.adressLookupReads) shouldBe JsSuccess(res)
+      }
+    }
+
+    "fail" when {
+      "neither postcode nor country are completed" in {
+        val tstJson = Json.parse(
+          """{
+            |  "address":{
+            |    "lines":[
+            |      "14 St Test Walker",
+            |      "Testford"
+            |    ]
+            |  }
+            |}""".stripMargin)
+
+        val result = Json.fromJson[Address](tstJson)(Address.adressLookupReads)
+        shouldHaveErrors(result, JsPath(), Seq(ValidationError("neither string nor country were defined")))
+      }
+      "only one address line is completed" in {
+        val tstJson = Json.parse(
+          """{
+            |  "address":{
+            |    "lines":[
+            |      "14 St Test Walker"
+            |    ],
+            |    "postcode":"TE1 1ST"
+            |  }
+            |}""".stripMargin)
+
+        val result = Json.fromJson[Address](tstJson)(Address.adressLookupReads)
+        shouldHaveErrors(result, JsPath(), Seq(ValidationError("only 1 lines provided from address-lookup-frontend")))
+      }
     }
   }
 }
