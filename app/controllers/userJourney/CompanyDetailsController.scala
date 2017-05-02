@@ -81,7 +81,8 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
           if (validatedForm.hasErrors) {
             badRequestResponse(validatedForm)
           } else {
-            companyDetailsService.submitTradingName(success, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+            val trimmedTradingName = success.copy(tradingName = success.tradingName.map(_.trim))
+            companyDetailsService.submitTradingName(trimmedTradingName, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
               case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.roAddress())
               case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
             }
