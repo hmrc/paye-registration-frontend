@@ -79,9 +79,17 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
           PAYEContactDetailsForm.form.bindFromRequest.fold(
             errs => companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
               .map (details => BadRequest(PAYEContactDetailsPage(details.companyName, errs))),
-            success => payeContactService.submitPayeContactDetails(success, profile.registrationID) map {
-              case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-              case DownstreamOutcome.Success => Redirect(routes.PAYEContactController.payeCorrespondenceAddress())
+            success => {
+              val trimmed = success.copy(
+                digitalContactDetails = success.digitalContactDetails.copy(
+                  phoneNumber   = success.digitalContactDetails.phoneNumber map(_.trim),
+                  mobileNumber  = success.digitalContactDetails.mobileNumber map(_.trim)
+                )
+              )
+              payeContactService.submitPayeContactDetails(trimmed, profile.registrationID) map {
+                case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+                case DownstreamOutcome.Success => Redirect(routes.PAYEContactController.payeCorrespondenceAddress())
+              }
             }
           )
         }

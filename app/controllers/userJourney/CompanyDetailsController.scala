@@ -136,9 +136,12 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
             errs => companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map (
                       details => BadRequest(BusinessContactDetailsPage(details.companyName, errs))
                     ),
-            success => companyDetailsService.submitBusinessContact(success, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
-              case DownstreamOutcome.Success => Redirect(routes.NatureOfBusinessController.natureOfBusiness())
-              case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+            success => {
+              val trimmed = success.copy(phoneNumber = success.phoneNumber map(_.trim), mobileNumber = success.mobileNumber map(_.trim))
+              companyDetailsService.submitBusinessContact(trimmed, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+                case DownstreamOutcome.Success => Redirect(routes.NatureOfBusinessController.natureOfBusiness())
+                case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+              }
             }
           )
         }

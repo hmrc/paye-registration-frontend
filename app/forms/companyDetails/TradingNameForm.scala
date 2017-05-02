@@ -24,7 +24,7 @@ import play.api.data.Forms._
 
 object TradingNameForm extends RequiredBooleanForm {
 
-  private val tradingNameRegex = """^[A-Za-z0-9\\\-,.()/&'!][A-Za-z 0-9\\\-,.()/&'!]{0,34}$"""
+  private val tradingNameRegex = """^[A-Za-z0-9\-,.()/&'!][A-Za-z 0-9\-,.()/&'!]{0,34}$"""
 
   def validateTradingName(vForm: Form[TradingName]): Boolean = {
     vForm.data("tradingName").trim.matches(tradingNameRegex)
