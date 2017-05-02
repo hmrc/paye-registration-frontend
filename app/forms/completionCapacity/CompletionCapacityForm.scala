@@ -27,6 +27,8 @@ import scala.util.{Success, Try}
 
 object CompletionCapacityForm {
 
+  private val ccRegex = """^[A-Za-z0-9 '\-]{1,100}$"""
+
   private def ifOther(mapping: Mapping[String]): Mapping[String] =
     onlyIf(isEqual("completionCapacity", "other"), mapping)("")
 
@@ -37,7 +39,7 @@ object CompletionCapacityForm {
         UserCapacity.fromString(data.getOrElse(key, ""))
       } match {
         case Success(capacity) => Right(capacity)
-        case _                 => Left(Seq(FormError(key, "pages.completionCapacity.incompleteError")))
+        case _                 => Left(Seq(FormError(key, "pages.completionCapacity.other.error")))
       }
     }
 
@@ -50,7 +52,7 @@ object CompletionCapacityForm {
   val form = Form(
     mapping(
       "completionCapacity" -> completionCapacity,
-      "completionCapacityOther" -> ifOther(text.verifying("pages.completionCapacity.incompleteError", !_.isEmpty))
+      "completionCapacityOther" -> ifOther(text.verifying("pages.completionCapacity.other.error", _.matches(ccRegex)))
     )(CompletionCapacityView.apply)(CompletionCapacityView.unapply)
   )
 }

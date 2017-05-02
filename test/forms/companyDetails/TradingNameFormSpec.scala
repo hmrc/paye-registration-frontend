@@ -26,16 +26,28 @@ class TradingNameFormSpec extends UnitSpec {
     "differentName" -> "true",
     "tradingName" -> "Tradez R Us"
   )
+
+  val validDataWithPunct = Map(
+    "differentName" -> "true",
+    "tradingName" -> "TestTrading&()-CJ.!"
+  )
+
   val invalidData = Map(
     "differentName" -> "true"
   )
+
+  val invalidDataTooLong = Map(
+    "differentName" -> "true",
+    "tradingName"   -> "A trading name that appears to be far too long for the box that it will go into"
+  )
+
   val noValidationNeedData = Map(
     "differentName" -> "false"
   )
 
   "Validating the trading name form" should {
     "throw the correct exception for an incorrect form" in {
-      a [ExpectedFormFieldNotPopulatedException] should be thrownBy  TradingNameForm.validateForm(testForm)
+      a[ExpectedFormFieldNotPopulatedException] should be thrownBy  TradingNameForm.validateForm(testForm)
     }
 
     "return the original form if no validation is needed" in {
@@ -46,9 +58,16 @@ class TradingNameFormSpec extends UnitSpec {
       TradingNameForm.validateForm(testForm.bind(validData)) shouldBe testForm.bind(validData)
     }
 
+    "return the original form if the data is correct even if it contains punctuation" in {
+      TradingNameForm.validateForm(testForm.bind(validDataWithPunct)) shouldBe testForm.bind(validDataWithPunct)
+    }
+
     "return the form with error for incomplete data" in {
       TradingNameForm.validateForm(testForm.bind(invalidData)) shouldBe testForm.bind(invalidData).withError("tradingName", "pages.tradingName.errorQuestion")
     }
-  }
 
+    "return the form with errors as the trading name is too long" in {
+      TradingNameForm.validateForm(testForm.bind(invalidDataTooLong)) shouldBe testForm.bind(invalidDataTooLong).withError("tradingName", "pages.tradingName.errorQuestion")
+    }
+  }
 }

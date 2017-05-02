@@ -172,6 +172,71 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
 
       boundForm shouldBe errForm
     }
-  }
 
+    "Have the correct error if the email is of a valid structure but too long" in {
+      val data: Map[String,String] = Map(
+        "businessEmail" -> "test-email-address@test-email-address-that-is-just-far-far-too-long-to-be-valid.com",
+        "mobileNumber" -> "",
+        "phoneNumber" -> ""
+      )
+      val boundForm = testForm.bind(data)
+
+      val errForm = Form(
+        testForm.mapping,
+        Map(
+          "businessEmail" -> "test-email-address@test-email-address-that-is-just-far-far-too-long-to-be-valid.com",
+          "mobileNumber" -> "",
+          "phoneNumber" -> ""
+        ),
+        List(FormError("businessEmail",List("pages.businessContact.email.tooLong"),List())),
+        None
+      )
+
+      boundForm shouldBe errForm
+    }
+
+    "Have the correct error if the mobile number is just a space" in {
+      val data: Map[String,String] = Map(
+        "businessEmail" -> "test@email.com",
+        "mobileNumber" -> " ",
+        "phoneNumber" -> ""
+      )
+      val boundForm = testForm.bind(data)
+
+      val errForm = Form(
+        testForm.mapping,
+        Map(
+          "businessEmail" -> "test@email.com",
+          "mobileNumber" -> " ",
+          "phoneNumber" -> ""
+        ),
+        List(FormError("mobileNumber",List("errors.invalid.mobileNumber"),List())),
+        None
+      )
+
+      boundForm shouldBe errForm
+    }
+
+    "Have the correct error if the phone number is just a space" in {
+      val data: Map[String,String] = Map(
+        "businessEmail" -> "test@email.com",
+        "mobileNumber" -> "",
+        "phoneNumber" -> " "
+      )
+      val boundForm = testForm.bind(data)
+
+      val errForm = Form(
+        testForm.mapping,
+        Map(
+          "businessEmail" -> "test@email.com",
+          "mobileNumber" -> "",
+          "phoneNumber" -> " "
+        ),
+        List(FormError("phoneNumber",List("errors.invalid.phoneNumber"),List())),
+        None
+      )
+
+      boundForm shouldBe errForm
+    }
+  }
 }

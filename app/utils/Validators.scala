@@ -25,15 +25,15 @@ import play.api.data.validation.{ValidationError, _}
 
 object Validators extends DateUtil {
 
-  private val emailRegex = """^[A-Za-z0-9\-_.@]{1,70}$""".r
-  private val phoneRegex = """^[0-9 ]{1,20}$""".r
-  private val mobileRegex = """^[0-9 ]{1,20}$""".r
+  private val emailRegex = """^([A-Za-z0-9\-_.]+)@([A-Za-z0-9\-_.]+)\.[A-Za-z0-9\-_.]{2,3}$"""
+  private val phoneNoTypeRegex = """^[0-9 ]{1,20}$""".r
   private val nonEmptyRegex = """^(?=\s*\S).*$""".r
   private val validNinoFormat = "[[A-Z]&&[^DFIQUV]][[A-Z]&&[^DFIQUVO]] ?\\d{2} ?\\d{2} ?\\d{2} ?[A-D]{1}"
   private val invalidPrefixes = List("BG", "GB", "NK", "KN", "TN", "NT", "ZZ")
+  private val natureOfBusinessRegex = """^[A-Za-z 0-9\-,/&']{1,100}$""".r
   private def hasValidPrefix(nino: String) = !invalidPrefixes.exists(nino.startsWith)
 
-  def isValidNino(nino: String) = nino.nonEmpty && hasValidPrefix(nino) && nino.matches(validNinoFormat)
+  def isValidNino(nino: String): Boolean = nino.nonEmpty && hasValidPrefix(nino) && nino.matches(validNinoFormat)
 
   def optionalValidation(constraint : Constraint[String]): Constraint[Option[String]] = Constraint("constraints.optional")({
     case Some(text: String)  if text != ""  => constraint(text)
@@ -42,17 +42,18 @@ object Validators extends DateUtil {
 
   val emailValidation: Constraint[String] = Constraint("constraints.emailCheck")({
     text =>
-      val errors = text match {
-        case emailRegex() => Nil
-        case _ => Seq(ValidationError("errors.invalid.email"))
+      val errors = text.trim match {
+        case tooLong if text.length > 70 => Seq(ValidationError("pages.businessContact.email.tooLong"))
+        case wrong if !text.matches(emailRegex) => Seq(ValidationError("errors.invalid.email"))
+        case _ => Nil
       }
-      if (errors.isEmpty) Valid else Invalid(errors)
+      if(errors.isEmpty) Valid else Invalid(errors)
   })
 
   val phoneNumberValidation: Constraint[String] = Constraint("constraints.phoneNumberCheck")({
     text =>
-      val errors = text match {
-        case phoneRegex() => Nil
+      val errors = text.trim match {
+        case phoneNoTypeRegex() => Nil
         case _ => Seq(ValidationError("errors.invalid.phoneNumber"))
       }
       if (errors.isEmpty) Valid else Invalid(errors)
@@ -60,8 +61,8 @@ object Validators extends DateUtil {
 
   val mobilePhoneNumberValidation: Constraint[String] = Constraint("constraints.mobilePhoneNumberCheck")({
     text =>
-      val errors = text match {
-        case mobileRegex() => Nil
+      val errors = text.trim match {
+        case phoneNoTypeRegex() => Nil
         case _ => Seq(ValidationError("errors.invalid.mobileNumber"))
       }
       if (errors.isEmpty) Valid else Invalid(errors)
@@ -70,10 +71,14 @@ object Validators extends DateUtil {
   def natureOfBusinessValidation: Mapping[String] = {
     val sicConstraint: Constraint[String] = Constraint("constraints.description")({
       text =>
-        val errors = (text, text.length >= 100) match {
-          case ("", _) => Seq(ValidationError("errors.invalid.sic.noEntry"))
-          case (_, true) => Seq(ValidationError("errors.invalid.sic.overCharLimit"))
-          case (_,_) => Nil
+        val errors = if(text.length >= 100) {
+          Seq(ValidationError("errors.invalid.sic.overCharLimit"))
+        } else {
+          text.trim match {
+            case natureOfBusinessRegex()  => Nil
+            case ""                       => Seq(ValidationError("errors.invalid.sic.noEntry"))
+            case _                        => Seq(ValidationError("errors.invalid.sic.invalidChars"))
+          }
         }
         if(errors.isEmpty) Valid else Invalid(errors)
     })

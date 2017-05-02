@@ -26,6 +26,7 @@ errors.invalid.mobileNumber                             = The mobile phone numbe
 errors.invalid.nino                                     = National Insurance number is in the wrong format
 errors.invalid.sic.noEntry                              = Tell us what the company does
 errors.invalid.sic.overCharLimit                        = Enter a business description using 100 characters or less
+errors.invalid.sic.invalidChars                         = Enter a business description using valid characters
 
 ## Welcome page
 pages.welcome.title                                     = Register as an employer
@@ -72,7 +73,7 @@ pages.completionCapacity.director                       = Director
 pages.completionCapacity.agent                          = Agent (for example, an accountant)
 pages.completionCapacity.other                          = Other (for example, a friend of the director)
 pages.completionCapacity.other.label                    = Describe your relationship to the business
-pages.completionCapacity.incompleteError                = Tell us your relationship to the business
+pages.completionCapacity.other.error                    = Enter your relationship to the business using 100 characters or less
 
 ## Trading Name Page
 pages.tradingName.title                                 = Trading name
@@ -112,6 +113,7 @@ pages.businessContact.heading                           = {0} contact details
 pages.businessContact.p1                                = Let us know how we can get in touch if we need more information about the company.
 pages.businessContact.p2                                = You need to provide at least one of the following contact details:
 pages.businessContact.email                             = Business email address
+pages.businessContact.email.tooLong                     = Enter your email address using 70 characters or less
 pages.businessContact.mobile                            = Business mobile number
 pages.businessContact.phone                             = Business telephone number (including area code)
 pages.businessContact.noFieldsCompleted                 = You need to provide at least one contact method so we can get in touch if we need to
