@@ -18,11 +18,23 @@
             <ul class="list list-bullet">
                 <li id="pay">@Messages("pages.welcome.bullet.pay")</li>
                 <li id="subcontractors">@Messages("pages.welcome.bullet.subcontractors")</li>
-                <li id="pension">@Messages("pages.welcome.bullet.pension")</li>
             </ul>
         </div>
 
         <p class="spaced-below" id="otherWaysToRegister">@Html(Messages("pages.welcome.otherWaysToRegister", "https://www.gov.uk/register-employer/y/yes/no/limited-company/no/no#other-ways-to-register"))</p>
+
+
+        @form(action = controllers.userJourney.routes.WelcomeController.submit()) {
+        <div class="form-group spaced-above">
+            <button class="button-get-started" role="button" id="continue">@Messages("app.common.startNow")</button>
+        </div>
+        }
+
+        <h2>@Messages("pages.welcome.beforeStart")</h2>
+
+
+        <p id="cost spaced-below">@Messages("pages.welcome.2months")</p>
+        <p id="nino spaced-below">@Messages("pages.welcome.nino")</p>
 
         <div class="form-group spaced-below">
             <div class="panel-indent">
@@ -30,21 +42,15 @@
             </div>
         </div>
 
-        <h2>@Messages("pages.welcome.beforeStart")</h2>
+
         <p class="spaced-below">@Messages("pages.welcome.yourApplication")</p>
         <ul class="list list-bullet spaced-below">
             <li id="completionTime">@Messages("pages.welcome.bullet.timeToComplete")</li>
             <li id="processingTime">@Messages("pages.welcome.bullet.timeToProcess")</li>
         </ul>
 
-        <p id="cost spaced-below">@Messages("pages.welcome.2months")</p>
-        <p id="nino spaced-below">@Messages("pages.welcome.nino")</p>
 
-        @form(action = controllers.userJourney.routes.WelcomeController.submit()) {
-        <div class="form-group spaced-above">
-            <button class="button-get-started" role="button" id="continue">@Messages("app.common.continue")</button>
-        </div>
-        }
+
 
     </div>
 

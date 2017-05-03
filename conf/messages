@@ -19,6 +19,7 @@ app.common.feedbackFirst                                = This is a new service.
 app.common.feedbackSecond                               = feedback.
 app.common.feedbackLinkText                             = feedback
 app.common.companyRegistrationOverview                  = Your company registration overview
+app.common.startNow                                     = Start now
 
 ## User error messages
 errors.invalid.email                                    = The email address you have provided is invalid
@@ -32,18 +33,17 @@ errors.invalid.sic.invalidChars                         = Enter a business descr
 ## Welcome page
 pages.welcome.title                                     = Register as an employer
 pages.welcome.heading                                   = Register as an employer
-pages.welcome.heading.register                          = You normally need to register as an employer with HM Revenue and Customs (HMRC) when you start:
+pages.welcome.heading.register                          = Use this service to register as an employer if you''re:
 pages.welcome.bullet.pay                                = paying any employees £112 or more a week (this is the same as £486 a month or £5,824 a year)
 pages.welcome.bullet.subcontractors                     = using subcontractors for construction work
-pages.welcome.bullet.pension                            = employing anyone who''s getting a pension or already has another job
-pages.welcome.otherWaysToRegister                       = If you''re providing any employees with expenses or benefits (for example, a company car) or reclaiming deductions taken from Construction Industry Scheme (CIS) payments, you need to <a href={0}>register using the correct online form</a>.
-pages.welcome.director                                  = You must register if you''re employing yourself (for example, if you''re the only director of a limited company).
+pages.welcome.otherWaysToRegister                       = If you provide employees with expenses, benefits or claim back deductions taken from Construction Industry Scheme (CIS) payments, you''ll need to <a href={0}>use this form</a> to register.
+pages.welcome.director                                  = You must register if you employ yourself (for example, as the only director of a limited company) and pay yourself a salary.
 pages.welcome.beforeStart                               = Before you start
 pages.welcome.yourApplication                           = Your application:
 pages.welcome.bullet.timeToComplete                     = shouldn''t take more than 15 minutes to complete
 pages.welcome.bullet.timeToProcess                      = can take up to 2 weeks for HMRC to process
 pages.welcome.2months                                   = You can''t register more than 2 months before you start paying people.
-pages.welcome.nino                                      = You''ll need the National Insurance number of at least one company director to register.
+pages.welcome.nino                                      = You''ll need the National Insurance number of at least one company director.
 
 ## Company Eligibility
 pages.companyEligibility.title                          = Is the company any of the following?
@@ -78,15 +78,18 @@ pages.completionCapacity.other.error                    = Enter your relationshi
 
 ## Trading Name Page
 pages.tradingName.title                                 = Trading name
-pages.tradingName.heading                               = Does the company trade under any other names than {0}?
-pages.tradingName.legend                                = Tell us if you do business using a different name to your registered company name.
+pages.tradingName.heading                               = Will the company trade under another name?
+pages.tradingName.lede                                  = Tell us if you''ll trade using a different name to {0} .
 pages.tradingName.tradingNameLabel                      = Trading name
 pages.tradingName.nameRulesSummary                      = What are the rules for trading names?
-pages.tradingName.nameRulesIntro                        = Trading names must not:
+pages.tradingName.nameRulesIntro                        = Companies can trade using a different name to the name registered with Companies House.
+pages.tradingName.nameRulesIntro1                       = It can''t be the same as another company''s. <a href="{0}"> Check if your trading name is already taken.</a>
+pages.tradingName.nameRulesIntro2                       = Trading names can''t:
 pages.tradingName.nameRules1                            = include ''limited'', ''Ltd'', ''limited liability partnership'', ''LLP'', ''public limited company'' or ''plc''
 pages.tradingName.nameRules2                            = be the same as an <a href={0}>existing trade mark</a>
 pages.tradingName.nameRules3                            = contain a 'sensitive' word or expression unless you <a href={0}>get permission</a>
 pages.tradingName.errorQuestion                         = Please enter a correct trading name
+
 
 ##Confirm RO Address
 pages.confirmRO.title                                   = Confirm the company''s registered office address
