@@ -36,10 +36,6 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
   lazy val companyRegistrationConnector = Play.current.injector.instanceOf[CompanyRegistrationConnector]
 
   val additionalConfiguration = Map(
-    "microservice.services.coho-api.host" -> s"$mockHost",
-    "microservice.services.coho-api.port" -> s"$mockPort",
-    "microservice.services.incorporation-information.host" -> s"$mockHost",
-    "microservice.services.incorporation-information.port" -> s"$mockPort",
     "microservice.services.business-registration.host" -> s"$mockHost",
     "microservice.services.business-registration.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
