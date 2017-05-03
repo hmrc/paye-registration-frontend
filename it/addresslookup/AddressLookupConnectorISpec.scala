@@ -18,9 +18,10 @@ package addresslookup
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.{ALFLocationHeaderNotSetException, AddressLookupConnector}
 import itutil.{IntegrationSpecBase, WiremockHelper}
+import models.Address
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json.Json
 import play.api.mvc.Call
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -48,7 +49,25 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
   implicit val hc = HeaderCarrier()
 
   "getAddress" should {
-    val testAddress = Json.obj("test" -> "address")
+    val testAddress = Json.parse(
+      """{
+        |  "address":{
+        |    "lines":[
+        |      "14 St Test Walker",
+        |      "Testford"
+        |    ],
+        |    "postcode":"TE1 1ST"
+        |  }
+        |}""".stripMargin)
+
+    val testAddressModel = Address(
+      line1 = "14 St Test Walker",
+      line2 = "Testford",
+      line3 = None,
+      line4 = None,
+      postCode = Some("TE1 1ST"),
+      country = None
+    )
 
     "get an address from a 200" in {
       val addressLookupConnector = new AddressLookupConnector()
@@ -63,7 +82,7 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getAddress) shouldBe testAddress
+      await(getAddress) shouldBe testAddressModel
     }
   }
 

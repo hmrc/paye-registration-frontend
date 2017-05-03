@@ -55,7 +55,7 @@ trait TestAddressLookupCtrl extends FrontendController with Actions with Session
               line2 = "No Lookup Town",
               line3 = Some("NoLookupShire"),
               line4 = None,
-              postCode = Some("TE3 3NL"),
+              postCode = None,
               country = Some("UK")
             ),
             profile.registrationID,
@@ -78,7 +78,7 @@ trait TestAddressLookupCtrl extends FrontendController with Actions with Session
               line3 = Some("NoLookupShire"),
               line4 = None,
               postCode = Some("TE3 3NL"),
-              country = Some("UK")
+              country = None
             ),
             profile.registrationID
           ) map {

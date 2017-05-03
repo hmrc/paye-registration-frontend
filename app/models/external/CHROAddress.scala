@@ -66,7 +66,7 @@ object CHROAddress {
         {if(additionalLines.length > 1) Some(additionalLines(1)) else None},
         {if(additionalLines.length > 2) Some(additionalLines(2)) else None},
         address.postalCode,
-        address.country
+        if(address.postalCode.isEmpty) address.country else None
       )
   }
 }

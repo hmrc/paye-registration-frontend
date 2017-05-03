@@ -63,36 +63,12 @@ trait AddressLookupSrv {
     request.getQueryString("id") match {
       case Some(id) =>
         val addressLookUpTimer = metricsService.addressLookupResponseTimer.time()
-        addressLookupConnector.getAddress(id) map { json =>
+        addressLookupConnector.getAddress(id) map { addr =>
             addressLookUpTimer.stop()
-            Some(jsonToAddress(json))
+            Some(addr)
         }
       case None => Future.successful(None)
     }
-  }
-
-  def jsonToAddress(obj: JsObject): Address = {
-    val address = obj.value("address").as[JsObject]
-    val lines = address.value("lines").as[JsArray].as[List[String]]
-    val postcode = address.value("postcode").as[String]
-    val country = address.\("country").get
-    val countryCode = country.\("code").get.as[String]
-
-    val L3 = if(lines.isDefinedAt(2)) Some(lines(2)) else None
-    val L4 = if(lines.isDefinedAt(3)) Some(lines(3)) else None
-
-    val addr = Address(
-      lines.head,
-      lines(1),
-      L3,
-      L4,
-      Some(postcode),
-      Some(countryCode)
-    )
-
-    Logger.debug(s"[AddressLookupService] - [jsonToAddress] - Address: $addr")
-
-    addr
   }
 
   private[services] def useAddressLookupFrontend: Boolean = {
