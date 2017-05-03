@@ -22,7 +22,7 @@ import connectors._
 import enums.CacheKeys
 import models.external.CurrentProfile
 import uk.gov.hmrc.play.http.HeaderCarrier
-import utils.Whitelist
+import utils.RegistrationWhitelist
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -37,7 +37,7 @@ class CurrentProfileService @Inject()(injBusinessRegistrationConnector: Business
   override val keystoreConnector = injKeystoreConnector
 }
 
-trait CurrentProfileSrv extends Whitelist {
+trait CurrentProfileSrv extends RegistrationWhitelist {
 
   val businessRegistrationConnector: BusinessRegistrationConnect
   val companyRegistrationConnector: CompanyRegistrationConnect
@@ -46,7 +46,9 @@ trait CurrentProfileSrv extends Whitelist {
   def fetchAndStoreCurrentProfile(implicit hc: HeaderCarrier) : Future[CurrentProfile] = {
     for {
       businessProfile <- businessRegistrationConnector.retrieveCurrentProfile
-      companyProfile  <- regIdCheck(businessProfile.registrationID, companyRegistrationConnector.getCompanyRegistrationDetails(businessProfile.registrationID))
+      companyProfile  <- ifRegIdNotWhitelisted(businessProfile.registrationID) {
+        companyRegistrationConnector.getCompanyRegistrationDetails(businessProfile.registrationID)
+      }
       currentProfile = CurrentProfile(businessProfile.registrationID, businessProfile.completionCapacity, companyProfile, businessProfile.language)
       _ <- keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, currentProfile)
     } yield {

@@ -56,6 +56,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
     "microservice.services.coho-api.host" -> s"$mockHost",
     "microservice.services.coho-api.port" -> s"$mockPort",
     "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng==",
+    "defaultCTStatus" -> "aGVsZA==",
     "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ==",
     "defaultCHROAddress" -> "eyJwcmVtaXNlcyI6IjE0IiwiYWRkcmVzc19saW5lXzEiOiJUZXN0IERlZmF1bHQgU3RyZWV0IiwiYWRkcmVzc19saW5lXzIiOiJUZXN0bGV5IiwibG9jYWxpdHkiOiJUZXN0Zm9yZCIsImNvdW50cnkiOiJVSyIsInBvc3RhbF9jb2RlIjoiVEUxIDFTVCJ9",
     "defaultSeqDirector" -> "W3siZGlyZWN0b3IiOnsiZm9yZW5hbWUiOiJmYXVsdHkiLCJzdXJuYW1lIjoiZGVmYXVsdCJ9fV0="
@@ -177,10 +178,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val response = await(fResponse)
 
       response.status shouldBe 200
-      val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
-      mdtpCookieData("csrfToken") shouldNot be("")
-      mdtpCookieData("sessionId") shouldBe SessionId
-      mdtpCookieData("userId") shouldBe userId
 
       val document = Jsoup.parse(response.body)
       document.title() shouldBe "Trading name"
@@ -268,10 +265,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val response = await(fResponse)
 
       response.status shouldBe 200
-      val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
-      mdtpCookieData("csrfToken") shouldNot be("")
-      mdtpCookieData("sessionId") shouldBe SessionId
-      mdtpCookieData("userId") shouldBe userId
 
       val document = Jsoup.parse(response.body)
       document.title() shouldBe "Confirm the company's registered office address"

@@ -41,6 +41,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
     "microservice.services.incorporation-information.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
     "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng==",
+    "defaultCTStatus" -> "aGVsZA==",
     "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ=="
   )
 

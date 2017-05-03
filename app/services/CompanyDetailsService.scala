@@ -24,7 +24,7 @@ import models.api.{CompanyDetails => CompanyDetailsAPI}
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.{Address, DigitalContactDetails}
 import uk.gov.hmrc.play.http.HeaderCarrier
-import utils.Whitelist
+import utils.RegistrationWhitelist
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -43,7 +43,7 @@ class CompanyDetailsService @Inject()(injPAYERegistrationConnector: PAYERegistra
   override val s4LService = injS4LService
 }
 
-trait CompanyDetailsSrv extends Whitelist {
+trait CompanyDetailsSrv extends RegistrationWhitelist {
 
   val payeRegConnector: PAYERegistrationConnect
   val compRegConnector: CompanyRegistrationConnect
@@ -55,7 +55,9 @@ trait CompanyDetailsSrv extends Whitelist {
     s4LService.fetchAndGet[CompanyDetailsView](CacheKeys.CompanyDetails.toString, regId) flatMap {
       case Some(companyDetails) => Future.successful(companyDetails)
       case None => for {
-        oDetails <- regIdCheck(regId, payeRegConnector.getCompanyDetails(regId))
+        oDetails <- ifRegIdNotWhitelisted(regId) {
+          payeRegConnector.getCompanyDetails(regId)
+        }
         details  <- convertOrCreateCompanyDetailsView(oDetails, txId)
         viewDetails <- saveToS4L(details, regId)
       } yield viewDetails

@@ -23,7 +23,7 @@ import enums.{CacheKeys, DownstreamOutcome}
 import models.api.Director
 import models.view.{Directors, Ninos, UserEnteredNino}
 import uk.gov.hmrc.play.http.HeaderCarrier
-import utils.Whitelist
+import utils.RegistrationWhitelist
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -39,7 +39,7 @@ class DirectorDetailsService @Inject()(
   override val s4LService = s4LServ
 }
 
-trait DirectorDetailsSrv extends Whitelist {
+trait DirectorDetailsSrv extends RegistrationWhitelist {
   val payeRegConnector: PAYERegistrationConnect
   val s4LService: S4LSrv
   val coHoAPIService: IncorporationInformationSrv
@@ -77,7 +77,9 @@ trait DirectorDetailsSrv extends Whitelist {
     s4LService.fetchAndGet(CacheKeys.DirectorDetails.toString, regId) flatMap {
       case Some(directors) => Future.successful(directors)
       case None => for {
-        regResponse <- regIdCheck(regId, payeRegConnector.getDirectors(regId))
+        regResponse <- ifRegIdNotWhitelisted(regId){
+          payeRegConnector.getDirectors(regId)
+        }
         directors <- convertOrRetrieveDirectors(regResponse, transactionId)
         data <- saveToS4L(directors, regId)
       } yield data

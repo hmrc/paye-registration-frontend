@@ -21,19 +21,25 @@ import connectors.{IncorpInfoResponse, IncorpInfoSuccessResponse}
 import models.DigitalContactDetails
 import models.api.{Director, CompanyDetails => CompanyDetailsAPI}
 import models.external.{CoHoCompanyDetailsModel, CompanyProfile}
+import play.api.Logger
 
 import scala.concurrent.Future
 
-trait Whitelist {
+trait RegistrationWhitelist {
   val applicationConfig = FrontendAppConfig
 
   implicit def getDefaultCompanyDetailsAPI(regId: String): Option[CompanyDetailsAPI] =
     Some(CompanyDetailsAPI(applicationConfig.defaultCompanyName, None, applicationConfig.defaultCHROAddress, applicationConfig.defaultCHROAddress, DigitalContactDetails(None, None, None)))
   implicit def getDefaultSeqDirector(regId: String): Seq[Director] = applicationConfig.defaultSeqDirector
-  implicit def getDefaultCompanyProfile(regId: String): CompanyProfile = CompanyProfile("held", "fakeTxId")
+  implicit def getDefaultCompanyProfile(regId: String): CompanyProfile = CompanyProfile(applicationConfig.defaultCTStatus, s"fakeTxId-$regId")
   implicit def getDefaultCoHoCompanyDetails(regId: String): IncorpInfoResponse = IncorpInfoSuccessResponse(CoHoCompanyDetailsModel(regId, applicationConfig.defaultCompanyName, Seq.empty))
 
-  def regIdCheck[T](regId: String, f: => Future[T])(implicit default: String => T): Future[T] = {
-    if( applicationConfig.regIdWhitelist.contains(regId) ) Future.successful(default(regId)) else f
+  def ifRegIdNotWhitelisted[T](regId: String)(f: => Future[T])(implicit default: String => T): Future[T] = {
+    if( applicationConfig.regIdWhitelist.contains(regId) ) {
+      Logger.info(s"Registration ID $regId is in the whitelist")
+      Future.successful(default(regId))
+    } else {
+      f
+    }
   }
 }

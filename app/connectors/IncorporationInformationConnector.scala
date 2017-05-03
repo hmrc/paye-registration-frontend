@@ -25,7 +25,7 @@ import services.{MetricsService, MetricsSrv}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
-import utils.Whitelist
+import utils.RegistrationWhitelist
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -46,7 +46,7 @@ case object IncorpInfoBadRequestResponse extends IncorpInfoResponse
 case class IncorpInfoErrorResponse(ex: Exception) extends IncorpInfoResponse
 case class IncorpInfoROAddress(response : CHROAddress) extends IncorpInfoResponse
 
-trait IncorporationInformationConnect extends Whitelist {
+trait IncorporationInformationConnect extends RegistrationWhitelist {
 
   val coHoAPIUrl: String
   val coHoAPIUri: String
@@ -56,7 +56,7 @@ trait IncorporationInformationConnect extends Whitelist {
   val metricsService: MetricsSrv
 
   def getCoHoCompanyDetails(registrationID: String)(implicit hc: HeaderCarrier): Future[IncorpInfoResponse] = {
-    regIdCheck(registrationID, {
+    ifRegIdNotWhitelisted(registrationID) {
       val cohoApiTimer = metricsService.cohoAPIResponseTimer.time()
       http.GET[CoHoCompanyDetailsModel](s"$coHoAPIUrl$coHoAPIUri/company/$registrationID") map { res =>
         cohoApiTimer.stop()
@@ -71,7 +71,7 @@ trait IncorporationInformationConnect extends Whitelist {
           cohoApiTimer.stop()
           IncorpInfoErrorResponse(ex)
       }
-    })
+    }
   }
 
   def getRegisteredOfficeAddress(transactionId: String)(implicit hc : HeaderCarrier): Future[CHROAddress] = {
