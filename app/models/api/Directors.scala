@@ -42,4 +42,8 @@ object Director {
     (__ \ "director").format[Name] and
       (__ \ "nino").formatNullable[String]
     )(Director.apply, unlift(Director.unapply))
+
+  val seqReads: Reads[Seq[Director]] = new Reads[Seq[Director]] {
+    override def reads(json: JsValue): JsResult[Seq[Director]] = Json.fromJson[Seq[Director]](json)
+  }
 }

@@ -25,6 +25,7 @@ import services.{MetricsService, MetricsSrv}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
+import utils.Whitelist
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -45,7 +46,7 @@ case object IncorpInfoBadRequestResponse extends IncorpInfoResponse
 case class IncorpInfoErrorResponse(ex: Exception) extends IncorpInfoResponse
 case class IncorpInfoROAddress(response : CHROAddress) extends IncorpInfoResponse
 
-trait IncorporationInformationConnect {
+trait IncorporationInformationConnect extends Whitelist {
 
   val coHoAPIUrl: String
   val coHoAPIUri: String
@@ -55,20 +56,22 @@ trait IncorporationInformationConnect {
   val metricsService: MetricsSrv
 
   def getCoHoCompanyDetails(registrationID: String)(implicit hc: HeaderCarrier): Future[IncorpInfoResponse] = {
-    val cohoApiTimer = metricsService.cohoAPIResponseTimer.time()
-    http.GET[CoHoCompanyDetailsModel](s"$coHoAPIUrl$coHoAPIUri/company/$registrationID") map { res =>
+    regIdCheck(registrationID, {
+      val cohoApiTimer = metricsService.cohoAPIResponseTimer.time()
+      http.GET[CoHoCompanyDetailsModel](s"$coHoAPIUrl$coHoAPIUri/company/$registrationID") map { res =>
         cohoApiTimer.stop()
         IncorpInfoSuccessResponse(res)
-    } recover {
-      case badRequestErr: BadRequestException =>
-        Logger.error("[CohoAPIConnector] [getCoHoCompanyDetails] - Received a BadRequest status code when expecting company details")
-        cohoApiTimer.stop()
-        IncorpInfoBadRequestResponse
-      case ex: Exception =>
-        Logger.error(s"[CohoAPIConnector] [getIncorporationStatus] - Received an error response when expecting company details - error: ${ex.getMessage}")
-        cohoApiTimer.stop()
-        IncorpInfoErrorResponse(ex)
-    }
+      } recover {
+        case badRequestErr: BadRequestException =>
+          Logger.error("[CohoAPIConnector] [getCoHoCompanyDetails] - Received a BadRequest status code when expecting company details")
+          cohoApiTimer.stop()
+          IncorpInfoBadRequestResponse
+        case ex: Exception =>
+          Logger.error(s"[CohoAPIConnector] [getIncorporationStatus] - Received an error response when expecting company details - error: ${ex.getMessage}")
+          cohoApiTimer.stop()
+          IncorpInfoErrorResponse(ex)
+      }
+    })
   }
 
   def getRegisteredOfficeAddress(transactionId: String)(implicit hc : HeaderCarrier): Future[CHROAddress] = {

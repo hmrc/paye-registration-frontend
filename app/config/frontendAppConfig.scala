@@ -21,8 +21,11 @@ import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
 import config.FrontendAppConfig.baseUrl
+import models.api.Director
+import models.external.CHROAddress
 import play.api.Configuration
 import play.api.Play.{configuration, current}
+import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.play.config.ServicesConfig
 
 trait AppConfig {
@@ -55,4 +58,20 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   lazy val whitelist = whiteListConfig("whitelist")
   lazy val whitelistExcluded = whiteListConfig("whitelist-excluded")
+
+  private def loadStringConfigBase64(key : String) : String = {
+    Some(new String(Base64.getDecoder
+      .decode(configuration.getString(key).getOrElse("")), "UTF-8"))
+    .getOrElse("")
+  }
+
+  private def loadJsonConfigBase64[T](key: String)(implicit reads: Reads[T]): T = {
+    val json = Json.parse(Base64.getDecoder.decode(configuration.getString(key).getOrElse("")))
+    Json.fromJson[T](json).getOrElse(throw new Exception(s"Missing configuration key: $key"))
+  }
+
+  lazy val regIdWhitelist = whiteListConfig("regIdWhitelist")
+  lazy val defaultCompanyName = loadStringConfigBase64("defaultCompanyName")
+  lazy val defaultCHROAddress = loadJsonConfigBase64[CHROAddress]("defaultCHROAddress")(CHROAddress.formatModel)
+  lazy val defaultSeqDirector = loadJsonConfigBase64[Seq[Director]]("defaultSeqDirector")(Director.seqReads)
 }
