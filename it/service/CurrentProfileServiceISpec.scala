@@ -36,8 +36,15 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
   lazy val companyRegistrationConnector = Play.current.injector.instanceOf[CompanyRegistrationConnector]
 
   val additionalConfiguration = Map(
+    "microservice.services.cachable.session-cache.host" -> s"$mockHost",
+    "microservice.services.cachable.session-cache.port" -> s"$mockPort",
+    "microservice.services.cachable.session-cache.domain" -> "keystore",
     "microservice.services.business-registration.host" -> s"$mockHost",
     "microservice.services.business-registration.port" -> s"$mockPort",
+    "microservice.services.company-registration.host" -> s"$mockHost",
+    "microservice.services.company-registration.port" -> s"$mockPort",
+    "microservice.services.coho-api.host" -> s"$mockHost",
+    "microservice.services.coho-api.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
     "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng==",
     "defaultCTStatus" -> "aGVsZA==",
@@ -48,7 +55,8 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
     .configure(additionalConfiguration)
     .build
 
-  implicit val hc = HeaderCarrier(sessionId = Some(SessionId("session-123")))
+  val sessionId = "session-123"
+  implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sessionId)))
 
   "fetchAndStoreCurrentProfile" should {
     "get a default Current Profile when the regId is part of the whitelist" in {
@@ -65,6 +73,8 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
                                                   "ENG")
 
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfileWithRegIdWhitelisted).toString)
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+      stubPut(s"/keystore/paye-registration-frontend/${sessionId}/data/CurrentProfile", 200, dummyS4LResponse)
 
       val currentProfileService = new CurrentProfileService(businessRegistrationConnector, keystoreConnector, companyRegistrationConnector)
       def getResponse = currentProfileService.fetchAndStoreCurrentProfile
@@ -80,12 +90,23 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
         "ENG"
       )
 
+      val companyRegistrationResp =
+        s"""{
+          |   "status": "held",
+          |   "confirmationReferences": {
+          |     "transaction-id": "000-434-${regId}"
+          |   }
+          |}""".stripMargin
+
       val expectedCurrentProfile = CurrentProfile(regId,
         None,
         CompanyProfile("held", s"000-434-$regId"),
         "ENG")
 
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfile).toString)
+      stubGet(s"/incorporation-frontend-stubs/$regId", 200, companyRegistrationResp)
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+      stubPut(s"/keystore/paye-registration-frontend/${sessionId}/data/CurrentProfile", 200, dummyS4LResponse)
 
       val currentProfileService = new CurrentProfileService(businessRegistrationConnector, keystoreConnector, companyRegistrationConnector)
       def getResponse = currentProfileService.fetchAndStoreCurrentProfile
