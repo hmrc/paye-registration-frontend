@@ -142,7 +142,7 @@ trait EmploymentCtrl extends FrontendController with Actions with I18nSupport wi
         FirstPaymentForm.form.bindFromRequest.fold(
           errors => Future.successful(BadRequest(FirstPaymentPage(errors))),
           model => employmentService.saveFirstPayment(model, profile.registrationID) map (
-             _ => Redirect(controllers.userJourney.routes.SummaryController.summary())
+             _ => Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
            )
         )
       }

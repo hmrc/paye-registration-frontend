@@ -373,7 +373,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/summary"
+          result.header.headers("Location") shouldBe "/register-for-paye/relationship-to-the-business"
       }
     }
 
@@ -389,7 +389,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/summary"
+          result.header.headers("Location") shouldBe "/register-for-paye/relationship-to-the-business"
       }
     }
   }

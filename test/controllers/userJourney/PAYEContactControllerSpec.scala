@@ -233,7 +233,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/register-for-paye/subcontractors")
+        redirectLocation(result) shouldBe Some("/register-for-paye/summary")
       }
     }
 
