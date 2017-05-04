@@ -54,7 +54,12 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
     "microservice.services.company-registration.host" -> s"$mockHost",
     "microservice.services.company-registration.port" -> s"$mockPort",
     "microservice.services.coho-api.host" -> s"$mockHost",
-    "microservice.services.coho-api.port" -> s"$mockPort"
+    "microservice.services.coho-api.port" -> s"$mockPort",
+    "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng==",
+    "defaultCTStatus" -> "aGVsZA==",
+    "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ==",
+    "defaultCHROAddress" -> "eyJwcmVtaXNlcyI6IjE0IiwiYWRkcmVzc19saW5lXzEiOiJUZXN0IERlZmF1bHQgU3RyZWV0IiwiYWRkcmVzc19saW5lXzIiOiJUZXN0bGV5IiwibG9jYWxpdHkiOiJUZXN0Zm9yZCIsImNvdW50cnkiOiJVSyIsInBvc3RhbF9jb2RlIjoiVEUxIDFTVCJ9",
+    "defaultSeqDirector" -> "W3siZGlyZWN0b3IiOnsiZm9yZW5hbWUiOiJmYXVsdHkiLCJzdXJuYW1lIjoiZGVmYXVsdCJ9fV0="
   ))
 
   override def beforeEach() {
@@ -150,6 +155,34 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       // TODO verify S4L put
     }
+
+    "Return a populated page with a default Company Name if the regId is part of the whitelist" in {
+      val regIdWhitelisted = "regWhitelist123"
+      val defaultCompanyName = "TEST-DEFAULT-COMPANY-NAME"
+
+      setupSimpleAuthMocks()
+
+      stubSuccessfulLogin()
+
+      stubKeystoreMetadata(SessionId, regIdWhitelisted, companyName)
+
+      stubGet(s"/save4later/paye-registration-frontend/${regIdWhitelisted}", 404, "")
+
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+      stubPut(s"/save4later/paye-registration-frontend/${regIdWhitelisted}/data/CompanyDetails", 200, dummyS4LResponse)
+
+      val fResponse = buildClient("/trading-name").
+        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        get()
+
+      val response = await(fResponse)
+
+      response.status shouldBe 200
+
+      val document = Jsoup.parse(response.body)
+      document.title() shouldBe "Trading name"
+      document.getElementById("pageHeading").text should include(defaultCompanyName)
+    }
   }
 
   "POST Trading Name" should {
@@ -206,6 +239,37 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val captor = crPuts.get(0)
       val json = Json.parse(captor.getBodyAsString)
       (json \ "tradingName").as[String] shouldBe tradingName
+    }
+  }
+
+  "GET RO Address page" should {
+    "show the page with a default RO Address if the regId is part of the whitelist" in {
+      val regIdWhitelisted = "regWhitelist123"
+      val defaultCompanyName = "TEST-DEFAULT-COMPANY-NAME"
+
+      setupSimpleAuthMocks()
+
+      stubSuccessfulLogin()
+
+      stubKeystoreMetadata(SessionId, regIdWhitelisted, companyName)
+
+      stubGet(s"/save4later/paye-registration-frontend/${regIdWhitelisted}", 404, "")
+
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+      stubPut(s"/save4later/paye-registration-frontend/${regIdWhitelisted}/data/CompanyDetails", 200, dummyS4LResponse)
+
+      val fResponse = buildClient("/registered-office-address").
+        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        get()
+
+      val response = await(fResponse)
+
+      response.status shouldBe 200
+
+      val document = Jsoup.parse(response.body)
+      document.title() shouldBe "Confirm the company's registered office address"
+      document.getElementById("companyName").text shouldBe defaultCompanyName
+      document.getElementById("ro-address-address-line-1").text shouldBe "14 Test Default Street"
     }
   }
 

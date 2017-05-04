@@ -16,10 +16,11 @@
 package payeregistrationapi
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import connectors.IncorporationInformationConnector
-import itutil.{IntegrationSpecBase, WiremockHelper}
+import connectors.{IncorpInfoSuccessResponse, IncorporationInformationConnector}
+import itutil.{IntegrationSpecBase, LoginStub, WiremockHelper}
 import models.api.Name
-import models.external.{CHROAddress, Officer, OfficerList}
+import models.external.{CHROAddress, CoHoCompanyDetailsModel, Officer, OfficerList}
+import play.api.http.HeaderNames
 import play.api.{Application, Play}
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.MetricsService
@@ -38,7 +39,10 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
     "microservice.services.coho-api.port" -> s"$mockPort",
     "microservice.services.incorporation-information.host" -> s"$mockHost",
     "microservice.services.incorporation-information.port" -> s"$mockPort",
-    "application.router" -> "testOnlyDoNotUseInAppConf.Routes"
+    "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
+    "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng==",
+    "defaultCTStatus" -> "aGVsZA==",
+    "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ=="
   )
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
@@ -47,6 +51,24 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
 
   val testTransId = "testTransId"
   implicit val hc = HeaderCarrier()
+
+  "getCoHoCompanyDetails" should {
+    "get a default CoHo Company Details when the regId is part of the whitelist" in {
+      val regIdWhitelisted = "regWhitelist123"
+      val defaultCompanyName = "TEST-DEFAULT-COMPANY-NAME"
+      val incorpInfoSuccessCoHoCompanyDetails = IncorpInfoSuccessResponse(
+                                                  CoHoCompanyDetailsModel(
+                                                    regIdWhitelisted,
+                                                    defaultCompanyName,
+                                                    Seq.empty)
+                                                )
+
+      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      def getResponse = incorpInfoConnector.getCoHoCompanyDetails(regIdWhitelisted)
+
+      await(getResponse) shouldBe incorpInfoSuccessCoHoCompanyDetails
+    }
+  }
 
   "getRegisteredOfficeAddress" should {
     val url = s"/incorporation-frontend-stubs/$testTransId/ro-address"

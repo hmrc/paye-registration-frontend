@@ -16,13 +16,17 @@
 
 package config
 
+import java.nio.charset.Charset
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
 import config.FrontendAppConfig.baseUrl
+import models.api.Director
+import models.external.CHROAddress
 import play.api.Configuration
 import play.api.Play.{configuration, current}
+import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.play.config.ServicesConfig
 
 trait AppConfig {
@@ -55,4 +59,19 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   lazy val whitelist = whiteListConfig("whitelist")
   lazy val whitelistExcluded = whiteListConfig("whitelist-excluded")
+
+  private def loadStringConfigBase64(key : String) : String = {
+    new String(Base64.getDecoder.decode(configuration.getString(key).getOrElse("")), Charset.forName("UTF-8"))
+  }
+
+  private def loadJsonConfigBase64[T](key: String)(implicit reads: Reads[T]): T = {
+    val json = Json.parse(Base64.getDecoder.decode(configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))))
+    json.asOpt[T].getOrElse(throw new Exception(s"Incorrect data for the key: $key"))
+  }
+
+  lazy val regIdWhitelist = whiteListConfig("regIdWhitelist")
+  lazy val defaultCompanyName = loadStringConfigBase64("defaultCompanyName")
+  lazy val defaultCHROAddress = loadJsonConfigBase64[CHROAddress]("defaultCHROAddress")(CHROAddress.formatModel)
+  lazy val defaultSeqDirector = loadJsonConfigBase64[Seq[Director]]("defaultSeqDirector")(Director.seqReads)
+  lazy val defaultCTStatus = loadStringConfigBase64("defaultCTStatus")
 }

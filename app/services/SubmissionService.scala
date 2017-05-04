@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import connectors.{DESResponse, PAYERegistrationConnect, PAYERegistrationConnector}
 import uk.gov.hmrc.play.http.HeaderCarrier
+import utils.RegistrationWhitelist
 
 import scala.concurrent.Future
 
@@ -28,12 +29,14 @@ class SubmissionService @Inject()(payeRegistrationConn: PAYERegistrationConnecto
   override val payeRegistrationConnector = payeRegistrationConn
 }
 
-trait SubmissionSrv {
+trait SubmissionSrv extends RegistrationWhitelist {
 
   val payeRegistrationConnector: PAYERegistrationConnect
 
   def submitRegistration(regId: String)(implicit hc: HeaderCarrier): Future[DESResponse] = {
-    payeRegistrationConnector.submitRegistration(regId)
+    ifRegIdNotWhitelisted(regId) {
+      payeRegistrationConnector.submitRegistration(regId)
+    }
   }
 
 }
