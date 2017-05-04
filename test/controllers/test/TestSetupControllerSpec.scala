@@ -65,7 +65,7 @@ class TestSetupControllerSpec extends PAYERegSpec {
       AuthBuilder.showWithAuthorisedUser(controller.testSetup("TESTLTD"), mockAuthConnector) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/post-sign-in"
+          result.header.headers("Location") shouldBe "/register-for-paye"
       }
     }
   }

@@ -80,7 +80,7 @@ trait TestSetupCtrl extends CurrentProfileCtrl with TestCoHoCtrl with TestRegSet
             _ <- log("S4LTeardown", doTearDownS4L(profile.registrationID))
             _ <- log("OfficersTeardown", doTeardownOfficers())
             _ <- log("OfficersSetup", doSetupOfficers(profile.registrationID))
-          } yield Redirect(controllers.userJourney.routes.SignInOutController.postSignIn())
+          } yield Redirect(controllers.userJourney.routes.PayeStartController.startPaye())
 
   }
 }
