@@ -82,7 +82,7 @@ trait TestAddressLookupCtrl extends FrontendController with Actions with Session
             ),
             profile.registrationID
           ) map {
-            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
+            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
             case DownstreamOutcome.Failure => InternalServerError("Couldn't save mock PPOB Address")
           }
         }
