@@ -48,8 +48,6 @@ class SummaryController @Inject()(injSummaryService: SummaryService,
   val keystoreConnector = injKeystoreConnector
   val payeRegistrationConnector = injPayeRegistrationConnector
   val messagesApi = injMessagesApi
-  override lazy val companyRegUrl = getConfString("company-registration-frontend.www.url", "Could not find Company Registration Frontend URL")
-  override lazy val companyRegUri = getConfString("company-registration-frontend.www.uri", "Could not find Company Registration Frontend URI")
 }
 
 trait SummaryCtrl extends FrontendController with Actions with I18nSupport with SessionProfile with ServicesConfig {
@@ -58,9 +56,6 @@ trait SummaryCtrl extends FrontendController with Actions with I18nSupport with 
   val submissionService: SubmissionSrv
   val keystoreConnector: KeystoreConnect
   val payeRegistrationConnector: PAYERegistrationConnect
-
-  val companyRegUrl : String
-  val companyRegUri : String
 
   val summary = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     withCurrentProfile { profile =>
@@ -79,7 +74,7 @@ trait SummaryCtrl extends FrontendController with Actions with I18nSupport with 
       invalidSubmissionGuard(profile) {
         submissionService.submitRegistration(profile.registrationID) map {
           case Success => Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation())
-          case Cancelled => Redirect(s"$companyRegUrl/$companyRegUri/dashboard")
+          case Cancelled => Redirect(controllers.userJourney.routes.DashboardController.dashboard())
           case Failed => Redirect(controllers.errors.routes.ErrorController.failedSubmission())
           case TimedOut => InternalServerError(views.html.pages.error.submissionTimeout())
         }
