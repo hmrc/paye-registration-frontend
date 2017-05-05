@@ -46,8 +46,13 @@
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages("pages.businessContact.heading", s"<span>$companyName</span>"))</h1>
 
-    <p id="p1">@messages("pages.businessContact.p1")</p>
-    <p id="p2">@messages("pages.businessContact.p2")</p>
+    <p id="p1">@messages("pages.businessContactDetails.p1")</p>
+    <div class="form-group">
+        <div class="panel-indent">
+            <p id="p2">@messages("pages.businessContactDetails.p2.indent")</p>
+        </div>
+    </div>
+
 
     @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.submitBusinessContactDetails()) {
 

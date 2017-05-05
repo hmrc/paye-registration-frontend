@@ -77,7 +77,7 @@ pages.completionCapacity.other.label                    = Describe your relation
 pages.completionCapacity.other.error                    = Enter your relationship to the business using 100 characters or less
 
 ## Trading Name Page
-pages.tradingName.title                                 = Trading name
+pages.tradingName.title                                 = Will the company trade under another name?
 pages.tradingName.heading                               = Will the company trade under another name?
 pages.tradingName.lede                                  = Tell us if you''ll trade using a different name to {0} .
 pages.tradingName.tradingNameLabel                      = Trading name
@@ -85,9 +85,9 @@ pages.tradingName.nameRulesSummary                      = What are the rules for
 pages.tradingName.nameRulesIntro                        = Companies can trade using a different name to the name registered with Companies House.
 pages.tradingName.nameRulesIntro1                       = It can''t be the same as another company''s. <a href="{0}"> Check if your trading name is already taken.</a>
 pages.tradingName.nameRulesIntro2                       = Trading names can''t:
-pages.tradingName.nameRules1                            = include ''limited'', ''Ltd'', ''limited liability partnership'', ''LLP'', ''public limited company'' or ''plc''
+pages.tradingName.nameRules1                            = include ''limited'', ''Ltd'', ''limited liability partnership, ''LLP'', ''public limited company'' or ''plc''
 pages.tradingName.nameRules2                            = be the same as an <a href={0}>existing trade mark</a>
-pages.tradingName.nameRules3                            = contain a 'sensitive' word or expression unless you <a href={0}>get permission</a>
+pages.tradingName.nameRules3                            = contain a ''sensitive'' word or expression unless you <a href={0}>get permission</a>
 pages.tradingName.errorQuestion                         = Please enter a correct trading name
 
 
@@ -100,10 +100,15 @@ pages.confirmRO.help.body                               = If the registered offi
 pages.confirmRO.help.body.link.url                      = https://ewf.companieshouse.gov.uk//seclogin?tc=1
 
 ##PPOB Address
-pages.ppobAddress.title                                 = Tell us where you''ll carry out most of your business activities
-pages.ppobAddress.heading                               = Where will you carry out most of your business activities?
+pages.ppobAddress.title                                 = Where will the company carry out most of its business activities?
+pages.ppobAddress.heading                               = Where will the company carry out most of its business activities?
 pages.ppobAddress.other                                 = A different location
 pages.ppobAddress.addressChoice.noEntry                 = Tell us where you''ll carry out most of your business activities
+pages.ppobAddress.itmaybeIntro                          = It may be:
+pages.ppobAddress.ppobAddressRules1                     = your home
+pages.ppobAddress.ppobAddressRules2                     = a private commercial office
+pages.ppobAddress.ppobAddressRules3                     = a studio or workshop
+pages.ppobAddress.peopleIntro1                          = People running mobile businesses (for example, plumbers) usually use the address where they keep their stock or equipment.
 
 ##Correspondence Address
 pages.correspondenceAddress.title                       = What is your company''s correspondence address?
@@ -112,14 +117,14 @@ pages.correspondenceAddress.other                       = A different location
 pages.correspondenceAddress.addressChoice.noEntry       = Tell us the company''s correspondence address
 
 ## Business Contact Details
-pages.businessContact.title                             = Company contact details
-pages.businessContact.heading                           = {0} contact details
-pages.businessContact.p1                                = Let us know how we can get in touch if we need more information about the company.
-pages.businessContact.p2                                = You need to provide at least one of the following contact details:
-pages.businessContact.email                             = Business email address
+pages.businessContact.title                             = What are the company contact details?
+pages.businessContact.heading                           = What are the company contact details?
+pages.businessContactDetails.p1                         = Let us know how we can get in touch if we need more information about the company.
+pages.businessContactDetails.p2.indent                  = You need to provide at least one of the following contact details.
+pages.businessContact.email                             = Email address
 pages.businessContact.email.tooLong                     = Enter your email address using 70 characters or less
-pages.businessContact.mobile                            = Business mobile number
-pages.businessContact.phone                             = Business telephone number (including area code)
+pages.businessContact.mobile                            = Mobile number
+pages.businessContact.phone                             = Phone number (including area code)
 pages.businessContact.noFieldsCompleted                 = You need to provide at least one contact method so we can get in touch if we need to
 
 ## PAYE Contact Details
@@ -195,9 +200,9 @@ pages.firstPayment.listElement2                         = within the next 2 mont
 pages.firstPayment.detail                               = Include any payments to yourself (for example, if you''re the only director of a limited company).
 
 ## NATURE OF BUSINESS
-pages.natureOfBusiness.title                            = Describe the business
-pages.natureOfBusiness.heading                          = What does {0} do?
-pages.natureOfBusiness.lede                             = Describe {0}''s main business activities including the type of goods or services it sells.
+pages.natureOfBusiness.title                            = What does the company do?
+pages.natureOfBusiness.heading                          = What does the company do?
+pages.natureOfBusiness.lede                             = Describe the company''s main business activities including the type of goods or services it sells.
 pages.natureOfBusiness.hint                             = For example, cleaning services
 pages.natureOfBusiness.textArea.label                   = Business activities description
 
