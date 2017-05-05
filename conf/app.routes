@@ -96,6 +96,7 @@ GET        /ticket-submitted                        controllers.errors.ErrorCont
 GET        /submission-failure                      controllers.errors.ErrorController.retrySubmission
 
 ## DASHBOARD
+POST       /dashboard                               controllers.userJourney.DashboardController.dashboard
 GET        /dashboard                               controllers.userJourney.DashboardController.dashboard
 
 ## Questionnaire
