@@ -35,7 +35,7 @@ class DashboardControllerSpec extends PAYERegSpec {
       override val keystoreConnector = mockKeystoreConnector
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
       override val companyRegUrl = "testUrl"
-      override val companyRegUri = "testUri"
+      override val companyRegUri = "/testUri"
     }
   }
 
@@ -51,7 +51,7 @@ class DashboardControllerSpec extends PAYERegSpec {
       AuthBuilder.showWithAuthorisedUser(controller.dashboard, mockAuthConnector) {
         (result: Future[Result]) =>
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controller.companyRegUrl}/${controller.companyRegUri}/dashboard")
+          redirectLocation(result) shouldBe Some(s"${controller.companyRegUrl}${controller.companyRegUri}/dashboard")
       }
     }
   }
