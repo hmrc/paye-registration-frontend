@@ -138,7 +138,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       }
     }
 
-    "return a SEE_OTHER and redirect to the Employing Staff page" in new Setup {
+    "return a SEE_OTHER and redirect to the Correspondence Address page" in new Setup {
       mockFetchCurrentProfile()
       val request = FakeRequest().withFormUrlEncodedBody(
         "name" -> "tata",
@@ -205,7 +205,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       }
     }
 
-    "redirect to employing staff if correspondence is chosen" in new Setup {
+    "redirect to summary if correspondence is chosen" in new Setup {
       val request = FakeRequest().withFormUrlEncodedBody(
         "chosenAddress" -> "correspondenceAddress"
       )
@@ -214,11 +214,11 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/register-for-paye/subcontractors")
+        redirectLocation(result) shouldBe Some("/register-for-paye/summary")
       }
     }
 
-    "redirect to employing staff if ro is chosen" in new Setup {
+    "redirect to summary if ro is chosen" in new Setup {
       val request = FakeRequest().withFormUrlEncodedBody(
         "chosenAddress" -> "roAddress"
       )
