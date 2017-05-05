@@ -124,7 +124,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
             },
             success => success.chosenAddress match {
               case AddressChoice.correspondenceAddress =>
-                Future.successful(Redirect(controllers.userJourney.routes.EmploymentController.subcontractors()))
+                Future.successful(Redirect(controllers.userJourney.routes.SummaryController.summary()))
               case AddressChoice.roAddress => for {
                 companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
                 res <- payeContactService.submitCorrespondence(companyDetails.roAddress, profile.registrationID)
