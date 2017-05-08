@@ -103,7 +103,7 @@ trait EligibilityCtrl extends FrontendController with Actions with I18nSupport w
               _ => if(success.eligible){
                 Redirect(controllers.userJourney.routes.EligibilityController.ineligible())
               } else {
-                Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+                Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
               }
             }
         )
