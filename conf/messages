@@ -148,29 +148,11 @@ pages.employingStaff.employingStaffRules2               = people already employe
 pages.employingStaff.employingStaffRules3               = people the company expects to employ before the end of year
 
 ## Subcontractors Page
-pages.subcontractors.title                              = Will the company be employing subcontractors in the construction industry?
-pages.subcontractors.heading                            = Will the company be employing subcontractors in the construction industry?
-pages.subcontractors.legend                             = Will the company be employing subcontractors in the construction industry?
-pages.subcontractors.nameRulesIntro                     = Companies who pay subcontractors to do construction work will be registered with the Construction Industry Scheme (CIS).
-pages.subcontractors.nameRulesIntro2                    = Under the CIS, contractors deduct money from a subcontractor''s payments and pass it to HMRC. The deductions count as advance payments towards the subcontractor''s tax and National Insurance.
-pages.subcontractors.detailsSummary                     = What work is covered by the CIS?
-pages.subcontractors.detailsList1                       = The CIS covers most construction work to:
-pages.subcontractors.detailsList2                       = Under the CIS, construction work includes:
-pages.subcontractors.detailsList3                       = It doesn''t include:
-pages.subcontractors.detailsList1Element1               = a permanent or temporary building or structure
-pages.subcontractors.detailsList1Element2               = civil engineering work like roads and bridges
-pages.subcontractors.detailsList2Element1               = preparing the site - for example, laying foundations and providing access works
-pages.subcontractors.detailsList2Element2               = demolition and dismantling
-pages.subcontractors.detailsList2Element3               = building work
-pages.subcontractors.detailsList2Element4               = alterations, repairs and decorating
-pages.subcontractors.detailsList2Element5               = installing systems for heating, lighting, power, water and ventilation
-pages.subcontractors.detailsList2Element6               = cleaning the inside of buildings after construction work
-pages.subcontractors.detailsList3Element1               = architecture and surveying
-pages.subcontractors.detailsList3Element2               = scaffolding hire (with no labour)
-pages.subcontractors.detailsList3Element3               = carpet fitting
-pages.subcontractors.detailsList3Element4               = making materials used in construction including plant and machinery
-pages.subcontractors.detailsList3Element5               = delivering materials
-pages.subcontractors.detailsList3Element6               = work on construction sites that''s clearly not construction - for example running a canteen or site facilities
+pages.subcontractors.title                              = Will you employ subcontractors in the construction industry?
+pages.subcontractors.heading                            = Will you employ subcontractors in the construction industry?
+pages.subcontractors.legend                             = Will you employ subcontractors in the construction industry?
+pages.subcontractors.nameRulesIntro                     = We''ll register you with the Construction Industry Scheme (CIS) if you pay subcontractors to do construction work.
+pages.subcontractors.findout                            = Find out <a href="{0}">what work is covered by the CIS</a>
 
 ## Company Pension Page
 pages.companyPension.title                              = Will you be paying out a company pension in the next 2 months?
