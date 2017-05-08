@@ -28,9 +28,13 @@
             <li>@Messages("pages.firstPayment.listElement1")</li>
             <li>@Messages("pages.firstPayment.listElement2")</li>
         </ul>
-        <p class="indent">@Messages("pages.firstPayment.detail")</p>
     </div>
 
+    <div class="form-group">
+        <div class="indent">
+            <p id="p2">@messages("pages.firstPayment.indent")</p>
+        </div>
+    </div>
 
     @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitFirstPayment) {
         @inlineDateInput(
@@ -39,20 +43,7 @@
         Some(Html(Messages("pages.firstPayment.hint")))
         )
 
-        <details>
-            <summary class="summary">@Messages("pages.firstPayment.firstPaymentRulesSummary")</summary>
-            <div class="panel-indent">
-                <div class="form-group">
-                    <p>@Messages("pages.firstPayment.firstPaymentRulesIntro")</p>
-                    <ul class="list list-bullet">
-                        <li>@Messages("pages.firstPayment.firstPaymentRules1")</li>
-                        <li>@Messages("pages.firstPayment.firstPaymentRules2")</li>
-                        <li>@Messages("pages.firstPayment.firstPaymentRules3")</li>
-                    </ul>
-                </div>
-                <p>@Messages("pages.firstPayment.detail")</p>
-            </div>
-        </details>
+
 
         <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
     }
