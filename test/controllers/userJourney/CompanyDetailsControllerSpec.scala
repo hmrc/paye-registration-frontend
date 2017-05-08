@@ -66,7 +66,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "show the correctly pre-populated trading name page when data has already been entered" in new Setup {
-      val cName = "Tst Company Name"
       mockFetchCurrentProfile()
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
 
@@ -74,7 +73,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
         (response: Future[Result]) =>
           status(response) shouldBe Status.OK
           val result = Jsoup.parse(bodyOf(response))
-          result.body().getElementById("pageHeading").text() shouldBe s"Does the company trade under any other names than $cName?"
+          result.body().getElementById("pageHeading").text() shouldBe "Will the company trade under another name?"
           result.body.getElementById("differentName-true").parent.classNames().contains("selected") shouldBe true
           result.body.getElementById("differentName-false").parent.classNames().contains("selected") shouldBe false
           result.body().getElementById("tradingName").attr("value") shouldBe validCompanyDetailsViewModel.tradingName.get.tradingName.get
@@ -91,7 +90,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
         (response: Future[Result]) =>
           status(response) shouldBe Status.OK
           val result = Jsoup.parse(bodyOf(response))
-          result.body().getElementById("pageHeading").text() shouldBe s"Does the company trade under any other names than $cName?"
+          result.body().getElementById("pageHeading").text() shouldBe "Will the company trade under another name?"
           result.body.getElementById("differentName-true").parent.classNames().contains("selected") shouldBe false
           result.body.getElementById("differentName-false").parent.classNames().contains("selected") shouldBe true
           result.body().getElementById("tradingName").attr("value") shouldBe ""
@@ -108,7 +107,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
         (response: Future[Result]) =>
           status(response) shouldBe Status.OK
           val result = Jsoup.parse(bodyOf(response))
-          result.body().getElementById("pageHeading").text() shouldBe s"Does the company trade under any other names than $cName?"
+          result.body().getElementById("pageHeading").text() shouldBe "Will the company trade under another name?"
           result.body.getElementById("differentName-true").parent.classNames().contains("selected") shouldBe false
           result.body.getElementById("differentName-false").parent.classNames().contains("selected") shouldBe false
           result.body().getElementById("tradingName").attr("value") shouldBe ""
@@ -125,7 +124,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
         response =>
           status(response) shouldBe Status.OK
           val result = Jsoup.parse(bodyOf(response))
-          result.body().getElementById("pageHeading").text() shouldBe s"Does the company trade under any other names than $cName?"
+          result.body().getElementById("pageHeading").text() shouldBe "Will the company trade under another name?"
           result.body.getElementById("differentName-true").parent.classNames().contains("selected") shouldBe false
           result.body.getElementById("differentName-false").parent.classNames().contains("selected") shouldBe false
           result.body().getElementById("tradingName").attr("value") shouldBe ""

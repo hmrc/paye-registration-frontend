@@ -34,7 +34,7 @@ class NatureOfBusinessViewSpec extends PAYERegSpec with I18nSupport {
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct title" in {
-      document.getElementById("pageHeading").text shouldBe messagesApi("pages.natureOfBusiness.heading", companyName)
+      document.getElementById("pageHeading").text shouldBe messagesApi("pages.natureOfBusiness.heading")
     }
 
     "have the correct lede paragraph" in {
@@ -43,16 +43,6 @@ class NatureOfBusinessViewSpec extends PAYERegSpec with I18nSupport {
 
     "have the correct hint text" in {
       document.getElementById("hint-text").text shouldBe messagesApi("pages.natureOfBusiness.hint")
-    }
-
-    "have the correct company name" when {
-      "placed into the title" in {
-        document.getElementById("company-title").text shouldBe companyName
-      }
-
-      "placed into the lede paragraph" in {
-        document.getElementById("company-lede").text shouldBe companyName
-      }
     }
   }
 }

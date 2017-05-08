@@ -109,8 +109,8 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") shouldBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Trading name"
-      document.getElementById("pageHeading").text should include(companyName)
+      document.title() shouldBe "Will the company trade under another name?"
+      document.getElementById("pageHeading").text shouldBe "Will the company trade under another name?"
       document.getElementById("differentName-true").attr("checked") shouldBe "checked"
       document.getElementById("differentName-false").attr("checked") shouldBe ""
       document.getElementById("tradingName").`val` shouldBe tradingName
@@ -147,8 +147,8 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") shouldBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Trading name"
-      document.getElementById("pageHeading").text should include(companyName)
+      document.title() shouldBe "Will the company trade under another name?"
+      document.getElementById("pageHeading").text shouldBe "Will the company trade under another name?"
       document.getElementById("differentName-true").attr("checked") shouldBe ""
       document.getElementById("differentName-false").attr("checked") shouldBe ""
       document.getElementById("tradingName").`val` shouldBe ""
@@ -180,8 +180,8 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status shouldBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Trading name"
-      document.getElementById("pageHeading").text should include(defaultCompanyName)
+      document.title() shouldBe "Will the company trade under another name?"
+      document.getElementById("pageHeading").text shouldBe "Will the company trade under another name?"
     }
   }
 
@@ -303,7 +303,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") shouldBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Tell us where you'll carry out most of your business activities"
+      document.title() shouldBe "Where will the company carry out most of its business activities?"
       document.getElementById("ro-address-line-1").text shouldBe "11"
       document.getElementsByAttributeValue("id", "ppob-address-line-1").size() shouldBe 0
 
@@ -338,7 +338,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") shouldBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Tell us where you'll carry out most of your business activities"
+      document.title() shouldBe "Where will the company carry out most of its business activities?"
       document.getElementById("ppob-address-line-1").text shouldBe "11"
       document.getElementsByAttributeValue("id", "ro-address-line-1").size() shouldBe 0
 
@@ -374,7 +374,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") shouldBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Tell us where you'll carry out most of your business activities"
+      document.title() shouldBe "Where will the company carry out most of its business activities?"
       document.getElementById("ro-address-line-1").text shouldBe "11"
       document.getElementById("ppob-address-line-1").text shouldBe "22"
 
