@@ -128,15 +128,16 @@ pages.businessContact.phone                             = Phone number (includin
 pages.businessContact.noFieldsCompleted                 = You need to provide at least one contact method so we can get in touch if we need to
 
 ## PAYE Contact Details
-pages.payeContact.title                                 = Who should we contact about the company''s PAYE
-pages.payeContact.heading                               = Who should we contact about {0}''s PAYE
+pages.payeContact.title                                 = Who should we contact about the company''s PAYE?
+pages.payeContact.heading                               = Who should we contact about the company''s PAYE?
 pages.payeContact.p1                                    = Let us know who we can contact if we need more information about the company''s PAYE scheme.
 pages.payeContact.contactName                           = Contact name
 pages.payeContact.email                                 = Email address
 pages.payeContact.mobile                                = Mobile number
-pages.payeContact.phone                                 = Daytime phone number (including area code)
+pages.payeContact.phone                                 = Phone number
 pages.payeContact.noFieldsCompleted                     = You need to provide at least one contact method so we can get in touch if we need to
 pages.payeContact.nameMandatory                         = Enter a contact name
+pages.payeContactDetails.information.indent             = You need to provide at least one of the following contact details.
 
 ## Employing Staff Page
 pages.employingStaff.title                              = Will the company employ staff this year?
@@ -155,31 +156,27 @@ pages.subcontractors.nameRulesIntro                     = We''ll register you wi
 pages.subcontractors.findout                            = Find out <a href="{0}">what work is covered by the CIS</a>
 
 ## Company Pension Page
-pages.companyPension.title                              = Will you be paying out a company pension in the next 2 months?
-pages.companyPension.heading                            = Will you be paying out a company pension in the next 2 months?
-pages.companyPension.legend                             = Will you be paying out a company pension in the next 2 months?
-pages.companyPension.setUpPensionIntro                  = Tell us if you''ll be paying out a company pension in the next 2 months to:
-pages.companyPension.setUpPension1                      = an employee who''s retired
-pages.companyPension.setUpPension2                      = a dependant of an employee who''s died
-pages.companyPension.setUpPensionIntro2                 = This doesn''t include payments you make into a workplace pension scheme for your employees.
+pages.companyPension.title                              = Will you make pension payments to a former employee or their dependants in the next 2 months?
+pages.companyPension.heading                            = Will you make pension payments to a former employee or their dependants in the next 2 months?
+pages.companyPension.legend                             = Will you make pension payments to a former employee or their dependants in the next 2 months?
+pages.companyPension.setUpPensionIntro                  = This includes payments to:
+pages.companyPension.setUpPension1                      = an employee who has retired
+pages.companyPension.setUpPension2                      = any dependants of an employee who has died
+pages.companyPension.information.indent                 = Don''t include contributions you make into a workplace pension scheme for your staff.
 
 ## First Payment Page
-pages.firstPayment.title                                = First payment to employees or subcontractors
-pages.firstPayment.heading                              = First payment to employees or subcontractors
-pages.firstPayment.legend                               = First payment to employees or subcontractors
+pages.firstPayment.title                                = Set your PAYE scheme start date
+pages.firstPayment.heading                              = Set your PAYE scheme start date
+pages.firstPayment.legend                               = Set your PAYE scheme start date
 pages.firstPayment.firstPaymentLabel                    = First Payment
-pages.firstPayment.intro                                = Enter the date of the first payment you made or will make to an employee or subcontractor.
-pages.firstPayment.hint                                 = For example, 22 4 2017
+pages.firstPayment.intro                                = Your PAYE scheme will start on the date of first payment to an employee or subcontractor.
+pages.firstPayment.hint                                 = For example, 8 6 2017
 pages.firstPayment.date.invalidRange                    = Please enter a date up to 61 days in the future
 pages.firstPayment.firstPaymentRulesSummary             = What counts as a payment?
-pages.firstPayment.firstPaymentRulesIntro               = Payments to employees or subcontractors include:
-pages.firstPayment.firstPaymentRules1                   = their salary or wages
-pages.firstPayment.firstPaymentRules2                   = expenses or benefits
-pages.firstPayment.firstPaymentRules3                   = any tips or bonuses
-pages.firstPayment.list                                 = This can be a date:
+pages.firstPayment.list                                 = This date can be:
 pages.firstPayment.listElement1                         = in the past
 pages.firstPayment.listElement2                         = within the next 2 months
-pages.firstPayment.detail                               = Include any payments to yourself (for example, if you''re the only director of a limited company).
+pages.firstPayment.indent                               = Your PAYE scheme will be cancelled if you don''t pay anyone within the next 2 months..
 
 ## NATURE OF BUSINESS
 pages.natureOfBusiness.title                            = What does the company do?
@@ -201,8 +198,29 @@ pages.directorDetails.input.hint-text                   = For example, QQ 12 34 
 pages.directorDetails.legend                            = What is the National Insurance number of each director?
 
 ## Summary Page
-pages.summary.title                                     = Check your answers
-pages.summary.heading                                   = Check your answers
+pages.summary.title                                     = Check and confirm your answers
+pages.summary.heading                                   = Check and confirm your answers
+
+
+pages.summary.employees.sectionHeading                  = Employment information
+pages.summary.employees.question                        = Employing staff
+pages.summary.employees.answers.true                    = Yes
+pages.summary.employees.answers.false                   = No
+pages.summary.employees.hiddenChangeText                = Change the company''s employment information
+
+pages.summary.companyPension.question                   = Paying out a company pension in the next 2 months
+pages.summary.companyPension.answers.true               = Yes
+pages.summary.companyPension.answers.false              = No
+pages.summary.companyPension.hiddenChangeText           = Change the company''s pension scheme
+
+pages.summary.subcontractors.question                   = Paying subcontractors
+pages.summary.subcontractors.answers.true               = Yes
+pages.summary.subcontractors.answers.false              = No
+pages.summary.subcontractors.hiddenChangeText           = Change the company''s subcontractor information
+
+pages.summary.firstPaymentDate.question                 = PAYE scheme start date
+pages.summary.firstPaymentDate.hiddenChangeText         = Change the company''s first payment date
+
 
 pages.summary.completionCapacity.sectionHeading         = Applicant
 pages.summary.completionCapacity.question               = Who the application is being made by
@@ -231,24 +249,6 @@ pages.summary.mobileNumber.hiddenChangeText             = Change the company''s 
 pages.summary.businessTelephone.hiddenChangeText        = Change the company''s business telephone
 
 
-pages.summary.employees.sectionHeading                  = Employment information
-pages.summary.employees.question                        = Employing staff
-pages.summary.employees.answers.true                    = Yes
-pages.summary.employees.answers.false                   = No
-pages.summary.employees.hiddenChangeText                = Change the company''s employment information
-
-pages.summary.companyPension.question                   = Paying out a company pension in the next 2 months
-pages.summary.companyPension.answers.true               = Yes
-pages.summary.companyPension.answers.false              = No
-pages.summary.companyPension.hiddenChangeText           = Change the company''s pension scheme
-
-pages.summary.subcontractors.question                   = Paying subcontractors
-pages.summary.subcontractors.answers.true               = Yes
-pages.summary.subcontractors.answers.false              = No
-pages.summary.subcontractors.hiddenChangeText           = Change the company''s subcontractor information
-
-pages.summary.firstPaymentDate.question                 = PAYE scheme start date
-pages.summary.firstPaymentDate.hiddenChangeText         = Change the company''s first payment date
 
 pages.summary.natureOfBusiness.question                 = Business activities
 pages.summary.natureOfBusiness.hiddenChangeText         = Change the business''s activities
