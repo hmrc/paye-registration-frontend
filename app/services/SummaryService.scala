@@ -53,11 +53,12 @@ trait SummarySrv {
       Seq(
         buildEmploymentSection(apiModel.employment),
         buildCompletionCapacitySection(apiModel.completionCapacity),
-        buildBusinessContactDetailsSection(apiModel.companyDetails.businessContactDetails),
         buildCompanyDetailsSection(apiModel.companyDetails, apiModel.sicCodes),
+        buildBusinessContactDetailsSection(apiModel.companyDetails.businessContactDetails),
         buildDirectorsSection(apiModel.directors),
         buildContactDetails(apiModel.payeContact)
       )
+
     )
   }
 
