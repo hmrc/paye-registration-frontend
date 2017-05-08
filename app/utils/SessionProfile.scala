@@ -33,7 +33,7 @@ trait SessionProfile {
   def withCurrentProfile(f: => CurrentProfile => Future[Result])(implicit hc: HeaderCarrier): Future[Result] = {
     keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString) flatMap {
       case Some(currentProfile) => f(currentProfile)
-      case None => Future.successful(Redirect(controllers.userJourney.routes.SignInOutController.postSignIn()))
+      case None => Future.successful(Redirect(controllers.userJourney.routes.PayeStartController.startPaye()))
     }
   }
 

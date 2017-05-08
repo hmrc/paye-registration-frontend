@@ -5,8 +5,10 @@ GET         /assets/*file                           controllers.Assets.at(path="
 ## POST SIGN IN
 GET         /post-sign-in                           controllers.userJourney.SignInOutController.postSignIn
 
+## PAYE START
+GET         /                                       controllers.userJourney.PayeStartController.startPaye
+
 ## WELCOME PAGE
-GET         /                                       controllers.userJourney.WelcomeController.show
 GET         /start                                  controllers.userJourney.WelcomeController.show
 POST        /start                                  controllers.userJourney.WelcomeController.submit
 

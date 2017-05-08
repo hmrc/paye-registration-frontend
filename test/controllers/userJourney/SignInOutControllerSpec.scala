@@ -34,7 +34,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture with BeforeAndAfterEach {
+class SignInOutControllerSpec extends PAYERegSpec {
 
   val mockCurrentProfileService = mock[CurrentProfileService]
   val mockCoHoAPIService = mock[IncorporationInformationService]
@@ -43,21 +43,10 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
   class Setup {
     val controller = new SignInOutCtrl {
       override val authConnector = mockAuthConnector
-      override val currentProfileService = mockCurrentProfileService
-      override val coHoAPIService = mockCoHoAPIService
-      override val payeRegistrationService = mockPAYERegService
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
       override val compRegFEURL: String = "testUrl"
       override val compRegFEURI: String = "/testUri"
     }
-  }
-
-  val fakeRequest = FakeRequest("GET", "/")
-  def validCurrentProfile(status: String) = CurrentProfile("testRegId", None, CompanyProfile(status, "txId"), "en")
-
-
-  override def beforeEach() {
-    reset(mockPAYERegService)
   }
 
   "Calling the postSignIn action" should {
@@ -67,7 +56,7 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
       status(result) shouldBe Status.SEE_OTHER
     }
 
-    "force the user to create a new account" in new Setup {
+    "redirect the user to the Company Registration post-sign-in action" in new Setup {
       when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]()))
         .thenReturn(AccountTypes.InvalidAccountType)
 
@@ -77,86 +66,5 @@ class SignInOutControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
           redirectLocation(result) shouldBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/post-sign-in")
       }
     }
-
-    "show an Error page for an authorised user without a registration ID" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]()))
-        .thenReturn(AccountTypes.Organisation)
-
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCurrentProfile("held")))
-
-      AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
-        result =>
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-      }
-    }
-
-    "show an Error page for an authorised user with a registration ID but no CoHo Company Details" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]()))
-        .thenReturn(AccountTypes.Organisation)
-
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCurrentProfile("held")))
-
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(DownstreamOutcome.Failure)
-
-      AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
-        result =>
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-      }
-    }
-
-    "show an Error page for an authorised user with a registration ID and CoHo Company Details, with an error response from the microservice" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]()))
-        .thenReturn(AccountTypes.Organisation)
-
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCurrentProfile("held")))
-
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(DownstreamOutcome.Success)
-
-      when(mockPAYERegService.assertRegistrationFootprint(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(DownstreamOutcome.Failure)
-
-      AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
-        result =>
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-      }
-    }
-
-    "redirect to the first eligibility page for an authorised user with a registration ID and CoHo Company Details, with PAYE Footprint correctly asserted" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]())).thenReturn(AccountTypes.Organisation)
-
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCurrentProfile("held")))
-
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(DownstreamOutcome.Success)
-
-      when(mockPAYERegService.assertRegistrationFootprint(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(DownstreamOutcome.Success)
-
-      AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
-        result =>
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.EligibilityController.companyEligibility()}")
-      }
-    }
-
-    "redirect the user to the start of Incorporation and Corporation Tax if their Company Registration document has a status of 'draft'" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]())).thenReturn(AccountTypes.Organisation)
-
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCurrentProfile("draft")))
-
-      AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
-        result =>
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/start")
-      }
-    }
   }
-
 }

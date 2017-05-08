@@ -52,7 +52,7 @@ class SessionProfileSpec extends PAYERegSpec with DateUtil {
 
       val result = await(TestSession.withCurrentProfile { _ => testFunc})
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn().url}")
+      redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.PayeStartController.startPaye().url}")
     }
   }
 

@@ -18,24 +18,31 @@ package controllers.userJourney
 
 import javax.inject.{Inject, Singleton}
 
+import auth.PAYERegime
+import config.FrontendAuthConnector
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc._
+import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 @Singleton
 class WelcomeController @Inject()(injMessagesApi: MessagesApi)
   extends WelcomeCtrl {
+  val authConnector = FrontendAuthConnector
   val messagesApi = injMessagesApi
 }
 
-trait WelcomeCtrl extends FrontendController with I18nSupport {
+trait WelcomeCtrl extends FrontendController with I18nSupport with Actions {
 
-  val show = Action { implicit request =>
-    Ok(views.html.pages.welcome())
+  val show = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
+    implicit user =>
+      implicit request =>
+        Ok(views.html.pages.welcome())
   }
 
-  val submit = Action { implicit request =>
-    Redirect(controllers.userJourney.routes.EligibilityController.companyEligibility())
+  val submit = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
+    implicit user =>
+      implicit request =>
+        Redirect(controllers.userJourney.routes.EligibilityController.companyEligibility())
   }
 
 }

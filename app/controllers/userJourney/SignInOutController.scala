@@ -35,16 +35,8 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 
 @Singleton
-class SignInOutController @Inject()(
-                                     injCurrentProfileService: CurrentProfileService,
-                                     injCoHoAPIService: IncorporationInformationService,
-                                     injPayeRegistrationService: PAYERegistrationService,
-                                     injMessagesApi: MessagesApi)
-  extends SignInOutCtrl with ServicesConfig {
+class SignInOutController @Inject()(injMessagesApi: MessagesApi) extends SignInOutCtrl with ServicesConfig {
   val authConnector = FrontendAuthConnector
-  val currentProfileService = injCurrentProfileService
-  val coHoAPIService = injCoHoAPIService
-  val payeRegistrationService = injPayeRegistrationService
   val messagesApi = injMessagesApi
   lazy val compRegFEURL = getConfString("company-registration-frontend.www.url", "")
   lazy val compRegFEURI = getConfString("company-registration-frontend.www.uri", "")
@@ -52,56 +44,13 @@ class SignInOutController @Inject()(
 
 trait SignInOutCtrl extends FrontendController with Actions with I18nSupport {
 
-  val currentProfileService: CurrentProfileSrv
-  val coHoAPIService: IncorporationInformationSrv
-  val payeRegistrationService: PAYERegistrationSrv
   val compRegFEURL: String
   val compRegFEURI: String
 
-  def postSignIn = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+  val postSignIn = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
     implicit user =>
       implicit request =>
-        hasOrgAffinity {
-          checkAndStoreCurrentProfile {
-            profile =>
-              checkAndStoreCompanyDetails(profile.registrationID) {
-                assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId){
-                  Redirect(controllers.userJourney.routes.EligibilityController.companyEligibility())
-                }
-              }
-          }
-        }
+        Redirect(s"$compRegFEURL$compRegFEURI/post-sign-in")
   }
 
-  private def checkAndStoreCurrentProfile(f: => CurrentProfile => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
-    currentProfileService.fetchAndStoreCurrentProfile flatMap {
-      case CurrentProfile(_, _, profile, _) if profile.status equals "draft" => Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/start"))
-      case currentProfile => f(currentProfile)
-    } recover {
-      case _ => InternalServerError(views.html.pages.error.restart())
-    }
-  }
-
-  private def checkAndStoreCompanyDetails(regId: String)(f: => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
-    coHoAPIService.fetchAndStoreCoHoCompanyDetails(regId) flatMap {
-      case DownstreamOutcome.Success => f
-      case DownstreamOutcome.Failure => Future.successful(InternalServerError(views.html.pages.error.restart()))
-    }
-  }
-
-  private def assertPAYERegistrationFootprint(regId: String, txId: String)(f: => Result)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
-    payeRegistrationService.assertRegistrationFootprint(regId, txId) map {
-      case DownstreamOutcome.Success => f
-      case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-    }
-  }
-
-  private def hasOrgAffinity(f: => Future[Result])(implicit hc: HeaderCarrier, authContext: AuthContext): Future[Result] = {
-    payeRegistrationService.getAccountAffinityGroup flatMap {
-      case AccountTypes.Organisation => Logger.info("[SignInOutController] - [hasOrgAffinity] - Authenticated user has ORGANISATION account, proceeding")
-        f
-      case AccountTypes.InvalidAccountType => Logger.info("[SignInOutController] - [hasOrgAffinity] - AUTHENTICATED USER NOT AN ORGANISATION ACCOUNT; redirecting to create new account")
-        Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/post-sign-in"))
-    }
-  }
 }
