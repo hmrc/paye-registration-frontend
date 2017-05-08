@@ -14,6 +14,8 @@
 
 @hiddenDetailsContent = {
     <p>@Messages("pages.tradingName.nameRulesIntro")</p>
+    <p>@Html(messages("pages.tradingName.nameRulesIntro1", "https://beta.companieshouse.gov.uk/company-name-availability"))</p>
+    <p>@Messages("pages.tradingName.nameRulesIntro2")</p>
     <ul class="list list-bullet">
         <li>@Messages("pages.tradingName.nameRules1")</li>
         <li>@Html(Messages("pages.tradingName.nameRules2", "https://www.gov.uk/search-for-trademark"))</li>
@@ -27,7 +29,12 @@
         Messages("app.common.errorSummaryLabel"), tradingNameForm
     )
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.tradingName.heading", companyName)</h1>
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.tradingName.heading")</h1>
+
+
+     <p id="lead-paragraph">@messages("pages.tradingName.lede", companyName)</p>
+
+     @hiddenDetails("tradingNameRules", Messages("pages.tradingName.nameRulesSummary"), hiddenDetailsContent)
 
     @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.submitTradingName) {
 
@@ -41,7 +48,6 @@
 
     </div>
 
-    @hiddenDetails("tradingNameRules", Messages("pages.tradingName.nameRulesSummary"), hiddenDetailsContent)
 
     <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
     }
