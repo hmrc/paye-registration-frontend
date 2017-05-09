@@ -34,6 +34,12 @@ class DateUtilSpec extends UnitSpec with DateUtil {
     }
   }
 
+  "calling toDate with a day set as 30 and month set as 2 and year as 2017" should {
+    "return an exception" in {
+      an[Exception] shouldBe thrownBy(toDate("2017", "2", "30"))
+    }
+  }
+
   "calling fromDate with a date format yyyy-MM-dd" should {
     "return a tuple3 (year: String, month: String, day: String)" in {
       fromDate(LocalDate.parse("2016-12-31")) shouldBe (("2016", "12", "31"))
