@@ -7,7 +7,7 @@ app.common.continue                                     = Continue
 app.common.saveAndContinue                              = Save and continue
 app.common.next                                         = Next
 app.common.back                                         = Back
-app.common.submit                                       = Submit
+app.common.submityourapplication                      = Submit your application
 app.common.errorSummaryLabel                            = There are errors on this page.
 app.common.change                                       = Change
 app.common.year                                         = Year
@@ -274,6 +274,9 @@ pages.summary.correspondenceAddress.hiddenChangeText    = Change the PAYE contac
 pages.summary.emailPAYEContact.answers.noAnswerGiven = '
 pages.summary.mobileNumberPAYEContact.answers.noAnswerGiven = '
 pages.summary.phoneNumberPAYEContact.answers.noAnswerGiven = '
+
+pages.summary.Description                                = Review the information you''ve provided before you submit your application.
+pages.summary.information.indent                         = Your answers should reflect your current business activities. You''ll need to tell HMRC about any changes to your business in the future.
 
 
 ## Confirmation Page
