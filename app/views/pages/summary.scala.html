@@ -23,9 +23,18 @@
         }
     </table>
 
+       <p>@Messages("pages.summary.Description")</p>
+
+       <div class="form-group">
+              <div class="indent">
+         <p>@messages("pages.summary.information.indent")</p>
+       </div>
+      </div>
+
+
     @form(action = controllers.userJourney.routes.SummaryController.submitRegistration()) {
         <div class="form-group">
-            <button class="button" type="submit" id="continue" >@messages("app.common.submit")</button>
+            <button class="button" type="submit" id="continue" >@messages("app.common.submityourapplication")</button>
         </div>
     }
 }
