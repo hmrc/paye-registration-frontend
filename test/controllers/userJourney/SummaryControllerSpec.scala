@@ -63,7 +63,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
         (response: Future[Result]) =>
           status(response) shouldBe Status.OK
           val result = Jsoup.parse(bodyOf(response))
-          result.body().getElementById("pageHeading").text() shouldBe "Check your answers"
+          result.body().getElementById("pageHeading").text() shouldBe "Check and confirm your answers"
           result.body.getElementById("tradingNameAnswer").text() shouldBe "tstTrade"
       }
     }
