@@ -17,12 +17,12 @@
 package utils
 
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import java.time.format.{DateTimeFormatter, ResolverStyle}
 import java.time.temporal.ChronoUnit
 
 trait DateUtil {
   def toDate(year: String, month: String, day: String): LocalDate = {
-    LocalDate.parse(year + "-" + month + "-" + day, DateTimeFormatter.ofPattern("yyyy-M-d"))
+    LocalDate.parse(year + "-" + month + "-" + day, DateTimeFormatter.ofPattern("uuuu-M-d").withResolverStyle(ResolverStyle.STRICT))
   }
 
   def fromDate(date: LocalDate): (String, String, String) = {
