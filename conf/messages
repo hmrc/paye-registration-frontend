@@ -55,16 +55,11 @@ pages.companyEligibility.details                        = What is a receiver?
 pages.companyEligibility.dropdown                       = A receiver is appointed by a bank or other creditor to take over the management of a company that can''t pay its debts. The aim of the receiver is to recover money owed to the creditor. This process is known as receivership.
 
 ## Director Eligibility
-pages.directorEligibility.title                         = Do any of the following apply to you?
-pages.directorEligibility.heading                       = Do any of the following apply to you?
-pages.directorEligibility.list1                         = You''re responsible for deducting your own tax or National Insurance (this includes registrars, Roman Catholic priests and certain other employees  of foreign embassies and consulates)
-pages.directorEligibility.list2                         = You provide non-cash incentive rewards using a taxed award scheme to pay the tax due
-pages.directorEligibility.details                       = What are non-cash incentive awards?
-pages.directorEligibility.dropdown                      = Non-cash incentive awards could be:
-pages.directorEligibility.detailsList1                  = gift vouchers
-pages.directorEligibility.detailsList2                  = travel
-pages.directorEligibility.detailsList3                  = prizes for employer-run competitions
-pages.directorEligibility.detailsList4                  = holidays you pay for
+pages.directorEligibility.title                         = Are you any of the following?
+pages.directorEligibility.heading                       = Are you any of the following?
+pages.directorEligibility.headList                      = Tell us if you''re:
+pages.directorEligibility.list1                         = an employee responsible for deducting and paying your own Income Tax or National Insurance (this includes registrars, Roman Catholic priests and certain other employees of foreign embassies and consulates)
+pages.directorEligibility.list2                         = responsible for deducting and paying Income Tax and National Insurance on non-cash payments you make to your own or other people''s employees
 
 ## Completion Capacity page
 pages.completionCapacity.title                          = What is your relationship to the business?
@@ -111,9 +106,9 @@ pages.ppobAddress.ppobAddressRules3                     = a studio or workshop
 pages.ppobAddress.peopleIntro1                          = People running mobile businesses (for example, plumbers) usually use the address where they keep their stock or equipment.
 
 ##Correspondence Address
-pages.correspondenceAddress.title                       = What is your company''s correspondence address?
+pages.correspondenceAddress.title                       = Where should we send post to?
 pages.correspondenceAddress.lede                        = We''ll use this address to send post relating to your PAYE scheme.
-pages.correspondenceAddress.other                       = A different location
+pages.correspondenceAddress.other                       = A different address
 pages.correspondenceAddress.addressChoice.noEntry       = Tell us the company''s correspondence address
 
 ## Business Contact Details

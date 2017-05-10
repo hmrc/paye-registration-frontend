@@ -11,24 +11,12 @@
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.directorEligibility.heading")</h1>
 
     <div class="spaced-below">
+        <p>@Messages("pages.directorEligibility.headList")</p>
         <ul class="list list-bullet">
             <li>@Messages("pages.directorEligibility.list1")</li>
             <li>@Messages("pages.directorEligibility.list2")</li>
         </ul>
     </div>
-
-    <details>
-        <summary class="summary">@Messages("pages.directorEligibility.details")</summary>
-        <div class="panel-indent">
-            @Messages("pages.directorEligibility.dropdown")
-            <ul class="list list-bullet">
-                <li>@Messages("pages.directorEligibility.detailsList1")</li>
-                <li>@Messages("pages.directorEligibility.detailsList2")</li>
-                <li>@Messages("pages.directorEligibility.detailsList3")</li>
-                <li>@Messages("pages.directorEligibility.detailsList4")</li>
-            </ul>
-        </div>
-    </details>
 
     @govHelpers.form(action = controllers.userJourney.routes.EligibilityController.submitDirectorEligibility()) {
         <div class="inline form-group">
