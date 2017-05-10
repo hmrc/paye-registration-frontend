@@ -77,14 +77,14 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
       response.status shouldBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "What is the National Insurance number of each director?"
+      document.title() shouldBe "Enter the National Insurance number of at least one company director"
       document.getElementsByClass("form-field").size shouldBe 2
 
       val list = document.getElementsByClass("form-label")
       def get(n: Int) = list.get(n).text
 
-      get(0) shouldBe s"faulty default For example, QQ 12 34 56 C"
-      get(1) shouldBe s"Test RegIdWhitelist"
+      get(0) shouldBe s"faulty default's National Insurance number For example, QQ 12 34 56 C"
+      get(1) shouldBe s"Test RegIdWhitelist's National Insurance number"
     }
   }
 }

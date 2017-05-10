@@ -66,7 +66,7 @@ class DirectorDetailsViewSpec extends PAYERegSpec with I18nSupport {
     }
 
     "display the directors name and prepopped Nino" in {
-      document.getElementsByClass("form-field").get(0).text shouldBe "Henri Lay (id 0) For example, QQ 12 34 56 C"
+      document.getElementsByClass("form-field").get(0).text shouldBe "Henri Lay (id 0)'s National Insurance number For example, QQ 12 34 56 C"
       document.getElementsByAttributeValueContaining("value", "ZY 12 34 56 A").size shouldBe 1
     }
 
@@ -86,11 +86,11 @@ class DirectorDetailsViewSpec extends PAYERegSpec with I18nSupport {
     "have all directors shown" in {
       val list = document.getElementsByClass("form-field")
       def get(n: Int) = list.get(n).text
-      get(0) shouldBe s"$d1 For example, QQ 12 34 56 C"
-      get(1) shouldBe d2
-      get(2) shouldBe d3
-      get(3) shouldBe d4
-      get(4) shouldBe d5
+      get(0) shouldBe s"$d1's National Insurance number For example, QQ 12 34 56 C"
+      get(1) shouldBe s"$d2's National Insurance number"
+      get(2) shouldBe s"$d3's National Insurance number"
+      get(3) shouldBe s"$d4's National Insurance number"
+      get(4) shouldBe s"$d5's National Insurance number"
       document.getElementsByClass("form-field").size shouldBe 5
       document.getElementsByClass("form-field").size shouldBe 5
     }

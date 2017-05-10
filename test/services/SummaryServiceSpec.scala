@@ -77,6 +77,31 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
   lazy val summary = Summary(
     Seq(
       SummarySection(
+        id = "employees",
+        Seq(
+          SummaryRow(
+            id = "employees",
+            answer = Left("true"),
+            Some(controllers.userJourney.routes.EmploymentController.employingStaff())
+          ),
+          SummaryRow(
+            id = "companyPension",
+            answer = Left("true"),
+            Some(controllers.userJourney.routes.EmploymentController.companyPension())
+          ),
+          SummaryRow(
+            id = "subcontractors",
+            answer = Left("true"),
+            Some(controllers.userJourney.routes.EmploymentController.subcontractors())
+          ),
+          SummaryRow(
+            id = "firstPaymentDate",
+            Right("20/12/2016"),
+            Some(controllers.userJourney.routes.EmploymentController.firstPayment())
+          )
+        )
+      ),
+      SummarySection(
         id = "completionCapacity",
         Seq(
           SummaryRow(
@@ -132,31 +157,6 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         )
       ),
       SummarySection(
-        id = "employees",
-        Seq(
-          SummaryRow(
-            id = "subcontractors",
-            answer = Left("true"),
-            Some(controllers.userJourney.routes.EmploymentController.subcontractors())
-          ),
-          SummaryRow(
-            id = "employees",
-            answer = Left("true"),
-            Some(controllers.userJourney.routes.EmploymentController.employingStaff())
-          ),
-          SummaryRow(
-            id = "companyPension",
-            answer = Left("true"),
-            Some(controllers.userJourney.routes.EmploymentController.companyPension())
-          ),
-          SummaryRow(
-            id = "firstPaymentDate",
-            Right("20/12/2016"),
-            Some(controllers.userJourney.routes.EmploymentController.firstPayment())
-          )
-        )
-      ),
-      SummarySection(
         id = "directorDetails",
         Seq(
           SummaryRow(
@@ -182,13 +182,13 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
           ),
           SummaryRow(
-            id = "mobileNumberPAYEContact",
-            answer = Right("1234567890"),
+            id = "phoneNumberPAYEContact",
+            answer = Right("0987654321"),
             changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
           ),
           SummaryRow(
-            id = "phoneNumberPAYEContact",
-            answer = Right("0987654321"),
+            id = "mobileNumberPAYEContact",
+            answer = Right("1234567890"),
             changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
           ),
           SummaryRow(
@@ -283,6 +283,31 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       lazy val summaryNoTName = Summary(
         Seq(
           SummarySection(
+            id = "employees",
+            Seq(
+              SummaryRow(
+                id = "employees",
+                answer = Left("true"),
+                Some(controllers.userJourney.routes.EmploymentController.employingStaff())
+              ),
+              SummaryRow(
+                id = "companyPension",
+                answer = Left("true"),
+                Some(controllers.userJourney.routes.EmploymentController.companyPension())
+              ),
+              SummaryRow(
+                id = "subcontractors",
+                answer = Left("true"),
+                Some(controllers.userJourney.routes.EmploymentController.subcontractors())
+              ),
+              SummaryRow(
+                id = "firstPaymentDate",
+                Right("20/12/2016"),
+                Some(controllers.userJourney.routes.EmploymentController.firstPayment())
+              )
+            )
+          ),
+          SummarySection(
             id = "completionCapacity",
             Seq(
               SummaryRow(
@@ -338,31 +363,6 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             )
           ),
           SummarySection(
-            id = "employees",
-            Seq(
-              SummaryRow(
-                id = "subcontractors",
-                answer = Left("true"),
-                Some(controllers.userJourney.routes.EmploymentController.subcontractors())
-              ),
-              SummaryRow(
-                id = "employees",
-                answer = Left("true"),
-                Some(controllers.userJourney.routes.EmploymentController.employingStaff())
-              ),
-              SummaryRow(
-                id = "companyPension",
-                answer = Left("true"),
-                Some(controllers.userJourney.routes.EmploymentController.companyPension())
-              ),
-              SummaryRow(
-                id = "firstPaymentDate",
-                Right("20/12/2016"),
-                Some(controllers.userJourney.routes.EmploymentController.firstPayment())
-              )
-            )
-          ),
-          SummarySection(
             id = "directorDetails",
             Seq(
               SummaryRow(
@@ -388,13 +388,13 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
                 changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
               ),
               SummaryRow(
-                id = "mobileNumberPAYEContact",
-                answer = Right("1234567890"),
+                id = "phoneNumberPAYEContact",
+                answer = Right("0987654321"),
                 changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
               ),
               SummaryRow(
-                id = "phoneNumberPAYEContact",
-                answer = Right("0987654321"),
+                id = "mobileNumberPAYEContact",
+                answer = Right("1234567890"),
                 changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
               ),
               SummaryRow(
@@ -491,11 +491,6 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         id = "employees",
         Seq(
           SummaryRow(
-            id = "subcontractors",
-            answer = Left("false"),
-            Some(controllers.userJourney.routes.EmploymentController.subcontractors())
-          ),
-          SummaryRow(
             id = "employees",
             answer = Left("false"),
             Some(controllers.userJourney.routes.EmploymentController.employingStaff())
@@ -504,6 +499,11 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             id = "companyPension",
             answer = Left("false"),
             Some(controllers.userJourney.routes.EmploymentController.companyPension())
+          ),
+          SummaryRow(
+            id = "subcontractors",
+            answer = Left("false"),
+            Some(controllers.userJourney.routes.EmploymentController.subcontractors())
           ),
           SummaryRow(
             id = "firstPaymentDate",
@@ -617,13 +617,13 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
-              id = "mobileNumberPAYEContact",
-              answer = Right("1234567890"),
+              id = "phoneNumberPAYEContact",
+              answer = Right("0987654321"),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
-              id = "phoneNumberPAYEContact",
-              answer = Right("0987654321"),
+              id = "mobileNumberPAYEContact",
+              answer = Right("1234567890"),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
@@ -666,12 +666,12 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
-              id = "mobileNumberPAYEContact",
+              id = "phoneNumberPAYEContact",
               answer = Left("noAnswerGiven"),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
-              id = "phoneNumberPAYEContact",
+              id = "mobileNumberPAYEContact",
               answer = Left("noAnswerGiven"),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),

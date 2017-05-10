@@ -51,13 +51,14 @@ trait SummarySrv {
   private[services] def registrationToSummary(apiModel: PAYERegistrationAPI): Summary = {
     Summary(
       Seq(
+        buildEmploymentSection(apiModel.employment),
         buildCompletionCapacitySection(apiModel.completionCapacity),
         buildCompanyDetailsSection(apiModel.companyDetails, apiModel.sicCodes),
         buildBusinessContactDetailsSection(apiModel.companyDetails.businessContactDetails),
-        buildEmploymentSection(apiModel.employment),
         buildDirectorsSection(apiModel.directors),
         buildContactDetails(apiModel.payeContact)
       )
+
     )
   }
 
@@ -160,14 +161,6 @@ trait SummarySrv {
       id = "employees",
       Seq(
         Some(SummaryRow(
-          id = "subcontractors",
-          answer = employment.subcontractors match {
-            case true => Left("true")
-            case false => Left("false")
-          },
-          changeLink = Some(controllers.userJourney.routes.EmploymentController.subcontractors())
-        )),
-        Some(SummaryRow(
           id = "employees",
           answer = employment.employees match {
             case true => Left("true")
@@ -186,6 +179,14 @@ trait SummarySrv {
               changeLink = Some(controllers.userJourney.routes.EmploymentController.companyPension())
             )
         },
+        Some(SummaryRow(
+          id = "subcontractors",
+          answer = employment.subcontractors match {
+            case true => Left("true")
+            case false => Left("false")
+          },
+          changeLink = Some(controllers.userJourney.routes.EmploymentController.subcontractors())
+        )),
         Some(SummaryRow(
           id = "firstPaymentDate",
           answer = Right(DateTimeFormatter.ofPattern("dd/MM/yyyy").format(employment.firstPayDate)),
@@ -235,17 +236,17 @@ trait SummarySrv {
           changeLink = changeCall
         ),
         SummaryRow(
-          id = "mobileNumberPAYEContact",
-          answer = digitalContact.mobileNumber match {
-            case Some(mobile) => Right(mobile)
+          id = "phoneNumberPAYEContact",
+          answer = digitalContact.phoneNumber match {
+            case Some(phone) => Right(phone)
             case _ => Left("noAnswerGiven")
           },
           changeLink = changeCall
         ),
         SummaryRow(
-          id = "phoneNumberPAYEContact",
-          answer = digitalContact.phoneNumber match {
-            case Some(phone) => Right(phone)
+          id = "mobileNumberPAYEContact",
+          answer = digitalContact.mobileNumber match {
+            case Some(mobile) => Right(mobile)
             case _ => Left("noAnswerGiven")
           },
           changeLink = changeCall
