@@ -142,7 +142,7 @@ class EligiblityMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") shouldBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Do any of the following apply to you?"
+      document.title() shouldBe "Are you any of the following?"
       document.getElementById("isEligible-true").attr("checked") shouldBe ""
       document.getElementById("isEligible-false").attr("checked") shouldBe "checked"
     }
