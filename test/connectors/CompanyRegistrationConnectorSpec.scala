@@ -21,20 +21,26 @@ import models.external.CompanyProfile
 import play.api.libs.json.{JsObject, Json}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
+import utils.PAYEFeatureSwitch
 
 import scala.concurrent.Future
 
 class CompanyRegistrationConnectorSpec extends PAYERegSpec {
 
-  val crTestUrl = "testUrl"
-  val crTestUri = "testUri"
+  val testUrl = "testUrl"
+  val testUri = "testUri"
+  val mockFeatureSwitch = mock[PAYEFeatureSwitch]
 
-  class Setup {
+  class Setup(stubbed: Boolean) {
     val connector = new CompanyRegistrationConnect {
-      val companyRegistrationUri = crTestUri
-      val companyRegistrationUrl = crTestUrl
+      val companyRegistrationUri = testUri
+      val companyRegistrationUrl = testUrl
+      val stubUri = testUri
+      val stubUrl = testUrl
       val http = mockWSHttp
       override val metricsService = new MockMetrics
+      override val featureSwitch = mockFeatureSwitch
+      override def useCompanyRegistration = stubbed
     }
 
     implicit val hc = HeaderCarrier()
@@ -66,23 +72,44 @@ class CompanyRegistrationConnectorSpec extends PAYERegSpec {
       """.stripMargin).as[JsObject]
 
   "getCompanyRegistrationDetails" should {
-    "return a CompanyProfile" in new Setup {
+    "return a CompanyProfile" in new Setup(false) {
       mockHttpGet[JsObject](connector.companyRegistrationUri, Future.successful(profileJson))
 
       val result = await(connector.getCompanyRegistrationDetails("testRegId"))
       result shouldBe CompanyProfile(status, transactionId)
     }
 
-    "throw a bad request exception" in new Setup {
+    "throw a bad request exception" in new Setup(false) {
       mockHttpGet[JsObject](connector.companyRegistrationUri, Future.failed(new BadRequestException("tstException")))
 
       intercept[BadRequestException](await(connector.getCompanyRegistrationDetails("testRegId")))
     }
 
-    "throw any other exception" in new Setup {
+    "throw any other exception" in new Setup(false) {
       mockHttpGet[JsObject](connector.companyRegistrationUri, Future.failed(new RuntimeException))
 
       intercept[RuntimeException](await(connector.getCompanyRegistrationDetails("testRegId")))
+    }
+
+    "be stubbed" when {
+      "returning a CompanyProfile" in new Setup(false) {
+        mockHttpGet[JsObject](connector.companyRegistrationUri, Future.successful(profileJson))
+
+        val result = await(connector.getCompanyRegistrationDetails("testRegId"))
+        result shouldBe CompanyProfile(status, transactionId)
+      }
+
+      "throwing a bad request exception" in new Setup(false) {
+        mockHttpGet[JsObject](connector.companyRegistrationUri, Future.failed(new BadRequestException("tstException")))
+
+        intercept[BadRequestException](await(connector.getCompanyRegistrationDetails("testRegId")))
+      }
+
+      "throwing any other exception" in new Setup(false) {
+        mockHttpGet[JsObject](connector.companyRegistrationUri, Future.failed(new RuntimeException))
+
+        intercept[RuntimeException](await(connector.getCompanyRegistrationDetails("testRegId")))
+      }
     }
   }
 }

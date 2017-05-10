@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package payeregistrationapi
 
 import com.github.tomakehurst.wiremock.client.WireMock._
@@ -23,6 +24,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
 import services.MetricsService
 import uk.gov.hmrc.play.http.HeaderCarrier
+import utils.PAYEFeatureSwitch
 
 class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
 
@@ -33,7 +35,10 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
   val additionalConfiguration = Map(
     "microservice.services.company-registration.host" -> s"$mockHost",
     "microservice.services.company-registration.port" -> s"$mockPort",
-    "microservice.services.company-registration.uri" -> "/corporation-tax-registration",
+    "microservice.services.incorporation-frontend-stubs.host" -> s"$mockHost",
+    "microservice.services.incorporation-frontend-stubs.port" -> s"$mockPort",
+    "auditing.consumer.baseUri.host" -> s"$mockHost",
+    "auditing.consumer.baseUri.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes"
   )
 
@@ -44,37 +49,88 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
   val regId = "12345"
   implicit val hc = HeaderCarrier()
 
+  val stubUrl = s"/incorporation-frontend-stubs/$regId"
   val url = s"/corporation-tax-registration/$regId"
 
   "getCompanyRegistrationDetails" should {
-    val testTransId =
+    def responseBody(transId: String) =
       Json.parse(
-        """
+        s"""
           |{
           |    "status" : "testStatus",
           |    "confirmationReferences" : {
-          |      "transaction-id" : "testTransactionID-001"
+          |      "transaction-id" : "$transId"
           |    }
           |}
         """.stripMargin).as[JsObject]
 
-    "get a status and a transaction id" in {
-      lazy val metrics = Play.current.injector.instanceOf[MetricsService]
-      val companyRegistrationConnector = new CompanyRegistrationConnector(metrics)
+    "get a status and a transaction id" when {
 
-      def getResponse = companyRegistrationConnector.getCompanyRegistrationDetails(regId)
+      "the feature flag points at the stub" in {
+        lazy val metrics = Play.current.injector.instanceOf[MetricsService]
+        lazy val featureSwitch = Play.current.injector.instanceOf[PAYEFeatureSwitch]
+        val companyRegistrationConnector = new CompanyRegistrationConnector(featureSwitch, metrics)
 
-      stubFor(get(urlMatching(url))
-        .willReturn(
-          aResponse()
-            .withStatus(200)
-            .withBody(Json.toJson(testTransId).toString())
+        def getResponse = companyRegistrationConnector.getCompanyRegistrationDetails(regId)
+
+        stubFor(get(urlMatching(stubUrl))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+              .withBody(Json.toJson(responseBody("testTransactionID-001")).toString())
+          )
         )
-      )
 
-      val result = await(getResponse)
-      result.status shouldBe "testStatus"
-      result.transactionId shouldBe "testTransactionID-001"
+        val result = await(getResponse)
+        result.status shouldBe "testStatus"
+        result.transactionId shouldBe "testTransactionID-001"
+      }
+
+      "the feature flag points at the Company Registration" in {
+        stubFor(post(urlMatching("/write/audit"))
+          .willReturn(
+            aResponse().
+              withStatus(200).
+              withBody("""{"x":2}""")
+          )
+        )
+
+        lazy val metrics = Play.current.injector.instanceOf[MetricsService]
+        lazy val featureSwitch = Play.current.injector.instanceOf[PAYEFeatureSwitch]
+        val companyRegistrationConnector = new CompanyRegistrationConnector(featureSwitch, metrics)
+
+        await(buildClient("/test-only/feature-flag/companyRegistration/true").get())
+
+        def getResponse = companyRegistrationConnector.getCompanyRegistrationDetails(regId)
+
+        stubFor(get(urlMatching(url))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+              .withBody(Json.toJson(responseBody("testTransactionID-001")).toString())
+          )
+        )
+
+        val result = await(getResponse)
+        result.status shouldBe "testStatus"
+        result.transactionId shouldBe "testTransactionID-001"
+
+        await(buildClient("/test-only/feature-flag/companyRegistration/false").get())
+
+        def getStubResponse = companyRegistrationConnector.getCompanyRegistrationDetails(regId)
+
+        stubFor(get(urlMatching(stubUrl))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+              .withBody(Json.toJson(responseBody("testTransactionID-002")).toString())
+          )
+        )
+
+        val stubbedResult = await(getResponse)
+        stubbedResult.status shouldBe "testStatus"
+        stubbedResult.transactionId shouldBe "testTransactionID-002"
+      }
     }
   }
 }
