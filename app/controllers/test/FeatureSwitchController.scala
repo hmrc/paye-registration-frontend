@@ -18,7 +18,7 @@ package controllers.test
 
 import javax.inject.{Inject, Singleton}
 
-import play.api.mvc.Action
+import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils._
 
@@ -36,10 +36,11 @@ trait FeatureSwitchCtrl extends FrontendController {
   val featureManager : FeatureManager
   val PayeFeatureSwitch : PAYEFeatureSwitches
 
-  def addressServiceSwitch(featureName: String, featureState: String) = Action.async {
+  def switcher(featureName: String, featureState: String): Action[AnyContent] = Action.async {
     implicit request =>
 
       def feature: FeatureSwitch = featureState match {
+        case "true" => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
         case "addressLookupFrontend" => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
         case _ => featureManager.disable(BooleanFeatureSwitch(featureName, enabled = false))
       }

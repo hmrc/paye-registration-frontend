@@ -20,7 +20,7 @@ POST       /reg-setup-paye-contact                       controllers.test.TestRe
 GET        /reg-setup                                    controllers.test.TestRegSetupController.regSetup
 POST       /reg-setup                                    controllers.test.TestRegSetupController.submitRegSetup
 
-GET        /feature-flag/:featureName/:featureStatus     controllers.test.FeatureSwitchController.addressServiceSwitch(featureName: String, featureStatus: String)
+GET        /feature-flag/:featureName/:featureStatus     controllers.test.FeatureSwitchController.switcher(featureName: String, featureStatus: String)
 
 GET        /no-lookup-ppob-address                       controllers.test.TestAddressLookupController.noLookupPPOBAddress
 GET        /no-lookup-correspondence-address             controllers.test.TestAddressLookupController.noLookupCorrespondenceAddress

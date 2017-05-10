@@ -26,28 +26,39 @@ import services.{MetricsService, MetricsSrv}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
+import utils.{PAYEFeatureSwitch, PAYEFeatureSwitches}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class CompanyRegistrationConnector @Inject()(injMetrics: MetricsService) extends CompanyRegistrationConnect with ServicesConfig {
+class CompanyRegistrationConnector @Inject()(injFeatureSwitch: PAYEFeatureSwitch,
+                                             injMetrics: MetricsService) extends CompanyRegistrationConnect with ServicesConfig {
   lazy val companyRegistrationUrl: String = baseUrl("company-registration")
   lazy val companyRegistrationUri: String = getConfString("company-registration.uri","")
+  lazy val stubUrl: String = baseUrl("incorporation-frontend-stubs")
+  lazy val stubUri: String = getConfString("incorporation-frontend-stubs.uri","")
   val http = WSHttp
   val metricsService = injMetrics
+  val featureSwitch = injFeatureSwitch
 }
 
 trait CompanyRegistrationConnect {
 
   val companyRegistrationUrl : String
   val companyRegistrationUri : String
+  val stubUrl : String
+  val stubUri : String
   val http : WSHttp
   val metricsService: MetricsSrv
+  val featureSwitch: PAYEFeatureSwitches
 
   def getCompanyRegistrationDetails(regId: String)(implicit hc : HeaderCarrier) : Future[CompanyProfile] = {
     val companyRegTimer = metricsService.companyRegistrationResponseTimer.time()
-    http.GET[JsObject](s"$companyRegistrationUrl$companyRegistrationUri/$regId") map {
+
+    val url = if (useCompanyRegistration) s"$companyRegistrationUrl$companyRegistrationUri" else s"$stubUrl$stubUri"
+
+    http.GET[JsObject](s"$url/$regId") map {
       response =>
         companyRegTimer.stop()
         val status = (response \ "status").as[String]
@@ -64,4 +75,9 @@ trait CompanyRegistrationConnect {
         throw ex
     }
   }
+
+  private[connectors] def useCompanyRegistration: Boolean = {
+    featureSwitch.companyReg.enabled
+  }
+
 }

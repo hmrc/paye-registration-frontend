@@ -40,7 +40,7 @@ class FeatureSwitchControllerSpec extends PAYERegSpec {
     }
   }
 
-  "addressServiceSwitch" should {
+  "switcher" should {
     "enable the addressService feature switch and return an OK" when {
       "addressService and addressLookUpFrontend are passed in the url" in new Setup {
         when(mockPAYEFeatureSwitch(ArgumentMatchers.any()))
@@ -49,7 +49,7 @@ class FeatureSwitchControllerSpec extends PAYERegSpec {
         when(mockFeatureManager.enable(ArgumentMatchers.any()))
           .thenReturn(testFeatureSwitch)
 
-        val result = controller.addressServiceSwitch("addressService","addressLookupFrontend")(FakeRequest())
+        val result = controller.switcher("addressService","addressLookupFrontend")(FakeRequest())
         status(result) shouldBe OK
       }
     }
@@ -62,7 +62,7 @@ class FeatureSwitchControllerSpec extends PAYERegSpec {
         when(mockFeatureManager.disable(ArgumentMatchers.any()))
           .thenReturn(testDisabledSwitch)
 
-        val result = await(controller.addressServiceSwitch("addressService","someOtherState")(FakeRequest()))
+        val result = await(controller.switcher("addressService","someOtherState")(FakeRequest()))
         status(result) shouldBe OK
       }
     }
@@ -72,7 +72,7 @@ class FeatureSwitchControllerSpec extends PAYERegSpec {
         when(mockPAYEFeatureSwitch(ArgumentMatchers.any()))
           .thenReturn(Future.successful(None))
 
-        val result = controller.addressServiceSwitch("invalidName","invalidState")(FakeRequest())
+        val result = controller.switcher("invalidName","invalidState")(FakeRequest())
         status(result) shouldBe BAD_REQUEST
       }
     }

@@ -16,6 +16,7 @@
 
 package service
 
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlMatching}
 import connectors.{BusinessRegistrationConnector, CompanyRegistrationConnector, KeystoreConnector}
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.external.{BusinessProfile, CompanyProfile, CurrentProfile}
@@ -36,6 +37,8 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
   lazy val companyRegistrationConnector = Play.current.injector.instanceOf[CompanyRegistrationConnector]
 
   val additionalConfiguration = Map(
+    "auditing.consumer.baseUri.host" -> s"$mockHost",
+    "auditing.consumer.baseUri.port" -> s"$mockPort",
     "microservice.services.cachable.session-cache.host" -> s"$mockHost",
     "microservice.services.cachable.session-cache.port" -> s"$mockPort",
     "microservice.services.cachable.session-cache.domain" -> "keystore",
@@ -43,6 +46,8 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
     "microservice.services.business-registration.port" -> s"$mockPort",
     "microservice.services.company-registration.host" -> s"$mockHost",
     "microservice.services.company-registration.port" -> s"$mockPort",
+    "microservice.services.incorporation-frontend-stubs.host" -> s"$mockHost",
+    "microservice.services.incorporation-frontend-stubs.port" -> s"$mockPort",
     "microservice.services.coho-api.host" -> s"$mockHost",
     "microservice.services.coho-api.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
@@ -82,7 +87,7 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
       await(getResponse) shouldBe expectedCurrentProfile
     }
 
-    "get a Current Profile" in {
+    "get a Current Profile while stubbed" in {
       val regId = "12345"
       val businessProfile = BusinessProfile(
         regId,
@@ -105,6 +110,48 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
 
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfile).toString)
       stubGet(s"/incorporation-frontend-stubs/$regId", 200, companyRegistrationResp)
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+      stubPut(s"/keystore/paye-registration-frontend/${sessionId}/data/CurrentProfile", 200, dummyS4LResponse)
+
+      val currentProfileService = new CurrentProfileService(businessRegistrationConnector, keystoreConnector, companyRegistrationConnector)
+      def getResponse = currentProfileService.fetchAndStoreCurrentProfile
+
+      await(getResponse) shouldBe expectedCurrentProfile
+    }
+
+    "get a Current Profile" in {
+      val regId = "12345"
+      val businessProfile = BusinessProfile(
+        regId,
+        None,
+        "ENG"
+      )
+
+      stubFor(post(urlMatching("/write/audit"))
+        .willReturn(
+          aResponse().
+            withStatus(200).
+            withBody("""{"x":2}""")
+        )
+      )
+
+      await(buildClient("/test-only/feature-flag/companyRegistration/true").get())
+
+      val companyRegistrationResp =
+        s"""{
+          |   "status": "held",
+          |   "confirmationReferences": {
+          |     "transaction-id": "000-434-${regId}"
+          |   }
+          |}""".stripMargin
+
+      val expectedCurrentProfile = CurrentProfile(regId,
+        None,
+        CompanyProfile("held", s"000-434-$regId"),
+        "ENG")
+
+      stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfile).toString)
+      stubGet(s"/corporation-tax-registration/$regId", 200, companyRegistrationResp)
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/keystore/paye-registration-frontend/${sessionId}/data/CurrentProfile", 200, dummyS4LResponse)
 
