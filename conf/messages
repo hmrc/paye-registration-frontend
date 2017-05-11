@@ -46,13 +46,12 @@ pages.welcome.2months                                   = You can''t register mo
 pages.welcome.nino                                      = You''ll need the National Insurance number of at least one company director.
 
 ## Company Eligibility
-pages.companyEligibility.title                          = Is the company any of the following?
-pages.companyEligibility.heading                        = Is the company any of the following?
-pages.companyEligibility.list1                          = An insurance company, or other business responsible for paying back sick pay to the employees of more than one employer?
-pages.companyEligibility.list2                          = A receiver paying employees of companies in receivership
-pages.companyEligibility.list3                          = An offshore employer outside of the European Economic Area or Isle of Man that isn''t liable for UK National Insurance
-pages.companyEligibility.details                        = What is a receiver?
-pages.companyEligibility.dropdown                       = A receiver is appointed by a bank or other creditor to take over the management of a company that can''t pay its debts. The aim of the receiver is to recover money owed to the creditor. This process is known as receivership.
+pages.companyEligibility.title                          = Do any of the following apply to you?
+pages.companyEligibility.heading                        = Do any of the following apply to you?
+pages.companyEligibility.list1                          = responsible for paying sick pay to the employees of other companies
+pages.companyEligibility.list2                          = appointed by a creditor to run a company that can''t pay its debts and you''re responsible for paying its employees
+pages.companyEligibility.list3                          = an employer based outside the UK who''s not liable to pay UK National Insurance
+pages.companyEligibility.headList                       = Tell us if you''re:
 
 ## Director Eligibility
 pages.directorEligibility.title                         = Are you any of the following?
