@@ -10,13 +10,29 @@
         <p align="center">@ackRef</p>
     </div>
 
-    <h2>@messages("pages.confirmation.heading2")</h2>
+    <div class="form-group">
+        <h2>@messages("pages.confirmation.heading2")</h2>
 
-    <p>@messages("pages.confirmation.p1")</p>
-    <ul class="bullets">
-        <li>@messages("pages.confirmation.bullet1")</li>
-        <li>@messages("pages.confirmation.bullet2")</li>
-    </ul>
-    <p>@messages("pages.confirmation.p2")</p>
+        <p>@messages("pages.confirmation.p1")</p>
+        <ul class="bullets">
+            <li>@messages("pages.confirmation.bullet1")</li>
+            <li>@messages("pages.confirmation.bullet2")</li>
+        </ul>
+        <p>@messages("pages.confirmation.p2")</p>
+    </div>
 
+    <div class="form-group">
+        <h2>@messages("pages.confirmation.heading3")</h2>
+
+        <p>@messages("pages.confirmation.p3")</p>
+        <ul class="bullets">
+            <li>@messages("pages.confirmation.bullet3.1") <a href="@messages("pages.confirmation.payroll.link")">@messages("pages.confirmation.bullet3.2")</a></li>
+        </ul>
+    </div>
+
+    @govHelpers.form(action = controllers.userJourney.routes.DashboardController.dashboard()) {
+        <div class="form-group">
+            <button class="button" type="submit" id="continue" >@messages("app.common.businessRegistrationOverview")</button>
+        </div>
+    }
 }

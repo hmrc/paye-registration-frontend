@@ -7,7 +7,7 @@ app.common.continue                                     = Continue
 app.common.saveAndContinue                              = Save and continue
 app.common.next                                         = Next
 app.common.back                                         = Back
-app.common.submityourapplication                      = Submit your application
+app.common.submityourapplication                        = Submit your application
 app.common.errorSummaryLabel                            = There are errors on this page.
 app.common.change                                       = Change
 app.common.year                                         = Year
@@ -19,6 +19,7 @@ app.common.feedbackFirst                                = This is a new service.
 app.common.feedbackSecond                               = feedback.
 app.common.feedbackLinkText                             = feedback
 app.common.companyRegistrationOverview                  = Your company registration overview
+app.common.businessRegistrationOverview                 = Your business registration overview
 app.common.startNow                                     = Start now
 app.common.companies-houseinfo                          = update it with Companies House.
 
@@ -278,10 +279,15 @@ pages.confirmation.title                                = Application complete
 pages.confirmation.heading                              = Application submitted
 pages.confirmation.reference                            = Your reference number is
 pages.confirmation.heading2                             = What happens next?
-pages.confirmation.p1                                   = If your application is successful you''ll be sent:
-pages.confirmation.bullet1                              = a letter from HMRC including your PAYE and Accounts Office reference numbers within 5 working days of the company registering with Companies House
+pages.confirmation.p1                                   = If your application is successful we''ll send you:
+pages.confirmation.bullet1                              = a letter with your PAYE and Accounts Office reference numbers within 5 working days of the company registering with Companies House
 pages.confirmation.bullet2                              = an activation pin for PAYE Online within 10 working days of the company registering with Companies House
 pages.confirmation.p2                                   = You''ll need these to send payroll information to HMRC.
+pages.confirmation.heading3                             = What you can do now
+pages.confirmation.p3                                   = Find out: 
+pages.confirmation.bullet3.1                            = about
+pages.confirmation.bullet3.2                            = running payroll
+pages.confirmation.payroll.link                         = https://www.gov.uk/running-payroll
 
 ## Ineligible
 pages.ineligible.title                                  = You can''t register as an employer online
