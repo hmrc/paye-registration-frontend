@@ -135,13 +135,13 @@ pages.payeContact.nameMandatory                         = Enter a contact name
 pages.payeContactDetails.information.indent             = You need to provide at least one of the following contact details.
 
 ## Employing Staff Page
-pages.employingStaff.title                              = Will the company employ staff this year?
-pages.employingStaff.heading                            = Will the company employ staff this year?
-pages.employingStaff.legend                             = Will the company employ staff this year?
-pages.employingStaff.employingStaffRulesIntro           = ''Staff'' may be:
-pages.employingStaff.employingStaffRules1               = yourself (for example, as the only director of a limited company)
-pages.employingStaff.employingStaffRules2               = people already employed by the company
-pages.employingStaff.employingStaffRules3               = people the company expects to employ before the end of year
+pages.employingStaff.title                              = Will you employ staff in the next 2 months?
+pages.employingStaff.heading                            = Will you employ staff in the next 2 months?
+pages.employingStaff.legend                             = Will the employ staff in the next 2 months?
+pages.employingStaff.employingStaffRulesIntro           = This includes:
+pages.employingStaff.employingStaffRules1               = you if you''re a company director, plus any other directors
+pages.employingStaff.employingStaffRules2               = people already employed by you
+
 
 ## Subcontractors Page
 pages.subcontractors.title                              = Will you employ subcontractors in the construction industry?
@@ -303,8 +303,8 @@ errorPages.restart.heading                              = Sorry, we''re having t
 errorPages.restart.p1                                   = You can try again by <a href={0}>restarting</a> your PAYE registration.
 errorPages.ineligible.title                             = You don''t need to register as an employer
 errorPages.ineligible.heading                           = You don''t need to register as an employer
-errorPages.ineligible.p1                                = If you''re not going to employ staff or subcontractors this year you don''t need to register as an employer.
-errorPages.ineligible.p2                                = However, you will have to register if your plans change and you start paying:
+errorPages.ineligible.p1                                = If you''re not going to employ staff or subcontractors in the next 2 months, you don''t need to register as an employer.
+errorPages.ineligible.p2                                = However, you''ll have to register if your plans change and you start paying:
 errorPages.ineligible.l1                                = employees
 errorPages.ineligible.l2                                = subcontractors
 errorPages.ineligible.l3                                = yourself if you''re a director of a company
