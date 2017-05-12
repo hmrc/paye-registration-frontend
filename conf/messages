@@ -62,13 +62,13 @@ pages.directorEligibility.list1                         = an employee responsibl
 pages.directorEligibility.list2                         = responsible for deducting and paying Income Tax and National Insurance on non-cash payments you make to your own or other people''s employees
 
 ## Completion Capacity page
-pages.completionCapacity.title                          = What is your relationship to the business?
-pages.completionCapacity.heading                        = What is your relationship to the business?
+pages.completionCapacity.title                          = What is your relationship to the company?
+pages.completionCapacity.heading                        = What is your relationship to the company?
 
 pages.completionCapacity.director                       = Director
-pages.completionCapacity.agent                          = Agent (for example, an accountant)
-pages.completionCapacity.other                          = Other (for example, a friend of the director)
-pages.completionCapacity.other.label                    = Describe your relationship to the business
+pages.completionCapacity.agent                          = Agent for example, an accountant
+pages.completionCapacity.other                          = Other for example, a friend of the director
+pages.completionCapacity.other.label                    = Your relationship to the company
 pages.completionCapacity.other.error                    = Enter your relationship to the business using 100 characters or less
 
 ## Trading Name Page
