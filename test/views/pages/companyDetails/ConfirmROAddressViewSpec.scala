@@ -43,12 +43,12 @@ class ConfirmROAddressViewSpec extends PAYERegSpec with I18nSupport {
     lazy val view = confirmROAddress(testCompanyName, testAddress)
     lazy val document = Jsoup.parse(view.body)
 
-    "have the company company in the page title" in {
-      document.getElementById("pageHeading").text.contains(testCompanyName) shouldBe true
+    "have the correct title" in {
+      document.getElementById("pageHeading").text shouldBe messagesApi("pages.confirmRO.title")
     }
 
     "have the correct lede paragraph" in {
-      document.getElementById("lead-paragraph").text shouldBe messagesApi("pages.confirmRO.lede")
+      document.getElementById("lead-paragraph").text shouldBe messagesApi("pages.confirmRO.lede", testCompanyName)
     }
 
     "have the correct drop down text" in {
@@ -60,7 +60,7 @@ class ConfirmROAddressViewSpec extends PAYERegSpec with I18nSupport {
     }
 
     "have the correct drop down body link text" in {
-      document.getElementById("companies-house-link").text shouldBe messagesApi("app.common.companies-house")
+      document.getElementById("companies-house-link").text shouldBe messagesApi("app.common.companies-houseinfo")
     }
   }
 }

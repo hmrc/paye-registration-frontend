@@ -268,7 +268,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val document = Jsoup.parse(response.body)
       document.title() shouldBe "Confirm the company's registered office address"
-      document.getElementById("companyName").text shouldBe defaultCompanyName
+      document.getElementById("lead-paragraph").text.contains(defaultCompanyName) shouldBe true
       document.getElementById("ro-address-address-line-1").text shouldBe "14 Test Default Street"
     }
   }
