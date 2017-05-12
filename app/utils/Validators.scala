@@ -25,7 +25,8 @@ import play.api.data.validation.{ValidationError, _}
 
 object Validators extends DateUtil {
 
-  private val emailRegex = """^([A-Za-z0-9\-_.]+)@([A-Za-z0-9\-_.]+)\.[A-Za-z0-9\-_.]{2,3}$"""
+  private val emailRegex = """^(?!.{71,})([-0-9a-zA-Z.+_]+@[-0-9a-zA-Z.+_]+\.[a-zA-Z]{2,4})$"""
+  private val emailLength = """[A-Za-z0-9\-_.@]{1,70}"""
   private val phoneNoTypeRegex = """^[0-9 ]{1,20}$""".r
   private val nonEmptyRegex = """^(?=\s*\S).*$""".r
   private val validNinoFormat = "[[A-Z]&&[^DFIQUV]][[A-Z]&&[^DFIQUVO]] ?\\d{2} ?\\d{2} ?\\d{2} ?[A-D]{1}"
@@ -44,8 +45,8 @@ object Validators extends DateUtil {
   val emailValidation: Constraint[String] = Constraint("constraints.emailCheck")({
     text =>
       val errors = text.trim match {
-        case tooLong if text.length > 70 => Seq(ValidationError("pages.businessContact.email.tooLong"))
         case wrong if !text.matches(emailRegex) => Seq(ValidationError("errors.invalid.email"))
+        case tooLong if !text.matches(emailLength) => Seq(ValidationError("pages.businessContact.email.tooLong"))
         case _ => Nil
       }
       if(errors.isEmpty) Valid else Invalid(errors)
