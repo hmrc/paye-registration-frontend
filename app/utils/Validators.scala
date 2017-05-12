@@ -31,6 +31,7 @@ object Validators extends DateUtil {
   private val validNinoFormat = "[[A-Z]&&[^DFIQUV]][[A-Z]&&[^DFIQUVO]] ?\\d{2} ?\\d{2} ?\\d{2} ?[A-D]{1}"
   private val invalidPrefixes = List("BG", "GB", "NK", "KN", "TN", "NT", "ZZ")
   private val natureOfBusinessRegex = """^[A-Za-z 0-9\-,/&']{1,100}$""".r
+  val postcodeRegex = """^[A-Z]{1,2}[0-9][0-9A-Z]? [0-9][A-Z]{2}$"""
   private def hasValidPrefix(nino: String) = !invalidPrefixes.exists(nino.startsWith)
 
   def isValidNino(nino: String): Boolean = nino.nonEmpty && hasValidPrefix(nino) && nino.matches(validNinoFormat)

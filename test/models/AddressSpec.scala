@@ -139,7 +139,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
             |  }
             |}""".stripMargin)
 
-        val res = outcomeAddress(country = Some("UK"))
+        val res = outcomeAddress(country = Some("United Kingdom"))
 
         Json.fromJson[Address](tstJson)(Address.adressLookupReads) shouldBe JsSuccess(res)
       }
@@ -159,6 +159,26 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
 
         Json.fromJson[Address](tstJson)(Address.adressLookupReads) shouldBe JsSuccess(res)
       }
+      "postcode is invalid but country is completed" in {
+        val tstJson = Json.parse(
+          """{
+            |  "address":{
+            |    "lines":[
+            |      "14 St Test Walker",
+            |      "Testford"
+            |    ],
+            |    "postcode":"Inval!d P0STCODE",
+            |    "country":{
+            |      "code":"UK",
+            |      "name":"United Kingdom"
+            |    }
+            |  }
+            |}""".stripMargin)
+
+        val res = outcomeAddress(country = Some("United Kingdom"))
+
+        Json.fromJson[Address](tstJson)(Address.adressLookupReads) shouldBe JsSuccess(res)
+      }
     }
 
     "fail" when {
@@ -174,7 +194,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
             |}""".stripMargin)
 
         val result = Json.fromJson[Address](tstJson)(Address.adressLookupReads)
-        shouldHaveErrors(result, JsPath(), Seq(ValidationError("neither string nor country were defined")))
+        shouldHaveErrors(result, JsPath(), Seq(ValidationError("No postcode and no country to default to")))
       }
       "only one address line is completed" in {
         val tstJson = Json.parse(
@@ -189,6 +209,21 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
 
         val result = Json.fromJson[Address](tstJson)(Address.adressLookupReads)
         shouldHaveErrors(result, JsPath(), Seq(ValidationError("only 1 lines provided from address-lookup-frontend")))
+      }
+      "postcode is invalid and country is not completed" in {
+        val tstJson = Json.parse(
+          """{
+            |  "address":{
+            |    "lines":[
+            |      "14 St Test Walker",
+            |      "Testford"
+            |    ],
+            |    "postcode":"Inval!d P0STCODE"
+            |  }
+            |}""".stripMargin)
+
+        val result = Json.fromJson[Address](tstJson)(Address.adressLookupReads)
+        shouldHaveErrors(result, JsPath(), Seq(ValidationError("Invalid postcode and no country to default to")))
       }
     }
   }
