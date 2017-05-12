@@ -45,8 +45,8 @@ object Validators extends DateUtil {
   val emailValidation: Constraint[String] = Constraint("constraints.emailCheck")({
     text =>
       val errors = text.trim match {
-        case tooLong if !text.matches(emailLength) => Seq(ValidationError("pages.businessContact.email.tooLong"))
         case wrong if !text.matches(emailRegex) => Seq(ValidationError("errors.invalid.email"))
+        case tooLong if !text.matches(emailLength) => Seq(ValidationError("pages.businessContact.email.tooLong"))
         case _ => Nil
       }
       if(errors.isEmpty) Valid else Invalid(errors)

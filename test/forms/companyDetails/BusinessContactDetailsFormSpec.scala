@@ -188,7 +188,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
           "mobileNumber" -> "",
           "phoneNumber" -> ""
         ),
-        List(FormError("businessEmail",List("pages.businessContact.email.tooLong"),List())),
+        List(FormError("businessEmail",List("errors.invalid.email"),List())),
         None
       )
 
