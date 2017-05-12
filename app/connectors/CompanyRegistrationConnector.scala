@@ -56,9 +56,9 @@ trait CompanyRegistrationConnect {
   def getCompanyRegistrationDetails(regId: String)(implicit hc : HeaderCarrier) : Future[CompanyProfile] = {
     val companyRegTimer = metricsService.companyRegistrationResponseTimer.time()
 
-    val url = if (useCompanyRegistration) s"$companyRegistrationUrl$companyRegistrationUri" else s"$stubUrl$stubUri"
+    val url = if (useCompanyRegistration) s"$companyRegistrationUrl$companyRegistrationUri/corporation-tax-registration" else s"$stubUrl$stubUri"
 
-    http.GET[JsObject](s"$url/$regId") map {
+    http.GET[JsObject](s"$url/$regId/corporation-tax-registration") map {
       response =>
         companyRegTimer.stop()
         val status = (response \ "status").as[String]

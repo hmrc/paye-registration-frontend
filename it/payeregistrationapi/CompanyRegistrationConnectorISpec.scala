@@ -49,8 +49,8 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
   val regId = "12345"
   implicit val hc = HeaderCarrier()
 
-  val stubUrl = s"/incorporation-frontend-stubs/$regId"
-  val url = s"/corporation-tax-registration/$regId"
+  val stubUrl = s"/incorporation-frontend-stubs/$regId/corporation-tax-registration"
+  val url = s"/company-registration/corporation-tax-registration/$regId/corporation-tax-registration"
 
   "getCompanyRegistrationDetails" should {
     def responseBody(transId: String) =

@@ -109,7 +109,7 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
         "ENG")
 
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfile).toString)
-      stubGet(s"/incorporation-frontend-stubs/$regId", 200, companyRegistrationResp)
+      stubGet(s"/incorporation-frontend-stubs/$regId/corporation-tax-registration", 200, companyRegistrationResp)
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/keystore/paye-registration-frontend/${sessionId}/data/CurrentProfile", 200, dummyS4LResponse)
 
@@ -151,7 +151,7 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
         "ENG")
 
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfile).toString)
-      stubGet(s"/corporation-tax-registration/$regId", 200, companyRegistrationResp)
+      stubGet(s"/company-registration/corporation-tax-registration/$regId/corporation-tax-registration", 200, companyRegistrationResp)
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/keystore/paye-registration-frontend/${sessionId}/data/CurrentProfile", 200, dummyS4LResponse)
 
