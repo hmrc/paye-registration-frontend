@@ -150,7 +150,7 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
     "Have the correct error if email is invalid" in {
       val data: Map[String,String] = Map(
         "name" -> "testName",
-        "digitalContact.contactEmail" -> "NotAProperEmail!!!!!",
+        "digitalContact.contactEmail" -> "NotAProperEmail",
         "digitalContact.mobileNumber" -> "",
         "digitalContact.phoneNumber" -> ""
       )
