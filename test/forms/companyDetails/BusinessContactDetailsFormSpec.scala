@@ -111,7 +111,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
 
     "Have the correct error if email is invalid" in {
       val data: Map[String,String] = Map(
-        "businessEmail" -> "NotAProperEmail!!!!!",
+        "businessEmail" -> "NotAProperEmail",
         "mobileNumber" -> "",
         "phoneNumber" -> ""
       )
@@ -119,7 +119,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
       val errForm = Form(
         testForm.mapping,
         Map(
-          "businessEmail" -> "NotAProperEmail!!!!!",
+          "businessEmail" -> "NotAProperEmail",
           "mobileNumber" -> "",
           "phoneNumber" -> ""
         ),
@@ -188,7 +188,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
           "mobileNumber" -> "",
           "phoneNumber" -> ""
         ),
-        List(FormError("businessEmail",List("pages.businessContact.email.tooLong"),List())),
+        List(FormError("businessEmail",List("errors.invalid.email"),List())),
         None
       )
 

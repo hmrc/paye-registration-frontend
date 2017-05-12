@@ -34,5 +34,4 @@ object BusinessContactDetailsForm extends OneOfManyForm {
       "phoneNumber" -> optional(text.verifying(phoneNumberValidation))
     )(DigitalContactDetails.apply)(DigitalContactDetails.unapply).verifying()
   )
-
 }
