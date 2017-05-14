@@ -23,43 +23,49 @@ import models.external.{CHROAddress, CoHoCompanyDetailsModel, Officer, OfficerLi
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier, NotFoundException}
+import utils.PAYEFeatureSwitch
 
 import scala.concurrent.Future
 
 class IncorporationInformationConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
 
-  val testUrl = "testCohoAPIUrl"
-  val testUri = "testCohoAPIUri"
+  val testUrl = "testIIUrl"
+  val testUri = "testIIUri"
+  val testStubUrl = "testIIStubUrl"
+  val testStubUri = "testIIStubUri"
   implicit val hc = HeaderCarrier()
+  val mockFeatureSwitch = mock[PAYEFeatureSwitch]
 
-  class Setup {
+  class Setup(unStubbed: Boolean) {
     val connector = new IncorporationInformationConnect {
-      val coHoAPIUrl = testUrl
-      val coHoAPIUri = testUri
+      val stubUrl = testStubUrl
+      val stubUri = testStubUri
       val incorpInfoUrl = testUrl
       val incorpInfoUri = testUri
       override val http : WSHttp = mockWSHttp
       override val metricsService = new MockMetrics
+      override val featureSwitch = mockFeatureSwitch
+      override def useIncorpInformation = unStubbed
     }
   }
 
 
   "getCoHoCompanyDetails" should {
-    "return a successful CoHo api response object for valid data" in new Setup {
-      mockHttpGet[CoHoCompanyDetailsModel](connector.coHoAPIUrl, Future.successful(validCoHoCompanyDetailsResponse))
+    "return a successful CoHo api response object for valid data" in new Setup(true) {
+      mockHttpGet[CoHoCompanyDetailsModel](connector.incorpInfoUrl, Future.successful(validCoHoCompanyDetailsResponse))
 
       await(connector.getCoHoCompanyDetails("testRegID")) shouldBe IncorpInfoSuccessResponse(validCoHoCompanyDetailsResponse)
     }
 
-    "return a CoHo Bad Request api response object for a bad request" in new Setup {
-      mockHttpGet[CoHoCompanyDetailsModel](connector.coHoAPIUrl, Future.failed(new BadRequestException("tstException")))
+    "return a CoHo Bad Request api response object for a bad request" in new Setup(true) {
+      mockHttpGet[CoHoCompanyDetailsModel](connector.incorpInfoUrl, Future.failed(new BadRequestException("tstException")))
 
       await(connector.getCoHoCompanyDetails("testRegID")) shouldBe IncorpInfoBadRequestResponse
     }
 
-    "return a CoHo error api response object for a downstream error" in new Setup {
+    "return a CoHo error api response object for a downstream error" in new Setup(true) {
       val ex = new RuntimeException("tstException")
-      mockHttpGet[CoHoCompanyDetailsModel](connector.coHoAPIUrl, Future.failed(ex))
+      mockHttpGet[CoHoCompanyDetailsModel](connector.incorpInfoUrl, Future.failed(ex))
 
       await(connector.getCoHoCompanyDetails("testRegID")) shouldBe IncorpInfoErrorResponse(ex)
     }
@@ -81,21 +87,21 @@ class IncorporationInformationConnectorSpec extends PAYERegSpec with CoHoAPIFixt
 
     val testTransId = "testTransId"
 
-    "return a successful CoHo api response object for valid data" in new Setup {
-      mockHttpGet[CHROAddress](connector.coHoAPIUrl, Future.successful(testAddr))
+    "return a successful CoHo api response object for valid data" in new Setup(true) {
+      mockHttpGet[CHROAddress](connector.incorpInfoUrl, Future.successful(testAddr))
 
       await(connector.getRegisteredOfficeAddress(testTransId)) shouldBe testAddr
     }
 
-    "return a CoHo Bad Request api response object for a bad request" in new Setup {
-      mockHttpGet[CHROAddress](connector.coHoAPIUrl, Future.failed(new BadRequestException("tstException")))
+    "return a CoHo Bad Request api response object for a bad request" in new Setup(true) {
+      mockHttpGet[CHROAddress](connector.incorpInfoUrl, Future.failed(new BadRequestException("tstException")))
 
       intercept[BadRequestException](await(connector.getRegisteredOfficeAddress(testTransId)))
     }
 
-    "return a CoHo error api response object for a downstream error" in new Setup {
+    "return a CoHo error api response object for a downstream error" in new Setup(true) {
       val ex = new RuntimeException("tstException")
-      mockHttpGet[CHROAddress](connector.coHoAPIUrl, Future.failed(ex))
+      mockHttpGet[CHROAddress](connector.incorpInfoUrl, Future.failed(ex))
 
       intercept[RuntimeException](await(connector.getRegisteredOfficeAddress(testTransId)) )
     }
@@ -122,27 +128,27 @@ class IncorporationInformationConnectorSpec extends PAYERegSpec with CoHoAPIFixt
 
     val testTransId = "testTransId"
 
-    "return a successful CoHo api response object for valid data" in new Setup {
-      mockHttpGet[OfficerList](connector.coHoAPIUrl, Future.successful(tstOfficerList))
+    "return a successful CoHo api response object for valid data" in new Setup(true) {
+      mockHttpGet[OfficerList](connector.incorpInfoUrl, Future.successful(tstOfficerList))
 
       await(connector.getOfficerList(testTransId)) shouldBe tstOfficerList
     }
 
-    "return a successful empty CoHo api response object for a not found request" in new Setup {
-      mockHttpGet[OfficerList](connector.coHoAPIUrl, Future.failed(new NotFoundException("tstException")))
+    "return a successful empty CoHo api response object for a not found request" in new Setup(true) {
+      mockHttpGet[OfficerList](connector.incorpInfoUrl, Future.failed(new NotFoundException("tstException")))
 
       await(connector.getOfficerList(testTransId)) shouldBe OfficerList(items = Nil)
     }
 
-    "return a CoHo Bad Request api response object for a bad request" in new Setup {
-      mockHttpGet[OfficerList](connector.coHoAPIUrl, Future.failed(new BadRequestException("tstException")))
+    "return a CoHo Bad Request api response object for a bad request" in new Setup(true) {
+      mockHttpGet[OfficerList](connector.incorpInfoUrl, Future.failed(new BadRequestException("tstException")))
 
       intercept[BadRequestException](await(connector.getOfficerList(testTransId)))
     }
 
-    "return a CoHo error api response object for a downstream error" in new Setup {
+    "return a CoHo error api response object for a downstream error" in new Setup(true) {
       val ex = new RuntimeException("tstException")
-      mockHttpGet[OfficerList](connector.coHoAPIUrl, Future.failed(ex))
+      mockHttpGet[OfficerList](connector.incorpInfoUrl, Future.failed(ex))
 
       intercept[RuntimeException](await(connector.getOfficerList(testTransId)) )
     }

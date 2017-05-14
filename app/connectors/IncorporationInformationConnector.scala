@@ -25,19 +25,21 @@ import services.{MetricsService, MetricsSrv}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
-import utils.RegistrationWhitelist
+import utils.{PAYEFeatureSwitches, PAYEFeatureSwitch, RegistrationWhitelist}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class IncorporationInformationConnector @Inject()(injMetrics: MetricsService) extends IncorporationInformationConnect with ServicesConfig {
-  lazy val coHoAPIUrl = baseUrl("coho-api")
-  lazy val coHoAPIUri = getConfString("coho-api.uri","")
+class IncorporationInformationConnector @Inject()(injFeatureSwitch: PAYEFeatureSwitch,
+                                                  injMetrics: MetricsService) extends IncorporationInformationConnect with ServicesConfig {
   lazy val incorpInfoUrl = baseUrl("incorporation-information")
   lazy val incorpInfoUri = getConfString("incorporation-information.uri","")
+  lazy val stubUrl: String = baseUrl("incorporation-frontend-stubs")
+  lazy val stubUri: String = getConfString("incorporation-frontend-stubs.uri","")
   val http : WSHttp = WSHttp
   val metricsService = injMetrics
+  val featureSwitch = injFeatureSwitch
 }
 
 sealed trait IncorpInfoResponse
@@ -48,17 +50,18 @@ case class IncorpInfoROAddress(response : CHROAddress) extends IncorpInfoRespons
 
 trait IncorporationInformationConnect extends RegistrationWhitelist {
 
-  val coHoAPIUrl: String
-  val coHoAPIUri: String
+  val stubUrl: String
+  val stubUri: String
   val incorpInfoUrl: String
   val incorpInfoUri: String
   val http: WSHttp
   val metricsService: MetricsSrv
+  val featureSwitch: PAYEFeatureSwitches
 
   def getCoHoCompanyDetails(registrationID: String)(implicit hc: HeaderCarrier): Future[IncorpInfoResponse] = {
     ifRegIdNotWhitelisted(registrationID) {
       val cohoApiTimer = metricsService.cohoAPIResponseTimer.time()
-      http.GET[CoHoCompanyDetailsModel](s"$coHoAPIUrl$coHoAPIUri/company/$registrationID") map { res =>
+      http.GET[CoHoCompanyDetailsModel](s"$constructIIUrl/company/$registrationID") map { res =>
         cohoApiTimer.stop()
         IncorpInfoSuccessResponse(res)
       } recover {
@@ -76,7 +79,7 @@ trait IncorporationInformationConnect extends RegistrationWhitelist {
 
   def getRegisteredOfficeAddress(transactionId: String)(implicit hc : HeaderCarrier): Future[CHROAddress] = {
     val cohoApiTimer = metricsService.cohoAPIResponseTimer.time()
-    http.GET[CHROAddress](s"$coHoAPIUrl$coHoAPIUri/$transactionId/ro-address") map { roAddress =>
+    http.GET[CHROAddress](s"$constructIIUrl/$transactionId/ro-address") map { roAddress =>
       cohoApiTimer.stop()
       roAddress
     } recover {
@@ -109,5 +112,17 @@ trait IncorporationInformationConnect extends RegistrationWhitelist {
         cohoApiTimer.stop()
         throw ex
     }
+  }
+
+  private[connectors] def constructIIUrl: String = {
+    if(useIncorpInformation) {
+      s"$incorpInfoUrl$incorpInfoUri"
+    } else {
+      s"$stubUrl$stubUri"
+    }
+  }
+
+  private[connectors] def useIncorpInformation: Boolean = {
+    featureSwitch.incorpInfo.enabled
   }
 }

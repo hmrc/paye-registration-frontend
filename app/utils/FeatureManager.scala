@@ -54,6 +54,7 @@ trait FeatureManager {
 class PAYEFeatureSwitch @Inject()(injManager: FeatureSwitchManager) extends PAYEFeatureSwitches {
   val addressLookupUrl = "addressService"
   val companyRegistration = "companyRegistration"
+  val incorporationInformation = "incorporationInformation"
   val manager = injManager
 }
 
@@ -61,14 +62,17 @@ trait PAYEFeatureSwitches {
 
   val addressLookupUrl: String
   val companyRegistration: String
+  val incorporationInformation: String
   val manager: FeatureManager
 
   def addressLookupFrontend = manager.getProperty(addressLookupUrl)
   def companyReg = manager.getProperty(companyRegistration)
+  def incorpInfo = manager.getProperty(incorporationInformation)
 
   def apply(name: String): Option[FeatureSwitch] = name match {
     case "addressService" => Some(addressLookupFrontend)
     case "companyRegistration" => Some(companyReg)
+    case "incorporationInformation" => Some(incorpInfo)
     case _ => None
   }
 }

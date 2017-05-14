@@ -28,23 +28,23 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.Future
 
 @Singleton
-class TestCoHoAPIConnector @Inject()() extends TestCoHoAPIConnect with ServicesConfig {
-  val coHoAPIUrl = baseUrl("coho-api")
+class TestIncorpInfoConnector @Inject()() extends TestIncorpInfoConnect with ServicesConfig {
+  val incorpInfoUrl = baseUrl("incorporation-frontend-stubs")
   val http : WSHttp = WSHttp
 }
 
-trait TestCoHoAPIConnect {
+trait TestIncorpInfoConnect {
 
-  val coHoAPIUrl: String
+  val incorpInfoUrl: String
   val http: WSHttp
 
   def addCoHoCompanyDetails(coHoCompanyDetailsModel: CoHoCompanyDetailsModel)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val json = Json.toJson[CoHoCompanyDetailsModel](coHoCompanyDetailsModel)
-    http.POST[JsValue, HttpResponse](s"$coHoAPIUrl/incorporation-frontend-stubs/test-only/insert-company-details", json)
+    http.POST[JsValue, HttpResponse](s"$incorpInfoUrl/incorporation-frontend-stubs/test-only/insert-company-details", json)
   }
 
   def tearDownCoHoCompanyDetails(regId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    http.GET[HttpResponse](s"$coHoAPIUrl/incorporation-frontend-stubs/test-only/wipe-individual-company-details/$regId")
+    http.GET[HttpResponse](s"$incorpInfoUrl/incorporation-frontend-stubs/test-only/wipe-individual-company-details/$regId")
   }
 
   def setupOfficers(regId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
@@ -137,10 +137,10 @@ trait TestCoHoAPIConnect {
          |}
     """.stripMargin)
 
-    http.POST[JsValue, HttpResponse](s"$coHoAPIUrl/incorporation-frontend-stubs/insert-data", officers)
+    http.POST[JsValue, HttpResponse](s"$incorpInfoUrl/incorporation-frontend-stubs/insert-data", officers)
   }
 
   def teardownOfficers()(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    http.PUT[String, HttpResponse](s"$coHoAPIUrl/incorporation-frontend-stubs/wipe-data", "")
+    http.PUT[String, HttpResponse](s"$incorpInfoUrl/incorporation-frontend-stubs/wipe-data", "")
   }
 }

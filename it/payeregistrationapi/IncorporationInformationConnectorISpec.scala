@@ -17,14 +17,14 @@ package payeregistrationapi
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.{IncorpInfoSuccessResponse, IncorporationInformationConnector}
-import itutil.{IntegrationSpecBase, LoginStub, WiremockHelper}
+import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.api.Name
 import models.external.{CHROAddress, CoHoCompanyDetailsModel, Officer, OfficerList}
-import play.api.http.HeaderNames
 import play.api.{Application, Play}
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.MetricsService
 import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
+import utils.PAYEFeatureSwitch
 
 class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
 
@@ -33,16 +33,22 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
   val mockUrl = s"http://$mockHost:$mockPort"
 
   lazy val metrics = Play.current.injector.instanceOf[MetricsService]
+  lazy val featureSwitch = Play.current.injector.instanceOf[PAYEFeatureSwitch]
+
+  val incorpInfoUri = "/incorpInfoUri"
+  val stubbedUri = "/stubbedUri"
 
   val additionalConfiguration = Map(
-    "microservice.services.coho-api.host" -> s"$mockHost",
-    "microservice.services.coho-api.port" -> s"$mockPort",
+    "microservice.services.incorporation-frontend-stubs.host" -> s"$mockHost",
+    "microservice.services.incorporation-frontend-stubs.port" -> s"$mockPort",
     "microservice.services.incorporation-information.host" -> s"$mockHost",
     "microservice.services.incorporation-information.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
     "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng==",
     "defaultCTStatus" -> "aGVsZA==",
-    "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ=="
+    "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ==",
+    "microservice.services.incorporation-information.uri" -> incorpInfoUri,
+    "microservice.services.incorporation-frontend-stubs.uri" -> stubbedUri
   )
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
@@ -51,6 +57,9 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
 
   val testTransId = "testTransId"
   implicit val hc = HeaderCarrier()
+
+  def stub() = await(buildClient("/test-only/feature-flag/incorporationInformation/false").get())
+  def unStub() = await(buildClient("/test-only/feature-flag/incorporationInformation/true").get())
 
   "getCoHoCompanyDetails" should {
     "get a default CoHo Company Details when the regId is part of the whitelist" in {
@@ -63,7 +72,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
                                                     Seq.empty)
                                                 )
 
-      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      val incorpInfoConnector = new IncorporationInformationConnector(featureSwitch, metrics)
       def getResponse = incorpInfoConnector.getCoHoCompanyDetails(regIdWhitelisted)
 
       await(getResponse) shouldBe incorpInfoSuccessCoHoCompanyDetails
@@ -71,7 +80,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
   }
 
   "getRegisteredOfficeAddress" should {
-    val url = s"/incorporation-frontend-stubs/$testTransId/ro-address"
+    val url = s"$incorpInfoUri/$testTransId/ro-address"
 
     val addressModel =
       CHROAddress(
@@ -85,7 +94,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
         None
       )
 
-    def setupStubResult(status: Int, body: String) =
+    def setupWiremockResult(status: Int, body: String) =
       stubFor(get(urlMatching(url))
         .willReturn(
           aResponse()
@@ -105,38 +114,56 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
 
     "get a registered office address" in {
 
-      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
-
+      val incorpInfoConnector = new IncorporationInformationConnector(featureSwitch, metrics)
+      unStub()
       def getResponse = incorpInfoConnector.getRegisteredOfficeAddress(testTransId)
 
-      setupStubResult(200, testAddress)
+      setupWiremockResult(200, testAddress)
 
       await(getResponse) shouldBe addressModel
     }
 
     "throw a BadRequestException" in {
-      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      val incorpInfoConnector = new IncorporationInformationConnector(featureSwitch, metrics)
 
       def getResponse = incorpInfoConnector.getRegisteredOfficeAddress(testTransId)
-
-      setupStubResult(400, "")
+      unStub()
+      setupWiremockResult(400, "")
 
       intercept[BadRequestException](await(incorpInfoConnector.getRegisteredOfficeAddress(testTransId)))
     }
 
     "throw an Exception" in {
-      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      val incorpInfoConnector = new IncorporationInformationConnector(featureSwitch, metrics)
 
       def getResponse = incorpInfoConnector.getRegisteredOfficeAddress(testTransId)
-
-      setupStubResult(500, "")
+      unStub()
+      setupWiremockResult(500, "")
 
       intercept[Exception](await(incorpInfoConnector.getRegisteredOfficeAddress(testTransId)))
+    }
+
+    "get a registered office address when stubbed" in {
+      val stubbedUrl = s"$stubbedUri/$testTransId/ro-address"
+
+      val incorpInfoConnector = new IncorporationInformationConnector(featureSwitch, metrics)
+      stub()
+      def getResponse = incorpInfoConnector.getRegisteredOfficeAddress(testTransId)
+
+      stubFor(get(urlMatching(stubbedUrl))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(testAddress)
+        )
+      )
+
+      await(getResponse) shouldBe addressModel
     }
   }
 
   "getOfficerList" should {
-    val url = s"/incorporation-information/$testTransId/officer-list"
+    val url = s"$incorpInfoUri/$testTransId/officer-list"
 
     val tstOfficerListModel = OfficerList(
       items = Seq(
@@ -155,7 +182,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
       )
     )
 
-    def setupStubResult(status: Int, body: String) =
+    def setupWiremockResult(status: Int, body: String) =
       stubFor(get(urlMatching(url))
         .willReturn(
           aResponse()
@@ -189,43 +216,53 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
 
     "get an officer list" in {
 
-      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      val incorpInfoConnector = new IncorporationInformationConnector(featureSwitch, metrics)
 
       def getResponse = incorpInfoConnector.getOfficerList(testTransId)
-
-      setupStubResult(200, tstOfficerListJson)
+      unStub()
+      setupWiremockResult(200, tstOfficerListJson)
 
       await(getResponse) shouldBe tstOfficerListModel
     }
 
     "get an empty officer list when CoHo API returns a NotFoundException" in {
-      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      val incorpInfoConnector = new IncorporationInformationConnector(featureSwitch, metrics)
 
       def getResponse = incorpInfoConnector.getOfficerList(testTransId)
-
-      setupStubResult(404, "")
+      unStub()
+      setupWiremockResult(404, "")
 
       await(getResponse) shouldBe OfficerList(items = Nil)
     }
 
     "throw a BadRequestException" in {
-      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      val incorpInfoConnector = new IncorporationInformationConnector(featureSwitch, metrics)
 
       def getResponse = incorpInfoConnector.getOfficerList(testTransId)
-
-      setupStubResult(400, "")
+      unStub()
+      setupWiremockResult(400, "")
 
       intercept[BadRequestException](await(incorpInfoConnector.getOfficerList(testTransId)))
     }
 
     "throw an Exception" in {
-      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      val incorpInfoConnector = new IncorporationInformationConnector(featureSwitch, metrics)
 
       def getResponse = incorpInfoConnector.getOfficerList(testTransId)
-
-      setupStubResult(500, "")
+      unStub()
+      setupWiremockResult(500, "")
 
       intercept[Exception](await(incorpInfoConnector.getOfficerList(testTransId)))
+    }
+
+    "get an officer list from II when stub is in place for other II calls" in {
+      val incorpInfoConnector = new IncorporationInformationConnector(featureSwitch, metrics)
+
+      def getResponse = incorpInfoConnector.getOfficerList(testTransId)
+      stub()
+      setupWiremockResult(200, tstOfficerListJson)
+
+      await(getResponse) shouldBe tstOfficerListModel
     }
   }
 }

@@ -17,7 +17,7 @@
 package controllers.test
 
 import builders.AuthBuilder
-import connectors.test.{TestBusinessRegConnect, TestCoHoAPIConnect, TestPAYERegConnect}
+import connectors.test.{TestBusinessRegConnect, TestIncorpInfoConnect, TestPAYERegConnect}
 import enums.DownstreamOutcome
 import models.external.BusinessProfile
 import models.test.CoHoCompanyDetailsFormModel
@@ -31,7 +31,7 @@ import scala.concurrent.Future
 class TestSetupControllerSpec extends PAYERegSpec {
   val mockTestBusRegConnector = mock[TestBusinessRegConnect]
   val mockCoHoAPIService = mock[IncorporationInformationSrv]
-  val mockTestAPIConnector = mock[TestCoHoAPIConnect]
+  val mockTestAPIConnector = mock[TestIncorpInfoConnect]
   val mockPayeRegConnector = mock[TestPAYERegConnect]
   val mockPayeRegService = mock[PAYERegistrationSrv]
   val mockS4LService = mock[S4LSrv]
@@ -42,7 +42,7 @@ class TestSetupControllerSpec extends PAYERegSpec {
       override val keystoreConnector = mockKeystoreConnector
       override val testBusinessRegConnector = mockTestBusRegConnector
       override val authConnector = mockAuthConnector
-      override val testCoHoAPIConnector = mockTestAPIConnector
+      override val testIncorpInfoConnector = mockTestAPIConnector
       override val coHoAPIService = mockCoHoAPIService
       override val messagesApi = mockMessages
       override val payeRegService = mockPayeRegService
