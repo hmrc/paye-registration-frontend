@@ -50,24 +50,24 @@ class CoHoAPIServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFi
 
     "return a successful DownstreamOutcome for a successful response from the CoHo API" in new Setup {
       mockKeystoreFetchAndGet[BusinessProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
-      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(tstSuccessResult))
+      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(tstSuccessResult))
       mockKeystoreCache[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, CacheMap("map", Map.empty))
 
-      await(service.fetchAndStoreCoHoCompanyDetails("123")) shouldBe DownstreamOutcome.Success
+      await(service.fetchAndStoreCoHoCompanyDetails("regId", "txId")) shouldBe DownstreamOutcome.Success
     }
 
     "return a failed DownstreamOutcome for a Bad Request response from the CoHo API" in new Setup {
       mockKeystoreFetchAndGet[BusinessProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
-      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(tstBadRequestResult))
+      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(tstBadRequestResult))
 
-      await(service.fetchAndStoreCoHoCompanyDetails("123")) shouldBe DownstreamOutcome.Failure
+      await(service.fetchAndStoreCoHoCompanyDetails("regId", "txId")) shouldBe DownstreamOutcome.Failure
     }
 
     "return a failed DownstreamOutcome for an Internal Exception response from the CoHo API" in new Setup {
       mockKeystoreFetchAndGet[BusinessProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
-      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(tstInternalErrorResult))
+      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(tstInternalErrorResult))
 
-      await(service.fetchAndStoreCoHoCompanyDetails("123")) shouldBe DownstreamOutcome.Failure
+      await(service.fetchAndStoreCoHoCompanyDetails("regId", "txId")) shouldBe DownstreamOutcome.Failure
     }
   }
 

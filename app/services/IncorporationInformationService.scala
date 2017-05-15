@@ -41,9 +41,9 @@ trait IncorporationInformationSrv {
   val coHoAPIConnector : IncorporationInformationConnect
   val keystoreConnector : KeystoreConnect
 
-  def fetchAndStoreCoHoCompanyDetails(txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def fetchAndStoreCoHoCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
-      coHoResp <- coHoAPIConnector.getCoHoCompanyDetails(txId)
+      coHoResp <- coHoAPIConnector.getCoHoCompanyDetails(regId, txId)
       outcome <- processCoHoResponse(coHoResp)
     } yield outcome
   }

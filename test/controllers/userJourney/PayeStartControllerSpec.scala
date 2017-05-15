@@ -98,7 +98,7 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("held")))
 
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(DownstreamOutcome.Failure)
 
       AuthBuilder.showWithAuthorisedUser(controller.startPaye, mockAuthConnector) {
@@ -113,7 +113,7 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
 
       mockFetchCurrentProfile()
 
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(DownstreamOutcome.Success)
 
       when(mockPAYERegService.assertRegistrationFootprint(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
@@ -131,7 +131,7 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("held")))
 
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(DownstreamOutcome.Success)
 
       when(mockPAYERegService.assertRegistrationFootprint(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))

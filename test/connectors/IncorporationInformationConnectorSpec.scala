@@ -52,20 +52,20 @@ class IncorporationInformationConnectorSpec extends PAYERegSpec with CoHoAPIFixt
     "return a successful CoHo api response object for valid data" in new Setup(true) {
       mockHttpGet[CoHoCompanyDetailsModel](connector.incorpInfoUrl, Future.successful(validCoHoCompanyDetailsResponse))
 
-      await(connector.getCoHoCompanyDetails("testRegID")) shouldBe IncorpInfoSuccessResponse(validCoHoCompanyDetailsResponse)
+      await(connector.getCoHoCompanyDetails("testRegID", "testTxID")) shouldBe IncorpInfoSuccessResponse(validCoHoCompanyDetailsResponse)
     }
 
     "return a CoHo Bad Request api response object for a bad request" in new Setup(true) {
       mockHttpGet[CoHoCompanyDetailsModel](connector.incorpInfoUrl, Future.failed(new BadRequestException("tstException")))
 
-      await(connector.getCoHoCompanyDetails("testRegID")) shouldBe IncorpInfoBadRequestResponse
+      await(connector.getCoHoCompanyDetails("testRegID", "testTxID")) shouldBe IncorpInfoBadRequestResponse
     }
 
     "return a CoHo error api response object for a downstream error" in new Setup(true) {
       val ex = new RuntimeException("tstException")
       mockHttpGet[CoHoCompanyDetailsModel](connector.incorpInfoUrl, Future.failed(ex))
 
-      await(connector.getCoHoCompanyDetails("testRegID")) shouldBe IncorpInfoErrorResponse(ex)
+      await(connector.getCoHoCompanyDetails("testRegID", "testTxID")) shouldBe IncorpInfoErrorResponse(ex)
     }
   }
 

@@ -46,6 +46,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
     "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng==",
     "defaultCTStatus" -> "aGVsZA==",
     "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ==",
+    "defaultCHROAddress" -> "eyJsaW5lMSI6IjMwIFRlc3QgUm9hZCIsImxpbmUyIjoiVGVzdGxleSIsImxpbmUzIjoiVGVzdGZvcmQiLCJsaW5lNCI6IlRlc3RzaGlyZSIsInBvc3RDb2RlIjoiVEUxIDNTVCJ9",
     "microservice.services.incorporation-information.uri" -> incorpInfoUri
   )
 
@@ -83,6 +84,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
 
     val testCompanyDetailsJson =
         """
+          |{
           |  "company_name":"test company",
           |  "registered_office_address":{
           |    "premises":"1",
@@ -91,12 +93,13 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
           |    "country":"UK",
           |    "postal_code":"TE2 2ST"
           |  }
+          |}
         """.stripMargin
 
     "fetch and convert company details" in {
 
       val incorpInfoConnector = new IncorporationInformationConnector(metrics)
-      def getResponse = incorpInfoConnector.getCoHoCompanyDetails(testTransId)
+      def getResponse = incorpInfoConnector.getCoHoCompanyDetails("regID", testTransId)
 
       setupWiremockResult(200, testCompanyDetailsJson)
 
@@ -109,9 +112,9 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
       val defaultCompanyName = "TEST-DEFAULT-COMPANY-NAME"
       val defaultROAddress = Address(
         "30 Test Road",
-        "Testford",
-        Some("Testley"),
+        "Testley",
         Some("Testford"),
+        Some("Testshire"),
         Some("TE1 3ST"),
         None
       )
@@ -122,7 +125,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
       )
 
       val incorpInfoConnector = new IncorporationInformationConnector(metrics)
-      def getResponse = incorpInfoConnector.getCoHoCompanyDetails(regIdWhitelisted)
+      def getResponse = incorpInfoConnector.getCoHoCompanyDetails(regIdWhitelisted, "txID")
 
       await(getResponse) shouldBe incorpInfoSuccessCoHoCompanyDetails
     }
@@ -202,7 +205,6 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
     "throw a BadRequestException" in {
       val incorpInfoConnector = new IncorporationInformationConnector(metrics)
 
-      def getResponse = incorpInfoConnector.getOfficerList(testTransId)
       setupWiremockResult(400, "")
 
       intercept[BadRequestException](await(incorpInfoConnector.getOfficerList(testTransId)))
@@ -211,7 +213,6 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
     "throw an Exception" in {
       val incorpInfoConnector = new IncorporationInformationConnector(metrics)
 
-      def getResponse = incorpInfoConnector.getOfficerList(testTransId)
       setupWiremockResult(500, "")
 
       intercept[Exception](await(incorpInfoConnector.getOfficerList(testTransId)))
