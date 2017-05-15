@@ -19,7 +19,7 @@ package connectors
 import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
-import models.external.CompanyProfile
+import models.external.CompanyRegistrationProfile
 import play.api.Logger
 import play.api.libs.json._
 import services.{MetricsService, MetricsSrv}
@@ -53,7 +53,7 @@ trait CompanyRegistrationConnect {
   val metricsService: MetricsSrv
   val featureSwitch: PAYEFeatureSwitches
 
-  def getCompanyRegistrationDetails(regId: String)(implicit hc : HeaderCarrier) : Future[CompanyProfile] = {
+  def getCompanyRegistrationDetails(regId: String)(implicit hc : HeaderCarrier) : Future[CompanyRegistrationProfile] = {
     val companyRegTimer = metricsService.companyRegistrationResponseTimer.time()
 
     val url = if (useCompanyRegistration) s"$companyRegistrationUrl$companyRegistrationUri/corporation-tax-registration" else s"$stubUrl$stubUri"
@@ -63,7 +63,7 @@ trait CompanyRegistrationConnect {
         companyRegTimer.stop()
         val status = (response \ "status").as[String]
         val txId = (response \ "confirmationReferences" \ "transaction-id").as[String]
-        CompanyProfile(status, txId)
+        CompanyRegistrationProfile(status, txId)
     } recover {
       case badRequestErr: BadRequestException =>
         companyRegTimer.stop()

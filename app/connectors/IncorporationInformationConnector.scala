@@ -58,10 +58,10 @@ trait IncorporationInformationConnect extends RegistrationWhitelist {
   val metricsService: MetricsSrv
   val featureSwitch: PAYEFeatureSwitches
 
-  def getCoHoCompanyDetails(registrationID: String)(implicit hc: HeaderCarrier): Future[IncorpInfoResponse] = {
-    ifRegIdNotWhitelisted(registrationID) {
+  def getCoHoCompanyDetails(transactionId: String)(implicit hc: HeaderCarrier): Future[IncorpInfoResponse] = {
+    ifRegIdNotWhitelisted(transactionId) {
       val cohoApiTimer = metricsService.cohoAPIResponseTimer.time()
-      http.GET[CoHoCompanyDetailsModel](s"$constructIIUrl/company/$registrationID") map { res =>
+      http.GET[CoHoCompanyDetailsModel](s"$constructIIUrl/company/$transactionId") map { res =>
         cohoApiTimer.stop()
         IncorpInfoSuccessResponse(res)
       } recover {

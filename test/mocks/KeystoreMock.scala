@@ -17,7 +17,7 @@
 package mocks
 
 import connectors._
-import models.external.{BusinessProfile, CompanyProfile, CurrentProfile}
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
@@ -58,7 +58,7 @@ trait KeystoreMock {
         .thenReturn(Future.successful(Some(CurrentProfile(
           regID,
           Some("Director"),
-          CompanyProfile("held", "txId"),
+          CompanyRegistrationProfile("held", "txId"),
           "ENG"
         ))))
   }

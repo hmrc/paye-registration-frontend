@@ -17,7 +17,7 @@
 package connectors
 
 import mocks.MockMetrics
-import models.external.CompanyProfile
+import models.external.CompanyRegistrationProfile
 import play.api.libs.json.{JsObject, Json}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
@@ -76,7 +76,7 @@ class CompanyRegistrationConnectorSpec extends PAYERegSpec {
       mockHttpGet[JsObject](connector.companyRegistrationUri, Future.successful(profileJson))
 
       val result = await(connector.getCompanyRegistrationDetails("testRegId"))
-      result shouldBe CompanyProfile(status, transactionId)
+      result shouldBe CompanyRegistrationProfile(status, transactionId)
     }
 
     "throw a bad request exception" in new Setup(false) {
@@ -96,7 +96,7 @@ class CompanyRegistrationConnectorSpec extends PAYERegSpec {
         mockHttpGet[JsObject](connector.companyRegistrationUri, Future.successful(profileJson))
 
         val result = await(connector.getCompanyRegistrationDetails("testRegId"))
-        result shouldBe CompanyProfile(status, transactionId)
+        result shouldBe CompanyRegistrationProfile(status, transactionId)
       }
 
       "throwing a bad request exception" in new Setup(false) {

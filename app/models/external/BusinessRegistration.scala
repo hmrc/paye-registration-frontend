@@ -32,16 +32,16 @@ object BusinessProfile {
   implicit val formats = Json.format[BusinessProfile]
 }
 
-case class CompanyProfile(status: String,
+case class CompanyRegistrationProfile(status: String,
                           transactionId: String)
 
-object CompanyProfile {
-  implicit val formats = Json.format[CompanyProfile]
+object CompanyRegistrationProfile {
+  implicit val formats = Json.format[CompanyRegistrationProfile]
 }
 
 case class CurrentProfile(registrationID: String,
                           completionCapacity : Option[String],
-                          companyTaxRegistration: CompanyProfile,
+                          companyTaxRegistration: CompanyRegistrationProfile,
                           language: String)
 
 object CurrentProfile {

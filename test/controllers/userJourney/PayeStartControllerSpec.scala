@@ -19,7 +19,7 @@ package controllers.userJourney
 import builders.AuthBuilder
 import enums.{AccountTypes, DownstreamOutcome}
 import fixtures.PAYERegistrationFixture
-import models.external.{CompanyProfile, CurrentProfile}
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
@@ -53,7 +53,7 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
   }
 
   val fakeRequest = FakeRequest("GET", "/")
-  def validCurrentProfile(status: String) = CurrentProfile("testRegId", None, CompanyProfile(status, "txId"), "en")
+  def validCurrentProfile(status: String) = CurrentProfile("testRegId", None, CompanyRegistrationProfile(status, "txId"), "en")
 
 
   override def beforeEach() {

@@ -17,10 +17,10 @@
 package utils
 
 import config.FrontendAppConfig
-import connectors.{Cancelled, DESResponse, IncorpInfoResponse, IncorpInfoSuccessResponse}
+import connectors.{DESResponse, IncorpInfoResponse, IncorpInfoSuccessResponse}
 import models.DigitalContactDetails
 import models.api.{Director, CompanyDetails => CompanyDetailsAPI}
-import models.external.{CoHoCompanyDetailsModel, CompanyProfile}
+import models.external.{CompanyRegistrationProfile, CoHoCompanyDetailsModel}
 import play.api.Logger
 
 import scala.concurrent.Future
@@ -31,7 +31,7 @@ trait RegistrationWhitelist {
   implicit def getDefaultCompanyDetailsAPI(regId: String): Option[CompanyDetailsAPI] =
     Some(CompanyDetailsAPI(applicationConfig.defaultCompanyName, None, applicationConfig.defaultCHROAddress, applicationConfig.defaultCHROAddress, DigitalContactDetails(None, None, None)))
   implicit def getDefaultSeqDirector(regId: String): Seq[Director] = applicationConfig.defaultSeqDirector
-  implicit def getDefaultCompanyProfile(regId: String): CompanyProfile = CompanyProfile(applicationConfig.defaultCTStatus, s"fakeTxId-$regId")
+  implicit def getDefaultCompanyProfile(regId: String): CompanyRegistrationProfile = CompanyRegistrationProfile(applicationConfig.defaultCTStatus, s"fakeTxId-$regId")
   implicit def getDefaultCoHoCompanyDetails(regId: String): IncorpInfoResponse = IncorpInfoSuccessResponse(CoHoCompanyDetailsModel(regId, applicationConfig.defaultCompanyName, Seq.empty))
   implicit def cancelSubmission(regId: String): DESResponse = throw new Exception(s"Registration ID $regId is in whitelist, no submission allowed")
 

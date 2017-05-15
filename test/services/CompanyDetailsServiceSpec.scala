@@ -20,7 +20,7 @@ import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, PAYERegistrationFixture, S4LFixture}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
-import models.external.{CHROAddress, CompanyProfile}
+import models.external.CompanyRegistrationProfile
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
@@ -104,7 +104,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
   }
 
-  def companyProfile(txId: String) = CompanyProfile("held", txId)
+  def companyProfile(txId: String) = CompanyRegistrationProfile("held", txId)
 
   "Calling apiToView" should {
     "correctly produce a view model from a Company Details API model with a completed trading name" in new Setup {

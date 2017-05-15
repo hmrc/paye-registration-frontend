@@ -19,7 +19,7 @@ package service
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlMatching}
 import connectors.{BusinessRegistrationConnector, CompanyRegistrationConnector, KeystoreConnector}
 import itutil.{IntegrationSpecBase, WiremockHelper}
-import models.external.{BusinessProfile, CompanyProfile, CurrentProfile}
+import models.external.{CompanyRegistrationProfile, BusinessProfile, CurrentProfile}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.{Application, Play}
@@ -74,7 +74,7 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
 
       val expectedCurrentProfile = CurrentProfile(regIdWhitelisted,
                                                   None,
-                                                  CompanyProfile("held", s"fakeTxId-$regIdWhitelisted"),
+                                                  CompanyRegistrationProfile("held", s"fakeTxId-$regIdWhitelisted"),
                                                   "ENG")
 
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfileWithRegIdWhitelisted).toString)
@@ -105,7 +105,7 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
 
       val expectedCurrentProfile = CurrentProfile(regId,
         None,
-        CompanyProfile("held", s"000-434-$regId"),
+        CompanyRegistrationProfile("held", s"000-434-$regId"),
         "ENG")
 
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfile).toString)
@@ -147,7 +147,7 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
 
       val expectedCurrentProfile = CurrentProfile(regId,
         None,
-        CompanyProfile("held", s"000-434-$regId"),
+        CompanyRegistrationProfile("held", s"000-434-$regId"),
         "ENG")
 
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfile).toString)

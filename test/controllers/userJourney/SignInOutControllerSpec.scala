@@ -19,7 +19,7 @@ package controllers.userJourney
 import builders.AuthBuilder
 import enums.{AccountTypes, DownstreamOutcome}
 import fixtures.PAYERegistrationFixture
-import models.external.{CompanyProfile, CurrentProfile}
+import models.external.{CompanyRegistrationProfile$, CurrentProfile}
 import org.scalatest.BeforeAndAfterEach
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
