@@ -5,9 +5,9 @@
 
 @main_template(title = messages("pages.confirmRO.title")) {
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages("pages.confirmRO.heading", s"<span id='companyName'>$companyName</span>"))</h1>
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages("pages.confirmRO.heading"))</h1>
 
-    <p id="lead-paragraph">@messages("pages.confirmRO.lede")</p>
+    <p id="lead-paragraph">@messages("pages.confirmRO.lede", companyName)</p>
 
     @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.confirmRO()) {
         <div class="form-group">
@@ -25,7 +25,7 @@
 }
 
 @incorrectAddressContent = {
-    <p>@messages("pages.confirmRO.help.body") <a id="companies-house-link" href='@messages("pages.confirmRO.help.body.link.url")'>@messages("app.common.companies-house")</a>.</p>
+    <p>@messages("pages.confirmRO.help.body") <a id="companies-house-link" href='@messages("pages.confirmRO.help.body.link.url")'>@messages("app.common.companies-houseinfo")</a>.</p>
 }
 
 

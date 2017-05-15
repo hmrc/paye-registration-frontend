@@ -20,6 +20,7 @@ app.common.feedbackSecond                               = feedback.
 app.common.feedbackLinkText                             = feedback
 app.common.companyRegistrationOverview                  = Your company registration overview
 app.common.startNow                                     = Start now
+app.common.companies-houseinfo                          = update it with Companies House.
 
 ## User error messages
 errors.invalid.email                                    = The email address you have provided is invalid
@@ -86,10 +87,10 @@ pages.tradingName.errorQuestion                         = Please enter a correct
 
 ##Confirm RO Address
 pages.confirmRO.title                                   = Confirm the company''s registered office address
-pages.confirmRO.heading                                 = This is {0}''s registered office address
-pages.confirmRO.lede                                    = This is the official address of the company. It''s where legal notices and company mail will be sent.
+pages.confirmRO.heading                                 = Confirm the company''s registered office address
+pages.confirmRO.lede                                    = This is the official address of {0}. It''s where legal notices and company mail will be sent.
 pages.confirmRO.help.link                               = Not the right address?
-pages.confirmRO.help.body                               = If the registered office address is incorrect, you''ll need to update it with
+pages.confirmRO.help.body                               = If the registered office address is incorrect, you''ll need to
 pages.confirmRO.help.body.link.url                      = https://ewf.companieshouse.gov.uk//seclogin?tc=1
 
 ##PPOB Address
