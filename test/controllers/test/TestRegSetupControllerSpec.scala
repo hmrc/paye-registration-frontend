@@ -17,7 +17,6 @@
 package controllers.test
 
 import builders.AuthBuilder
-import connectors.BusinessRegistrationConnect
 import connectors.test.TestPAYERegConnect
 import enums.DownstreamOutcome
 import fixtures.BusinessRegistrationFixture

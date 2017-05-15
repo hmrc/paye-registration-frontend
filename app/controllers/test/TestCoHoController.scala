@@ -64,14 +64,13 @@ trait TestCoHoCtrl extends FrontendController with Actions with I18nSupport {
   def submitCoHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        businessRegConnector.retrieveCurrentProfile flatMap { profile =>
-          TestCoHoCompanyDetailsForm.form.bindFromRequest.fold(
-            errors => Future.successful(BadRequest(views.html.pages.test.coHoCompanyDetailsSetup(errors))),
-            success => for {
-              res <- doAddCoHoCompanyDetails(success, profile.registrationID)
-            } yield Ok(res)
-          )
-        }
+        TestCoHoCompanyDetailsForm.form.bindFromRequest.fold(
+          errors => Future.successful(BadRequest(views.html.pages.test.coHoCompanyDetailsSetup(errors))),
+          success => for {
+            profile <- businessRegConnector.retrieveCurrentProfile
+            res <- doAddCoHoCompanyDetails(profile.registrationID, success.companyName)
+          } yield Ok(res)
+        )
   }
 
   def coHoCompanyDetailsTearDown = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
@@ -85,25 +84,14 @@ trait TestCoHoCtrl extends FrontendController with Actions with I18nSupport {
   }
 
   protected[controllers] def doCoHoCompanyDetailsTearDown(regId: String)(implicit request: Request[AnyContent]): Future[String] = {
-    testIncorpInfoConnector.tearDownCoHoCompanyDetails(regId).map (_ =>"Company details collection removed")
+    testIncorpInfoConnector.teardownIndividualCoHoCompanyDetails(regId).map (_ =>"Company details collection removed")
   }
 
-  protected[controllers] def doAddCoHoCompanyDetails(formModel: CoHoCompanyDetailsFormModel, regId: String)(implicit request: Request[AnyContent]): Future[String] = {
+  protected[controllers] def doAddCoHoCompanyDetails(regId: String, companyName: String)(implicit request: Request[AnyContent]): Future[String] = {
     for {
-      resp <- testIncorpInfoConnector.addCoHoCompanyDetails(formModel.toCoHoCompanyDetailsAPIModel(regId))
-    } yield s"Company Name: ${formModel.companyName}, response status: ${resp.status}"
+      resp <- testIncorpInfoConnector.setupCoHoCompanyDetails(regId, companyName)
+    } yield s"Company Name: $companyName, registration ID: $regId. Response status: ${resp.status}"
   }
 
-  protected[controllers] def doTeardownOfficers()(implicit request: Request[AnyContent]): Future[String] = {
-    testIncorpInfoConnector.teardownOfficers() map {
-      resp => s"[Teardown Officers] response status: ${resp.status}"
-    }
-  }
-
-  protected[controllers] def doSetupOfficers(regId: String)(implicit request: Request[AnyContent]): Future[String] = {
-    testIncorpInfoConnector.setupOfficers(regId) map {
-      resp => s"[Setup Officers] response status: ${resp.status}"
-    }
-  }
 
 }

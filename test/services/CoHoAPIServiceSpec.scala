@@ -75,13 +75,13 @@ class CoHoAPIServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFi
     "return the Company Name when there is a CoHo company details model stored in keystore" in new Setup {
       mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, Some(validCoHoCompanyDetailsResponse))
 
-      await(service.getStoredCompanyName()) shouldBe validCoHoCompanyDetailsResponse.companyName
+      await(service.getStoredCompanyDetails()) shouldBe validCoHoCompanyDetailsResponse
     }
 
     "throw a CompanyDetailsNotFoundException when there is no CoHo company details model stored in keystore" in new Setup {
       mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, None)
 
-      a[CompanyDetailsNotFoundException] shouldBe thrownBy(await(service.getStoredCompanyName()))
+      a[CompanyDetailsNotFoundException] shouldBe thrownBy(await(service.getStoredCompanyDetails()))
     }
   }
 

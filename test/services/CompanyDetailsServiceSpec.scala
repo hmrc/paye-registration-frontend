@@ -20,7 +20,7 @@ import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, PAYERegistrationFixture, S4LFixture}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
-import models.external.CompanyRegistrationProfile
+import models.external.{CoHoCompanyDetailsModel, CompanyRegistrationProfile}
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
@@ -235,49 +235,52 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
   "Calling getCompanyDetails" should {
     "return the correct View response when Company Details are returned from S4L" in new APIConverterMockedSetup {
-      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.CompanyDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(Some(validCompanyDetailsViewModel)))
 
       await(service.getCompanyDetails("12345", "txId")) shouldBe validCompanyDetailsViewModel
     }
 
     "return the correct View response when Company Details are returned from the connector" in new APIConverterMockedSetup {
-      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.CompanyDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(None))
 
       when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(validCompanyDetailsAPI)))
 
-      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.CompanyDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
+      when(mockS4LService.saveForm(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
       await(service.getCompanyDetails("54321", "txId")) shouldBe validCompanyDetailsViewModel
     }
 
     "return a default View model with company name and RO Address when no Company Details are returned from the connector" in new Setup {
-      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.CompanyDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
+      val tstROAddress = Address("addrLine1", "addrLine2", None, None, Some("TE9 9ST"))
+      val tstCompanyDetailsModel = CoHoCompanyDetailsModel(
+        companyName = "tstCompanyName",
+        roAddress = tstROAddress
+      )
+
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(None))
 
       when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
-      when(mockCoHoService.getStoredCompanyName()(ArgumentMatchers.any()))
-        .thenReturn(Future.successful("Tst company name"))
+      when(mockCoHoService.getStoredCompanyDetails()(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(tstCompanyDetailsModel))
 
-      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.CompanyDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
+      when(mockS4LService.saveForm(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
-      when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.eq("54321"))(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(companyProfile("txId")))
 
-      when(mockCohoAPIConnector.getRegisteredOfficeAddress(ArgumentMatchers.eq("txId"))(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future.successful(validCHROAddress))
-
-      await(service.getCompanyDetails("54321", "txId")) shouldBe CompanyDetailsView("Tst company name", None, validCHROAddress, None, None)
+      await(service.getCompanyDetails("54321", "txId")) shouldBe CompanyDetailsView("tstCompanyName", None, tstROAddress, None, None)
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
-      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.CompanyDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(None))
 
       when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
@@ -315,7 +318,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         Some(DigitalContactDetails(Some("test@paye.co.uk"), None, None))
       )
 
-      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.CompanyDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
+      when(mockS4LService.saveForm(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
       await(service.saveCompanyDetails(incompleteCompanyDetailsViewModel, "54321")) shouldBe DownstreamOutcome.Success

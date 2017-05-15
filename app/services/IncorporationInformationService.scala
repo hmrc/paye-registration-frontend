@@ -58,10 +58,9 @@ trait IncorporationInformationSrv {
     }
   }
 
-  def getStoredCompanyName()(implicit hc: HeaderCarrier): Future[String] = {
+  def getStoredCompanyDetails()(implicit hc: HeaderCarrier): Future[CoHoCompanyDetailsModel] = {
     keystoreConnector.fetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString) map {
-      case Some(model) => model.companyName
-      case _ => throw new CompanyDetailsNotFoundException()
+      _.getOrElse(throw new CompanyDetailsNotFoundException())
     }
   }
 

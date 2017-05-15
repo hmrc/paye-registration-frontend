@@ -35,39 +35,21 @@ class TestCoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
     }
   }
 
-  "addCoHoCompanyDetails" should {
+  "setupCoHoCompanyDetails" should {
     "return a valid response when successfully set up" in new Setup {
       val resp = HttpResponse(responseStatus = 200)
       mockHttpPOST[JsValue, HttpResponse](connector.incorpInfoUrl, Future.successful(resp))
 
-      await(connector.addCoHoCompanyDetails(validCoHoCompanyDetailsResponse)) shouldBe resp
+      await(connector.setupCoHoCompanyDetails("123", "company name")) shouldBe resp
     }
   }
 
-  "tearDownCoHoCompanyDetails" should {
-    "return a valid response when successfully completed" in new Setup {
-      val resp = HttpResponse(responseStatus = 200)
-      mockHttpGet[HttpResponse](connector.incorpInfoUrl, Future.successful(resp))
-
-      await(connector.tearDownCoHoCompanyDetails("tstRegID")) shouldBe resp
-    }
-  }
-
-  "setupOfficers" should {
-    "return a valid response when successfully set up" in new Setup {
-      val resp = HttpResponse(responseStatus = 200)
-      mockHttpPOST[JsValue, HttpResponse](connector.incorpInfoUrl, Future.successful(resp))
-
-      await(connector.setupOfficers("123")) shouldBe resp
-    }
-  }
-
-  "teardownOfficers" should {
+  "teardownCoHoCompanyDetails" should {
     "return a valid response when successfully set up" in new Setup {
       val resp = HttpResponse(responseStatus = 200)
       mockHttpPUT[String, HttpResponse](connector.incorpInfoUrl, Future.successful(resp))
 
-      await(connector.teardownOfficers()) shouldBe resp
+      await(connector.teardownCoHoCompanyDetails()) shouldBe resp
     }
   }
 

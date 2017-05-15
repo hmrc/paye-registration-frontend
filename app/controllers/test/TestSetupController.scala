@@ -25,7 +25,7 @@ import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector, TestIn
 import models.test.CoHoCompanyDetailsFormModel
 import play.api.Logger
 import play.api.i18n.MessagesApi
-import services.{IncorporationInformationService, IncorporationInformationSrv, PAYERegistrationService, PAYERegistrationSrv, S4LService, S4LSrv}
+import services._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -73,14 +73,11 @@ trait TestSetupCtrl extends BusinessProfileCtrl with TestCoHoCtrl with TestRegSe
     implicit user =>
       implicit request =>
           for {
-            profile <- log("CurrentProfileSetup", doBusinessProfileSetup)
-
-            _ <- log("CoHoCompanyDetailsTeardown", doCoHoCompanyDetailsTearDown(profile.registrationID))
-            _ <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(CoHoCompanyDetailsFormModel(companyName, List.empty, List.empty), profile.registrationID))
-            _ <- log("RegTeardown", doIndividualRegTeardown(profile.registrationID))
-            _ <- log("S4LTeardown", doTearDownS4L(profile.registrationID))
-            _ <- log("OfficersTeardown", doTeardownOfficers())
-            _ <- log("OfficersSetup", doSetupOfficers(profile.registrationID))
+            businessProfile <- log("CurrentProfileSetup", doBusinessProfileSetup)
+            _ <- log("CoHoCompanyDetailsTeardown", doCoHoCompanyDetailsTearDown(businessProfile.registrationID))
+            _ <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(businessProfile.registrationID, companyName))
+            _ <- log("RegTeardown", doIndividualRegTeardown(businessProfile.registrationID))
+            _ <- log("S4LTeardown", doTearDownS4L(businessProfile.registrationID))
           } yield Redirect(controllers.userJourney.routes.PayeStartController.startPaye())
 
   }

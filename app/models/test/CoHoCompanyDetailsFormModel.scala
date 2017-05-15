@@ -23,23 +23,7 @@ case class CoHoCompanyDetailsFormModel (
                                        companyName: String,
                                        sicCodes: List[String],
                                        descriptions: List[String]
-                                         ) {
-
-  def toCoHoCompanyDetailsAPIModel(regID: String) = CoHoCompanyDetailsModel(regID, companyName, constructAreasOfIndustry())
-
-  private def constructAreasOfIndustry(): List[AreaOfIndustry] = {
-
-    val filteredCodes = sicCodes.filterNot(_ == "")
-    val filteredDescs = descriptions.filterNot(_ == "")
-    if(filteredCodes.length == filteredDescs.length) {
-      filteredCodes.zipWithIndex.map { case (sicCode, index) =>
-        AreaOfIndustry(sicCode, filteredDescs(index))
-      }
-    } else {
-      throw new Exception("sic codes and descriptions did not match in length in CoHoCompanyDetailsFormModel")
-    }
-  }
-}
+                                         )
 
 
 object CoHoCompanyDetailsFormModel {

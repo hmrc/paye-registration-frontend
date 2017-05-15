@@ -32,7 +32,7 @@ trait RegistrationWhitelist {
     Some(CompanyDetailsAPI(applicationConfig.defaultCompanyName, None, applicationConfig.defaultCHROAddress, applicationConfig.defaultCHROAddress, DigitalContactDetails(None, None, None)))
   implicit def getDefaultSeqDirector(regId: String): Seq[Director] = applicationConfig.defaultSeqDirector
   implicit def getDefaultCompanyProfile(regId: String): CompanyRegistrationProfile = CompanyRegistrationProfile(applicationConfig.defaultCTStatus, s"fakeTxId-$regId")
-  implicit def getDefaultCoHoCompanyDetails(regId: String): IncorpInfoResponse = IncorpInfoSuccessResponse(CoHoCompanyDetailsModel(regId, applicationConfig.defaultCompanyName, Seq.empty))
+  implicit def getDefaultCoHoCompanyDetails(regId: String): IncorpInfoResponse = IncorpInfoSuccessResponse(CoHoCompanyDetailsModel(applicationConfig.defaultCompanyName, applicationConfig.defaultCHROAddress))
   implicit def cancelSubmission(regId: String): DESResponse = throw new Exception(s"Registration ID $regId is in whitelist, no submission allowed")
 
   def ifRegIdNotWhitelisted[T](regId: String)(f: => Future[T])(implicit default: String => T): Future[T] = {

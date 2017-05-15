@@ -19,7 +19,7 @@ package connectors
 import fixtures.CoHoAPIFixture
 import mocks.MockMetrics
 import models.api.Name
-import models.external.{CHROAddress, CoHoCompanyDetailsModel, Officer, OfficerList}
+import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier, NotFoundException}
@@ -44,8 +44,6 @@ class IncorporationInformationConnectorSpec extends PAYERegSpec with CoHoAPIFixt
       val incorpInfoUri = testUri
       override val http : WSHttp = mockWSHttp
       override val metricsService = new MockMetrics
-      override val featureSwitch = mockFeatureSwitch
-      override def useIncorpInformation = unStubbed
     }
   }
 
@@ -68,42 +66,6 @@ class IncorporationInformationConnectorSpec extends PAYERegSpec with CoHoAPIFixt
       mockHttpGet[CoHoCompanyDetailsModel](connector.incorpInfoUrl, Future.failed(ex))
 
       await(connector.getCoHoCompanyDetails("testRegID")) shouldBe IncorpInfoErrorResponse(ex)
-    }
-  }
-
-  "getRegisteredOfficeAddress" should {
-
-    val testAddr =
-      CHROAddress(
-        "premises",
-        "l1",
-        Some("l2"),
-        "locality",
-        Some("country"),
-        Some("pobox"),
-        Some("pCode"),
-        Some("region")
-      )
-
-    val testTransId = "testTransId"
-
-    "return a successful CoHo api response object for valid data" in new Setup(true) {
-      mockHttpGet[CHROAddress](connector.incorpInfoUrl, Future.successful(testAddr))
-
-      await(connector.getRegisteredOfficeAddress(testTransId)) shouldBe testAddr
-    }
-
-    "return a CoHo Bad Request api response object for a bad request" in new Setup(true) {
-      mockHttpGet[CHROAddress](connector.incorpInfoUrl, Future.failed(new BadRequestException("tstException")))
-
-      intercept[BadRequestException](await(connector.getRegisteredOfficeAddress(testTransId)))
-    }
-
-    "return a CoHo error api response object for a downstream error" in new Setup(true) {
-      val ex = new RuntimeException("tstException")
-      mockHttpGet[CHROAddress](connector.incorpInfoUrl, Future.failed(ex))
-
-      intercept[RuntimeException](await(connector.getRegisteredOfficeAddress(testTransId)) )
     }
   }
 

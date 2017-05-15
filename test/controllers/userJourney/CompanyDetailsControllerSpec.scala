@@ -18,7 +18,7 @@ package controllers.userJourney
 
 import builders.AuthBuilder
 import enums.DownstreamOutcome
-import fixtures.{PAYERegistrationFixture, S4LFixture}
+import fixtures.{CoHoAPIFixture, PAYERegistrationFixture, S4LFixture}
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.{Address, DigitalContactDetails}
 import org.jsoup._
@@ -35,7 +35,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYERegistrationFixture {
+class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYERegistrationFixture with CoHoAPIFixture {
   val mockS4LService = mock[S4LService]
   val mockCompanyDetailsService = mock[CompanyDetailsService]
   val mockCoHoService = mock[IncorporationInformationService]
@@ -167,7 +167,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     "return 400 when a user enters no data" in new Setup {
       mockFetchCurrentProfile()
       when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
-      when(mockCoHoService.getStoredCompanyName()(ArgumentMatchers.any())).thenReturn(Future.successful("tst Name"))
+      when(mockCoHoService.getStoredCompanyDetails()(ArgumentMatchers.any())).thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
       )) {
         result =>
@@ -177,7 +177,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
     "return 400 when a user enters invalid data" in new Setup {
       mockFetchCurrentProfile()
-      when(mockCoHoService.getStoredCompanyName()(ArgumentMatchers.any())).thenReturn(Future.successful("tst Name"))
+      when(mockCoHoService.getStoredCompanyDetails()(ArgumentMatchers.any())).thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "differentName" -> "true"
       )) {

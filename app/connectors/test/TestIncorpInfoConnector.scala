@@ -38,29 +38,22 @@ trait TestIncorpInfoConnect {
   val incorpInfoUrl: String
   val http: WSHttp
 
-  def addCoHoCompanyDetails(coHoCompanyDetailsModel: CoHoCompanyDetailsModel)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    val json = Json.toJson[CoHoCompanyDetailsModel](coHoCompanyDetailsModel)
-    http.POST[JsValue, HttpResponse](s"$incorpInfoUrl/incorporation-frontend-stubs/test-only/insert-company-details", json)
-  }
-
-  def tearDownCoHoCompanyDetails(regId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    http.GET[HttpResponse](s"$incorpInfoUrl/incorporation-frontend-stubs/test-only/wipe-individual-company-details/$regId")
-  }
-
-  def setupOfficers(regId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  private def txId(regId: String):String = s"000-434-$regId"
+   
+  def setupCoHoCompanyDetails(regId: String, companyName: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val officers = Json.parse(
       s"""
          |{
-         |    "transaction_id" : "000-434-$regId",
-         |    "company_name" : "MOOO LIMITED",
+         |    "transaction_id" : "${txId(regId)}",
+         |    "company_name" : "$companyName",
          |    "company_type" : "ltd",
          |    "registered_office_address" : {
-         |        "premises" : "98",
-         |        "address_line_1" : "LIMBRICK LANE",
-         |        "address_line_2" : "GORING-BY-SEA",
-         |        "locality" : "WORTHING",
+         |        "premises" : "12",
+         |        "address_line_1" : "Test Road",
+         |        "address_line_2" : "Testshire",
+         |        "locality" : "Greater Testford",
          |        "country" : "United Kingdom",
-         |        "postal_code" : "BN12 6AG"
+         |        "postal_code" : "TE1 1ST"
          |    },
          |    "officers" : [
          |        {
@@ -75,12 +68,12 @@ trait TestIncorpInfoConnect {
          |                "year" : "1973"
          |            },
          |            "address" : {
-         |                "premises" : "98",
-         |                "address_line_1" : "LIMBRICK LANE",
-         |                "address_line_2" : "GORING-BY-SEA",
-         |                "locality" : "WORTHING",
+         |                "premises" : "13",
+         |                "address_line_1" : "Test Road",
+         |                "address_line_2" : "Testshire",
+         |                "locality" : "Greater Testford",
          |                "country" : "United Kingdom",
-         |                "postal_code" : "BN12 6AG"
+         |                "postal_code" : "TE1 1ST"
          |            },
          |            "officer_role" : "director"
          |        },
@@ -96,11 +89,12 @@ trait TestIncorpInfoConnect {
          |                "year" : "1988"
          |            },
          |            "address" : {
-         |                "premises" : "713",
-         |                "address_line_1" : "ST. JAMES GATE",
-         |                "locality" : "NEWCASTLE UPON TYNE",
-         |                "country" : "England",
-         |                "postal_code" : "NE1 4BB"
+         |                "premises" : "14",
+         |                "address_line_1" : "Test Road",
+         |                "address_line_2" : "Testshire",
+         |                "locality" : "Greater Testford",
+         |                "country" : "United Kingdom",
+         |                "postal_code" : "TE1 1ST"
          |            },
          |            "officer_role" : "director"
          |        },
@@ -115,11 +109,12 @@ trait TestIncorpInfoConnect {
          |                "year" : "1994"
          |            },
          |            "address" : {
-         |                "premises" : "1",
-         |                "address_line_1" : "L ST",
-         |                "locality" : "TYNE",
-         |                "country" : "England",
-         |                "postal_code" : "AA1 4AA"
+         |                "premises" : "15",
+         |                "address_line_1" : "Test Road",
+         |                "address_line_2" : "Testshire",
+         |                "locality" : "Greater Testford",
+         |                "country" : "United Kingdom",
+         |                "postal_code" : "TE1 1ST"
          |            },
          |            "officer_role" : "director"
          |        }
@@ -140,7 +135,11 @@ trait TestIncorpInfoConnect {
     http.POST[JsValue, HttpResponse](s"$incorpInfoUrl/incorporation-frontend-stubs/insert-data", officers)
   }
 
-  def teardownOfficers()(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def teardownCoHoCompanyDetails()(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     http.PUT[String, HttpResponse](s"$incorpInfoUrl/incorporation-frontend-stubs/wipe-data", "")
+  }
+
+  def teardownIndividualCoHoCompanyDetails(regId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    http.PUT[String, HttpResponse](s"$incorpInfoUrl/incorporation-frontend-stubs/wipe-individual-data", txId(regId))
   }
 }

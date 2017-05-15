@@ -58,4 +58,41 @@ object Address {
       Address(lines.head,lines(1),L3,L4,postCode,country)
     }
   }
+
+  val incorpInfoReads: Reads[Address] = new Reads[Address] {
+    def reads(json: JsValue): JsResult[Address] = {
+
+      val premises = json.\("premises").as[String]
+      val addressLine1 = json.\("address_line_1").as[String]
+      val addressLine2 = json.\("address_line_2").asOpt[String]
+      val poBox = json.\("po_box").asOpt[String]
+      val locality = json.\("locality").as[String]
+      val region = json.\("region").asOpt[String]
+      val postalCode = json.\("postal_code").asOpt[String]
+      val country = json.\("country").asOpt[String]
+
+
+      val (line1, oLine2) = if((premises + " " + addressLine1).length > 26) {
+        (premises, Some(addressLine1))
+      } else {
+        (premises + " " + addressLine1, None)
+      }
+
+      val addrLine2POBox: Option[String] = Seq(addressLine2, poBox).flatten.foldLeft("")(_ + " " + _).trim match {
+        case ""  => None
+        case str  => Some(str)
+      }
+
+      val additionalLines: Seq[String] = Seq(oLine2, addrLine2POBox, Some(locality), region).flatten
+
+      JsSuccess(Address(
+        line1,
+        additionalLines.head,
+        additionalLines.lift(1),
+        additionalLines.lift(2),
+        postalCode,
+        if(postalCode.isEmpty) country else None
+      ))
+    }
+  }
 }

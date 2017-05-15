@@ -20,7 +20,6 @@ import builders.AuthBuilder
 import connectors.test.{TestBusinessRegConnect, TestIncorpInfoConnect, TestPAYERegConnect}
 import enums.DownstreamOutcome
 import models.external.BusinessProfile
-import models.test.CoHoCompanyDetailsFormModel
 import play.api.http.Status
 import play.api.mvc.{AnyContent, Request}
 import services.{IncorporationInformationSrv, PAYERegistrationSrv, S4LSrv}
@@ -51,11 +50,9 @@ class TestSetupControllerSpec extends PAYERegSpec {
 
       override def doBusinessProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = Future.successful(BusinessProfile("regId", None, "en"))
       override def doCoHoCompanyDetailsTearDown(regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
-      override def doAddCoHoCompanyDetails(formModel: CoHoCompanyDetailsFormModel, regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
+      override def doAddCoHoCompanyDetails(regId: String, companyName: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
       override def doIndividualRegTeardown(regId: String) (implicit request: Request[AnyContent]): Future[DownstreamOutcome.Value] = Future.successful(DownstreamOutcome.Success)
       override def doTearDownS4L(regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
-      override def doTeardownOfficers()(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
-      override def doSetupOfficers(regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
     }
   }
   
