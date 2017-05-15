@@ -58,7 +58,6 @@ trait AddressLookupConnect {
     val continueJson = Json.obj("continueUrl" -> s"$continue")
 
     http.POST[JsObject, HttpResponse](postUrl, continueJson) map { resp =>
-      Logger.debug(s"Response from ALF: $resp")
       resp.header("Location").getOrElse {
         Logger.warn("[AddressLookupConnector] [getOnRampUrl] - ERROR: Location header not set in ALF response")
         throw new ALFLocationHeaderNotSetException
