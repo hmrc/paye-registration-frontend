@@ -53,7 +53,7 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
           Seq(
             SummaryRow(
               id ="completionCapacity",
-              answer = Left("director"),
+              answers = List(Left("director")),
               changeLink = Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
             )
           )
@@ -90,12 +90,12 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
           Seq(
             SummaryRow(
               id ="tradingName",
-              answer = Left("noAnswerGiven"),
+              answers = List(Left("noAnswerGiven")),
               changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
             ),
             SummaryRow(
               id = "roAddress",
-              answer = Right("14 St Test Walk<br />Testley"),
+              answers = List(Right("14 St Test Walk"), Right("Testley")),
               changeLink = None
             )
           )
@@ -144,22 +144,22 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
           Seq(
             SummaryRow(
               id = "employees",
-              answer = Left("false"),
+              answers = List(Left("false")),
               Some(controllers.userJourney.routes.EmploymentController.employingStaff())
             ),
             SummaryRow(
               id = "companyPension",
-              answer = Left("false"),
+              answers = List(Left("false")),
               Some(controllers.userJourney.routes.EmploymentController.companyPension())
             ),
             SummaryRow(
               id = "subcontractors",
-              answer = Left("false"),
+              answers = List(Left("false")),
               Some(controllers.userJourney.routes.EmploymentController.subcontractors())
             ),
             SummaryRow(
               id = "firstPaymentDate",
-              Right("2/9/2016"),
+              answers = List(Right("2/9/2016")),
               Some(controllers.userJourney.routes.EmploymentController.firstPayment())
             )
           )
@@ -231,17 +231,17 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
           Seq(
             SummaryRow(
               id = "businessEmail",
-              answer = Right("test@email.com"),
+              answers = List(Right("test@email.com")),
               changeLink = None
             ),
             SummaryRow(
               id = "mobileNumber",
-              answer = Right("1234567890"),
+              answers = List(Right("1234567890")),
               changeLink = None
             ),
             SummaryRow(
               id = "businessTelephone",
-              answer = Right("0987654321"),
+              answers = List(Right("0987654321")),
               changeLink = None
             )
           )
@@ -289,7 +289,7 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
           Seq(
             SummaryRow(
               id = "natureOfBusiness",
-              answer = Right("Flower Arranging"),
+              answers = List(Right("Flower Arranging")),
               changeLink = Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness()),
               questionArgs = None,
               commonQuestionKey = None
@@ -323,14 +323,14 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
           Seq(
             SummaryRow(
               id = "director0",
-              answer = Right("ZZ123456A"),
+              answers = List(Right("ZZ123456A")),
               changeLink = Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
               questionArgs = Some(Seq("Timothy Buttersford")),
               commonQuestionKey = Some("director")
             ),
             SummaryRow(
               id = "director1",
-              answer = Right(""),
+              answers = List(Right("")),
               changeLink = Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
               questionArgs = Some(Seq("Pierre Simpson")),
               commonQuestionKey = Some("director")
