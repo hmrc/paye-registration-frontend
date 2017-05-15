@@ -52,7 +52,7 @@ class TestSetupController @Inject()(injKeystoreConnector: KeystoreConnector,
   val s4LService = injS4LService
 }
 
-trait TestSetupCtrl extends CurrentProfileCtrl with TestCoHoCtrl with TestRegSetupCtrl with TestCacheCtrl {
+trait TestSetupCtrl extends BusinessProfileCtrl with TestCoHoCtrl with TestRegSetupCtrl with TestCacheCtrl {
   val keystoreConnector: KeystoreConnect
   val businessRegConnector: BusinessRegistrationConnect
   val testBusinessRegConnector: TestBusinessRegConnect
@@ -73,7 +73,7 @@ trait TestSetupCtrl extends CurrentProfileCtrl with TestCoHoCtrl with TestRegSet
     implicit user =>
       implicit request =>
           for {
-            profile <- log("CurrentProfileSetup", doCurrentProfileSetup)
+            profile <- log("CurrentProfileSetup", doBusinessProfileSetup)
 
             _ <- log("CoHoCompanyDetailsTeardown", doCoHoCompanyDetailsTearDown(profile.registrationID))
             _ <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(CoHoCompanyDetailsFormModel(companyName, List.empty, List.empty), profile.registrationID))

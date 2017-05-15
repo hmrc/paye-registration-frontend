@@ -28,34 +28,33 @@ import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class CurrentProfileController @Inject()(injKeystoreConnector: KeystoreConnector,
+class BusinessProfileController @Inject()(injKeystoreConnector: KeystoreConnector,
                                          injBusinessRegConnector: BusinessRegistrationConnector,
                                          injTestBusinessRegConnector: TestBusinessRegConnector)
-  extends CurrentProfileCtrl {
+  extends BusinessProfileCtrl {
   val authConnector = FrontendAuthConnector
   val keystoreConnector = injKeystoreConnector
   val businessRegConnector = injBusinessRegConnector
   val testBusinessRegConnector = injTestBusinessRegConnector
 }
 
-trait CurrentProfileCtrl extends FrontendController with Actions {
+trait BusinessProfileCtrl extends FrontendController with Actions {
   val keystoreConnector: KeystoreConnect
   val businessRegConnector: BusinessRegistrationConnect
   val testBusinessRegConnector: TestBusinessRegConnect
 
-  def currentProfileSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+  def businessProfileSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         for {
-          res <- doCurrentProfileSetup
+          res <- doBusinessProfileSetup
         } yield Ok(res.toString)
   }
 
-  protected[controllers] def doCurrentProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = {
+  protected[controllers] def doBusinessProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = {
     businessRegConnector.retrieveCurrentProfile
-      .recoverWith { case _ => testBusinessRegConnector.createCurrentProfileEntry }
+      .recoverWith { case _ => testBusinessRegConnector.createBusinessProfileEntry }
   }
 }

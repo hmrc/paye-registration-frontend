@@ -37,7 +37,7 @@ class TestBusinessRegConnectorSpec extends PAYERegSpec with BusinessRegistration
     "make a http POST request to business registration micro-service to create a CurrentProfile entry" in new Setup {
       mockHttpPOST[JsValue, BusinessProfile](connector.businessRegUrl, validBusinessRegistrationResponse)
 
-      await(connector.createCurrentProfileEntry) shouldBe validBusinessRegistrationResponse
+      await(connector.createBusinessProfileEntry) shouldBe validBusinessRegistrationResponse
     }
   }
 }

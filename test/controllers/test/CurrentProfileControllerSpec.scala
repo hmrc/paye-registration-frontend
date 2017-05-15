@@ -35,7 +35,7 @@ class CurrentProfileControllerSpec extends PAYERegSpec with KeystoreFixture {
   val testProfile = BusinessProfile("testRegId", Some("testCapacity"), "testLang")
 
   class Setup {
-    val controller = new CurrentProfileCtrl {
+    val controller = new BusinessProfileCtrl {
       override val businessRegConnector = mockBusinessRegistrationConnector
       override val keystoreConnector = mockKeystoreConnector
       override val testBusinessRegConnector = mockTestBusRegConnector
@@ -52,7 +52,7 @@ class CurrentProfileControllerSpec extends PAYERegSpec with KeystoreFixture {
         when(mockKeystoreConnector.cache[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(blankCacheMap))
 
-        AuthBuilder.showWithAuthorisedUser(controller.currentProfileSetup, mockAuthConnector) { result =>
+        AuthBuilder.showWithAuthorisedUser(controller.businessProfileSetup, mockAuthConnector) { result =>
           status(result) shouldBe OK
         }
       }
@@ -61,13 +61,13 @@ class CurrentProfileControllerSpec extends PAYERegSpec with KeystoreFixture {
         when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[HttpReads[BusinessProfile]]()))
           .thenReturn(Future.failed(new NotFoundException("")))
 
-        when(mockTestBusRegConnector.createCurrentProfileEntry(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestBusRegConnector.createBusinessProfileEntry(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testProfile))
 
         when(mockKeystoreConnector.cache[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(blankCacheMap))
 
-        AuthBuilder.showWithAuthorisedUser(controller.currentProfileSetup, mockAuthConnector) { result =>
+        AuthBuilder.showWithAuthorisedUser(controller.businessProfileSetup, mockAuthConnector) { result =>
           status(result) shouldBe OK
         }
       }

@@ -49,7 +49,7 @@ class TestSetupControllerSpec extends PAYERegSpec {
       override val testPAYERegConnector = mockPayeRegConnector
       override val s4LService = mockS4LService
 
-      override def doCurrentProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = Future.successful(BusinessProfile("regId", None, "en"))
+      override def doBusinessProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = Future.successful(BusinessProfile("regId", None, "en"))
       override def doCoHoCompanyDetailsTearDown(regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
       override def doAddCoHoCompanyDetails(formModel: CoHoCompanyDetailsFormModel, regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
       override def doIndividualRegTeardown(regId: String) (implicit request: Request[AnyContent]): Future[DownstreamOutcome.Value] = Future.successful(DownstreamOutcome.Success)
