@@ -22,6 +22,12 @@
         </div>
 
         <p class="spaced-below" id="otherWaysToRegister">@Html(Messages("pages.welcome.otherWaysToRegister", "https://www.gov.uk/register-employer/y/yes/no/limited-company/no/no#other-ways-to-register"))</p>
+        <ul class="list list-bullet spaced-below">
+            <li id="completionTime">@Messages("pages.welcome.bullet.timeToComplete")</li>
+            <li id="processingTime">@Messages("pages.welcome.bullet.timeToProcess")</li>
+        </ul>
+        <p id="cost spaced-below">@Messages("pages.welcome.2months")</p>
+
 
 
         @form(action = controllers.userJourney.routes.WelcomeController.submit()) {
@@ -33,21 +39,9 @@
         <h2>@Messages("pages.welcome.beforeStart")</h2>
 
 
-        <p id="cost spaced-below">@Messages("pages.welcome.2months")</p>
         <p id="nino spaced-below">@Messages("pages.welcome.nino")</p>
 
-        <div class="form-group spaced-below">
-            <div class="panel-indent">
-                <p id="info">@Messages("pages.welcome.director")</p>
-            </div>
-        </div>
-
-
-        <p class="spaced-below">@Messages("pages.welcome.yourApplication")</p>
-        <ul class="list list-bullet spaced-below">
-            <li id="completionTime">@Messages("pages.welcome.bullet.timeToComplete")</li>
-            <li id="processingTime">@Messages("pages.welcome.bullet.timeToProcess")</li>
-        </ul>
+        <p id="nino spaced-below">@Messages("pages.welcome.application")</p>
 
 
 
