@@ -30,7 +30,7 @@ case class Officer(
 
 object Officer {
   implicit val formatModel: Reads[Officer] = (
-    (__ \ "name_elements").read[Name] and
+    (__ \ "name_elements").read[Name](Name.normalizeNameReads) and
       (__ \ "officer_role").read[String] and
       (__ \ "resigned_on").readNullable[DateTime] and
       (__ \ "appointment_link").readNullable[String]

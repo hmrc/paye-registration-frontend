@@ -18,6 +18,7 @@ package models.api
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import utils.Formatters
 
 case class Name(
                  forename: Option[String],
@@ -33,6 +34,13 @@ object Name {
       (__ \ "surname").format[String] and
       (__ \ "title").formatNullable[String]
   )(Name.apply, unlift(Name.unapply))
+
+  val normalizeNameReads = (
+    (__ \ "forename").readNullable[String](Formatters.normalizeReads) and
+      (__ \ "other_forenames").readNullable[String](Formatters.normalizeReads) and
+      (__ \ "surname").read[String](Formatters.normalizeReads) and
+      (__ \ "title").readNullable[String](Formatters.normalizeReads)
+  )(Name.apply _)
 }
 
 case class Director(name: Name, nino: Option[String])

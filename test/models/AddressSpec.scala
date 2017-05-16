@@ -375,6 +375,28 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
 
         readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
       }
+
+      "converting and normalize CHROAddress with minimal data" in {
+        val tstCHROAddressJson = Json.parse(
+          """{
+            |  "premises":"12",
+            |  "address_line_1":"Shört Stréèt Name",
+            |  "locality":"Têstfôrd",
+            |  "postal_code":"TË1 1ST",
+            |  "country":"ÜK"
+            |}""".stripMargin)
+
+        val testAddress = Address(
+          line1 = "12 Short Street Name",
+          line2 = "Testford",
+          line3 = None,
+          line4 = None,
+          country = None,
+          postCode = Some("TE1 1ST")
+        )
+
+        readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
+      }
     }
   }
 }

@@ -16,7 +16,6 @@
 
 package models.test
 
-import models.external.{AreaOfIndustry, CoHoCompanyDetailsModel}
 import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.play.test.UnitSpec
 
