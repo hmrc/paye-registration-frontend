@@ -20,17 +20,23 @@ import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import utils.{Formatters, Validators}
 
-case class Address(
-                    line1: String,
-                    line2: String,
-                    line3: Option[String],
-                    line4: Option[String],
-                    postCode: Option[String],
-                    country: Option[String] = None
-                  )
+case class Address(line1: String,
+                   line2: String,
+                   line3: Option[String],
+                   line4: Option[String],
+                   postCode: Option[String],
+                   country: Option[String] = None)
 
 object Address {
   implicit val format = Json.format[Address]
+
+  def trimLine(stringToTrim: String, trimTo: Int): String = {
+    if(stringToTrim.length > trimTo) stringToTrim.substring(0, trimTo) else stringToTrim
+  }
+
+  def trimOptionalLine(stringToString: Option[String], trimTo: Int): Option[String] = {
+    stringToString map(_.substring(0, if(stringToString.get.length > trimTo) trimTo else stringToString.get.length))
+  }
 
   val adressLookupReads: Reads[Address] = new Reads[Address] {
     def reads(json: JsValue): JsResult[Address] = {
@@ -52,14 +58,12 @@ object Address {
       }
     }
 
-    def makeAddress(postCode: Option[String], country: Option[String], lines: List[String]) = {
-      val L3 = if(lines.isDefinedAt(2)) Some(lines(2)) else None
-      val L4 = if(lines.isDefinedAt(3)) Some(lines(3)) else None
+    def makeAddress(postCode: Option[String], country: Option[String], lines: List[String]): Address = {
       Address(
-        line1     = lines.head.substring(0,if(lines.head.length > 27) 27 else lines.head.length),
-        line2     = lines(1).substring(0,if(lines(1).length > 27) 27 else lines(1).length),
-        line3     = L3.map(_.substring(0,if(L3.get.length > 27) 27 else L3.get.length)),
-        line4     = L4.map(_.substring(0,if(L4.get.length > 18) 18 else L4.get.length)),
+        line1     = trimLine(lines.head, 27),
+        line2     = trimLine(lines(1), 27),
+        line3     = trimOptionalLine(lines.lift(2), 27),
+        line4     = trimOptionalLine(lines.lift(3), 18),
         postCode  = postCode,
         country   = country
       )
@@ -93,12 +97,12 @@ object Address {
       val additionalLines: Seq[String] = Seq(oLine2, addrLine2POBox, Some(locality), region).flatten
 
       JsSuccess(Address(
-        line1,
-        additionalLines.head,
-        additionalLines.lift(1),
-        additionalLines.lift(2),
-        postalCode,
-        if(postalCode.isEmpty) country else None
+        line1     = trimLine(line1, 27),
+        line2     = trimLine(additionalLines.head, 27),
+        line3     = trimOptionalLine(additionalLines.lift(1), 27),
+        line4     = trimOptionalLine(additionalLines.lift(2), 18),
+        postCode  = postalCode,
+        country   = if(postalCode.isEmpty) country else None
       ))
     }
   }

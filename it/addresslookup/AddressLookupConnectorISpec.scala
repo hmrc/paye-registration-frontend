@@ -84,6 +84,42 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
 
       await(getAddress) shouldBe testAddressModel
     }
+
+    "get an address from a 200 and trim the lines if they are too long" in {
+      val testAddressLongLines = Json.parse(
+        """{
+          |  "address":{
+          |    "lines":[
+          |      "14 St Test Walker on stupidly long road",
+          |      "Testford"
+          |    ],
+          |    "postcode":"TE1 1ST"
+          |  }
+          |}""".stripMargin)
+
+      val testAddressModelTrimmed = Address(
+        line1 = "14 St Test Walker on stupid",
+        line2 = "Testford",
+        line3 = None,
+        line4 = None,
+        postCode = Some("TE1 1ST"),
+        country = None
+      )
+
+      val addressLookupConnector = new AddressLookupConnector()
+
+      def getAddress = addressLookupConnector.getAddress(testId)
+
+      stubFor(get(urlMatching(s"/api/confirmed\\?id\\=$testId"))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(testAddressLongLines.toString())
+        )
+      )
+
+      await(getAddress) shouldBe testAddressModelTrimmed
+    }
   }
 
   "getOnRampUrl" should {

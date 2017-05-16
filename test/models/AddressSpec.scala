@@ -377,7 +377,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
         val testAddress = Address(
           line1 = "Unit 14234",
           line2 = "Really Long Street Name",
-          line3 = Some("Industrial estate PO BOX TST36"),
+          line3 = Some("Industrial estate PO BOX TS"),
           line4 = Some("Testford"),
           country = None,
           postCode = Some("TE1 1ST")
