@@ -16,10 +16,10 @@
 
 package services
 
-import connectors.{BusinessRegistrationConnect, CompanyRegistrationConnect, KeystoreConnect}
-import enums.{CacheKeys, DownstreamOutcome}
+import connectors.{BusinessRegistrationConnect, CompanyRegistrationConnect}
+import enums.CacheKeys
 import fixtures.BusinessRegistrationFixture
-import models.external.{BusinessProfile, CompanyProfile, CurrentProfile}
+import models.external.{CompanyRegistrationProfile, BusinessProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import testHelpers.PAYERegSpec
@@ -42,7 +42,7 @@ class CurrentProfileServiceSpec extends PAYERegSpec with BusinessRegistrationFix
 
   implicit val hc = HeaderCarrier()
   val validBusinessProfile = validBusinessRegistrationResponse
-  val validCompanyProfile = CompanyProfile("held", "txId")
+  val validCompanyProfile = CompanyRegistrationProfile("held", "txId")
 
   val validCurrentProfile = CurrentProfile(
                               validBusinessProfile.registrationID,

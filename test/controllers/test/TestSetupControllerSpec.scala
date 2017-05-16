@@ -17,10 +17,9 @@
 package controllers.test
 
 import builders.AuthBuilder
-import connectors.test.{TestBusinessRegConnect, TestCoHoAPIConnect, TestPAYERegConnect}
+import connectors.test.{TestBusinessRegConnect, TestIncorpInfoConnect, TestPAYERegConnect}
 import enums.DownstreamOutcome
 import models.external.BusinessProfile
-import models.test.CoHoCompanyDetailsFormModel
 import play.api.http.Status
 import play.api.mvc.{AnyContent, Request}
 import services.{IncorporationInformationSrv, PAYERegistrationSrv, S4LSrv}
@@ -31,7 +30,7 @@ import scala.concurrent.Future
 class TestSetupControllerSpec extends PAYERegSpec {
   val mockTestBusRegConnector = mock[TestBusinessRegConnect]
   val mockCoHoAPIService = mock[IncorporationInformationSrv]
-  val mockTestAPIConnector = mock[TestCoHoAPIConnect]
+  val mockTestAPIConnector = mock[TestIncorpInfoConnect]
   val mockPayeRegConnector = mock[TestPAYERegConnect]
   val mockPayeRegService = mock[PAYERegistrationSrv]
   val mockS4LService = mock[S4LSrv]
@@ -42,20 +41,18 @@ class TestSetupControllerSpec extends PAYERegSpec {
       override val keystoreConnector = mockKeystoreConnector
       override val testBusinessRegConnector = mockTestBusRegConnector
       override val authConnector = mockAuthConnector
-      override val testCoHoAPIConnector = mockTestAPIConnector
+      override val testIncorpInfoConnector = mockTestAPIConnector
       override val coHoAPIService = mockCoHoAPIService
       override val messagesApi = mockMessages
       override val payeRegService = mockPayeRegService
       override val testPAYERegConnector = mockPayeRegConnector
       override val s4LService = mockS4LService
 
-      override def doCurrentProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = Future.successful(BusinessProfile("regId", None, "en"))
+      override def doBusinessProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = Future.successful(BusinessProfile("regId", None, "en"))
       override def doCoHoCompanyDetailsTearDown(regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
-      override def doAddCoHoCompanyDetails(formModel: CoHoCompanyDetailsFormModel, regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
+      override def doAddCoHoCompanyDetails(regId: String, companyName: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
       override def doIndividualRegTeardown(regId: String) (implicit request: Request[AnyContent]): Future[DownstreamOutcome.Value] = Future.successful(DownstreamOutcome.Success)
       override def doTearDownS4L(regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
-      override def doTeardownOfficers()(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
-      override def doSetupOfficers(regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
     }
   }
   

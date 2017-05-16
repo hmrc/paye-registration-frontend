@@ -109,8 +109,8 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
   }
 
   private def badRequestResponse(form: Form[TradingName])(implicit request: Request[AnyContent]): Future[Result] = {
-    cohoService.getStoredCompanyName map {
-      cName => BadRequest(TradingNamePage(form, cName))
+    cohoService.getStoredCompanyDetails map {
+      details => BadRequest(TradingNamePage(form, details.companyName))
     }
   }
 

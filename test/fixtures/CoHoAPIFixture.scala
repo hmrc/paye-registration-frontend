@@ -16,6 +16,7 @@
 
 package fixtures
 
+import models.Address
 import models.api.{Director, Name}
 import models.external._
 import models.view.Directors
@@ -23,29 +24,14 @@ import models.view.Directors
 trait CoHoAPIFixture {
 
   val validCoHoCompanyDetailsResponse = CoHoCompanyDetailsModel(
-    registrationID = "12345",
     companyName = "Test Company",
-    areasOfIndustry = Seq(
-      AreaOfIndustry(
-        sicCode = "100",
-        description = "Chips"
-      ),
-      AreaOfIndustry(
-        sicCode = "101",
-        description = "Fish"
-      )
+    roAddress = Address(
+      line1 = "1 Test Road",
+      line2 = "Testford",
+      line3 = None,
+      line4 = None,
+      postCode = Some("TE1 1ST")
     )
-  )
-
-  val validCHROAddress = CHROAddress(
-    premises = "11",
-    addressLine1 = "Test Street",
-    addressLine2 = Some("Test Area"),
-    locality = "Test Town",
-    country = Some("Test Country"),
-    poBox = Some("Test PO BOX"),
-    postalCode = Some("TE1 1ST"),
-    region = Some("Test Region")
   )
 
   val validOfficerList = OfficerList(

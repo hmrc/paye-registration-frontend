@@ -62,7 +62,7 @@ trait PayeStartCtrl extends FrontendController with Actions with I18nSupport {
         hasOrgAffinity {
           checkAndStoreCurrentProfile {
             profile =>
-              checkAndStoreCompanyDetails(profile.registrationID) {
+              checkAndStoreCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) {
                 assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId){
                   Redirect(controllers.userJourney.routes.WelcomeController.show())
                 }
@@ -81,8 +81,8 @@ trait PayeStartCtrl extends FrontendController with Actions with I18nSupport {
     }
   }
 
-  private def checkAndStoreCompanyDetails(regId: String)(f: => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
-    coHoAPIService.fetchAndStoreCoHoCompanyDetails(regId) flatMap {
+  private def checkAndStoreCompanyDetails(regId: String, txID: String)(f: => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+    coHoAPIService.fetchAndStoreCoHoCompanyDetails(regId, txID) flatMap {
       case DownstreamOutcome.Success => f
       case DownstreamOutcome.Failure => Future.successful(InternalServerError(views.html.pages.error.restart()))
     }

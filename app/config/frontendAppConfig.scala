@@ -18,13 +18,9 @@ package config
 
 import java.nio.charset.Charset
 import java.util.Base64
-import javax.inject.{Inject, Singleton}
 
-import com.google.inject.ImplementedBy
-import config.FrontendAppConfig.baseUrl
+import models.Address
 import models.api.Director
-import models.external.CHROAddress
-import play.api.Configuration
 import play.api.Play.{configuration, current}
 import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -71,7 +67,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   lazy val regIdWhitelist = whiteListConfig("regIdWhitelist")
   lazy val defaultCompanyName = loadStringConfigBase64("defaultCompanyName")
-  lazy val defaultCHROAddress = loadJsonConfigBase64[CHROAddress]("defaultCHROAddress")(CHROAddress.formatModel)
+  lazy val defaultCHROAddress = loadJsonConfigBase64[Address]("defaultCHROAddress")
   lazy val defaultSeqDirector = loadJsonConfigBase64[Seq[Director]]("defaultSeqDirector")(Director.seqReads)
   lazy val defaultCTStatus = loadStringConfigBase64("defaultCTStatus")
 }

@@ -17,6 +17,7 @@
 package itutil
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import models.Address
 import play.api.libs.json.{JsString, JsObject, Json}
 import uk.gov.hmrc.crypto.json.JsonEncryptor
 import uk.gov.hmrc.crypto.{ApplicationCrypto, Protected}
@@ -46,9 +47,12 @@ trait CachingStub {
                |   "language": "ENG"
                |  },
                |  "CoHoCompanyDetails": {
-               |    "registration_id": "${regId}",
                |    "company_name": "${companyName}",
-               |    "areas_of_industry": []
+               |    "registered_office_address": {
+               |      "line1":"Line1",
+               |      "line2":"Line2",
+               |      "postCode":"TE1 1ST"
+               |    }
                |  }
                |}
                |}""".stripMargin

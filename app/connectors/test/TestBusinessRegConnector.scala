@@ -38,7 +38,7 @@ trait TestBusinessRegConnect {
   val businessRegUrl: String
   val http: WSHttp
 
-  def createCurrentProfileEntry(implicit hc: HeaderCarrier): Future[BusinessProfile] = {
+  def createBusinessProfileEntry(implicit hc: HeaderCarrier): Future[BusinessProfile] = {
     val json = Json.toJson[BusinessRegistrationRequest](BusinessRegistrationRequest("ENG"))
     http.POST[JsValue, BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration", json)
   }

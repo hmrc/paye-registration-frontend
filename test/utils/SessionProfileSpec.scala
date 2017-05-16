@@ -18,7 +18,7 @@ package utils
 
 import connectors.KeystoreConnect
 import enums.CacheKeys
-import models.external.{CompanyProfile, CurrentProfile}
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import play.api.mvc.Result
 import play.api.mvc.Results.Ok
 import testHelpers.PAYERegSpec
@@ -37,7 +37,7 @@ class SessionProfileSpec extends PAYERegSpec with DateUtil {
   implicit val hc = HeaderCarrier()
   def testFunc : Future[Result] = Future.successful(Ok)
 
-  val validProfile = CurrentProfile("regId", None, CompanyProfile("held", "txId"), "")
+  val validProfile = CurrentProfile("regId", None, CompanyRegistrationProfile("held", "txId"), "")
 
   "calling withCurrentProfile" should {
     "return an Ok status when a profile is found" in {

@@ -16,6 +16,7 @@
 
 package models.external
 
+import models.Address
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -43,26 +44,27 @@ object AreaOfIndustry {
 
 
 case class CoHoCompanyDetailsModel(
-                                registrationID: String,
-                                companyName: String,
-                                areasOfIndustry: Seq[AreaOfIndustry]
+                                  companyName: String,
+                                  roAddress: Address
                                 ) {
 }
 
 object CoHoCompanyDetailsModel {
 
   val r =
-    (__ \ "registration_id").read[String] and
-      (__ \ "company_name").read[String] and
-      (__ \ "areas_of_industry").read[Seq[AreaOfIndustry]]
+    (__ \ "company_name").read[String] and
+    (__ \ "registered_office_address").read[Address]
 
   val w =
-    (__ \ "registration_id").write[String] and
-      (__ \ "company_name").write[String] and
-      (__ \ "areas_of_industry").write[Seq[AreaOfIndustry]]
+    (__ \ "company_name").write[String] and
+    (__ \ "registered_office_address").write[Address]
 
   val apiReads: Reads[CoHoCompanyDetailsModel] = (r)(CoHoCompanyDetailsModel.apply _)
   val apiWrites: Writes[CoHoCompanyDetailsModel] = (w)(unlift(CoHoCompanyDetailsModel.unapply))
+  val incorpInfoReads = (
+      (__ \ "company_name").read[String] and
+      (__ \ "registered_office_address").read[Address](Address.incorpInfoReads)
+    )(CoHoCompanyDetailsModel.apply _)
 
   implicit val format = Format(apiReads, apiWrites)
 }

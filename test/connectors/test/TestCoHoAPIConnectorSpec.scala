@@ -25,49 +25,31 @@ import scala.concurrent.Future
 
 class TestCoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
 
-  val testUrl = "testCohoAPIUrl"
+  val testUrl = "testIncorpInfoUrl"
   implicit val hc = HeaderCarrier()
 
   class Setup {
-    val connector = new TestCoHoAPIConnector {
-      override val coHoAPIUrl = testUrl
+    val connector = new TestIncorpInfoConnector {
+      override val incorpInfoUrl = testUrl
       override val http = mockWSHttp
     }
   }
 
-  "addCoHoCompanyDetails" should {
+  "setupCoHoCompanyDetails" should {
     "return a valid response when successfully set up" in new Setup {
       val resp = HttpResponse(responseStatus = 200)
-      mockHttpPOST[JsValue, HttpResponse](connector.coHoAPIUrl, Future.successful(resp))
+      mockHttpPOST[JsValue, HttpResponse](connector.incorpInfoUrl, Future.successful(resp))
 
-      await(connector.addCoHoCompanyDetails(validCoHoCompanyDetailsResponse)) shouldBe resp
+      await(connector.setupCoHoCompanyDetails("123", "company name")) shouldBe resp
     }
   }
 
-  "tearDownCoHoCompanyDetails" should {
-    "return a valid response when successfully completed" in new Setup {
-      val resp = HttpResponse(responseStatus = 200)
-      mockHttpGet[HttpResponse](connector.coHoAPIUrl, Future.successful(resp))
-
-      await(connector.tearDownCoHoCompanyDetails("tstRegID")) shouldBe resp
-    }
-  }
-
-  "setupOfficers" should {
+  "teardownCoHoCompanyDetails" should {
     "return a valid response when successfully set up" in new Setup {
       val resp = HttpResponse(responseStatus = 200)
-      mockHttpPOST[JsValue, HttpResponse](connector.coHoAPIUrl, Future.successful(resp))
+      mockHttpPUT[String, HttpResponse](connector.incorpInfoUrl, Future.successful(resp))
 
-      await(connector.setupOfficers("123")) shouldBe resp
-    }
-  }
-
-  "teardownOfficers" should {
-    "return a valid response when successfully set up" in new Setup {
-      val resp = HttpResponse(responseStatus = 200)
-      mockHttpPUT[String, HttpResponse](connector.coHoAPIUrl, Future.successful(resp))
-
-      await(connector.teardownOfficers()) shouldBe resp
+      await(connector.teardownCoHoCompanyDetails()) shouldBe resp
     }
   }
 

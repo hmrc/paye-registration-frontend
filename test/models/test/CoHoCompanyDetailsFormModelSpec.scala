@@ -51,32 +51,4 @@ class CoHoCompanyDetailsFormModelSpec extends UnitSpec {
       Json.toJson[CoHoCompanyDetailsFormModel](tstModel) shouldBe tstJson
     }
   }
-
-  "Calling toCoHoCompanyDetailsAPIModel" should {
-    "return a valid CoHoCompanyDetailsFormModel" in {
-      val tstModel = CoHoCompanyDetailsFormModel(
-        companyName = "TESTLTD",
-        sicCodes = List("150", "", "155", "163"),
-        descriptions = List("consulting", "laundring", "cleaning")
-      )
-
-      val expectResult = CoHoCompanyDetailsModel("1234", "TESTLTD", List(
-        AreaOfIndustry("150", "consulting"),
-        AreaOfIndustry("155", "laundring"),
-        AreaOfIndustry("163", "cleaning")
-      ))
-
-      tstModel.toCoHoCompanyDetailsAPIModel("1234") shouldBe expectResult
-    }
-
-    "return an exception if the list of sicCodes and descriptions are not matching" in {
-      val tstModel = CoHoCompanyDetailsFormModel(
-        companyName = "TESTLTD",
-        sicCodes = List("150", "", "155", "163"),
-        descriptions = List("consulting", "laundring", "cleaning", "failing")
-      )
-
-      intercept[Exception](tstModel.toCoHoCompanyDetailsAPIModel("1234"))
-    }
-  }
 }

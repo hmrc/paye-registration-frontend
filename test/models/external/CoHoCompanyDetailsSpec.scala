@@ -16,40 +16,31 @@
 
 package models.external
 
+import models.Address
 import play.api.libs.json.{JsSuccess, Json}
 import testHelpers.PAYERegSpec
 
 class CoHoCompanyDetailsSpec extends PAYERegSpec {
 
   val tstModel = CoHoCompanyDetailsModel(
-    registrationID = "12345",
     companyName = "Test Company",
-    areasOfIndustry = Seq(
-      AreaOfIndustry(
-        sicCode = "100",
-        description = "Chips"
-      ),
-      AreaOfIndustry(
-        sicCode = "101",
-        description = "Fish"
-      )
+    roAddress = Address(
+      "Line1",
+      "Line2",
+      None,
+      None,
+      Some("TE1 1ST")
     )
   )
 
   val tstJson = Json.parse(
     """{
-      |  "registration_id":"12345",
       |  "company_name":"Test Company",
-      |  "areas_of_industry": [
-      |    {
-      |      "sic_code":"100",
-      |      "description":"Chips"
-      |    },
-      |    {
-      |      "sic_code":"101",
-      |      "description":"Fish"
-      |    }
-      |  ]
+      |  "registered_office_address":{
+      |    "line1":"Line1",
+      |    "line2":"Line2",
+      |    "postCode":"TE1 1ST"
+      |  }
       |}""".stripMargin)
 
   "CoHoCompanyDetailsModel" should {

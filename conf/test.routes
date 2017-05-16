@@ -1,5 +1,5 @@
 
-GET        /current-profile-setup                        controllers.test.CurrentProfileController.currentProfileSetup
+GET        /current-profile-setup                        controllers.test.BusinessProfileController.businessProfileSetup
 
 GET        /company-details-setup                        controllers.test.TestCoHoController.coHoCompanyDetailsSetup
 POST       /company-details-setup                        controllers.test.TestCoHoController.submitCoHoCompanyDetailsSetup

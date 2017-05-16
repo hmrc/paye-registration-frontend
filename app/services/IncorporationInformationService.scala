@@ -41,9 +41,9 @@ trait IncorporationInformationSrv {
   val coHoAPIConnector : IncorporationInformationConnect
   val keystoreConnector : KeystoreConnect
 
-  def fetchAndStoreCoHoCompanyDetails(regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def fetchAndStoreCoHoCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
-      coHoResp <- coHoAPIConnector.getCoHoCompanyDetails(regId)
+      coHoResp <- coHoAPIConnector.getCoHoCompanyDetails(regId, txId)
       outcome <- processCoHoResponse(coHoResp)
     } yield outcome
   }
@@ -58,10 +58,9 @@ trait IncorporationInformationSrv {
     }
   }
 
-  def getStoredCompanyName()(implicit hc: HeaderCarrier): Future[String] = {
+  def getStoredCompanyDetails()(implicit hc: HeaderCarrier): Future[CoHoCompanyDetailsModel] = {
     keystoreConnector.fetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString) map {
-      case Some(model) => model.companyName
-      case _ => throw new CompanyDetailsNotFoundException()
+      _.getOrElse(throw new CompanyDetailsNotFoundException())
     }
   }
 

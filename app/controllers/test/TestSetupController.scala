@@ -21,11 +21,11 @@ import javax.inject.{Inject, Singleton}
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{BusinessRegistrationConnect, BusinessRegistrationConnector, KeystoreConnect, KeystoreConnector}
-import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector, TestCoHoAPIConnect, TestCoHoAPIConnector, TestPAYERegConnect, TestPAYERegConnector}
+import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector, TestIncorpInfoConnect, TestIncorpInfoConnector, TestPAYERegConnect, TestPAYERegConnector}
 import models.test.CoHoCompanyDetailsFormModel
 import play.api.Logger
 import play.api.i18n.MessagesApi
-import services.{IncorporationInformationService, IncorporationInformationSrv, PAYERegistrationService, PAYERegistrationSrv, S4LService, S4LSrv}
+import services._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -34,7 +34,7 @@ import scala.concurrent.Future
 class TestSetupController @Inject()(injKeystoreConnector: KeystoreConnector,
                                     injBusinessRegConnector: BusinessRegistrationConnector,
                                     injTestBusinessRegConnector: TestBusinessRegConnector,
-                                    injTestCoHoAPIConnector: TestCoHoAPIConnector,
+                                    injTestIncorpInfoConnector: TestIncorpInfoConnector,
                                     injCoHoAPIService: IncorporationInformationService,
                                     injMessagesApi: MessagesApi,
                                     injTestPAYERegConnector: TestPAYERegConnector,
@@ -44,7 +44,7 @@ class TestSetupController @Inject()(injKeystoreConnector: KeystoreConnector,
   val keystoreConnector = injKeystoreConnector
   val businessRegConnector = injBusinessRegConnector
   val testBusinessRegConnector = injTestBusinessRegConnector
-  val testCoHoAPIConnector = injTestCoHoAPIConnector
+  val testIncorpInfoConnector = injTestIncorpInfoConnector
   val coHoAPIService = injCoHoAPIService
   val messagesApi = injMessagesApi
   val payeRegService = injPayeRegService
@@ -52,11 +52,11 @@ class TestSetupController @Inject()(injKeystoreConnector: KeystoreConnector,
   val s4LService = injS4LService
 }
 
-trait TestSetupCtrl extends CurrentProfileCtrl with TestCoHoCtrl with TestRegSetupCtrl with TestCacheCtrl {
+trait TestSetupCtrl extends BusinessProfileCtrl with TestCoHoCtrl with TestRegSetupCtrl with TestCacheCtrl {
   val keystoreConnector: KeystoreConnect
   val businessRegConnector: BusinessRegistrationConnect
   val testBusinessRegConnector: TestBusinessRegConnect
-  val testCoHoAPIConnector: TestCoHoAPIConnect
+  val testIncorpInfoConnector: TestIncorpInfoConnect
   val coHoAPIService: IncorporationInformationSrv
   val payeRegService: PAYERegistrationSrv
   val testPAYERegConnector: TestPAYERegConnect
@@ -73,13 +73,11 @@ trait TestSetupCtrl extends CurrentProfileCtrl with TestCoHoCtrl with TestRegSet
     implicit user =>
       implicit request =>
           for {
-            profile <- log("CurrentProfileSetup", doCurrentProfileSetup)
-            _ <- log("CoHoCompanyDetailsTeardown", doCoHoCompanyDetailsTearDown(profile.registrationID))
-            _ <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(CoHoCompanyDetailsFormModel(companyName, List.empty, List.empty), profile.registrationID))
-            _ <- log("RegTeardown", doIndividualRegTeardown(profile.registrationID))
-            _ <- log("S4LTeardown", doTearDownS4L(profile.registrationID))
-            _ <- log("OfficersTeardown", doTeardownOfficers())
-            _ <- log("OfficersSetup", doSetupOfficers(profile.registrationID))
+            businessProfile <- log("CurrentProfileSetup", doBusinessProfileSetup)
+            _ <- log("CoHoCompanyDetailsTeardown", doCoHoCompanyDetailsTearDown(businessProfile.registrationID))
+            _ <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(businessProfile.registrationID, companyName))
+            _ <- log("RegTeardown", doIndividualRegTeardown(businessProfile.registrationID))
+            _ <- log("S4LTeardown", doTearDownS4L(businessProfile.registrationID))
           } yield Redirect(controllers.userJourney.routes.PayeStartController.startPaye())
 
   }
