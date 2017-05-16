@@ -95,7 +95,7 @@ trait PAYERegistrationFixture {
       id="tradingName",
       Seq(SummaryRow(
         id="tradingName",
-        answer = Right("tstTrade"),
+        answers = List(Right("tstTrade")),
         changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName()),
         None,
         None

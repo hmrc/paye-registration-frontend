@@ -28,9 +28,9 @@ case class SummarySection(
                         )
 
 case class SummaryRow(
-                      id: String,
-                      answer: Either[String, String],
-                      changeLink: Option[Call],
-                      questionArgs: Option[Seq[String]] = None,
-                      commonQuestionKey: Option[String] = None
+                       id: String,
+                       answers: List[Either[String, String]],
+                       changeLink: Option[Call],
+                       questionArgs: Option[Seq[String]] = None,
+                       commonQuestionKey: Option[String] = None
                       )

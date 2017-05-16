@@ -81,22 +81,22 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         Seq(
           SummaryRow(
             id = "employees",
-            answer = Left("true"),
+            answers = List(Left("true")),
             Some(controllers.userJourney.routes.EmploymentController.employingStaff())
           ),
           SummaryRow(
             id = "companyPension",
-            answer = Left("true"),
+            answers = List(Left("true")),
             Some(controllers.userJourney.routes.EmploymentController.companyPension())
           ),
           SummaryRow(
             id = "subcontractors",
-            answer = Left("true"),
+            answers = List(Left("true")),
             Some(controllers.userJourney.routes.EmploymentController.subcontractors())
           ),
           SummaryRow(
             id = "firstPaymentDate",
-            Right("20/12/2016"),
+            answers = List(Right("20/12/2016")),
             Some(controllers.userJourney.routes.EmploymentController.firstPayment())
           )
         )
@@ -106,7 +106,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         Seq(
           SummaryRow(
             id ="completionCapacity",
-            answer = Right("High Priest"),
+            answers = List(Right("High Priest")),
             changeLink = Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
           )
         )
@@ -116,22 +116,22 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         Seq(
           SummaryRow(
             id = "tradingName",
-            answer = Right("tstTrade"),
+            answers = List(Right("tstTrade")),
             changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
           ),
           SummaryRow(
             id = "roAddress",
-            answer = Right("14 St Test Walk<br />Testley"),
+            answers = List(Right("14 St Test Walk"), Right("Testley")),
             None
           ),
           SummaryRow(
             id = "ppobAddress",
-            answer = Right("15 St Test Avenue<br />Testpool<br />TestUponAvon<br />Nowhereshire<br />LE1 1ST<br />UK"),
+            answers = List(Right("15 St Test Avenue"), Right("Testpool"), Right("TestUponAvon"), Right("Nowhereshire"), Right("LE1 1ST"), Right("UK")),
             Some(controllers.userJourney.routes.CompanyDetailsController.ppobAddress())
           ),
           SummaryRow(
             id = "natureOfBusiness",
-            answer = Right("Firearms"),
+            answers = List(Right("Firearms")),
             Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
           )
         )
@@ -141,17 +141,17 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         Seq(
           SummaryRow(
             id = "businessEmail",
-            answer = Right("test@email.com"),
+            answers = List(Right("test@email.com")),
             changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
           ),
           SummaryRow(
             id = "mobileNumber",
-            answer = Right("1234567890"),
+            answers = List(Right("1234567890")),
             changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
           ),
           SummaryRow(
             id = "businessTelephone",
-            answer = Right("0987654321"),
+            answers = List(Right("0987654321")),
             changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
           )
         )
@@ -161,7 +161,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         Seq(
           SummaryRow(
             id = "director0",
-            answer = Right("ZZ 12 34 56 A"),
+            answers = List(Right("ZZ 12 34 56 A")),
             Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
             Some(Seq("Timothy Buttersford")),
             Some("director")
@@ -173,27 +173,27 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         Seq(
           SummaryRow(
             id = "contactName",
-            answer = Right("testName"),
+            answers = List(Right("testName")),
             changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
           ),
           SummaryRow(
             id = "emailPAYEContact",
-            answer = Right("testEmail"),
+            answers = List(Right("testEmail")),
             changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
           ),
           SummaryRow(
             id = "phoneNumberPAYEContact",
-            answer = Right("0987654321"),
+            answers = List(Right("0987654321")),
             changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
           ),
           SummaryRow(
             id = "mobileNumberPAYEContact",
-            answer = Right("1234567890"),
+            answers = List(Right("1234567890")),
             changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
           ),
           SummaryRow(
             id = "correspondenceAddress",
-            answer = Right("22 Test test<br />Testerarium<br />TE0 0ST"),
+            answers = List(Right("22 Test test"), Right("Testerarium"), Right("TE0 0ST")),
             changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress())
           )
         )
@@ -276,9 +276,9 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         payeContact = validPAYEContactAPI
       )
 
-      val formatHMTLROAddress = service.formatHTMLAddress(apiRegistrationNoTName.companyDetails.roAddress)
-      val formatHMTLPPOBAddress = service.formatHTMLAddress(apiRegistrationNoTName.companyDetails.ppobAddress)
-      val formatHMTLCorrespondenceAddress = service.formatHTMLAddress(validPAYEContactAPI.correspondenceAddress)
+      val formatHMTLROAddress = service.addressToSummaryRowAnswers(apiRegistrationNoTName.companyDetails.roAddress)
+      val formatHMTLPPOBAddress = service.addressToSummaryRowAnswers(apiRegistrationNoTName.companyDetails.ppobAddress)
+      val formatHMTLCorrespondenceAddress = service.addressToSummaryRowAnswers(validPAYEContactAPI.correspondenceAddress)
 
       lazy val summaryNoTName = Summary(
         Seq(
@@ -287,22 +287,22 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             Seq(
               SummaryRow(
                 id = "employees",
-                answer = Left("true"),
+                answers = List(Left("true")),
                 Some(controllers.userJourney.routes.EmploymentController.employingStaff())
               ),
               SummaryRow(
                 id = "companyPension",
-                answer = Left("true"),
+                answers = List(Left("true")),
                 Some(controllers.userJourney.routes.EmploymentController.companyPension())
               ),
               SummaryRow(
                 id = "subcontractors",
-                answer = Left("true"),
+                answers = List(Left("true")),
                 Some(controllers.userJourney.routes.EmploymentController.subcontractors())
               ),
               SummaryRow(
                 id = "firstPaymentDate",
-                Right("20/12/2016"),
+                answers = List(Right("20/12/2016")),
                 Some(controllers.userJourney.routes.EmploymentController.firstPayment())
               )
             )
@@ -312,7 +312,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             Seq(
               SummaryRow(
                 id ="completionCapacity",
-                answer = Right("High Priestess"),
+                answers = List(Right("High Priestess")),
                 changeLink = Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
               )
             )
@@ -322,22 +322,22 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             Seq(
               SummaryRow(
                 id = "tradingName",
-                answer = Left("noAnswerGiven"),
+                answers = List(Left("noAnswerGiven")),
                 changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
               ),
               SummaryRow(
                 id = "roAddress",
-                answer = Right(formatHMTLROAddress),
+                answers = formatHMTLROAddress,
                 None
               ),
               SummaryRow(
                 id = "ppobAddress",
-                answer = Right(formatHMTLPPOBAddress),
+                answers = formatHMTLPPOBAddress,
                 Some(controllers.userJourney.routes.CompanyDetailsController.ppobAddress())
               ),
               SummaryRow(
                 id = "natureOfBusiness",
-                answer = Right("Firearms"),
+                answers = List(Right("Firearms")),
                 Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
               )
             )
@@ -347,17 +347,17 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             Seq(
               SummaryRow(
                 id = "businessEmail",
-                answer = Right("test@email.com"),
+                answers = List(Right("test@email.com")),
                 changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
               ),
               SummaryRow(
                 id = "mobileNumber",
-                answer = Right("1234567890"),
+                answers = List(Right("1234567890")),
                 changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
               ),
               SummaryRow(
                 id = "businessTelephone",
-                answer = Right("0987654321"),
+                answers = List(Right("0987654321")),
                 changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
               )
             )
@@ -367,7 +367,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             Seq(
               SummaryRow(
                 id = "director0",
-                answer = Right("ZZ 12 34 56 A"),
+                answers = List(Right("ZZ 12 34 56 A")),
                 Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
                 Some(Seq("Timothy Buttersford")),
                 Some("director")
@@ -379,27 +379,27 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             Seq(
               SummaryRow(
                 id = "contactName",
-                answer = Right("testName"),
+                answers = List(Right("testName")),
                 changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
               ),
               SummaryRow(
                 id = "emailPAYEContact",
-                answer = Right("testEmail"),
+                answers = List(Right("testEmail")),
                 changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
               ),
               SummaryRow(
                 id = "phoneNumberPAYEContact",
-                answer = Right("0987654321"),
+                answers = List(Right("0987654321")),
                 changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
               ),
               SummaryRow(
                 id = "mobileNumberPAYEContact",
-                answer = Right("1234567890"),
+                answers = List(Right("1234567890")),
                 changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
               ),
               SummaryRow(
                 id = "correspondenceAddress",
-                answer = Right(formatHMTLCorrespondenceAddress),
+                answers = formatHMTLCorrespondenceAddress,
                 changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress())
               )
             )
@@ -428,30 +428,30 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         )
       )
 
-      val formatHMTLROAddress = service.formatHTMLAddress(validCompanyDetailsAPI.roAddress)
-      val formatHMTLPPOBAddress = service.formatHTMLAddress(validCompanyDetailsAPI.ppobAddress)
+      val formatHMTLROAddress = service.addressToSummaryRowAnswers(validCompanyDetailsAPI.roAddress)
+      val formatHMTLPPOBAddress = service.addressToSummaryRowAnswers(validCompanyDetailsAPI.ppobAddress)
 
       val companyDetailsSection = SummarySection(
         id = "companyDetails",
         Seq(
           SummaryRow(
             id = "tradingName",
-            answer = Right("Test Company Trading Name"),
+            answers = List(Right("Test Company Trading Name")),
             changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
           ),
           SummaryRow(
             id = "roAddress",
-            answer = Right(formatHMTLROAddress),
+            answers = formatHMTLROAddress,
             None
           ),
           SummaryRow(
             id = "ppobAddress",
-            answer = Right(formatHMTLPPOBAddress),
+            answers = formatHMTLPPOBAddress,
             Some(controllers.userJourney.routes.CompanyDetailsController.ppobAddress())
           ),
           SummaryRow(
             id = "natureOfBusiness",
-            answer = Right("Novelty hairbrushes"),
+            answers = List(Right("Novelty hairbrushes")),
             Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
           )
         )
@@ -492,22 +492,22 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         Seq(
           SummaryRow(
             id = "employees",
-            answer = Left("false"),
+            answers = List(Left("false")),
             Some(controllers.userJourney.routes.EmploymentController.employingStaff())
           ),
           SummaryRow(
             id = "companyPension",
-            answer = Left("false"),
+            answers = List(Left("false")),
             Some(controllers.userJourney.routes.EmploymentController.companyPension())
           ),
           SummaryRow(
             id = "subcontractors",
-            answer = Left("false"),
+            answers = List(Left("false")),
             Some(controllers.userJourney.routes.EmploymentController.subcontractors())
           ),
           SummaryRow(
             id = "firstPaymentDate",
-            Right("20/12/2016"),
+            answers = List(Right("20/12/2016")),
             Some(controllers.userJourney.routes.EmploymentController.firstPayment())
           )
         )
@@ -532,17 +532,17 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
           Seq(
             Some(SummaryRow(
               id = "businessEmail",
-              answer = Right("test@email.com"),
+              answers = List(Right("test@email.com")),
               changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
             )),
             Some(SummaryRow(
               id = "mobileNumber",
-              answer = Right("1234567890"),
+              answers = List(Right("1234567890")),
               changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
             )),
             Some(SummaryRow(
               id = "businessTelephone",
-              answer = Right("0987654321"),
+              answers = List(Right("0987654321")),
               changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
             ))
           ).flatten
@@ -565,17 +565,17 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
           Seq(
             Some(SummaryRow(
               id = "businessEmail",
-              answer = Left("noAnswerGiven"),
+              answers = List(Left("noAnswerGiven")),
               changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
             )),
             Some(SummaryRow(
               id = "mobileNumber",
-              answer = Left("noAnswerGiven"),
+              answers = List(Left("noAnswerGiven")),
               changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
             )),
             Some(SummaryRow(
               id = "businessTelephone",
-              answer = Left("noAnswerGiven"),
+              answers = List(Left("noAnswerGiven")),
               changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
             ))
           ).flatten
@@ -608,27 +608,27 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
           Seq(
             SummaryRow(
               id = "contactName",
-              answer = Right("tstName"),
+              answers = List(Right("tstName")),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
               id = "emailPAYEContact",
-              answer = Right("test@email.com"),
+              answers = List(Right("test@email.com")),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
               id = "phoneNumberPAYEContact",
-              answer = Right("0987654321"),
+              answers = List(Right("0987654321")),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
               id = "mobileNumberPAYEContact",
-              answer = Right("1234567890"),
+              answers = List(Right("1234567890")),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
               id = "correspondenceAddress",
-              answer = Right("tstLine1<br />tstLine2<br />pstCode<br />UK"),
+              answers = List(Right("tstLine1"), Right("tstLine2"), Right("pstCode"), Right("UK")),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress())
             )
           )
@@ -657,27 +657,27 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
           Seq(
             SummaryRow(
               id = "contactName",
-              answer = Right("tstName"),
+              answers = List(Right("tstName")),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
               id = "emailPAYEContact",
-              answer = Left("noAnswerGiven"),
+              answers = List(Left("noAnswerGiven")),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
               id = "phoneNumberPAYEContact",
-              answer = Left("noAnswerGiven"),
+              answers = List(Left("noAnswerGiven")),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
               id = "mobileNumberPAYEContact",
-              answer = Left("noAnswerGiven"),
+              answers = List(Left("noAnswerGiven")),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
               id = "correspondenceAddress",
-              answer = Right("tstLine1<br />tstLine2<br />pstCode<br />UK"),
+              answers = List(Right("tstLine1"), Right("tstLine2"), Right("pstCode"), Right("UK")),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress())
             )
           )
@@ -695,7 +695,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         Seq(
           SummaryRow(
             id ="completionCapacity",
-            answer = Left("director"),
+            answers = List(Left("director")),
             changeLink = Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
           )
         )
@@ -711,7 +711,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         Seq(
           SummaryRow(
             id ="completionCapacity",
-            answer = Left("agent"),
+            answers = List(Left("agent")),
             changeLink = Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
           )
         )
@@ -727,7 +727,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         Seq(
           SummaryRow(
             id ="completionCapacity",
-            answer = Right("Executive in charge of helicopters"),
+            answers = List(Right("Executive in charge of helicopters")),
             changeLink = Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
           )
         )
@@ -767,14 +767,14 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
           Seq(
             Some(SummaryRow(
               id = "director0",
-              answer = Right("ZZ 12 34 56 A"),
+              answers = List(Right("ZZ 12 34 56 A")),
               changeLink = Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
               questionArgs = Some(Seq("Timothy Buttersford")),
               commonQuestionKey = Some("director")
             )),
             Some(SummaryRow(
               id = "director1",
-              answer = Right(""),
+              answers = List(Right("")),
               changeLink = Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
               questionArgs = Some(Seq("Pierre Simpson")),
               commonQuestionKey = Some("director")
