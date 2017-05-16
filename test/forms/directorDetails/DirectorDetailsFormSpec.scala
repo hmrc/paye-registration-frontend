@@ -136,7 +136,11 @@ class DirectorDetailsFormSpec extends UnitSpec {
         "nino[8]" -> "SR 15 33 66 QW",
         "nino[9]" -> "DR 15 33 66 C",
         "nino[10]" -> "SD 15 33 66 C",
-        "nino[11]" -> "S  R 15 33 66 C"
+        "nino[11]" -> "S  R 15 33 66 C",
+        "nino[12]" -> "bi876392b",
+        "nino[13]" -> "aa123456e",
+        "nino[14]" -> "zz 12 11 34 c",
+        "nino[15]" -> "sr 12 11 34 c"
       )
 
       val errs = Seq(
@@ -150,7 +154,10 @@ class DirectorDetailsFormSpec extends UnitSpec {
         FormError("nino[8]", "errors.invalid.nino"),
         FormError("nino[9]", "errors.invalid.nino"),
         FormError("nino[10]", "errors.invalid.nino"),
-        FormError("nino[11]", "errors.invalid.nino")
+        FormError("nino[11]", "errors.invalid.nino"),
+        FormError("nino[12]", "errors.invalid.nino"),
+        FormError("nino[13]", "errors.invalid.nino"),
+        FormError("nino[14]", "errors.invalid.nino")
       )
 
       "Fail to bind with the correct errors" in {
