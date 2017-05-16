@@ -113,5 +113,74 @@ class OfficerListSpec extends PAYERegSpec {
     "read from Json" in {
       Json.fromJson[OfficerList](tstOfficerListJson).get shouldBe tstOfficerList
     }
+
+    "read and normalize from Json" in {
+      val tstOfficerListJson2 = Json.parse(
+        """[
+          |   {
+          |      "name_elements":{
+          |         "forename":"Bob",
+          |         "other_forenames":"Bimbly Bobblôus",
+          |         "surname":"Bobbïngs"
+          |      },
+          |      "date_of_birth":{
+          |         "day":"12",
+          |         "month":"11",
+          |         "year":"1973"
+          |      },
+          |      "address":{
+          |         "premises":"98",
+          |         "address_line_1":"LIMBRICK LANE",
+          |         "address_line_2":"GORING-BY-SEA",
+          |         "locality":"WORTHING",
+          |         "country":"United Kingdom",
+          |         "postal_code":"BN12 6AG"
+          |      },
+          |      "officer_role":"director"
+          |   },
+          |   {
+          |      "name_elements":{
+          |         "title":"Mx",
+          |         "forename":"Jingly",
+          |         "surname":"Jinglés"
+          |      },
+          |      "date_of_birth":{
+          |         "day":"12",
+          |         "month":"07",
+          |         "year":"1988"
+          |      },
+          |      "address":{
+          |         "premises":"713",
+          |         "address_line_1":"ST. JAMES GATE",
+          |         "locality":"NEWCASTLE UPON TYNE",
+          |         "country":"England",
+          |         "postal_code":"NE1 4BB"
+          |      },
+          |      "officer_role":"director"
+          |   },
+          |   {
+          |      "name_elements":{
+          |         "forename":"Jorgè",
+          |         "surname":"Freshwàter"
+          |      },
+          |      "date_of_birth":{
+          |         "day":"10",
+          |         "month":"06",
+          |         "year":"1994"
+          |      },
+          |      "address":{
+          |         "premises":"1",
+          |         "address_line_1":"L ST",
+          |         "locality":"TYNE",
+          |         "country":"England",
+          |         "postal_code":"AA1 4AA"
+          |      },
+          |      "officer_role":"legend"
+          |   }
+          |]""".stripMargin
+      )
+
+      Json.fromJson[OfficerList](tstOfficerListJson2).get shouldBe tstOfficerList
+    }
   }
 }

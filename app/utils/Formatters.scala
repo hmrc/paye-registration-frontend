@@ -16,6 +16,24 @@
 
 package utils
 
+import java.text.Normalizer
+
+import play.api.libs.json.{JsResult, JsSuccess, JsValue, Json, Reads}
+
 object Formatters {
   def ninoFormatter(nino: String): String = nino.grouped(2).mkString(" ")
+
+  lazy val normalizeReads = new Reads[String] {
+    override def reads(json: JsValue): JsResult[String] = Json.fromJson[String](json).flatMap {
+      s =>
+        val normalized = Normalizer.normalize(s, Normalizer.Form.NFKD)
+        JsSuccess(normalized.replaceAll("\\p{M}", ""))
+    }
+  }
+
+  lazy val normalizeListReads = new Reads[List[String]] {
+    override def reads(json: JsValue): JsResult[List[String]] = Json.fromJson[List[String]](json).flatMap {
+      l => JsSuccess(l.map(Normalizer.normalize(_, Normalizer.Form.NFKD).replaceAll("\\p{M}", "")))
+    }
+  }
 }

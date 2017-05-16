@@ -18,7 +18,7 @@ package models
 
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
-import utils.Validators
+import utils.{Formatters, Validators}
 
 case class Address(
                     line1: String,
@@ -35,14 +35,14 @@ object Address {
   val adressLookupReads: Reads[Address] = new Reads[Address] {
     def reads(json: JsValue): JsResult[Address] = {
 
-      val validatedPostcode = json.\("address").\("postcode").asOpt[String] match {
+      val validatedPostcode = json.\("address").\("postcode").asOpt[String](Formatters.normalizeReads) match {
         case Some(pc) if pc.matches(Validators.postcodeRegex) => Right(pc)
         case Some(pc) => Left("Invalid postcode")
         case _ => Left("No postcode")
       }
 
-      val addressLines = json.\("address").\("lines").as[JsArray].as[List[String]]
-      val countryName = json.\("address").\("country").\("name").asOpt[String]
+      val addressLines = json.\("address").\("lines").as[JsArray].as[List[String]](Formatters.normalizeListReads)
+      val countryName = json.\("address").\("country").\("name").asOpt[String](Formatters.normalizeReads)
 
       (validatedPostcode, countryName, addressLines) match {
         case (Left(msg), None, _)              => JsError(ValidationError(s"$msg and no country to default to"))
@@ -62,14 +62,14 @@ object Address {
   val incorpInfoReads: Reads[Address] = new Reads[Address] {
     def reads(json: JsValue): JsResult[Address] = {
 
-      val premises = json.\("premises").as[String]
-      val addressLine1 = json.\("address_line_1").as[String]
-      val addressLine2 = json.\("address_line_2").asOpt[String]
-      val poBox = json.\("po_box").asOpt[String]
-      val locality = json.\("locality").as[String]
-      val region = json.\("region").asOpt[String]
-      val postalCode = json.\("postal_code").asOpt[String]
-      val country = json.\("country").asOpt[String]
+      val premises = json.\("premises").as[String](Formatters.normalizeReads)
+      val addressLine1 = json.\("address_line_1").as[String](Formatters.normalizeReads)
+      val addressLine2 = json.\("address_line_2").asOpt[String](Formatters.normalizeReads)
+      val poBox = json.\("po_box").asOpt[String](Formatters.normalizeReads)
+      val locality = json.\("locality").as[String](Formatters.normalizeReads)
+      val region = json.\("region").asOpt[String](Formatters.normalizeReads)
+      val postalCode = json.\("postal_code").asOpt[String](Formatters.normalizeReads)
+      val country = json.\("country").asOpt[String](Formatters.normalizeReads)
 
 
       val (line1, oLine2) = if((premises + " " + addressLine1).length > 26) {

@@ -106,7 +106,6 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
       await(getResponse) shouldBe IncorpInfoSuccessResponse(deetsModel)
     }
 
-    // TODO: Get monsieur Henri to make it work
     "get a default CoHo Company Details when the regId is part of the whitelist" in {
       val regIdWhitelisted = "regWhitelist123"
       val defaultCompanyName = "TEST-DEFAULT-COMPANY-NAME"

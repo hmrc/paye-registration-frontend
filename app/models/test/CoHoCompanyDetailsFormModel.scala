@@ -16,7 +16,6 @@
 
 package models.test
 
-import models.external.{AreaOfIndustry, CoHoCompanyDetailsModel}
 import play.api.libs.json.Json
 
 case class CoHoCompanyDetailsFormModel (
