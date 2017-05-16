@@ -55,7 +55,14 @@ object Address {
     def makeAddress(postCode: Option[String], country: Option[String], lines: List[String]) = {
       val L3 = if(lines.isDefinedAt(2)) Some(lines(2)) else None
       val L4 = if(lines.isDefinedAt(3)) Some(lines(3)) else None
-      Address(lines.head,lines(1),L3,L4,postCode,country)
+      Address(
+        line1     = lines.head.substring(0,if(lines.head.length > 27) 27 else lines.head.length),
+        line2     = lines(1).substring(0,if(lines(1).length > 27) 27 else lines(1).length),
+        line3     = L3.map(_.substring(0,if(L3.get.length > 27) 27 else L3.get.length)),
+        line4     = L4.map(_.substring(0,if(L4.get.length > 18) 18 else L4.get.length)),
+        postCode  = postCode,
+        country   = country
+      )
     }
   }
 

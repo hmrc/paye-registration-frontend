@@ -179,6 +179,38 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
 
         Json.fromJson[Address](tstJson)(Address.adressLookupReads) shouldBe JsSuccess(res)
       }
+
+      "lines 1-4 are too long and are there trimmed" in {
+        val inputJson = Json.parse(
+          """
+            |{
+            | "address" : {
+            |   "lines": [
+            |     "abcdefghijklmnopqrstuvwxyz@#",
+            |     "abcdefghijklmnopqrstuvwxyz@#",
+            |     "abcdefghijklmnopqrstuvwxyz@#",
+            |     "abcdefghijklmnopqrstuvwxyz@#"
+            |   ],
+            |   "postcode" : "TF4 2FT",
+            |   "country" : {
+            |     "code" : "UK",
+            |     "name" : "United Kingdom"
+            |   }
+            | }
+            |}
+          """.stripMargin)
+
+        val expected = Address(
+          line1 = "abcdefghijklmnopqrstuvwxyz@",
+          line2 = "abcdefghijklmnopqrstuvwxyz@",
+          line3 = Some("abcdefghijklmnopqrstuvwxyz@"),
+          line4 = Some("abcdefghijklmnopqr"),
+          postCode = Some("TF4 2FT"),
+          country = None
+        )
+
+        Json.fromJson[Address](inputJson)(Address.adressLookupReads) shouldBe JsSuccess(expected)
+      }
     }
 
     "fail" when {
