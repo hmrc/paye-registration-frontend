@@ -23,10 +23,10 @@ import play.api.data.format.Formatter
 import utils.Validators.isValidNatureOfBusiness
 
 object NatureOfBusinessForm {
-  def trimAndRemoveNewline(s: String): String = s.trim.replaceAll("\r\n|\r|\n|\t", " ")
+  def removeNewlineAndTrim(s: String): String = s.replaceAll("\r\n|\r|\n|\t", " ").trim
 
   def validate(entry: String): Either[Seq[FormError], String] = {
-    trimAndRemoveNewline(entry) match {
+    removeNewlineAndTrim(entry) match {
       case t if t.length >= 100                 => Left(Seq(FormError("description", "errors.invalid.sic.overCharLimit")))
       case ""                                   => Left(Seq(FormError("description", "errors.invalid.sic.noEntry")))
       case nob if isValidNatureOfBusiness(nob)  => Right(nob)

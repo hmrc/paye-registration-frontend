@@ -44,7 +44,7 @@ class NatureOfBusinessFormSpec extends PAYERegSpec {
   )
 
   val dataWithNewlineTab = Map(
-    "description" -> "I\nam\ta\r\ntest\rdescription"
+    "description" -> "\n\n\nI\nam\ta\r\ntest\rdescription\n\n\n\n\n"
   )
 
   val invalidDataChars = Map(
