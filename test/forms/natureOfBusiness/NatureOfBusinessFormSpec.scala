@@ -43,9 +43,26 @@ class NatureOfBusinessFormSpec extends PAYERegSpec {
     "description" -> "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   )
 
+  val dataWithNewlineTab = Map(
+    "description" -> "I\nam\ta\r\ntest\rdescription"
+  )
+
+  val invalidDataChars = Map(
+    "description" -> "I @m @ t£st descr!ption"
+  )
+
   "Validating the NatureOfBusiness form" should {
     "return the original form if there are no errors" in {
       val result = NatureOfBusinessForm.form.bind(validData).fold(
+        errors => errors,
+        success => success
+      )
+
+      result shouldBe NatureOfBusiness("I am a test description")
+    }
+
+    "return a trimmed and newline/tab replaced by whitespace if there are no errors" in {
+      val result = NatureOfBusinessForm.form.bind(dataWithNewlineTab).fold(
         errors => errors,
         success => success
       )
@@ -71,6 +88,13 @@ class NatureOfBusinessFormSpec extends PAYERegSpec {
       "the description is over 100 chars" in {
         val boundForm = testForm.bind(invalidDataTooLong)
         val formError = FormError("description", "errors.invalid.sic.overCharLimit")
+
+        boundForm.errors shouldBe Seq(formError)
+      }
+
+      "the description contains invalid chars" in {
+        val boundForm = testForm.bind(invalidDataChars)
+        val formError = FormError("description", "errors.invalid.sic.invalidChars")
 
         boundForm.errors shouldBe Seq(formError)
       }
