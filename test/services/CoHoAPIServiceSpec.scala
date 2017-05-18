@@ -35,7 +35,7 @@ class CoHoAPIServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFi
 
   trait Setup {
     val service = new IncorporationInformationSrv {
-      override val coHoAPIConnector: IncorporationInformationConnect = mockCoHoAPIConnector
+      override val incorpInfoConnector: IncorporationInformationConnect = mockCoHoAPIConnector
       override val keystoreConnector: KeystoreConnect = mockKeystoreConnector
     }
   }

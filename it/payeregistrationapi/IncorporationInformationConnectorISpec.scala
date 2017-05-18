@@ -16,6 +16,7 @@
 package payeregistrationapi
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import common.exceptions.DownstreamExceptions.OfficerListNotFoundException
 import connectors.{IncorpInfoSuccessResponse, IncorporationInformationConnector}
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.Address
@@ -24,7 +25,7 @@ import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import play.api.{Application, Play}
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.MetricsService
-import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier, NotFoundException}
 import utils.PAYEFeatureSwitch
 
 class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
@@ -192,13 +193,20 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
       await(getResponse) shouldBe tstOfficerListModel
     }
 
-    "get an empty officer list when CoHo API returns a NotFoundException" in {
+    "throw an OfficerListNotFoundException when CoHo API returns an empty list" in {
       val incorpInfoConnector = new IncorporationInformationConnector(metrics)
 
-      def getResponse = incorpInfoConnector.getOfficerList(testTransId)
+      setupWiremockResult(200, "[]")
+
+      intercept[OfficerListNotFoundException](await(incorpInfoConnector.getOfficerList(testTransId)))
+    }
+
+    "throw a NotFoundException" in {
+      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+
       setupWiremockResult(404, "")
 
-      await(getResponse) shouldBe OfficerList(items = Nil)
+      intercept[NotFoundException](await(incorpInfoConnector.getOfficerList(testTransId)))
     }
 
     "throw a BadRequestException" in {

@@ -18,6 +18,7 @@ package connectors
 
 import javax.inject.{Inject, Singleton}
 
+import common.exceptions.DownstreamExceptions.OfficerListNotFoundException
 import config.WSHttp
 import models.external.{CoHoCompanyDetailsModel, OfficerList}
 import play.api.Logger
@@ -53,39 +54,44 @@ trait IncorporationInformationConnect extends RegistrationWhitelist {
   def getCoHoCompanyDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[IncorpInfoResponse] = {
     ifRegIdNotWhitelisted(regId) {
       implicit val rds = CoHoCompanyDetailsModel.incorpInfoReads
-      val cohoApiTimer = metricsService.cohoAPIResponseTimer.time()
+      val incorpInfoTimer = metricsService.incorpInfoResponseTimer.time()
       http.GET[CoHoCompanyDetailsModel](s"$incorpInfoUrl$incorpInfoUri/$transactionId/company-profile") map { res =>
-        cohoApiTimer.stop()
+        incorpInfoTimer.stop()
         IncorpInfoSuccessResponse(res)
       } recover {
         case badRequestErr: BadRequestException =>
-          Logger.error("[CohoAPIConnector] [getCoHoCompanyDetails] - Received a BadRequest status code when expecting company details")
-          cohoApiTimer.stop()
+          Logger.error("[IncorporationInformationConnector] [getCoHoCompanyDetails] - Received a BadRequest status code when expecting company details")
+          incorpInfoTimer.stop()
           IncorpInfoBadRequestResponse
         case ex: Exception =>
-          Logger.error(s"[CohoAPIConnector] [getIncorporationStatus] - Received an error response when expecting company details - error: ${ex.getMessage}")
-          cohoApiTimer.stop()
+          Logger.error(s"[IncorporationInformationConnector] [getIncorporationStatus] - Received an error response when expecting company details - error: ${ex.getMessage}")
+          incorpInfoTimer.stop()
           IncorpInfoErrorResponse(ex)
       }
     }
   }
 
   def getOfficerList(transactionId: String)(implicit hc : HeaderCarrier): Future[OfficerList] = {
-    val cohoApiTimer = metricsService.cohoAPIResponseTimer.time()
+    val incorpInfoTimer = metricsService.incorpInfoResponseTimer.time()
     http.GET[OfficerList](s"$incorpInfoUrl$incorpInfoUri/$transactionId/officer-list") map { list =>
-      cohoApiTimer.stop()
-      list
+      incorpInfoTimer.stop()
+      if( list.items.isEmpty ) {
+        Logger.error("[IncorporationInformationConnector] [getOfficerList] - Received an empty Officer list")
+        throw new OfficerListNotFoundException
+      }
+      else { list }
     } recover {
-      case e: NotFoundException =>
-        cohoApiTimer.stop()
-        OfficerList(items = Nil)
+      case notFoundErr: NotFoundException =>
+        Logger.error("[IncorporationInformationConnector] [getOfficerList] - Received a NotFound status code when expecting an Officer list")
+        incorpInfoTimer.stop()
+        throw notFoundErr
       case badRequestErr: BadRequestException =>
-        Logger.error("[CohoAPIConnector] [getOfficerList] - Received a BadRequest status code when expecting an Officer list")
-        cohoApiTimer.stop()
+        Logger.error("[IncorporationInformationConnector] [getOfficerList] - Received a BadRequest status code when expecting an Officer list")
+        incorpInfoTimer.stop()
         throw badRequestErr
       case ex: Exception =>
-        Logger.error(s"[CohoAPIConnector] [getOfficerList] - Received an error response when expecting an Officer list - error: ${ex.getMessage}")
-        cohoApiTimer.stop()
+        Logger.error(s"[IncorporationInformationConnector] [getOfficerList] - Received an error response when expecting an Officer list - error: ${ex.getMessage}")
+        incorpInfoTimer.stop()
         throw ex
     }
   }

@@ -35,14 +35,14 @@ class DirectorDetailsService @Inject()(
                                         s4LServ: S4LService) extends DirectorDetailsSrv {
 
   override val payeRegConnector = payeRegistrationConn
-  override val coHoAPIService = coHoAPIServ
+  override val incorpInfoService = coHoAPIServ
   override val s4LService = s4LServ
 }
 
 trait DirectorDetailsSrv extends RegistrationWhitelist {
   val payeRegConnector: PAYERegistrationConnect
   val s4LService: S4LSrv
-  val coHoAPIService: IncorporationInformationSrv
+  val incorpInfoService: IncorporationInformationSrv
 
   implicit val formatRecordSet = Directors.directorMappingFormat
 
@@ -63,7 +63,7 @@ trait DirectorDetailsSrv extends RegistrationWhitelist {
   private[services] def convertOrRetrieveDirectors(directorList: Seq[Director], transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
     directorList match {
       case Nil => for {
-        directors <- coHoAPIService.getDirectorDetails(transactionId)
+        directors <- incorpInfoService.getDirectorDetails(transactionId)
       } yield directors
       case dirList => Future.successful(apiToView(dirList))
     }

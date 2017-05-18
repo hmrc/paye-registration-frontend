@@ -31,19 +31,19 @@ import scala.concurrent.Future
 
 @Singleton
 class IncorporationInformationService @Inject()(injkeystoreConnector: KeystoreConnector,
-                                                injCoHoAPIConnector: IncorporationInformationConnector) extends IncorporationInformationSrv {
+                                                injIncorpInfoConnector: IncorporationInformationConnector) extends IncorporationInformationSrv {
   override val keystoreConnector = injkeystoreConnector
-  override val coHoAPIConnector = injCoHoAPIConnector
+  override val incorpInfoConnector = injIncorpInfoConnector
 }
 
 trait IncorporationInformationSrv {
 
-  val coHoAPIConnector : IncorporationInformationConnect
+  val incorpInfoConnector : IncorporationInformationConnect
   val keystoreConnector : KeystoreConnect
 
   def fetchAndStoreCoHoCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
-      coHoResp <- coHoAPIConnector.getCoHoCompanyDetails(regId, txId)
+      coHoResp <- incorpInfoConnector.getCoHoCompanyDetails(regId, txId)
       outcome <- processCoHoResponse(coHoResp)
     } yield outcome
   }
@@ -66,7 +66,7 @@ trait IncorporationInformationSrv {
 
   def getDirectorDetails(txId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
     for {
-      officerList <- coHoAPIConnector.getOfficerList(txId)
+      officerList <- incorpInfoConnector.getOfficerList(txId)
       directorDetails <- convertOfficerList2Directors(officerList)
     } yield directorDetails
   }

@@ -16,6 +16,7 @@
 
 package connectors
 
+import common.exceptions.DownstreamExceptions.OfficerListNotFoundException
 import fixtures.CoHoAPIFixture
 import mocks.MockMetrics
 import models.api.Name
@@ -96,10 +97,16 @@ class IncorporationInformationConnectorSpec extends PAYERegSpec with CoHoAPIFixt
       await(connector.getOfficerList(testTransId)) shouldBe tstOfficerList
     }
 
-    "return a successful empty CoHo api response object for a not found request" in new Setup(true) {
+    "return an OfficerListNotFound exception when CoHo api response object returns an empty list" in new Setup(true) {
+      mockHttpGet[OfficerList](connector.incorpInfoUrl, Future.successful(tstOfficerList.copy(items = Seq.empty)))
+
+      intercept[OfficerListNotFoundException](await(connector.getOfficerList(testTransId)))
+    }
+
+    "return a CoHo Not Found api response object for a downstream not found error" in new Setup(true) {
       mockHttpGet[OfficerList](connector.incorpInfoUrl, Future.failed(new NotFoundException("tstException")))
 
-      await(connector.getOfficerList(testTransId)) shouldBe OfficerList(items = Nil)
+      intercept[NotFoundException](await(connector.getOfficerList(testTransId)))
     }
 
     "return a CoHo Bad Request api response object for a bad request" in new Setup(true) {
