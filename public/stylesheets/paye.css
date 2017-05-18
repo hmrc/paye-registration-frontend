@@ -32,6 +32,10 @@ tbody tr {
   border-bottom: 1px solid #a1acb2;
 }
 
+.confirmation-banner {
+    color: #FFFFFF;
+}
+
 .spaced-below {
   padding-bottom: 10px;
 }
