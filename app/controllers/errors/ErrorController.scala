@@ -74,8 +74,7 @@ trait ErrorCtrl extends FrontendController with Actions with I18nSupport with Se
       DeskproForm.form.bindFromRequest.fold(
         errors => Future.successful(BadRequest(views.html.pages.error.submissionFailed(errors))),
         success =>  deskproService.submitTicket(profile.registrationID, success) map {
-          ticket => Logger.info(s"Ticket id: $ticket")
-            Redirect(controllers.errors.routes.ErrorController.submittedTicket)
+          ticket => Redirect(controllers.errors.routes.ErrorController.submittedTicket)
         }
       )
     }
