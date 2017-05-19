@@ -289,7 +289,7 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
           Seq(
             SummaryRow(
               id = "natureOfBusiness",
-              answers = List(Right("Flower Arranging")),
+              answers = List(Right("<h1>Flower Arranging</h1>")),
               changeLink = Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness()),
               questionArgs = None,
               commonQuestionKey = None
@@ -306,12 +306,12 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
       document.getElementById(s"natureOfBusiness$suffixIdSectionHeading").text shouldBe messagesApi("pages.summary.natureOfBusiness.sectionHeading")
     }
 
-    "have the correct question text for director0" in {
+    "have the correct question text for Nature Of Business" in {
       document.getElementById(s"natureOfBusiness$suffixIdQuestion").text shouldBe messagesApi("pages.summary.natureOfBusiness.question")
     }
 
-    "have the correct answer text for director0" in {
-      document.getElementById(s"natureOfBusiness$suffixIdAnswer").text shouldBe "Flower Arranging"
+    "have the correct answer text for Nature Of Business" in {
+      document.getElementById(s"natureOfBusiness$suffixIdAnswer").text shouldBe "<h1>Flower Arranging</h1>"
     }
   }
 

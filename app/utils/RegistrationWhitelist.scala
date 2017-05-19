@@ -29,7 +29,7 @@ trait RegistrationWhitelist {
   val applicationConfig = FrontendAppConfig
 
   implicit def getDefaultCompanyDetailsAPI(regId: String): Option[CompanyDetailsAPI] =
-    Some(CompanyDetailsAPI(applicationConfig.defaultCompanyName, None, applicationConfig.defaultCHROAddress, applicationConfig.defaultCHROAddress, DigitalContactDetails(None, None, None)))
+    Some(CompanyDetailsAPI(applicationConfig.defaultCompanyName, None, applicationConfig.defaultCHROAddress, applicationConfig.defaultCHROAddress, DigitalContactDetails(Some("email@email.com"), None, None)))
   implicit def getDefaultSeqDirector(regId: String): Seq[Director] = applicationConfig.defaultSeqDirector
   implicit def getDefaultCompanyProfile(regId: String): CompanyRegistrationProfile = CompanyRegistrationProfile(applicationConfig.defaultCTStatus, s"fakeTxId-$regId")
   implicit def getDefaultCoHoCompanyDetails(regId: String): IncorpInfoResponse = IncorpInfoSuccessResponse(CoHoCompanyDetailsModel(applicationConfig.defaultCompanyName, applicationConfig.defaultCHROAddress))
