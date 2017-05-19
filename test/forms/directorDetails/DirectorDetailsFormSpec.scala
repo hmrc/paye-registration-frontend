@@ -140,7 +140,8 @@ class DirectorDetailsFormSpec extends UnitSpec {
         "nino[12]" -> "bi876392b",
         "nino[13]" -> "aa123456e",
         "nino[14]" -> "zz 12 11 34 c",
-        "nino[15]" -> "sr 12 11 34 c"
+        "nino[15]" -> "sr 12 11 34 c",
+        "nino[16]" -> "     sr 12 11 34 c     "
       )
 
       val errs = Seq(
