@@ -17,14 +17,38 @@
 package forms.natureOfBuinessDetails
 
 import models.view.NatureOfBusiness
-import play.api.data.Form
+import play.api.data.{Form, FormError, Forms, Mapping}
 import play.api.data.Forms._
-import utils.Validators.natureOfBusinessValidation
+import play.api.data.format.Formatter
+import utils.Validators.isValidNatureOfBusiness
 
 object NatureOfBusinessForm {
+  def removeNewlineAndTrim(s: String): String = s.replaceAll("\r\n|\r|\n|\t", " ").trim
+
+  def validate(entry: String): Either[Seq[FormError], String] = {
+    removeNewlineAndTrim(entry) match {
+      case t if t.length >= 100                 => Left(Seq(FormError("description", "errors.invalid.sic.overCharLimit")))
+      case ""                                   => Left(Seq(FormError("description", "errors.invalid.sic.noEntry")))
+      case nob if isValidNatureOfBusiness(nob)  => Right(nob)
+      case _                                    => Left(Seq(FormError("description", "errors.invalid.sic.invalidChars")))
+    }
+  }
+
+  implicit def natureOfBusinessFormatter: Formatter[String] = new Formatter[String] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], String] = {
+      validate(data.getOrElse(key, ""))
+    }
+
+    override def unbind(key: String, value: String): Map[String, String] = {
+      Map("description" -> value)
+    }
+  }
+
+  val natureOfBusiness: Mapping[String] = Forms.of[String](natureOfBusinessFormatter)
+
   val form = Form(
     mapping(
-      "description" -> natureOfBusinessValidation
+      "description" -> natureOfBusiness
     )(NatureOfBusiness.apply)(NatureOfBusiness.unapply)
   )
 }

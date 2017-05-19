@@ -31,7 +31,7 @@ object Validators extends DateUtil {
   private val nonEmptyRegex = """^(?=\s*\S).*$""".r
   private val validNinoFormat = "[[a-zA-Z]&&[^DFIQUVdfiquv]][[a-zA-Z]&&[^DFIQUVOdfiquvo]] ?\\d{2} ?\\d{2} ?\\d{2} ?[a-dA-D]{1}"
   private val invalidPrefixes = List("BG", "GB", "NK", "KN", "TN", "NT", "ZZ")
-  private val natureOfBusinessRegex = """^[A-Za-z 0-9\-,/&']{1,100}$""".r
+  private val natureOfBusinessRegex = """^(?![\r\n|\r|\n|\t])[A-Za-z 0-9\-,/&']{1,100}$"""
   val postcodeRegex = """^[A-Z]{1,2}[0-9][0-9A-Z]? [0-9][A-Z]{2}$"""
   private def hasValidPrefix(nino: String) = !invalidPrefixes.exists(nino.toUpperCase.startsWith)
 
@@ -70,22 +70,7 @@ object Validators extends DateUtil {
       if (errors.isEmpty) Valid else Invalid(errors)
   })
 
-  def natureOfBusinessValidation: Mapping[String] = {
-    val sicConstraint: Constraint[String] = Constraint("constraints.description")({
-      text =>
-        val errors = if(text.length >= 100) {
-          Seq(ValidationError("errors.invalid.sic.overCharLimit"))
-        } else {
-          text.trim match {
-            case natureOfBusinessRegex()  => Nil
-            case ""                       => Seq(ValidationError("errors.invalid.sic.noEntry"))
-            case _                        => Seq(ValidationError("errors.invalid.sic.invalidChars"))
-          }
-        }
-        if(errors.isEmpty) Valid else Invalid(errors)
-    })
-    text().verifying(sicConstraint)
-  }
+  def isValidNatureOfBusiness(natureOfBusiness: String): Boolean = natureOfBusiness.matches(natureOfBusinessRegex)
 
   def firstPaymentDateWithinRange(date: LocalDate): Boolean = {
     lessOrEqualThanXDaysAfter(LocalDate.now(), date, 61)
