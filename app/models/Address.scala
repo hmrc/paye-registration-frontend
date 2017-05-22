@@ -25,7 +25,8 @@ case class Address(line1: String,
                    line3: Option[String],
                    line4: Option[String],
                    postCode: Option[String],
-                   country: Option[String] = None)
+                   country: Option[String] = None,
+                   auditRef: Option[String] = None)
 
 object Address {
   implicit val format = Json.format[Address]
@@ -40,6 +41,10 @@ object Address {
 
   val adressLookupReads: Reads[Address] = new Reads[Address] {
     def reads(json: JsValue): JsResult[Address] = {
+
+      println("*****************************")
+      print(Json.prettyPrint(json))
+      println("*****************************")
 
       val validatedPostcode = json.\("address").\("postcode").asOpt[String](Formatters.normalizeReads) match {
         case Some(pc) if pc.matches(Validators.postcodeRegex) => Right(pc)

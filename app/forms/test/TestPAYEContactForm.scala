@@ -40,7 +40,8 @@ object TestPAYEContactForm {
         "line3" -> optional(text),
         "line4" -> optional(text),
         "postCode" -> optional(text),
-        "country" -> optional(text)
+        "country" -> optional(text),
+        "auditRef" -> optional(text)
       )(Address.apply)(Address.unapply)
     )(PAYEContact.apply)(PAYEContact.unapply)
   )

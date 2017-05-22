@@ -99,6 +99,12 @@
         '_label -> "RO Address Country (optional)"
         )
     </div>
+    <div class="inline form-group">
+        @govHelpers.input(
+        payeForm("companyDetails.roAddress.auditRef"),
+        '_label -> "RO Address Audit Ref (optional)"
+        )
+    </div>
 
     <h2>PPOB Address</h2>
     <div class="inline form-group">
@@ -135,6 +141,12 @@
         @govHelpers.input(
         payeForm("companyDetails.ppobAddress.country"),
         '_label -> "PPOB Address Country (optional)"
+        )
+    </div>
+    <div class="inline form-group">
+        @govHelpers.input(
+        payeForm("companyDetails.ppobAddress.auditRef"),
+        '_label -> "PPOB Address Audit Ref (optional)"
         )
     </div>
 
@@ -347,6 +359,12 @@
         @govHelpers.input(
         payeForm("payeContact.correspondenceAddress.country"),
         '_label -> "PAYE Correspondence Address Country (optional)"
+        )
+    </div>
+    <div class="inline form-group">
+        @govHelpers.input(
+        payeForm("payeContact.correspondenceAddress.auditRef"),
+        '_label -> "Correspondence Address Audit Ref (optional)"
         )
     </div>
 
