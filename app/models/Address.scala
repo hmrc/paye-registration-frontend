@@ -42,10 +42,6 @@ object Address {
   val adressLookupReads: Reads[Address] = new Reads[Address] {
     def reads(json: JsValue): JsResult[Address] = {
 
-      println("*****************************")
-      print(Json.prettyPrint(json))
-      println("*****************************")
-
       val validatedPostcode = json.\("address").\("postcode").asOpt[String](Formatters.normalizeReads) match {
         case Some(pc) if pc.matches(Validators.postcodeRegex) => Right(pc)
         case Some(pc) => Left("Invalid postcode")
@@ -54,23 +50,25 @@ object Address {
 
       val addressLines = json.\("address").\("lines").as[JsArray].as[List[String]](Formatters.normalizeListReads)
       val countryName = json.\("address").\("country").\("name").asOpt[String](Formatters.normalizeReads)
+      val auditRef = json.\("auditRef").asOpt[String]
 
       (validatedPostcode, countryName, addressLines) match {
         case (Left(msg), None, _)              => JsError(ValidationError(s"$msg and no country to default to"))
         case (_, _, lines) if lines.length < 2 => JsError(ValidationError(s"only ${lines.length} lines provided from address-lookup-frontend"))
-        case (Left(msg), c @ Some(_), lines)   => JsSuccess(makeAddress(None, c, lines))
-        case (Right(pc), _, lines)             => JsSuccess(makeAddress(Some(pc), None, lines))
+        case (Left(msg), c @ Some(_), lines)   => JsSuccess(makeAddress(None, c, lines, auditRef))
+        case (Right(pc), _, lines)             => JsSuccess(makeAddress(Some(pc), None, lines, auditRef))
       }
     }
 
-    def makeAddress(postCode: Option[String], country: Option[String], lines: List[String]): Address = {
+    def makeAddress(postCode: Option[String], country: Option[String], lines: List[String], auditRef: Option[String]): Address = {
       Address(
         line1     = trimLine(lines.head, 27),
         line2     = trimLine(lines(1), 27),
         line3     = trimOptionalLine(lines.lift(2), 27),
         line4     = trimOptionalLine(lines.lift(3), 18),
         postCode  = postCode,
-        country   = country
+        country   = country,
+        auditRef  = auditRef
       )
     }
   }
