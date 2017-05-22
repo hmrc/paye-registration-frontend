@@ -43,7 +43,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
   class Setup {
     val service = new DirectorDetailsSrv {
       override val payeRegConnector = mockPAYERegConnector
-      override val coHoAPIService = mockCoHoService
+      override val incorpInfoService = mockCoHoService
       override val s4LService = mockS4LService
     }
   }
@@ -51,7 +51,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
   class NoDirectorDetailsMockedSetup {
     val service = new DirectorDetailsSrv {
       override val payeRegConnector = mockPAYERegConnector
-      override val coHoAPIService = mockCoHoService
+      override val incorpInfoService = mockCoHoService
       override val s4LService = mockS4LService
 
       override def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
@@ -67,7 +67,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
   class DirectorDetailsMockedSetup {
     val service = new DirectorDetailsSrv {
       override val payeRegConnector = mockPAYERegConnector
-      override val coHoAPIService = mockCoHoService
+      override val incorpInfoService = mockCoHoService
       override val s4LService = mockS4LService
 
       override def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
@@ -83,7 +83,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
   class APIConverterMockedSetup {
     val service = new DirectorDetailsSrv {
       override val payeRegConnector = mockPAYERegConnector
-      override val coHoAPIService = mockCoHoService
+      override val incorpInfoService = mockCoHoService
       override val s4LService = mockS4LService
 
       override def apiToView(apiModel: Seq[Director]): Directors = {

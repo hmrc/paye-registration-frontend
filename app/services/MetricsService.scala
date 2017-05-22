@@ -26,7 +26,7 @@ class MetricsService @Inject()(injMetrics: Metrics) extends MetricsSrv {
   override val payeRegistrationResponseTimer = injMetrics.defaultRegistry.timer("paye-registration-call-timer")
   override val addressLookupResponseTimer = injMetrics.defaultRegistry.timer("address-lookup-call-timer")
   override val businessRegistrationResponseTimer = injMetrics.defaultRegistry.timer("business-registration-call-timer")
-  override val cohoAPIResponseTimer = injMetrics.defaultRegistry.timer("coho-api-call-timer")
+  override val incorpInfoResponseTimer = injMetrics.defaultRegistry.timer("incorporation-information-call-timer")
   override val companyRegistrationResponseTimer = injMetrics.defaultRegistry.timer("company-registration-call-timer")
   override val keystoreResponseTimer = injMetrics.defaultRegistry.timer("keystore-call-timer")
   override val s4lResponseTimer = injMetrics.defaultRegistry.timer("s4l-call-timer")
@@ -37,7 +37,7 @@ trait MetricsSrv {
   val payeRegistrationResponseTimer: Timer
   val addressLookupResponseTimer: Timer
   val businessRegistrationResponseTimer: Timer
-  val cohoAPIResponseTimer: Timer
+  val incorpInfoResponseTimer: Timer
   val companyRegistrationResponseTimer: Timer
   val keystoreResponseTimer: Timer
   val s4lResponseTimer: Timer

@@ -16,6 +16,7 @@
 package payeregistrationapi
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import common.exceptions.DownstreamExceptions.OfficerListNotFoundException
 import connectors.{IncorpInfoSuccessResponse, IncorporationInformationConnector}
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.Address
@@ -192,13 +193,20 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
       await(getResponse) shouldBe tstOfficerListModel
     }
 
-    "get an empty officer list when CoHo API returns a NotFoundException" in {
+    "throw an OfficerListNotFoundException when CoHo API returns an empty list" in {
       val incorpInfoConnector = new IncorporationInformationConnector(metrics)
 
-      def getResponse = incorpInfoConnector.getOfficerList(testTransId)
+      setupWiremockResult(200, "[]")
+
+      intercept[OfficerListNotFoundException](await(incorpInfoConnector.getOfficerList(testTransId)))
+    }
+
+    "throw an OfficerListNotFoundException for a 404 response" in {
+      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+
       setupWiremockResult(404, "")
 
-      await(getResponse) shouldBe OfficerList(items = Nil)
+      intercept[OfficerListNotFoundException](await(incorpInfoConnector.getOfficerList(testTransId)))
     }
 
     "throw a BadRequestException" in {

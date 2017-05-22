@@ -45,7 +45,7 @@ object DirectorDetailsForm {
       } else {
         data.getOrElse(key,"") match {
           case ""   => Right(UserEnteredNino(getIndex(key), None))
-          case nino if isValidNino(nino) => Right(UserEnteredNino(getIndex(key), Some(nino.replaceAll("\\s", "").toUpperCase)))
+          case nino if isValidNino(nino.trim) => Right(UserEnteredNino(getIndex(key), Some(nino.replaceAll("\\s", "").toUpperCase)))
           case _ => Left(Seq(FormError(key, "errors.invalid.nino")))
         }
       }

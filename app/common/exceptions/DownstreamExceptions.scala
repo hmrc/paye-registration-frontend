@@ -23,4 +23,5 @@ trait DownstreamExceptions {
   class CurrentProfileNotFoundException extends Exception
   class CompanyDetailsNotFoundException extends Exception
   class PAYEMicroserviceException(msg:String) extends Exception (msg)
+  class OfficerListNotFoundException extends Exception
 }
