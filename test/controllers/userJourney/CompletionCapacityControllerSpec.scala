@@ -17,10 +17,13 @@
 package controllers.userJourney
 
 import builders.AuthBuilder
+import connectors.PAYERegistrationConnector
 import enums.{DownstreamOutcome, UserCapacity}
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import models.view.CompletionCapacity
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
+import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.CompletionCapacityService
@@ -32,6 +35,8 @@ import scala.concurrent.Future
 class CompletionCapacityControllerSpec extends PAYERegSpec {
 
   val mockCompletionCapacityService = mock[CompletionCapacityService]
+  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
+
 
   class Setup {
     val testController = new CompletionCapacityCtrl {
@@ -39,13 +44,21 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
       override val messagesApi = mockMessages
       override val completionCapacityService = mockCompletionCapacityService
       override val keystoreConnector = mockKeystoreConnector
+      override val payeRegistrationConnector = mockPayeRegistrationConnector
+
+      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+        f(CurrentProfile(
+          "12345",
+          Some("Director"),
+          CompanyRegistrationProfile("held", "txId"),
+          "ENG"
+        ))
+      }
     }
   }
   "completionCapacity" should {
     "return an OK if a capacity has been found" in new Setup {
       val capacity = CompletionCapacity(UserCapacity.director, "")
-
-      mockFetchCurrentProfile()
 
       when(mockCompletionCapacityService.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Some(capacity)))
@@ -56,7 +69,6 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
     }
 
     "return an OK if a capacity has not been found" in new Setup {
-      mockFetchCurrentProfile()
       when(mockCompletionCapacityService.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(None))
 
@@ -72,7 +84,6 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
         "" -> ""
       )
 
-      mockFetchCurrentProfile()
       AuthBuilder.submitWithAuthorisedUser(testController.submitCompletionCapacity, mockAuthConnector, request) { result =>
         status(result) shouldBe BAD_REQUEST
       }
@@ -85,7 +96,6 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
         "completionCapacity" -> "director",
         "completionCapacityOther" -> ""
       )
-      mockFetchCurrentProfile()
 
       when(mockCompletionCapacityService.saveCompletionCapacity(ArgumentMatchers.any[CompletionCapacity](), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))

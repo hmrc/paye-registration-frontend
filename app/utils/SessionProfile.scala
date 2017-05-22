@@ -16,25 +16,36 @@
 
 package utils
 
-import connectors.KeystoreConnect
-import enums.CacheKeys
+import common.exceptions.InternalExceptions
+import connectors.{KeystoreConnect, PAYERegistrationConnect}
+import enums.{CacheKeys, PAYEStatus}
 import models.external.CurrentProfile
-import play.api.mvc.Result
+import play.api.mvc.{Request, Result}
 import play.api.mvc.Results.Redirect
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait SessionProfile {
+trait SessionProfile extends InternalExceptions {
 
   val keystoreConnector: KeystoreConnect
+  val payeRegistrationConnector: PAYERegistrationConnect
 
-  def withCurrentProfile(f: => CurrentProfile => Future[Result])(implicit hc: HeaderCarrier): Future[Result] = {
+  def withCurrentProfile(f: => CurrentProfile => Future[Result])(implicit request: Request[_],  hc: HeaderCarrier): Future[Result] = {
     keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString) flatMap {
-      case Some(currentProfile) => f(currentProfile)
+      case Some(currentProfile) => payeRegistrationConnector.getStatus(currentProfile.registrationID) flatMap {
+        case Some(status) => status match {
+          case PAYEStatus.held | PAYEStatus.submitted => request.path match {
+              // TODO - going to re-factor this under SCRS-6939
+            case "/register-for-paye/confirmation" => f(currentProfile)
+            case _               => Future.successful(Redirect(controllers.userJourney.routes.DashboardController.dashboard()))
+          }
+          case _                                      => f(currentProfile)
+        }
+        case None => throw new MissingDocumentStatus(s"There was no document status found for reg id ${currentProfile.registrationID}")
+      }
       case None => Future.successful(Redirect(controllers.userJourney.routes.PayeStartController.startPaye()))
     }
   }
-
 }

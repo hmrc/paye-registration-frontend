@@ -33,4 +33,6 @@ trait InternalExceptions {
   )
 
   class APIConversionException(msg: String) extends Exception(msg)
+
+  class MissingDocumentStatus(msg: String) extends Exception(msg)
 }

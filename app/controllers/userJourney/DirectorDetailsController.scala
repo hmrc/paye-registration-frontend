@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector}
+import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
 import forms.directorDetails.DirectorDetailsForm
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.{DirectorDetailsService, DirectorDetailsSrv}
@@ -32,11 +32,13 @@ import views.html.pages.{directorDetails => DirectorDetailsPage}
 @Singleton
 class DirectorDetailsController @Inject()(injMessagesApi: MessagesApi,
                                           injDirectorDetailsService: DirectorDetailsService,
-                                          injKeystoreConnector: KeystoreConnector) extends DirectorDetailsCtrl {
+                                          injKeystoreConnector: KeystoreConnector,
+                                          injPayeRegistrationConnector: PAYERegistrationConnector) extends DirectorDetailsCtrl {
   val authConnector = FrontendAuthConnector
   val messagesApi = injMessagesApi
   val directorDetailsService = injDirectorDetailsService
   val keystoreConnector = injKeystoreConnector
+  val payeRegistrationConnector = injPayeRegistrationConnector
 }
 
 trait DirectorDetailsCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {

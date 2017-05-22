@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector}
+import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
 import views.html.pages.eligibility.{companyEligibility => CompanyEligibilityPage, directorEligibility => DirectorEligibilityPage, ineligible => IneligiblePage}
 import forms.eligibility.{CompanyEligibilityForm, DirectorEligibilityForm}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -35,12 +35,14 @@ import scala.concurrent.Future
 @Singleton
 class EligibilityController @Inject()(injMessagesApi: MessagesApi,
                                       injKeystoreConnector: KeystoreConnector,
-                                      injEligibilityService: EligibilityService
+                                      injEligibilityService: EligibilityService,
+                                      injPayeRegistrationConnector: PAYERegistrationConnector
                                      ) extends EligibilityCtrl with ServicesConfig {
   val authConnector = FrontendAuthConnector
   val messagesApi = injMessagesApi
   override val eligibilityService = injEligibilityService
   override val keystoreConnector = injKeystoreConnector
+  val payeRegistrationConnector = injPayeRegistrationConnector
   lazy val compRegFEURL = getConfString("company-registration-frontend.www.url", "")
   lazy val compRegFEURI = getConfString("company-registration-frontend.www.uri", "")
 }

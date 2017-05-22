@@ -17,15 +17,18 @@
 package controllers.test
 
 import builders.AuthBuilder
+import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
-import play.api.mvc.Result
+import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.{PAYEContactService, CompanyDetailsService}
+import services.{CompanyDetailsService, PAYEContactService}
 import testHelpers.PAYERegSpec
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
@@ -34,13 +37,24 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
   val fakeRequest = FakeRequest("GET", "/")
   val mockCompanyDetailsService = mock[CompanyDetailsService]
   val mockPAYEContactService = mock[PAYEContactService]
+  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
 
   class Setup {
     val controller = new TestAddressLookupCtrl {
       override val authConnector = mockAuthConnector
+      override val payeRegistrationConnector = mockPayeRegistrationConnector
       override val companyDetailsService = mockCompanyDetailsService
       override val payeContactService = mockPAYEContactService
       override val keystoreConnector = mockKeystoreConnector
+
+      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+        f(CurrentProfile(
+          "12345",
+          Some("Director"),
+          CompanyRegistrationProfile("held", "txId"),
+          "ENG"
+        ))
+      }
     }
   }
 
@@ -53,7 +67,6 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
     }
 
     "return 500 when the mocked address can't be submitted" in new Setup {
-      mockFetchCurrentProfile()
       when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
@@ -64,7 +77,6 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
     }
 
     "return 303 when the mocked address is successfully submitted" in new Setup {
-      mockFetchCurrentProfile()
       when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
@@ -85,7 +97,6 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
     }
 
     "return 500 when the mocked address can't be submitted" in new Setup {
-      mockFetchCurrentProfile()
       when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthBuilder.showWithAuthorisedUser(controller.noLookupCorrespondenceAddress, mockAuthConnector) {
@@ -95,7 +106,6 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
     }
 
     "return 303 when the mocked address is successfully submitted" in new Setup {
-      mockFetchCurrentProfile()
       when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.showWithAuthorisedUser(controller.noLookupCorrespondenceAddress, mockAuthConnector) {

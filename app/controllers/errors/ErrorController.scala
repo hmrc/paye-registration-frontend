@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector}
+import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
 import forms.errors.DeskproForm
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -34,12 +34,14 @@ import scala.concurrent.Future
 @Singleton
 class ErrorController @Inject()(injMessagesApi: MessagesApi,
                                 injKeystoreConnector: KeystoreConnector,
+                                injPayeRegistrationConnector: PAYERegistrationConnector,
                                 injDeskproService: DeskproService)
                                 extends ErrorCtrl{
   val authConnector = FrontendAuthConnector
   val messagesApi = injMessagesApi
   val keystoreConnector = injKeystoreConnector
   val deskproService = injDeskproService
+  val payeRegistrationConnector = injPayeRegistrationConnector
 }
 
 trait ErrorCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {

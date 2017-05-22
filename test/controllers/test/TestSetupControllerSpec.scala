@@ -17,6 +17,7 @@
 package controllers.test
 
 import builders.AuthBuilder
+import connectors.PAYERegistrationConnector
 import connectors.test.{TestBusinessRegConnect, TestIncorpInfoConnect, TestPAYERegConnect}
 import enums.DownstreamOutcome
 import models.external.BusinessProfile
@@ -34,11 +35,13 @@ class TestSetupControllerSpec extends PAYERegSpec {
   val mockPayeRegConnector = mock[TestPAYERegConnect]
   val mockPayeRegService = mock[PAYERegistrationSrv]
   val mockS4LService = mock[S4LSrv]
+  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
 
   class Setup {
     val controller = new TestSetupCtrl {
       override val businessRegConnector = mockBusinessRegistrationConnector
       override val keystoreConnector = mockKeystoreConnector
+      override val payeRegistrationConnector = mockPayeRegistrationConnector
       override val testBusinessRegConnector = mockTestBusRegConnector
       override val authConnector = mockAuthConnector
       override val testIncorpInfoConnector = mockTestAPIConnector

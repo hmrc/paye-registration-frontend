@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector}
+import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
 import forms.completionCapacity.CompletionCapacityForm
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
@@ -35,11 +35,13 @@ import scala.concurrent.Future
 @Singleton
 class CompletionCapacityController @Inject()(injMessagesApi: MessagesApi,
                                              injCompletionCapacityService: CompletionCapacityService,
-                                             injKeystoreConnector: KeystoreConnector) extends CompletionCapacityCtrl {
+                                             injKeystoreConnector: KeystoreConnector,
+                                             injPayeRegistrationConnector: PAYERegistrationConnector) extends CompletionCapacityCtrl {
   val authConnector = FrontendAuthConnector
   val messagesApi = injMessagesApi
   val completionCapacityService = injCompletionCapacityService
   val keystoreConnector = injKeystoreConnector
+  val payeRegistrationConnector = injPayeRegistrationConnector
 }
 
 trait CompletionCapacityCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {

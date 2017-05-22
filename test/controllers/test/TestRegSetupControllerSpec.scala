@@ -17,11 +17,14 @@
 package controllers.test
 
 import builders.AuthBuilder
+import connectors.PAYERegistrationConnector
 import connectors.test.TestPAYERegConnect
 import enums.DownstreamOutcome
 import fixtures.BusinessRegistrationFixture
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
+import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK}
 import services.PAYERegistrationSrv
@@ -34,21 +37,31 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
 
   val mockPayeRegConnector = mock[TestPAYERegConnect]
   val mockPayeRegService = mock[PAYERegistrationSrv]
+  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
 
   class Setup {
     val controller = new TestRegSetupCtrl {
       override val testPAYERegConnector = mockPayeRegConnector
       override val payeRegService = mockPayeRegService
+      override val payeRegistrationConnector = mockPayeRegistrationConnector
       override val messagesApi = mockMessages
       override val authConnector = mockAuthConnector
       override val keystoreConnector = mockKeystoreConnector
+
+      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+        f(CurrentProfile(
+          "12345",
+          Some("Director"),
+          CompanyRegistrationProfile("held", "txId"),
+          "ENG"
+        ))
+      }
     }
   }
 
   "regTeardown" should {
     "return an OK" when {
       "the registration collection has been successfully torn down" in new Setup {
-        mockFetchCurrentProfile()
         when(mockPayeRegConnector.testRegistrationTeardown()(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
@@ -60,7 +73,6 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
 
     "return an INTERNAL_SERVER_ERROR" when {
       "there was a problem tearing down the registration collection" in new Setup {
-        mockFetchCurrentProfile()
         when(mockPayeRegConnector.testRegistrationTeardown()(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
@@ -98,8 +110,6 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
   "regSetup" should {
     "return an OK" when {
       "the reg setup has been rendered with the form and the regId fetched" in new Setup {
-        mockFetchCurrentProfile()
-
         AuthBuilder.showWithAuthorisedUser(controller.regSetup, mockAuthConnector) { result =>
           status(result) shouldBe OK
         }
@@ -110,7 +120,6 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
   "submitRegSetup" should {
     "return a BAD_REQUEST" when {
       "there was a problem validating the form values" in new Setup {
-        mockFetchCurrentProfile()
         val request = FakeRequest().withFormUrlEncodedBody()
 
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetup, mockAuthConnector, request) { result =>
@@ -179,7 +188,6 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
           "payeContact.correspondenceAddress.country" -> "testCountry"
         )
 
-        mockFetchCurrentProfile()
         when(mockPayeRegConnector.addPAYERegistration(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
@@ -248,7 +256,6 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
           "payeContact.correspondenceAddress.postCode" -> "testPostCode",
           "payeContact.correspondenceAddress.country" -> "testCountry"
         )
-        mockFetchCurrentProfile()
         when(mockPayeRegConnector.addPAYERegistration(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
@@ -262,7 +269,6 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
   "regSetupCompanyDetails" should {
     "return an OK" when {
       "the payeRegCompanyDetailsSetup page has been rendered" in new Setup {
-        mockFetchCurrentProfile()
         AuthBuilder.showWithAuthorisedUser(controller.regSetupCompanyDetails, mockAuthConnector) { result =>
           status(result) shouldBe OK
         }
@@ -274,7 +280,6 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
     "return a BAD_REQUEST" when {
       "the form values cannot be validated" in new Setup {
         val request = FakeRequest().withFormUrlEncodedBody()
-        mockFetchCurrentProfile()
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupCompanyDetails, mockAuthConnector, request) { result =>
           status(result) shouldBe BAD_REQUEST
         }
@@ -303,7 +308,6 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
           "businessContactDetails.mobileNumber" -> "testNumber",
           "businessContactDetails.phoneNumber" -> "testNumber"
         )
-        mockFetchCurrentProfile()
         when(mockPayeRegConnector.addTestCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
@@ -335,7 +339,6 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
           "businessContactDetails.mobileNumber" -> "testNumber",
           "businessContactDetails.phoneNumber" -> "testNumber"
         )
-        mockFetchCurrentProfile()
         when(mockPayeRegConnector.addTestCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
@@ -349,7 +352,6 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
   "regSetupPAYEContact" should {
     "return an OK" when {
       "the payeRegPAYEContactSetup page has been rendered" in new Setup {
-        mockFetchCurrentProfile()
         AuthBuilder.showWithAuthorisedUser(controller.regSetupPAYEContact, mockAuthConnector) { result =>
           status(result) shouldBe OK
         }
@@ -361,7 +363,6 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
     "return a BAD_REQUEST" when {
       "the form data cant be validated" in new Setup {
         val request = FakeRequest().withFormUrlEncodedBody()
-        mockFetchCurrentProfile()
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupPAYEContact, mockAuthConnector, request) { result =>
           status(result) shouldBe BAD_REQUEST
         }
@@ -382,7 +383,6 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
           "correspondenceAddress.postCode" -> "testPostCode",
           "correspondenceAddress.country" -> "testCountry"
         )
-        mockFetchCurrentProfile()
         when(mockPayeRegConnector.addTestPAYEContact(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
@@ -406,7 +406,6 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
           "correspondenceAddress.postCode" -> "testPostCode",
           "correspondenceAddress.country" -> "testCountry"
         )
-        mockFetchCurrentProfile()
         when(mockPayeRegConnector.addTestPAYEContact(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 

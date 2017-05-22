@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector}
+import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
 import enums.DownstreamOutcome
 import forms.payeContactDetails.{CorrespondenceAddressForm, PAYEContactDetailsForm}
 import models.view.PAYEContact
@@ -41,6 +41,7 @@ class PAYEContactController @Inject()(
                                        injPAYEContactService: PAYEContactService,
                                        injAddressLookupService: AddressLookupService,
                                        injKeystoreConnector: KeystoreConnector,
+                                       injPayeRegistrationConnector: PAYERegistrationConnector,
                                        injMessagesApi: MessagesApi)
   extends PAYEContactCtrl {
   val authConnector = FrontendAuthConnector
@@ -49,6 +50,7 @@ class PAYEContactController @Inject()(
   val addressLookupService = injAddressLookupService
   val keystoreConnector = injKeystoreConnector
   val messagesApi = injMessagesApi
+  val payeRegistrationConnector = injPayeRegistrationConnector
 }
 
 trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {

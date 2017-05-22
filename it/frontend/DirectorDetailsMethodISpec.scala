@@ -77,6 +77,8 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
+      stubPayeRegDocumentStatus(regIdWhitelisted)
+
       stubKeystoreMetadata(SessionId, regIdWhitelisted, companyName)
 
       stubGet(s"/save4later/paye-registration-frontend/${regIdWhitelisted}", 404, "")

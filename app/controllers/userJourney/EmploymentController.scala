@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector}
+import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
 import forms.employmentDetails._
 import models.view.{EmployingStaff, Subcontractors}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -36,12 +36,14 @@ import scala.concurrent.Future
 class EmploymentController @Inject()(
                                       injEmploymentService: EmploymentService,
                                       injKeystoreConnector: KeystoreConnector,
+                                      injPayeRegistrationConnector: PAYERegistrationConnector,
                                       injMessagesApi: MessagesApi)
   extends EmploymentCtrl {
   val authConnector = FrontendAuthConnector
   val employmentService = injEmploymentService
   val keystoreConnector = injKeystoreConnector
   val messagesApi = injMessagesApi
+  val payeRegistrationConnector = injPayeRegistrationConnector
 }
 
 trait EmploymentCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {

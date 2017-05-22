@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector}
+import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
 import enums.DownstreamOutcome
 import forms.companyDetails.{BusinessContactDetailsForm, PPOBForm, TradingNameForm}
 import models.view.{AddressChoice, ChosenAddress, TradingName}
@@ -42,6 +42,7 @@ class CompanyDetailsController @Inject()(
                                           injCompanyDetailsService: CompanyDetailsService,
                                           injCohoService: IncorporationInformationService,
                                           injMessagesApi: MessagesApi,
+                                          injPayeRegistrationConnector: PAYERegistrationConnector,
                                           injAddressLookupService: AddressLookupService)
   extends CompanyDetailsCtrl {
   val authConnector = FrontendAuthConnector
@@ -51,6 +52,7 @@ class CompanyDetailsController @Inject()(
   val cohoService = injCohoService
   val messagesApi = injMessagesApi
   val addressLookupService = injAddressLookupService
+  val payeRegistrationConnector = injPayeRegistrationConnector
 }
 
 trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {

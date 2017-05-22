@@ -17,13 +17,15 @@
 package controllers.userJourney
 
 import builders.AuthBuilder
+import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
 import models.api.{Director, Name}
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import models.view.{Directors, Ninos, UserEnteredNino}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.i18n.MessagesApi
-import play.api.mvc.Result
+import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.DirectorDetailsSrv
@@ -36,6 +38,7 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
 
   val mockDirectorDetailService = mock[DirectorDetailsSrv]
   val mockMessagesApi = mock[MessagesApi]
+  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
 
   class Setup {
     val testController = new DirectorDetailsCtrl {
@@ -43,6 +46,16 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
       override val messagesApi = fakeApplication.injector.instanceOf[MessagesApi]
       override val authConnector = mockAuthConnector
       override val keystoreConnector = mockKeystoreConnector
+      override val payeRegistrationConnector = mockPayeRegistrationConnector
+
+      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+        f(CurrentProfile(
+          "12345",
+          Some("Director"),
+          CompanyRegistrationProfile("held", "txId"),
+          "ENG"
+        ))
+      }
     }
   }
 
@@ -76,7 +89,6 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
     }
 
     "return an OK" in new Setup {
-      mockFetchCurrentProfile()
       when(mockDirectorDetailService.getDirectorDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(testDirectors))
 
@@ -104,7 +116,6 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
       val request = FakeRequest().withFormUrlEncodedBody(
         "nino[0]" -> ""
       )
-      mockFetchCurrentProfile()
       when(mockDirectorDetailService.getDirectorDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(testDirectors))
 
@@ -119,7 +130,6 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
 
     "return a SEE_OTHER and redirect to the PAYE Contact page" in new Setup {
       val request = FakeRequest().withFormUrlEncodedBody()
-      mockFetchCurrentProfile()
       when(mockDirectorDetailService.submitNinos(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 

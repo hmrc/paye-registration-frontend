@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector}
+import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
 import enums.DownstreamOutcome
 import forms.natureOfBuinessDetails.NatureOfBusinessForm
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -36,12 +36,14 @@ import views.html.pages.{natureOfBusiness => NatureOfBusinessPage}
 class NatureOfBusinessController @Inject()(injMessagesApi: MessagesApi,
                                            injNatureOfBusinessService: NatureOfBusinessService,
                                            injKeystoreConnector: KeystoreConnector,
+                                           injPayeRegistrationConnector: PAYERegistrationConnector,
                                            injCompanyDetailsService: CompanyDetailsService) extends NatureOfBusinessCtrl {
   val authConnector = FrontendAuthConnector
   implicit val messagesApi = injMessagesApi
   val natureOfBusinessService = injNatureOfBusinessService
   val companyDetailsService = injCompanyDetailsService
   val keystoreConnector = injKeystoreConnector
+  val payeRegistrationConnector = injPayeRegistrationConnector
 }
 
 trait NatureOfBusinessCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {

@@ -19,10 +19,11 @@ package connectors
 import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
-import enums.DownstreamOutcome
+import enums.{DownstreamOutcome, PAYEStatus}
 import models.api.{Director, Eligibility, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.Logger
 import play.api.http.Status
+import play.api.libs.json.{JsObject, JsValue, Reads}
 import services.{MetricsService, MetricsSrv}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
@@ -313,6 +314,17 @@ trait PAYERegistrationConnect {
       case e: Exception =>
         payeRegTimer.stop()
         throw logResponse(e, "getAcknowledgementReference", "getting acknowledgement reference")
+    }
+  }
+
+  def getStatus(regId: String)(implicit hc: HeaderCarrier): Future[Option[PAYEStatus.Value]] = {
+    val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
+    http.GET[JsObject](s"$payeRegUrl/paye-registration/$regId/status") map { json =>
+      Some((json \ "status").as[PAYEStatus.Value](Reads.enumNameReads(PAYEStatus)))
+    } recover {
+      case e : Throwable =>
+        logResponse(e, "getStatus", "getting PAYE registration document status")
+        None
     }
   }
 
