@@ -71,6 +71,8 @@ class EligiblityMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
+      stubPayeRegDocumentStatus(regId)
+
       stubKeystoreMetadata(SessionId, regId, "companyName")
 
       stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
@@ -112,6 +114,8 @@ class EligiblityMethodISpec extends IntegrationSpecBase
       setupSimpleAuthMocks()
 
       stubSuccessfulLogin()
+
+      stubPayeRegDocumentStatus(regId)
 
       stubKeystoreMetadata(SessionId, regId, "companyName")
 

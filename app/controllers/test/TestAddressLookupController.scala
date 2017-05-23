@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector}
+import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
 import enums.DownstreamOutcome
 import models.Address
 import services._
@@ -32,12 +32,14 @@ import utils.SessionProfile
 class TestAddressLookupController @Inject()(
                                              injCompanyDetailsService: CompanyDetailsService,
                                              injKeystoreConnector: KeystoreConnector,
+                                             injPayeRegistrationConnector: PAYERegistrationConnector,
                                              injPAYEContactService: PAYEContactService)
   extends TestAddressLookupCtrl {
   val authConnector = FrontendAuthConnector
   val companyDetailsService = injCompanyDetailsService
   val payeContactService = injPAYEContactService
   val keystoreConnector = injKeystoreConnector
+  val payeRegistrationConnector = injPayeRegistrationConnector
 }
 
 trait TestAddressLookupCtrl extends FrontendController with Actions with SessionProfile {

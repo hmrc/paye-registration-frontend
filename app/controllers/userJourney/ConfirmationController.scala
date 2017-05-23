@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector}
+import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.{ConfirmationService, ConfirmationSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
@@ -33,11 +33,13 @@ import scala.concurrent.Future
 @Singleton
 class ConfirmationController @Inject()(injMessagesApi: MessagesApi,
                                        injKeystore: KeystoreConnector,
-                                       injConfirmationService: ConfirmationService) extends ConfirmationCtrl {
+                                       injConfirmationService: ConfirmationService,
+                                       injPayeRegistrationConnector: PAYERegistrationConnector) extends ConfirmationCtrl {
   val authConnector = FrontendAuthConnector
   val messagesApi = injMessagesApi
   val keystoreConnector = injKeystore
   val confirmationService = injConfirmationService
+  val payeRegistrationConnector = injPayeRegistrationConnector
 }
 
 trait ConfirmationCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {

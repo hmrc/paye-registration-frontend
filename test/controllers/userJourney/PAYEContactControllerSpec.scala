@@ -17,9 +17,11 @@
 package controllers.userJourney
 
 import builders.AuthBuilder
+import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
 import fixtures.{PAYERegistrationFixture, S4LFixture}
 import models.Address
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.http.Status
@@ -36,6 +38,7 @@ import scala.concurrent.Future
 class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYERegistrationFixture {
   val mockCompanyDetailsService = mock[CompanyDetailsService]
   val mockPAYEContactService = mock[PAYEContactService]
+  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
   val mockAddressLookupService = mock[AddressLookupService]
   val mockMessagesApi = mock[MessagesApi]
 
@@ -47,6 +50,16 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val keystoreConnector = mockKeystoreConnector
       override val messagesApi = fakeApplication.injector.instanceOf[MessagesApi]
       override val authConnector = mockAuthConnector
+      override val payeRegistrationConnector = mockPayeRegistrationConnector
+
+      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+        f(CurrentProfile(
+          "12345",
+          Some("Director"),
+          CompanyRegistrationProfile("held", "txId"),
+          "ENG"
+        ))
+      }
     }
   }
 
@@ -58,8 +71,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
 
     "return an OK with data from registration" in new Setup {
-      mockFetchCurrentProfile()
-
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
 
       when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
@@ -72,7 +83,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
 
     "return an OK without data" in new Setup {
-      mockFetchCurrentProfile()
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
 
       when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
@@ -93,7 +103,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
 
     "return a BAD_REQUEST if there is problem with the submitted form, no name" in new Setup {
-      mockFetchCurrentProfile()
       val request = FakeRequest().withFormUrlEncodedBody(
         "name" -> ""
       )
@@ -108,7 +117,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
 
     "return a BAD_REQUEST if there is problem with the submitted form, no contact details" in new Setup {
-      mockFetchCurrentProfile()
       val request = FakeRequest().withFormUrlEncodedBody(
         "name" -> "teeeeeeest"
       )
@@ -123,7 +131,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
 
     "show an error page when there is an error response from the microservice" in new Setup {
-      mockFetchCurrentProfile()
       val request = FakeRequest().withFormUrlEncodedBody(
         "name" -> "tata",
         "digitalContact.contactEmail" -> "tata@test.com"
@@ -139,7 +146,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
 
     "return a SEE_OTHER and redirect to the Correspondence Address page" in new Setup {
-      mockFetchCurrentProfile()
       val request = FakeRequest().withFormUrlEncodedBody(
         "name" -> "tata",
         "digitalContact.contactEmail" -> "tata@test.com"
@@ -189,7 +195,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "ro" -> validCompanyDetailsViewModel.roAddress,
         "correspondence" -> validCompanyDetailsViewModel.ppobAddress.get
       )
-      mockFetchCurrentProfile()
 
       when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validPAYEContactView))
@@ -210,8 +215,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "chosenAddress" -> "correspondenceAddress"
       )
 
-      mockFetchCurrentProfile()
-
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/register-for-paye/summary")
@@ -222,8 +225,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       val request = FakeRequest().withFormUrlEncodedBody(
         "chosenAddress" -> "roAddress"
       )
-
-      mockFetchCurrentProfile()
 
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
@@ -241,7 +242,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       val request = FakeRequest().withFormUrlEncodedBody(
         "chosenAddress" -> "roAddress"
       )
-      mockFetchCurrentProfile()
 
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
@@ -258,7 +258,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       val request = FakeRequest("GET", "/testuri?id=123456789").withFormUrlEncodedBody(
         "chosenAddress" -> "other"
       )
-      mockFetchCurrentProfile()
 
       when(mockAddressLookupService.buildAddressLookupUrl(ArgumentMatchers.any[String](), ArgumentMatchers.any[Call]())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful("testUrl"))
@@ -283,7 +282,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
           Some("testPostcode"),
           Some("testCode")
         ))
-      mockFetchCurrentProfile()
 
       when(mockAddressLookupService.getAddress(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[_]]()))
         .thenReturn(Future.successful(expected))

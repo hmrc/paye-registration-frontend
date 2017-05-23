@@ -17,13 +17,14 @@
 package controllers.userJourney
 
 import builders.AuthBuilder
-import connectors.KeystoreConnect
+import connectors.{KeystoreConnect, PAYERegistrationConnector}
 import enums.DownstreamOutcome
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import models.view.{CompanyEligibility, DirectorEligibility, Eligibility}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.http.Status
-import play.api.mvc.Result
+import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import services.{EligibilityService, EligibilitySrv}
 import testHelpers.PAYERegSpec
@@ -33,6 +34,7 @@ import scala.concurrent.Future
 
 class EligibilityControllerSpec extends PAYERegSpec {
   val mockEligibilityService = mock[EligibilityService]
+  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
 
   class Setup {
     val controller = new EligibilityCtrl {
@@ -40,10 +42,20 @@ class EligibilityControllerSpec extends PAYERegSpec {
       override val compRegFEURL: String = "testUrl"
       override val compRegFEURI: String = "/testUri"
       override val keystoreConnector: KeystoreConnect = mockKeystoreConnector
+      override val payeRegistrationConnector = mockPayeRegistrationConnector
 
       override protected def authConnector = mockAuthConnector
 
       override def messagesApi = mockMessages
+
+      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+        f(CurrentProfile(
+          "12345",
+          Some("Director"),
+          CompanyRegistrationProfile("held", "txId"),
+          "ENG"
+        ))
+      }
     }
   }
 
@@ -61,7 +73,6 @@ class EligibilityControllerSpec extends PAYERegSpec {
     }
 
     "return 200 for an authorised user with data already saved" in new Setup {
-      mockFetchCurrentProfile()
       when(mockEligibilityService.getEligibility(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validEligibilityModel))
 
@@ -72,7 +83,6 @@ class EligibilityControllerSpec extends PAYERegSpec {
     }
 
     "return 200 for an authorised user with no data" in new Setup {
-      mockFetchCurrentProfile()
       when(mockEligibilityService.getEligibility(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validEmptyModel))
 
@@ -90,7 +100,6 @@ class EligibilityControllerSpec extends PAYERegSpec {
     }
 
     "return 400 for an invalid answer" in new Setup {
-      mockFetchCurrentProfile()
       AuthBuilder.submitWithAuthorisedUser(controller.submitCompanyEligibility(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody()) {
         result =>
           status(result) shouldBe Status.BAD_REQUEST
@@ -98,7 +107,6 @@ class EligibilityControllerSpec extends PAYERegSpec {
     }
 
     "redirect to the Ineligibility page when a user enters YES answer" in new Setup {
-      mockFetchCurrentProfile()
       when(mockEligibilityService.saveCompanyEligibility(ArgumentMatchers.eq(regId), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(DownstreamOutcome.Success)
       AuthBuilder.submitWithAuthorisedUser(controller.submitCompanyEligibility(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
@@ -111,7 +119,6 @@ class EligibilityControllerSpec extends PAYERegSpec {
     }
 
     "redirect to the Director Eligibility page when a user enters NO answer" in new Setup {
-      mockFetchCurrentProfile()
       when(mockEligibilityService.saveCompanyEligibility(ArgumentMatchers.eq(regId), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(DownstreamOutcome.Success)
       AuthBuilder.submitWithAuthorisedUser(controller.submitCompanyEligibility(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
@@ -131,7 +138,6 @@ class EligibilityControllerSpec extends PAYERegSpec {
     }
 
     "return 200 for an authorised user with data already saved" in new Setup {
-      mockFetchCurrentProfile()
       when(mockEligibilityService.getEligibility(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validEligibilityModel))
 
@@ -142,7 +148,6 @@ class EligibilityControllerSpec extends PAYERegSpec {
     }
 
     "return 200 for an authorised user with no data" in new Setup {
-      mockFetchCurrentProfile()
       when(mockEligibilityService.getEligibility(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validEmptyModel))
 
@@ -160,7 +165,6 @@ class EligibilityControllerSpec extends PAYERegSpec {
     }
 
     "return 400 for an invalid answer" in new Setup {
-      mockFetchCurrentProfile()
       AuthBuilder.submitWithAuthorisedUser(controller.submitDirectorEligibility(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody()) {
         result =>
           status(result) shouldBe Status.BAD_REQUEST
@@ -168,7 +172,6 @@ class EligibilityControllerSpec extends PAYERegSpec {
     }
 
     "redirect to the Ineligibility page when a user enters YES answer" in new Setup {
-      mockFetchCurrentProfile()
       when(mockEligibilityService.saveDirectorEligibility(ArgumentMatchers.eq(regId), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(DownstreamOutcome.Success)
       AuthBuilder.submitWithAuthorisedUser(controller.submitDirectorEligibility(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
@@ -181,7 +184,6 @@ class EligibilityControllerSpec extends PAYERegSpec {
     }
 
     "redirect to the Director Eligibility page when a user enters NO answer" in new Setup {
-      mockFetchCurrentProfile()
       when(mockEligibilityService.saveDirectorEligibility(ArgumentMatchers.eq(regId), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(DownstreamOutcome.Success)
       AuthBuilder.submitWithAuthorisedUser(controller.submitDirectorEligibility(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
@@ -201,7 +203,6 @@ class EligibilityControllerSpec extends PAYERegSpec {
     }
 
     "return 200 for an authorised user" in new Setup {
-      mockFetchCurrentProfile()
 
       AuthBuilder.showWithAuthorisedUser(controller.ineligible, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -217,7 +218,6 @@ class EligibilityControllerSpec extends PAYERegSpec {
     }
 
     "return 303 and redirect to Company Registration for an authorised user" in new Setup {
-      mockFetchCurrentProfile()
 
       AuthBuilder.showWithAuthorisedUser(controller.questionnaire, mockAuthConnector) {
         (response: Future[Result]) =>

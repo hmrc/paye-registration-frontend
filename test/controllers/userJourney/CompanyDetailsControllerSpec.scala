@@ -17,8 +17,10 @@
 package controllers.userJourney
 
 import builders.AuthBuilder
+import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
 import fixtures.{CoHoAPIFixture, PAYERegistrationFixture, S4LFixture}
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.{Address, DigitalContactDetails}
 import org.jsoup._
@@ -40,16 +42,27 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
   val mockCompanyDetailsService = mock[CompanyDetailsService]
   val mockCoHoService = mock[IncorporationInformationService]
   val mockAddressLookupService = mock[AddressLookupService]
+  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
 
   class Setup {
     val controller = new CompanyDetailsCtrl {
       override val s4LService = mockS4LService
       override val keystoreConnector = mockKeystoreConnector
+      override val payeRegistrationConnector = mockPayeRegistrationConnector
       override val authConnector = mockAuthConnector
       override val companyDetailsService = mockCompanyDetailsService
       override val cohoService = mockCoHoService
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
       override val addressLookupService = mockAddressLookupService
+
+      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+        f(CurrentProfile(
+          "12345",
+          Some("Director"),
+          CompanyRegistrationProfile("held", "txId"),
+          "ENG"
+        ))
+      }
     }
   }
 
@@ -66,7 +79,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "show the correctly pre-populated trading name page when data has already been entered" in new Setup {
-      mockFetchCurrentProfile()
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
@@ -82,7 +94,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
     "show the correctly pre-populated trading name page when negative data has already been entered" in new Setup {
       val cName = "Tst Company Name"
-      mockFetchCurrentProfile()
       val negativeTradingNameCompanyDetails = validCompanyDetailsViewModel.copy(tradingName = Some(negativeTradingNameViewModel))
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(negativeTradingNameCompanyDetails))
 
@@ -99,7 +110,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
     "show a blank trading name page when no Trading Name data has been entered" in new Setup {
       val cName = "Tst Company Name"
-      mockFetchCurrentProfile()
       val noTradingNameCompanyDetails = validCompanyDetailsViewModel.copy(tradingName = None)
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(noTradingNameCompanyDetails))
 
@@ -116,7 +126,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
     "show a blank trading name page when no Company Details data has been entered" in new Setup {
       val cName = "Tst Company Name"
-      mockFetchCurrentProfile()
       val defaultCompanyDetailsView = CompanyDetailsView(cName, None, validROAddress, None, None)
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(defaultCompanyDetailsView))
 
@@ -140,7 +149,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       redirectLocation(result).getOrElse("NO REDIRECT LOCATION!").contains("/gg/sign-in") shouldBe true
     }
     "redirect to the confirm ro address page when a user enters valid data" in new Setup {
-      mockFetchCurrentProfile()
       when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "differentName" -> "true",
@@ -153,7 +161,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "show an error page when there is an error response from the microservice" in new Setup {
-      mockFetchCurrentProfile()
       when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "differentName" -> "true",
@@ -165,7 +172,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "return 400 when a user enters no data" in new Setup {
-      mockFetchCurrentProfile()
       when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
       when(mockCoHoService.getStoredCompanyDetails()(ArgumentMatchers.any())).thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
@@ -176,7 +182,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "return 400 when a user enters invalid data" in new Setup {
-      mockFetchCurrentProfile()
       when(mockCoHoService.getStoredCompanyDetails()(ArgumentMatchers.any())).thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "differentName" -> "true"
@@ -200,7 +205,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
             Some("testPostCode"),
             None
           )
-        mockFetchCurrentProfile()
 
         when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(validCompanyDetailsViewModel))
@@ -229,7 +233,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
     "redirect to next page" when {
       "the user clicks confirm" in new Setup {
-        mockFetchCurrentProfile()
         AuthBuilder.showWithAuthorisedUser(controller.confirmRO, mockAuthConnector) {
           result =>
             status(result) shouldBe SEE_OTHER
@@ -244,7 +247,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
     "return an ok" when {
       "the user is authorised to view the page and there is a saved buiness contact details model" in new Setup {
-        mockFetchCurrentProfile()
         when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(validCompanyDetailsViewModel.copy(businessContactDetails = Some(bcd))))
 
@@ -257,7 +259,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
     "return an ok" when {
       "the user is authorised to view the page and there is no business contact details model" in new Setup {
-        mockFetchCurrentProfile()
         when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(validCompanyDetailsViewModel.copy(businessContactDetails = None)))
 
@@ -283,7 +284,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "show form errors" in new Setup {
-      mockFetchCurrentProfile()
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
@@ -294,7 +294,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "show error page when there is an internal error" in new Setup {
-      mockFetchCurrentProfile()
       when(mockCompanyDetailsService.submitBusinessContact(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
@@ -307,7 +306,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "redirect to next page when the user submit valid data" in new Setup {
-      mockFetchCurrentProfile()
       when(mockCompanyDetailsService.submitBusinessContact(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
@@ -327,7 +325,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
         "ro" -> validCompanyDetailsViewModel.roAddress,
         "ppob" -> validCompanyDetailsViewModel.ppobAddress.get
       )
-      mockFetchCurrentProfile()
 
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
@@ -347,7 +344,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
         "chosenAddress" -> ""
       )
 
-      mockFetchCurrentProfile()
 
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
@@ -361,7 +357,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       val request = FakeRequest().withFormUrlEncodedBody(
         "chosenAddress" -> "ppobAddress"
       )
-      mockFetchCurrentProfile()
 
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
@@ -377,7 +372,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
         "chosenAddress" -> "roAddress"
       )
 
-      mockFetchCurrentProfile()
 
       when(mockCompanyDetailsService.copyROAddrToPPOBAddr(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
@@ -392,7 +386,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       val request = FakeRequest("GET", "/testuri?id=123456789").withFormUrlEncodedBody(
         "chosenAddress" -> "other"
       )
-      mockFetchCurrentProfile()
 
       when(mockAddressLookupService.buildAddressLookupUrl(ArgumentMatchers.any[String](), ArgumentMatchers.any[Call]())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful("testUrl"))
@@ -418,7 +411,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
           Some("testCode")
         ))
 
-      mockFetchCurrentProfile()
 
       when(mockAddressLookupService.getAddress(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[_]]()))
         .thenReturn(Future.successful(expected))
@@ -441,8 +433,6 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
           Some("testPostcode"),
           Some("testCode")
         ))
-
-      mockFetchCurrentProfile()
 
       when(mockAddressLookupService.getAddress(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[_]]()))
         .thenReturn(Future.successful(expected))

@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{BusinessRegistrationConnector, BusinessRegistrationConnect, KeystoreConnect, KeystoreConnector}
+import connectors._
 import connectors.test.{TestPAYERegConnect, TestPAYERegConnector}
 import enums.DownstreamOutcome
 import forms.test.{TestPAYEContactForm, TestPAYERegCompanyDetailsSetupForm, TestPAYERegSetupForm}
@@ -37,6 +37,7 @@ import scala.concurrent.Future
 class TestRegSetupController @Inject()(injPayeRegService:PAYERegistrationService,
                                        injTestPAYERegConnector: TestPAYERegConnector,
                                        injKeystoreConnector: KeystoreConnector,
+                                       injPayeRegistrationConnector: PAYERegistrationConnector,
                                        injMessagesApi: MessagesApi)
   extends TestRegSetupCtrl {
   val authConnector = FrontendAuthConnector
@@ -44,6 +45,7 @@ class TestRegSetupController @Inject()(injPayeRegService:PAYERegistrationService
   val testPAYERegConnector = injTestPAYERegConnector
   val messagesApi = injMessagesApi
   val keystoreConnector = injKeystoreConnector
+  val payeRegistrationConnector = injPayeRegistrationConnector
 }
 
 trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {

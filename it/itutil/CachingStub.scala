@@ -17,10 +17,13 @@
 package itutil
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import enums.PAYEStatus
 import models.Address
-import play.api.libs.json.{JsString, JsObject, Json}
+import play.api.libs.json.{JsObject, JsString, Json}
 import uk.gov.hmrc.crypto.json.JsonEncryptor
 import uk.gov.hmrc.crypto.{ApplicationCrypto, Protected}
+
+import scala.concurrent.Future
 
 trait CachingStub {
 
@@ -56,6 +59,23 @@ trait CachingStub {
                |  }
                |}
                |}""".stripMargin
+          )
+      )
+    )
+  }
+
+  def stubPayeRegDocumentStatus(regId: String) = {
+    val payeRegUrl = s"/paye-registration/$regId/status"
+    stubFor(get(urlMatching(payeRegUrl))
+      .willReturn(
+        aResponse()
+          .withStatus(200)
+          .withBody(
+            s"""
+               |{
+               |  "status" : "draft"
+               |}
+             """.stripMargin
           )
       )
     )

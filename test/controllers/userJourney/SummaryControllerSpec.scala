@@ -20,15 +20,17 @@ import builders.AuthBuilder
 import connectors._
 import enums.PAYEStatus
 import fixtures.PAYERegistrationFixture
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.mvc.Result
+import play.api.mvc.{Request, Result}
 import play.api.test.Helpers._
 import services.{SubmissionService, SummaryService}
 import testHelpers.PAYERegSpec
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
@@ -46,13 +48,20 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       override val payeRegistrationConnector = mockPayeRegistrationConnector
       override val submissionService = mockSubmissionService
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+
+      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+        f(CurrentProfile(
+          "12345",
+          Some("Director"),
+          CompanyRegistrationProfile("held", "txId"),
+          "ENG"
+        ))
+      }
     }
   }
 
   "Calling summary to show the summary page" should {
     "show the summary page when a valid model is returned from the microservice and the reg doc status is draft" in new Setup {
-      mockFetchCurrentProfile()
-
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validPAYERegistrationAPI))
 
@@ -69,8 +78,6 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
     }
 
     "return an Internal Server Error response when no valid model is returned from the microservice" in new Setup {
-      mockFetchCurrentProfile()
-
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validPAYERegistrationAPI))
 
@@ -84,8 +91,6 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
 
     "return a see other" when {
       "the reg document status is held" in new Setup {
-        mockFetchCurrentProfile()
-
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(validPAYERegistrationAPI.copy(status = PAYEStatus.held)))
 
@@ -99,8 +104,6 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       }
 
       "the reg document status is submitted" in new Setup {
-        mockFetchCurrentProfile()
-
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(validPAYERegistrationAPI.copy(status = PAYEStatus.submitted)))
 
@@ -114,8 +117,6 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       }
 
       "the reg document status is invalid" in new Setup {
-        mockFetchCurrentProfile()
-
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(validPAYERegistrationAPI.copy(status = PAYEStatus.invalid)))
 
@@ -129,8 +130,6 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       }
 
       "the reg document status is rejected" in new Setup {
-        mockFetchCurrentProfile()
-
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(validPAYERegistrationAPI.copy(status = PAYEStatus.rejected)))
 
@@ -147,8 +146,6 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
 
   "Calling submitRegistration" should {
     "show the confirmation page" in new Setup {
-      mockFetchCurrentProfile()
-
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validPAYERegistrationAPI))
 
@@ -161,8 +158,6 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       }
     }
     "show the dashboard" in new Setup {
-      mockFetchCurrentProfile()
-
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validPAYERegistrationAPI))
 
@@ -175,8 +170,6 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       }
     }
     "show the retry page" in new Setup {
-      mockFetchCurrentProfile()
-
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validPAYERegistrationAPI))
 
@@ -188,8 +181,6 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       }
     }
     "show the deskpro page" in new Setup {
-      mockFetchCurrentProfile()
-
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validPAYERegistrationAPI))
 

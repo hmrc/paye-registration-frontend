@@ -17,19 +17,24 @@
 package controllers.userJourney
 
 import builders.AuthBuilder
+import connectors.PAYERegistrationConnector
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.http.Status
 import play.api.http.Status.OK
 import play.api.i18n.MessagesApi
+import play.api.mvc.{Request, Result}
 import services.ConfirmationService
 import testHelpers.PAYERegSpec
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
 class ConfirmationControllerSpec extends PAYERegSpec {
 
   val mockConfirmationService = mock[ConfirmationService]
+  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
 
   class Setup {
     val controller = new ConfirmationCtrl {
@@ -37,13 +42,21 @@ class ConfirmationControllerSpec extends PAYERegSpec {
       override val keystoreConnector = mockKeystoreConnector
       override val confirmationService = mockConfirmationService
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+      override val payeRegistrationConnector = mockPayeRegistrationConnector
+
+      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+        f(CurrentProfile(
+          "12345",
+          Some("Director"),
+          CompanyRegistrationProfile("held", "txId"),
+          "ENG"
+        ))
+      }
     }
   }
 
   "showConfirmation" should {
     "display the confirmation page with an acknowledgement reference retrieved from backend" in new Setup {
-      mockFetchCurrentProfile()
-
       when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("BRPY00000000001")))
 
@@ -54,8 +67,6 @@ class ConfirmationControllerSpec extends PAYERegSpec {
     }
 
     "show an error page when there is no acknowledgement reference returned from the backend" in new Setup {
-      mockFetchCurrentProfile()
-
       when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 

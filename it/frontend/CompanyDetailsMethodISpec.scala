@@ -79,6 +79,8 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
+      stubPayeRegDocumentStatus(regId)
+
       stubKeystoreMetadata(SessionId, regId, companyName)
 
       stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
@@ -123,6 +125,8 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
+      stubPayeRegDocumentStatus(regId)
+
       stubKeystoreMetadata(SessionId, regId, companyName)
 
       stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
@@ -164,6 +168,8 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
+      stubPayeRegDocumentStatus(regIdWhitelisted)
+
       stubKeystoreMetadata(SessionId, regIdWhitelisted, companyName)
 
       stubGet(s"/save4later/paye-registration-frontend/$regIdWhitelisted", 404, "")
@@ -192,6 +198,8 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val tradingName = "Foo Trading"
 
       setupSimpleAuthMocks()
+
+      stubPayeRegDocumentStatus(regId)
 
       val csrfToken = UUID.randomUUID().toString
 
@@ -253,6 +261,8 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       stubKeystoreMetadata(SessionId, regIdWhitelisted, companyName)
 
+      stubPayeRegDocumentStatus(regIdWhitelisted)
+
       stubGet(s"/save4later/paye-registration-frontend/${regIdWhitelisted}", 404, "")
 
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
@@ -279,6 +289,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
+      stubPayeRegDocumentStatus(regId)
       stubKeystoreMetadata(SessionId, regId, companyName)
 
       val roDoc = s"""{"line1":"11", "line2":"22", "postCode":"pc1 1pc"}"""
@@ -313,6 +324,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
+      stubPayeRegDocumentStatus(regId)
       stubKeystoreMetadata(SessionId, regId, companyName)
 
       val roDoc = s"""{"line1":"11", "line2":"22", "postCode":"pc1 1pc"}"""
@@ -348,6 +360,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
+      stubPayeRegDocumentStatus(regId)
       stubKeystoreMetadata(SessionId, regId, companyName)
 
       val roDoc = s"""{"line1":"11", "line2":"22", "postCode":"pc1 1pc"}"""
@@ -386,6 +399,8 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
   "POST PPOB Address" should {
     "save to microservice with full company details data" in {
       setupSimpleAuthMocks()
+
+      stubPayeRegDocumentStatus(regId)
 
       val csrfToken = UUID.randomUUID().toString
 
@@ -436,6 +451,8 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
     "save to save for later with incomplete company details data" in {
       setupSimpleAuthMocks()
+
+      stubPayeRegDocumentStatus(regId)
 
       val csrfToken = UUID.randomUUID().toString
 

@@ -17,17 +17,21 @@
 package controllers.userJourney
 
 import builders.AuthBuilder
+import connectors.PAYERegistrationConnector
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.mvc.Result
+import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import testHelpers.PAYERegSpec
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
 class DashboardControllerSpec extends PAYERegSpec {
   val fakeRequest = FakeRequest("GET", "/")
+  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
 
   class Setup {
     val controller = new DashboardCtrl {
@@ -36,6 +40,16 @@ class DashboardControllerSpec extends PAYERegSpec {
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
       override val companyRegUrl = "testUrl"
       override val companyRegUri = "/testUri"
+      override val payeRegistrationConnector = mockPayeRegistrationConnector
+
+      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+        f(CurrentProfile(
+          "12345",
+          Some("Director"),
+          CompanyRegistrationProfile("held", "txId"),
+          "ENG"
+        ))
+      }
     }
   }
 
@@ -46,7 +60,6 @@ class DashboardControllerSpec extends PAYERegSpec {
     }
 
     "redirect to dashboard page" in new Setup {
-      mockFetchCurrentProfile()
 
       AuthBuilder.showWithAuthorisedUser(controller.dashboard, mockAuthConnector) {
         (result: Future[Result]) =>

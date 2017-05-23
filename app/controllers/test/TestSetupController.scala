@@ -20,8 +20,8 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{BusinessRegistrationConnect, BusinessRegistrationConnector, KeystoreConnect, KeystoreConnector}
-import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector, TestIncorpInfoConnect, TestIncorpInfoConnector, TestPAYERegConnect, TestPAYERegConnector}
+import connectors._
+import connectors.test._
 import models.test.CoHoCompanyDetailsFormModel
 import play.api.Logger
 import play.api.i18n.MessagesApi
@@ -39,6 +39,7 @@ class TestSetupController @Inject()(injKeystoreConnector: KeystoreConnector,
                                     injMessagesApi: MessagesApi,
                                     injTestPAYERegConnector: TestPAYERegConnector,
                                     injPayeRegService:PAYERegistrationService,
+                                    injPayeRegistrationConnector: PAYERegistrationConnector,
                                     injS4LService: S4LService) extends TestSetupCtrl {
   val authConnector = FrontendAuthConnector
   val keystoreConnector = injKeystoreConnector
@@ -50,6 +51,7 @@ class TestSetupController @Inject()(injKeystoreConnector: KeystoreConnector,
   val payeRegService = injPayeRegService
   val testPAYERegConnector = injTestPAYERegConnector
   val s4LService = injS4LService
+  val payeRegistrationConnector = injPayeRegistrationConnector
 }
 
 trait TestSetupCtrl extends BusinessProfileCtrl with TestCoHoCtrl with TestRegSetupCtrl with TestCacheCtrl {
