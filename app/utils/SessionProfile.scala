@@ -41,7 +41,8 @@ trait SessionProfile extends InternalExceptions {
             case "/register-for-paye/confirmation" => f(currentProfile)
             case _               => Future.successful(Redirect(controllers.userJourney.routes.DashboardController.dashboard()))
           }
-          case _                                      => f(currentProfile)
+          case PAYEStatus.draft | PAYEStatus.invalid => f(currentProfile)
+          case _ => Future.successful(Redirect(controllers.userJourney.routes.DashboardController.dashboard()))
         }
         case None => throw new MissingDocumentStatus(s"There was no document status found for reg id ${currentProfile.registrationID}")
       }

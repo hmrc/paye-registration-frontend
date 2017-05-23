@@ -109,6 +109,19 @@ class SessionProfileSpec extends PAYERegSpec with DateUtil with InternalExceptio
       redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.DashboardController.dashboard().url}")
     }
 
+    "redirect to dashboard if the users document status is something else but valid" in {
+      implicit val request = FakeRequest()
+
+      mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile))
+
+      when(mockPayeRegistrationConnector.getStatus(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(PAYEStatus.acknowledged)))
+
+      val result = await(TestSession.withCurrentProfile { _ => testFunc})
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.DashboardController.dashboard().url}")
+    }
+
     "throw a MissingStatus exception is the users registration document doesn't contain a status" in {
       implicit val request = FakeRequest()
 
