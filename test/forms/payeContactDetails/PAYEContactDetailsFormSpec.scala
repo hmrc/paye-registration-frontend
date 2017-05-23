@@ -28,13 +28,13 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
   "Binding PAYEContactDetailsForm to a model" should {
     "Bind successfully with full data" in {
       val data = Map(
-        "name" -> "testName",
+        "name" -> "test Mary-Jane84 de l'aurore",
         "digitalContact.contactEmail" -> "testEmail@testing.com",
         "digitalContact.mobileNumber" -> "01234567987",
         "digitalContact.phoneNumber" -> "07798123456"
       )
       val model = PAYEContactDetails(
-        name = "testName",
+        name = "test Mary-Jane84 de l'aurore",
         DigitalContactDetails(
           email = Some("testEmail@testing.com"),
           mobileNumber = Some("01234567987"),
@@ -150,6 +150,20 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
     "Have the correct error if name is invalid" in {
       val data: Map[String,String] = Map(
         "name" -> "<h1>dgdgfd",
+        "digitalContact.contactEmail" -> "email@business.net",
+        "digitalContact.mobileNumber" -> "",
+        "digitalContact.phoneNumber" -> ""
+      )
+      val boundForm = testForm.bind(data)
+      val nameError = FormError("name", "errors.invalid.name.invalidChars")
+
+
+      boundForm.errors shouldBe Seq(nameError)
+    }
+
+    "Have the correct error if name is more than 100 characters" in {
+      val data: Map[String,String] = Map(
+        "name" -> "test Mary-Jane84 de l'aurore TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST",
         "digitalContact.contactEmail" -> "email@business.net",
         "digitalContact.mobileNumber" -> "",
         "digitalContact.phoneNumber" -> ""

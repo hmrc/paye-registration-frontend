@@ -33,7 +33,7 @@ object Validators extends DateUtil {
   private val invalidPrefixes = List("BG", "GB", "NK", "KN", "TN", "NT", "ZZ")
   private val natureOfBusinessRegex = """^(?![\r\n|\r|\n|\t])[A-Za-z 0-9\-,/&']{1,100}$"""
   val postcodeRegex = """^[A-Z]{1,2}[0-9][0-9A-Z]? [0-9][A-Z]{2}$"""
-  private val nameRegex = """^[a-zA-Z- ]+$""".r
+  private val nameRegex = """^[A-Za-z 0-9\'-]{1,100}$""".r
 
   private def hasValidPrefix(nino: String) = !invalidPrefixes.exists(nino.toUpperCase.startsWith)
 
