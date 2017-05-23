@@ -135,13 +135,27 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
 
     "Have the correct error if name is not completed" in {
       val data: Map[String,String] = Map(
-        "name" -> "",
+        "name" -> "    ",
         "digitalContact.contactEmail" -> "email@business.net",
         "digitalContact.mobileNumber" -> "",
         "digitalContact.phoneNumber" -> ""
       )
       val boundForm = testForm.bind(data)
       val nameError = FormError("name", "pages.payeContact.nameMandatory")
+
+
+      boundForm.errors shouldBe Seq(nameError)
+    }
+
+    "Have the correct error if name is invalid" in {
+      val data: Map[String,String] = Map(
+        "name" -> "<h1>dgdgfd",
+        "digitalContact.contactEmail" -> "email@business.net",
+        "digitalContact.mobileNumber" -> "",
+        "digitalContact.phoneNumber" -> ""
+      )
+      val boundForm = testForm.bind(data)
+      val nameError = FormError("name", "errors.invalid.name.invalidChars")
 
 
       boundForm.errors shouldBe Seq(nameError)

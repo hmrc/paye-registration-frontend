@@ -30,7 +30,7 @@ object PAYEContactDetailsForm extends OneOfManyForm {
 
   val form = Form(
     mapping(
-    "name" -> text.verifying("pages.payeContact.nameMandatory", _.length > 0),
+    "name" -> text.verifying(nameValidation),
     "digitalContact" -> mapping(
         "contactEmail" -> oneOfManyErrorTarget.verifying(optionalValidation(emailValidation)),
         "mobileNumber" -> optional(text.verifying(mobilePhoneNumberValidation)),

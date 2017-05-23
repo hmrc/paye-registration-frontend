@@ -33,6 +33,8 @@ object Validators extends DateUtil {
   private val invalidPrefixes = List("BG", "GB", "NK", "KN", "TN", "NT", "ZZ")
   private val natureOfBusinessRegex = """^(?![\r\n|\r|\n|\t])[A-Za-z 0-9\-,/&']{1,100}$"""
   val postcodeRegex = """^[A-Z]{1,2}[0-9][0-9A-Z]? [0-9][A-Z]{2}$"""
+  private val nameRegex = """^[a-zA-Z- ]+$""".r
+
   private def hasValidPrefix(nino: String) = !invalidPrefixes.exists(nino.toUpperCase.startsWith)
 
   def isValidNino(nino: String): Boolean = nino.nonEmpty && hasValidPrefix(nino) && nino.matches(validNinoFormat)
@@ -66,6 +68,16 @@ object Validators extends DateUtil {
       val errors = text.trim match {
         case phoneNoTypeRegex() => Nil
         case _ => Seq(ValidationError("errors.invalid.mobileNumber"))
+      }
+      if (errors.isEmpty) Valid else Invalid(errors)
+  })
+
+  val nameValidation: Constraint[String] = Constraint("constraints.nameCheck")({
+    text =>
+      val errors = text.trim match {
+        case name if name.length <= 0 => Seq(ValidationError("pages.payeContact.nameMandatory"))
+        case nameRegex() => Nil
+        case _ => Seq(ValidationError("errors.invalid.name.invalidChars"))
       }
       if (errors.isEmpty) Valid else Invalid(errors)
   })
