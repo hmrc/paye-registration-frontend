@@ -51,19 +51,22 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
     def outcomeAddress(line3: Option[String] = None,
                        line4: Option[String] = None,
                        country: Option[String] = None,
-                       postcode: Option[String] = None
+                       postcode: Option[String] = None,
+                       auditRef: Option[String] = None
                         ) = Address(
                           "14 St Test Walker",
                           "Testford",
                           line3,
                           line4,
                           postcode,
-                          country
+                          country,
+                          auditRef
                         )
     "succeed" when {
       "all lines are defined" in {
         val tstJson = Json.parse(
         """{
+          |  "auditRef":"tstAuditRef",
           |  "address":{
           |    "lines":[
           |      "14 St Test Walker",
@@ -79,7 +82,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
           |  }
           |}""".stripMargin)
 
-        val res = outcomeAddress(line3 = Some("Testley"), line4 = Some("Testshire"), postcode = Some("TE1 1ST"))
+        val res = outcomeAddress(line3 = Some("Testley"), line4 = Some("Testshire"), postcode = Some("TE1 1ST"), auditRef = Some("tstAuditRef"))
 
         Json.fromJson[Address](tstJson)(Address.adressLookupReads) shouldBe JsSuccess(res)
       }

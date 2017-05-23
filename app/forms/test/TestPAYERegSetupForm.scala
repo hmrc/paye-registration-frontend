@@ -65,7 +65,8 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
           "line3" -> optional(text),
           "line4" -> optional(text),
           "postCode" -> optional(text),
-          "country" -> optional(text)
+          "country" -> optional(text),
+          "auditRef" -> optional(text)
         )(Address.apply)(Address.unapply),
         "ppobAddress" -> mapping(
           "line1" -> text,
@@ -73,7 +74,8 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
           "line3" -> optional(text),
           "line4" -> optional(text),
           "postCode" -> optional(text),
-          "country" -> optional(text)
+          "country" -> optional(text),
+          "auditRef" -> optional(text)
         )(Address.apply)(Address.unapply),
         "businessContactDetails" -> mapping(
           "businessEmail" -> optional(text),
@@ -115,7 +117,8 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
           "line3" -> optional(text),
           "line4" -> optional(text),
           "postCode" -> optional(text),
-          "country" -> optional(text)
+          "country" -> optional(text),
+          "auditRef" -> optional(text)
         )(Address.apply)(Address.unapply)
       )(PAYEContact.apply)(PAYEContact.unapply)
     )(PAYERegistration.apply)(PAYERegistration.unapply)
