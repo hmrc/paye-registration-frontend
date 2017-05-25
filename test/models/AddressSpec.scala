@@ -214,6 +214,67 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
 
         Json.fromJson[Address](inputJson)(Address.adressLookupReads) shouldBe JsSuccess(expected)
       }
+
+      "construct a foreign address with the postcode in address line 3" in {
+        val inputJson = Json.parse(
+          """
+            |{
+            | "address" : {
+            |   "lines": [
+            |     "line 1",
+            |     "line 2"
+            |   ],
+            |   "postcode" : "0121",
+            |   "country" : {
+            |     "code" : "USA",
+            |     "name" : "United States of America"
+            |   }
+            | }
+            |}
+          """.stripMargin)
+
+        val expected = Address(
+          line1 = "line 1",
+          line2 = "line 2",
+          line3 = Some("0121"),
+          line4 = None,
+          postCode = None,
+          country = Some("United States of America")
+        )
+
+        Json.fromJson[Address](inputJson)(Address.adressLookupReads) shouldBe JsSuccess(expected)
+      }
+
+      "construct a foreign address with the postcode in address line 4" in {
+        val inputJson = Json.parse(
+          """
+            |{
+            | "address" : {
+            |   "lines": [
+            |     "line 1",
+            |     "line 2",
+            |     "line 3"
+            |   ],
+            |   "postcode" : "0121",
+            |   "country" : {
+            |     "code" : "USA",
+            |     "name" : "United States of America"
+            |   }
+            | }
+            |}
+          """.stripMargin)
+
+        val expected = Address(
+          line1 = "line 1",
+          line2 = "line 2",
+          line3 = Some("line 3"),
+          line4 = Some("0121"),
+          postCode = None,
+          country = Some("United States of America")
+        )
+
+        Json.fromJson[Address](inputJson)(Address.adressLookupReads) shouldBe JsSuccess(expected)
+      }
     }
 
     "fail" when {
