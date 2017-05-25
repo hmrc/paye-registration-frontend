@@ -215,6 +215,36 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
         Json.fromJson[Address](inputJson)(Address.adressLookupReads) shouldBe JsSuccess(expected)
       }
 
+      "there are trailing spaces in UK address" in {
+        val inputJson = Json.parse(
+          """
+            |{
+            | "address" : {
+            |   "lines": [
+            |     "   14 Saint John Walker",
+            |     "   Telford  "
+            |   ],
+            |   "postcode" : " TF4 2FT ",
+            |   "country" : {
+            |     "code" : "UK",
+            |     "name" : " United Kingdom "
+            |   }
+            | }
+            |}
+          """.stripMargin)
+
+        val expected = Address(
+          line1 = "14 Saint John Walker",
+          line2 = "Telford",
+          line3 = None,
+          line4 = None,
+          postCode = Some("TF4 2FT"),
+          country = None
+        )
+
+        Json.fromJson[Address](inputJson)(Address.adressLookupReads) shouldBe JsSuccess(expected)
+      }
+
       "construct a foreign address with the postcode in address line 3" in {
         val inputJson = Json.parse(
           """
@@ -269,6 +299,36 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
           line2 = "line 2",
           line3 = Some("line 3"),
           line4 = Some("0121"),
+          postCode = None,
+          country = Some("United States of America")
+        )
+
+        Json.fromJson[Address](inputJson)(Address.adressLookupReads) shouldBe JsSuccess(expected)
+      }
+
+      "construct a foreign address and remove trailing spaces" in {
+        val inputJson = Json.parse(
+          """
+            |{
+            | "address" : {
+            |   "lines": [
+            |     " line 1 ",
+            |     " line 2 "
+            |   ],
+            |   "postcode" : " 0121 ",
+            |   "country" : {
+            |     "code" : "USA",
+            |     "name" : " United States of America "
+            |   }
+            | }
+            |}
+          """.stripMargin)
+
+        val expected = Address(
+          line1 = "line 1",
+          line2 = "line 2",
+          line3 = Some("0121"),
+          line4 = None,
           postCode = None,
           country = Some("United States of America")
         )
@@ -436,6 +496,32 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
             |  "region":"Testshire",
             |  "country":"UK",
             |  "postal_code":"TE1 1ST"
+            |}""".stripMargin)
+
+        val testAddress = Address(
+          line1 = "Unit 14234",
+          line2 = "Really Long Street Name",
+          line3 = Some("Industrial estate PO BOX TS"),
+          line4 = Some("Testford"),
+          country = None,
+          postCode = Some("TE1 1ST")
+        )
+
+        readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
+      }
+
+      "converting CHROAddress with a PO Box, a line 2 and long address line 1 with trailing spaces" in {
+        val tstCHROAddressJson = Json.parse(
+          """{
+            |  "premises":"  Unit 14234  ",
+            |  "po_box":"   PO BOX TST36 ",
+            |  "address_line_1":" Really Long Street Name    ",
+            |  "address_line_2":"     Industrial estate  ",
+            |  "po_box":"PO BOX TST36        ",
+            |  "locality":"    Testford ",
+            |  "region":"Testshire ",
+            |  "country":" UK ",
+            |  "postal_code":"  TE1 1ST  "
             |}""".stripMargin)
 
         val testAddress = Address(

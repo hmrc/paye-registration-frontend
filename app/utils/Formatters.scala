@@ -23,17 +23,17 @@ import play.api.libs.json.{JsResult, JsSuccess, JsValue, Json, Reads}
 object Formatters {
   def ninoFormatter(nino: String): String = nino.grouped(2).mkString(" ")
 
-  lazy val normalizeReads = new Reads[String] {
+  lazy val normalizeTrimmedReads = new Reads[String] {
     override def reads(json: JsValue): JsResult[String] = Json.fromJson[String](json).flatMap {
       s =>
         val normalized = Normalizer.normalize(s, Normalizer.Form.NFKD)
-        JsSuccess(normalized.replaceAll("\\p{M}", ""))
+        JsSuccess(normalized.replaceAll("\\p{M}", "").trim)
     }
   }
 
-  lazy val normalizeListReads = new Reads[List[String]] {
+  lazy val normalizeTrimmedListReads = new Reads[List[String]] {
     override def reads(json: JsValue): JsResult[List[String]] = Json.fromJson[List[String]](json).flatMap {
-      l => JsSuccess(l.map(Normalizer.normalize(_, Normalizer.Form.NFKD).replaceAll("\\p{M}", "")))
+      l => JsSuccess(l.map(Normalizer.normalize(_, Normalizer.Form.NFKD).replaceAll("\\p{M}", "").trim))
     }
   }
 }

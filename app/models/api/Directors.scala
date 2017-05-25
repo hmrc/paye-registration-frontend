@@ -36,10 +36,10 @@ object Name {
   )(Name.apply, unlift(Name.unapply))
 
   val normalizeNameReads = (
-    (__ \ "forename").readNullable[String](Formatters.normalizeReads) and
-      (__ \ "other_forenames").readNullable[String](Formatters.normalizeReads) and
-      (__ \ "surname").read[String](Formatters.normalizeReads) and
-      (__ \ "title").readNullable[String](Formatters.normalizeReads)
+    (__ \ "forename").readNullable[String](Formatters.normalizeTrimmedReads) and
+      (__ \ "other_forenames").readNullable[String](Formatters.normalizeTrimmedReads) and
+      (__ \ "surname").read[String](Formatters.normalizeTrimmedReads) and
+      (__ \ "title").readNullable[String](Formatters.normalizeTrimmedReads)
   )(Name.apply _)
 }
 

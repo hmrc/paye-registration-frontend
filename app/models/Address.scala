@@ -34,24 +34,26 @@ object Address {
   private val unitedKingdomDomains = List("United Kingdom", "UK", "GB", "Great Britain", "Wales", "Scotland", "Northern Ireland")
 
   def trimLine(stringToTrim: String, trimTo: Int): String = {
-    if(stringToTrim.length > trimTo) stringToTrim.substring(0, trimTo) else stringToTrim
+    val trimmed = stringToTrim.trim
+    if(trimmed.length > trimTo) trimmed.substring(0, trimTo) else trimmed
   }
 
   def trimOptionalLine(stringToString: Option[String], trimTo: Int): Option[String] = {
-    stringToString map(_.substring(0, if(stringToString.get.length > trimTo) trimTo else stringToString.get.length))
+    val trimmed = stringToString map(_.trim)
+    trimmed map(_.substring(0, if(trimmed.get.length > trimTo) trimTo else trimmed.get.length))
   }
 
   val adressLookupReads: Reads[Address] = new Reads[Address] {
     def reads(json: JsValue): JsResult[Address] = {
-      val unvalidatedPostCode = json.\("address").\("postcode").asOpt[String](Formatters.normalizeReads)
+      val unvalidatedPostCode = json.\("address").\("postcode").asOpt[String](Formatters.normalizeTrimmedReads)
       val validatedPostcode   = unvalidatedPostCode match {
         case Some(pc) if pc.matches(Validators.postcodeRegex) => Right(pc)
         case Some(_) => Left("Invalid postcode")
         case _ => Left("No postcode")
       }
 
-      val addressLines  = json.\("address").\("lines").as[JsArray].as[List[String]](Formatters.normalizeListReads)
-      val countryName   = json.\("address").\("country").\("name").asOpt[String](Formatters.normalizeReads)
+      val addressLines  = json.\("address").\("lines").as[JsArray].as[List[String]](Formatters.normalizeTrimmedListReads)
+      val countryName   = json.\("address").\("country").\("name").asOpt[String](Formatters.normalizeTrimmedReads)
       val auditRef      = json.\("auditRef").asOpt[String]
 
       def buildAddress: JsResult[Address] = (validatedPostcode, countryName, addressLines) match {
@@ -96,14 +98,14 @@ object Address {
   val incorpInfoReads: Reads[Address] = new Reads[Address] {
     def reads(json: JsValue): JsResult[Address] = {
 
-      val premises      = json.\("premises").as[String](Formatters.normalizeReads)
-      val addressLine1  = json.\("address_line_1").as[String](Formatters.normalizeReads)
-      val addressLine2  = json.\("address_line_2").asOpt[String](Formatters.normalizeReads)
-      val poBox         = json.\("po_box").asOpt[String](Formatters.normalizeReads)
-      val locality      = json.\("locality").as[String](Formatters.normalizeReads)
-      val region        = json.\("region").asOpt[String](Formatters.normalizeReads)
-      val postalCode    = json.\("postal_code").asOpt[String](Formatters.normalizeReads)
-      val country       = json.\("country").asOpt[String](Formatters.normalizeReads)
+      val premises      = json.\("premises").as[String](Formatters.normalizeTrimmedReads)
+      val addressLine1  = json.\("address_line_1").as[String](Formatters.normalizeTrimmedReads)
+      val addressLine2  = json.\("address_line_2").asOpt[String](Formatters.normalizeTrimmedReads)
+      val poBox         = json.\("po_box").asOpt[String](Formatters.normalizeTrimmedReads)
+      val locality      = json.\("locality").as[String](Formatters.normalizeTrimmedReads)
+      val region        = json.\("region").asOpt[String](Formatters.normalizeTrimmedReads)
+      val postalCode    = json.\("postal_code").asOpt[String](Formatters.normalizeTrimmedReads)
+      val country       = json.\("country").asOpt[String](Formatters.normalizeTrimmedReads)
 
 
       val (line1, oLine2) = if((premises + " " + addressLine1).length > 26) {
