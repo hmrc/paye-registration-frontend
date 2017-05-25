@@ -34,11 +34,13 @@ object Address {
   private val unitedKingdomDomains = List("United Kingdom", "UK", "GB", "Great Britain", "Wales", "Scotland", "Northern Ireland")
 
   def trimLine(stringToTrim: String, trimTo: Int): String = {
-    if(stringToTrim.length > trimTo) stringToTrim.trim.substring(0, trimTo) else stringToTrim
+    val trimmed = stringToTrim.trim
+    if(trimmed.length > trimTo) trimmed.substring(0, trimTo) else trimmed
   }
 
   def trimOptionalLine(stringToString: Option[String], trimTo: Int): Option[String] = {
-    stringToString map(_.trim.substring(0, if(stringToString.get.length > trimTo) trimTo else stringToString.get.length))
+    val trimmed = stringToString map(_.trim)
+    trimmed map(_.substring(0, if(trimmed.get.length > trimTo) trimTo else trimmed.get.length))
   }
 
   val adressLookupReads: Reads[Address] = new Reads[Address] {
