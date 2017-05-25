@@ -44,7 +44,7 @@ object Address {
   val adressLookupReads: Reads[Address] = new Reads[Address] {
     def reads(json: JsValue): JsResult[Address] = {
       val unvalidatedPostCode = json.\("address").\("postcode").asOpt[String](Formatters.normalizeReads)
-      val validatedPostcode   = json.\("address").\("postcode").asOpt[String](Formatters.normalizeReads) match {
+      val validatedPostcode   = unvalidatedPostCode match {
         case Some(pc) if pc.matches(Validators.postcodeRegex) => Right(pc)
         case Some(_) => Left("Invalid postcode")
         case _ => Left("No postcode")
@@ -62,30 +62,18 @@ object Address {
       }
 
       countryName match {
-        case Some(country) => if(unitedKingdomDomains.contains(country)) {
-          buildAddress
-        } else {
-          JsSuccess(createForeignAddress(unvalidatedPostCode, countryName, addressLines, auditRef))
-        }
-        case None => buildAddress
+        case Some(country) if !unitedKingdomDomains.contains(country) => JsSuccess(createForeignAddress(unvalidatedPostCode, countryName, addressLines, auditRef))
+        case _ => buildAddress
       }
     }
 
     def createForeignAddress(postCode: Option[String], country: Option[String], lines: List[String], auditRef: Option[String]): Address = {
+      val additionalLines = List(lines.lift(2), lines.lift(3), postCode).flatten
       Address(
         line1       = trimLine(lines.head, 27),
         line2       = trimLine(lines(1), 27),
-        line3       = trimOptionalLine(if(lines.lift(2).isDefined) lines.lift(2) else postCode, 27),
-        line4       = trimOptionalLine(
-          if(lines.lift(3).isDefined) {
-            lines.lift(3)
-          } else if(lines.lift(3).isEmpty && lines.lift(2).isDefined) {
-            postCode
-          } else {
-            None
-          },
-          18
-        ),
+        line3       = trimOptionalLine(additionalLines.headOption, 27),
+        line4       = trimOptionalLine(additionalLines.lift(1),18),
         postCode    = None,
         country     = country,
         auditRef    = auditRef
