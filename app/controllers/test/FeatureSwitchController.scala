@@ -26,7 +26,7 @@ import scala.concurrent.Future
 
 @Singleton
 class FeatureSwitchController @Inject()(injFeatureSwitch: FeatureSwitchManager,
-                                        injPayeFeatureSwitch: PAYEFeatureSwitch) extends FeatureSwitchCtrl{
+                                        injPayeFeatureSwitch: PAYEFeatureSwitch) extends FeatureSwitchCtrl {
   val featureManager = injFeatureSwitch
   val PayeFeatureSwitch = injPayeFeatureSwitch
 }
