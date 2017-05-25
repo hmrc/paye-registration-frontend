@@ -34,25 +34,25 @@ object Address {
   private val unitedKingdomDomains = List("United Kingdom", "UK", "GB", "Great Britain", "Wales", "Scotland", "Northern Ireland")
 
   def trimLine(stringToTrim: String, trimTo: Int): String = {
-    if(stringToTrim.length > trimTo) stringToTrim.substring(0, trimTo) else stringToTrim
+    if(stringToTrim.length > trimTo) stringToTrim.trim.substring(0, trimTo) else stringToTrim
   }
 
   def trimOptionalLine(stringToString: Option[String], trimTo: Int): Option[String] = {
-    stringToString map(_.substring(0, if(stringToString.get.length > trimTo) trimTo else stringToString.get.length))
+    stringToString map(_.trim.substring(0, if(stringToString.get.length > trimTo) trimTo else stringToString.get.length))
   }
 
   val adressLookupReads: Reads[Address] = new Reads[Address] {
     def reads(json: JsValue): JsResult[Address] = {
-      val unvalidatedPostCode = json.\("address").\("postcode").asOpt[String](Formatters.normalizeReads)
+      val unvalidatedPostCode = json.\("address").\("postcode").asOpt[String](Formatters.normalizeReads) map(_.trim)
       val validatedPostcode   = unvalidatedPostCode match {
         case Some(pc) if pc.matches(Validators.postcodeRegex) => Right(pc)
         case Some(_) => Left("Invalid postcode")
         case _ => Left("No postcode")
       }
 
-      val addressLines  = json.\("address").\("lines").as[JsArray].as[List[String]](Formatters.normalizeListReads)
-      val countryName   = json.\("address").\("country").\("name").asOpt[String](Formatters.normalizeReads)
-      val auditRef      = json.\("auditRef").asOpt[String]
+      val addressLines  = json.\("address").\("lines").as[JsArray].as[List[String]](Formatters.normalizeListReads) map(_.trim)
+      val countryName   = json.\("address").\("country").\("name").asOpt[String](Formatters.normalizeReads) map(_.trim)
+      val auditRef      = json.\("auditRef").asOpt[String] map(_.trim)
 
       def buildAddress: JsResult[Address] = (validatedPostcode, countryName, addressLines) match {
         case (Left(msg), None       , _    )                      => JsError(ValidationError(s"$msg and no country to default to"))
@@ -75,8 +75,8 @@ object Address {
         line3       = trimOptionalLine(additionalLines.headOption, 27),
         line4       = trimOptionalLine(additionalLines.lift(1),18),
         postCode    = None,
-        country     = country,
-        auditRef    = auditRef
+        country     = country map(_.trim),
+        auditRef    = auditRef.map(_.trim)
       )
     }
 
@@ -86,9 +86,9 @@ object Address {
         line2     = trimLine(lines(1), 27),
         line3     = trimOptionalLine(lines.lift(2), 27),
         line4     = trimOptionalLine(lines.lift(3), 18),
-        postCode  = postCode,
-        country   = country,
-        auditRef  = auditRef
+        postCode  = postCode map(_.trim),
+        country   = country map(_.trim),
+        auditRef  = auditRef map(_.trim)
       )
     }
   }
@@ -96,14 +96,14 @@ object Address {
   val incorpInfoReads: Reads[Address] = new Reads[Address] {
     def reads(json: JsValue): JsResult[Address] = {
 
-      val premises      = json.\("premises").as[String](Formatters.normalizeReads)
-      val addressLine1  = json.\("address_line_1").as[String](Formatters.normalizeReads)
-      val addressLine2  = json.\("address_line_2").asOpt[String](Formatters.normalizeReads)
-      val poBox         = json.\("po_box").asOpt[String](Formatters.normalizeReads)
-      val locality      = json.\("locality").as[String](Formatters.normalizeReads)
-      val region        = json.\("region").asOpt[String](Formatters.normalizeReads)
-      val postalCode    = json.\("postal_code").asOpt[String](Formatters.normalizeReads)
-      val country       = json.\("country").asOpt[String](Formatters.normalizeReads)
+      val premises      = json.\("premises").as[String](Formatters.normalizeReads).trim
+      val addressLine1  = json.\("address_line_1").as[String](Formatters.normalizeReads).trim
+      val addressLine2  = json.\("address_line_2").asOpt[String](Formatters.normalizeReads) map(_.trim)
+      val poBox         = json.\("po_box").asOpt[String](Formatters.normalizeReads) map(_.trim)
+      val locality      = json.\("locality").as[String](Formatters.normalizeReads).trim
+      val region        = json.\("region").asOpt[String](Formatters.normalizeReads) map(_.trim)
+      val postalCode    = json.\("postal_code").asOpt[String](Formatters.normalizeReads) map(_.trim)
+      val country       = json.\("country").asOpt[String](Formatters.normalizeReads) map(_.trim)
 
 
       val (line1, oLine2) = if((premises + " " + addressLine1).length > 26) {
@@ -124,8 +124,8 @@ object Address {
         line2     = trimLine(additionalLines.head, 27),
         line3     = trimOptionalLine(additionalLines.lift(1), 27),
         line4     = trimOptionalLine(additionalLines.lift(2), 18),
-        postCode  = postalCode,
-        country   = if(postalCode.isEmpty) country else None
+        postCode  = postalCode.map(_.trim),
+        country   = if(postalCode.isEmpty) country map(_.trim) else None
       ))
     }
   }
