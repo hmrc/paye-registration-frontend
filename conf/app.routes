@@ -8,6 +8,9 @@ GET         /post-sign-in                           controllers.userJourney.Sign
 ## PAYE START
 GET         /                                       controllers.userJourney.PayeStartController.startPaye
 
+## PAYE RESTART
+GET         /re-register-for-paye                   controllers.userJourney.PayeStartController.restartPaye
+
 ## WELCOME PAGE
 GET         /start                                  controllers.userJourney.WelcomeController.show
 POST        /start                                  controllers.userJourney.WelcomeController.submit

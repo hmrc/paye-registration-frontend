@@ -18,7 +18,8 @@ package services
 
 import builders.AuthBuilder
 import connectors._
-import enums.{AccountTypes, DownstreamOutcome}
+import enums.{AccountTypes, DownstreamOutcome, RegistrationDeletion}
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.{JsObject, Json}
@@ -37,12 +38,14 @@ class PAYERegistrationServiceSpec extends PAYERegSpec {
     val service = new PAYERegistrationSrv {
       override val authConnector = mockAuthConnector
       override val payeRegistrationConnector = mockRegConnector
+      override val keyStoreConnector = mockKeystoreConnector
     }
   }
 
   implicit val hc = HeaderCarrier()
   implicit val context = AuthBuilder.createTestUser
 
+  val validCurrentProfile = CurrentProfile("testRegId", None, CompanyRegistrationProfile("rejected", "txId"), "en")
 
   val forbidden = Upstream4xxResponse("403", 403, 403)
   val notFound = new NotFoundException("404")
@@ -92,6 +95,41 @@ class PAYERegistrationServiceSpec extends PAYERegSpec {
 
         val result = await(service.getAccountAffinityGroup)
         result shouldBe AccountTypes.InvalidAccountType
+      }
+    }
+  }
+
+  "deletePayeRegistrationDocument" should {
+    "return a RegistrationDeletionSuccess" when {
+      "the users paye document was deleted" in new Setup {
+        when(mockRegConnector.deleteCurrentRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(RegistrationDeletion.success))
+
+        when(mockKeystoreConnector.remove()(ArgumentMatchers.any[HeaderCarrier]()))
+          .thenReturn(Future.successful(HttpResponse(200)))
+
+        val result = await(service.deletePayeRegistrationDocument("testRegId", "testTxId"))
+        result shouldBe RegistrationDeletion.success
+      }
+    }
+
+    "return a RegistrationDeletionInvalidStatus" when {
+      "the users paye document was not deleted" in new Setup {
+        when(mockRegConnector.deleteCurrentRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(RegistrationDeletion.invalidStatus))
+
+        val result = await(service.deletePayeRegistrationDocument("testRegId", "testTxId"))
+        result shouldBe RegistrationDeletion.invalidStatus
+      }
+    }
+
+    "return a RegistrationDeletionFailure" when {
+      "there was a general problem" in new Setup {
+        when(mockRegConnector.deleteCurrentRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(RegistrationDeletion.failure))
+
+        val result = await(service.deletePayeRegistrationDocument("testRegId", "testTxId"))
+        result shouldBe RegistrationDeletion.failure
       }
     }
   }

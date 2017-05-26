@@ -19,27 +19,31 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import config.FrontendAuthConnector
-import enums.AccountTypes
+import common.exceptions.InternalExceptions.NoCurrentSessionException
+import enums.{AccountTypes, CacheKeys, DownstreamOutcome, RegistrationDeletion}
 import play.api.libs.json.JsObject
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import connectors._
-import enums.DownstreamOutcome
+import models.external.CurrentProfile
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class PAYERegistrationService @Inject()(payeRegistrationConn: PAYERegistrationConnector) extends PAYERegistrationSrv {
+class PAYERegistrationService @Inject()(payeRegistrationConn: PAYERegistrationConnector,
+                                        injKeystoreConnector: KeystoreConnector) extends PAYERegistrationSrv {
   override val payeRegistrationConnector = payeRegistrationConn
   override val authConnector = FrontendAuthConnector
+  override val keyStoreConnector = injKeystoreConnector
 }
 
 trait PAYERegistrationSrv {
 
   val payeRegistrationConnector: PAYERegistrationConnect
   val authConnector: AuthConnector
+  val keyStoreConnector: KeystoreConnect
 
   def assertRegistrationFootprint(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     payeRegistrationConnector.createNewRegistration(regId, txId)
@@ -51,6 +55,16 @@ trait PAYERegistrationSrv {
         case "organisation" => Future.successful(AccountTypes.Organisation)
         case _              => Future.successful(AccountTypes.InvalidAccountType)
       }
+    }
+  }
+
+  def deletePayeRegistrationDocument(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
+    payeRegistrationConnector.deleteCurrentRegistrationDocument(regId, txId) flatMap  {
+      case RegistrationDeletion.success => keyStoreConnector.remove() map {
+        _ => RegistrationDeletion.success
+      }
+      case RegistrationDeletion.invalidStatus => Future.successful(RegistrationDeletion.invalidStatus)
+      case RegistrationDeletion.failure => Future.successful(RegistrationDeletion.failure)
     }
   }
 }

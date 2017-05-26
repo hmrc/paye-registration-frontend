@@ -16,14 +16,18 @@
 
 package connectors
 
-import enums.DownstreamOutcome
+import enums.{DownstreamOutcome, RegistrationDeletion}
 import fixtures.PAYERegistrationFixture
 import mocks.MockMetrics
 import models.api.{Director, Eligibility, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
-import play.api.http.Status
+import play.api.http.Status._
+import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
+
+import scala.concurrent.Future
 
 class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFixture {
 
@@ -48,12 +52,12 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
 
   "Calling createNewRegistration" should {
     "return a successful outcome when the microservice successfully creates a new PAYE Registration" in new Setup {
-      mockHttpPATCH[String, HttpResponse]("tst-url", HttpResponse(Status.OK))
+      mockHttpPATCH[String, HttpResponse]("tst-url", HttpResponse(OK))
 
       await(connector.createNewRegistration("tstID", "tstTXID")) shouldBe DownstreamOutcome.Success
     }
     "return a failed outcome when the microservice returns a 2xx response other than OK" in new Setup {
-      mockHttpPATCH[String, HttpResponse]("tst-url", HttpResponse(Status.ACCEPTED))
+      mockHttpPATCH[String, HttpResponse]("tst-url", HttpResponse(ACCEPTED))
 
       await(connector.createNewRegistration("tstID", "tstTXID")) shouldBe DownstreamOutcome.Failure
     }
@@ -515,7 +519,32 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
       mockHttpFailedPUT[String, HttpResponse]("test-url", upstream5xx)
 
       await(connector.submitRegistration("tstID")) shouldBe TimedOut
+    }
+  }
 
+  "deleteCurrentRegistrationDocument" should {
+    "return a RegistrationDeletion Success" in new Setup {
+      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(HttpResponse(OK)))
+
+      val result = await(connector.deleteCurrentRegistrationDocument("testRegId", "testTxID"))
+      result shouldBe RegistrationDeletion.success
+    }
+
+    "return a RegistrationDeletion failure" in new Setup {
+      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR)))
+
+      val result = await(connector.deleteCurrentRegistrationDocument("testRegId", "testTxID"))
+      result shouldBe RegistrationDeletion.failure
+    }
+
+    "return a RegistrationDeletion invalidStatus" in new Setup {
+      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(HttpResponse(PRECONDITION_FAILED)))
+
+      val result = await(connector.deleteCurrentRegistrationDocument("testRegId", "testTxID"))
+      result shouldBe RegistrationDeletion.invalidStatus
     }
   }
 }

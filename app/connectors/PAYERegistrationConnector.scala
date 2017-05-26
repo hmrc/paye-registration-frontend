@@ -19,10 +19,10 @@ package connectors
 import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
-import enums.{DownstreamOutcome, PAYEStatus}
+import enums.{DownstreamOutcome, PAYEStatus, RegistrationDeletion}
 import models.api.{Director, Eligibility, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.Logger
-import play.api.http.Status
+import play.api.http.Status._
 import play.api.libs.json.{JsObject, JsValue, Reads}
 import services.{MetricsService, MetricsSrv}
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -55,7 +55,7 @@ trait PAYERegistrationConnect {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
     http.PATCH[String, HttpResponse](s"$payeRegUrl/paye-registration/$regID/new", txID) map {
       response => response.status match {
-        case Status.OK =>
+        case OK =>
           payeRegTimer.stop()
           DownstreamOutcome.Success
       }
@@ -85,8 +85,8 @@ trait PAYERegistrationConnect {
       response =>
         payeRegTimer.stop()
         response.status match {
-          case Status.OK         => Success
-          case Status.NO_CONTENT => Cancelled
+          case OK         => Success
+          case NO_CONTENT => Cancelled
         }
     } recover {
       case e: Exception =>
@@ -325,6 +325,18 @@ trait PAYERegistrationConnect {
       case e : Throwable =>
         logResponse(e, "getStatus", "getting PAYE registration document status")
         None
+    }
+  }
+
+  def deleteCurrentRegistrationDocument(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
+    http.DELETE[HttpResponse](s"$payeRegUrl/paye-registration/$regId/delete") map {
+      _.status match {
+        case OK                   => RegistrationDeletion.success
+        case PRECONDITION_FAILED  =>
+          Logger.warn(s"[PAYERegistrationConnector] - [deleteCurrentRegistrationDocument] Deleting document for regId $regId and txId $txId failed as document was not rejected")
+          RegistrationDeletion.invalidStatus
+        case _                    => RegistrationDeletion.failure
+      }
     }
   }
 
