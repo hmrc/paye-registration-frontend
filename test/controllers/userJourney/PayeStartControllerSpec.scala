@@ -20,7 +20,7 @@ import builders.AuthBuilder
 import connectors.CompanyRegistrationConnector
 import enums.{AccountTypes, DownstreamOutcome, RegistrationDeletion}
 import fixtures.PAYERegistrationFixture
-import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
@@ -192,19 +192,50 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
         }
       }
 
-      "redirect to dashboard" when {
-        "the users document has not been deleted as it was not rejected" in new Setup {
-          when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-            .thenReturn(Future.successful(Some(validCurrentProfile("rejected"))))
+      "the users document is deleted and are going to start their application again but there wasn't a current profile in session" in new Setup {
+        val testBusinessProfile = BusinessProfile(
+          "testRegId",
+          Some("director"),
+          "ENG"
+        )
 
-          when(mockPAYERegService.deletePayeRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-            .thenReturn(Future.successful(RegistrationDeletion.invalidStatus))
+        val testCompanyProfile = CompanyRegistrationProfile(
+          "rejected",
+          "testTxId"
+        )
 
-          AuthBuilder.showWithAuthorisedUser(controller.restartPaye, mockAuthConnector) {
-            result =>
-              status(result) shouldBe Status.SEE_OTHER
-              redirectLocation(result) shouldBe Some(controllers.userJourney.routes.DashboardController.dashboard().url)
-          }
+        when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+          .thenReturn(Future.successful(None))
+
+        when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
+          .thenReturn(Future.successful(testBusinessProfile))
+
+        when(mockCompanyRegistrationConnector.getCompanyRegistrationDetails(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(testCompanyProfile))
+
+        when(mockPAYERegService.deletePayeRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(RegistrationDeletion.success))
+
+        AuthBuilder.showWithAuthorisedUser(controller.restartPaye, mockAuthConnector) {
+          result =>
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(s"/register-for-paye")
+        }
+      }
+    }
+
+    "redirect to dashboard" when {
+      "the users document has not been deleted as it was not rejected" in new Setup {
+        when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+          .thenReturn(Future.successful(Some(validCurrentProfile("rejected"))))
+
+        when(mockPAYERegService.deletePayeRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(RegistrationDeletion.invalidStatus))
+
+        AuthBuilder.showWithAuthorisedUser(controller.restartPaye, mockAuthConnector) {
+          result =>
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(controllers.userJourney.routes.DashboardController.dashboard().url)
         }
       }
     }
