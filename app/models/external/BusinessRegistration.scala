@@ -33,7 +33,7 @@ object BusinessProfile {
 }
 
 case class CompanyRegistrationProfile(status: String,
-                          transactionId: String)
+                                      transactionId: String)
 
 object CompanyRegistrationProfile {
   implicit val formats = Json.format[CompanyRegistrationProfile]

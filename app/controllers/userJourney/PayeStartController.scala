@@ -20,11 +20,12 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import enums.{AccountTypes, DownstreamOutcome}
+import connectors._
+import enums.{AccountTypes, CacheKeys, DownstreamOutcome, RegistrationDeletion}
 import models.external.CurrentProfile
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{AnyContent, Request, Result}
+import play.api.mvc.{Action, AnyContent, Request, Result}
 import services._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.frontend.auth.{Actions, AuthContext}
@@ -37,12 +38,18 @@ import scala.concurrent.Future
 class PayeStartController @Inject()(injCurrentProfileService: CurrentProfileService,
                                     injCoHoAPIService: IncorporationInformationService,
                                     injPayeRegistrationService: PAYERegistrationService,
+                                    injKeystoreConnector: KeystoreConnector,
+                                    injBusinessRegistrationConnector: BusinessRegistrationConnector,
+                                    injCompanyRegistrationConnector: CompanyRegistrationConnector,
                                     injMessagesApi: MessagesApi) extends PayeStartCtrl with ServicesConfig {
   val authConnector = FrontendAuthConnector
   val messagesApi = injMessagesApi
   val currentProfileService = injCurrentProfileService
   val coHoAPIService = injCoHoAPIService
   val payeRegistrationService = injPayeRegistrationService
+  val keystoreConnector = injKeystoreConnector
+  val businessRegistrationConnector = injBusinessRegistrationConnector
+  val companyRegistrationConnector = injCompanyRegistrationConnector
   lazy val compRegFEURL = getConfString("company-registration-frontend.www.url", "")
   lazy val compRegFEURI = getConfString("company-registration-frontend.www.uri", "")
 }
@@ -52,6 +59,9 @@ trait PayeStartCtrl extends FrontendController with Actions with I18nSupport {
   val currentProfileService: CurrentProfileSrv
   val coHoAPIService: IncorporationInformationSrv
   val payeRegistrationService: PAYERegistrationSrv
+  val keystoreConnector: KeystoreConnect
+  val businessRegistrationConnector: BusinessRegistrationConnect
+  val companyRegistrationConnector: CompanyRegistrationConnect
   val compRegFEURL: String
   val compRegFEURI: String
 
@@ -69,6 +79,32 @@ trait PayeStartCtrl extends FrontendController with Actions with I18nSupport {
               }
           }
         }
+  }
+
+  def restartPaye: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user =>
+      implicit request =>
+        for {
+          (regId, txId)   <- getRegIdAndTxId
+          deleted         <- payeRegistrationService.deletePayeRegistrationDocument(regId, txId)
+        } yield {
+          deleted match {
+            case RegistrationDeletion.success => Redirect(routes.PayeStartController.startPaye())
+            case RegistrationDeletion.invalidStatus => Redirect(controllers.userJourney.routes.DashboardController.dashboard())
+          }
+        }
+  }
+
+  private def getRegIdAndTxId(implicit hc: HeaderCarrier): Future[(String, String)] = {
+    keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString) flatMap {
+      case Some(profile) => Future.successful((profile.registrationID, profile.companyTaxRegistration.transactionId))
+      case None => for {
+        businessProfile <- businessRegistrationConnector.retrieveCurrentProfile
+        companyProfile  <- companyRegistrationConnector.getCompanyRegistrationDetails(businessProfile.registrationID)
+      } yield {
+        (businessProfile.registrationID, companyProfile.transactionId)
+      }
+    }
   }
 
   private def checkAndStoreCurrentProfile(f: => CurrentProfile => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
