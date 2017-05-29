@@ -24,6 +24,7 @@ import enums.DownstreamOutcome
 import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI, PAYEContact => PAYEContactAPI}
 import play.api.Logger
 import play.api.http.Status
+import play.api.libs.json.{Json, JsObject}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -93,6 +94,16 @@ trait TestPAYERegConnect {
     } recover {
       case e: Exception =>
         Logger.warn(s"[PAYERegistrationConnector] [tearDownIndividualRegistration] received error when clearing registration details - Error: ${e.getMessage}")
+        DownstreamOutcome.Failure
+    }
+  }
+
+  def updateStatus(regId: String, status: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    http.POST[JsObject, HttpResponse](s"$payeRegUrl/paye-registration/test-only/update-status/$regId/$status", Json.obj()) map {
+      resp => DownstreamOutcome.Success
+    } recover {
+      case e: Exception =>
+        Logger.warn(s"[PAYERegistrationConnector] [updateStatus] received error when updating status details - Error: ${e.getMessage}")
         DownstreamOutcome.Failure
     }
   }

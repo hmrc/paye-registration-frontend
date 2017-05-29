@@ -22,9 +22,6 @@ import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
 import play.api.test.FakeApplication
 
-/**
-  * Created by henrilay on 03/05/2017.
-  */
 class DirectorDetailsMethodISpec extends IntegrationSpecBase
                                     with LoginStub
                                     with CachingStub

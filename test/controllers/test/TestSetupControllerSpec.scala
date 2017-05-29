@@ -23,6 +23,8 @@ import enums.DownstreamOutcome
 import models.external.BusinessProfile
 import play.api.http.Status
 import play.api.mvc.{AnyContent, Request}
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito._
 import services.{IncorporationInformationSrv, PAYERegistrationSrv, S4LSrv}
 import testHelpers.PAYERegSpec
 
@@ -66,6 +68,30 @@ class TestSetupControllerSpec extends PAYERegSpec {
         result =>
           status(result) shouldBe Status.SEE_OTHER
           result.header.headers("Location") shouldBe "/register-for-paye"
+      }
+    }
+  }
+
+  "update-status" should {
+    "return 200 for success" in new Setup {
+      mockBusinessRegFetch(Future.successful(BusinessProfile("regID", Some("Director"), "EN")))
+      when(mockPayeRegConnector.updateStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(DownstreamOutcome.Success))
+
+      AuthBuilder.showWithAuthorisedUser(controller.updateStatus("draft"), mockAuthConnector) {
+        result =>
+          status(result) shouldBe Status.OK
+      }
+    }
+
+    "return 500 for failure" in new Setup {
+      mockBusinessRegFetch(Future.successful(BusinessProfile("regID", Some("Director"), "EN")))
+      when(mockPayeRegConnector.updateStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(DownstreamOutcome.Failure))
+
+      AuthBuilder.showWithAuthorisedUser(controller.updateStatus("draft"), mockAuthConnector) {
+        result =>
+          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
       }
     }
   }

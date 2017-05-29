@@ -26,3 +26,5 @@ GET        /no-lookup-ppob-address                       controllers.test.TestAd
 GET        /no-lookup-correspondence-address             controllers.test.TestAddressLookupController.noLookupCorrespondenceAddress
 
 GET        /setup/:companyName                           controllers.test.TestSetupController.testSetup(companyName: String)
+
+GET        /update-status/:status                        controllers.test.TestSetupController.updateStatus(status)

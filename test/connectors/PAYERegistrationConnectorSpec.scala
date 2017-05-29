@@ -533,15 +533,14 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
 
     "return a RegistrationDeletion failure" in new Setup {
       when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(HttpResponse(INTERNAL_SERVER_ERROR)))
+        .thenReturn(Future.failed(Upstream5xxResponse("msg", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
 
-      val result = await(connector.deleteCurrentRegistrationDocument("testRegId", "testTxID"))
-      result shouldBe RegistrationDeletion.failure
+      intercept[Upstream5xxResponse](await(connector.deleteCurrentRegistrationDocument("testRegId", "testTxID")))
     }
 
     "return a RegistrationDeletion invalidStatus" in new Setup {
       when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(HttpResponse(PRECONDITION_FAILED)))
+        .thenReturn(Future.failed(Upstream4xxResponse("msg", PRECONDITION_FAILED, PRECONDITION_FAILED)))
 
       val result = await(connector.deleteCurrentRegistrationDocument("testRegId", "testTxID"))
       result shouldBe RegistrationDeletion.invalidStatus
