@@ -22,6 +22,7 @@ import fixtures.PAYERegistrationFixture
 import models.api.PAYERegistration
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
+import play.api.libs.json.JsObject
 import play.mvc.Http.Status
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._
@@ -115,6 +116,20 @@ class TestPAYERegConnectorSpec extends PAYERegSpec with PAYERegistrationFixture 
       mockHttpFailedGET[HttpResponse]("tst-url", e)
 
       await(connector.tearDownIndividualRegistration("regId")) shouldBe DownstreamOutcome.Failure
+    }
+  }
+
+  "Calling update-status" should {
+    "return a successful outcome for a successful update" in new Setup {
+      mockHttpPOST[JsObject, HttpResponse]("tst-url", HttpResponse(Status.OK))
+
+      await(connector.updateStatus("regId", "rejected")) shouldBe DownstreamOutcome.Success
+    }
+    "return a failed outcome for an unsuccessful teardown" in new Setup {
+      val e = new RuntimeException("tst")
+      mockHttpFailedPOST[JsObject, HttpResponse]("tst-url", e)
+
+      await(connector.updateStatus("regId", "submitted")) shouldBe DownstreamOutcome.Failure
     }
   }
 }

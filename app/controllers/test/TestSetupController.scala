@@ -22,6 +22,7 @@ import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors._
 import connectors.test._
+import enums.DownstreamOutcome
 import models.test.CoHoCompanyDetailsFormModel
 import play.api.Logger
 import play.api.i18n.MessagesApi
@@ -82,5 +83,16 @@ trait TestSetupCtrl extends BusinessProfileCtrl with TestCoHoCtrl with TestRegSe
             _ <- log("S4LTeardown", doTearDownS4L(businessProfile.registrationID))
           } yield Redirect(controllers.userJourney.routes.PayeStartController.startPaye())
 
+  }
+
+  def updateStatus(status: String) = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user =>
+      implicit request =>
+        businessRegConnector.retrieveCurrentProfile.flatMap { profile =>
+          testPAYERegConnector.updateStatus(profile.registrationID, status) map {
+            case DownstreamOutcome.Success => Ok(s"status for regId ${profile.registrationID} updated to '$status'")
+            case DownstreamOutcome.Failure => InternalServerError(s"Unable to update status for regId ${profile.registrationID}")
+          }
+        }
   }
 }
