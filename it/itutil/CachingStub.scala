@@ -64,6 +64,31 @@ trait CachingStub {
     )
   }
 
+  def stubEmptyKeystore(sessionId: String) = {
+    val keystoreUrl = s"/keystore/paye-registration-frontend/$sessionId"
+    stubFor(get(urlMatching(keystoreUrl))
+      .willReturn(
+        aResponse().
+          withStatus(200).
+          withBody(
+            s"""{
+               |"id": "$sessionId",
+               |"data": {}
+               |}""".stripMargin
+          )
+      )
+    )
+  }
+
+  def stubKeystoreDelete(sessionId: String) = {
+    stubFor(delete(urlMatching(s"/keystore/paye-registration-frontend/$sessionId"))
+      .willReturn(
+        aResponse()
+          .withStatus(200)
+      )
+    )
+  }
+
   def stubPayeRegDocumentStatus(regId: String) = {
     val payeRegUrl = s"/paye-registration/$regId/status"
     stubFor(get(urlMatching(payeRegUrl))

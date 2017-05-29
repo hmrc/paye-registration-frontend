@@ -18,6 +18,5 @@ package enums
 
 object RegistrationDeletion extends Enumeration {
   val success = Value
-  val failure = Value
   val invalidStatus = Value
 }

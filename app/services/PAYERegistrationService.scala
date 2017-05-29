@@ -64,7 +64,6 @@ trait PAYERegistrationSrv {
         _ => RegistrationDeletion.success
       }
       case RegistrationDeletion.invalidStatus => Future.successful(RegistrationDeletion.invalidStatus)
-      case RegistrationDeletion.failure => Future.successful(RegistrationDeletion.failure)
     }
   }
 }

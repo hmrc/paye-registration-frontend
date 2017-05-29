@@ -23,7 +23,7 @@ import enums.{DownstreamOutcome, PAYEStatus, RegistrationDeletion}
 import models.api.{Director, Eligibility, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.Logger
 import play.api.http.Status._
-import play.api.libs.json.{JsObject, JsValue, Reads}
+import play.api.libs.json.{JsObject, Reads}
 import services.{MetricsService, MetricsSrv}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
@@ -320,9 +320,11 @@ trait PAYERegistrationConnect {
   def getStatus(regId: String)(implicit hc: HeaderCarrier): Future[Option[PAYEStatus.Value]] = {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
     http.GET[JsObject](s"$payeRegUrl/paye-registration/$regId/status") map { json =>
+      payeRegTimer.stop()
       Some((json \ "status").as[PAYEStatus.Value](Reads.enumNameReads(PAYEStatus)))
     } recover {
       case e : Throwable =>
+        payeRegTimer.stop()
         logResponse(e, "getStatus", "getting PAYE registration document status")
         None
     }
@@ -332,11 +334,14 @@ trait PAYERegistrationConnect {
     http.DELETE[HttpResponse](s"$payeRegUrl/paye-registration/$regId/delete") map {
       _.status match {
         case OK                   => RegistrationDeletion.success
-        case PRECONDITION_FAILED  =>
-          Logger.warn(s"[PAYERegistrationConnector] - [deleteCurrentRegistrationDocument] Deleting document for regId $regId and txId $txId failed as document was not rejected")
-          RegistrationDeletion.invalidStatus
-        case _                    => RegistrationDeletion.failure
       }
+    } recover {
+      case fourXX: Upstream4xxResponse if fourXX.upstreamResponseCode == PRECONDITION_FAILED =>
+        Logger.warn(s"[PAYERegistrationConnector] - [deleteCurrentRegistrationDocument] Deleting document for regId $regId and txId $txId failed as document was not rejected")
+        RegistrationDeletion.invalidStatus
+      case fiveXX: Upstream5xxResponse =>
+        Logger.warn(s"[PAYERegistrationConnector] - [deleteCurrentRegistrationDocument] Deleting document for regId $regId and txId $txId failed due to downstream error: ${fiveXX.message}")
+        throw fiveXX
     }
   }
 

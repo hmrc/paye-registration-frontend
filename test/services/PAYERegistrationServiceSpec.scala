@@ -122,15 +122,5 @@ class PAYERegistrationServiceSpec extends PAYERegSpec {
         result shouldBe RegistrationDeletion.invalidStatus
       }
     }
-
-    "return a RegistrationDeletionFailure" when {
-      "there was a general problem" in new Setup {
-        when(mockRegConnector.deleteCurrentRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-          .thenReturn(Future.successful(RegistrationDeletion.failure))
-
-        val result = await(service.deletePayeRegistrationDocument("testRegId", "testTxId"))
-        result shouldBe RegistrationDeletion.failure
-      }
-    }
   }
 }
