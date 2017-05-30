@@ -156,7 +156,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/registered-office-address"
+          result.header.headers("Location") shouldBe "/register-for-paye/confirm-registered-office-address"
       }
     }
 

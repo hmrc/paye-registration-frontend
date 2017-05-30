@@ -99,7 +99,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
         AuthBuilder.showWithAuthorisedUser(controller.summary, mockAuthConnector) {
           (response: Future[Result]) =>
             status(response) shouldBe Status.SEE_OTHER
-            redirectLocation(response) shouldBe Some("/register-for-paye/confirmation")
+            redirectLocation(response) shouldBe Some("/register-for-paye/application-submitted")
         }
       }
 
@@ -112,7 +112,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
         AuthBuilder.showWithAuthorisedUser(controller.summary, mockAuthConnector) {
           (response: Future[Result]) =>
             status(response) shouldBe Status.SEE_OTHER
-            redirectLocation(response) shouldBe Some("/register-for-paye/confirmation")
+            redirectLocation(response) shouldBe Some("/register-for-paye/application-submitted")
         }
       }
 
@@ -154,7 +154,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
         (result: Future[Result]) =>
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result).get shouldBe "/register-for-paye/confirmation"
+          redirectLocation(result).get shouldBe "/register-for-paye/application-submitted"
       }
     }
     "show the dashboard" in new Setup {
@@ -166,7 +166,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
         (result: Future[Result]) =>
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result).get shouldBe "/register-for-paye/dashboard"
+          redirectLocation(result).get shouldBe "/register-for-paye/business-registration-overview"
       }
     }
     "show the retry page" in new Setup {
@@ -189,7 +189,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
         (result: Future[Result]) =>
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result).get shouldBe "/register-for-paye/something-went-wrong-send-your-details"
+          redirectLocation(result).get shouldBe "/register-for-paye/something-went-wrong"
       }
     }
   }

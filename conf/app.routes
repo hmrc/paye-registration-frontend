@@ -1,108 +1,106 @@
 # microservice specific routes
-
-GET         /assets/*file                           controllers.Assets.at(path="/public", file)
+GET         /assets/*file                                     controllers.Assets.at(path="/public", file)
 
 ## POST SIGN IN
-GET         /post-sign-in                           controllers.userJourney.SignInOutController.postSignIn
+GET         /post-sign-in                                     controllers.userJourney.SignInOutController.postSignIn
 
 ## PAYE START
-GET         /                                       controllers.userJourney.PayeStartController.startPaye
+GET         /                                                 controllers.userJourney.PayeStartController.startPaye
 
 ## PAYE RESTART
-GET         /re-register-as-an-employer             controllers.userJourney.PayeStartController.restartPaye
+GET         /re-register-as-an-employer                       controllers.userJourney.PayeStartController.restartPaye
 
 ## WELCOME PAGE
-GET         /start                                  controllers.userJourney.WelcomeController.show
-POST        /start                                  controllers.userJourney.WelcomeController.submit
+GET         /register-as-employer                             controllers.userJourney.WelcomeController.show
+POST        /register-as-employer                             controllers.userJourney.WelcomeController.submit
 
 ## COMPANY ELIGIBILITY
-GET         /is-the-company-any-of-the-following    controllers.userJourney.EligibilityController.companyEligibility
-POST        /is-the-company-any-of-the-following    controllers.userJourney.EligibilityController.submitCompanyEligibility
+GET         /do-any-of-the-following-apply                    controllers.userJourney.EligibilityController.companyEligibility
+POST        /do-any-of-the-following-apply                    controllers.userJourney.EligibilityController.submitCompanyEligibility
 
 ## DIRECTOR ELIGIBILITY
-GET         /do-any-of-the-following-apply          controllers.userJourney.EligibilityController.directorEligibility
-POST        /do-any-of-the-following-apply          controllers.userJourney.EligibilityController.submitDirectorEligibility
+GET         /are-you-any-of-the-following                     controllers.userJourney.EligibilityController.directorEligibility
+POST        /are-you-any-of-the-following                     controllers.userJourney.EligibilityController.submitDirectorEligibility
 
 ## COMPLETION CAPACITY
-GET         /relationship-to-the-business           controllers.userJourney.CompletionCapacityController.completionCapacity
-POST        /relationship-to-the-business           controllers.userJourney.CompletionCapacityController.submitCompletionCapacity
+GET         /relationship-to-company                          controllers.userJourney.CompletionCapacityController.completionCapacity
+POST        /relationship-to-company                          controllers.userJourney.CompletionCapacityController.submitCompletionCapacity
 
 ## COMPANY DETAILS
-GET         /trading-name                           controllers.userJourney.CompanyDetailsController.tradingName
-POST        /trading-name                           controllers.userJourney.CompanyDetailsController.submitTradingName
+GET         /trading-name                                     controllers.userJourney.CompanyDetailsController.tradingName
+POST        /trading-name                                     controllers.userJourney.CompanyDetailsController.submitTradingName
 
 ## CONFIRM RO ADDRESS
-GET         /registered-office-address              controllers.userJourney.CompanyDetailsController.roAddress
-POST        /registered-office-address              controllers.userJourney.CompanyDetailsController.confirmRO
+GET         /confirm-registered-office-address                controllers.userJourney.CompanyDetailsController.roAddress
+POST        /confirm-registered-office-address                controllers.userJourney.CompanyDetailsController.confirmRO
 
 ## PPOB ADDRESS
-GET         /principal-place-of-business            controllers.userJourney.CompanyDetailsController.ppobAddress
-POST        /principal-place-of-business            controllers.userJourney.CompanyDetailsController.submitPPOBAddress
-GET         /return-from-address-for-ppob           controllers.userJourney.CompanyDetailsController.savePPOBAddress
+GET         /where-company-carries-out-business-activities    controllers.userJourney.CompanyDetailsController.ppobAddress
+POST        /where-company-carries-out-business-activities    controllers.userJourney.CompanyDetailsController.submitPPOBAddress
+GET         /return-from-address-for-ppob                     controllers.userJourney.CompanyDetailsController.savePPOBAddress
 
 ## BUSINESS CONTACT DETAILS
-GET         /business-contact-details               controllers.userJourney.CompanyDetailsController.businessContactDetails
-POST        /business-contact-details               controllers.userJourney.CompanyDetailsController.submitBusinessContactDetails
+GET         /business-contact-details                         controllers.userJourney.CompanyDetailsController.businessContactDetails
+POST        /business-contact-details                         controllers.userJourney.CompanyDetailsController.submitBusinessContactDetails
 
 ## EMPLOYMENT
-GET         /employing-staff                        controllers.userJourney.EmploymentController.employingStaff
-POST        /employing-staff                        controllers.userJourney.EmploymentController.submitEmployingStaff
+GET         /employ-staff-next-two-months                     controllers.userJourney.EmploymentController.employingStaff
+POST        /employ-staff-next-two-months                     controllers.userJourney.EmploymentController.submitEmployingStaff
 
 ## SUBCONTRACTORS
-GET         /subcontractors                         controllers.userJourney.EmploymentController.subcontractors
-POST        /subcontractors                         controllers.userJourney.EmploymentController.submitSubcontractors
+GET         /employ-subcontractors-construction-industry      controllers.userJourney.EmploymentController.subcontractors
+POST        /employ-subcontractors-construction-industry      controllers.userJourney.EmploymentController.submitSubcontractors
 
 ## COMPANY PENSION
-GET         /company-pension                        controllers.userJourney.EmploymentController.companyPension
-POST        /company-pension                        controllers.userJourney.EmploymentController.submitCompanyPension
+GET         /make-pension-payment-next-two-months             controllers.userJourney.EmploymentController.companyPension
+POST        /make-pension-payment-next-two-months             controllers.userJourney.EmploymentController.submitCompanyPension
 
 ## FIRST PAYMENT
-GET         /first-payment                          controllers.userJourney.EmploymentController.firstPayment
-POST        /first-payment                          controllers.userJourney.EmploymentController.submitFirstPayment
+GET         /set-paye-scheme-start-date                       controllers.userJourney.EmploymentController.firstPayment
+POST        /set-paye-scheme-start-date                       controllers.userJourney.EmploymentController.submitFirstPayment
 
 ## NATURE OF BUSINESS
-GET         /nature-of-business                     controllers.userJourney.NatureOfBusinessController.natureOfBusiness
-POST        /nature-of-business                     controllers.userJourney.NatureOfBusinessController.submitNatureOfBusiness
+GET         /what-company-does                                controllers.userJourney.NatureOfBusinessController.natureOfBusiness
+POST        /what-company-does                                controllers.userJourney.NatureOfBusinessController.submitNatureOfBusiness
 
 ## DIRECTOR DETAILS
-GET         /director-national-insurance-number     controllers.userJourney.DirectorDetailsController.directorDetails
-POST        /director-national-insurance-number     controllers.userJourney.DirectorDetailsController.submitDirectorDetails
+GET         /director-national-insurance-number               controllers.userJourney.DirectorDetailsController.directorDetails
+POST        /director-national-insurance-number               controllers.userJourney.DirectorDetailsController.submitDirectorDetails
 
 ## PAYE CONTACT DETAILS
-GET         /company-contact                        controllers.userJourney.PAYEContactController.payeContactDetails
-POST        /company-contact                        controllers.userJourney.PAYEContactController.submitPAYEContactDetails
+GET         /who-should-we-contact                            controllers.userJourney.PAYEContactController.payeContactDetails
+POST        /who-should-we-contact                            controllers.userJourney.PAYEContactController.submitPAYEContactDetails
 
 ## PAYE CONTACT DETAILS
-GET         /correspondence-address                 controllers.userJourney.PAYEContactController.payeCorrespondenceAddress
-POST        /correspondence-address                 controllers.userJourney.PAYEContactController.submitPAYECorrespondenceAddress
-GET         /return-from-address-for-corresp-addr   controllers.userJourney.PAYEContactController.savePAYECorrespondenceAddress
+GET         /where-to-send-post                               controllers.userJourney.PAYEContactController.payeCorrespondenceAddress
+POST        /where-to-send-post                               controllers.userJourney.PAYEContactController.submitPAYECorrespondenceAddress
+GET         /return-from-address-for-corresp-addr             controllers.userJourney.PAYEContactController.savePAYECorrespondenceAddress
 
 ## SUMMARY
-GET         /summary                                controllers.userJourney.SummaryController.summary
-POST        /summary                                controllers.userJourney.SummaryController.submitRegistration
+GET         /check-and-confirm-your-answers                   controllers.userJourney.SummaryController.summary
+POST        /check-and-confirm-your-answers                   controllers.userJourney.SummaryController.submitRegistration
 
 ## CONFIRMATION
-GET         /confirmation                           controllers.userJourney.ConfirmationController.showConfirmation
+GET         /application-submitted                            controllers.userJourney.ConfirmationController.showConfirmation
 
 ## FEEDBACK
-GET        /feedback                                controllers.feedback.FeedbackController.feedbackShow
-POST       /feedback                                controllers.feedback.FeedbackController.submitFeedback
-GET        /thankyou                                controllers.feedback.FeedbackController.thankyou
+GET        /feedback                                          controllers.feedback.FeedbackController.feedbackShow
+POST       /feedback                                          controllers.feedback.FeedbackController.submitFeedback
+GET        /thankyou                                          controllers.feedback.FeedbackController.thankyou
 
 ## ERRORS
+GET        /ineligible-for-paye                               controllers.errors.ErrorController.ineligible
+GET        /you-cant-register-online                          controllers.userJourney.EligibilityController.ineligible
 
-GET        /ineligible-for-paye                     controllers.errors.ErrorController.ineligible
-GET        /you-cant-register-online                controllers.userJourney.EligibilityController.ineligible
+GET        /something-went-wrong                              controllers.errors.ErrorController.failedSubmission
+POST       /something-went-wrong                              controllers.errors.ErrorController.submitTicket
+GET        /ticket-submitted                                  controllers.errors.ErrorController.submittedTicket
 
-GET        /something-went-wrong-send-your-details  controllers.errors.ErrorController.failedSubmission
-POST       /something-went-wrong-send-your-details  controllers.errors.ErrorController.submitTicket
-GET        /ticket-submitted                        controllers.errors.ErrorController.submittedTicket
-
-GET        /submission-failure                      controllers.errors.ErrorController.retrySubmission
+GET        /submission-failure                                controllers.errors.ErrorController.retrySubmission
 
 ## DASHBOARD
-GET        /dashboard                               controllers.userJourney.DashboardController.dashboard
+GET        /business-registration-overview                    controllers.userJourney.DashboardController.dashboard
 
 ## Questionnaire
 
-POST       /questionnaire                           controllers.userJourney.EligibilityController.questionnaire
+POST       /questionnaire                                     controllers.userJourney.EligibilityController.questionnaire

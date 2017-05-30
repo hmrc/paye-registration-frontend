@@ -158,7 +158,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
         val response = await(fResponse)
 
         response.status shouldBe 303
-        response.header("Location") shouldBe Some("/register-for-paye/dashboard")
+        response.header("Location") shouldBe Some("/register-for-paye/business-registration-overview")
       }
     }
 

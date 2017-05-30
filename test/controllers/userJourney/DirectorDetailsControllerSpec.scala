@@ -136,7 +136,7 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
       AuthBuilder.submitWithAuthorisedUser(testController.submitDirectorDetails, mockAuthConnector, request) {
         result =>
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some("/register-for-paye/company-contact")
+          redirectLocation(result) shouldBe Some("/register-for-paye/who-should-we-contact")
       }
     }
   }

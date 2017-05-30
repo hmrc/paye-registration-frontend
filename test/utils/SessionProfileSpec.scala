@@ -60,7 +60,7 @@ class SessionProfileSpec extends PAYERegSpec with DateUtil with InternalExceptio
     }
 
     "proceed even if the status is held and the request path is for /confirmation" in {
-      implicit val confirmationRequest = FakeRequest("GET", "/register-for-paye/confirmation")
+      implicit val confirmationRequest = FakeRequest("GET", "/register-for-paye/application-submitted")
 
       mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile))
 
@@ -72,7 +72,7 @@ class SessionProfileSpec extends PAYERegSpec with DateUtil with InternalExceptio
     }
 
     "proceed even if the status is submitted and the request path is for /confirmation" in {
-      implicit val confirmationRequest = FakeRequest("GET", "/register-for-paye/confirmation")
+      implicit val confirmationRequest = FakeRequest("GET", "/register-for-paye/application-submitted")
 
       mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile))
 

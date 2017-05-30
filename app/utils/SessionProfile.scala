@@ -38,7 +38,7 @@ trait SessionProfile extends InternalExceptions {
         case Some(status) => status match {
           case PAYEStatus.held | PAYEStatus.submitted => request.path match {
               // TODO - going to re-factor this under SCRS-6939
-            case "/register-for-paye/confirmation" => f(currentProfile)
+            case "/register-for-paye/application-submitted" => f(currentProfile)
             case _               => Future.successful(Redirect(controllers.userJourney.routes.DashboardController.dashboard()))
           }
           case PAYEStatus.draft | PAYEStatus.invalid => f(currentProfile)

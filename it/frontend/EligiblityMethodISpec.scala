@@ -89,7 +89,7 @@ class EligiblityMethodISpec extends IntegrationSpecBase
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
 
-      val fResponse = buildClient("/is-the-company-any-of-the-following").
+      val fResponse = buildClient("/do-any-of-the-following-apply").
         withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
@@ -133,7 +133,7 @@ class EligiblityMethodISpec extends IntegrationSpecBase
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/save4later/paye-registration-frontend/${regId}/data/DirectorDetails", 200, dummyS4LResponse)
 
-      val fResponse = buildClient("/do-any-of-the-following-apply").
+      val fResponse = buildClient("/are-you-any-of-the-following").
         withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
