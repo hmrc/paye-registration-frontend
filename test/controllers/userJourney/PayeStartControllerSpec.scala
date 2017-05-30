@@ -145,7 +145,7 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
       AuthBuilder.showWithAuthorisedUser(controller.startPaye, mockAuthConnector) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some("/register-for-paye/start")
+          redirectLocation(result) shouldBe Some("/register-for-paye/register-as-employer")
       }
     }
 

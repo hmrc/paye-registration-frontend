@@ -157,7 +157,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYEContactDetails, mockAuthConnector, request) {
         result =>
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some("/register-for-paye/correspondence-address")
+          redirectLocation(result) shouldBe Some("/register-for-paye/where-to-send-post")
       }
     }
   }
@@ -217,7 +217,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/register-for-paye/summary")
+        redirectLocation(result) shouldBe Some("/register-for-paye/check-and-confirm-your-answers")
       }
     }
 
@@ -234,7 +234,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("/register-for-paye/summary")
+        redirectLocation(result) shouldBe Some("/register-for-paye/check-and-confirm-your-answers")
       }
     }
 

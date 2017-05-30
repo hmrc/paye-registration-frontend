@@ -241,7 +241,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val response = await(fResponse)
 
       response.status shouldBe 303
-      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/registered-office-address")
+      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/confirm-registered-office-address")
 
       val crPuts = findAll(patchRequestedFor(urlMatching(s"/paye-registration/${regId}/company-details")))
       val captor = crPuts.get(0)
@@ -268,7 +268,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/save4later/paye-registration-frontend/${regIdWhitelisted}/data/CompanyDetails", 200, dummyS4LResponse)
 
-      val fResponse = buildClient("/registered-office-address").
+      val fResponse = buildClient("/confirm-registered-office-address").
         withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
@@ -301,7 +301,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
                       |}""".stripMargin
       stubS4LGet(regId, "CompanyDetails", payeDoc)
 
-      val fResponse = buildClient("/principal-place-of-business").
+      val fResponse = buildClient("/where-company-carries-out-business-activities").
         withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
@@ -337,7 +337,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
                       |}""".stripMargin
       stubS4LGet(regId, "CompanyDetails", payeDoc)
 
-      val fResponse = buildClient("/principal-place-of-business").
+      val fResponse = buildClient("/where-company-carries-out-business-activities").
         withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
@@ -374,7 +374,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
                       |}""".stripMargin
       stubS4LGet(regId, "CompanyDetails", payeDoc)
 
-      val fResponse = buildClient("/principal-place-of-business").
+      val fResponse = buildClient("/where-company-carries-out-business-activities").
         withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
@@ -430,7 +430,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
 
-      val fResponse = buildClient("/principal-place-of-business").
+      val fResponse = buildClient("/where-company-carries-out-business-activities").
         withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken"->Seq("xxx-ignored-xxx"),
@@ -478,7 +478,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
 
-      val fResponse = buildClient("/principal-place-of-business").
+      val fResponse = buildClient("/where-company-carries-out-business-activities").
         withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken"->Seq("xxx-ignored-xxx"),

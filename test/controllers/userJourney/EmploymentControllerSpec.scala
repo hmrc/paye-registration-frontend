@@ -110,7 +110,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/company-pension"
+          result.header.headers("Location") shouldBe "/register-for-paye/make-pension-payment-next-two-months"
       }
     }
 
@@ -121,7 +121,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/first-payment"
+          result.header.headers("Location") shouldBe "/register-for-paye/set-paye-scheme-start-date"
       }
     }
 
@@ -180,7 +180,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/first-payment"
+          result.header.headers("Location") shouldBe "/register-for-paye/set-paye-scheme-start-date"
       }
     }
   }
@@ -229,7 +229,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/employing-staff"
+          result.header.headers("Location") shouldBe "/register-for-paye/employ-staff-next-two-months"
       }
     }
 
@@ -362,7 +362,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/relationship-to-the-business"
+          result.header.headers("Location") shouldBe "/register-for-paye/relationship-to-company"
       }
     }
 
@@ -377,7 +377,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/relationship-to-the-business"
+          result.header.headers("Location") shouldBe "/register-for-paye/relationship-to-company"
       }
     }
   }
