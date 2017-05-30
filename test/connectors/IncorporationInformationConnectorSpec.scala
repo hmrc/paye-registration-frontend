@@ -21,6 +21,7 @@ import fixtures.CoHoAPIFixture
 import mocks.MockMetrics
 import models.api.Name
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
+import play.api.libs.json.{Json, JsObject}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier, NotFoundException}
@@ -89,35 +90,63 @@ class IncorporationInformationConnectorSpec extends PAYERegSpec with CoHoAPIFixt
       )
     )
 
+    val tstOfficerListJson =
+      """
+        |{
+        |  "officers": [
+        |    {
+        |      "name" : "test",
+        |      "name_elements" : {
+        |        "forename" : "test1",
+        |        "other_forenames" : "test11",
+        |        "surname" : "testa",
+        |        "title" : "Mr"
+        |      },
+        |      "officer_role" : "cic-manager"
+        |    }, {
+        |      "name" : "test",
+        |      "name_elements" : {
+        |        "forename" : "test2",
+        |        "other_forenames" : "test22",
+        |        "surname" : "testb",
+        |        "title" : "Mr"
+        |      },
+        |      "officer_role" : "corporate-director"
+        |    }
+        |  ]
+        |}""".stripMargin
+
+    val tstOfficerListObject = Json.parse(tstOfficerListJson).as[JsObject]
     val testTransId = "testTransId"
 
     "return a successful CoHo api response object for valid data" in new Setup(true) {
-      mockHttpGet[OfficerList](connector.incorpInfoUrl, Future.successful(tstOfficerList))
+      mockHttpGet[JsObject](connector.incorpInfoUrl, Future.successful(tstOfficerListObject))
 
       await(connector.getOfficerList(testTransId)) shouldBe tstOfficerList
     }
 
     "return an OfficerListNotFound exception when CoHo api response object returns an empty list" in new Setup(true) {
-      mockHttpGet[OfficerList](connector.incorpInfoUrl, Future.successful(tstOfficerList.copy(items = Seq.empty)))
+      val emptyOfficersListJson = JsObject(Seq("officers" -> Json.arr()))
+      mockHttpGet[JsObject](connector.incorpInfoUrl, Future.successful(emptyOfficersListJson))
 
       intercept[OfficerListNotFoundException](await(connector.getOfficerList(testTransId)))
     }
 
     "return an OfficerListNotFound exception for a downstream not found error" in new Setup(true) {
-      mockHttpGet[OfficerList](connector.incorpInfoUrl, Future.failed(new NotFoundException("tstException")))
+      mockHttpGet[JsObject](connector.incorpInfoUrl, Future.failed(new NotFoundException("tstException")))
 
       intercept[OfficerListNotFoundException](await(connector.getOfficerList(testTransId)))
     }
 
     "return a CoHo Bad Request api response object for a bad request" in new Setup(true) {
-      mockHttpGet[OfficerList](connector.incorpInfoUrl, Future.failed(new BadRequestException("tstException")))
+      mockHttpGet[JsObject](connector.incorpInfoUrl, Future.failed(new BadRequestException("tstException")))
 
       intercept[BadRequestException](await(connector.getOfficerList(testTransId)))
     }
 
     "return a CoHo error api response object for a downstream error" in new Setup(true) {
       val ex = new RuntimeException("tstException")
-      mockHttpGet[OfficerList](connector.incorpInfoUrl, Future.failed(ex))
+      mockHttpGet[JsObject](connector.incorpInfoUrl, Future.failed(ex))
 
       intercept[RuntimeException](await(connector.getOfficerList(testTransId)) )
     }

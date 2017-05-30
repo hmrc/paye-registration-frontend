@@ -161,27 +161,30 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
       )
 
     val tstOfficerListJson =
-      """[
-        |  {
-        |    "name" : "test",
-        |    "name_elements" : {
-        |      "forename" : "test1",
-        |      "other_forenames" : "test11",
-        |      "surname" : "testa",
-        |      "title" : "Mr"
-        |    },
-        |    "officer_role" : "cic-manager"
-        |  }, {
-        |    "name" : "test",
-        |    "name_elements" : {
-        |      "forename" : "test2",
-        |      "other_forenames" : "test22",
-        |      "surname" : "testb",
-        |      "title" : "Mr"
-        |    },
-        |    "officer_role" : "corporate-director"
-        |  }
-        |]""".stripMargin
+      """
+        |{
+        |  "officers": [
+        |    {
+        |      "name" : "test",
+        |      "name_elements" : {
+        |        "forename" : "test1",
+        |        "other_forenames" : "test11",
+        |        "surname" : "testa",
+        |        "title" : "Mr"
+        |      },
+        |      "officer_role" : "cic-manager"
+        |    }, {
+        |      "name" : "test",
+        |      "name_elements" : {
+        |        "forename" : "test2",
+        |        "other_forenames" : "test22",
+        |        "surname" : "testb",
+        |        "title" : "Mr"
+        |      },
+        |      "officer_role" : "corporate-director"
+        |    }
+        |  ]
+        |}""".stripMargin
 
     "get an officer list" in {
 
@@ -196,7 +199,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
     "throw an OfficerListNotFoundException when CoHo API returns an empty list" in {
       val incorpInfoConnector = new IncorporationInformationConnector(metrics)
 
-      setupWiremockResult(200, "[]")
+      setupWiremockResult(200, """{"officers": []}""")
 
       intercept[OfficerListNotFoundException](await(incorpInfoConnector.getOfficerList(testTransId)))
     }

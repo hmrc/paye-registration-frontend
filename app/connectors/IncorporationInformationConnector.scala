@@ -22,6 +22,7 @@ import common.exceptions.DownstreamExceptions.OfficerListNotFoundException
 import config.WSHttp
 import models.external.{CoHoCompanyDetailsModel, OfficerList}
 import play.api.Logger
+import play.api.libs.json._
 import services.{MetricsService, MetricsSrv}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
@@ -73,24 +74,25 @@ trait IncorporationInformationConnect extends RegistrationWhitelist {
 
   def getOfficerList(transactionId: String)(implicit hc : HeaderCarrier): Future[OfficerList] = {
     val incorpInfoTimer = metricsService.incorpInfoResponseTimer.time()
-    http.GET[OfficerList](s"$incorpInfoUrl$incorpInfoUri/$transactionId/officer-list") map { list =>
+    http.GET[JsObject](s"$incorpInfoUrl$incorpInfoUri/$transactionId/officer-list") map { obj =>
       incorpInfoTimer.stop()
+      val list = obj.\("officers").as[OfficerList]
       if( list.items.isEmpty ) {
-        Logger.error("[IncorporationInformationConnector] [getOfficerList] - Received an empty Officer list")
+        Logger.error(s"[IncorporationInformationConnector] [getOfficerList] - Received an empty Officer list for TX-ID $transactionId")
         throw new OfficerListNotFoundException
       }
       else { list }
     } recover {
       case notFoundErr: NotFoundException =>
-        Logger.error("[IncorporationInformationConnector] [getOfficerList] - Received a NotFound status code when expecting an Officer list")
+        Logger.error(s"[IncorporationInformationConnector] [getOfficerList] - Received a NotFound status code when expecting an Officer list for TX-ID $transactionId")
         incorpInfoTimer.stop()
         throw new OfficerListNotFoundException
       case badRequestErr: BadRequestException =>
-        Logger.error("[IncorporationInformationConnector] [getOfficerList] - Received a BadRequest status code when expecting an Officer list")
+        Logger.error(s"[IncorporationInformationConnector] [getOfficerList] - Received a BadRequest status code when expecting an Officer list for TX-ID $transactionId")
         incorpInfoTimer.stop()
         throw badRequestErr
       case ex: Exception =>
-        Logger.error(s"[IncorporationInformationConnector] [getOfficerList] - Received an error response when expecting an Officer list - error: ${ex.getMessage}")
+        Logger.error(s"[IncorporationInformationConnector] [getOfficerList] - Received an error response when expecting an Officer list for TX-ID $transactionId - error: ${ex.getMessage}")
         incorpInfoTimer.stop()
         throw ex
     }
