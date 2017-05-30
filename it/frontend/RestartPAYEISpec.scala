@@ -98,7 +98,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
 
         await(enableCompanyRegistrationFeature())
 
-        val fResponse = buildClient("/re-register-for-paye").
+        val fResponse = buildClient("/re-register-as-an-employer").
           withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
           get()
 
@@ -125,7 +125,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
           )
         )
 
-        val fResponse = buildClient("/re-register-for-paye").
+        val fResponse = buildClient("/re-register-as-an-employer").
           withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
           get()
 
@@ -151,7 +151,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
           )
         )
 
-        val fResponse = buildClient("/re-register-for-paye").
+        val fResponse = buildClient("/re-register-as-an-employer").
           withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
           get()
 
@@ -176,7 +176,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
           )
         )
 
-        val fResponse = buildClient("/re-register-for-paye").
+        val fResponse = buildClient("/re-register-as-an-employer").
           withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
           get()
 
