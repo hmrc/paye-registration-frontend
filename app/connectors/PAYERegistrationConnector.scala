@@ -60,7 +60,7 @@ trait PAYERegistrationConnect {
           DownstreamOutcome.Success
       }
     } recover {
-      case e: Exception => logResponse(e, "createNewRegistration", "creating new registration")
+      case e: Exception => logResponse(e, "createNewRegistration", "creating new registration", regID, Some(txID))
         payeRegTimer.stop()
         DownstreamOutcome.Failure
     }
@@ -75,7 +75,7 @@ trait PAYERegistrationConnect {
     } recover {
       case e: Exception =>
         payeRegTimer.stop()
-        throw logResponse(e, "getRegistration", "getting registration")
+        throw logResponse(e, "getRegistration", "getting registration", regID)
     }
   }
 
@@ -90,7 +90,7 @@ trait PAYERegistrationConnect {
         }
     } recover {
       case e: Exception =>
-        logResponse(e, "submitRegistration", "submitting PAYE Registration to DES")
+        logResponse(e, "submitRegistration", "submitting PAYE Registration to DES", regId)
         e match {
           case _ : Upstream5xxResponse => TimedOut
           case _ => Failed
@@ -110,7 +110,7 @@ trait PAYERegistrationConnect {
         None
       case e: Exception =>
         payeRegTimer.stop()
-        throw logResponse(e, "getCompanyDetails", "getting company details")
+        throw logResponse(e, "getCompanyDetails", "getting company details", regID)
     }
   }
 
@@ -123,7 +123,7 @@ trait PAYERegistrationConnect {
     } recover {
       case e: Exception =>
         payeRegTimer.stop()
-        throw logResponse(e, "upsertCompanyDetails", "upserting company details")
+        throw logResponse(e, "upsertCompanyDetails", "upserting company details", regID)
     }
   }
 
@@ -139,7 +139,7 @@ trait PAYERegistrationConnect {
         None
       case e: Exception =>
         payeRegTimer.stop()
-        throw logResponse(e, "getEmployment", "getting employment")
+        throw logResponse(e, "getEmployment", "getting employment", regID)
     }
   }
 
@@ -152,7 +152,7 @@ trait PAYERegistrationConnect {
     } recover {
       case e: Exception =>
         payeRegTimer.stop()
-        throw logResponse(e, "upsertEmployment", "upserting employment")
+        throw logResponse(e, "upsertEmployment", "upserting employment", regID)
     }
   }
 
@@ -168,7 +168,7 @@ trait PAYERegistrationConnect {
         Seq.empty
       case e: Exception =>
         payeRegTimer.stop()
-        throw logResponse(e, "getDirectors", "getting directors")
+        throw logResponse(e, "getDirectors", "getting directors", regID)
     }
   }
 
@@ -181,7 +181,7 @@ trait PAYERegistrationConnect {
     } recover {
       case e: Exception =>
         payeRegTimer.stop()
-        throw logResponse(e, "upsertDirectors", "upserting directors")
+        throw logResponse(e, "upsertDirectors", "upserting directors", regID)
     }
   }
 
@@ -197,7 +197,7 @@ trait PAYERegistrationConnect {
         Seq.empty
       case e: Exception =>
         payeRegTimer.stop()
-        throw logResponse(e, "getSICCodes", "getting sic codes")
+        throw logResponse(e, "getSICCodes", "getting sic codes", regID)
     }
   }
 
@@ -210,7 +210,7 @@ trait PAYERegistrationConnect {
     } recover {
       case e: Exception =>
         payeRegTimer.stop()
-        throw logResponse(e, "upsertSICCodes", "upserting sic codes")
+        throw logResponse(e, "upsertSICCodes", "upserting sic codes", regID)
     }
   }
 
@@ -226,7 +226,7 @@ trait PAYERegistrationConnect {
         None
       case e: Exception =>
         payeRegTimer.stop()
-        throw logResponse(e, "getPAYEContact", "getting paye contact")
+        throw logResponse(e, "getPAYEContact", "getting paye contact", regID)
     }
   }
 
@@ -239,7 +239,7 @@ trait PAYERegistrationConnect {
     } recover {
       case e: Exception =>
         payeRegTimer.stop()
-        throw logResponse(e, "upsertPAYEContact", "upserting paye contact")
+        throw logResponse(e, "upsertPAYEContact", "upserting paye contact", regID)
     }
   }
 
@@ -255,7 +255,7 @@ trait PAYERegistrationConnect {
         None
       case e: Exception =>
         payeRegTimer.stop()
-        throw logResponse(e, "getCompletionCapacity", "getting completion capacity")
+        throw logResponse(e, "getCompletionCapacity", "getting completion capacity", regID)
     }
   }
 
@@ -268,7 +268,7 @@ trait PAYERegistrationConnect {
     } recover {
       case e: Exception =>
         payeRegTimer.stop()
-        throw logResponse(e, "upsertCompletionCapacity", "upserting completion capacity")
+        throw logResponse(e, "upsertCompletionCapacity", "upserting completion capacity", regID)
     }
   }
 
@@ -284,7 +284,7 @@ trait PAYERegistrationConnect {
         None
       case e: Exception =>
         payeRegTimer.stop()
-        throw logResponse(e, "getEligibility", "getting eligibility")
+        throw logResponse(e, "getEligibility", "getting eligibility", regID)
     }
   }
 
@@ -297,7 +297,7 @@ trait PAYERegistrationConnect {
     } recover {
       case e: Exception =>
         payeRegTimer.stop()
-        throw logResponse(e, "upsertEligibility", "upserting eligibility")
+        throw logResponse(e, "upsertEligibility", "upserting eligibility", regID)
     }
   }
 
@@ -313,7 +313,7 @@ trait PAYERegistrationConnect {
         None
       case e: Exception =>
         payeRegTimer.stop()
-        throw logResponse(e, "getAcknowledgementReference", "getting acknowledgement reference")
+        throw logResponse(e, "getAcknowledgementReference", "getting acknowledgement reference", regID)
     }
   }
 
@@ -325,7 +325,7 @@ trait PAYERegistrationConnect {
     } recover {
       case e : Throwable =>
         payeRegTimer.stop()
-        logResponse(e, "getStatus", "getting PAYE registration document status")
+        logResponse(e, "getStatus", "getting PAYE registration document status", regId)
         None
     }
   }
@@ -340,13 +340,13 @@ trait PAYERegistrationConnect {
         Logger.warn(s"[PAYERegistrationConnector] - [deleteCurrentRegistrationDocument] Deleting document for regId $regId and txId $txId failed as document was not rejected")
         RegistrationDeletion.invalidStatus
       case fiveXX: Upstream5xxResponse =>
-        Logger.warn(s"[PAYERegistrationConnector] - [deleteCurrentRegistrationDocument] Deleting document for regId $regId and txId $txId failed due to downstream error: ${fiveXX.message}")
-        throw fiveXX
+        throw logResponse(fiveXX, "deleteCurrentRegistrationDocument", s"deleting document, error message: ${fiveXX.message}", regId, Some(txId))
     }
   }
 
-  private[connectors] def logResponse(e: Throwable, f: String, m: String): Throwable = {
-    def log(s: String) = Logger.warn(s"[PAYERegistrationConnector] [$f] received $s when $m")
+  private[connectors] def logResponse(e: Throwable, f: String, m: String, regId: String, txId: Option[String] = None): Throwable = {
+    val optTxId = txId.map(t => s" and txId: $t").getOrElse("")
+    def log(s: String) = Logger.warn(s"[PAYERegistrationConnector] [$f] received $s when $m for regId: $regId$optTxId")
     e match {
       case e: NotFoundException => log("NOT FOUND")
       case e: BadRequestException => log("BAD REQUEST")

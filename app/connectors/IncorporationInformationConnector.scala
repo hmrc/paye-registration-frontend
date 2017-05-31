@@ -61,11 +61,11 @@ trait IncorporationInformationConnect extends RegistrationWhitelist {
         IncorpInfoSuccessResponse(res)
       } recover {
         case badRequestErr: BadRequestException =>
-          Logger.error("[IncorporationInformationConnector] [getCoHoCompanyDetails] - Received a BadRequest status code when expecting company details")
+          Logger.error(s"[IncorporationInformationConnector] [getCoHoCompanyDetails] - Received a BadRequest status code when expecting company details for regId: $regId / TX-ID: $transactionId")
           incorpInfoTimer.stop()
           IncorpInfoBadRequestResponse
         case ex: Exception =>
-          Logger.error(s"[IncorporationInformationConnector] [getIncorporationStatus] - Received an error response when expecting company details - error: ${ex.getMessage}")
+          Logger.error(s"[IncorporationInformationConnector] [getCoHoCompanyDetails] - Received an error when expecting company details for regId: $regId / TX-ID: $transactionId - error: ${ex.getMessage}")
           incorpInfoTimer.stop()
           IncorpInfoErrorResponse(ex)
       }
