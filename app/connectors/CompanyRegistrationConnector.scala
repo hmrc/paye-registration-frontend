@@ -67,11 +67,11 @@ trait CompanyRegistrationConnect {
     } recover {
       case badRequestErr: BadRequestException =>
         companyRegTimer.stop()
-        Logger.error("[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received a BadRequest status code when expecting a Company Registration document")
+        Logger.error(s"[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received a BadRequest status code when expecting a Company Registration document for reg id: $regId")
         throw badRequestErr
       case ex: Exception =>
         companyRegTimer.stop()
-        Logger.error(s"[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received an error response when expecting a Company Registration document - error: ${ex.getMessage}")
+        Logger.error(s"[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received an error when expecting a Company Registration document for reg id: $regId - error: ${ex.getMessage}")
         throw ex
     }
   }
