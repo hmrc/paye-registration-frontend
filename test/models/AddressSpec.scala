@@ -17,7 +17,7 @@
 package models
 
 import play.api.data.validation.ValidationError
-import play.api.libs.json.{JsValue, JsPath, JsSuccess, Json}
+import play.api.libs.json._
 import uk.gov.hmrc.play.test.UnitSpec
 
 class AddressSpec extends UnitSpec with JsonFormValidation {
@@ -396,8 +396,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
             |  "address_line_2":"Testley",
             |  "locality":"Testford",
             |  "country":"UK",
-            |  "postal_code":"TE1 1ST",
-            |  "region":"Testshire"
+            |  "postal_code":"TE1 1ST"
             |}""".stripMargin)
 
         val testAddress = Address(
@@ -412,23 +411,20 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
         readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
       }
 
-      "converting CHROAddress with a PO Box" in {
+      "converting CHROAddress without a premises" in {
         val tstCHROAddressJson = Json.parse(
           """{
-            |  "premises":"Unit 14234",
-            |  "po_box":"PO BOX TST36",
-            |  "address_line_1":"Really Long Street Name",
+            |  "address_line_1":"1 Really Long Street Name",
             |  "locality":"Testford",
-            |  "region":"Testshire",
             |  "country":"UK",
             |  "postal_code":"TE1 1ST"
             |}""".stripMargin)
 
         val testAddress = Address(
-          line1 = "Unit 14234",
-          line2 = "Really Long Street Name",
-          line3 = Some("PO BOX TST36"),
-          line4 = Some("Testford"),
+          line1 = "1 Really Long Street Name",
+          line2 = "Testford",
+          line3 = None,
+          line4 = None,
           country = None,
           postCode = Some("TE1 1ST")
         )
@@ -436,22 +432,20 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
         readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
       }
 
-      "converting CHROAddress with a PO Box and short address line 1" in {
+      "converting CHROAddress with a short address line 1" in {
         val tstCHROAddressJson = Json.parse(
           """{
             |  "premises":"12",
-            |  "po_box":"PO BOX TST36",
             |  "address_line_1":"Short Street Name",
             |  "locality":"Testford",
-            |  "region":"Testshire",
             |  "country":"UK"
             |}""".stripMargin)
 
         val testAddress = Address(
           line1 = "12 Short Street Name",
-          line2 = "PO BOX TST36",
-          line3 = Some("Testford"),
-          line4 = Some("Testshire"),
+          line2 = "Testford",
+          line3 = None,
+          line4 = None,
           country = Some("UK"),
           postCode = None
         )
@@ -459,24 +453,22 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
         readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
       }
 
-      "converting CHROAddress with a PO Box, a line 2 and short address line 1" in {
+      "converting CHROAddress with a line 2 and short address line 1" in {
         val tstCHROAddressJson = Json.parse(
           """{
             |  "premises":"12",
-            |  "po_box":"PO BOX TST36",
             |  "address_line_1":"Short Street Name",
             |  "address_line_2":"Testley",
             |  "locality":"Testford",
-            |  "region":"Testshire",
             |  "country":"UK",
             |  "postal_code":"TE1 1ST"
             |}""".stripMargin)
 
         val testAddress = Address(
           line1 = "12 Short Street Name",
-          line2 = "Testley PO BOX TST36",
+          line2 = "Testley",
           line3 = Some("Testford"),
-          line4 = Some("Testshire"),
+          line4 = None,
           country = None,
           postCode = Some("TE1 1ST")
         )
@@ -484,16 +476,13 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
         readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
       }
 
-      "converting CHROAddress with a PO Box, a line 2 and long address line 1" in {
+      "converting CHROAddress with a line 2 and long address line 1" in {
         val tstCHROAddressJson = Json.parse(
           """{
             |  "premises":"Unit 14234",
-            |  "po_box":"PO BOX TST36",
             |  "address_line_1":"Really Long Street Name",
             |  "address_line_2":"Industrial estate",
-            |  "po_box":"PO BOX TST36",
             |  "locality":"Testford",
-            |  "region":"Testshire",
             |  "country":"UK",
             |  "postal_code":"TE1 1ST"
             |}""".stripMargin)
@@ -501,7 +490,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
         val testAddress = Address(
           line1 = "Unit 14234",
           line2 = "Really Long Street Name",
-          line3 = Some("Industrial estate PO BOX TS"),
+          line3 = Some("Industrial estate"),
           line4 = Some("Testford"),
           country = None,
           postCode = Some("TE1 1ST")
@@ -510,16 +499,13 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
         readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
       }
 
-      "converting CHROAddress with a PO Box, a line 2 and long address line 1 with trailing spaces" in {
+      "converting CHROAddress with a line 2 and long address line 1 with trailing spaces" in {
         val tstCHROAddressJson = Json.parse(
           """{
             |  "premises":"  Unit 14234  ",
-            |  "po_box":"   PO BOX TST36 ",
             |  "address_line_1":" Really Long Street Name    ",
             |  "address_line_2":"     Industrial estate  ",
-            |  "po_box":"PO BOX TST36        ",
             |  "locality":"    Testford ",
-            |  "region":"Testshire ",
             |  "country":" UK ",
             |  "postal_code":"  TE1 1ST  "
             |}""".stripMargin)
@@ -527,7 +513,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
         val testAddress = Address(
           line1 = "Unit 14234",
           line2 = "Really Long Street Name",
-          line3 = Some("Industrial estate PO BOX TS"),
+          line3 = Some("Industrial estate"),
           line4 = Some("Testford"),
           country = None,
           postCode = Some("TE1 1ST")
@@ -536,7 +522,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
         readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
       }
 
-      "converting CHROAddress with minimal data" in {
+      "converting CHROAddress with minimal data and premises" in {
         val tstCHROAddressJson = Json.parse(
           """{
             |  "premises":"12",
@@ -558,7 +544,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
         readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
       }
 
-      "converting and normalize CHROAddress with minimal data" in {
+      "converting and normalize CHROAddress with minimal data and premises" in {
         val tstCHROAddressJson = Json.parse(
           """{
             |  "premises":"12",
@@ -578,6 +564,123 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
         )
 
         readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
+      }
+    }
+
+    "fail" when {
+      "there are not enough lines defined 1" in {
+        val tstCHROAddressJson = Json.parse(
+          """{
+            |  "premises":"12",
+            |  "postal_code":"TE1 1ST",
+            |  "country":"UK"
+            |}""".stripMargin)
+
+        val res: JsResult[Address] = readCoHoAddress(tstCHROAddressJson)
+        val err = "Only 1 address lines returned from II for RO Address\n" +
+          "Lines defined:\n" +
+          "premises: true\n" +
+          "address line 1: false\n" +
+          "address line 2: false\n" +
+          "locality: false\n" +
+          "postcode: true\n" +
+          "country: true\n"
+        shouldHaveErrors(res, JsPath(), Seq(ValidationError(err)))
+      }
+      "there are not enough lines defined 2" in {
+        val tstCHROAddressJson = Json.parse(
+          """{
+            |  "postal_code":"TE1 1ST",
+            |  "country":"UK"
+            |}""".stripMargin)
+
+        val res: JsResult[Address] = readCoHoAddress(tstCHROAddressJson)
+        val err = "Only 0 address lines returned from II for RO Address\n" +
+          "Lines defined:\n" +
+          "premises: false\n" +
+          "address line 1: false\n" +
+          "address line 2: false\n" +
+          "locality: false\n" +
+          "postcode: true\n" +
+          "country: true\n"
+        shouldHaveErrors(res, JsPath(), Seq(ValidationError(err)))
+      }
+      "there are not enough lines defined 3" in {
+        val tstCHROAddressJson = Json.parse(
+          """{
+            |  "address_line_1":"Short Street Name",
+            |  "postal_code":"TE1 1ST",
+            |  "country":"UK"
+            |}""".stripMargin)
+
+        val res: JsResult[Address] = readCoHoAddress(tstCHROAddressJson)
+        val err = "Only 1 address lines returned from II for RO Address\n" +
+          "Lines defined:\n" +
+          "premises: false\n" +
+          "address line 1: true\n" +
+          "address line 2: false\n" +
+          "locality: false\n" +
+          "postcode: true\n" +
+          "country: true\n"
+        shouldHaveErrors(res, JsPath(), Seq(ValidationError(err)))
+      }
+      "there are not enough lines defined 4" in {
+        val tstCHROAddressJson = Json.parse(
+          """{
+            |  "address_line_2":"Short Street Name",
+            |  "postal_code":"TE1 1ST",
+            |  "country":"UK"
+            |}""".stripMargin)
+
+        val res: JsResult[Address] = readCoHoAddress(tstCHROAddressJson)
+        val err = "Only 1 address lines returned from II for RO Address\n" +
+          "Lines defined:\n" +
+          "premises: false\n" +
+          "address line 1: false\n" +
+          "address line 2: true\n" +
+          "locality: false\n" +
+          "postcode: true\n" +
+          "country: true\n"
+        shouldHaveErrors(res, JsPath(), Seq(ValidationError(err)))
+      }
+      "there are not enough lines defined 5" in {
+        val tstCHROAddressJson = Json.parse(
+          """{
+            |  "locality":"Short Street Name",
+            |  "postal_code":"TE1 1ST",
+            |  "country":"UK"
+            |}""".stripMargin)
+
+        val res: JsResult[Address] = readCoHoAddress(tstCHROAddressJson)
+        val err = "Only 1 address lines returned from II for RO Address\n" +
+          "Lines defined:\n" +
+          "premises: false\n" +
+          "address line 1: false\n" +
+          "address line 2: false\n" +
+          "locality: true\n" +
+          "postcode: true\n" +
+          "country: true\n"
+        shouldHaveErrors(res, JsPath(), Seq(ValidationError(err)))
+      }
+      "there is neither postcode nor country defined" in {
+        val tstCHROAddressJson = Json.parse(
+          """{
+            |  "premises":"Unit 14234",
+            |  "address_line_1":"Really Long Street Name",
+            |  "address_line_2":"Testley",
+            |  "locality":"Testford"
+            |}""".stripMargin)
+
+        val res: JsResult[Address] = readCoHoAddress(tstCHROAddressJson)
+        val err = "Neither postcode nor country returned from II for RO Address\n" +
+          "Lines defined:\n" +
+          "premises: true\n" +
+          "address line 1: true\n" +
+          "address line 2: true\n" +
+          "locality: true\n" +
+          "postcode: false\n" +
+          "country: false\n"
+        shouldHaveErrors(res, JsPath(), Seq(ValidationError(err)))
       }
     }
   }
