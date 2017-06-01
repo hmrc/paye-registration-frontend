@@ -6,6 +6,7 @@ Source code for the PAYE Registration frontend microservice, part of the SCRS jo
 
 ## Running the Application
 
+
 In order to run the microservice, you must have SBT installed. You should then be able to start the application using: 
 
 ```sbt "run {PORTNUM}"```
