@@ -98,37 +98,53 @@ object Address {
   val incorpInfoReads: Reads[Address] = new Reads[Address] {
     def reads(json: JsValue): JsResult[Address] = {
 
-      val premises      = json.\("premises").as[String](Formatters.normalizeTrimmedReads)
-      val addressLine1  = json.\("address_line_1").as[String](Formatters.normalizeTrimmedReads)
-      val addressLine2  = json.\("address_line_2").asOpt[String](Formatters.normalizeTrimmedReads)
-      val poBox         = json.\("po_box").asOpt[String](Formatters.normalizeTrimmedReads)
-      val locality      = json.\("locality").as[String](Formatters.normalizeTrimmedReads)
-      val region        = json.\("region").asOpt[String](Formatters.normalizeTrimmedReads)
-      val postalCode    = json.\("postal_code").asOpt[String](Formatters.normalizeTrimmedReads)
-      val country       = json.\("country").asOpt[String](Formatters.normalizeTrimmedReads)
+      val oPremises      = json.\("premises").asOpt[String](Formatters.normalizeTrimmedReads)
+      val oAddressLine1  = json.\("address_line_1").asOpt[String](Formatters.normalizeTrimmedReads)
+      val oAddressLine2  = json.\("address_line_2").asOpt[String](Formatters.normalizeTrimmedReads)
+      val oLocality      = json.\("locality").asOpt[String](Formatters.normalizeTrimmedReads)
+      val oPostalCode    = json.\("postal_code").asOpt[String](Formatters.normalizeTrimmedReads)
+      val oCountry       = json.\("country").asOpt[String](Formatters.normalizeTrimmedReads)
 
 
-      val (line1, oLine2) = if((premises + " " + addressLine1).length > 26) {
-        (premises, Some(addressLine1))
+      val (oLine1, oLine2) = oPremises match {
+        case Some(premises) => oAddressLine1 match {
+          case Some(addressLine1) => if((premises + " " + addressLine1).length > 26) {
+              (Some(premises), Some(addressLine1))
+            } else {
+              (Some(premises + " " + addressLine1), None)
+            }
+          case None => (Some(premises), None)
+        }
+        case None => (oAddressLine1, None)
+      }
+
+      val lines: Seq[String] = Seq(oLine1, oLine2, oAddressLine2, oLocality).flatten
+
+      def incorrectAddressErrorMessage(msg: String): String = {
+        s"$msg\n" +
+          s"Lines defined:\n" +
+          s"premises: ${oPremises.isDefined}\n" +
+          s"address line 1: ${oAddressLine1.isDefined}\n" +
+          s"address line 2: ${oAddressLine2.isDefined}\n" +
+          s"locality: ${oLocality.isDefined}\n" +
+          s"postcode: ${oPostalCode.isDefined}\n" +
+          s"country: ${oCountry.isDefined}\n"
+      }
+
+      if(lines.length < 2) {
+        JsError(incorrectAddressErrorMessage(s"Only ${lines.length} address lines returned from II for RO Address"))
+      } else if (oPostalCode.isEmpty && oCountry.isEmpty) {
+        JsError(incorrectAddressErrorMessage(s"Neither postcode nor country returned from II for RO Address"))
       } else {
-        (premises + " " + addressLine1, None)
+        JsSuccess(Address(
+          line1     = trimLine(lines.head, 27),
+          line2     = trimLine(lines(1), 27),
+          line3     = trimOptionalLine(lines.lift(2), 27),
+          line4     = trimOptionalLine(lines.lift(3), 18),
+          postCode  = oPostalCode,
+          country   = if(oPostalCode.isEmpty) oCountry else None
+        ))
       }
-
-      val addrLine2POBox: Option[String] = Seq(addressLine2, poBox).flatten.foldLeft("")(_ + " " + _).trim match {
-        case ""  => None
-        case str  => Some(str)
-      }
-
-      val additionalLines: Seq[String] = Seq(oLine2, addrLine2POBox, Some(locality), region).flatten
-
-      JsSuccess(Address(
-        line1     = trimLine(line1, 27),
-        line2     = trimLine(additionalLines.head, 27),
-        line3     = trimOptionalLine(additionalLines.lift(1), 27),
-        line4     = trimOptionalLine(additionalLines.lift(2), 18),
-        postCode  = postalCode,
-        country   = if(postalCode.isEmpty) country else None
-      ))
     }
   }
 }
