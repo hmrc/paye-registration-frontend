@@ -353,6 +353,17 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       }
     }
 
+    "return 400 for a date before 1900" in new Setup {
+      AuthBuilder.submitWithAuthorisedUser(controller.submitFirstPayment(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+        "firstPayYear" -> "1899",
+        "firstPayMonth" -> "12",
+        "firstPayDay" -> "31"
+      )) {
+        result =>
+          status(result) shouldBe Status.BAD_REQUEST
+      }
+    }
+
     "redirect to the Summary page when a user enters a valid past date" in new Setup {
       when(mockEmploymentService.saveFirstPayment(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(validEmploymentViewModel)
       AuthBuilder.submitWithAuthorisedUser(controller.submitFirstPayment(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(

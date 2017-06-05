@@ -34,6 +34,7 @@ object Validators extends DateUtil {
   private val natureOfBusinessRegex = """^(?![\r\n|\r|\n|\t])[A-Za-z 0-9\-,/&']{1,100}$"""
   val postcodeRegex = """^[A-Z]{1,2}[0-9][0-9A-Z]? [0-9][A-Z]{2}$"""
   private val nameRegex = """^[A-Za-z 0-9\'-]{1,100}$""".r
+  val minDate = LocalDate.of(1900,1,1)
 
   private def hasValidPrefix(nino: String) = !invalidPrefixes.exists(nino.toUpperCase.startsWith)
 
@@ -86,6 +87,10 @@ object Validators extends DateUtil {
 
   def firstPaymentDateWithinRange(date: LocalDate): Boolean = {
     lessOrEqualThanXDaysAfter(LocalDate.now(), date, 61)
+  }
+
+  def beforeMinDate(date: LocalDate): Boolean = {
+    date.isBefore(minDate)
   }
 }
 

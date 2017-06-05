@@ -65,7 +65,8 @@ class OfficerListSpec extends PAYERegSpec {
       |         "country":"United Kingdom",
       |         "postal_code":"BN12 6AG"
       |      },
-      |      "officer_role":"director"
+      |      "officer_role":"director",
+      |      "retired_on":"01/01/2017"
       |   },
       |   {
       |      "name_elements":{
