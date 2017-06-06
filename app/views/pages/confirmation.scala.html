@@ -1,4 +1,3 @@
-@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @(ackRef: String)(implicit request: Request[_], messages: Messages)
 
 @main_template(title = messages("pages.confirmation.title"), backButton = false) {
@@ -30,9 +29,9 @@
         </ul>
     </div>
 
-    @govHelpers.form(action = controllers.userJourney.routes.DashboardController.dashboard()) {
+    <form action="@controllers.userJourney.routes.DashboardController.dashboard()" method="get">
         <div class="form-group">
             <button class="button" type="submit" id="continue" >@messages("app.common.businessRegistrationOverview")</button>
         </div>
-    }
+    </form>
 }
