@@ -26,6 +26,8 @@ class NatureOfBusinessFormSpec extends PAYERegSpec {
 
   val messagesApi = fakeApplication.injector.instanceOf[MessagesApi]
 
+  val oneHundred = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
   val testForm = NatureOfBusinessForm.form
   val validData = Map(
     "description" -> "I am a test description"
@@ -35,8 +37,8 @@ class NatureOfBusinessFormSpec extends PAYERegSpec {
     "description" -> ""
   )
 
-  val invalidData100Chars = Map(
-    "description" -> "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  val validData100Chars = Map(
+    "description" -> oneHundred
   )
 
   val invalidDataTooLong = Map(
@@ -61,6 +63,15 @@ class NatureOfBusinessFormSpec extends PAYERegSpec {
       result shouldBe NatureOfBusiness("I am a test description")
     }
 
+    "the description is equal to 100 chars" in {
+      val result = testForm.bind(validData100Chars).fold(
+        errors => errors,
+        success => success
+      )
+
+      result shouldBe NatureOfBusiness(oneHundred)
+    }
+
     "return a trimmed and newline/tab replaced by whitespace if there are no errors" in {
       val result = NatureOfBusinessForm.form.bind(dataWithNewlineTab).fold(
         errors => errors,
@@ -74,13 +85,6 @@ class NatureOfBusinessFormSpec extends PAYERegSpec {
       "the description is empty" in {
         val boundForm = testForm.bind(invalidDataNoEntry)
         val formError = FormError("description", "errors.invalid.sic.noEntry")
-
-        boundForm.errors shouldBe Seq(formError)
-      }
-
-      "the description is equal to 100 chars" in {
-        val boundForm = testForm.bind(invalidData100Chars)
-        val formError = FormError("description", "errors.invalid.sic.overCharLimit")
 
         boundForm.errors shouldBe Seq(formError)
       }
