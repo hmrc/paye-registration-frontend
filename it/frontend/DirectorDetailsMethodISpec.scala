@@ -49,8 +49,8 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
     "microservice.services.paye-registration.port" -> s"$mockPort",
     "microservice.services.company-registration.host" -> s"$mockHost",
     "microservice.services.company-registration.port" -> s"$mockPort",
-    "microservice.services.coho-api.host" -> s"$mockHost",
-    "microservice.services.coho-api.port" -> s"$mockPort",
+    "microservice.services.incorporation-information.host" -> s"$mockHost",
+    "microservice.services.incorporation-information.port" -> s"$mockPort",
     "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng==",
     "defaultCTStatus" -> "aGVsZA==",
     "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ==",
@@ -100,6 +100,67 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       get(0) shouldBe s"faulty default's National Insurance number For example, QQ 12 34 56 C"
       get(1) shouldBe s"Test RegIdWhitelist's National Insurance number"
+    }
+
+    "show the page with a list of Directors" in {
+      setupSimpleAuthMocks()
+
+      stubSuccessfulLogin()
+
+      stubPayeRegDocumentStatus(regId)
+
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+
+      stubGet(s"/paye-registration/${regId}/directors", 404, "")
+
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/DirectorDetails", 200, dummyS4LResponse)
+
+      val tstOfficerListJson =
+        """
+          |{
+          |  "officers": [
+          |    {
+          |      "name" : "test",
+          |      "name_elements" : {
+          |        "forename" : "test1",
+          |        "other_forenames" : "test11",
+          |        "surname" : "testa",
+          |        "title" : "Mr"
+          |      },
+          |      "officer_role" : "director",
+          |      "resigned_on" : "2017-01-01"
+          |    }, {
+          |      "name" : "test",
+          |      "name_elements" : {
+          |        "forename" : "test2",
+          |        "other_forenames" : "test22",
+          |        "surname" : "testb",
+          |        "title" : "Mr"
+          |      },
+          |      "officer_role" : "corporate-director"
+          |    }
+          |  ]
+          |}""".stripMargin
+      stubGet(s"/incorporation-information/12345/officer-list", 200, tstOfficerListJson)
+
+      val fResponse = buildClient("/director-national-insurance-number").
+        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        get()
+
+      val response = await(fResponse)
+
+      response.status shouldBe 200
+
+      val document = Jsoup.parse(response.body)
+      document.getElementsByClass("form-field").size shouldBe 1
+
+      val list = document.getElementsByClass("form-label")
+      def get(n: Int) = list.get(n).text
+
+      get(0) shouldBe s"test2 testb's National Insurance number For example, QQ 12 34 56 C"
     }
   }
 }
