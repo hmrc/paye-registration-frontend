@@ -30,7 +30,7 @@ class TestCoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
 
   class Setup {
     val connector = new TestIncorpInfoConnector {
-      override val incorpInfoUrl = testUrl
+      override val incorpFEStubsUrl = testUrl
       override val http = mockWSHttp
     }
   }
@@ -38,7 +38,7 @@ class TestCoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
   "setupCoHoCompanyDetails" should {
     "return a valid response when successfully set up" in new Setup {
       val resp = HttpResponse(responseStatus = 200)
-      mockHttpPOST[JsValue, HttpResponse](connector.incorpInfoUrl, Future.successful(resp))
+      mockHttpPOST[JsValue, HttpResponse](connector.incorpFEStubsUrl, Future.successful(resp))
 
       await(connector.setupCoHoCompanyDetails("123", "company name")) shouldBe resp
     }
@@ -47,7 +47,7 @@ class TestCoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
   "teardownCoHoCompanyDetails" should {
     "return a valid response when successfully set up" in new Setup {
       val resp = HttpResponse(responseStatus = 200)
-      mockHttpPUT[String, HttpResponse](connector.incorpInfoUrl, Future.successful(resp))
+      mockHttpPUT[String, HttpResponse](connector.incorpFEStubsUrl, Future.successful(resp))
 
       await(connector.teardownCoHoCompanyDetails()) shouldBe resp
     }

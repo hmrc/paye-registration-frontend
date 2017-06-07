@@ -29,17 +29,17 @@ import scala.concurrent.Future
 
 @Singleton
 class TestIncorpInfoConnector @Inject()() extends TestIncorpInfoConnect with ServicesConfig {
-  val incorpInfoUrl = baseUrl("incorporation-frontend-stubs")
+  val incorpFEStubsUrl = baseUrl("incorporation-frontend-stubs")
   val http : WSHttp = WSHttp
 }
 
 trait TestIncorpInfoConnect {
 
-  val incorpInfoUrl: String
+  val incorpFEStubsUrl: String
   val http: WSHttp
 
   private def txId(regId: String):String = s"000-434-$regId"
-   
+
   def setupCoHoCompanyDetails(regId: String, companyName: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val officers = Json.parse(
       s"""
@@ -117,6 +117,27 @@ trait TestIncorpInfoConnect {
          |                "postal_code" : "TE1 1ST"
          |            },
          |            "officer_role" : "director"
+         |        },
+         |        {
+         |            "name_elements" : {
+         |                "forename" : "Jesus",
+         |                "surname" : "Splitwater"
+         |            },
+         |            "date_of_birth" : {
+         |                "day" : "25",
+         |                "month" : "12",
+         |                "year" : "1990"
+         |            },
+         |            "address" : {
+         |                "premises" : "16",
+         |                "address_line_1" : "Test Road",
+         |                "address_line_2" : "Testshire",
+         |                "locality" : "Greater Testford",
+         |                "country" : "United Kingdom",
+         |                "postal_code" : "TE1 1ST"
+         |            },
+         |            "officer_role" : "director",
+         |            "resigned_on" : "2017-01-01"
          |        }
          |    ],
          |    "sic_codes" : [
@@ -132,14 +153,14 @@ trait TestIncorpInfoConnect {
          |}
     """.stripMargin)
 
-    http.POST[JsValue, HttpResponse](s"$incorpInfoUrl/incorporation-frontend-stubs/insert-data", officers)
+    http.POST[JsValue, HttpResponse](s"$incorpFEStubsUrl/incorporation-frontend-stubs/insert-data", officers)
   }
 
   def teardownCoHoCompanyDetails()(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    http.PUT[String, HttpResponse](s"$incorpInfoUrl/incorporation-frontend-stubs/wipe-data", "")
+    http.PUT[String, HttpResponse](s"$incorpFEStubsUrl/incorporation-frontend-stubs/wipe-data", "")
   }
 
   def teardownIndividualCoHoCompanyDetails(regId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    http.PUT[String, HttpResponse](s"$incorpInfoUrl/incorporation-frontend-stubs/wipe-individual-data", txId(regId))
+    http.PUT[String, HttpResponse](s"$incorpFEStubsUrl/incorporation-frontend-stubs/wipe-individual-data", txId(regId))
   }
 }
