@@ -17,13 +17,10 @@
 package controllers.userJourney
 
 import builders.AuthBuilder
-import enums.{AccountTypes, DownstreamOutcome}
-import fixtures.PAYERegistrationFixture
-import models.external.{CompanyRegistrationProfile$, CurrentProfile}
-import org.scalatest.BeforeAndAfterEach
+import enums.AccountTypes
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.http.Status
+import play.api.http.Status.SEE_OTHER
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -31,8 +28,6 @@ import services.{IncorporationInformationService, CurrentProfileService, PAYEReg
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
-
-import scala.concurrent.Future
 
 class SignInOutControllerSpec extends PAYERegSpec {
 
@@ -50,10 +45,9 @@ class SignInOutControllerSpec extends PAYERegSpec {
   }
 
   "Calling the postSignIn action" should {
-
     "return 303 for an unauthorised user" in new Setup {
       val result = controller.postSignIn()(FakeRequest())
-      status(result) shouldBe Status.SEE_OTHER
+      status(result) shouldBe SEE_OTHER
     }
 
     "redirect the user to the Company Registration post-sign-in action" in new Setup {
@@ -62,8 +56,18 @@ class SignInOutControllerSpec extends PAYERegSpec {
 
       AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
         result =>
-          status(result) shouldBe Status.SEE_OTHER
+          status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/post-sign-in")
+      }
+    }
+  }
+
+  "signOut" should {
+    "redirect to the exit questionnaire and clear the session" in new Setup {
+      AuthBuilder.showWithAuthorisedUser(controller.signOut, mockAuthConnector) {
+        result =>
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/questionnaire")
       }
     }
   }

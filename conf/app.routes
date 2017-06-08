@@ -3,6 +3,7 @@ GET         /assets/*file                                     controllers.Assets
 
 ## POST SIGN IN
 GET         /post-sign-in                                     controllers.userJourney.SignInOutController.postSignIn
+GET         /sign-out                                         controllers.userJourney.SignInOutController.signOut
 
 ## PAYE START
 GET         /                                                 controllers.userJourney.PayeStartController.startPaye

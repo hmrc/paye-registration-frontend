@@ -25,7 +25,7 @@ import auth.PAYERegime
 import config.FrontendAuthConnector
 import enums.DownstreamOutcome
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{AnyContent, Request, Result}
+import play.api.mvc.{Action, AnyContent, Request, Result}
 import services._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.frontend.auth.{Actions, AuthContext}
@@ -51,6 +51,12 @@ trait SignInOutCtrl extends FrontendController with Actions with I18nSupport {
     implicit user =>
       implicit request =>
         Redirect(s"$compRegFEURL$compRegFEURI/post-sign-in")
+  }
+
+  def signOut: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
+    implicit user =>
+      implicit request =>
+        Redirect(s"$compRegFEURL$compRegFEURI/questionnaire").withNewSession
   }
 
 }

@@ -23,8 +23,9 @@
 }
 
 @headerNavLinks = {
-  <li><a id="homeNavHref" href="@controllers.userJourney.routes.DashboardController.dashboard()"
-         data-journey-click="primary-navigation:Click:Home">Home</a></li>
+  <li>
+      <a id="signOutNavHref" href="@controllers.userJourney.routes.SignInOutController.signOut()" data-journey-click="primary-navigation:Click:SignOut">Sign out</a>
+  </li>
 }
 
 @insideHeader = {
