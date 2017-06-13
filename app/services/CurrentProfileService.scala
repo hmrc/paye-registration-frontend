@@ -19,7 +19,7 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import connectors._
-import enums.CacheKeys
+import enums.{PAYEStatus, CacheKeys}
 import models.external.CurrentProfile
 import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.RegistrationWhitelist
@@ -29,10 +29,12 @@ import scala.concurrent.Future
 
 @Singleton
 class CurrentProfileService @Inject()(injBusinessRegistrationConnector: BusinessRegistrationConnector,
+                                      injPAYERegistrationConnector: PAYERegistrationConnector,
                                       injKeystoreConnector: KeystoreConnector,
                                       injCompanyRegistrationConnector: CompanyRegistrationConnector) extends CurrentProfileSrv {
 
   override val businessRegistrationConnector = injBusinessRegistrationConnector
+  override val payeRegistrationConnector = injPAYERegistrationConnector
   override val companyRegistrationConnector = injCompanyRegistrationConnector
   override val keystoreConnector = injKeystoreConnector
 }
@@ -40,6 +42,7 @@ class CurrentProfileService @Inject()(injBusinessRegistrationConnector: Business
 trait CurrentProfileSrv extends RegistrationWhitelist {
 
   val businessRegistrationConnector: BusinessRegistrationConnect
+  val payeRegistrationConnector: PAYERegistrationConnect
   val companyRegistrationConnector: CompanyRegistrationConnect
   val keystoreConnector: KeystoreConnect
 
@@ -49,11 +52,19 @@ trait CurrentProfileSrv extends RegistrationWhitelist {
       companyProfile  <- ifRegIdNotWhitelisted(businessProfile.registrationID) {
         companyRegistrationConnector.getCompanyRegistrationDetails(businessProfile.registrationID)
       }
-      currentProfile = CurrentProfile(businessProfile.registrationID, businessProfile.completionCapacity, companyProfile, businessProfile.language)
+      oRegStatus      <- payeRegistrationConnector.getStatus(businessProfile.registrationID)
+      submitted       =  regSubmitted(oRegStatus)
+      currentProfile  = CurrentProfile(businessProfile.registrationID, businessProfile.completionCapacity, companyProfile, businessProfile.language, submitted)
       _ <- keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, currentProfile)
     } yield {
       currentProfile
     }
   }
 
+  private[services] def regSubmitted(oRegStatus: Option[PAYEStatus.Value]): Boolean = {
+    oRegStatus.exists {
+      case PAYEStatus.draft | PAYEStatus.invalid => false
+      case _ => true
+    }
+  }
 }

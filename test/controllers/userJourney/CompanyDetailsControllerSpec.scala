@@ -55,12 +55,13 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
       override val addressLookupService = mockAddressLookupService
 
-      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(CurrentProfile(
           "12345",
           Some("Director"),
           CompanyRegistrationProfile("held", "txId"),
-          "ENG"
+          "ENG",
+          payeRegistrationSubmitted = false
         ))
       }
     }

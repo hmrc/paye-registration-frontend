@@ -49,12 +49,13 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
       override val payeRegistrationConnector = mockPayeRegistrationConnector
 
-      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result])(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(CurrentProfile(
           "12345",
           Some("Director"),
           CompanyRegistrationProfile("held", "txId"),
-          "ENG"
+          "ENG",
+          payeRegistrationSubmitted = false
         ))
       }
     }

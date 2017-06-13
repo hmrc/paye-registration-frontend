@@ -16,8 +16,8 @@
 
 package services
 
-import connectors.{BusinessRegistrationConnect, CompanyRegistrationConnect}
-import enums.CacheKeys
+import connectors.{PAYERegistrationConnect, BusinessRegistrationConnect, CompanyRegistrationConnect}
+import enums.{PAYEStatus, CacheKeys}
 import fixtures.BusinessRegistrationFixture
 import models.external.{CompanyRegistrationProfile, BusinessProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
@@ -31,11 +31,13 @@ import scala.concurrent.Future
 class CurrentProfileServiceSpec extends PAYERegSpec with BusinessRegistrationFixture {
 
   val mockCompanyRegistrationConnector = mock[CompanyRegistrationConnect]
+  val mockPAYERegistrationConnector = mock[PAYERegistrationConnect]
 
   class Setup {
     val service = new CurrentProfileSrv {
       override val businessRegistrationConnector: BusinessRegistrationConnect = mockBusinessRegistrationConnector
       override val companyRegistrationConnector: CompanyRegistrationConnect = mockCompanyRegistrationConnector
+      override val payeRegistrationConnector: PAYERegistrationConnect = mockPAYERegistrationConnector
       override val keystoreConnector = mockKeystoreConnector
     }
   }
@@ -48,7 +50,8 @@ class CurrentProfileServiceSpec extends PAYERegSpec with BusinessRegistrationFix
                               validBusinessProfile.registrationID,
                               validBusinessProfile.completionCapacity,
                               validCompanyProfile,
-                              validBusinessProfile.language
+                              validBusinessProfile.language,
+                              payeRegistrationSubmitted = false
                             )
 
   "fetchAndStoreCurrentProfile" should {
@@ -61,14 +64,14 @@ class CurrentProfileServiceSpec extends PAYERegSpec with BusinessRegistrationFix
 
       mockKeystoreCache[BusinessProfile](CacheKeys.CurrentProfile.toString, CacheMap("", Map.empty))
 
+      when(mockPAYERegistrationConnector.getStatus(ArgumentMatchers.contains(validBusinessProfile.registrationID))(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(Some(PAYEStatus.draft)))
+
       await(service.fetchAndStoreCurrentProfile) shouldBe validCurrentProfile
     }
 
     "Return an unsuccessful outcome when there is no record in Business Registration" in new Setup {
       mockBusinessRegFetch(Future.failed(new NotFoundException("")))
-
-      when(mockCompanyRegistrationConnector.getCompanyRegistrationDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCompanyProfile))
 
       intercept[NotFoundException](await(service.fetchAndStoreCurrentProfile))
     }
@@ -76,19 +79,32 @@ class CurrentProfileServiceSpec extends PAYERegSpec with BusinessRegistrationFix
     "Return an unsuccessful outcome when the user is not authorised for Business Registration" in new Setup {
       mockBusinessRegFetch(Future.failed(new ForbiddenException("")))
 
-      when(mockCompanyRegistrationConnector.getCompanyRegistrationDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCompanyProfile))
-
       intercept[ForbiddenException](await(service.fetchAndStoreCurrentProfile))
     }
 
     "Return an unsuccessful outcome when Business Registration returns an error response" in new Setup {
       mockBusinessRegFetch(Future.failed(new RuntimeException("")))
 
-      when(mockCompanyRegistrationConnector.getCompanyRegistrationDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCompanyProfile))
-
       intercept[RuntimeException](await(service.fetchAndStoreCurrentProfile))
+    }
+  }
+
+  "regSubmitted" should {
+    "return false when status is draft" in new Setup {
+      service.regSubmitted(Some(PAYEStatus.draft)) shouldBe false
+    }
+    "return false when status is invalid" in new Setup {
+      service.regSubmitted(Some(PAYEStatus.invalid)) shouldBe false
+    }
+    "return true when status is neither draft nor invalid" in new Setup {
+      service.regSubmitted(Some(PAYEStatus.held)) shouldBe true
+      service.regSubmitted(Some(PAYEStatus.submitted)) shouldBe true
+      service.regSubmitted(Some(PAYEStatus.acknowledged)) shouldBe true
+      service.regSubmitted(Some(PAYEStatus.rejected)) shouldBe true
+      service.regSubmitted(Some(PAYEStatus.cancelled)) shouldBe true
+    }
+    "return false when no status is returned" in new Setup {
+      service.regSubmitted(None) shouldBe false
     }
   }
 

@@ -17,7 +17,7 @@
 package service
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlMatching}
-import connectors.{BusinessRegistrationConnector, CompanyRegistrationConnector, KeystoreConnector}
+import connectors.{PAYERegistrationConnector, BusinessRegistrationConnector, CompanyRegistrationConnector, KeystoreConnector}
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.external.{CompanyRegistrationProfile, BusinessProfile, CurrentProfile}
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -35,6 +35,7 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
   lazy val businessRegistrationConnector = Play.current.injector.instanceOf[BusinessRegistrationConnector]
   lazy val keystoreConnector = Play.current.injector.instanceOf[KeystoreConnector]
   lazy val companyRegistrationConnector = Play.current.injector.instanceOf[CompanyRegistrationConnector]
+  lazy val payeRegistrationConnector = Play.current.injector.instanceOf[PAYERegistrationConnector]
 
   val additionalConfiguration = Map(
     "auditing.consumer.baseUri.host" -> s"$mockHost",
@@ -46,6 +47,8 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
     "microservice.services.business-registration.port" -> s"$mockPort",
     "microservice.services.company-registration.host" -> s"$mockHost",
     "microservice.services.company-registration.port" -> s"$mockPort",
+    "microservice.services.paye-registration.host" -> s"$mockHost",
+    "microservice.services.paye-registration.port" -> s"$mockPort",
     "microservice.services.incorporation-frontend-stubs.host" -> s"$mockHost",
     "microservice.services.incorporation-frontend-stubs.port" -> s"$mockPort",
     "microservice.services.coho-api.host" -> s"$mockHost",
@@ -55,6 +58,15 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
     "defaultCTStatus" -> "aGVsZA==",
     "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ=="
   )
+
+  def backendStatus(status: String) = {
+    s"""{
+     |   "status": "$status",
+     |   "lastUpdate": "2017-05-01T12:00:00Z",
+     |   "ackRef": "testAckRef",
+     |   "empref": "testEmpRef"
+     |}""".stripMargin
+  }
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
     .configure(additionalConfiguration)
@@ -75,13 +87,15 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
       val expectedCurrentProfile = CurrentProfile(regIdWhitelisted,
                                                   None,
                                                   CompanyRegistrationProfile("held", s"fakeTxId-$regIdWhitelisted"),
-                                                  "ENG")
+                                                  "ENG",
+                                                  payeRegistrationSubmitted = false)
 
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfileWithRegIdWhitelisted).toString)
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/keystore/paye-registration-frontend/${sessionId}/data/CurrentProfile", 200, dummyS4LResponse)
+      stubGet(s"/paye-registration/$regIdWhitelisted/status", 200, backendStatus("draft"))
 
-      val currentProfileService = new CurrentProfileService(businessRegistrationConnector, keystoreConnector, companyRegistrationConnector)
+      val currentProfileService = new CurrentProfileService(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector)
       def getResponse = currentProfileService.fetchAndStoreCurrentProfile
 
       await(getResponse) shouldBe expectedCurrentProfile
@@ -106,14 +120,16 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
       val expectedCurrentProfile = CurrentProfile(regId,
         None,
         CompanyRegistrationProfile("held", s"000-434-$regId"),
-        "ENG")
+        "ENG",
+        payeRegistrationSubmitted = false)
 
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfile).toString)
       stubGet(s"/incorporation-frontend-stubs/$regId/corporation-tax-registration", 200, companyRegistrationResp)
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/keystore/paye-registration-frontend/${sessionId}/data/CurrentProfile", 200, dummyS4LResponse)
+      stubGet(s"/paye-registration/$regId/status", 404, "")
 
-      val currentProfileService = new CurrentProfileService(businessRegistrationConnector, keystoreConnector, companyRegistrationConnector)
+      val currentProfileService = new CurrentProfileService(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector)
       def getResponse = currentProfileService.fetchAndStoreCurrentProfile
 
       await(getResponse) shouldBe expectedCurrentProfile
@@ -148,14 +164,16 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
       val expectedCurrentProfile = CurrentProfile(regId,
         None,
         CompanyRegistrationProfile("held", s"000-434-$regId"),
-        "ENG")
+        "ENG",
+        payeRegistrationSubmitted = true)
 
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfile).toString)
       stubGet(s"/company-registration/corporation-tax-registration/$regId/corporation-tax-registration", 200, companyRegistrationResp)
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/keystore/paye-registration-frontend/${sessionId}/data/CurrentProfile", 200, dummyS4LResponse)
+      stubGet(s"/paye-registration/$regId/status",200,backendStatus("submitted"))
 
-      val currentProfileService = new CurrentProfileService(businessRegistrationConnector, keystoreConnector, companyRegistrationConnector)
+      val currentProfileService = new CurrentProfileService(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector)
       def getResponse = currentProfileService.fetchAndStoreCurrentProfile
 
       await(getResponse) shouldBe expectedCurrentProfile

@@ -32,20 +32,15 @@ trait SessionProfile extends InternalExceptions {
   val keystoreConnector: KeystoreConnect
   val payeRegistrationConnector: PAYERegistrationConnect
 
-  def withCurrentProfile(f: => CurrentProfile => Future[Result])(implicit request: Request[_],  hc: HeaderCarrier): Future[Result] = {
+
+  def withCurrentProfile(f: => CurrentProfile => Future[Result], checkSubmissionStatus: Boolean = true)(implicit request: Request[_],  hc: HeaderCarrier): Future[Result] = {
     keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString) flatMap {
-      case Some(currentProfile) => payeRegistrationConnector.getStatus(currentProfile.registrationID) flatMap {
-        case Some(status) => status match {
-          case PAYEStatus.held | PAYEStatus.submitted => request.path match {
-              // TODO - going to re-factor this under SCRS-6939
-            case "/register-for-paye/application-submitted" => f(currentProfile)
-            case _               => Future.successful(Redirect(controllers.userJourney.routes.DashboardController.dashboard()))
-          }
-          case PAYEStatus.draft | PAYEStatus.invalid => f(currentProfile)
-          case _ => Future.successful(Redirect(controllers.userJourney.routes.DashboardController.dashboard()))
+      case Some(currentProfile) =>
+        if(checkSubmissionStatus && currentProfile.payeRegistrationSubmitted) {
+          Future.successful(Redirect(controllers.userJourney.routes.DashboardController.dashboard()))
+        } else {
+          f(currentProfile)
         }
-        case None => throw new MissingDocumentStatus(s"There was no document status found for reg id ${currentProfile.registrationID}")
-      }
       case None => Future.successful(Redirect(controllers.userJourney.routes.PayeStartController.startPaye()))
     }
   }

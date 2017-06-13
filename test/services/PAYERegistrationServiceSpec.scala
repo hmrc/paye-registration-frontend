@@ -48,7 +48,7 @@ class PAYERegistrationServiceSpec extends PAYERegSpec {
   implicit val hc = HeaderCarrier()
   implicit val context = AuthBuilder.createTestUser
 
-  val validCurrentProfile = CurrentProfile("testRegId", None, CompanyRegistrationProfile("rejected", "txId"), "en")
+  val validCurrentProfile = CurrentProfile("testRegId", None, CompanyRegistrationProfile("rejected", "txId"), "en", false)
 
   val forbidden = Upstream4xxResponse("403", 403, 403)
   val notFound = new NotFoundException("404")
