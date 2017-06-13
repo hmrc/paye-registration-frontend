@@ -18,8 +18,9 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import connectors.{KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
-import enums.{DownstreamOutcome, UserCapacity}
+import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
+import enums.{CacheKeys, DownstreamOutcome, UserCapacity}
+import models.external.CurrentProfile
 import models.view.CompletionCapacity
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -27,14 +28,20 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class CompletionCapacityService @Inject()(injPAYERegistrationConnector: PAYERegistrationConnector) extends CompletionCapacitySrv {
+class CompletionCapacityService @Inject()(
+                                           injPAYERegistrationConnector: PAYERegistrationConnector,
+                                           injKeystoreConnector: KeystoreConnector
+                                         ) extends CompletionCapacitySrv {
 
   override val payeRegConnector = injPAYERegistrationConnector
+  override val keystoreConnector = injKeystoreConnector
 }
 
 trait CompletionCapacitySrv {
 
   val payeRegConnector: PAYERegistrationConnect
+  val keystoreConnector: KeystoreConnect
+
 
   def saveCompletionCapacity(completionCapacity: CompletionCapacity, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     payeRegConnector.upsertCompletionCapacity(regId, viewToAPI(completionCapacity)) map {
@@ -43,9 +50,23 @@ trait CompletionCapacitySrv {
   }
 
   def getCompletionCapacity(regId: String)(implicit hc: HeaderCarrier): Future[Option[CompletionCapacity]] = {
-    for{
-      capacity <- payeRegConnector.getCompletionCapacity(regId)
-    } yield capacity.map (apiToView)
+    for {
+      oCapacity <- payeRegConnector.getCompletionCapacity(regId)
+      capacity  <- convertOrFetchCapacity(oCapacity)
+    } yield capacity.map(apiToView)
+  }
+
+  def convertOrFetchCapacity(oCapacity:Option[String])(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    oCapacity match {
+      case Some(capacity) => Future.successful(Some(capacity))
+      case None           => getCapacityFromKeystore
+    }
+  }
+
+  def getCapacityFromKeystore()(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString).map{
+      oCurrentProfile => oCurrentProfile.flatMap(_.completionCapacity)
+    }
   }
 
   private[services] def viewToAPI(completionCapacity: CompletionCapacity): String = {

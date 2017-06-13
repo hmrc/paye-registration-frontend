@@ -30,7 +30,12 @@ trait CachingStub {
   implicit lazy val jsonCrypto = ApplicationCrypto.JsonCrypto
   implicit lazy val encryptionFormat = new JsonEncryptor[JsObject]()
 
-  def stubKeystoreMetadata(session: String, regId: String, companyName: String) = {
+  def stubKeystoreMetadata(session: String,
+                           regId: String,
+                           companyName: String,
+                           completionCapacity: String = "Director"
+                          ) = {
+
     val keystoreUrl = s"/keystore/paye-registration-frontend/$session"
     stubFor(get(urlMatching(keystoreUrl))
       .willReturn(
