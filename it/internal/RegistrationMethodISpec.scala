@@ -62,6 +62,18 @@ class RegistrationMethodISpec extends IntegrationSpecBase
   val companyName = "Foo Ltd"
 
   "DELETE registration" should {
+    "return 500 when error occured to get Authority for the session" in {
+      stubGet(s"/auth/authority", 404, "")
+
+      val fResponse = buildClientInternal(s"/$regId/delete").
+        withHeaders("X-Session-ID" -> "1112223355556").
+        delete()
+
+      val response = await(fResponse)
+
+      response.status shouldBe 500
+    }
+
     "return 400 if the Registration ID requested for delete is not same as the CurrentProfile from Keystore" in {
       setupSimpleAuthMocks()
 
@@ -133,7 +145,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       response.status shouldBe 412
     }
 
-    "return 404 if the Registration is not found" in {
+    "return 500 if the Registration is not found" in {
       setupSimpleAuthMocks()
 
       stubSuccessfulLogin()
@@ -150,7 +162,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 404
+      response.status shouldBe 500
     }
 
     "return 500 if PAYERegistration microservice returns 403" in {

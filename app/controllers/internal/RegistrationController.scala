@@ -26,7 +26,7 @@ import play.api.mvc.Action
 import services.{PAYERegistrationService, PAYERegistrationSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException, Upstream4xxResponse}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -55,10 +55,20 @@ trait RegistrationCtrl extends FrontendController with Actions {
             case RegistrationDeletion.success => Ok
             case RegistrationDeletion.invalidStatus => PreconditionFailed
             case RegistrationDeletion.forbidden =>
-              Logger.warn(s"[RegistrationController] - [delete] Requested document regId $regId to be deleted is not corresponding to the CurrentProfile regId")
+              Logger.warn(s"[RegistrationController] [delete] - Requested document regId $regId to be deleted is not corresponding to the CurrentProfile regId")
               BadRequest
-            case RegistrationDeletion.fail => InternalServerError
+          } recover {
+            case ex: Exception =>
+              Logger.error(s"[RegistrationController] [delete] - Received an error when deleting Registration regId: $regId - error: ${ex.getMessage}")
+              InternalServerError
           }
+        case None =>
+          Logger.warn(s"[RegistrationController] [delete] - Can't get the Authority")
+          Future.successful(Unauthorized)
+      } recover {
+        case ex: Exception =>
+          Logger.error(s"[RegistrationController] [delete] - Received an error when retrieving Authority - error: ${ex.getMessage}")
+          InternalServerError
       }
     }
   }
