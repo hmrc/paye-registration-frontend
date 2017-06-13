@@ -80,7 +80,7 @@ trait PAYERegistrationSrv {
       } else {
         s4LService.clear(regId) flatMap { response =>
           response.status match {
-            case OK => payeRegistrationConnector.deleteCurrentRegistrationInProgress(regId, profile.companyTaxRegistration.transactionId)
+            case NO_CONTENT => payeRegistrationConnector.deleteCurrentRegistrationInProgress(regId, profile.companyTaxRegistration.transactionId)
             case INTERNAL_SERVER_ERROR => Future.successful(RegistrationDeletion.fail)
           }
         }

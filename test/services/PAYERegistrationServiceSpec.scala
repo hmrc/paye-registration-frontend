@@ -33,12 +33,15 @@ class PAYERegistrationServiceSpec extends PAYERegSpec {
 
   val mockRegConnector = mock[PAYERegistrationConnector]
   val mockS4LService = mock[S4LService]
+  val mockCurrentProfileService = mock[CurrentProfileService]
 
   class Setup {
     val service = new PAYERegistrationSrv {
       override val authConnector = mockAuthConnector
       override val payeRegistrationConnector = mockRegConnector
       override val keyStoreConnector = mockKeystoreConnector
+      override val currentProfileService = mockCurrentProfileService
+      override val s4LService = mockS4LService
     }
   }
 

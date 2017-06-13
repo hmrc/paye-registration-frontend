@@ -18,16 +18,18 @@ package controllers.internal
 
 import javax.inject.{Inject, Singleton}
 
-import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.RegistrationDeletion
 import play.api.Logger
+import play.api.mvc.Action
 import services.{PAYERegistrationService, PAYERegistrationSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class RegistrationController @Inject()(injKeystoreConnector: KeystoreConnector,
@@ -44,14 +46,20 @@ trait RegistrationCtrl extends FrontendController with Actions {
   val payeRegistrationConnector: PAYERegistrationConnect
   val payeRegistrationService: PAYERegistrationSrv
 
-  def delete(regId: String) = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    payeRegistrationService.deletePayeRegistrationInProgress(regId) map {
-      case RegistrationDeletion.success => Ok
-      case RegistrationDeletion.invalidStatus => PreconditionFailed
-      case RegistrationDeletion.forbidden =>
-        Logger.warn(s"[RegistrationController] - [delete] Requested document regId $regId to be deleted is not corresponding to the CurrentProfile regId")
-        Forbidden
-      case RegistrationDeletion.fail => InternalServerError
+  def delete(regId: String) = Action.async {
+    implicit request => {
+      val hc = HeaderCarrier.fromHeadersAndSession(request.headers)
+      FrontendAuthConnector.currentAuthority(hc) flatMap {
+        case Some(_) =>
+          payeRegistrationService.deletePayeRegistrationInProgress(regId)(hc) map {
+            case RegistrationDeletion.success => Ok
+            case RegistrationDeletion.invalidStatus => PreconditionFailed
+            case RegistrationDeletion.forbidden =>
+              Logger.warn(s"[RegistrationController] - [delete] Requested document regId $regId to be deleted is not corresponding to the CurrentProfile regId")
+              BadRequest
+            case RegistrationDeletion.fail => InternalServerError
+          }
+      }
     }
   }
 }

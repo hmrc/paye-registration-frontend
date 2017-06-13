@@ -17,8 +17,9 @@
 package internal
 
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
+import models.external.BusinessProfile
 import org.scalatest.BeforeAndAfterEach
-import play.api.http.HeaderNames
+import play.api.libs.json.Json
 import play.api.test.FakeApplication
 
 class RegistrationMethodISpec extends IntegrationSpecBase
@@ -34,6 +35,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
     "play.filters.csrf.header.bypassHeaders.Csrf-Bypass" -> "nocheck",
+    "Csrf-Bypass-value" -> "bm9jaGVjaw==",
     "auditing.consumer.baseUri.host" -> s"$mockHost",
     "auditing.consumer.baseUri.port" -> s"$mockPort",
     "microservice.services.cachable.session-cache.host" -> s"$mockHost",
@@ -45,7 +47,11 @@ class RegistrationMethodISpec extends IntegrationSpecBase
     "microservice.services.auth.host" -> s"$mockHost",
     "microservice.services.auth.port" -> s"$mockPort",
     "microservice.services.paye-registration.host" -> s"$mockHost",
-    "microservice.services.paye-registration.port" -> s"$mockPort"
+    "microservice.services.paye-registration.port" -> s"$mockPort",
+    "microservice.services.business-registration.host" -> s"$mockHost",
+    "microservice.services.business-registration.port" -> s"$mockPort",
+    "microservice.services.company-registration.host" -> s"$mockHost",
+    "microservice.services.company-registration.port" -> s"$mockPort"
   ))
 
   override def beforeEach() {
@@ -56,7 +62,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
   val companyName = "Foo Ltd"
 
   "DELETE registration" should {
-    "return 403 if the Registration ID requested for delete is not same as the CurrentProfile" in {
+    "return 400 if the Registration ID requested for delete is not same as the CurrentProfile from Keystore" in {
       setupSimpleAuthMocks()
 
       stubSuccessfulLogin()
@@ -64,12 +70,47 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubKeystoreMetadata(SessionId, regId, companyName)
 
       val fResponse = buildClientInternal(s"/4/delete").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHeaders("X-Session-ID" -> SessionId).
         delete()
 
       val response = await(fResponse)
 
-      response.status shouldBe 403
+      response.status shouldBe 400
+    }
+
+    "return 400 if the Registration ID requested for delete is not same as the CurrentProfile" in {
+      setupSimpleAuthMocks()
+
+      stubSuccessfulLogin()
+
+      stubGet(s"/keystore/paye-registration-frontend/$SessionId", 404, "")
+
+      val businessProfile = BusinessProfile(
+        regId,
+        None,
+        "ENG"
+      )
+
+      val companyRegistrationResp =
+        s"""{
+           |   "status": "held",
+           |   "confirmationReferences": {
+           |     "transaction-id": "000-434-${regId}"
+           |   }
+           |}""".stripMargin
+
+      stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfile).toString)
+      stubGet(s"/incorporation-frontend-stubs/$regId/corporation-tax-registration", 200, companyRegistrationResp)
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+      stubPut(s"/keystore/paye-registration-frontend/$SessionId/data/CurrentProfile", 200, dummyS4LResponse)
+
+      val fResponse = buildClientInternal(s"/4/delete").
+        withHeaders("X-Session-ID" -> SessionId).
+        delete()
+
+      val response = await(fResponse)
+
+      response.status shouldBe 400
     }
 
     "return 412 if the Registration is not in Draft or Rejected status for deletion" in {
@@ -79,12 +120,12 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubKeystoreMetadata(SessionId, regId, companyName)
 
-      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 204, "")
 
       stubDelete(s"/paye-registration/${regId}/delete-in-progress", 412, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHeaders("X-Session-ID" -> SessionId).
         delete()
 
       val response = await(fResponse)
@@ -99,12 +140,12 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubKeystoreMetadata(SessionId, regId, companyName)
 
-      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 204, "")
 
       stubDelete(s"/paye-registration/${regId}/delete-in-progress", 404, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHeaders("X-Session-ID" -> SessionId).
         delete()
 
       val response = await(fResponse)
@@ -119,12 +160,12 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubKeystoreMetadata(SessionId, regId, companyName)
 
-      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 204, "")
 
       stubDelete(s"/paye-registration/${regId}/delete-in-progress", 403, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHeaders("X-Session-ID" -> SessionId).
         delete()
 
       val response = await(fResponse)
@@ -139,12 +180,12 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubKeystoreMetadata(SessionId, regId, companyName)
 
-      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 204, "")
 
       stubDelete(s"/paye-registration/${regId}/delete-in-progress", 500, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHeaders("X-Session-ID" -> SessionId).
         delete()
 
       val response = await(fResponse)
@@ -162,12 +203,32 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubDelete(s"/save4later/paye-registration-frontend/${regId}", 500, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHeaders("X-Session-ID" -> SessionId).
         delete()
 
       val response = await(fResponse)
 
       response.status shouldBe 500
+    }
+
+    "return 200 if PAYERegistration microservice successfully delete Registration" in {
+      setupSimpleAuthMocks()
+
+      stubSuccessfulLogin()
+
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 204, "")
+
+      stubDelete(s"/paye-registration/${regId}/delete-in-progress", 200, "")
+
+      val fResponse = buildClientInternal(s"/$regId/delete").
+        withHeaders("X-Session-ID" -> SessionId).
+        delete()
+
+      val response = await(fResponse)
+
+      response.status shouldBe 200
     }
   }
 }

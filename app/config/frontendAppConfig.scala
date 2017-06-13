@@ -72,4 +72,5 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   lazy val defaultCTStatus = loadStringConfigBase64("defaultCTStatus")
 
   lazy val uriWhiteList = configuration.getStringSeq("csrfexceptions.whitelist").getOrElse(Seq.empty).toSet
+  lazy val csrfBypassValue = loadStringConfigBase64("Csrf-Bypass-value")
 }

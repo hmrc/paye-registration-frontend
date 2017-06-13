@@ -16,6 +16,7 @@
 
 package filters
 
+import config.FrontendAppConfig
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.http.HttpVerbs.DELETE
 import play.api.mvc.{RequestHeader, Result}
@@ -31,7 +32,7 @@ class PAYECSRFExceptionsFilter(whitelist: Set[String]) extends CSRFExceptionsFil
 
   private[filters] def deleteFilteredHeaders(rh: RequestHeader, now: () => DateTime = () => DateTime.now.withZone(DateTimeZone.UTC)) = {
     if (rh.method == DELETE && whitelist.exists(rh.path.matches(_))) {
-      rh.copy(headers = rh.headers.add("Csrf-Bypass" -> "nocheck"))
+      rh.copy(headers = rh.headers.add("Csrf-Bypass" -> FrontendAppConfig.csrfBypassValue))
     } else {
       rh.copy(headers = rh.headers.remove("Csrf-Bypass"))
     }
