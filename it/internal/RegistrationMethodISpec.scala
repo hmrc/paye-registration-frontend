@@ -51,7 +51,9 @@ class RegistrationMethodISpec extends IntegrationSpecBase
     "microservice.services.business-registration.host" -> s"$mockHost",
     "microservice.services.business-registration.port" -> s"$mockPort",
     "microservice.services.company-registration.host" -> s"$mockHost",
-    "microservice.services.company-registration.port" -> s"$mockPort"
+    "microservice.services.company-registration.port" -> s"$mockPort",
+    "microservice.services.incorporation-frontend-stubs.host" -> s"$mockHost",
+    "microservice.services.incorporation-frontend-stubs.port" -> s"$mockPort"
   ))
 
   override def beforeEach() {
