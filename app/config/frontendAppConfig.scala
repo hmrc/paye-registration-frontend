@@ -70,4 +70,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   lazy val defaultCHROAddress = loadJsonConfigBase64[Address]("defaultCHROAddress")
   lazy val defaultSeqDirector = loadJsonConfigBase64[Seq[Director]]("defaultSeqDirector")(Director.seqReads)
   lazy val defaultCTStatus = loadStringConfigBase64("defaultCTStatus")
+
+  lazy val uriWhiteList = configuration.getStringSeq("csrfexceptions.whitelist").getOrElse(Seq.empty).toSet
+  lazy val csrfBypassValue = loadStringConfigBase64("Csrf-Bypass-value")
 }

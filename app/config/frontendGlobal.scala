@@ -17,6 +17,7 @@
 package config
 
 import com.typesafe.config.Config
+import filters.PAYECSRFExceptionsFilter
 import net.ceedubs.ficus.Ficus._
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
@@ -48,6 +49,8 @@ trait FrontendGlobal
    views.html.error_template(pageTitle, heading, message)
 
   override def microserviceMetricsConfig(implicit app: Application): Option[Configuration] = app.configuration.getConfig(s"microservice.metrics")
+
+  override def csrfExceptionsFilter = new PAYECSRFExceptionsFilter(FrontendAppConfig.uriWhiteList)
 }
 
 object ControllerConfiguration extends ControllerConfig {

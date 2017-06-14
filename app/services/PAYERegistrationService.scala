@@ -19,7 +19,6 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import config.FrontendAuthConnector
-import common.exceptions.InternalExceptions.NoCurrentSessionException
 import enums.{AccountTypes, CacheKeys, DownstreamOutcome, RegistrationDeletion}
 import play.api.libs.json.JsObject
 import uk.gov.hmrc.play.frontend.auth.AuthContext
@@ -27,16 +26,21 @@ import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import connectors._
 import models.external.CurrentProfile
 import uk.gov.hmrc.play.http.HeaderCarrier
+import play.api.http.Status._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
 class PAYERegistrationService @Inject()(payeRegistrationConn: PAYERegistrationConnector,
-                                        injKeystoreConnector: KeystoreConnector) extends PAYERegistrationSrv {
+                                        injKeystoreConnector: KeystoreConnector,
+                                        injCurrentProfileService: CurrentProfileService,
+                                        injS4LService: S4LService) extends PAYERegistrationSrv {
   override val payeRegistrationConnector = payeRegistrationConn
   override val authConnector = FrontendAuthConnector
   override val keyStoreConnector = injKeystoreConnector
+  override val currentProfileService = injCurrentProfileService
+  override val s4LService = injS4LService
 }
 
 trait PAYERegistrationSrv {
@@ -44,6 +48,8 @@ trait PAYERegistrationSrv {
   val payeRegistrationConnector: PAYERegistrationConnect
   val authConnector: AuthConnector
   val keyStoreConnector: KeystoreConnect
+  val currentProfileService: CurrentProfileSrv
+  val s4LService: S4LSrv
 
   def assertRegistrationFootprint(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     payeRegistrationConnector.createNewRegistration(regId, txId)
@@ -64,6 +70,27 @@ trait PAYERegistrationSrv {
         _ => RegistrationDeletion.success
       }
       case RegistrationDeletion.invalidStatus => Future.successful(RegistrationDeletion.invalidStatus)
+    }
+  }
+
+  def deletePayeRegistrationInProgress(regId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
+    getCurrentProfile flatMap { profile =>
+      if( regId != profile.registrationID ) {
+        Future.successful(RegistrationDeletion.forbidden)
+      } else {
+        s4LService.clear(regId) flatMap { response =>
+          response.status match {
+            case NO_CONTENT => payeRegistrationConnector.deleteCurrentRegistrationInProgress(regId, profile.companyTaxRegistration.transactionId)
+          }
+        }
+      }
+    }
+  }
+
+  private def getCurrentProfile(implicit hc: HeaderCarrier): Future[CurrentProfile] = {
+    keyStoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString) flatMap {
+      case Some(currentProfile) => Future.successful(currentProfile)
+      case None => currentProfileService.fetchAndStoreCurrentProfile
     }
   }
 }

@@ -344,6 +344,20 @@ trait PAYERegistrationConnect {
     }
   }
 
+  def deleteCurrentRegistrationInProgress(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
+    http.DELETE[HttpResponse](s"$payeRegUrl/paye-registration/$regId/delete-in-progress") map {
+      _.status match {
+        case OK                   => RegistrationDeletion.success
+      }
+    } recover {
+      case fourXX: Upstream4xxResponse if fourXX.upstreamResponseCode == PRECONDITION_FAILED =>
+        Logger.warn(s"[PAYERegistrationConnector] - [deleteCurrentRegistrationInProgress] Deleting document for regId $regId and txId $txId failed as document was not draft or invalid")
+        RegistrationDeletion.invalidStatus
+      case fiveXX: Upstream5xxResponse =>
+        throw logResponse(fiveXX, "deleteCurrentRegistrationInProgress", s"deleting document, error message: ${fiveXX.message}", regId, Some(txId))
+    }
+  }
+
   private[connectors] def logResponse(e: Throwable, f: String, m: String, regId: String, txId: Option[String] = None): Throwable = {
     val optTxId = txId.map(t => s" and txId: $t").getOrElse("")
     def log(s: String) = Logger.warn(s"[PAYERegistrationConnector] [$f] received $s when $m for regId: $regId$optTxId")

@@ -49,6 +49,7 @@ trait WiremockHelper {
   def resetWiremock() = WireMock.reset()
 
   def buildClient(path: String) = WS.url(s"http://localhost:$port/register-for-paye$path").withFollowRedirects(false)
+  def buildClientInternal(path: String) = WS.url(s"http://localhost:$port/internal$path").withFollowRedirects(false)
 
   def stubGet(url: String, status: Integer, body: String) =
     stubFor(get(urlMatching(url))

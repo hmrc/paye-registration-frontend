@@ -2,5 +2,6 @@
 ->         /register-for-paye         app.Routes
 ->         /                          health.Routes
 ->         /template                  template.Routes
+->         /internal                  internal.Routes
 
 GET        /admin/metrics             @com.kenshoo.play.metrics.MetricsController.metrics
