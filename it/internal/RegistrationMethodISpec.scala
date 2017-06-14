@@ -34,8 +34,6 @@ class RegistrationMethodISpec extends IntegrationSpecBase
   override implicit lazy val app = FakeApplication(additionalConfiguration = Map(
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
-    "play.filters.csrf.header.bypassHeaders.Csrf-Bypass" -> "nocheck",
-    "Csrf-Bypass-value" -> "bm9jaGVjaw==",
     "auditing.consumer.baseUri.host" -> s"$mockHost",
     "auditing.consumer.baseUri.port" -> s"$mockPort",
     "microservice.services.cachable.session-cache.host" -> s"$mockHost",
@@ -51,7 +49,9 @@ class RegistrationMethodISpec extends IntegrationSpecBase
     "microservice.services.business-registration.host" -> s"$mockHost",
     "microservice.services.business-registration.port" -> s"$mockPort",
     "microservice.services.company-registration.host" -> s"$mockHost",
-    "microservice.services.company-registration.port" -> s"$mockPort"
+    "microservice.services.company-registration.port" -> s"$mockPort",
+    "microservice.services.incorporation-frontend-stubs.host" -> s"$mockHost",
+    "microservice.services.incorporation-frontend-stubs.port" -> s"$mockPort"
   ))
 
   override def beforeEach() {
