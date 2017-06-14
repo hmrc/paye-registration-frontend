@@ -18,10 +18,13 @@ package services
 
 import builders.AuthBuilder
 import connectors.{Failed, PAYERegistrationConnector, Success, TimedOut}
+import enums.{CacheKeys, UserCapacity}
 import fixtures.{CoHoAPIFixture, KeystoreFixture}
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
+import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -33,30 +36,44 @@ class SubmissionServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAP
   trait Setup {
     val service = new SubmissionSrv {
       override val payeRegistrationConnector = mockPayeRegConnector
+      override val keystoreConnector = mockKeystoreConnector
     }
   }
 
   val regId = "12345"
   implicit val hc = HeaderCarrier()
 
+  def currentProfile(regId: String) = CurrentProfile(
+    registrationID = regId,
+    completionCapacity = Some(UserCapacity.director.toString),
+    companyTaxRegistration = CompanyRegistrationProfile(
+      status = "acknowledged",
+      transactionId = "40-123456"
+    ),
+    language = "ENG",
+    payeRegistrationSubmitted = false
+  )
+
   "submitRegistration" should {
     "return a Success DES Response" in new Setup {
       when(mockPayeRegConnector.submitRegistration(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Success))
 
-      await(service.submitRegistration(regId)) shouldBe Success
+      mockKeystoreCache(CacheKeys.CurrentProfile.toString, CacheMap("CurrentProfile", Map.empty))
+
+      await(service.submitRegistration(currentProfile(regId))) shouldBe Success
     }
     "return a Failed DES Response" in new Setup {
       when(mockPayeRegConnector.submitRegistration(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Failed))
 
-      await(service.submitRegistration(regId)) shouldBe Failed
+      await(service.submitRegistration(currentProfile(regId))) shouldBe Failed
     }
     "return a TimedOut DES Response" in new Setup {
       when(mockPayeRegConnector.submitRegistration(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(TimedOut))
 
-      await(service.submitRegistration(regId)) shouldBe TimedOut
+      await(service.submitRegistration(currentProfile(regId))) shouldBe TimedOut
     }
   }
 

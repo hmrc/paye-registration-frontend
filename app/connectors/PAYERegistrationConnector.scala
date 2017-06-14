@@ -310,6 +310,7 @@ trait PAYERegistrationConnect {
     } recover {
       case e: NotFoundException =>
         payeRegTimer.stop()
+        logResponse(e, "getAcknowledgementReference", "getting acknowledgement reference", regID)
         None
       case e: Exception =>
         payeRegTimer.stop()

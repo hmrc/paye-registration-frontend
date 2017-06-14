@@ -72,7 +72,7 @@ trait SummaryCtrl extends FrontendController with Actions with I18nSupport with 
   val submitRegistration = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     withCurrentProfile { profile =>
       invalidSubmissionGuard(profile) {
-        submissionService.submitRegistration(profile.registrationID) map {
+        submissionService.submitRegistration(profile) map {
           case Success => Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation())
           case Cancelled => Redirect(controllers.userJourney.routes.DashboardController.dashboard())
           case Failed => Redirect(controllers.errors.routes.ErrorController.failedSubmission())

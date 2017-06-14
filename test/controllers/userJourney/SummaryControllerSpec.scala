@@ -150,7 +150,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validPAYERegistrationAPI))
 
-      when(mockSubmissionService.submitRegistration(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(Success))
+      when(mockSubmissionService.submitRegistration(ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any())).thenReturn(Future.successful(Success))
 
       AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
         (result: Future[Result]) =>
@@ -162,7 +162,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validPAYERegistrationAPI))
 
-      when(mockSubmissionService.submitRegistration(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(Cancelled))
+      when(mockSubmissionService.submitRegistration(ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any())).thenReturn(Future.successful(Cancelled))
 
       AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
         (result: Future[Result]) =>
@@ -174,7 +174,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validPAYERegistrationAPI))
 
-      when(mockSubmissionService.submitRegistration(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(TimedOut))
+      when(mockSubmissionService.submitRegistration(ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any())).thenReturn(Future.successful(TimedOut))
 
       AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
         (result: Future[Result]) =>
@@ -185,7 +185,7 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validPAYERegistrationAPI))
 
-      when(mockSubmissionService.submitRegistration(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(Failed))
+      when(mockSubmissionService.submitRegistration(ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any())).thenReturn(Future.successful(Failed))
 
       AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
         (result: Future[Result]) =>

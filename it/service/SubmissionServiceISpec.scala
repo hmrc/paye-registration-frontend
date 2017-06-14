@@ -16,23 +16,33 @@
 
 package service
 
-import connectors.{PAYERegistrationConnector, Success}
-import itutil.{IntegrationSpecBase, WiremockHelper}
+import java.util.UUID
+
+import connectors.{KeystoreConnector, PAYERegistrationConnector, Success, Failed}
+import enums.{CacheKeys, UserCapacity}
+import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import play.api.libs.json.Json
 import play.api.{Application, Play}
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.SubmissionService
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.logging.SessionId
+import com.github.tomakehurst.wiremock.client.WireMock._
 
-class SubmissionServiceISpec extends IntegrationSpecBase {
+class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
   lazy val payeRegistrationConnector = Play.current.injector.instanceOf[PAYERegistrationConnector]
+  lazy val keystoreConnector = Play.current.injector.instanceOf[KeystoreConnector]
 
   val additionalConfiguration = Map(
     "microservice.services.paye-registration.host" -> s"$mockHost",
     "microservice.services.paye-registration.port" -> s"$mockPort",
+    "microservice.services.cachable.session-cache.host" -> s"$mockHost",
+    "microservice.services.cachable.session-cache.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
     "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng=="
   )
@@ -41,27 +51,70 @@ class SubmissionServiceISpec extends IntegrationSpecBase {
     .configure(additionalConfiguration)
     .build
 
-  implicit val hc = HeaderCarrier()
+  val sId = UUID.randomUUID().toString
+  implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sId)))
+
+  def currentProfile(regId: String) = CurrentProfile(
+    registrationID = regId,
+    completionCapacity = Some(UserCapacity.director.toString),
+    companyTaxRegistration = CompanyRegistrationProfile(
+      status = "acknowledged",
+      transactionId = "40-123456"
+    ),
+    language = "ENG",
+    payeRegistrationSubmitted = false
+  )
 
   "submitRegistration" should {
     "NOT send the submission if the regId is in whitelist" in {
       val regIdWhitelisted = "regWhitelist123"
 
-      val submissionService = new SubmissionService(payeRegistrationConnector)
-      def getResponse = submissionService.submitRegistration(regIdWhitelisted)
+      val submissionService = new SubmissionService(payeRegistrationConnector, keystoreConnector)
+      def getResponse = submissionService.submitRegistration(currentProfile(regIdWhitelisted))
 
       an[Exception] shouldBe thrownBy(await(getResponse))
     }
 
-    "send the submission if the regId is not in whitelist" in {
+    "send the submission and update keystore if the regId is not in whitelist" in {
       val regId = "12345"
 
       stubPut(s"/paye-registration/$regId/submit-registration", 200, "")
+      stubKeystoreCache(sId, CacheKeys.CurrentProfile.toString)
 
-      val submissionService = new SubmissionService(payeRegistrationConnector)
-      def getResponse = submissionService.submitRegistration(regId)
+      val submissionService = new SubmissionService(payeRegistrationConnector, keystoreConnector)
+      def getResponse = submissionService.submitRegistration(currentProfile(regId))
 
       await(getResponse) shouldBe Success
+
+      verify(putRequestedFor(urlEqualTo(s"/keystore/paye-registration-frontend/$sId/data/${CacheKeys.CurrentProfile.toString}"))
+        .withRequestBody(
+          equalToJson(Json.parse(
+            s"""{
+               |  "registrationID":"12345",
+               |  "completionCapacity":"director",
+               |  "companyTaxRegistration":{
+               |    "status":"acknowledged",
+               |    "transactionId":"40-123456"
+               |  },"language":"ENG",
+               |  "payeRegistrationSubmitted":true
+               |}
+             """.stripMargin).toString)
+        )
+      )
+    }
+
+    "send the submission and leave keystore unchanged if the DES submission fails" in {
+      val regId = "12345"
+
+      stubPut(s"/paye-registration/$regId/submit-registration", 400, "")
+      stubKeystoreCache(sId, CacheKeys.CurrentProfile.toString)
+
+      val submissionService = new SubmissionService(payeRegistrationConnector, keystoreConnector)
+      def getResponse = submissionService.submitRegistration(currentProfile(regId))
+
+      await(getResponse) shouldBe Failed
+
+      verify(0, putRequestedFor(urlEqualTo(s"/keystore/paye-registration-frontend/$sId/data/${CacheKeys.CurrentProfile.toString}")))
     }
   }
 }
