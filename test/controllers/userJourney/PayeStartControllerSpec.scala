@@ -58,8 +58,8 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
   }
 
   val fakeRequest = FakeRequest("GET", "/")
-  def validCurrentProfile(status: String) = CurrentProfile("testRegId", None, CompanyRegistrationProfile(status, "txId"), "en", false)
 
+  def validCurrentProfile(status: String) = CurrentProfile("testRegId", CompanyRegistrationProfile(status, "txId"), "en", false)
 
   override def beforeEach() {
     reset(mockPAYERegService)
@@ -195,7 +195,7 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
       "the users document is deleted and are going to start their application again but there wasn't a current profile in session" in new Setup {
         val testBusinessProfile = BusinessProfile(
           "testRegId",
-          Some("director"),
+          "director",
           "ENG"
         )
 

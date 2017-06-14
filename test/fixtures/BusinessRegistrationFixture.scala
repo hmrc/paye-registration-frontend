@@ -22,7 +22,7 @@ trait BusinessRegistrationFixture {
 
   lazy val validBusinessRegistrationResponse = BusinessProfile(
     "12345",
-    Some("director"),
+    "director",
     "ENG"
   )
 }

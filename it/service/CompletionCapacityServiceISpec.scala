@@ -19,7 +19,7 @@ package service
 import java.util.UUID
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, stubFor, urlMatching}
-import connectors.{KeystoreConnector, PAYERegistrationConnector}
+import connectors.{BusinessRegistrationConnector, KeystoreConnector, PAYERegistrationConnector}
 import enums.UserCapacity
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import models.view.CompletionCapacity
@@ -36,11 +36,13 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
 
 
   lazy val payeRegistrationConnector = Play.current.injector.instanceOf[PAYERegistrationConnector]
-  lazy val keystoreConnector = Play.current.injector.instanceOf[KeystoreConnector]
+  lazy val busRegConnector = Play.current.injector.instanceOf[BusinessRegistrationConnector]
 
   val additionalConfiguration = Map(
     "microservice.services.paye-registration.host" -> s"$mockHost",
     "microservice.services.paye-registration.port" -> s"$mockPort",
+    "microservice.services.business-registration.port" -> s"$mockHost",
+    "microservice.services.business-registration.port" -> s"$mockPort",
     "microservice.services.cachable.session-cache.host" -> s"$mockHost",
     "microservice.services.cachable.session-cache.port" -> s"$mockPort"
   )
@@ -57,75 +59,65 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
   "getCompletionCapacity" should {
     "return a completion capacity if one is stored in the backend" in {
 
-      stubFor(get(urlMatching(s"/paye-registration/$regID/capacity"))
+      stubFor(get(urlMatching(s"/business-registration/business-tax-registration"))
         .willReturn(
           aResponse().
             withStatus(200).
-            withBody(""""director"""")
+            withBody(
+              """
+                |{
+                | "registrationID" : "1234",
+                | "completionCapacity" : "Director",
+                | "language" : "EN"
+                |}
+                |"""".stripMargin)
         )
       )
 
-      val tstCap = new CompletionCapacityService(payeRegistrationConnector, keystoreConnector)
+      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
       val res = await(tstCap.getCompletionCapacity(regID))
 
       res shouldBe Some(CompletionCapacity(UserCapacity.director, ""))
     }
   }
 
-  "Get Completion Capacity from Key Store if PR returns 404" in {
+  "Return no Completion Capacity from BR (returns 404)" in {
 
     implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sId)))
 
-    stubFor(get(urlMatching(s"/paye-registration/$regID/capacity"))
+    stubFor(get(urlMatching(s"/business-registration/business-tax-registration"))
       .willReturn(
         aResponse().
           withStatus(404)
       )
     )
-    stubKeystoreMetadata(sId,regID,"tst company", "agent")
 
-    val tstCap = new CompletionCapacityService(payeRegistrationConnector, keystoreConnector)
+    val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
     val res = await(tstCap.getCompletionCapacity(regID))
 
-    res shouldBe Some(CompletionCapacity(UserCapacity.agent, ""))
+    res shouldBe None
 
   }
 
-  "Return None if there is no completion capacity in PR or Keystore" in {
+  "Return None if there is no completion capacity in the BR document" in {
 
     implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sId)))
 
-    stubFor(get(urlMatching(s"/paye-registration/$regID/capacity"))
-      .willReturn(
-        aResponse().
-          withStatus(404)
-      )
-    )
-
-    val keystoreUrl = s"/keystore/paye-registration-frontend/$sId"
-    stubFor(get(urlMatching(keystoreUrl))
+    stubFor(get(urlMatching(s"/business-registration/business-tax-registration"))
       .willReturn(
         aResponse().
           withStatus(200).
           withBody(
-            s"""{
-               |"id": "$sId",
-               |"data": {
-               | "CurrentProfile": {
-               |   "registrationID": "$regID",
-               |   "companyTaxRegistration": {
-               |      "status": "submitted",
-               |      "transactionId": "12345"
-               |   },
-               |   "language": "ENG"
-               |  }
-               |}
-               |}""".stripMargin
-          )
+            """
+              |{
+              | "registrationID" : "1234",
+              | "language" : "EN"
+              |}
+              |"""".stripMargin)
       )
     )
 
-    val tstCap = new CompletionCapacityService(payeRegistrationConnector, keystoreConnector)
+    val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
     val res = await(tstCap.getCompletionCapacity(regID))
 
     res shouldBe None

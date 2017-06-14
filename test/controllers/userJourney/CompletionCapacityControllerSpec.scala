@@ -49,7 +49,7 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
       override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(CurrentProfile(
           "12345",
-          Some("Director"),
+          "Director",
           CompanyRegistrationProfile("held", "txId"),
           "ENG",
           payeRegistrationSubmitted = false
@@ -69,7 +69,9 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
       }
     }
 
-    "return an OK if a capacity has not been found" in new Setup {
+    "return an OK if a capacity has NOT been found" in new Setup {
+      val capacity = CompletionCapacity(UserCapacity.director, "")
+
       when(mockCompletionCapacityService.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(None))
 

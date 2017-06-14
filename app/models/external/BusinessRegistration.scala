@@ -27,7 +27,7 @@ object BusinessRegistrationRequest {
 }
 
 case class BusinessProfile(registrationID: String,
-                           completionCapacity : Option[String],
+                           completionCapacity : String,
                            language: String)
 
 object BusinessProfile {
@@ -42,7 +42,6 @@ object CompanyRegistrationProfile {
 }
 
 case class CurrentProfile(registrationID: String,
-                          completionCapacity : Option[String],
                           companyTaxRegistration: CompanyRegistrationProfile,
                           language: String,
                           payeRegistrationSubmitted: Boolean)
@@ -51,7 +50,6 @@ object CurrentProfile {
 
   val reads = (
     (__ \ "registrationID").read[String] and
-      (__ \ "completionCapacity").readNullable[String] and
       (__ \ "companyTaxRegistration").read[CompanyRegistrationProfile] and
       (__ \ "language").read[String] and
       ((__ \ "payeRegistrationSubmitted").read[Boolean] or Reads.pure(false))

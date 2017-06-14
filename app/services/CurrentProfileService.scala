@@ -54,7 +54,7 @@ trait CurrentProfileSrv extends RegistrationWhitelist {
       }
       oRegStatus      <- payeRegistrationConnector.getStatus(businessProfile.registrationID)
       submitted       =  regSubmitted(oRegStatus)
-      currentProfile  = CurrentProfile(businessProfile.registrationID, businessProfile.completionCapacity, companyProfile, businessProfile.language, submitted)
+      currentProfile  = CurrentProfile(businessProfile.registrationID, companyProfile, businessProfile.language, submitted)
       _ <- keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, currentProfile)
     } yield {
       currentProfile

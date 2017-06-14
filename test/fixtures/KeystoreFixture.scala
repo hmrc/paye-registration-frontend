@@ -23,7 +23,7 @@ trait KeystoreFixture {
 
   lazy val validCurrentProfileResponse = BusinessProfile(
     "12345",
-    Some("Director"),
+    "Director",
     "ENG"
   )
 

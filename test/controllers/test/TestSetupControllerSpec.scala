@@ -53,7 +53,7 @@ class TestSetupControllerSpec extends PAYERegSpec {
       override val testPAYERegConnector = mockPayeRegConnector
       override val s4LService = mockS4LService
 
-      override def doBusinessProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = Future.successful(BusinessProfile("regId", None, "en"))
+      override def doBusinessProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = Future.successful(BusinessProfile("regId", "Director", "en"))
       override def doCoHoCompanyDetailsTearDown(regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
       override def doAddCoHoCompanyDetails(regId: String, companyName: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
       override def doIndividualRegTeardown(regId: String) (implicit request: Request[AnyContent]): Future[DownstreamOutcome.Value] = Future.successful(DownstreamOutcome.Success)
@@ -74,7 +74,7 @@ class TestSetupControllerSpec extends PAYERegSpec {
 
   "update-status" should {
     "return 200 for success" in new Setup {
-      mockBusinessRegFetch(Future.successful(BusinessProfile("regID", Some("Director"), "EN")))
+      mockBusinessRegFetch(Future.successful(BusinessProfile("regID", "Director", "EN")))
       when(mockPayeRegConnector.updateStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
@@ -85,7 +85,7 @@ class TestSetupControllerSpec extends PAYERegSpec {
     }
 
     "return 500 for failure" in new Setup {
-      mockBusinessRegFetch(Future.successful(BusinessProfile("regID", Some("Director"), "EN")))
+      mockBusinessRegFetch(Future.successful(BusinessProfile("regID", "Director", "EN")))
       when(mockPayeRegConnector.updateStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 

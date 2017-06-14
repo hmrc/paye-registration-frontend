@@ -78,7 +78,7 @@ class TestCoHoControllerSpec extends PAYERegSpec {
         mockFetchCurrentProfile()
         mockBusinessRegFetch(
           BusinessProfile(registrationID = "1",
-            completionCapacity = Some("director"),
+            completionCapacity = "director",
             language = "EN")
         )
         when(mockTestAPIConnector.setupCoHoCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))

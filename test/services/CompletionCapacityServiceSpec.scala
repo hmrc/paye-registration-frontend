@@ -16,7 +16,7 @@
 
 package services
 
-import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
+import connectors._
 import enums.{DownstreamOutcome, UserCapacity}
 import models.view.CompletionCapacity
 import org.mockito.ArgumentMatchers
@@ -33,11 +33,12 @@ class CompletionCapacityServiceSpec extends PAYERegSpec {
 
   val mockPAYERegConnector = mock[PAYERegistrationConnector]
   val mockKSConnector = mock[KeystoreConnector]
+  val mockBusRegConnector = mock[BusinessRegistrationConnector]
 
   class Setup {
     val service = new CompletionCapacitySrv {
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
-      override val keystoreConnector: KeystoreConnect = mockKSConnector
+      override val businessRegistrationConnector: BusinessRegistrationConnect = mockBusRegConnector
     }
   }
 

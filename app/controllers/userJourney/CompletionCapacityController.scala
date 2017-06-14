@@ -55,7 +55,7 @@ trait CompletionCapacityCtrl extends FrontendController with Actions with I18nSu
         withCurrentProfile { profile =>
           completionCapacityService.getCompletionCapacity(profile.registrationID) map {
             case Some(capacity) => Ok(CompletionCapacityView(CompletionCapacityForm.form.fill(capacity)))
-            case None => Ok(CompletionCapacityView(CompletionCapacityForm.form))
+            case None           => Ok(CompletionCapacityView(CompletionCapacityForm.form))
           }
         }
   }
