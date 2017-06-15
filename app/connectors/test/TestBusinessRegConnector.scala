@@ -19,13 +19,14 @@ package connectors.test
 import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
-import models.external.{BusinessRegistrationRequest, BusinessProfile}
+import models.external.{BusinessProfile, BusinessRegistrationRequest}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class TestBusinessRegConnector @Inject()() extends TestBusinessRegConnect with ServicesConfig {
@@ -43,4 +44,12 @@ trait TestBusinessRegConnect {
     http.POST[JsValue, BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration", json)
   }
 
+  def updateCompletionCapacity(regId: String, completionCapacity: String)(implicit hc: HeaderCarrier): Future[String] = {
+    http.POST[JsValue, JsValue](s"$businessRegUrl/business-registration/test-only/update-cc/$regId", Json.parse(
+      s"""
+        |{
+        | "cc" : "$completionCapacity"
+        |}
+      """.stripMargin)) map(_.toString)
+  }
 }

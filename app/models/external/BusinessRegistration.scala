@@ -27,7 +27,6 @@ object BusinessRegistrationRequest {
 }
 
 case class BusinessProfile(registrationID: String,
-                           completionCapacity : String,
                            language: String)
 
 object BusinessProfile {

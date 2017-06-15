@@ -57,7 +57,29 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
   val sId = UUID.randomUUID().toString
 
   "getCompletionCapacity" should {
-    "return a completion capacity if one is stored in the backend" in {
+    "return a completion capacity from PR if the PR document contains a CC" in {
+      stubFor(get(urlMatching(s"/paye-registration/$regID/capacity"))
+        .willReturn(
+          aResponse().
+            withStatus(200).
+            withBody(""""director"""")
+        )
+      )
+
+      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
+      val res = await(tstCap.getCompletionCapacity(regID))
+
+      res shouldBe Some(CompletionCapacity(UserCapacity.director, ""))
+    }
+
+    "return a completion capacity from BR if one is found in BR but NOT in PR" in {
+      stubFor(get(urlMatching(s"/paye-registration/$regID/capacity"))
+        .willReturn(
+          aResponse().
+            withStatus(404).
+            withBody(""""director"""")
+        )
+      )
 
       stubFor(get(urlMatching(s"/business-registration/business-tax-registration"))
         .willReturn(
@@ -79,49 +101,54 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
 
       res shouldBe Some(CompletionCapacity(UserCapacity.director, ""))
     }
-  }
 
-  "Return no Completion Capacity from BR (returns 404)" in {
-
-    implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sId)))
-
-    stubFor(get(urlMatching(s"/business-registration/business-tax-registration"))
-      .willReturn(
-        aResponse().
-          withStatus(404)
+    "return none if no CC is found in either PR or BR (BR 404)" in {
+      stubFor(get(urlMatching(s"/paye-registration/$regID/capacity"))
+        .willReturn(
+          aResponse().
+            withStatus(404)
+        )
       )
-    )
 
-    val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
-    val res = await(tstCap.getCompletionCapacity(regID))
-
-    res shouldBe None
-
-  }
-
-  "Return None if there is no completion capacity in the BR document" in {
-
-    implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sId)))
-
-    stubFor(get(urlMatching(s"/business-registration/business-tax-registration"))
-      .willReturn(
-        aResponse().
-          withStatus(200).
-          withBody(
-            """
-              |{
-              | "registrationID" : "1234",
-              | "language" : "EN"
-              |}
-              |"""".stripMargin)
+      stubFor(get(urlMatching(s"/business-registration/business-tax-registration"))
+        .willReturn(
+          aResponse().
+            withStatus(404)
+        )
       )
-    )
 
-    val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
-    val res = await(tstCap.getCompletionCapacity(regID))
+      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
+      val res = await(tstCap.getCompletionCapacity(regID))
 
-    res shouldBe None
+      res shouldBe None
+    }
 
+    "return none if no CC is found in either PR or BR (BR 200 no CC in document)" in {
+      stubFor(get(urlMatching(s"/paye-registration/$regID/capacity"))
+        .willReturn(
+          aResponse().
+            withStatus(404)
+        )
+      )
+
+      stubFor(get(urlMatching(s"/business-registration/business-tax-registration"))
+        .willReturn(
+          aResponse().
+            withStatus(200).
+            withBody(
+              """
+                |{
+                | "registrationID" : "1234",
+                | "language" : "EN"
+                |}
+                |"""".stripMargin)
+        )
+      )
+
+      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
+      val res = await(tstCap.getCompletionCapacity(regID))
+
+      res shouldBe None
+    }
   }
-
 }

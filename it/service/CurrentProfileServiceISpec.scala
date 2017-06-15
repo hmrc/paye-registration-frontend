@@ -80,7 +80,6 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
       val regIdWhitelisted = "regWhitelist123"
       val businessProfileWithRegIdWhitelisted = BusinessProfile(
         regIdWhitelisted,
-        "Director",
         "ENG"
       )
 
@@ -104,7 +103,6 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
       val regId = "12345"
       val businessProfile = BusinessProfile(
         regId,
-        "Director",
         "ENG"
       )
 
@@ -138,7 +136,6 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
       val regId = "12345"
       val businessProfile = BusinessProfile(
         regId,
-        "Director",
         "ENG"
       )
 

@@ -1,0 +1,19 @@
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+
+@import models.test.TestCC
+
+@(testCCForm: Form[TestCC])(implicit request: Request[_], messagesApi: Messages)
+
+<h1 class="form-title heading-xlarge" id="pageHeading">Enter Completion Capacity</h1>
+
+@govHelpers.form(action = controllers.test.routes.TestCCController.submitUpdateCC) {
+    <h2>Director, agent or other</h2>
+    <div class="inline form-group">
+    @govHelpers.input(
+        testCCForm("cc"),
+        '_label -> "Completion Capacity"
+    )
+    </div>
+
+    <button class="button" type="submit" id="continue" >Submit</button>
+}

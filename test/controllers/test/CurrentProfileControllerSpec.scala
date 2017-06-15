@@ -32,7 +32,7 @@ class CurrentProfileControllerSpec extends PAYERegSpec with KeystoreFixture {
 
   val mockTestBusRegConnector = mock[TestBusinessRegConnect]
 
-  val testProfile = BusinessProfile("testRegId", "testCapacity", "testLang")
+  val testProfile = BusinessProfile("testRegId", "testLang")
 
   class Setup {
     val controller = new BusinessProfileCtrl {

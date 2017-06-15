@@ -48,7 +48,6 @@ class CurrentProfileServiceSpec extends PAYERegSpec with BusinessRegistrationFix
 
   val validCurrentProfile = CurrentProfile(
                               validBusinessProfile.registrationID,
-                              validBusinessProfile.completionCapacity,
                               validCompanyProfile,
                               validBusinessProfile.language,
                               payeRegistrationSubmitted = false

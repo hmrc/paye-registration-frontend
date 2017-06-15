@@ -28,3 +28,6 @@ GET        /no-lookup-correspondence-address             controllers.test.TestAd
 GET        /setup/:companyName                           controllers.test.TestSetupController.testSetup(companyName: String)
 
 GET        /update-status/:status                        controllers.test.TestSetupController.updateStatus(status)
+
+GET        /update-cc                                    controllers.test.TestCCController.showUpdateCC
+POST       /update-cc                                    controllers.test.TestCCController.submitUpdateCC

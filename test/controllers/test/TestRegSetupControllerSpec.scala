@@ -18,7 +18,7 @@ package controllers.test
 
 import builders.AuthBuilder
 import connectors.PAYERegistrationConnector
-import connectors.test.TestPAYERegConnect
+import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector, TestPAYERegConnect}
 import enums.DownstreamOutcome
 import fixtures.BusinessRegistrationFixture
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
@@ -38,6 +38,7 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
   val mockPayeRegConnector = mock[TestPAYERegConnect]
   val mockPayeRegService = mock[PAYERegistrationSrv]
   val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
+  val mockTestBusRegConnector = mock[TestBusinessRegConnector]
 
   class Setup {
     val controller = new TestRegSetupCtrl {
@@ -47,11 +48,11 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
       override val messagesApi = mockMessages
       override val authConnector = mockAuthConnector
       override val keystoreConnector = mockKeystoreConnector
+      override val testBusinessRegConnector = mockTestBusRegConnector
 
       override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(CurrentProfile(
           "12345",
-          "Director",
           CompanyRegistrationProfile("held", "txId"),
           "ENG",
           payeRegistrationSubmitted = false
@@ -192,6 +193,9 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
         when(mockPayeRegConnector.addPAYERegistration(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
+        when(mockTestBusRegConnector.updateCompletionCapacity(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful("director"))
+
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetup, mockAuthConnector, request) { result =>
           status(result) shouldBe OK
         }
@@ -259,6 +263,9 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
         )
         when(mockPayeRegConnector.addPAYERegistration(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
+
+        when(mockTestBusRegConnector.updateCompletionCapacity(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful("director"))
 
         AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetup, mockAuthConnector, request) { result =>
           status(result) shouldBe INTERNAL_SERVER_ERROR

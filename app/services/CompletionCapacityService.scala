@@ -50,12 +50,18 @@ trait CompletionCapacitySrv {
   }
 
   def getCompletionCapacity(regId: String)(implicit hc: HeaderCarrier): Future[Option[CompletionCapacity]] = {
-    businessRegistrationConnector.retrieveCurrentProfile map { profile =>
-      Some(apiToView(profile.completionCapacity))
-    } recover {
-      case e: Throwable =>
-        Logger.warn(s"[CompletionCapacityService] - [getCompletionCapacity] - No completion capacity was found in business registration for regId $regId: reason ${e.getMessage}")
-        None
+    payeRegConnector.getCompletionCapacity(regId) flatMap {
+      case Some(prCC) => Future.successful(Some(apiToView(prCC)))
+      case None       => businessRegistrationConnector.retrieveCompletionCapacity map {
+        case Some(brCC) => Some(apiToView(brCC))
+        case None       =>
+          Logger.warn(s"[CompletionCapacityService] - [getCompletionCapacity] - BR document was found for regId $regId but it contained no completion capacity")
+          None
+      } recover {
+        case e: Throwable =>
+          Logger.warn(s"[CompletionCapacityService] - [getCompletionCapacity] - No document was found in business registration for regId $regId: reason ${e.getMessage}")
+          None
+      }
     }
   }
 

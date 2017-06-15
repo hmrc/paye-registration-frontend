@@ -48,7 +48,6 @@ class TestCacheControllerSpec extends PAYERegSpec {
         mockFetchCurrentProfile()
         mockBusinessRegFetch(
           BusinessProfile(registrationID = "1",
-                          completionCapacity = "director",
                           language = "EN")
         )
 

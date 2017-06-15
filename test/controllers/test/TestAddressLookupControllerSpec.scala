@@ -50,7 +50,6 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
       override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(CurrentProfile(
           "12345",
-          "Director",
           CompanyRegistrationProfile("held", "txId"),
           "ENG",
           payeRegistrationSubmitted = false

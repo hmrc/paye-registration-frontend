@@ -21,6 +21,7 @@ import mocks.MockMetrics
 import models.external.BusinessProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
+import play.api.libs.json.{JsValue, Json}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, NotFoundException}
 
@@ -66,6 +67,48 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
         .thenReturn(Future.failed(new RuntimeException("Runtime Exception")))
 
       intercept[RuntimeException](await(connector.retrieveCurrentProfile))
+    }
+  }
+
+  "retrieveCompletionCapacity" should {
+    "return an optional string if CC is found in the BR document" in new Setup {
+      when(mockWSHttp.GET[JsValue](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Json.parse(
+          """
+            |{
+            | "completionCapacity" : "director"
+            |}
+          """.stripMargin)))
+
+      await(connector.retrieveCompletionCapacity) shouldBe Some("director")
+    }
+
+    "return none if the CC isn't in the BR document" in new Setup {
+      when(mockWSHttp.GET[JsValue](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Json.parse("""{}""")))
+
+      await(connector.retrieveCompletionCapacity) shouldBe None
+    }
+
+    "throw a NotFoundException if the response code is a 404" in new Setup {
+      when(mockWSHttp.GET[JsValue](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new NotFoundException("Bad request")))
+
+      intercept[NotFoundException](await(connector.retrieveCompletionCapacity))
+    }
+
+    "throw a Forbidden exception if the request has been deemed unauthorised" in new Setup {
+      when(mockWSHttp.GET[JsValue](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new ForbiddenException("Forbidden")))
+
+      intercept[ForbiddenException](await(connector.retrieveCompletionCapacity))
+    }
+
+    "throw a Exception when something unexpected happened" in new Setup {
+      when(mockWSHttp.GET[JsValue](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new RuntimeException("Run time exception")))
+
+      intercept[RuntimeException](await(connector.retrieveCompletionCapacity))
     }
   }
 }

@@ -195,7 +195,6 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
       "the users document is deleted and are going to start their application again but there wasn't a current profile in session" in new Setup {
         val testBusinessProfile = BusinessProfile(
           "testRegId",
-          "director",
           "ENG"
         )
 

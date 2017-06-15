@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors._
-import connectors.test.{TestPAYERegConnect, TestPAYERegConnector}
+import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector, TestPAYERegConnect, TestPAYERegConnector}
 import enums.DownstreamOutcome
 import forms.test.{TestPAYEContactForm, TestPAYERegCompanyDetailsSetupForm, TestPAYERegSetupForm}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -38,6 +38,7 @@ class TestRegSetupController @Inject()(injPayeRegService:PAYERegistrationService
                                        injTestPAYERegConnector: TestPAYERegConnector,
                                        injKeystoreConnector: KeystoreConnector,
                                        injPayeRegistrationConnector: PAYERegistrationConnector,
+                                       injBusinessRegistrationConnector: TestBusinessRegConnector,
                                        injMessagesApi: MessagesApi)
   extends TestRegSetupCtrl {
   val authConnector = FrontendAuthConnector
@@ -46,6 +47,7 @@ class TestRegSetupController @Inject()(injPayeRegService:PAYERegistrationService
   val messagesApi = injMessagesApi
   val keystoreConnector = injKeystoreConnector
   val payeRegistrationConnector = injPayeRegistrationConnector
+  val testBusinessRegConnector = injBusinessRegistrationConnector
 }
 
 trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
@@ -53,6 +55,7 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
   val payeRegService: PAYERegistrationSrv
   val testPAYERegConnector: TestPAYERegConnect
   val keystoreConnector: KeystoreConnect
+  val testBusinessRegConnector: TestBusinessRegConnect
 
   val regTeardown = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
@@ -95,10 +98,16 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
           TestPAYERegSetupForm.form.bindFromRequest.fold(
             errors =>
               Future.successful(BadRequest(views.html.pages.test.payeRegistrationSetup(errors, profile.registrationID, profile.companyTaxRegistration.transactionId))),
-            success => testPAYERegConnector.addPAYERegistration(success) map {
-              case DownstreamOutcome.Success => Ok("PAYE Registration set up successfully")
-              case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Registration")
-            }
+            success =>
+              for {
+                setupReg <- testPAYERegConnector.addPAYERegistration(success)
+                updateCC <- testBusinessRegConnector.updateCompletionCapacity(profile.registrationID, success.completionCapacity)
+              } yield {
+                setupReg match {
+                  case DownstreamOutcome.Success => Ok("PAYE Registration set up successfully")
+                  case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Registration")
+                }
+              }
           )
         }
   }
