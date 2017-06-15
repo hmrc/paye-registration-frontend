@@ -56,7 +56,6 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
 
   def currentProfile(regId: String) = CurrentProfile(
     registrationID = regId,
-    completionCapacity = Some(UserCapacity.director.toString),
     companyTaxRegistration = CompanyRegistrationProfile(
       status = "acknowledged",
       transactionId = "40-123456"
@@ -91,7 +90,6 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
           equalToJson(Json.parse(
             s"""{
                |  "registrationID":"12345",
-               |  "completionCapacity":"director",
                |  "companyTaxRegistration":{
                |    "status":"acknowledged",
                |    "transactionId":"40-123456"
