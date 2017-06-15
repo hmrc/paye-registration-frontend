@@ -310,6 +310,7 @@ trait PAYERegistrationConnect {
     } recover {
       case e: NotFoundException =>
         payeRegTimer.stop()
+        logResponse(e, "getAcknowledgementReference", "getting acknowledgement reference", regID)
         None
       case e: Exception =>
         payeRegTimer.stop()
@@ -323,6 +324,10 @@ trait PAYERegistrationConnect {
       payeRegTimer.stop()
       Some((json \ "status").as[PAYEStatus.Value](Reads.enumNameReads(PAYEStatus)))
     } recover {
+      case notFound: NotFoundException =>
+        payeRegTimer.stop()
+        Logger.info(s"[PAYERegistrationConnector] [getStatus] received NotFound when checking status for regId $regId")
+        None
       case e : Throwable =>
         payeRegTimer.stop()
         logResponse(e, "getStatus", "getting PAYE registration document status", regId)

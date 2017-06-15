@@ -59,7 +59,8 @@ trait KeystoreMock {
           regID,
           Some("Director"),
           CompanyRegistrationProfile("held", "txId"),
-          "ENG"
+          "ENG",
+          payeRegistrationSubmitted = false
         ))))
   }
 }

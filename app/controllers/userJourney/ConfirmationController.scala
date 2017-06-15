@@ -50,11 +50,11 @@ trait ConfirmationCtrl extends FrontendController with Actions with I18nSupport 
   val showConfirmation = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        withCurrentProfile { profile =>
+        withCurrentProfile( { profile =>
           confirmationService.getAcknowledgementReference(profile.registrationID) flatMap {
               case Some(ref) => Future.successful(Ok(ConfirmationPage(ref)))
               case None => Future.successful(InternalServerError(views.html.pages.error.restart()))
             }
-        }
+        }, checkSubmissionStatus = false)
   }
 }

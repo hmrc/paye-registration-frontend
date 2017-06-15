@@ -18,24 +18,38 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import connectors.{DESResponse, PAYERegistrationConnect, PAYERegistrationConnector}
+import connectors._
+import enums.CacheKeys
+import models.external.CurrentProfile
 import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.RegistrationWhitelist
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
 @Singleton
-class SubmissionService @Inject()(payeRegistrationConn: PAYERegistrationConnector) extends SubmissionSrv {
-  override val payeRegistrationConnector = payeRegistrationConn
+class SubmissionService @Inject()(
+                                   injPayeRegistrationConn: PAYERegistrationConnector,
+                                   injKeystoreConnector: KeystoreConnector
+                                   ) extends SubmissionSrv {
+  override val payeRegistrationConnector = injPayeRegistrationConn
+  override val keystoreConnector = injKeystoreConnector
 }
 
 trait SubmissionSrv extends RegistrationWhitelist {
 
   val payeRegistrationConnector: PAYERegistrationConnect
+  val keystoreConnector: KeystoreConnect
 
-  def submitRegistration(regId: String)(implicit hc: HeaderCarrier): Future[DESResponse] = {
-    ifRegIdNotWhitelisted(regId) {
-      payeRegistrationConnector.submitRegistration(regId)
+  def submitRegistration(profile: CurrentProfile)(implicit hc: HeaderCarrier): Future[DESResponse] = {
+    ifRegIdNotWhitelisted(profile.registrationID) {
+      payeRegistrationConnector.submitRegistration(profile.registrationID).flatMap {
+        case Success =>
+          keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, profile.copy(payeRegistrationSubmitted = true)).map {
+          _ => Success
+        }
+        case other => Future.successful(other)
+      }
     }
   }
 

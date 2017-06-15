@@ -58,7 +58,7 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
   }
 
   val fakeRequest = FakeRequest("GET", "/")
-  def validCurrentProfile(status: String) = CurrentProfile("testRegId", None, CompanyRegistrationProfile(status, "txId"), "en")
+  def validCurrentProfile(status: String) = CurrentProfile("testRegId", None, CompanyRegistrationProfile(status, "txId"), "en", false)
 
 
   override def beforeEach() {

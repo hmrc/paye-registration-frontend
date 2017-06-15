@@ -43,105 +43,49 @@ class SessionProfileSpec extends PAYERegSpec with DateUtil with InternalExceptio
 
   implicit val hc = HeaderCarrier()
   def testFunc : Future[Result] = Future.successful(Ok)
+  implicit val request = FakeRequest()
 
-  val validProfile = CurrentProfile("regId", None, CompanyRegistrationProfile("held", "txId"), "")
+  def validProfile(regSubmitted: Boolean) = CurrentProfile("regId", None, CompanyRegistrationProfile("held", "txId"), "", regSubmitted)
 
   "calling withCurrentProfile" should {
-    "return an Ok status when a profile is found" in {
-      implicit val request = FakeRequest()
+    "carry out the passed function" when {
+      "payeRegistrationSubmitted is 'false'" in {
 
-      mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile))
+        mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile(false)))
 
-      when(mockPayeRegistrationConnector.getStatus(ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(PAYEStatus.draft)))
+        val result = await(TestSession.withCurrentProfile { _ => testFunc })
+        status(result) shouldBe OK
+      }
 
-      val result = await(TestSession.withCurrentProfile { _ => testFunc})
-      status(result) shouldBe OK
+      "payeRegistrationSubmitted is 'true' and withCurrentProfile is called specifying no check of submission status" in {
+
+        mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile(true)))
+
+        val result = await(TestSession.withCurrentProfile ({ _ => testFunc }, checkSubmissionStatus = false))
+        status(result) shouldBe OK
+      }
     }
 
-    "proceed even if the status is held and the request path is for /confirmation" in {
-      implicit val confirmationRequest = FakeRequest("GET", "/register-for-paye/application-submitted")
+    "redirect to dashboard" when {
+      "payeRegistrationSubmitted is 'true'" in {
 
-      mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile))
+        mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile(true)))
 
-      when(mockPayeRegistrationConnector.getStatus(ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(PAYEStatus.held)))
-
-      val result = await(TestSession.withCurrentProfile { _ => testFunc})
-      status(result) shouldBe OK
+        val result = await(TestSession.withCurrentProfile { _ => testFunc })
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.DashboardController.dashboard()}")
+      }
     }
 
-    "proceed even if the status is submitted and the request path is for /confirmation" in {
-      implicit val confirmationRequest = FakeRequest("GET", "/register-for-paye/application-submitted")
+    "redirect to start of journey" when {
+      "currentProfile is not in Keystore" in {
 
-      mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile))
+        mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, None)
 
-      when(mockPayeRegistrationConnector.getStatus(ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(PAYEStatus.submitted)))
-
-      val result = await(TestSession.withCurrentProfile { _ => testFunc})
-      status(result) shouldBe OK
-    }
-
-    "redirect to dashboard if the users document status is held" in {
-      implicit val request = FakeRequest()
-
-      mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile))
-
-      when(mockPayeRegistrationConnector.getStatus(ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(PAYEStatus.held)))
-
-      val result = await(TestSession.withCurrentProfile { _ => testFunc})
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.DashboardController.dashboard().url}")
-    }
-
-    "redirect to dashboard if the users document status is submitted" in {
-      implicit val request = FakeRequest()
-
-      mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile))
-
-      when(mockPayeRegistrationConnector.getStatus(ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(PAYEStatus.submitted)))
-
-      val result = await(TestSession.withCurrentProfile { _ => testFunc})
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.DashboardController.dashboard().url}")
-    }
-
-    "redirect to dashboard if the users document status is something else but valid" in {
-      implicit val request = FakeRequest()
-
-      mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile))
-
-      when(mockPayeRegistrationConnector.getStatus(ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(PAYEStatus.acknowledged)))
-
-      val result = await(TestSession.withCurrentProfile { _ => testFunc})
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.DashboardController.dashboard().url}")
-    }
-
-    "throw a MissingStatus exception is the users registration document doesn't contain a status" in {
-      implicit val request = FakeRequest()
-
-      mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile))
-
-      when(mockPayeRegistrationConnector.getStatus(ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(None))
-
-      intercept[MissingDocumentStatus](await(TestSession.withCurrentProfile { _ => testFunc}))
-    }
-
-    "redirect to post-sign-in when no profile is found" in {
-      implicit val request = FakeRequest()
-
-      mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, None)
-
-      val result = await(TestSession.withCurrentProfile { _ => testFunc})
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.PayeStartController.startPaye().url}")
+        val result = await(TestSession.withCurrentProfile { _ => testFunc })
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.PayeStartController.startPaye()}")
+      }
     }
   }
-
 }

@@ -31,17 +31,17 @@ trait CachingStub {
   implicit lazy val encryptionFormat = new JsonEncryptor[JsObject]()
 
   def stubKeystoreMetadata(session: String, regId: String, companyName: String) = {
-    val keystoreUrl = s"/keystore/paye-registration-frontend/${session}"
+    val keystoreUrl = s"/keystore/paye-registration-frontend/$session"
     stubFor(get(urlMatching(keystoreUrl))
       .willReturn(
         aResponse().
           withStatus(200).
           withBody(
             s"""{
-               |"id": "${session}",
+               |"id": "$session",
                |"data": {
                | "CurrentProfile": {
-               |   "registrationID": "${regId}",
+               |   "registrationID": "$regId",
                |   "completionCapacity": "Director",
                |   "companyTaxRegistration": {
                |      "status": "submitted",
@@ -50,7 +50,7 @@ trait CachingStub {
                |   "language": "ENG"
                |  },
                |  "CoHoCompanyDetails": {
-               |    "company_name": "${companyName}",
+               |    "company_name": "$companyName",
                |    "registered_office_address": {
                |      "line1":"Line1",
                |      "line2":"Line2",
@@ -58,6 +58,22 @@ trait CachingStub {
                |    }
                |  }
                |}
+               |}""".stripMargin
+          )
+      )
+    )
+  }
+
+  def stubKeystoreGet(session: String, data: String) = {
+    val keystoreUrl = s"/keystore/paye-registration-frontend/$session"
+    stubFor(get(urlMatching(keystoreUrl))
+      .willReturn(
+        aResponse().
+          withStatus(200).
+          withBody(
+            s"""{
+               |"id": "$session",
+               |"data": $data
                |}""".stripMargin
           )
       )
@@ -85,6 +101,21 @@ trait CachingStub {
       .willReturn(
         aResponse()
           .withStatus(200)
+      )
+    )
+  }
+
+  def stubKeystoreCache(sessionId: String, key: String) = {
+    stubFor(put(urlMatching(s"/keystore/paye-registration-frontend/$sessionId/data/$key"))
+      .willReturn(
+        aResponse()
+          .withStatus(200).
+          withBody(
+          s"""{
+             |"id": "$sessionId",
+             |"data": {}
+             |}""".stripMargin
+          )
       )
     )
   }
