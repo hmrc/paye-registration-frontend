@@ -119,7 +119,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
   val businessContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        withCurrentProfile({ profile =>
+        withCurrentProfile { profile =>
           companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map {
             details =>
               details.businessContactDetails match {
@@ -127,7 +127,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
                 case _ => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form))
               }
           }
-        })
+        }
   }
 
   val submitBusinessContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
