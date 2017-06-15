@@ -48,7 +48,7 @@ trait TestBusinessRegConnect {
     http.POST[JsValue, JsValue](s"$businessRegUrl/business-registration/test-only/update-cc/$regId", Json.parse(
       s"""
         |{
-        | "cc" : "$completionCapacity"
+        | "completionCapacity" : "$completionCapacity"
         |}
       """.stripMargin)) map(_.toString)
   }
