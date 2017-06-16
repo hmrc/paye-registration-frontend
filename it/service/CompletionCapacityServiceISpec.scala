@@ -72,6 +72,21 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
       res shouldBe Some(CompletionCapacity(UserCapacity.director, ""))
     }
 
+    "return a completion capacity from PR if the PR document contains a CC but is not director or agent" in {
+      stubFor(get(urlMatching(s"/paye-registration/$regID/capacity"))
+        .willReturn(
+          aResponse().
+            withStatus(200).
+            withBody(""""friend"""")
+        )
+      )
+
+      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
+      val res = await(tstCap.getCompletionCapacity(regID))
+
+      res shouldBe Some(CompletionCapacity(UserCapacity.other, "friend"))
+    }
+
     "return a completion capacity from BR if one is found in BR but NOT in PR" in {
       stubFor(get(urlMatching(s"/paye-registration/$regID/capacity"))
         .willReturn(
@@ -100,6 +115,35 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
       val res = await(tstCap.getCompletionCapacity(regID))
 
       res shouldBe Some(CompletionCapacity(UserCapacity.director, ""))
+    }
+
+    "return a completion capacity from BR if one is found in BR but NOT in PR and it isn't director or agent" in {
+      stubFor(get(urlMatching(s"/paye-registration/$regID/capacity"))
+        .willReturn(
+          aResponse().
+            withStatus(404)
+        )
+      )
+
+      stubFor(get(urlMatching(s"/business-registration/business-tax-registration"))
+        .willReturn(
+          aResponse().
+            withStatus(200).
+            withBody(
+              """
+                |{
+                | "registrationID" : "1234",
+                | "completionCapacity" : "aunt",
+                | "language" : "EN"
+                |}
+                |"""".stripMargin)
+        )
+      )
+
+      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
+      val res = await(tstCap.getCompletionCapacity(regID))
+
+      res shouldBe Some(CompletionCapacity(UserCapacity.other, "aunt"))
     }
 
     "return none if no CC is found in either PR or BR (BR 404)" in {
