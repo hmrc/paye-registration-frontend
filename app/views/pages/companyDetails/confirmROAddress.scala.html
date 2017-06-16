@@ -1,4 +1,4 @@
-@import helpers.templates.{addressDisplay, hiddenDetails}
+@import helpers.templates.{addressBlockDisplay, hiddenDetails}
 @import models.Address
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @(companyName : String, address : Address)(implicit request: Request[_], messages: Messages)
@@ -11,7 +11,7 @@
 
     @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.confirmRO()) {
         <div class="form-group">
-            @addressDisplay(address, "ro-address")
+            @addressBlockDisplay(address, "ro-address")
         </div>
 
         <div class="form-group">
