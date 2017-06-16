@@ -32,9 +32,7 @@ trait CachingStub {
 
   def stubKeystoreMetadata(session: String,
                            regId: String,
-                           companyName: String,
-                           completionCapacity: String = "Director"
-                          ) = {
+                           companyName: String) = {
 
     val keystoreUrl = s"/keystore/paye-registration-frontend/$session"
     stubFor(get(urlMatching(keystoreUrl))
@@ -47,7 +45,6 @@ trait CachingStub {
                |"data": {
                | "CurrentProfile": {
                |   "registrationID": "$regId",
-               |   "completionCapacity": "Director",
                |   "companyTaxRegistration": {
                |      "status": "submitted",
                |      "transactionId": "12345"
