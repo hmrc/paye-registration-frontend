@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package fixtures
+package models.test
 
-import models.external.BusinessProfile
+import play.api.libs.json.Json
 
-trait BusinessRegistrationFixture {
+case class TestCC(cc: String)
 
-  lazy val validBusinessRegistrationResponse = BusinessProfile(
-    "12345",
-    "ENG"
-  )
+object TestCC {
+  implicit val format = Json.format[TestCC]
 }

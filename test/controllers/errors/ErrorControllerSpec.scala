@@ -23,7 +23,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Codec, Request, Result}
+import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.DeskproService
@@ -53,7 +53,6 @@ class ErrorControllerSpec extends PAYERegSpec {
       override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_],  hc: HeaderCarrier): Future[Result] = {
         f(CurrentProfile(
           "12345",
-          Some("Director"),
           CompanyRegistrationProfile("held", "txId"),
           "ENG",
           payeRegistrationSubmitted = false

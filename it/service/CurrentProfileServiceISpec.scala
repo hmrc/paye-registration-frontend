@@ -80,12 +80,10 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
       val regIdWhitelisted = "regWhitelist123"
       val businessProfileWithRegIdWhitelisted = BusinessProfile(
         regIdWhitelisted,
-        None,
         "ENG"
       )
 
       val expectedCurrentProfile = CurrentProfile(regIdWhitelisted,
-                                                  None,
                                                   CompanyRegistrationProfile("held", s"fakeTxId-$regIdWhitelisted"),
                                                   "ENG",
                                                   payeRegistrationSubmitted = false)
@@ -105,7 +103,6 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
       val regId = "12345"
       val businessProfile = BusinessProfile(
         regId,
-        None,
         "ENG"
       )
 
@@ -117,8 +114,8 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
           |   }
           |}""".stripMargin
 
-      val expectedCurrentProfile = CurrentProfile(regId,
-        None,
+      val expectedCurrentProfile = CurrentProfile(
+        regId,
         CompanyRegistrationProfile("held", s"000-434-$regId"),
         "ENG",
         payeRegistrationSubmitted = false)
@@ -139,7 +136,6 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
       val regId = "12345"
       val businessProfile = BusinessProfile(
         regId,
-        None,
         "ENG"
       )
 
@@ -162,7 +158,6 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
           |}""".stripMargin
 
       val expectedCurrentProfile = CurrentProfile(regId,
-        None,
         CompanyRegistrationProfile("held", s"000-434-$regId"),
         "ENG",
         payeRegistrationSubmitted = true)

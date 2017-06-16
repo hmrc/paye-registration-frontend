@@ -21,6 +21,7 @@ import javax.inject.{Inject, Singleton}
 import config.WSHttp
 import models.external.BusinessProfile
 import play.api.Logger
+import play.api.libs.json.JsValue
 import services.{MetricsService, MetricsSrv}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
@@ -45,6 +46,26 @@ trait BusinessRegistrationConnect {
   def retrieveCurrentProfile(implicit hc: HeaderCarrier, rds: HttpReads[BusinessProfile]): Future[BusinessProfile] = {
     val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
     http.GET[BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration") recover {
+      case e: NotFoundException =>
+        businessRegistrationTimer.stop()
+        Logger.error(s"[BusinessRegistrationConnector] [retrieveCurrentProfile] - Received a NotFound status code when expecting current profile from Business-Registration")
+        throw e
+      case e: ForbiddenException =>
+        businessRegistrationTimer.stop()
+        Logger.error(s"[BusinessRegistrationConnector] [retrieveCurrentProfile] - Received a Forbidden status code when expecting current profile from Business-Registration")
+        throw e
+      case e: Exception =>
+        businessRegistrationTimer.stop()
+        Logger.error(s"[BusinessRegistrationConnector] [retrieveCurrentProfile] - Received error when expecting current profile from Business-Registration - Error ${e.getMessage}")
+        throw e
+    }
+  }
+
+  def retrieveCompletionCapacity(implicit hc: HeaderCarrier, rds: HttpReads[JsValue]): Future[Option[String]] = {
+    val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
+    http.GET[JsValue](s"$businessRegUrl/business-registration/business-tax-registration") map {
+      json => (json \ "completionCapacity").asOpt[String]
+    } recover {
       case e: NotFoundException =>
         businessRegistrationTimer.stop()
         Logger.error(s"[BusinessRegistrationConnector] [retrieveCurrentProfile] - Received a NotFound status code when expecting current profile from Business-Registration")

@@ -99,7 +99,6 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       val businessProfile = BusinessProfile(
         regId,
-        None,
         "ENG"
       )
 

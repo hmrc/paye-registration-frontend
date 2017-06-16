@@ -45,7 +45,6 @@ class SubmissionServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAP
 
   def currentProfile(regId: String) = CurrentProfile(
     registrationID = regId,
-    completionCapacity = Some(UserCapacity.director.toString),
     companyTaxRegistration = CompanyRegistrationProfile(
       status = "acknowledged",
       transactionId = "40-123456"

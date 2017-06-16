@@ -81,6 +81,7 @@ trait TestSetupCtrl extends BusinessProfileCtrl with TestCoHoCtrl with TestRegSe
             _ <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(businessProfile.registrationID, companyName))
             _ <- log("RegTeardown", doIndividualRegTeardown(businessProfile.registrationID))
             _ <- log("S4LTeardown", doTearDownS4L(businessProfile.registrationID))
+            _ <- log("CCUpdate", testBusinessRegConnector.updateCompletionCapacity(businessProfile.registrationID, "director"))
           } yield Redirect(controllers.userJourney.routes.PayeStartController.startPaye())
 
   }

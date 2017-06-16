@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package fixtures
+package forms.test
 
-import models.external.BusinessProfile
+import models.test.TestCC
+import play.api.data.Form
+import play.api.data.Forms._
 
-trait BusinessRegistrationFixture {
-
-  lazy val validBusinessRegistrationResponse = BusinessProfile(
-    "12345",
-    "ENG"
+object TestCCUpdateForm {
+  val form = Form(
+    mapping(
+      "cc" -> nonEmptyText
+    )(TestCC.apply)(TestCC.unapply)
   )
 }

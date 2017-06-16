@@ -27,7 +27,6 @@ class CurrentProfileSpec extends PAYERegSpec {
 
         val tstCurrentProfile = CurrentProfile(
           registrationID = "54321",
-          completionCapacity = Some("Director"),
           companyTaxRegistration = CompanyRegistrationProfile(
             status = "submitted",
             transactionId = "12345"
@@ -39,7 +38,6 @@ class CurrentProfileSpec extends PAYERegSpec {
         val tstJson = Json.parse(
           """{
             |  "registrationID": "54321",
-            |  "completionCapacity": "Director",
             |  "companyTaxRegistration": {
             |     "status": "submitted",
             |     "transactionId": "12345"
@@ -56,7 +54,6 @@ class CurrentProfileSpec extends PAYERegSpec {
 
       val tstCurrentProfile = CurrentProfile(
         registrationID = "54321",
-        completionCapacity = Some("Director"),
         companyTaxRegistration = CompanyRegistrationProfile(
           status = "submitted",
           transactionId = "12345"
@@ -68,7 +65,6 @@ class CurrentProfileSpec extends PAYERegSpec {
       val tstJson = Json.parse(
         """{
           |  "registrationID": "54321",
-          |  "completionCapacity": "Director",
           |  "companyTaxRegistration": {
           |     "status": "submitted",
           |     "transactionId": "12345"

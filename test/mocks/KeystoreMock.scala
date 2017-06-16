@@ -57,7 +57,6 @@ trait KeystoreMock {
     when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CurrentProfile]]()))
         .thenReturn(Future.successful(Some(CurrentProfile(
           regID,
-          Some("Director"),
           CompanyRegistrationProfile("held", "txId"),
           "ENG",
           payeRegistrationSubmitted = false

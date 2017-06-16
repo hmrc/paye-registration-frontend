@@ -45,7 +45,7 @@ class SessionProfileSpec extends PAYERegSpec with DateUtil with InternalExceptio
   def testFunc : Future[Result] = Future.successful(Ok)
   implicit val request = FakeRequest()
 
-  def validProfile(regSubmitted: Boolean) = CurrentProfile("regId", None, CompanyRegistrationProfile("held", "txId"), "", regSubmitted)
+  def validProfile(regSubmitted: Boolean) = CurrentProfile("regId", CompanyRegistrationProfile("held", "txId"), "", regSubmitted)
 
   "calling withCurrentProfile" should {
     "carry out the passed function" when {

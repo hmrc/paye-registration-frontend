@@ -18,23 +18,30 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import connectors.{KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
+import connectors._
 import enums.{DownstreamOutcome, UserCapacity}
 import models.view.CompletionCapacity
+import play.api.Logger
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class CompletionCapacityService @Inject()(injPAYERegistrationConnector: PAYERegistrationConnector) extends CompletionCapacitySrv {
+class CompletionCapacityService @Inject()(
+                                           injPAYERegistrationConnector: PAYERegistrationConnector,
+                                           injBusinessregistrationConnector: BusinessRegistrationConnector
+                                         ) extends CompletionCapacitySrv {
 
   override val payeRegConnector = injPAYERegistrationConnector
+  override val businessRegistrationConnector = injBusinessregistrationConnector
 }
 
 trait CompletionCapacitySrv {
 
   val payeRegConnector: PAYERegistrationConnect
+  val businessRegistrationConnector: BusinessRegistrationConnect
+
 
   def saveCompletionCapacity(completionCapacity: CompletionCapacity, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     payeRegConnector.upsertCompletionCapacity(regId, viewToAPI(completionCapacity)) map {
@@ -43,9 +50,19 @@ trait CompletionCapacitySrv {
   }
 
   def getCompletionCapacity(regId: String)(implicit hc: HeaderCarrier): Future[Option[CompletionCapacity]] = {
-    for{
-      capacity <- payeRegConnector.getCompletionCapacity(regId)
-    } yield capacity.map (apiToView)
+    payeRegConnector.getCompletionCapacity(regId) flatMap {
+      case Some(prCC) => Future.successful(Some(apiToView(prCC)))
+      case None       => businessRegistrationConnector.retrieveCompletionCapacity map {
+        case Some(brCC) => Some(apiToView(brCC))
+        case None       =>
+          Logger.warn(s"[CompletionCapacityService] - [getCompletionCapacity] - BR document was found for regId $regId but it contained no completion capacity")
+          None
+      } recover {
+        case e: Throwable =>
+          Logger.warn(s"[CompletionCapacityService] - [getCompletionCapacity] - No document was found in business registration for regId $regId: reason ${e.getMessage}")
+          None
+      }
+    }
   }
 
   private[services] def viewToAPI(completionCapacity: CompletionCapacity): String = {

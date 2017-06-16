@@ -16,7 +16,7 @@
 
 package services
 
-import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
+import connectors._
 import enums.{DownstreamOutcome, UserCapacity}
 import models.view.CompletionCapacity
 import org.mockito.ArgumentMatchers
@@ -32,10 +32,13 @@ class CompletionCapacityServiceSpec extends PAYERegSpec {
   implicit val hc = HeaderCarrier()
 
   val mockPAYERegConnector = mock[PAYERegistrationConnector]
+  val mockKSConnector = mock[KeystoreConnector]
+  val mockBusRegConnector = mock[BusinessRegistrationConnector]
 
   class Setup {
     val service = new CompletionCapacitySrv {
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
+      override val businessRegistrationConnector: BusinessRegistrationConnect = mockBusRegConnector
     }
   }
 
@@ -48,27 +51,6 @@ class CompletionCapacityServiceSpec extends PAYERegSpec {
         .thenReturn(Future.successful(jobTitle))
 
       await(service.saveCompletionCapacity(tstCapacity, "12345")) shouldBe DownstreamOutcome.Success
-    }
-  }
-
-  "Calling saveCompletionCapacity" should {
-    "return a view model when there is a completion capacity in the database" in new Setup {
-
-      val jobTitle = "director"
-      val tstCapacity = CompletionCapacity(UserCapacity.director, "")
-
-      when(mockPAYERegConnector.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(jobTitle)))
-
-      await(service.getCompletionCapacity("12345")) shouldBe Some(tstCapacity)
-    }
-
-    "return an empty option when there is no completion capacity in the database" in new Setup {
-
-      when(mockPAYERegConnector.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(None))
-
-      await(service.getCompletionCapacity("12345")) shouldBe None
     }
   }
 
