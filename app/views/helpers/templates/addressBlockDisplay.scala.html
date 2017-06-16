@@ -1,0 +1,17 @@
+@import models.Address
+@(address : Address, blockId : String)
+
+    <span id="@{blockId}-address-line-1">@address.line1</span><br />
+    <span id="@{blockId}-address-line-2">@address.line2</span>
+    @address.line3.map { item =>
+        <br /><span id="@{blockId}-address-line-3">@item</span>
+    }
+    @address.line4.map { item =>
+        <br /><span id="@{blockId}-address-line-4">@item</span>
+    }
+    @address.postCode.map { item =>
+        <br /><span id="@{blockId}-post-code">@item</span>
+    }
+    @address.country.map { item =>
+        <br /><span id="@{blockId}-country">@item</span>
+    }
