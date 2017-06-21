@@ -8,7 +8,7 @@
     <h2 id="error-summary-heading" class="h3-heading">@heading</h2>
     <ul class="js-error-summary-messages">
         @if(form.hasErrors) {
-        @form.errors.map { error =>
+        @form.errors.distinct.map { error =>
         <li role="tooltip" @dataJourney.map(page => Html(s"""data-journey="${page}:error:${error.key}""""))>
             <a href='#@{error.key.replace("noFieldsCompleted-","")}'
                id="@{error.key}-error-summary"
