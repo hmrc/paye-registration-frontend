@@ -44,6 +44,23 @@ trait CoHoAPIFixture {
       ),
       Officer(
         name = Name(Some("test2"), Some("test22"), "testb", Some("Mr")),
+        role = "director",
+        resignedOn = None,
+        appointmentLink = None
+      )
+    )
+  )
+
+  val invalidOfficerList = OfficerList(
+    items = Seq(
+      Officer(
+        name = Name(Some("test1"), Some("test11"), "testa", Some("Mr")),
+        role = "cic-manager",
+        resignedOn = None,
+        appointmentLink = None
+      ),
+      Officer(
+        name = Name(Some("test2"), Some("test22"), "testb", Some("Mr")),
         role = "corporate-director",
         resignedOn = None,
         appointmentLink = None
