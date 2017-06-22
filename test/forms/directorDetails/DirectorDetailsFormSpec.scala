@@ -170,6 +170,24 @@ class DirectorDetailsFormSpec extends UnitSpec {
         boundForm.data shouldBe data
       }
     }
-  }
 
+    "Fail to bind when there are duplicates" in {
+      val data = Map(
+        "nino[0]" -> "A",
+        "nino[1]" -> "JX556677D",
+        "nino[2]" -> "JX556677D"
+      )
+
+      val errs = Seq(
+        FormError("nino[0]", "errors.invalid.nino"),
+        FormError("nino[1]", "errors.invalid.nino"),
+        FormError("nino[2]", "errors.invalid.nino")
+      )
+
+      val boundForm = testForm.bind(data)
+      boundForm.errors shouldBe List(
+        FormError("", "")
+      )
+    }
+  }
 }
