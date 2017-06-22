@@ -21,6 +21,7 @@ import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, KeystoreFixture}
 import models.external.{BusinessProfile, CoHoCompanyDetailsModel}
+import models.view.Directors
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
@@ -86,6 +87,11 @@ class CoHoAPIServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFi
   }
 
   "Calling getDirectorDetails" should {
+    "return the nothing when there are no directors details in the Officer list in CoHo API" in new Setup {
+      when(mockCoHoAPIConnector.getOfficerList(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(invalidOfficerList))
+
+      await(service.getDirectorDetails("testTransactionId")) shouldBe Directors(Map())
+    }
     "return the directors details when there is Officer list in CoHo API" in new Setup {
       when(mockCoHoAPIConnector.getOfficerList(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(validOfficerList))
 
