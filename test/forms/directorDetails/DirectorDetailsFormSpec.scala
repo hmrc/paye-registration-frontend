@@ -145,17 +145,16 @@ class DirectorDetailsFormSpec extends UnitSpec {
       )
 
       val errs = Seq(
+        FormError("", "errors.duplicate.nino"),
         FormError("nino[0]", "errors.invalid.nino"),
         FormError("nino[2]", "errors.invalid.nino"),
         FormError("nino[3]", "errors.invalid.nino"),
         FormError("nino[4]", "errors.invalid.nino"),
-        FormError("nino[5]", "errors.invalid.nino"),
         FormError("nino[6]", "errors.invalid.nino"),
         FormError("nino[7]", "errors.invalid.nino"),
         FormError("nino[8]", "errors.invalid.nino"),
         FormError("nino[9]", "errors.invalid.nino"),
         FormError("nino[10]", "errors.invalid.nino"),
-        FormError("nino[11]", "errors.invalid.nino"),
         FormError("nino[12]", "errors.invalid.nino"),
         FormError("nino[13]", "errors.invalid.nino"),
         FormError("nino[14]", "errors.invalid.nino")
@@ -170,6 +169,23 @@ class DirectorDetailsFormSpec extends UnitSpec {
         boundForm.data shouldBe data
       }
     }
-  }
 
+    "Fail to bind when there are duplicates" in {
+      val data = Map(
+        "nino[0]" -> "JX556677D",
+        "nino[1]" -> "JX556677D"
+      )
+
+      val errs = Seq(
+        FormError("nino[0]", "errors.invalid.nino"),
+        FormError("nino[1]", "errors.invalid.nino"),
+        FormError("nino[2]", "errors.invalid.nino")
+      )
+
+      val boundForm = testForm.bind(data)
+      boundForm.errors shouldBe List(
+        FormError("", List("errors.duplicate.nino"))
+      )
+    }
+  }
 }

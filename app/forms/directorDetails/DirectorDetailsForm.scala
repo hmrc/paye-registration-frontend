@@ -17,8 +17,10 @@
 package forms.directorDetails
 
 import models.view.{Ninos, UserEnteredNino}
+import play.api.Logger
 import play.api.data.Forms._
 import play.api.data.format.Formatter
+import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError, Forms, Mapping}
 import utils.Formatters
 import utils.Validators.isValidNino
@@ -33,21 +35,31 @@ object DirectorDetailsForm {
     }
 
     def bind(key: String, data: Map[String, String]) = {
+      def emptyForm = if(getIndex(key) != "0") false else {
+        data.map{
+          case ("csrfToken", v) => ""
+          case (k, v)           => v
+        }.forall( _ == "")
+      }
 
-      val emptyForm = data.map{
-        case ("csrfToken", v) => ""
-        case (k, v)           => v
-      }.forall( _ == "")
+      def trimNino(nino: String): String = nino.replaceAll("\\s", "").toUpperCase
 
-      if(getIndex(key) == "0" && emptyForm) {
-        Left(Seq(FormError("noFieldsCompleted-nino[0]", "pages.directorDetails.errors.noneCompleted")))
-        // TODO: Add noFieldsCompleted as a string constant as it's used here, in OneOfManyForm and in views
-      } else {
-        data.getOrElse(key,"") match {
-          case ""   => Right(UserEnteredNino(getIndex(key), None))
-          case nino if isValidNino(nino.trim) => Right(UserEnteredNino(getIndex(key), Some(nino.replaceAll("\\s", "").toUpperCase)))
-          case _ => Left(Seq(FormError(key, "errors.invalid.nino")))
-        }
+      def duplicates: Boolean = if(getIndex(key) != "0") false else {
+        val ninoList = data.filter(tuple => isValidNino(trimNino(tuple._2))).toList map(ninoList => trimNino(ninoList._2))
+        ninoList.size != ninoList.distinct.size
+      }
+
+      def nino = data.getOrElse(key,"")
+
+      def showNinoError: Boolean = !(nino == "" || isValidNino(trimNino(nino)))
+
+      (emptyForm, duplicates, showNinoError, nino) match {
+        case (true, _, _, _)              => Left(Seq(FormError("noFieldsCompleted-nino[0]", "pages.directorDetails.errors.noneCompleted")))
+        case (_, true, true, _)           => Left(Seq(FormError("", "errors.duplicate.nino"), FormError(key, "errors.invalid.nino")))
+        case (_, true, false, _)          => Left(Seq(FormError("", "errors.duplicate.nino")))
+        case (_, false, true, _)          => Left(Seq(FormError(key, "errors.invalid.nino")))
+        case (_, false, false, "")        => Right(UserEnteredNino(getIndex(key), None))
+        case (_, false, false, validNino) => Right(UserEnteredNino(getIndex(key), Some(trimNino(validNino))))
       }
     }
 
@@ -56,11 +68,9 @@ object DirectorDetailsForm {
 
   val userNino: Mapping[UserEnteredNino] = Forms.of[UserEnteredNino](userNinoFormatter)
 
-
   val form = Form(
     mapping(
       "nino" -> list(userNino)
     )(Ninos.apply)(Ninos.unapply)
   )
-
 }

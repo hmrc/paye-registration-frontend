@@ -2,10 +2,15 @@
 
 @errs = @{form.errors.filter(_.key.contains("noFieldsCompleted"))}
 
-<div class="@if(errs.nonEmpty) {form-field--error}">
+<div class="@if(errs.nonEmpty) {form-field--error} @if(form.globalErrors.nonEmpty) {form-field--error}">
     @errs.map { err =>
         <span class="error-notification" id="@{err.key}" role="tooltip">
             @messages(err.message)
+        </span>
+    }
+    @if(form.globalErrors.nonEmpty) {
+        <span class="error-notification" id="@{form.globalError.get.key}" role="tooltip">
+            @messages(form.globalError.get.message)
         </span>
     }
     @html

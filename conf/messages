@@ -28,6 +28,7 @@ errors.invalid.email                                    = The email address you 
 errors.invalid.phoneNumber                              = The phone number you have provided is invalid
 errors.invalid.mobileNumber                             = The mobile phone number you have provided is invalid
 errors.invalid.nino                                     = National Insurance number is in the wrong format
+errors.duplicate.nino                                   = You''ve entered the same National Insurance number more than once
 errors.invalid.sic.noEntry                              = Tell us what the company does
 errors.invalid.sic.overCharLimit                        = Enter a business description using 100 characters or less
 errors.invalid.sic.invalidChars                         = Enter a business description using valid characters
