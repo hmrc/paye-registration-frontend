@@ -35,36 +35,29 @@ object DirectorDetailsForm {
     }
 
     def bind(key: String, data: Map[String, String]) = {
-      def emptyForm = data.map{
-        case ("csrfToken", v) => ""
-        case (k, v)           => v
-      }.forall( _ == "")
+      def emptyForm = if(getIndex(key) != "0") false else {
+        data.map{
+          case ("csrfToken", v) => ""
+          case (k, v)           => v
+        }.forall( _ == "")
+      }
 
-      def duplicates: Boolean = {
+      def duplicates: Boolean = if(getIndex(key) != "0") false else {
         val ninoList = data.filter(tuple => isValidNino(tuple._2)).toList map(ninoList => ninoList._2)
         ninoList.size != ninoList.distinct.size
       }
 
-      if(getIndex(key) == "0" && emptyForm) {
-        Left(Seq(FormError("noFieldsCompleted-nino[0]", "pages.directorDetails.errors.noneCompleted")))
-        // TODO: Add noFieldsCompleted as a string constant as it's used here, in OneOfManyForm and in views
-      } else {
+      val nino = data.getOrElse(key,"").trim
 
-        val dupes = if(getIndex(key) == "0" && duplicates) {
-          Seq(FormError("", "errors.duplicate.nino"))
-        } else {
-          Seq.empty
-        }
+      def showNinoError: Boolean = !(nino == "" || isValidNino(nino))
 
-        data.getOrElse(key,"") match {
-          case ""   => Right(UserEnteredNino(getIndex(key), None))
-          case nino if isValidNino(nino.trim) => if(duplicates) {
-            Left(Seq(FormError("", "errors.duplicate.nino")))
-          } else {
-            Right(UserEnteredNino(getIndex(key), Some(nino.replaceAll("\\s", "").toUpperCase)))
-          }
-          case _ => Left(Seq(FormError(key, "errors.invalid.nino")) ++ dupes)
-        }
+      (emptyForm, duplicates, showNinoError, nino) match {
+        case (true, _, _, _)              => Left(Seq(FormError("noFieldsCompleted-nino[0]", "pages.directorDetails.errors.noneCompleted")))
+        case (_, true, true, _)           => Left(Seq(FormError("", "errors.duplicate.nino"), FormError(key, "errors.invalid.nino")))
+        case (_, true, false, _)          => Left(Seq(FormError("", "errors.duplicate.nino")))
+        case (_, false, true, _)          => Left(Seq(FormError(key, "errors.invalid.nino")))
+        case (_, false, false, "")        => Right(UserEnteredNino(getIndex(key), None))
+        case (_, false, false, validNino) => Right(UserEnteredNino(getIndex(key), Some(validNino.replaceAll("\\s", "").toUpperCase)))
       }
     }
 
