@@ -43,7 +43,7 @@ trait CompletionCapacitySrv {
   val businessRegistrationConnector: BusinessRegistrationConnect
 
 
-  def saveCompletionCapacity(completionCapacity: CompletionCapacity, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def saveCompletionCapacity(regId: String, completionCapacity: CompletionCapacity)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     payeRegConnector.upsertCompletionCapacity(regId, viewToAPI(completionCapacity)) map {
       _ => DownstreamOutcome.Success
     }
@@ -52,11 +52,14 @@ trait CompletionCapacitySrv {
   def getCompletionCapacity(regId: String)(implicit hc: HeaderCarrier): Future[Option[CompletionCapacity]] = {
     payeRegConnector.getCompletionCapacity(regId) flatMap {
       case Some(prCC) => Future.successful(Some(apiToView(prCC)))
-      case None       => businessRegistrationConnector.retrieveCompletionCapacity map {
-        case Some(brCC) => Some(apiToView(brCC))
+      case None       => businessRegistrationConnector.retrieveCompletionCapacity flatMap {
+        case Some(brCC) =>
+          payeRegConnector.upsertCompletionCapacity(regId, brCC) flatMap {
+            _ => Future.successful(Some(apiToView(brCC)))
+          }
         case None       =>
           Logger.warn(s"[CompletionCapacityService] - [getCompletionCapacity] - BR document was found for regId $regId but it contained no completion capacity")
-          None
+          Future.successful(None)
       } recover {
         case e: Throwable =>
           Logger.warn(s"[CompletionCapacityService] - [getCompletionCapacity] - No document was found in business registration for regId $regId: reason ${e.getMessage}")

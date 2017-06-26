@@ -50,7 +50,7 @@ class CompletionCapacityServiceSpec extends PAYERegSpec {
       when(mockPAYERegConnector.upsertCompletionCapacity(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(jobTitle))
 
-      await(service.saveCompletionCapacity(tstCapacity, "12345")) shouldBe DownstreamOutcome.Success
+      await(service.saveCompletionCapacity("12345", tstCapacity)) shouldBe DownstreamOutcome.Success
     }
   }
 

@@ -67,7 +67,7 @@ trait CompletionCapacityCtrl extends FrontendController with Actions with I18nSu
           CompletionCapacityForm.form.bindFromRequest.fold(
             errors => Future.successful(BadRequest(CompletionCapacityView(errors))),
             success => {
-              completionCapacityService.saveCompletionCapacity(success, profile.registrationID) map {
+              completionCapacityService.saveCompletionCapacity(profile.registrationID, success) map {
                 _ => Redirect(routes.CompanyDetailsController.tradingName())
               }
             }
