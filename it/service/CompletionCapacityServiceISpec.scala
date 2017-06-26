@@ -111,6 +111,8 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
         )
       )
 
+      stubPatch(s"/paye-registration/$regID/capacity", 200, "\"director\"")
+
       val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
       val res = await(tstCap.getCompletionCapacity(regID))
 
@@ -139,6 +141,8 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
                 |"""".stripMargin)
         )
       )
+
+      stubPatch(s"/paye-registration/$regID/capacity", 200, "\"aunt\"")
 
       val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
       val res = await(tstCap.getCompletionCapacity(regID))

@@ -99,7 +99,7 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
         "completionCapacityOther" -> ""
       )
 
-      when(mockCompletionCapacityService.saveCompletionCapacity(ArgumentMatchers.any[CompletionCapacity](), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockCompletionCapacityService.saveCompletionCapacity(ArgumentMatchers.anyString(), ArgumentMatchers.any[CompletionCapacity]())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitCompletionCapacity, mockAuthConnector, request) { result =>
