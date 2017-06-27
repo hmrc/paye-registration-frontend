@@ -492,4 +492,105 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
     }
   }
+
+  "Business Contact Details" should {
+
+    val contactDetails = {
+      s"""
+         |{
+         |  "firstName": "fName",
+         |  "middleName": "mName",
+         |  "surname": "sName",
+         |  "email": "email@email.zzz",
+         |  "telephoneNumber": "0987654321",
+         |  "mobileNumber": "1234567890"
+         |}""".stripMargin
+    }
+
+    "get prepoulated from Business Registration" in {
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubPayeRegDocumentStatus(regId)
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      stubGet(s"/paye-registration/$regId/contact-details", 404, "")
+      stubGet(s"/business-registration/$regId/contact-details", 200, contactDetails)
+
+      val response = await(buildClient("/business-contact-details")
+        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .get())
+
+      response.status shouldBe 200
+      val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
+      mdtpCookieData("csrfToken") shouldNot be("")
+      mdtpCookieData("sessionId") shouldBe SessionId
+      mdtpCookieData("userId") shouldBe userId
+
+      val document = Jsoup.parse(response.body)
+      document.title() shouldBe "What are the company contact details?"
+      document.getElementById("businessEmail").text shouldBe "email@email.zzz"
+      document.getElementById("mobileNumber").text shouldBe "1234567890"
+      document.getElementById("phoneNumber").text shouldBe "0987654321"
+    }
+    "get prepoulated from Paye Registration" in {
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubPayeRegDocumentStatus(regId)
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      stubGet(s"/paye-registration/$regId/contact-details", 200, contactDetails)
+
+      val response = await(buildClient("/business-contact-details")
+        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .get())
+
+      response.status shouldBe 200
+      val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
+      mdtpCookieData("csrfToken") shouldNot be("")
+      mdtpCookieData("sessionId") shouldBe SessionId
+      mdtpCookieData("userId") shouldBe userId
+
+
+      val document = Jsoup.parse(response.body)
+      document.title() shouldBe "What are the company contact details?"
+      document.getElementById("businessEmail").text shouldBe "email@email.zzz"
+      document.getElementById("mobileNumber").text shouldBe "1234567890"
+      document.getElementById("phoneNumber").text shouldBe "0987654321"
+    }
+    "not be prepoulated if no data is found in Business Registration or Paye Registration" in {
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubPayeRegDocumentStatus(regId)
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      stubGet(s"/paye-registration/$regId/contact-details", 404, "")
+      stubGet(s"/business-registration/$regId/contact-details", 404, "")
+
+      val roDoc = s"""{"line1":"1","line2":"2","postCode":"pc"}"""
+      val payeDoc =s"""{
+                      |"companyName": "${companyName}",
+                      |"tradingName": {"differentName":false},
+                      |"roAddress": ${roDoc}
+                      |}""".stripMargin
+
+      stubS4LGet(regId, "CompanyDetails", payeDoc)
+
+      val response = await(buildClient("/business-contact-details")
+        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .get())
+
+      response.status shouldBe 200
+      val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
+      mdtpCookieData("csrfToken") shouldNot be("")
+      mdtpCookieData("sessionId") shouldBe SessionId
+      mdtpCookieData("userId") shouldBe userId
+
+
+      val document = Jsoup.parse(response.body)
+      document.title() shouldBe "What are the company contact details?"
+      document.getElementById("businessEmail").text shouldBe ""
+      document.getElementById("mobileNumber").text shouldBe ""
+      document.getElementById("phoneNumber").text shouldBe ""
+    }
+  }
 }

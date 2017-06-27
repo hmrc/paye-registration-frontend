@@ -18,7 +18,7 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import connectors.{KeystoreConnector, S4LConnect, S4LConnector}
+import connectors.{S4LConnect, S4LConnector}
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
