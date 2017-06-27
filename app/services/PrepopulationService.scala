@@ -19,6 +19,12 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import connectors.{BusinessRegistrationConnect, BusinessRegistrationConnector}
+import models.DigitalContactDetails
+import models.view.PAYEContactDetails
+import uk.gov.hmrc.play.http.HeaderCarrier
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class PrepopulationService @Inject()(injBusinessRegistrationConnector: BusinessRegistrationConnector) extends PrepopulationSrv {
@@ -29,5 +35,18 @@ trait PrepopulationSrv {
 
   val busRegConnector: BusinessRegistrationConnect
 
+  def getBusinessContactDetails(regId: String)(implicit hc: HeaderCarrier): Future[Option[DigitalContactDetails]] = {
+    busRegConnector.retrieveContactDetails(regId) map {
+      case Some(contactDetails) => Some(DigitalContactDetails(contactDetails.digitalContactDetails.email,
+                                                              contactDetails.digitalContactDetails.mobileNumber,
+                                                              contactDetails.digitalContactDetails.phoneNumber))
+      case None => None
+    }
+  }
 
+  def saveContactDetails(regId: String, contactDetails: DigitalContactDetails)(implicit hc: HeaderCarrier): Future[DigitalContactDetails] = {
+    busRegConnector.upsertContactDetails(regId, PAYEContactDetails(name = "", digitalContactDetails = contactDetails)) map {
+      _ => contactDetails
+    }
+  }
 }

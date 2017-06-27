@@ -70,17 +70,36 @@ trait BusinessRegistrationConnect {
     }
   }
 
-  def retrieveContactDetails(regId: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYEContactDetails]): Future[PAYEContactDetails] = {
+  def retrieveContactDetails(regId: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYEContactDetails]): Future[Option[PAYEContactDetails]] = {
     val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
-    implicit val reads = PAYEContactDetails.prepopFormat
+    implicit val rds = PAYEContactDetails.prepopReads
     http.GET[PAYEContactDetails](s"$businessRegUrl/business-registration/$regId/contact-details") map {
       details =>
         businessRegistrationTimer.stop()
-        details
+        Some(details)
     } recover {
+      case notfound: NotFoundException =>
+        businessRegistrationTimer.stop()
+        None
       case e =>
         businessRegistrationTimer.stop()
-        throw logResponse(e, "retrieveContactDetails", "retrieving contact details", Some(regId))
+        logResponse(e, "retrieveContactDetails", "retrieving contact details")
+        None
+    }
+  }
+
+  def upsertContactDetails(regId: String, contactDetails: PAYEContactDetails)(implicit hc: HeaderCarrier): Future[PAYEContactDetails] = {
+    val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
+    implicit val wts = PAYEContactDetails.prepopWrites
+    http.POST[PAYEContactDetails, JsValue](s"$businessRegUrl/business-registration/$regId/contact-details", contactDetails) map {
+      _ =>
+        businessRegistrationTimer.stop()
+        contactDetails
+    } recover {
+      case e: Exception =>
+        businessRegistrationTimer.stop()
+        logResponse(e, "upsertContactDetails", "upserting contact details")
+        contactDetails
     }
   }
 

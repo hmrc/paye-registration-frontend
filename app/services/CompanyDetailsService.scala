@@ -34,13 +34,15 @@ class CompanyDetailsService @Inject()(injPAYERegistrationConnector: PAYERegistra
                                       injCoHoAPIService: IncorporationInformationService,
                                       injS4LService: S4LService,
                                       injCompRegConnector : CompanyRegistrationConnector,
-                                      injCohoAPIConnector: IncorporationInformationConnector) extends CompanyDetailsSrv {
+                                      injCohoAPIConnector: IncorporationInformationConnector,
+                                      injPrepopulationService: PrepopulationService) extends CompanyDetailsSrv {
 
   override val payeRegConnector = injPAYERegistrationConnector
   override val compRegConnector = injCompRegConnector
   override val cohoAPIConnector = injCohoAPIConnector
   override val cohoService = injCoHoAPIService
   override val s4LService = injS4LService
+  override val prepopService = injPrepopulationService
 }
 
 trait CompanyDetailsSrv extends RegistrationWhitelist {
@@ -50,6 +52,7 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
   val cohoAPIConnector: IncorporationInformationConnect
   val cohoService: IncorporationInformationSrv
   val s4LService: S4LSrv
+  val prepopService: PrepopulationSrv
 
   def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
     s4LService.fetchAndGet[CompanyDetailsView](CacheKeys.CompanyDetails.toString, regId) flatMap {
@@ -58,18 +61,19 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
         oDetails <- ifRegIdNotWhitelisted(regId) {
           payeRegConnector.getCompanyDetails(regId)
         }
-        details  <- convertOrCreateCompanyDetailsView(oDetails, txId)
+        details  <- convertOrCreateCompanyDetailsView(oDetails, regId, txId)
         viewDetails <- saveToS4L(details, regId)
       } yield viewDetails
     }
   }
 
-  private[services] def convertOrCreateCompanyDetailsView(oAPI: Option[CompanyDetailsAPI], txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+  private[services] def convertOrCreateCompanyDetailsView(oAPI: Option[CompanyDetailsAPI], regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
     oAPI match {
       case Some(detailsAPI) => Future.successful(apiToView(detailsAPI))
       case None => for {
         details   <- cohoService.getStoredCompanyDetails
-      } yield CompanyDetailsView(details.companyName, None, details.roAddress, None, None)
+        bcd       <- prepopService.getBusinessContactDetails(regId)
+      } yield CompanyDetailsView(details.companyName, None, details.roAddress, None, bcd)
     }
   }
 
@@ -83,8 +87,9 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
         saveToS4L(incompleteView, regId) map {_ => DownstreamOutcome.Success},
       completeAPI =>
         for {
-          details   <- payeRegConnector.upsertCompanyDetails(regId, completeAPI)
-          clearData <- s4LService.clear(regId)
+          contactDetail <- prepopService.saveContactDetails(regId, viewModel.businessContactDetails.get)
+          details       <- payeRegConnector.upsertCompanyDetails(regId, completeAPI)
+          clearData     <- s4LService.clear(regId)
         } yield DownstreamOutcome.Success
       )
   }

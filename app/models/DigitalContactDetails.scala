@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json, Writes}
 
 case class DigitalContactDetails(email : Option[String],
                                   mobileNumber : Option[String],
@@ -24,4 +24,14 @@ case class DigitalContactDetails(email : Option[String],
 
 object DigitalContactDetails {
   implicit val format = Json.format[DigitalContactDetails]
+
+  val prepopWrites: Writes[DigitalContactDetails] = new Writes[DigitalContactDetails] {
+    def writes(contactDetails: DigitalContactDetails): JsObject = {
+      val jsonEmail = contactDetails.email.fold(Json.obj())(email => Json.obj("email" -> email))
+      val jsonMobileNumber = contactDetails.mobileNumber.fold(Json.obj())(mobile => Json.obj("mobileNumber" -> mobile))
+      val jsonTelephoneNumber = contactDetails.phoneNumber.fold(Json.obj())(tel => Json.obj("telephoneNumber" -> tel))
+
+      jsonEmail ++ jsonMobileNumber ++ jsonTelephoneNumber
+    }
+  }
 }
