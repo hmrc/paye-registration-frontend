@@ -73,7 +73,7 @@ object PAYEContactDetails {
             .dropRight(1)
             .toList
 
-          if(middleSplit.nonEmpty) Some(middleSplit.reduceLeft(_ + " " + _)) else None
+          if(middleSplit.nonEmpty) Some(middleSplit.mkString(" ")) else None
         }
         val lastName = if(split.length < 2) None else Some(split.last)
 

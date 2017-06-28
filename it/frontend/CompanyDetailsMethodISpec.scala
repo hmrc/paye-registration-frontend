@@ -602,77 +602,35 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       document.getElementById("mobileNumber").attr("value") shouldBe ""
       document.getElementById("phoneNumber").attr("value") shouldBe ""
     }
-  }
 
-  "POST Business Contact Details" should {
-    val csrfToken = UUID.randomUUID().toString
-
-    "upsert the contact details in Business Registration" in {
-      val newEmail = "newEmail@email.biz.co.uk"
-      val newTelephoneNumber = "02123456789"
-      val newMobileNumber = "07123456789"
-
+    "not be prepoulated if no data is found in Paye Registration and error is returned from Business Registration" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId, companyName)
 
+      stubGet(s"/paye-registration/$regId/contact-details", 404, "")
+      stubGet(s"/business-registration/$regId/contact-details", 403, "")
+
       val roDoc = s"""{"line1":"1","line2":"2","postCode":"pc"}"""
       val payeDoc =s"""{
-                      |   "companyName": "$companyName",
-                      |   "tradingName": {"differentName":false},
-                      |   "roAddress": $roDoc,
-                      |   "ppobAddress": $roDoc,
-                      |   "businessContactDetails": {
-                      |     "email": "email@email.zzz",
-                      |     "mobileNumber": "1234567890",
-                      |     "phoneNumber": "0987654321"
-                      |   }
+                      |"companyName": "${companyName}",
+                      |"tradingName": {"differentName":false},
+                      |"roAddress": ${roDoc}
                       |}""".stripMargin
+
       stubS4LGet(regId, "CompanyDetails", payeDoc)
 
-      val updatedPayeDoc =
-        s"""{
-           |   "companyName": "${companyName}",
-           |   "roAddress": ${roDoc},
-           |   "ppobAddress": ${roDoc},
-           |   "businessContactDetails": {
-           |     "email": "$newEmail",
-           |     "mobileNumber": "$newMobileNumber"
-           |   }
-           |}""".stripMargin
-      stubPatch(s"/paye-registration/${regId}/company-details", 200, updatedPayeDoc)
+      val response = await(buildClient("/business-contact-details")
+        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .get())
 
-      val updatedContactDetail =
-        s"""
-           |{
-           |   "email": "$newEmail",
-           |   "telephoneNumber": "$newTelephoneNumber",
-           |   "mobileNumber": "$newMobileNumber"
-           |}
-         """.stripMargin
-      stubPost(s"/business-registration/${regId}/contact-details", 200, updatedContactDetail)
+      response.status shouldBe 200
 
-      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
-
-      val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
-      val fResponse = buildClient("/business-contact-details").
-        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
-        post(Map(
-          "csrfToken" -> Seq("xxx-ignored-xxx"),
-          "businessEmail" -> Seq(s"$newEmail"),
-          "phoneNumber" -> Seq(s"$newTelephoneNumber"),
-          "mobileNumber" -> Seq(s"$newMobileNumber")
-        ))
-
-      val response = await(fResponse)
-      response.status shouldBe 303
-      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/what-company-does")
-
-      val reqPosts = findAll(postRequestedFor(urlMatching(s"/business-registration/${regId}/contact-details")))
-      val captor = reqPosts.get(0)
-      val json = Json.parse(captor.getBodyAsString)
-
-      json shouldBe Json.parse(updatedContactDetail)
+      val document = Jsoup.parse(response.body)
+      document.title() shouldBe "What are the company contact details?"
+      document.getElementById("businessEmail").attr("value") shouldBe ""
+      document.getElementById("mobileNumber").attr("value") shouldBe ""
+      document.getElementById("phoneNumber").attr("value") shouldBe ""
     }
   }
 }

@@ -43,7 +43,8 @@ class CompanyDetailsController @Inject()(
                                           injCohoService: IncorporationInformationService,
                                           injMessagesApi: MessagesApi,
                                           injPayeRegistrationConnector: PAYERegistrationConnector,
-                                          injAddressLookupService: AddressLookupService)
+                                          injAddressLookupService: AddressLookupService,
+                                          injPrepopulationService: PrepopulationService)
   extends CompanyDetailsCtrl {
   val authConnector = FrontendAuthConnector
   val s4LService = injS4LService
@@ -53,6 +54,7 @@ class CompanyDetailsController @Inject()(
   val messagesApi = injMessagesApi
   val addressLookupService = injAddressLookupService
   val payeRegistrationConnector = injPayeRegistrationConnector
+  val prepopService = injPrepopulationService
 }
 
 trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
@@ -61,6 +63,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
   val companyDetailsService: CompanyDetailsSrv
   val cohoService: IncorporationInformationSrv
   val addressLookupService: AddressLookupSrv
+  val prepopService: PrepopulationSrv
 
   val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user => implicit request =>
@@ -120,11 +123,15 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
     implicit user =>
       implicit request =>
         withCurrentProfile { profile =>
-          companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+          companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) flatMap {
             details =>
               details.businessContactDetails match {
-                case Some(bcd) => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form.fill(bcd)))
-                case _ => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form))
+                case Some(bcd) => Future.successful(Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form.fill(bcd))))
+                case _ =>
+                  prepopService.getBusinessContactDetails(profile.registrationID) map {
+                    case Some(prepopBCD) => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form.fill(prepopBCD)))
+                    case _ => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form))
+                  }
               }
           }
         }

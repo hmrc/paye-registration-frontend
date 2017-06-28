@@ -60,14 +60,14 @@ class TestPAYERegConnectorSpec extends PAYERegSpec with PAYERegistrationFixture 
   "Calling addTestCompanyDetails" should {
     "return a successful outcome for a successful add of Company Details" in new Setup {
       mockFetchCurrentProfile("54321")
-      when(mockPAYERegConnector.upsertCompanyDetails(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.upsertCompanyDetails(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCompanyDetailsAPI))
 
       await(connector.addTestCompanyDetails(validCompanyDetailsAPI, "54321")) shouldBe DownstreamOutcome.Success
     }
     "return a failed outcome for an unsuccessful add of Company Details" in new Setup {
       mockFetchCurrentProfile("54321")
-      when(mockPAYERegConnector.upsertCompanyDetails(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.upsertCompanyDetails(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new RuntimeException("tst")))
 
       await(connector.addTestCompanyDetails(validCompanyDetailsAPI, "54321")) shouldBe DownstreamOutcome.Failure

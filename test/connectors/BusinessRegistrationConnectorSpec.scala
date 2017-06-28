@@ -115,17 +115,15 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
   }
 
   "retrieveContactDetails" should {
-
     val regId = "12345"
 
     val validContactDetails = PAYEContactDetails("Test Name", DigitalContactDetails(Some("email@test.test"), Some("012345"), Some("543210")))
 
-    "return an optional string if contact details are found in the BR document" in new Setup {
+    "return an optional PAYE Contact Details if contact details are found in Business Registration" in new Setup {
       when(mockWSHttp.GET[PAYEContactDetails](ArgumentMatchers.contains(s"/business-registration/$regId/contact-details"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validContactDetails))
 
-      await(connector.retrieveContactDetails(regId)) shouldBe validContactDetails
+      await(connector.retrieveContactDetails(regId)) shouldBe Some(validContactDetails)
     }
   }
 }
-0
