@@ -58,13 +58,13 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
         oDetails <- ifRegIdNotWhitelisted(regId) {
           payeRegConnector.getCompanyDetails(regId)
         }
-        details  <- convertOrCreateCompanyDetailsView(oDetails, txId)
+        details  <- convertOrCreateCompanyDetailsView(oDetails)
         viewDetails <- saveToS4L(details, regId)
       } yield viewDetails
     }
   }
 
-  private[services] def convertOrCreateCompanyDetailsView(oAPI: Option[CompanyDetailsAPI], txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+  private[services] def convertOrCreateCompanyDetailsView(oAPI: Option[CompanyDetailsAPI])(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
     oAPI match {
       case Some(detailsAPI) => Future.successful(apiToView(detailsAPI))
       case None => for {
@@ -83,8 +83,8 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
         saveToS4L(incompleteView, regId) map {_ => DownstreamOutcome.Success},
       completeAPI =>
         for {
-          details   <- payeRegConnector.upsertCompanyDetails(regId, completeAPI)
-          clearData <- s4LService.clear(regId)
+          details       <- payeRegConnector.upsertCompanyDetails(regId, completeAPI)
+          clearData     <- s4LService.clear(regId)
         } yield DownstreamOutcome.Success
       )
   }

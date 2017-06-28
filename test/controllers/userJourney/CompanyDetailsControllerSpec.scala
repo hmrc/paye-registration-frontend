@@ -43,6 +43,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
   val mockCoHoService = mock[IncorporationInformationService]
   val mockAddressLookupService = mock[AddressLookupService]
   val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
+  val mockPrepopulationService = mock[PrepopulationService]
 
   class Setup {
     val controller = new CompanyDetailsCtrl {
@@ -54,6 +55,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       override val cohoService = mockCoHoService
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
       override val addressLookupService = mockAddressLookupService
+      override val prepopService = mockPrepopulationService
 
       override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(CurrentProfile(
@@ -261,6 +263,24 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       "the user is authorised to view the page and there is no business contact details model" in new Setup {
         when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(validCompanyDetailsViewModel.copy(businessContactDetails = None)))
+
+        when(mockPrepopulationService.getBusinessContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+            .thenReturn(Future.successful(None))
+
+        AuthBuilder.showWithAuthorisedUser(controller.businessContactDetails, mockAuthConnector) {
+          result =>
+            status(result) shouldBe OK
+        }
+      }
+    }
+
+    "return an ok" when {
+      "the user is authorised to view the page with prepopulated data and there is no business contact details model" in new Setup {
+        when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+          .thenReturn(Future.successful(validCompanyDetailsViewModel.copy(businessContactDetails = None)))
+
+        when(mockPrepopulationService.getBusinessContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+          .thenReturn(Future.successful(validCompanyDetailsViewModel.businessContactDetails))
 
         AuthBuilder.showWithAuthorisedUser(controller.businessContactDetails, mockAuthConnector) {
           result =>

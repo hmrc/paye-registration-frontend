@@ -17,7 +17,8 @@
 package models.view
 
 import models.{Address, DigitalContactDetails}
-import play.api.libs.json.Json
+import play.api.libs.json._
+import utils.Formatters
 
 case class PAYEContactDetails(name: String,
                               digitalContactDetails: DigitalContactDetails)
@@ -25,6 +26,71 @@ case class PAYEContactDetails(name: String,
 object PAYEContactDetails {
   implicit val digitalContactFormat = DigitalContactDetails.format
   implicit val format = Json.format[PAYEContactDetails]
+
+  val prepopReads: Reads[PAYEContactDetails] = new Reads[PAYEContactDetails] {
+    def reads(json: JsValue): JsResult[PAYEContactDetails] = {
+      val oFirstName = json.\("firstName").asOpt[String](Formatters.normalizeTrimmedReads)
+      val oMiddleName = json.\("middleName").asOpt[String](Formatters.normalizeTrimmedReads)
+      val oLastName = json.\("surname").asOpt[String](Formatters.normalizeTrimmedReads)
+      val oEmail = json.\("email").asOpt[String](Formatters.normalizeTrimmedReads)
+      val oPhone = json.\("telephoneNumber").asOpt[String](Formatters.normalizeTrimmedReads)
+      val oMobile = json.\("mobileNumber").asOpt[String](Formatters.normalizeTrimmedReads)
+
+      def incorrectContactDetails(msg: String): String = {
+        s"$msg\n" +
+          s"Lines defined:\n" +
+          s"firstName: ${oFirstName.isDefined}\n" +
+          s"middleName: ${oMiddleName.isDefined}\n" +
+          s"surname: ${oLastName.isDefined}\n" +
+          s"email: ${oEmail.isDefined}\n" +
+          s"mobile: ${oMobile.isDefined}\n" +
+          s"phone: ${oPhone.isDefined}\n"
+      }
+
+      if(oFirstName.isEmpty && oMiddleName.isEmpty && oLastName.isEmpty) {
+        JsError(incorrectContactDetails(s"No name components defined"))
+      } else if (oEmail.isEmpty && oMobile.isEmpty && oPhone.isEmpty) {
+        JsError(incorrectContactDetails(s"No contact details defined"))
+      } else {
+        JsSuccess(
+          PAYEContactDetails(
+            name                  = Seq(oFirstName, oMiddleName, oLastName).flatten.mkString(" "),
+            digitalContactDetails = DigitalContactDetails(oEmail, oMobile, oPhone))
+        )
+      }
+    }
+  }
+
+  val prepopWrites: Writes[PAYEContactDetails] = new Writes[PAYEContactDetails] {
+    def writes(payeContactDetails: PAYEContactDetails): JsObject = {
+      def splitName(fullName: String): (Option[String], Option[String], Option[String]) = {
+        val split = fullName.trim.split("\\s+")
+
+        val firstName = if(fullName.trim.isEmpty) None else Some(split.head)
+        val middleName = {
+          val middleSplit = split
+            .drop(1)
+            .dropRight(1)
+            .toList
+
+          if(middleSplit.nonEmpty) Some(middleSplit.mkString(" ")) else None
+        }
+        val lastName = if(split.length < 2) None else Some(split.last)
+
+        (firstName, middleName, lastName)
+      }
+
+      val (firstName, middleName, surname) = splitName(payeContactDetails.name)
+      val jsonFirstName = firstName.fold(Json.obj())(fn => Json.obj("firstName" -> fn))
+      val jsonMiddleName = middleName.fold(Json.obj())(mn => Json.obj("middleName" -> mn))
+      val jsonSurname = surname.fold(Json.obj())(sn => Json.obj("surname" -> sn))
+
+      jsonFirstName ++
+      jsonMiddleName ++
+      jsonSurname ++
+      Json.toJson(payeContactDetails.digitalContactDetails)(DigitalContactDetails.prepopWrites).as[JsObject]
+    }
+  }
 }
 
 case class PAYEContact(contactDetails: Option[PAYEContactDetails],

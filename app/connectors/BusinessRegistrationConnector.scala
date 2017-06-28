@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
 import models.external.BusinessProfile
+import models.view.PAYEContactDetails
 import play.api.Logger
 import play.api.libs.json.JsValue
 import services.{MetricsService, MetricsSrv}
@@ -45,39 +46,76 @@ trait BusinessRegistrationConnect {
 
   def retrieveCurrentProfile(implicit hc: HeaderCarrier, rds: HttpReads[BusinessProfile]): Future[BusinessProfile] = {
     val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
-    http.GET[BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration") recover {
-      case e: NotFoundException =>
+    http.GET[BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration") map {
+      profile =>
         businessRegistrationTimer.stop()
-        Logger.error(s"[BusinessRegistrationConnector] [retrieveCurrentProfile] - Received a NotFound status code when expecting current profile from Business-Registration")
-        throw e
-      case e: ForbiddenException =>
+        profile
+    } recover {
+      case e =>
         businessRegistrationTimer.stop()
-        Logger.error(s"[BusinessRegistrationConnector] [retrieveCurrentProfile] - Received a Forbidden status code when expecting current profile from Business-Registration")
-        throw e
-      case e: Exception =>
-        businessRegistrationTimer.stop()
-        Logger.error(s"[BusinessRegistrationConnector] [retrieveCurrentProfile] - Received error when expecting current profile from Business-Registration - Error ${e.getMessage}")
-        throw e
+        throw logResponse(e, "retrieveCompletionCapacity", "retrieving completion capacity")
     }
   }
 
   def retrieveCompletionCapacity(implicit hc: HeaderCarrier, rds: HttpReads[JsValue]): Future[Option[String]] = {
     val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
     http.GET[JsValue](s"$businessRegUrl/business-registration/business-tax-registration") map {
-      json => (json \ "completionCapacity").asOpt[String]
+      json =>
+        businessRegistrationTimer.stop()
+        (json \ "completionCapacity").asOpt[String]
     } recover {
-      case e: NotFoundException =>
+      case e =>
         businessRegistrationTimer.stop()
-        Logger.error(s"[BusinessRegistrationConnector] [retrieveCurrentProfile] - Received a NotFound status code when expecting current profile from Business-Registration")
-        throw e
-      case e: ForbiddenException =>
+        throw logResponse(e, "retrieveCompletionCapacity", "retrieving completion capacity")
+    }
+  }
+
+  def retrieveContactDetails(regId: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYEContactDetails]): Future[Option[PAYEContactDetails]] = {
+    val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
+    implicit val rds = PAYEContactDetails.prepopReads
+    http.GET[PAYEContactDetails](s"$businessRegUrl/business-registration/$regId/contact-details") map {
+      details =>
         businessRegistrationTimer.stop()
-        Logger.error(s"[BusinessRegistrationConnector] [retrieveCurrentProfile] - Received a Forbidden status code when expecting current profile from Business-Registration")
-        throw e
+        Some(details)
+    } recover {
+      case notfound: NotFoundException =>
+        businessRegistrationTimer.stop()
+        None
+      case e =>
+        businessRegistrationTimer.stop()
+        logResponse(e, "retrieveContactDetails", "retrieving contact details")
+        None
+    }
+  }
+
+  def upsertContactDetails(regId: String, contactDetails: PAYEContactDetails)(implicit hc: HeaderCarrier): Future[PAYEContactDetails] = {
+    val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
+    implicit val wts = PAYEContactDetails.prepopWrites
+    http.POST[PAYEContactDetails, JsValue](s"$businessRegUrl/business-registration/$regId/contact-details", contactDetails) map {
+      _ =>
+        businessRegistrationTimer.stop()
+        contactDetails
+    } recover {
       case e: Exception =>
         businessRegistrationTimer.stop()
-        Logger.error(s"[BusinessRegistrationConnector] [retrieveCurrentProfile] - Received error when expecting current profile from Business-Registration - Error ${e.getMessage}")
-        throw e
+        logResponse(e, "upsertContactDetails", "upserting contact details")
+        contactDetails
     }
+  }
+
+  private[connectors] def logResponse(e: Throwable, f: String, m: String, regId: Option[String] = None): Throwable = {
+    val optRegId = regId.map(r => s" and regId: $regId").getOrElse("")
+    def log(s: String) = Logger.error(s"[BusinessRegistrationConnector] [$f] received $s when $m$optRegId")
+    e match {
+      case e: NotFoundException => log("NOT FOUND")
+      case e: BadRequestException => log("BAD REQUEST")
+      case e: Upstream4xxResponse => e.upstreamResponseCode match {
+      case 403 => log("FORBIDDEN")
+      case _ => log(s"Upstream 4xx: ${e.upstreamResponseCode} ${e.message}")
+    }
+      case e: Upstream5xxResponse => log(s"Upstream 5xx: ${e.upstreamResponseCode}")
+      case e: Exception => log(s"ERROR: ${e.getMessage}")
+    }
+    e
   }
 }

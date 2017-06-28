@@ -55,6 +55,8 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
     "microservice.services.company-registration.port" -> s"$mockPort",
     "microservice.services.coho-api.host" -> s"$mockHost",
     "microservice.services.coho-api.port" -> s"$mockPort",
+    "microservice.services.business-registration.host" -> s"$mockHost",
+    "microservice.services.business-registration.port" -> s"$mockPort",
     "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng==",
     "defaultCTStatus" -> "aGVsZA==",
     "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ==",
@@ -131,6 +133,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
       stubGet(s"/paye-registration/${regId}/company-details", 404, "")
+      stubGet(s"/business-registration/${regId}/contact-details", 404, "")
       val crDoc = s"""{"transaction-id": "${txId}"}"""
       stubGet(s"/incorporation-frontend-stubs/corporation-tax-registration/${regId}/confirmation-references", 200, crDoc)
       val roDoc = s"""{"premises":"p", "address_line_1":"1", "locality":"l"}"""
@@ -490,6 +493,144 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status shouldBe 303
       response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/business-contact-details")
 
+    }
+  }
+
+  "GET Business Contact Details" should {
+
+    val contactDetails = {
+      s"""
+         |{
+         |  "firstName": "fName",
+         |  "middleName": "mName",
+         |  "surname": "sName",
+         |  "email": "email@email.zzz",
+         |  "telephoneNumber": "0987654321",
+         |  "mobileNumber": "1234567890"
+         |}""".stripMargin
+    }
+
+    "get prepoulated from Business Registration" in {
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubGet(s"/paye-registration/$regId/company-details", 404, "")
+      stubGet(s"/business-registration/$regId/contact-details", 200, contactDetails)
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
+
+      val response = await(buildClient("/business-contact-details")
+        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .get())
+
+      response.status shouldBe 200
+      val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
+      mdtpCookieData("csrfToken") shouldNot be("")
+      mdtpCookieData("sessionId") shouldBe SessionId
+      mdtpCookieData("userId") shouldBe userId
+
+      val document = Jsoup.parse(response.body)
+      document.title() shouldBe "What are the company contact details?"
+      document.getElementById("businessEmail").attr("value") shouldBe "email@email.zzz"
+      document.getElementById("mobileNumber").attr("value") shouldBe "1234567890"
+      document.getElementById("phoneNumber").attr("value") shouldBe "0987654321"
+    }
+
+    "get prepoulated from Paye Registration" in {
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      val roDoc = s"""{"line1":"1","line2":"2","postCode":"pc"}"""
+      val payeDoc =s"""{
+                      |   "companyName": "$companyName",
+                      |   "roAddress": $roDoc,
+                      |   "ppobAddress": $roDoc,
+                      |   "businessContactDetails": {
+                      |     "email": "email@email.zzz",
+                      |     "mobileNumber": "1234567890",
+                      |     "phoneNumber": "0987654321"
+                      |   }
+                      |}""".stripMargin
+
+      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubGet(s"/paye-registration/$regId/company-details", 200, payeDoc)
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
+
+      val response = await(buildClient("/business-contact-details")
+        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .get())
+
+      response.status shouldBe 200
+
+      val document = Jsoup.parse(response.body)
+      document.title() shouldBe "What are the company contact details?"
+      document.getElementById("businessEmail").attr("value") shouldBe "email@email.zzz"
+      document.getElementById("mobileNumber").attr("value") shouldBe "1234567890"
+      document.getElementById("phoneNumber").attr("value") shouldBe "0987654321"
+    }
+
+    "not be prepoulated if no data is found in Business Registration or Paye Registration" in {
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      stubGet(s"/paye-registration/$regId/contact-details", 404, "")
+      stubGet(s"/business-registration/$regId/contact-details", 404, "")
+
+      val roDoc = s"""{"line1":"1","line2":"2","postCode":"pc"}"""
+      val payeDoc =s"""{
+                      |"companyName": "${companyName}",
+                      |"tradingName": {"differentName":false},
+                      |"roAddress": ${roDoc}
+                      |}""".stripMargin
+
+      stubS4LGet(regId, "CompanyDetails", payeDoc)
+
+      val response = await(buildClient("/business-contact-details")
+        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .get())
+
+      response.status shouldBe 200
+
+      val document = Jsoup.parse(response.body)
+      document.title() shouldBe "What are the company contact details?"
+      document.getElementById("businessEmail").attr("value") shouldBe ""
+      document.getElementById("mobileNumber").attr("value") shouldBe ""
+      document.getElementById("phoneNumber").attr("value") shouldBe ""
+    }
+
+    "not be prepoulated if no data is found in Paye Registration and error is returned from Business Registration" in {
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      stubGet(s"/paye-registration/$regId/contact-details", 404, "")
+      stubGet(s"/business-registration/$regId/contact-details", 403, "")
+
+      val roDoc = s"""{"line1":"1","line2":"2","postCode":"pc"}"""
+      val payeDoc =s"""{
+                      |"companyName": "${companyName}",
+                      |"tradingName": {"differentName":false},
+                      |"roAddress": ${roDoc}
+                      |}""".stripMargin
+
+      stubS4LGet(regId, "CompanyDetails", payeDoc)
+
+      val response = await(buildClient("/business-contact-details")
+        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .get())
+
+      response.status shouldBe 200
+
+      val document = Jsoup.parse(response.body)
+      document.title() shouldBe "What are the company contact details?"
+      document.getElementById("businessEmail").attr("value") shouldBe ""
+      document.getElementById("mobileNumber").attr("value") shouldBe ""
+      document.getElementById("phoneNumber").attr("value") shouldBe ""
     }
   }
 }

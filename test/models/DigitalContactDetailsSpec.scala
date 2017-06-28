@@ -105,4 +105,76 @@ class DigitalContactDetailsSpec extends PAYERegSpec {
     }
   }
 
+  "BusinessContactDetails with full data to write Prepopulation Service" should {
+    val targetJsonMax = Json.parse(
+      s"""{
+         |  "email":"test@email.com",
+         |  "mobileNumber":"07943000111",
+         |  "telephoneNumber":"0161385032"
+         |}""".stripMargin)
+
+    val maxModel = DigitalContactDetails(
+      email = Some("test@email.com"),
+      mobileNumber = Some("07943000111"),
+      phoneNumber = Some("0161385032")
+    )
+
+    "write to Json" in {
+      Json.toJson[DigitalContactDetails](maxModel)(DigitalContactDetails.prepopWrites) shouldBe targetJsonMax
+    }
+  }
+
+  "BusinessContactDetails with partial data no email to write Prepopulation Service" should {
+    val json = Json.parse(
+      s"""{
+         |  "mobileNumber":"07943000111",
+         |  "telephoneNumber":"0161385032"
+         |}""".stripMargin)
+
+    val model = DigitalContactDetails(
+      email = None,
+      mobileNumber = Some("07943000111"),
+      phoneNumber = Some("0161385032")
+    )
+
+    "write to Json" in {
+      Json.toJson[DigitalContactDetails](model)(DigitalContactDetails.prepopWrites) shouldBe json
+    }
+  }
+
+  "BusinessContactDetails with partial data no mobileNumber to write Prepopulation Service" should {
+    val json = Json.parse(
+      s"""{
+         |  "email":"test@email.com",
+         |  "telephoneNumber":"0161385032"
+         |}""".stripMargin)
+
+    val model = DigitalContactDetails(
+      email = Some("test@email.com"),
+      mobileNumber = None,
+      phoneNumber = Some("0161385032")
+    )
+
+    "write to Json" in {
+      Json.toJson[DigitalContactDetails](model)(DigitalContactDetails.prepopWrites) shouldBe json
+    }
+  }
+
+  "BusinessContactDetails with partial data no phoneNumber to write Prepopulation Service" should {
+    val json = Json.parse(
+      s"""{
+         |  "email":"test@email.com",
+         |  "mobileNumber":"07943000111"
+         |}""".stripMargin)
+
+    val model = DigitalContactDetails(
+      email = Some("test@email.com"),
+      mobileNumber = Some("07943000111"),
+      phoneNumber = None
+    )
+
+    "write to Json" in {
+      Json.toJson[DigitalContactDetails](model)(DigitalContactDetails.prepopWrites) shouldBe json
+    }
+  }
 }

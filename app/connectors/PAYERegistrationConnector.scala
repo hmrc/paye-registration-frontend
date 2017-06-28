@@ -114,7 +114,7 @@ trait PAYERegistrationConnect {
     }
   }
 
-  def upsertCompanyDetails(regID: String, companyDetails: CompanyDetailsAPI)(implicit hc: HeaderCarrier, rds: HttpReads[CompanyDetailsAPI]): Future[CompanyDetailsAPI] = {
+  def upsertCompanyDetails(regID: String, companyDetails: CompanyDetailsAPI)(implicit hc: HeaderCarrier): Future[CompanyDetailsAPI] = {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
     http.PATCH[CompanyDetailsAPI, CompanyDetailsAPI](s"$payeRegUrl/paye-registration/$regID/company-details", companyDetails) map {
       resp =>
