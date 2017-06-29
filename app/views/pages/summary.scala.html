@@ -5,33 +5,27 @@
 @(summaryModel: Summary)(implicit request: Request[_], messages: Messages)
 
 @main_template(title = Messages("pages.summary.title")) {
-
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.summary.heading")</h1>
 
     <table class="table--borderless">
-        @for(section <- summaryModel.sections) {
+    @for(section <- summaryModel.sections) {
+        <thead>
+            <tr>
+                <th colspan="3" id="@{section.id}SectionHeading"><h2>@Messages(s"pages.summary.${section.id}.sectionHeading")</h2></th>
+            </tr>
+        </thead>
 
-            <thead>
-                <tr>
-                    <th colspan="3" id="@{section.id}SectionHeading"><h2>@Messages(s"pages.summary.${section.id}.sectionHeading")</h2></th>
-                </tr>
-            </thead>
-
-            @for(row <- section.rows) {
-                @summaryRow(row)
-            }
+        @for(row <- section.rows) {
+            @summaryRow(row)
         }
+    }
     </table>
 
-       <p>@Messages("pages.summary.Description")</p>
-
-       <div class="form-group">
-              <div class="indent">
-         <p>@messages("pages.summary.information.indent")</p>
-       </div>
-      </div>
-
-
+    <div class="form-group">
+        <div class="indent">
+            <p>@messages("pages.summary.information.indent")</p>
+        </div>
+    </div>
     @form(action = controllers.userJourney.routes.SummaryController.submitRegistration()) {
         <div class="form-group">
             <button class="button" type="submit" id="continue" >@messages("app.common.submityourapplication")</button>
