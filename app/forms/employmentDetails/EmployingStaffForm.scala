@@ -24,7 +24,7 @@ import play.api.data.Forms._
 object EmployingStaffForm extends RequiredBooleanForm {
   val form = Form(
     mapping(
-      "currentYear" -> requiredBoolean
+      "isEmployingStaff" -> requiredBoolean
     )(EmployingStaff.apply)(EmployingStaff.unapply)
   )
 }
