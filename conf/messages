@@ -121,7 +121,7 @@ pages.businessContactDetails.p2.indent                  = You need to provide at
 pages.businessContact.email                             = Email address
 pages.businessContact.email.tooLong                     = Enter your email address using 70 characters or less
 pages.businessContact.mobile                            = Mobile number
-pages.businessContact.phone                             = Phone number (including area code)
+pages.businessContact.phone                             = Phone number
 pages.businessContact.noFieldsCompleted                 = You need to provide at least one contact method so we can get in touch if we need to
 
 ## PAYE Contact Details
