@@ -105,7 +105,7 @@ pages.ppobAddress.itmaybeIntro                          = It may be:
 pages.ppobAddress.ppobAddressRules1                     = your home
 pages.ppobAddress.ppobAddressRules2                     = a private commercial office
 pages.ppobAddress.ppobAddressRules3                     = a studio or workshop
-pages.ppobAddress.peopleIntro1                          = People running mobile businesses (for example, plumbers) usually use the address where they keep their stock or equipment.
+pages.ppobAddress.peopleIntro1                          = People running mobile businesses (for example, plumbers or consultants) usually use the address where they keep their stock or equipment.
 
 ##Correspondence Address
 pages.correspondenceAddress.title                       = Where should we send post to?
