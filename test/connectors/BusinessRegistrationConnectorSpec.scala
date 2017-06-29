@@ -18,12 +18,11 @@ package connectors
 
 import fixtures.BusinessRegistrationFixture
 import mocks.MockMetrics
-import models.DigitalContactDetails
+import models.{Address, DigitalContactDetails}
 import models.external.BusinessProfile
 import models.view.PAYEContactDetails
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.omg.CosNaming.NamingContextPackage.NotFound
 import play.api.libs.json.{JsValue, Json, Writes}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._
@@ -173,6 +172,66 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
         .thenReturn(Future.failed(new NotFoundException("")))
 
       await(connector.upsertContactDetails(regId, validContactDetails)) shouldBe validContactDetails
+    }
+  }
+
+  "retrieveAddresses" should {
+    val regId = "54321"
+
+    val addressJson = Json.parse(
+      """{
+        |  "addresses":[
+        |    {
+        |      "addressLine1":"line 1",
+        |      "addressLine2":"line 2",
+        |      "addressLine3":"line 3",
+        |      "country":"UK",
+        |      "postcode":"TE1 1ST"
+        |    },
+        |    {
+        |      "addressLine1":"line one",
+        |      "addressLine2":"line two",
+        |      "addressLine3":"line three",
+        |      "addressLine4":"line four",
+        |      "country":"UK"
+        |    }
+        |  ]
+        |}
+      """.stripMargin)
+
+    val addresses = Seq(
+      Address(
+        "line 1",
+        "line 2",
+        Some("line 3"),
+        None,
+        Some("TE1 1ST"),
+        None,
+        None
+      ),
+      Address(
+      "line one",
+      "line two",
+      Some("line three"),
+      Some("line four"),
+      None,
+      Some("UK"),
+      None
+      )
+    )
+
+    "return a list of addresses" in new Setup{
+      when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(addressJson))
+
+      await(connector.retrieveAddresses(regId)) shouldBe addresses
+    }
+
+    "return an empty list of addresses in the case of an error" in new Setup{
+      when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(Upstream4xxResponse("badRequest", 400, 400)))
+
+      await(connector.retrieveAddresses(regId)) shouldBe Seq.empty
     }
   }
 }
