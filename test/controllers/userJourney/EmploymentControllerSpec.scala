@@ -106,7 +106,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
     "redirect to the Company Pension page when a user enters YES answer" in new Setup {
       when(mockEmploymentService.saveEmployingStaff(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(validEmploymentViewModel)
       AuthBuilder.submitWithAuthorisedUser(controller.submitEmployingStaff(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
-        "currentYear" -> "true"
+        "isEmployingStaff" -> "true"
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
@@ -117,7 +117,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
     "redirect to the First Payment page when a user enters NO answer" in new Setup {
       when(mockEmploymentService.saveEmployingStaff(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(validEmploymentViewModel2)
       AuthBuilder.submitWithAuthorisedUser(controller.submitEmployingStaff(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
-        "currentYear" -> "false"
+        "isEmployingStaff" -> "false"
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
@@ -128,7 +128,7 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
     "redirect to the Ineligible page when a user enters NO answer while also having a NO for Subcontractors" in new Setup {
       when(mockEmploymentService.saveEmployingStaff(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(ineligible)
       AuthBuilder.submitWithAuthorisedUser(controller.submitEmployingStaff(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
-        "currentYear" -> "false"
+        "isEmployingStaff" -> "false"
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER

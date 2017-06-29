@@ -21,7 +21,7 @@ import java.time.LocalDate
 import play.api.libs.json.Json
 
 
-case class EmployingStaff(currentYear: Boolean)
+case class EmployingStaff(isEmployingStaff: Boolean)
 object EmployingStaff {
   implicit val format = Json.format[EmployingStaff]
 }

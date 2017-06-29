@@ -137,12 +137,12 @@ pages.payeContact.nameMandatory                         = Enter a contact name
 pages.payeContactDetails.information.indent             = You need to provide at least one of the following contact details.
 
 ## Employing Staff Page
-pages.employingStaff.title                              = Will you employ staff in the next 2 months?
-pages.employingStaff.heading                            = Will you employ staff in the next 2 months?
-pages.employingStaff.legend                             = Will the employ staff in the next 2 months?
+pages.employingStaff.title                              = Over the next 2 months will you pay any staff, including yourself?
+pages.employingStaff.heading                            = Over the next 2 months will you pay any staff, including yourself?
+pages.employingStaff.legend                             = Over the next 2 months will you pay any staff, including yourself?
 pages.employingStaff.employingStaffRulesIntro           = This includes:
-pages.employingStaff.employingStaffRules1               = you if you''re a company director, plus any other directors
-pages.employingStaff.employingStaffRules2               = people already employed by you
+pages.employingStaff.employingStaffRules1               = people already employed by you
+pages.employingStaff.employingStaffRules2               = directors who receive a salary either as a regular wage or lump sum
 
 
 ## Subcontractors Page
