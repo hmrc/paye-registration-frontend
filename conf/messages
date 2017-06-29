@@ -99,7 +99,7 @@ pages.confirmRO.help.body.link.url                      = https://ewf.companiesh
 ##PPOB Address
 pages.ppobAddress.title                                 = Where will the company carry out most of its business activities?
 pages.ppobAddress.heading                               = Where will the company carry out most of its business activities?
-pages.ppobAddress.other                                 = A different location
+pages.ppobAddress.other                                 = A different address
 pages.ppobAddress.addressChoice.noEntry                 = Tell us where you''ll carry out most of your business activities
 pages.ppobAddress.itmaybeIntro                          = It may be:
 pages.ppobAddress.ppobAddressRules1                     = your home
