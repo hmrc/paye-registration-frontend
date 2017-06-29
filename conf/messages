@@ -76,7 +76,7 @@ pages.completionCapacity.other.error                    = Enter your relationshi
 ## Trading Name Page
 pages.tradingName.title                                 = Will the company trade under another name?
 pages.tradingName.heading                               = Will the company trade under another name?
-pages.tradingName.lede                                  = Tell us if you''ll trade using a different name to {0} .
+pages.tradingName.lede                                  = Tell us if you''ll trade using a different name to {0}.
 pages.tradingName.tradingNameLabel                      = Trading name
 pages.tradingName.nameRulesSummary                      = What are the rules for trading names?
 pages.tradingName.nameRulesIntro                        = Companies can trade using a different name to the name registered with Companies House.
@@ -159,7 +159,7 @@ pages.companyPension.legend                             = Will you make pension 
 pages.companyPension.setUpPensionIntro                  = This includes payments to:
 pages.companyPension.setUpPension1                      = an employee who has retired
 pages.companyPension.setUpPension2                      = any dependants of an employee who has died
-pages.companyPension.information.indent                 = Don''t include contributions you make into a workplace pension scheme for your staff.
+
 
 ## First Payment Page
 pages.firstPayment.title                                = Set your PAYE scheme start date
