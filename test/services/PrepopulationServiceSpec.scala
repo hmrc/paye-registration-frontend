@@ -78,5 +78,4 @@ class PrepopulationServiceSpec extends PAYERegSpec {
       await(service.saveContactDetails(regId, validContactDetails)) shouldBe validContactDetails
     }
   }
-
 }
