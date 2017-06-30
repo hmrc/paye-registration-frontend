@@ -19,7 +19,7 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import connectors.{BusinessRegistrationConnect, BusinessRegistrationConnector}
-import models.DigitalContactDetails
+import models.{Address, DigitalContactDetails}
 import models.view.PAYEContactDetails
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -48,5 +48,17 @@ trait PrepopulationSrv {
     busRegConnector.upsertContactDetails(regId, contactDetails) map {
       _ => contactDetails
     }
+  }
+
+  def getPrePopAddresses(regId: String,roAdress: Address,otherAddress: Option[Address]):Future[Map[Int,Address]] = {
+    busRegConnector.retrieveAddresses(regId) map {
+    list => {
+      val filteredList = list.distinct.filterNot(addr => {
+        roAdress == addr && otherAddress.contains(addr)
+      })
+      filteredList.zipWithIndex.map {case (addr, i) => i -> addr}.toMap
+      }
+    }
+
   }
 }
