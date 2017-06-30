@@ -52,7 +52,7 @@ trait PAYEContactSrv  {
     PAYEContactView(Some(apiData.contactDetails), Some(apiData.correspondenceAddress))
   }
 
-  private def saveToS4L(viewData: PAYEContactView, regId: String)(implicit hc: HeaderCarrier): Future[PAYEContactView] = {
+  private def saveToS4L(regId: String, viewData: PAYEContactView)(implicit hc: HeaderCarrier): Future[PAYEContactView] = {
     s4LService.saveForm[PAYEContactView](CacheKeys.PAYEContact.toString, viewData, regId).map(_ => viewData)
   }
 
@@ -82,7 +82,7 @@ trait PAYEContactSrv  {
   def submitPAYEContact(viewModel: PAYEContactView, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     viewToAPI(viewModel).fold(
       incompleteView =>
-        saveToS4L(incompleteView, regId) map {_ => DownstreamOutcome.Success},
+        saveToS4L(regId, incompleteView) map {_ => DownstreamOutcome.Success},
       completeAPI =>
         for {
           details   <- payeRegConnector.upsertPAYEContact(regId, completeAPI)

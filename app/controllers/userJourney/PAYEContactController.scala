@@ -23,6 +23,7 @@ import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
 import enums.DownstreamOutcome
 import forms.payeContactDetails.{CorrespondenceAddressForm, PAYEContactDetailsForm}
+import models.Address
 import models.view.PAYEContact
 import models.view.{AddressChoice, ChosenAddress}
 import play.api.Logger
@@ -43,8 +44,8 @@ class PAYEContactController @Inject()(
                                        injAddressLookupService: AddressLookupService,
                                        injKeystoreConnector: KeystoreConnector,
                                        injPayeRegistrationConnector: PAYERegistrationConnector,
-                                       injPrepopulationService: PrepopulationService,
-                                       injMessagesApi: MessagesApi)
+                                       injMessagesApi: MessagesApi,
+                                       injPrepopulationService: PrepopulationService)
   extends PAYEContactCtrl {
   val authConnector = FrontendAuthConnector
   val companyDetailsService = injCompanyDetailsService
@@ -119,9 +120,13 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
           for {
             payeContact <- payeContactService.getPAYEContact(profile.registrationID)
             companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+            listPrepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, payeContact.correspondenceAddress)
           } yield {
             val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
-            Ok(PAYECorrespondenceAddressPage(CorrespondenceAddressForm.form.fill(ChosenAddress(AddressChoice.correspondenceAddress)), addressMap.get("ro"), addressMap.get("correspondence")))
+            Ok(PAYECorrespondenceAddressPage(CorrespondenceAddressForm.form.fill(ChosenAddress(AddressChoice.correspondenceAddress)),
+                                            addressMap.get("ro"),
+                                            addressMap.get("correspondence"),
+                                            listPrepopAddresses))
           }
         }
   }
@@ -136,7 +141,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
               companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
             } yield {
               val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
-              BadRequest(PAYECorrespondenceAddressPage(errs, addressMap.get("ro"), addressMap.get("correspondence")))
+              BadRequest(PAYECorrespondenceAddressPage(errs, addressMap.get("ro"), addressMap.get("correspondence"), Map[Int, Address]()))
             },
             success => success.chosenAddress match {
               case AddressChoice.correspondenceAddress =>

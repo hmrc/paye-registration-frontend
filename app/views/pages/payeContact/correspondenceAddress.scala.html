@@ -3,7 +3,7 @@
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers.templates.{payeInputRadioGroup, addressDisplay}
 
-@(chooseAddressForm: Form[ChosenAddress], roAddress: Option[Address], correspondenceAddress: Option[Address])(implicit request: Request[_], messages: Messages)
+@(chooseAddressForm: Form[ChosenAddress], roAddress: Option[Address], correspondenceAddress: Option[Address], prepopAddresses: Seq[Address])(implicit request: Request[_], messages: Messages)
 
 @main_template(title = messages("pages.correspondenceAddress.title")) {
     @govHelpers.errorSummary(
@@ -22,9 +22,10 @@
                 field = chooseAddressForm("chosenAddress"),
                 Seq(
                     roAddress.map("roAddress" -> addressDisplay(_, "ro").toString),
-                    correspondenceAddress.map("correspondenceAddress" -> addressDisplay(_, "correspondence").toString),
-                    Some("other" -> messages("pages.correspondenceAddress.other"))
-                ).flatten,
+                    correspondenceAddress.map("correspondenceAddress" -> addressDisplay(_, "correspondence").toString)
+                ).flatten.++(
+                    prepopAddresses.zipWithIndex.map(tuple => s"prepopAddress${tuple._2}" -> addressDisplay(tuple._1, s"prepopAddress${tuple._2}").toString)
+                ).:+("other" -> messages("pages.correspondenceAddress.other")),
                 '_legend -> messages("pages.correspondenceAddress.legend"),
                 '_legendID -> "chosenAddress",
                 '_helpText -> None,
