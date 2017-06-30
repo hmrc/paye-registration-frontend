@@ -54,13 +54,12 @@ trait PrepopulationSrv {
     }
   }
 
-  def getPrePopAddresses(regId: String,roAdress: Address,otherAddress: Option[Address]):Future[Map[Int,Address]] = {
+  def getPrePopAddresses(regId: String, roAdress: Address, otherAddress: Option[Address])(implicit hc: HeaderCarrier): Future[Map[Int,Address]] = {
     busRegConnector.retrieveAddresses(regId) map {
-    list => {
-      val filteredList = list.distinct.filterNot(addr => {
-        roAdress == addr && otherAddress.contains(addr)
-      })
-      filteredList.zipWithIndex.map {case (addr, i) => i -> addr}.toMap
+      list => {
+        list.distinct.filterNot(addr => {
+          roAdress == addr || otherAddress.contains(addr)
+        }).zipWithIndex.map {case (addr, i) => i -> addr}.toMap
       }
     }
 
