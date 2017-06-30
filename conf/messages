@@ -18,6 +18,7 @@ app.common.companies-house                              = Companies House
 app.common.feedbackFirst                                = This is a new service. Help us improve it - send your
 app.common.feedbackSecond                               = feedback.
 app.common.feedbackLinkText                             = feedback
+app.common.bottom.feedback                              = Leave feedback
 app.common.companyRegistrationOverview                  = Your company registration overview
 app.common.businessRegistrationOverview                 = Your business registration overview
 app.common.startNow                                     = Start now

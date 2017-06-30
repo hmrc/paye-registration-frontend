@@ -119,11 +119,9 @@ trait EligibilityCtrl extends FrontendController with Actions with I18nSupport w
       }
   }
 
-  val questionnaire = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user => implicit request =>
-      withCurrentProfile { _ =>
-        Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/questionnaire"))
-      }
+  val questionnaire = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
+    implicit user =>
+      implicit request =>
+        Redirect(s"$compRegFEURL$compRegFEURI/questionnaire")
   }
-
 }

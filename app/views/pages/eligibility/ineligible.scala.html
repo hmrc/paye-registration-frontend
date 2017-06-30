@@ -23,7 +23,7 @@
         </ul>
     </div>
 
-    @govHelpers.form(action = controllers.userJourney.routes.EligibilityController.questionnaire()) {
+    <form action="@controllers.userJourney.routes.EligibilityController.questionnaire()" method="get">
         <button class="button" type="submit" id="continue" >@Messages("app.common.next")</button>
-    }
+    </form>
 }

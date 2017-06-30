@@ -104,4 +104,4 @@ GET        /business-registration-overview                    controllers.userJo
 
 ## Questionnaire
 
-POST       /questionnaire                                     controllers.userJourney.EligibilityController.questionnaire
+GET       /questionnaire                                     controllers.userJourney.EligibilityController.questionnaire
