@@ -19,9 +19,10 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import connectors.{S4LConnect, S4LConnector}
-import play.api.libs.json.Format
+import play.api.libs.json._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
+import utils.Formatters
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -41,12 +42,25 @@ trait S4LSrv {
     } yield cacheMap
   }
 
+  def saveMap[K, V](formId: String, data: Map[K, V], regId: String)(implicit hc: HeaderCarrier, formatK: Format[K], formatV: Format[V]): Future[CacheMap] = {
+    implicit val mapFormat: Format[Map[K, V]] = Format(Formatters.mapReads[K, V], Formatters.mapWrites[K, V])
+    for {
+      cacheMap <- s4LConnector.saveForm[Map[K, V]](regId, formId, data)
+    } yield cacheMap
+  }
+
   def fetchAndGet[T](formId: String, regId: String)(implicit hc: HeaderCarrier, format: Format[T]): Future[Option[T]] = {
     for {
       data  <- s4LConnector.fetchAndGet[T](regId, formId)
     } yield data
   }
 
+  def fetchAndGetMap[K, V](formId: String, regId: String)(implicit hc: HeaderCarrier, formatK: Format[K], formatV: Format[V]): Future[Option[Map[K, V]]] = {
+    implicit val mapFormat: Format[Map[K, V]] = Format(Formatters.mapReads[K, V], Formatters.mapWrites[K, V])
+    for {
+      cacheMap <- s4LConnector.fetchAndGet[Map[K, V]](regId, formId)
+    } yield cacheMap
+  }
 
   def clear(regId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     for {
