@@ -118,6 +118,21 @@ trait BusinessRegistrationConnect {
     }
   }
 
+  def upsertAddress(regId: String, address: Address)(implicit hc: HeaderCarrier): Future[Address] = {
+    val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
+    implicit val wts = Address.prePopWrites
+    http.POST[Address, JsValue](s"$businessRegUrl/business-registration/$regId/addresses", address) map {
+      _ =>
+        businessRegistrationTimer.stop()
+        address
+    } recover {
+      case e: Exception =>
+        businessRegistrationTimer.stop()
+        logResponse(e, "upsertAddress", "upserting address")
+        address
+    }
+  }
+
   private[connectors] def logResponse(e: Throwable, f: String, m: String, regId: Option[String] = None): Throwable = {
     val optRegId = regId.map(r => s" and regId: $regId").getOrElse("")
     def log(s: String) = Logger.error(s"[BusinessRegistrationConnector] [$f] received $s when $m$optRegId")

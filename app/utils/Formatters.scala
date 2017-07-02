@@ -18,7 +18,8 @@ package utils
 
 import java.text.Normalizer
 
-import play.api.libs.json.{JsResult, JsSuccess, JsValue, Json, Reads}
+import play.api.libs.json.Json.JsValueWrapper
+import play.api.libs.json._
 
 object Formatters {
   def ninoFormatter(nino: String): String = nino.grouped(2).mkString(" ")
@@ -35,5 +36,20 @@ object Formatters {
     override def reads(json: JsValue): JsResult[List[String]] = Json.fromJson[List[String]](json).flatMap {
       l => JsSuccess(l.map(Normalizer.normalize(_, Normalizer.Form.NFKD).replaceAll("\\p{M}", "").trim))
     }
+  }
+
+  def mapReads[K, V]()(implicit formatK: Format[K], formatV: Format[V]): Reads[Map[K, V]] = new Reads[Map[K, V]] {
+    def reads(jv: JsValue): JsResult[Map[K, V]] =
+      JsSuccess(jv.as[Map[String, String]].map{case (k, v) =>
+        k.asInstanceOf[K] -> v.asInstanceOf[V]
+      })
+  }
+
+  def mapWrites[K, V]()(implicit formatK: Format[K], formatV: Format[V]): Writes[Map[K, V]] = new Writes[Map[K, V]] {
+    def writes(map: Map[K, V]): JsValue =
+      Json.obj(map.map{case (s, o) =>
+        val ret: (String, JsValueWrapper) = s.toString -> Json.toJson[V](o)
+        ret
+      }.toSeq:_*)
   }
 }
