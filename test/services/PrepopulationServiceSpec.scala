@@ -31,6 +31,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 
 class PrepopulationServiceSpec extends PAYERegSpec {
+  implicit val hc = new HeaderCarrier()
   val mockS4LService = mock[S4LService]
 
   trait Setup {
@@ -69,7 +70,6 @@ class PrepopulationServiceSpec extends PAYERegSpec {
     auditRef = Some("tstAuditRef2")
   )
 
-  implicit val hc = new HeaderCarrier()
   val regId = "55555"
 
   val validDigitalContact = DigitalContactDetails(Some("a@b.c"), Some("123"), Some("321"))
