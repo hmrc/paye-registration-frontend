@@ -23,7 +23,7 @@ import models.external.BusinessProfile
 import models.view.PAYEContactDetails
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.libs.json.{JsString, Writes, JsValue, Json}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http._
 
@@ -175,7 +175,7 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
     }
   }
 
-  "retrieveAddresses" should {
+  "RetrieveAddresses" should {
     val regId = "54321"
 
     val addressJson = Json.parse(
@@ -232,6 +232,29 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
         .thenReturn(Future.failed(Upstream4xxResponse("badRequest", 400, 400)))
 
       await(connector.retrieveAddresses(regId)) shouldBe Seq.empty
+    }
+  }
+
+  "UpsertAddress" should {
+    val address = Address(
+      "firstLine",
+      "secondLine",
+      None,
+      None,
+      Some("TE1 1ST")
+    )
+    val regId = "99999"
+    "successfully upsert an address" in new Setup {
+      when(mockWSHttp.POST[Address, JsValue](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"), ArgumentMatchers.any[Address](), ArgumentMatchers.any())(ArgumentMatchers.any[Writes[Address]](), ArgumentMatchers.any[HttpReads[JsValue]](), ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(JsString("test")))
+
+      await(connector.upsertAddress(regId, address)) shouldBe address
+    }
+    "successfully complete in case of BR error response" in new Setup {
+      when(mockWSHttp.POST[Address, JsValue](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"), ArgumentMatchers.any[Address](), ArgumentMatchers.any())(ArgumentMatchers.any[Writes[Address]](), ArgumentMatchers.any[HttpReads[JsValue]](), ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.failed(Upstream5xxResponse("error", 500, 500)))
+
+      await(connector.upsertAddress(regId, address)) shouldBe address
     }
   }
 }
