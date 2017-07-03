@@ -16,10 +16,9 @@
 
 package forms.helpers
 
-import models.view.{AddressChoice, ChosenAddress}
-import play.api.data.Forms.mapping
+import models.view.AddressChoice
 import play.api.data.format.Formatter
-import play.api.data.{Form, FormError, Forms, Mapping}
+import play.api.data.{FormError, Forms, Mapping}
 import play.api.libs.json.Json
 
 trait ChooseAddressForm {
@@ -34,7 +33,7 @@ trait ChooseAddressForm {
       }
     }
 
-    def unbind(key: String, value: AddressChoice): Map[String, String] = Map(key -> Json.toJson[AddressChoice](value).as[String])
+    def unbind(key: String, value: AddressChoice): Map[String, String] = Map(key -> value.toString)
   }
 
   val chosenAddress: Mapping[AddressChoice] = Forms.of[AddressChoice](addressChoiceFormatter)

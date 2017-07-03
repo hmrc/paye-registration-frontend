@@ -29,7 +29,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class PrepopulationService @Inject()(injBusinessRegistrationConnector: BusinessRegistrationConnector,
+class
+PrepopulationService @Inject()(injBusinessRegistrationConnector: BusinessRegistrationConnector,
                                      injS4LService: S4LService) extends PrepopulationSrv {
   override val busRegConnector = injBusinessRegistrationConnector
   override val s4LService = injS4LService

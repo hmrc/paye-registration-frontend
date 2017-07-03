@@ -1,5 +1,5 @@
 @import models.Address
-@import models.view.ChosenAddress
+@import models.view.{ChosenAddress, PrepopAddress}
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers.templates.{payeInputRadioGroup, addressDisplay}
 
@@ -24,7 +24,7 @@
                     roAddress.map("roAddress" -> addressDisplay(_, "ro").toString),
                     correspondenceAddress.map("correspondenceAddress" -> addressDisplay(_, "correspondence").toString)
                 ).flatten.++(
-                    prepopAddresses.map {case (k, v) => s"prepopAddress$k" -> addressDisplay(v, s"prepopaddress$k").toString}.toList
+                    prepopAddresses.map {case (k, v) => s"${PrepopAddress.prefix}$k" -> addressDisplay(v, s"${PrepopAddress.prefix.toLowerCase}$k").toString}.toList
                 ).:+("other" -> messages("pages.correspondenceAddress.other")),
                 '_legend -> messages("pages.correspondenceAddress.legend"),
                 '_legendID -> "chosenAddress",

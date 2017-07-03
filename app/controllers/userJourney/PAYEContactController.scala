@@ -23,7 +23,6 @@ import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
 import enums.DownstreamOutcome
 import forms.payeContactDetails.{CorrespondenceAddressForm, PAYEContactDetailsForm}
-import models.Address
 import models.view.{ChosenAddress, CorrespondenceAddress, Other, PAYEContact, PrepopAddress, ROAddress}
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -33,6 +32,7 @@ import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.SessionProfile
 import views.html.pages.payeContact.{correspondenceAddress => PAYECorrespondenceAddressPage, payeContactDetails => PAYEContactDetailsPage}
+import common.exceptions.DownstreamExceptions.S4LFetchException
 
 import scala.concurrent.Future
 
@@ -158,18 +158,15 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
                   redirectUrl => Redirect(redirectUrl)
                 }
               case prepop: PrepopAddress => (for {
-                payeContact <- payeContactService.getPAYEContact(profile.registrationID)
-                companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-                prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, payeContact.correspondenceAddress)
-                _ <- prepopService.savePrePopAddress(profile.registrationID, prepop.index)
-                res <- payeContactService.submitCorrespondence(prepopAddresses.getOrElse(prepop.index, throw new PrePopAddressNotFoundException), profile.registrationID)
+                prepopAddress <- prepopService.getAddress(profile.registrationID, prepop.index)
+                res <- payeContactService.submitCorrespondence(prepopAddress, profile.registrationID)
+                _ <- prepopService.saveAddress(profile.registrationID, prepopAddress)
               } yield res match {
                 case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
                 case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
               }) recover {
-                case e: PrePopAddressesNotFoundException =>
-                  InternalServerError(views.html.pages.error.restart())
-                case ex: PrePopAddressNotFoundException =>
+                case e: S4LFetchException =>
+                  Logger.warn(s"[PAYEContactController] [submitPAYECorrespondenceAddress] - Error while saving Correspondence Address with a PrepopAddress: ${e.getMessage}")
                   InternalServerError(views.html.pages.error.restart())
               }
             }

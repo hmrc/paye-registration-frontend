@@ -60,8 +60,8 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
       None
     )
 
-  val testListPrepopAddresses = Seq(
-    Address(
+  val testListPrepopAddresses = Map(
+    0 -> Address(
       "testPPAL01",
       "testPPAL02",
       Some("testPPAL03"),
@@ -69,7 +69,7 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
       Some("testPPAPostCode01"),
       None
     ),
-    Address(
+    1 -> Address(
       "testPPAL11",
       "testPPAL12",
       Some("testPPAL13"),
@@ -130,7 +130,7 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
   }
 
   "The Correspondence Address screen without Correspondence Address" should {
-    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), None, Seq.empty)
+    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), None, Map[Int, Address]())
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct title" in {
@@ -163,7 +163,7 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
   }
 
   "The Correspondence Address screen with Correspondence Address" should {
-    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), Some(testCorrespondenceAddress), Seq.empty)
+    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), Some(testCorrespondenceAddress), Map[Int, Address]())
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct name for radio button correspondenceAddress" in {

@@ -16,7 +16,7 @@
 
 package forms.helpers
 
-import models.view.{AddressChoice, ChosenAddress, CorrespondenceAddress, Other, PPOBAddress, PrepopAddress, ROAddress}
+import models.view.{ConvertToPrepopAddressException, CorrespondenceAddress, Other, PPOBAddress, PrepopAddress, ROAddress}
 import play.api.data.FormError
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -93,6 +93,16 @@ class ChooseAddressFormSpec extends UnitSpec {
 
       "Unbind successfully" in {
         testForm.addressChoiceFormatter.unbind("tstKey", PrepopAddress(10)) shouldBe Map("tstKey" -> "prepopAddress10")
+      }
+    }
+
+    "Supplied with wrong data" should {
+      val data = Map(
+        "chosenAddress" -> "prepopAddressxx"
+      )
+
+      "Fail to bind with the correct errors" in {
+        a[ConvertToPrepopAddressException] shouldBe thrownBy(testForm.addressChoiceFormatter.bind("chosenAddress", data))
       }
     }
 
