@@ -8,7 +8,7 @@ app.common.saveAndContinue                              = Save and continue
 app.common.next                                         = Next
 app.common.back                                         = Back
 app.common.submitYourApplication                        = Confirm and submit
-app.common.errorSummaryLabel                            = There are errors on this page.
+app.common.errorSummaryLabel                            = This page has errors
 app.common.change                                       = Change
 app.common.year                                         = Year
 app.common.month                                        = Month
@@ -56,6 +56,7 @@ pages.companyEligibility.list1                          = responsible for paying
 pages.companyEligibility.list2                          = appointed by a creditor to run a company that can''t pay its debts and you''re responsible for paying its employees
 pages.companyEligibility.list3                          = an employer based outside the UK who''s not liable to pay UK National Insurance
 pages.companyEligibility.headList                       = Tell us if you''re:
+pages.companyEligibility.error                          = Tell us if any of the following apply to you
 
 ## Director Eligibility
 pages.directorEligibility.title                         = Are you any of the following?
@@ -63,6 +64,7 @@ pages.directorEligibility.heading                       = Are you any of the fol
 pages.directorEligibility.headList                      = Tell us if you''re:
 pages.directorEligibility.list1                         = an employee responsible for deducting and paying your own Income Tax or National Insurance (this includes registrars, Roman Catholic priests and certain other employees of foreign embassies and consulates)
 pages.directorEligibility.list2                         = responsible for deducting and paying Income Tax and National Insurance on non-cash payments you make to your own or other people''s employees
+pages.directorEligibility.error                         = Tell us if any of the following apply to you
 
 ## Completion Capacity page
 pages.completionCapacity.title                          = What is your relationship to the company?
@@ -72,6 +74,7 @@ pages.completionCapacity.director                       = Director
 pages.completionCapacity.agent                          = Agent - for example, an accountant
 pages.completionCapacity.other                          = Other - for example, a friend of the director
 pages.completionCapacity.other.label                    = Your relationship to the company
+pages.completionCapacity.error                          = Tell us your relationship to the business
 pages.completionCapacity.other.error                    = Enter your relationship to the business using 100 characters or less
 
 ## Trading Name Page
@@ -86,7 +89,8 @@ pages.tradingName.nameRulesIntro2                       = Trading names can''t:
 pages.tradingName.nameRules1                            = include ''limited'', ''Ltd'', ''limited liability partnership, ''LLP'', ''public limited company'' or ''plc''
 pages.tradingName.nameRules2                            = be the same as an <a href={0}>existing trade mark</a>
 pages.tradingName.nameRules3                            = contain a ''sensitive'' word or expression unless you <a href={0}>get permission</a>
-pages.tradingName.errorQuestion                         = Please enter a correct trading name
+pages.tradingName.errorQuestion                         = Enter a trading name
+pages.tradingName.error                                 = Tell us if the company trades under any other name
 
 
 ##Confirm RO Address
@@ -123,7 +127,7 @@ pages.businessContact.email                             = Email address
 pages.businessContact.email.tooLong                     = Enter your email address using 70 characters or less
 pages.businessContact.mobile                            = Mobile number
 pages.businessContact.phone                             = Phone number
-pages.businessContact.noFieldsCompleted                 = You need to provide at least one contact method so we can get in touch if we need to
+pages.businessContact.noFieldsCompleted                 = Enter at least one company contact detail
 
 ## PAYE Contact Details
 pages.payeContact.title                                 = Who should we contact about the company''s PAYE?
@@ -144,6 +148,7 @@ pages.employingStaff.legend                             = Over the next 2 months
 pages.employingStaff.employingStaffRulesIntro           = This includes:
 pages.employingStaff.employingStaffRules1               = people already employed by you
 pages.employingStaff.employingStaffRules2               = directors who receive a salary either as a regular wage or lump sum
+pages.employingStaff.error                              = Tell us if over the next 2 months you will pay any staff, including yourself
 
 
 ## Subcontractors Page
@@ -152,6 +157,7 @@ pages.subcontractors.heading                            = Will you employ subcon
 pages.subcontractors.legend                             = Will you employ subcontractors in the construction industry?
 pages.subcontractors.nameRulesIntro                     = We''ll register you with the Construction Industry Scheme (CIS) if you pay subcontractors to do construction work.
 pages.subcontractors.findout                            = Find out <a href="{0}">what work is covered by the CIS</a>
+pages.subcontractors.error                              = Tell us if the company will pay subcontractors to do work this year
 
 ## Company Pension Page
 pages.companyPension.title                              = Will you make pension payments to a former employee or their dependants in the next 2 months?
@@ -160,6 +166,7 @@ pages.companyPension.legend                             = Will you make pension 
 pages.companyPension.setUpPensionIntro                  = This includes payments to:
 pages.companyPension.setUpPension1                      = an employee who has retired
 pages.companyPension.setUpPension2                      = any dependants of an employee who has died
+pages.companyPension.error                              = Tell us if you will make pension payments to a former employee or their dependants in the next 2 months
 
 
 ## First Payment Page

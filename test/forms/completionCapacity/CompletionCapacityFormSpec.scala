@@ -78,7 +78,7 @@ class CompletionCapacityFormSpec extends UnitSpec {
 
       val boundForm = testForm.bind(data)
 
-      boundForm.errors shouldBe Seq(FormError("completionCapacity", "pages.completionCapacity.other.error"))
+      boundForm.errors shouldBe Seq(FormError("completionCapacity", "pages.completionCapacity.error"))
     }
 
     "Fail to bind when other capacity is incomplete" in {

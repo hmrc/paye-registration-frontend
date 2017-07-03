@@ -39,7 +39,7 @@ object CompletionCapacityForm {
         UserCapacity.fromString(data.getOrElse(key, ""))
       } match {
         case Success(capacity) => Right(capacity)
-        case _                 => Left(Seq(FormError(key, "pages.completionCapacity.other.error")))
+        case _                 => Left(Seq(FormError(key, "pages.completionCapacity.error")))
       }
     }
 

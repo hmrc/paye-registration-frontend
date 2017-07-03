@@ -22,6 +22,9 @@ import play.api.data.Form
 import play.api.data.Forms.mapping
 
 object SubcontractorsForm extends RequiredBooleanForm {
+
+  override val errorMsg = "pages.subcontractors.error"
+
   val form = Form(
     mapping(
       "hasContractors" -> requiredBoolean

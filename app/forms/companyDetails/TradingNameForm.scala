@@ -50,6 +50,8 @@ object TradingNameForm extends RequiredBooleanForm {
 
   private def tradingNameFieldNotCompleted(data: Form[TradingName]) = data("tradingName").value.isEmpty
 
+  override val errorMsg = "pages.tradingName.error"
+
   val form = Form(
     mapping(
       "differentName" -> requiredBoolean,

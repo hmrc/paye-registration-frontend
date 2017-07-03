@@ -22,6 +22,9 @@ import play.api.data.Form
 import play.api.data.Forms.mapping
 
 object CompanyEligibilityForm extends RequiredBooleanForm {
+
+  override val errorMsg = "pages.companyEligibility.error"
+
   val form = Form(
     mapping(
       "isEligible" -> requiredBoolean
