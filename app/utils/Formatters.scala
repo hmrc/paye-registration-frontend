@@ -38,15 +38,16 @@ object Formatters {
     }
   }
 
-  def mapReads[K, V]()(implicit formatK: Format[K], formatV: Format[V]): Reads[Map[K, V]] = new Reads[Map[K, V]] {
-    def reads(jv: JsValue): JsResult[Map[K, V]] =
-      JsSuccess(jv.as[Map[String, String]].map{case (k, v) =>
-        k.asInstanceOf[K] -> v.asInstanceOf[V]
+  def intMapReads[V]()(implicit formatV: Format[V]): Reads[Map[Int, V]] = new Reads[Map[Int, V]] {
+    def reads(jv: JsValue): JsResult[Map[Int, V]] = {
+      JsSuccess(jv.as[Map[String, JsValue]].map { case (k, v) =>
+        k.toInt -> v.as[V]
       })
+    }
   }
 
-  def mapWrites[K, V]()(implicit formatK: Format[K], formatV: Format[V]): Writes[Map[K, V]] = new Writes[Map[K, V]] {
-    def writes(map: Map[K, V]): JsValue =
+  def intMapWrites[V]()(implicit formatV: Format[V]): Writes[Map[Int, V]] = new Writes[Map[Int, V]] {
+    def writes(map: Map[Int, V]): JsValue =
       Json.obj(map.map{case (s, o) =>
         val ret: (String, JsValueWrapper) = s.toString -> Json.toJson[V](o)
         ret

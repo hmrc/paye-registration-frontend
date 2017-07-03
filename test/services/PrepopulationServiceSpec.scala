@@ -160,8 +160,8 @@ class PrepopulationServiceSpec extends PAYERegSpec {
       val regId = "regID"
       when(mockBusinessRegistrationConnector.retrieveAddresses(ArgumentMatchers.contains(regId))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Seq(addr1, addr2)))
-      when(mockS4LService.saveMap(ArgumentMatchers.contains("PrePopAddresses"), ArgumentMatchers.any(), ArgumentMatchers.contains(regId))
-          (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Int]](), ArgumentMatchers.any[Format[Address]]()))
+      when(mockS4LService.saveIntMap(ArgumentMatchers.contains("PrePopAddresses"), ArgumentMatchers.any(), ArgumentMatchers.contains(regId))
+          (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Address]]()))
         .thenReturn(Future.successful(CacheMap("PrePopAddresses", Map.empty)))
 
       await(service.getPrePopAddresses(regId, addr3, None)) shouldBe Map(0 -> addr1, 1 -> addr2)
@@ -181,24 +181,24 @@ class PrepopulationServiceSpec extends PAYERegSpec {
   "GetAddress" should {
     "fetch an address by ID" in new Setup {
       val regId = "9999"
-      when(mockS4LService.fetchAndGetMap(ArgumentMatchers.contains("PrePopAddresses"), ArgumentMatchers.contains(regId))
-          (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Int]](), ArgumentMatchers.any[Format[Address]]()))
+      when(mockS4LService.fetchAndGetIntMap(ArgumentMatchers.contains("PrePopAddresses"), ArgumentMatchers.contains(regId))
+          (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Address]]()))
         .thenReturn(Future.successful(Some(Map(0 -> addr1, 1 -> addr2, 2 -> addr3))))
 
       await(service.getAddress(regId, 1)) shouldBe addr2
     }
     "throw an exception when no addresses are returned from S4L" in new Setup {
       val regId = "9999"
-      when(mockS4LService.fetchAndGetMap(ArgumentMatchers.contains("PrePopAddresses"), ArgumentMatchers.contains(regId))
-      (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Int]](), ArgumentMatchers.any[Format[Address]]()))
+      when(mockS4LService.fetchAndGetIntMap(ArgumentMatchers.contains("PrePopAddresses"), ArgumentMatchers.contains(regId))
+      (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Address]]()))
         .thenReturn(Future.successful(None))
 
       intercept[S4LFetchException](await(service.getAddress(regId, 1)))
     }
     "throw an exception when there is no address corresponding to the passed key returned from S4L" in new Setup {
       val regId = "9999"
-      when(mockS4LService.fetchAndGetMap(ArgumentMatchers.contains("PrePopAddresses"), ArgumentMatchers.contains(regId))
-      (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Int]](), ArgumentMatchers.any[Format[Address]]()))
+      when(mockS4LService.fetchAndGetIntMap(ArgumentMatchers.contains("PrePopAddresses"), ArgumentMatchers.contains(regId))
+      (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Address]]()))
         .thenReturn(Future.successful(Some(Map(0 -> addr1, 1 -> addr2))))
 
       intercept[S4LFetchException](await(service.getAddress(regId, 2)))

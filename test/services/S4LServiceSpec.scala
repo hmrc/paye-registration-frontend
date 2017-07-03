@@ -52,14 +52,14 @@ class S4LServiceSpec extends PAYERegSpec with KeystoreFixture with PAYERegistrat
     "save a Map with the correct key" in new Setup {
       mockS4LSaveForm[Map[Int, String]]("intMap", CacheMap("int-map", Map.empty))
 
-      await(service.saveMap[Int, String]("intMap", Map(1 -> "string", 2 -> "otherString"), "regId")).id shouldBe "int-map"
+      await(service.saveIntMap[String]("intMap", Map(1 -> "string", 2 -> "otherString"), "regId")).id shouldBe "int-map"
     }
 
     "fetch a Map with the correct key" in new Setup {
       val map = Map("one" -> 1, "two" -> 2)
       mockS4LFetchAndGet[Map[String, Int]]("stringMap", Some(map))
 
-      await(service.fetchAndGetMap[String, Int]("stringMap", "regId")) shouldBe Some(map)
+      await(service.fetchAndGetIntMap[Int]("stringMap", "regId")) shouldBe Some(map)
     }
 
     "clear down S4L data" in new Setup {
