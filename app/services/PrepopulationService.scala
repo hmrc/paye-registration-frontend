@@ -64,7 +64,7 @@ trait PrepopulationSrv {
     busRegConnector.retrieveAddresses(regId) flatMap {
       addresses =>
         val filteredAddresses = filterAddresses(addresses, roAddress, otherAddress)
-        s4LService.saveMap[Int, Address](CacheKeys.PrePopAddresses.toString, filteredAddresses, regId) map {
+        s4LService.saveIntMap[Address](CacheKeys.PrePopAddresses.toString, filteredAddresses, regId) map {
         _ => filteredAddresses
       }
     }
@@ -84,7 +84,7 @@ trait PrepopulationSrv {
   }
 
   def getAddress(regId: String, addressId: Int)(implicit hc: HeaderCarrier): Future[Address] = {
-    s4LService.fetchAndGetMap[Int, Address](CacheKeys.PrePopAddresses.toString, regId) map {
+    s4LService.fetchAndGetIntMap[Address](CacheKeys.PrePopAddresses.toString, regId) map {
       oAddresses => oAddresses.map {
         _.getOrElse(addressId, {throw new S4LFetchException(s"[PrepopulationService] - [getAddress] No address stored with address ID $addressId for reg ID $regId")})
       }.getOrElse(throw new S4LFetchException(s"[PrepopulationService] - [getAddress] No address map returned from S4L for reg ID $regId"))

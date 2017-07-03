@@ -42,10 +42,10 @@ trait S4LSrv {
     } yield cacheMap
   }
 
-  def saveMap[K, V](formId: String, data: Map[K, V], regId: String)(implicit hc: HeaderCarrier, formatK: Format[K], formatV: Format[V]): Future[CacheMap] = {
-    implicit val mapFormat: Format[Map[K, V]] = Format(Formatters.mapReads[K, V], Formatters.mapWrites[K, V])
+  def saveIntMap[V](formId: String, data: Map[Int, V], regId: String)(implicit hc: HeaderCarrier, formatV: Format[V]): Future[CacheMap] = {
+    implicit val mapFormat: Format[Map[Int, V]] = Format(Formatters.intMapReads[V], Formatters.intMapWrites[V])
     for {
-      cacheMap <- s4LConnector.saveForm[Map[K, V]](regId, formId, data)
+      cacheMap <- s4LConnector.saveForm[Map[Int, V]](regId, formId, data)
     } yield cacheMap
   }
 
@@ -55,10 +55,10 @@ trait S4LSrv {
     } yield data
   }
 
-  def fetchAndGetMap[K, V](formId: String, regId: String)(implicit hc: HeaderCarrier, formatK: Format[K], formatV: Format[V]): Future[Option[Map[K, V]]] = {
-    implicit val mapFormat: Format[Map[K, V]] = Format(Formatters.mapReads[K, V], Formatters.mapWrites[K, V])
+  def fetchAndGetIntMap[V](formId: String, regId: String)(implicit hc: HeaderCarrier, formatV: Format[V]): Future[Option[Map[Int, V]]] = {
+    implicit val mapFormat: Format[Map[Int, V]] = Format(Formatters.intMapReads[V], Formatters.intMapWrites[V])
     for {
-      cacheMap <- s4LConnector.fetchAndGet[Map[K, V]](regId, formId)
+      cacheMap <- s4LConnector.fetchAndGet[Map[Int, V]](regId, formId)
     } yield cacheMap
   }
 
