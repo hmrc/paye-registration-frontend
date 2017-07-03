@@ -19,6 +19,7 @@ import java.util.UUID
 
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import com.github.tomakehurst.wiremock.client.WireMock._
+import enums.CacheKeys
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
@@ -52,7 +53,9 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     "microservice.services.paye-registration.host" -> s"$mockHost",
     "microservice.services.paye-registration.port" -> s"$mockPort",
     "microservice.services.business-registration.host" -> s"$mockHost",
-    "microservice.services.business-registration.port" -> s"$mockPort"
+    "microservice.services.business-registration.port" -> s"$mockPort",
+    "microservice.services.address-lookup-frontend.host" -> s"$mockHost",
+    "microservice.services.address-lookup-frontend.port" -> s"$mockPort"
   ))
 
   override def beforeEach() {
@@ -64,7 +67,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
   "GET PAYE Contact details" should {
 
-    "not be prepoulated if no data is found in Paye Registration and error is returned from Business Registration" in {
+    "not be prepopulated if no data is found in Paye Registration and error is returned from Business Registration" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId, companyName)
@@ -152,8 +155,8 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
            |      "name": "$newName",
            |      "digitalContactDetails": {
            |        "email": "$newEmail",
-           |        "phoneNumber": "$newMobileNumber",
-           |        "mobileNumber": "$newTelephoneNumber"
+           |        "phoneNumber": "$newTelephoneNumber",
+           |        "mobileNumber": "$newMobileNumber"
            |      }
            |   }
            |}""".stripMargin
@@ -212,6 +215,291 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
        """.stripMargin
 
       json shouldBe Json.parse(prepopJson)
+    }
+  }
+
+  "GET Correspondence Address" should {
+    val tradingName = "Foo Trading"
+    val roDoc = s"""{"line1":"1", "line2":"2", "postCode":"pc"}"""
+    val payeDoc =
+      s"""{
+         |"companyName": "${companyName}",
+         |"tradingName": "${tradingName}",
+         |"roAddress": ${roDoc},
+         |"ppobAddress": ${roDoc},
+         |"businessContactDetails": {}
+         |}""".stripMargin
+
+    "not be prepopulated if an error is returned from Business Registration" in {
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")
+      stubGet(s"/paye-registration/$regId/company-details", 200, payeDoc)
+      stubGet(s"/business-registration/$regId/addresses", 403, "")
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PrePopAddresses", 200, dummyS4LResponse)
+
+      val response = await(buildClient("/where-to-send-post")
+        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .get())
+
+      response.status shouldBe 200
+
+      val document = Jsoup.parse(response.body)
+      document.title() shouldBe "Where should we send post to?"
+      document.getElementById("chosenAddress-roaddress").attr("value") shouldBe "roAddress"
+      document.getElementById("ro-address-line-1").text shouldBe "1"
+      document.getElementById("ro-address-line-2").text shouldBe ", 2"
+      document.getElementById("ro-post-code").text shouldBe ", pc"
+
+      an[Exception] shouldBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
+
+      document.getElementById("chosenAddress-other").attr("value") shouldBe "other"
+    }
+
+    "not be prepopulated if a wrong address is returned from Business Registration" in {
+      val addresses =
+        s"""{
+           |  "addresses": [
+           |    {
+           |      "addressLine1": "prepopLine1",
+           |      "addressLine2": "prepopLine2",
+           |      "postcode": "wrongPostcode"
+           |    },
+           |    {
+           |      "addressLine1": "prepopLine11",
+           |      "addressLine2": "prepopLine22",
+           |      "addressLine3": "prepopLine33",
+           |      "country": "prepopCountry"
+           |    }
+           |  ]
+           |}""".stripMargin
+
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")
+      stubGet(s"/paye-registration/$regId/company-details", 200, payeDoc)
+      stubGet(s"/business-registration/$regId/addresses", 200, addresses)
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PrePopAddresses", 200, dummyS4LResponse)
+
+      val response = await(buildClient("/where-to-send-post")
+        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .get())
+
+      response.status shouldBe 200
+
+      val document = Jsoup.parse(response.body)
+      an[Exception] shouldBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
+    }
+
+    "be prepopulated if data is returned from Business Registration" in {
+      val addresses =
+        s"""{
+           |  "addresses": [
+           |    {
+           |      "addressLine1": "prepopLine1",
+           |      "addressLine2": "prepopLine2",
+           |      "postcode": "AB9 8ZZ"
+           |    },
+           |    {
+           |      "addressLine1": "prepopLine11",
+           |      "addressLine2": "prepopLine22",
+           |      "addressLine3": "prepopLine33",
+           |      "country": "prepopCountry"
+           |    }
+           |  ]
+           |}""".stripMargin
+
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")
+      stubGet(s"/paye-registration/$regId/company-details", 200, payeDoc)
+      stubGet(s"/business-registration/$regId/addresses", 200, addresses)
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PrePopAddresses", 200, dummyS4LResponse)
+
+      val response = await(buildClient("/where-to-send-post")
+        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .get())
+
+      response.status shouldBe 200
+
+      val document = Jsoup.parse(response.body)
+      document.title() shouldBe "Where should we send post to?"
+      document.getElementById("chosenAddress-roaddress").attr("value") shouldBe "roAddress"
+      document.getElementById("chosenAddress-roaddress").attr("name") shouldBe "chosenAddress"
+      document.getElementById("ro-address-line-1").text shouldBe "1"
+      document.getElementById("ro-address-line-2").text shouldBe ", 2"
+      document.getElementById("ro-post-code").text shouldBe ", pc"
+
+      document.getElementById("chosenAddress-prepopaddress0").attr("value") shouldBe "prepopAddress0"
+      document.getElementById("chosenAddress-prepopaddress0").attr("name") shouldBe "chosenAddress"
+      document.getElementById("prepopaddress0-address-line-1").text shouldBe "prepopLine1"
+      document.getElementById("prepopaddress0-address-line-2").text shouldBe ", prepopLine2"
+      document.getElementById("prepopaddress0-post-code").text shouldBe ", AB9 8ZZ"
+
+      document.getElementById("chosenAddress-prepopaddress1").attr("value") shouldBe "prepopAddress1"
+      document.getElementById("chosenAddress-prepopaddress1").attr("name") shouldBe "chosenAddress"
+      document.getElementById("prepopaddress1-address-line-1").text shouldBe "prepopLine11"
+      document.getElementById("prepopaddress1-address-line-2").text shouldBe ", prepopLine22"
+      document.getElementById("prepopaddress1-address-line-3").text shouldBe ", prepopLine33"
+      document.getElementById("prepopaddress1-country").text shouldBe ", prepopCountry"
+
+      document.getElementById("chosenAddress-other").attr("value") shouldBe "other"
+      document.getElementById("chosenAddress-other").attr("name") shouldBe "chosenAddress"
+    }
+  }
+
+  "POST Correspondence Address" should {
+    val csrfToken = UUID.randomUUID().toString
+    val addresses =
+      s"""{
+         |  "13": {
+         |    "line1": "prepopLine1",
+         |    "line2": "prepopLine2",
+         |    "postCode": "prepopPC0"
+         |  },
+         |  "1": {
+         |    "line1": "prepopLine11",
+         |    "line2": "prepopLine22",
+         |    "line3": "prepopLine33",
+         |    "postCode": "prepopPC1"
+         |  }
+         |}""".stripMargin
+    val updatedPayeDoc =
+      s"""{
+         |   "correspondenceAddress": {"line1":"prepopLine1","line2":"prepopLine2","postCode":"prepopPC0"},
+         |   "contactDetails": {
+         |      "name": "PAYEContactName",
+         |      "digitalContactDetails": {
+         |        "email": "test@email.uk",
+         |        "phoneNumber": "021234",
+         |        "mobileNumber": "071234"
+         |      }
+         |   }
+         |}""".stripMargin
+
+    "upsert PAYE Contact Details in PAYE Registration with a prepop address" in {
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubS4LGet(regId, CacheKeys.PrePopAddresses.toString, addresses)
+      stubPatch(s"/paye-registration/$regId/contact-correspond-paye", 200, updatedPayeDoc)
+      stubGet(s"/paye-registration/$regId/contact-correspond-paye", 200, updatedPayeDoc)
+
+      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+
+      val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
+      val fResponse = buildClient("/where-to-send-post").
+        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
+        post(Map(
+          "csrfToken" -> Seq("xxx-ignored-xxx"),
+          "chosenAddress" -> Seq("prepopAddress13")
+        ))
+
+      val response = await(fResponse)
+      response.status shouldBe 303
+      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/check-and-confirm-your-answers")
+
+      val reqPosts = findAll(patchRequestedFor(urlMatching(s"/paye-registration/${regId}/contact-correspond-paye")))
+      val captor = reqPosts.get(0)
+      val json = Json.parse(captor.getBodyAsString)
+
+      json shouldBe Json.parse(updatedPayeDoc)
+    }
+  }
+
+  "GET savePAYECorrespondenceAddress" should {
+    val addressLookupID = "888"
+    val updatedPayeDoc =
+      s"""{
+         |   "correspondenceAddress": {"line1":"prepopLine1","line2":"prepopLine2","postCode":"prepopPC0"},
+         |   "contactDetails": {
+         |      "name": "PAYEContactName",
+         |      "digitalContactDetails": {
+         |        "email": "test@email.uk",
+         |        "phoneNumber": "021234",
+         |        "mobileNumber": "071234"
+         |      }
+         |   }
+         |}""".stripMargin
+
+    "upsert PAYE Contact Details in PAYE Registration and upsert addresses in Business Registration with an address from Address Lookup" in {
+      val addressAuditRef = "tstAuditRef"
+      val addressLine1 = "14 St Test Walker"
+      val addressLine2 = "Testford"
+      val addressLine3 = "Testley"
+      val addressLine4 = "Testshire"
+      val addressPostcode = "TE1 1ST"
+      val addressFromALF = s"""{
+                             |  "auditRef":"$addressAuditRef",
+                             |  "address":{
+                             |    "lines":[
+                             |      "$addressLine1",
+                             |      "$addressLine2",
+                             |      "$addressLine3",
+                             |      "$addressLine4"
+                             |    ],
+                             |    "postcode":"$addressPostcode",
+                             |    "country":{
+                             |      "code":"UK",
+                             |      "name":"United Kingdom"
+                             |    }
+                             |  }
+                             |}""".stripMargin
+
+      val newAddress2BusReg =
+        s"""
+           |{
+           |   "auditRef": "$addressAuditRef",
+           |   "addressLine1": "$addressLine1",
+           |   "addressLine2": "$addressLine2",
+           |   "addressLine3": "$addressLine3",
+           |   "addressLine4": "$addressLine4",
+           |   "postcode": "$addressPostcode"
+           |}
+       """.stripMargin
+
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubPatch(s"/paye-registration/$regId/contact-correspond-paye", 200, updatedPayeDoc)
+      stubGet(s"/paye-registration/$regId/contact-correspond-paye", 200, updatedPayeDoc)
+      stubPost(s"/business-registration/${regId}/addresses", 200, newAddress2BusReg)
+      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+      stubGet(s"/api/confirmed?id=$addressLookupID", 200, addressFromALF)
+
+      val response = await(buildClient(s"/return-from-address-for-corresp-addr?id=$addressLookupID")
+        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .get())
+
+      response.status shouldBe 303
+      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/check-and-confirm-your-answers")
+
+      val reqPosts = findAll(postRequestedFor(urlMatching(s"/business-registration/${regId}/addresses")))
+      val captor = reqPosts.get(0)
+      val json = Json.parse(captor.getBodyAsString)
+
+      json shouldBe Json.parse(newAddress2BusReg)
     }
   }
 }

@@ -160,7 +160,6 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
               case prepop: PrepopAddress => (for {
                 prepopAddress <- prepopService.getAddress(profile.registrationID, prepop.index)
                 res <- payeContactService.submitCorrespondence(prepopAddress, profile.registrationID)
-                _ <- prepopService.saveAddress(profile.registrationID, prepopAddress)
               } yield res match {
                 case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
                 case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
@@ -181,6 +180,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
           for {
             Some(address) <- addressLookupService.getAddress
             res <- payeContactService.submitCorrespondence(address, profile.registrationID)
+            _ <- prepopService.saveAddress(profile.registrationID, address)
           } yield res match {
             case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
             case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
