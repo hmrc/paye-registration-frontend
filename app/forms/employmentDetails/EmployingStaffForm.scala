@@ -22,6 +22,9 @@ import play.api.data.Form
 import play.api.data.Forms._
 
 object EmployingStaffForm extends RequiredBooleanForm {
+
+  override val errorMsg = "pages.employingStaff.error"
+
   val form = Form(
     mapping(
       "isEmployingStaff" -> requiredBoolean

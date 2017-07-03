@@ -20,6 +20,9 @@ import play.api.data.format.Formatter
 import play.api.data.{FormError, Forms, Mapping}
 
 trait RequiredBooleanForm {
+
+  val errorMsg: String = "error.required"
+
   implicit def requiredBooleanFormatter: Formatter[Boolean] = new Formatter[Boolean] {
 
     override val format = Some(("format.boolean", Nil))
@@ -29,7 +32,7 @@ trait RequiredBooleanForm {
       Right(data.getOrElse(key,"")).right.flatMap {
         case "true" => Right(true)
         case "false" => Right(false)
-        case _ => Left(Seq(FormError(key, "error.required", Nil)))
+        case _ => Left(Seq(FormError(key, errorMsg, Nil)))
       }
     }
 

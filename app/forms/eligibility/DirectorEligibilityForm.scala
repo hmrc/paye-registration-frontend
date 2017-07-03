@@ -22,6 +22,9 @@ import play.api.data.Form
 import play.api.data.Forms.mapping
 
 object DirectorEligibilityForm extends RequiredBooleanForm {
+
+  override val errorMsg = "pages.directorEligibility.error"
+
   val form = Form(
     mapping(
       "isEligible" -> requiredBoolean
