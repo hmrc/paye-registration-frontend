@@ -20,21 +20,22 @@ import models.view.{AddressChoice, ChosenAddress}
 import play.api.data.Forms.mapping
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError, Forms, Mapping}
+import play.api.libs.json.Json
 
 trait ChooseAddressForm {
 
   val errMessage: String
 
-  implicit def addressChoiceFormatter: Formatter[AddressChoice.Value] = new Formatter[AddressChoice.Value] {
-    def bind(key: String, data: Map[String, String]): Either[Seq[FormError], AddressChoice.Value] = {
+  implicit def addressChoiceFormatter: Formatter[AddressChoice] = new Formatter[AddressChoice] {
+    def bind(key: String, data: Map[String, String]): Either[Seq[FormError], AddressChoice] = {
       Right(data.getOrElse(key,"")).right.flatMap {
         case "" => Left(Seq(FormError(key, errMessage, Nil)))
         case choice => Right(AddressChoice.fromString(choice))
       }
     }
 
-    def unbind(key: String, value: AddressChoice.Value): Map[String, String] = Map(key -> value.toString)
+    def unbind(key: String, value: AddressChoice): Map[String, String] = Map(key -> Json.toJson[AddressChoice](value).as[String])
   }
 
-  val chosenAddress: Mapping[AddressChoice.Value] = Forms.of[AddressChoice.Value](addressChoiceFormatter)
+  val chosenAddress: Mapping[AddressChoice] = Forms.of[AddressChoice](addressChoiceFormatter)
 }

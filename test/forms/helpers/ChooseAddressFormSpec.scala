@@ -16,7 +16,7 @@
 
 package forms.helpers
 
-import models.view.{AddressChoice, ChosenAddress}
+import models.view.{AddressChoice, ChosenAddress, CorrespondenceAddress, Other, PPOBAddress, PrepopAddress, ROAddress}
 import play.api.data.FormError
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -32,11 +32,11 @@ class ChooseAddressFormSpec extends UnitSpec {
       )
 
       "Bind successfully" in {
-        testForm.addressChoiceFormatter.bind("chosenAddress", data) shouldBe Right(AddressChoice.other)
+        testForm.addressChoiceFormatter.bind("chosenAddress", data) shouldBe Right(Other)
       }
 
       "Unbind successfully" in {
-        testForm.addressChoiceFormatter.unbind("tstKey", AddressChoice.other) shouldBe Map("tstKey" -> "other")
+        testForm.addressChoiceFormatter.unbind("tstKey", Other) shouldBe Map("tstKey" -> "other")
       }
     }
 
@@ -46,11 +46,11 @@ class ChooseAddressFormSpec extends UnitSpec {
       )
 
       "Bind successfully" in {
-        testForm.addressChoiceFormatter.bind("chosenAddress", data) shouldBe Right(AddressChoice.roAddress)
+        testForm.addressChoiceFormatter.bind("chosenAddress", data) shouldBe Right(ROAddress)
       }
 
       "Unbind successfully" in {
-        testForm.addressChoiceFormatter.unbind("tstKey", AddressChoice.roAddress) shouldBe Map("tstKey" -> "roAddress")
+        testForm.addressChoiceFormatter.unbind("tstKey", ROAddress) shouldBe Map("tstKey" -> "roAddress")
       }
     }
 
@@ -60,11 +60,11 @@ class ChooseAddressFormSpec extends UnitSpec {
       )
 
       "Bind successfully" in {
-        testForm.addressChoiceFormatter.bind("chosenAddress", data) shouldBe Right(AddressChoice.ppobAddress)
+        testForm.addressChoiceFormatter.bind("chosenAddress", data) shouldBe Right(PPOBAddress)
       }
 
       "Unbind successfully" in {
-        testForm.addressChoiceFormatter.unbind("tstKey", AddressChoice.ppobAddress) shouldBe Map("tstKey" -> "ppobAddress")
+        testForm.addressChoiceFormatter.unbind("tstKey", PPOBAddress) shouldBe Map("tstKey" -> "ppobAddress")
       }
     }
 
@@ -74,11 +74,25 @@ class ChooseAddressFormSpec extends UnitSpec {
       )
 
       "Bind successfully" in {
-        testForm.addressChoiceFormatter.bind("chosenAddress", data) shouldBe Right(AddressChoice.correspondenceAddress)
+        testForm.addressChoiceFormatter.bind("chosenAddress", data) shouldBe Right(CorrespondenceAddress)
       }
 
       "Unbind successfully" in {
-        testForm.addressChoiceFormatter.unbind("tstKey", AddressChoice.correspondenceAddress) shouldBe Map("tstKey" -> "correspondenceAddress")
+        testForm.addressChoiceFormatter.unbind("tstKey", CorrespondenceAddress) shouldBe Map("tstKey" -> "correspondenceAddress")
+      }
+    }
+
+    "Supplied with full data for value prepopAddress10" should {
+      val data = Map(
+        "chosenAddress" -> "prepopAddress10"
+      )
+
+      "Bind successfully" in {
+        testForm.addressChoiceFormatter.bind("chosenAddress", data) shouldBe Right(PrepopAddress(10))
+      }
+
+      "Unbind successfully" in {
+        testForm.addressChoiceFormatter.unbind("tstKey", PrepopAddress(10)) shouldBe Map("tstKey" -> "prepopAddress10")
       }
     }
 

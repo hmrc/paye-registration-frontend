@@ -62,7 +62,7 @@ object PAYEContactDetails {
   }
 
   val prepopWrites: Writes[PAYEContactDetails] = new Writes[PAYEContactDetails] {
-    def writes(payeContactDetails: PAYEContactDetails): JsObject = {
+    def writes(payeContactDetails: PAYEContactDetails): JsValue = {
       def splitName(fullName: String): (Option[String], Option[String], Option[String]) = {
         val split = fullName.trim.split("\\s+")
 

@@ -132,7 +132,7 @@ trait BusinessRegistrationConnect {
         address
     }
   }
-
+  
   private[connectors] def logResponse(e: Throwable, f: String, m: String, regId: Option[String] = None): Throwable = {
     val optRegId = regId.map(r => s" and regId: $regId").getOrElse("")
     def log(s: String) = Logger.error(s"[BusinessRegistrationConnector] [$f] received $s when $m$optRegId")

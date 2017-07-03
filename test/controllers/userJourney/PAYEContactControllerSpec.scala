@@ -42,9 +42,13 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
   val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
   val mockAddressLookupService = mock[AddressLookupService]
   val mockMessagesApi = mock[MessagesApi]
+<<<<<<< HEAD
   val mockPrepopService = mock[PrepopulationService]
 
   val regId = "12345"
+=======
+  val mockPrepopulationService = mock[PrepopulationService]
+>>>>>>> update form bind/unbind for ChooseAddress
 
   class Setup {
     val testController = new PAYEContactCtrl {
@@ -55,7 +59,11 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val messagesApi = fakeApplication.injector.instanceOf[MessagesApi]
       override val authConnector = mockAuthConnector
       override val payeRegistrationConnector = mockPayeRegistrationConnector
+<<<<<<< HEAD
       override val prepopService = mockPrepopService
+=======
+      override val prepopService = mockPrepopulationService
+>>>>>>> update form bind/unbind for ChooseAddress
 
       override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(CurrentProfile(
@@ -204,6 +212,9 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
+
+      when(mockPrepopulationService.getAddresses(ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(Seq.empty))
 
       when(mockPAYEContactService.getCorrespondenceAddresses(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(addressMap)
