@@ -20,10 +20,11 @@ import play.api.libs.json.Json
 import testHelpers.PAYERegSpec
 
 class ChosenAddressSpec extends PAYERegSpec {
-  val tstChosenAddressOther = ChosenAddress(chosenAddress = AddressChoice.other)
-  val tstChosenAddressROAddress = ChosenAddress(chosenAddress = AddressChoice.roAddress)
-  val tstChosenAddressPPOBAddress = ChosenAddress(chosenAddress = AddressChoice.ppobAddress)
-  val tstChosenAddressCorrespondenceAddress = ChosenAddress(chosenAddress = AddressChoice.correspondenceAddress)
+  val tstChosenAddressOther = ChosenAddress(chosenAddress = Other)
+  val tstChosenAddressROAddress = ChosenAddress(chosenAddress = ROAddress)
+  val tstChosenAddressPPOBAddress = ChosenAddress(chosenAddress = PPOBAddress)
+  val tstChosenAddressCorrespondenceAddress = ChosenAddress(chosenAddress = CorrespondenceAddress)
+  def tstChosenAddressPrepopAddress(index: Int) = ChosenAddress(chosenAddress = PrepopAddress(index))
 
   val tstChosenAddressOtherJson = Json.parse(
     """{
@@ -55,6 +56,12 @@ class ChosenAddressSpec extends PAYERegSpec {
       |}""".stripMargin
   )
 
+  def tstChosenAddressPrepopAddressJson(index: Int) = Json.parse(
+    s"""{
+      |  "chosenAddress":"prepopAddress$index"
+      |}""".stripMargin
+  )
+
   "ChosenAddress" should {
     "read from Json with other value" in {
       Json.fromJson[ChosenAddress](tstChosenAddressOtherJson).asOpt shouldBe Some(tstChosenAddressOther)
@@ -76,6 +83,14 @@ class ChosenAddressSpec extends PAYERegSpec {
       Json.fromJson[ChosenAddress](tstWrongChosenAddressJson).asOpt shouldBe None
     }
 
+    "read from Json with prepopAddress0 value" in {
+      Json.fromJson[ChosenAddress](tstChosenAddressPrepopAddressJson(0)).asOpt shouldBe Some(tstChosenAddressPrepopAddress(0))
+    }
+
+    "read from Json with prepopAddress10 value" in {
+      Json.fromJson[ChosenAddress](tstChosenAddressPrepopAddressJson(10)).asOpt shouldBe Some(tstChosenAddressPrepopAddress(10))
+    }
+
     "write to json with other value" in {
       Json.toJson[ChosenAddress](tstChosenAddressOther) shouldBe tstChosenAddressOtherJson
     }
@@ -90,6 +105,14 @@ class ChosenAddressSpec extends PAYERegSpec {
 
     "write to json with correspondenceAddress value" in {
       Json.toJson[ChosenAddress](tstChosenAddressCorrespondenceAddress) shouldBe tstChosenAddressCorrespondenceAddressJson
+    }
+
+    "write to json with prepopAddress0 value" in {
+      Json.toJson[ChosenAddress](tstChosenAddressPrepopAddress(0)) shouldBe tstChosenAddressPrepopAddressJson(0)
+    }
+
+    "write to json with prepopAddress10 value" in {
+      Json.toJson[ChosenAddress](tstChosenAddressPrepopAddress(10)) shouldBe tstChosenAddressPrepopAddressJson(10)
     }
   }
 }

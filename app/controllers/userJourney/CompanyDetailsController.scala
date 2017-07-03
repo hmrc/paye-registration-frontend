@@ -23,7 +23,7 @@ import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
 import enums.DownstreamOutcome
 import forms.companyDetails.{BusinessContactDetailsForm, PPOBForm, TradingNameForm}
-import models.view.{AddressChoice, ChosenAddress, TradingName}
+import models.view.{AddressChoice, ChosenAddress, Other, PPOBAddress, ROAddress, TradingName}
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
@@ -166,7 +166,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
         withCurrentProfile { profile =>
           companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId).map { companyDetails =>
             val addressMap = companyDetailsService.getPPOBPageAddresses(companyDetails)
-            Ok(PPOBAddressPage(PPOBForm.form.fill(ChosenAddress(AddressChoice.ppobAddress)), addressMap.get("ro"), addressMap.get("ppob")))
+            Ok(PPOBAddressPage(PPOBForm.form.fill(ChosenAddress(PPOBAddress)), addressMap.get("ro"), addressMap.get("ppob")))
           }
         }
   }
@@ -182,12 +182,12 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
                 BadRequest(PPOBAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob")))
             },
             success => success.chosenAddress match {
-              case AddressChoice.ppobAddress =>
+              case PPOBAddress =>
                 Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
-              case AddressChoice.roAddress =>
+              case ROAddress =>
                 companyDetailsService.copyROAddrToPPOBAddr(profile.registrationID, profile.companyTaxRegistration.transactionId)
                   .map (_ => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
-              case AddressChoice.other =>
+              case Other =>
                 addressLookupService.buildAddressLookupUrl("payereg1", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()) map {
                   redirectUrl => Redirect(redirectUrl)
                 }
