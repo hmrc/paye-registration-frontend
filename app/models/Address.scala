@@ -34,8 +34,6 @@ object Address {
 
   private val unitedKingdomDomains = List("United Kingdom", "UK", "GB", "Great Britain", "Wales", "Scotland", "Northern Ireland")
 
-  private val ignore = OWrites[Any](_ => Json.obj())
-
   def trimLine(stringToTrim: String, trimTo: Int): String = {
     val trimmed = stringToTrim.trim
     if(trimmed.length > trimTo) trimmed.substring(0, trimTo) else trimmed
@@ -172,7 +170,8 @@ object Address {
           line3 = json.\("addressLine3").asOpt[String],
           line4 = json.\("addressLine4").asOpt[String],
           postCode = validatedPostcode,
-          country = ctry
+          country = ctry,
+          auditRef = json.\("auditRef").asOpt[String]
         ))
       } else {
         JsError("Neither country nor valid postcode defined in PrePop Address")
@@ -187,7 +186,7 @@ object Address {
     (__ \ "addressLine4").writeNullable[String] and
     (__ \ "postcode").writeNullable[String] and
     (__ \ "country").writeNullable[String] and
-    ignore
+    (__ \ "auditRef").writeNullable[String]
   )(unlift(Address.unapply))
 
   val prePopFormat = Format(prePopReads, prePopWrites)
