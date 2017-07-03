@@ -213,8 +213,8 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
-      when(mockPrepopulationService.getAddresses(ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future.successful(Seq.empty))
+      when(mockPrepopulationService.getPrePopAddresses(ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(Map[Int, Address]()))
 
       when(mockPAYEContactService.getCorrespondenceAddresses(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(addressMap)

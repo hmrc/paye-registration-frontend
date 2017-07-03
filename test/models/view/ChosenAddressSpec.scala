@@ -26,93 +26,71 @@ class ChosenAddressSpec extends PAYERegSpec {
   val tstChosenAddressCorrespondenceAddress = ChosenAddress(chosenAddress = CorrespondenceAddress)
   def tstChosenAddressPrepopAddress(index: Int) = ChosenAddress(chosenAddress = PrepopAddress(index))
 
-  val tstChosenAddressOtherJson = Json.parse(
-    """{
-      |  "chosenAddress":"other"
-      |}""".stripMargin
-  )
-
-  val tstChosenAddressROAddressJson = Json.parse(
-    """{
-      |  "chosenAddress":"roAddress"
-      |}""".stripMargin
-  )
-
-  val tstChosenAddressPPOBAddressJson = Json.parse(
-    """{
-      |  "chosenAddress":"ppobAddress"
-      |}""".stripMargin
-  )
-
-  val tstChosenAddressCorrespondenceAddressJson = Json.parse(
-    """{
-      |  "chosenAddress":"correspondenceAddress"
-      |}""".stripMargin
-  )
-
-  val tstWrongChosenAddressJson = Json.parse(
-    """{
-      |  "chosenAddress":"wrong"
-      |}""".stripMargin
-  )
-
-  def tstChosenAddressPrepopAddressJson(index: Int) = Json.parse(
-    s"""{
-      |  "chosenAddress":"prepopAddress$index"
-      |}""".stripMargin
-  )
-
-  "ChosenAddress" should {
-    "read from Json with other value" in {
-      Json.fromJson[ChosenAddress](tstChosenAddressOtherJson).asOpt shouldBe Some(tstChosenAddressOther)
+  "AddressChoice fromString" should {
+    "return a Other object when the input string is other" in {
+      AddressChoice.fromString("other") shouldBe Other
     }
 
-    "read from Json with roAddress value" in {
-      Json.fromJson[ChosenAddress](tstChosenAddressROAddressJson).asOpt shouldBe Some(tstChosenAddressROAddress)
+    "return a ROAddress object when the input string is roAddress" in {
+      AddressChoice.fromString("roAddress") shouldBe ROAddress
     }
 
-    "read from Json with correspondenceAddress value" in {
-      Json.fromJson[ChosenAddress](tstChosenAddressCorrespondenceAddressJson).asOpt shouldBe Some(tstChosenAddressCorrespondenceAddress)
+    "return a PPOBAddress object when the input string is ppobAddress" in {
+      AddressChoice.fromString("ppobAddress") shouldBe PPOBAddress
     }
 
-    "read from Json with ppobAddress value" in {
-      Json.fromJson[ChosenAddress](tstChosenAddressPPOBAddressJson).asOpt shouldBe Some(tstChosenAddressPPOBAddress)
+    "return a CorrespondenceAddress object when the input string is correspondenceAddress" in {
+      AddressChoice.fromString("correspondenceAddress") shouldBe CorrespondenceAddress
     }
 
-    "read from Json with a wrong value " in {
-      Json.fromJson[ChosenAddress](tstWrongChosenAddressJson).asOpt shouldBe None
+    "return a PrepopAddress object with index 0 when the input string is prepopAddress0" in {
+      AddressChoice.fromString("prepopAddress0") shouldBe PrepopAddress(0)
     }
 
-    "read from Json with prepopAddress0 value" in {
-      Json.fromJson[ChosenAddress](tstChosenAddressPrepopAddressJson(0)).asOpt shouldBe Some(tstChosenAddressPrepopAddress(0))
+    "return a PrepopAddres object with index 10 when the input string is prepopAddress10" in {
+      AddressChoice.fromString("prepopAddress10") shouldBe PrepopAddress(10)
     }
 
-    "read from Json with prepopAddress10 value" in {
-      Json.fromJson[ChosenAddress](tstChosenAddressPrepopAddressJson(10)).asOpt shouldBe Some(tstChosenAddressPrepopAddress(10))
+    "return an exception when the input string is not correct" in {
+      a[ConvertToPrepopAddressException] shouldBe thrownBy(AddressChoice.fromString("Other"))
     }
 
-    "write to json with other value" in {
-      Json.toJson[ChosenAddress](tstChosenAddressOther) shouldBe tstChosenAddressOtherJson
+    "return an exception when the input string is not a valid PrepopAddress index value" in {
+      a[ConvertToPrepopAddressException] shouldBe thrownBy(AddressChoice.fromString("prepopAddressx"))
+    }
+  }
+
+  "ROAddress toString" should {
+    "return roAddress string" in {
+      ROAddress.toString shouldBe "roAddress"
+    }
+  }
+
+  "PPOBAddress toString" should {
+    "return ppobAddress string" in {
+      PPOBAddress.toString shouldBe "ppobAddress"
+    }
+  }
+
+  "CorrespondenceAddress toString" should {
+    "return correspondenceAddress string" in {
+      CorrespondenceAddress.toString shouldBe "correspondenceAddress"
+    }
+  }
+
+  "Other toString" should {
+    "return other string" in {
+      Other.toString shouldBe "other"
+    }
+  }
+
+  "PrepopAddress toString" should {
+    "return prepopAddress0 string" in {
+      PrepopAddress(0).toString shouldBe "prepopAddress0"
     }
 
-    "write to json with roAddress value" in {
-      Json.toJson[ChosenAddress](tstChosenAddressROAddress) shouldBe tstChosenAddressROAddressJson
-    }
-
-    "write to json with ppobAddress value" in {
-      Json.toJson[ChosenAddress](tstChosenAddressPPOBAddress) shouldBe tstChosenAddressPPOBAddressJson
-    }
-
-    "write to json with correspondenceAddress value" in {
-      Json.toJson[ChosenAddress](tstChosenAddressCorrespondenceAddress) shouldBe tstChosenAddressCorrespondenceAddressJson
-    }
-
-    "write to json with prepopAddress0 value" in {
-      Json.toJson[ChosenAddress](tstChosenAddressPrepopAddress(0)) shouldBe tstChosenAddressPrepopAddressJson(0)
-    }
-
-    "write to json with prepopAddress10 value" in {
-      Json.toJson[ChosenAddress](tstChosenAddressPrepopAddress(10)) shouldBe tstChosenAddressPrepopAddressJson(10)
+    "return prepopAddress10 string" in {
+      PrepopAddress(10).toString shouldBe "prepopAddress10"
     }
   }
 }
