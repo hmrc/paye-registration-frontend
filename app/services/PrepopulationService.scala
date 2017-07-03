@@ -44,6 +44,10 @@ trait PrepopulationSrv {
     }
   }
 
+  def getPAYEContactDetails(regId: String)(implicit hc: HeaderCarrier): Future[Option[PAYEContactDetails]] = {
+    busRegConnector.retrieveContactDetails(regId)
+  }
+
   def saveContactDetails(regId: String, contactDetails: PAYEContactDetails)(implicit hc: HeaderCarrier): Future[PAYEContactDetails] = {
     busRegConnector.upsertContactDetails(regId, contactDetails) map {
       _ => contactDetails

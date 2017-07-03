@@ -25,6 +25,7 @@ import enums.DownstreamOutcome
 import forms.payeContactDetails.{CorrespondenceAddressForm, PAYEContactDetailsForm}
 import models.view.PAYEContact
 import models.view.{AddressChoice, ChosenAddress}
+import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import services._
@@ -42,6 +43,7 @@ class PAYEContactController @Inject()(
                                        injAddressLookupService: AddressLookupService,
                                        injKeystoreConnector: KeystoreConnector,
                                        injPayeRegistrationConnector: PAYERegistrationConnector,
+                                       injPrepopulationService: PrepopulationService,
                                        injMessagesApi: MessagesApi)
   extends PAYEContactCtrl {
   val authConnector = FrontendAuthConnector
@@ -51,6 +53,7 @@ class PAYEContactController @Inject()(
   val keystoreConnector = injKeystoreConnector
   val messagesApi = injMessagesApi
   val payeRegistrationConnector = injPayeRegistrationConnector
+  val prepopService = injPrepopulationService
 }
 
 trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
@@ -59,6 +62,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
   val payeContactService: PAYEContactSrv
   val addressLookupService: AddressLookupSrv
   val keystoreConnector: KeystoreConnect
+  val prepopService: PrepopulationSrv
 
   val payeContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
@@ -66,7 +70,10 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
         withCurrentProfile { profile =>
           for {
             companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-            payeContact <- payeContactService.getPAYEContact(profile.registrationID)
+            payeContact <- payeContactService.getPAYEContact(profile.registrationID) flatMap {
+              case PAYEContact(None, _) => prepopService.getPAYEContactDetails(profile.registrationID) map { res => PAYEContact(res, None) }
+              case other => Future.successful(other)
+            }
           } yield payeContact match {
             case PAYEContact(Some(contactDetails), _) => Ok(PAYEContactDetailsPage(companyDetails.companyName, PAYEContactDetailsForm.form.fill(contactDetails)))
             case _ => Ok(PAYEContactDetailsPage(companyDetails.companyName, PAYEContactDetailsForm.form))
@@ -89,6 +96,13 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
                   mobileNumber  = success.digitalContactDetails.mobileNumber map(_.trim)
                 )
               )
+
+              prepopService.saveContactDetails(profile.registrationID, trimmed) map {
+                _ => Logger.info(s"Successfully saved Contact Details to Prepopulation for regId: ${profile.registrationID}")
+              } recover {
+                case _ => Logger.warn(s"Failed to save Contact Details to Prepopulation for regId: ${profile.registrationID}")
+              }
+
               payeContactService.submitPayeContactDetails(trimmed, profile.registrationID) map {
                 case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
                 case DownstreamOutcome.Success => Redirect(routes.PAYEContactController.payeCorrespondenceAddress())

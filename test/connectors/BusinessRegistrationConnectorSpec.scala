@@ -23,9 +23,10 @@ import models.external.BusinessProfile
 import models.view.PAYEContactDetails
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.libs.json.{JsValue, Json}
+import org.omg.CosNaming.NamingContextPackage.NotFound
+import play.api.libs.json.{JsValue, Json, Writes}
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.play.http._
 
 import scala.concurrent.Future
 
@@ -101,9 +102,9 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
 
     "throw a Forbidden exception if the request has been deemed unauthorised" in new Setup {
       when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains("/business-registration/business-tax-registration"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(new ForbiddenException("Forbidden")))
+        .thenReturn(Future.failed(new Upstream4xxResponse("Forbidden", 403, 403)))
 
-      intercept[ForbiddenException](await(connector.retrieveCompletionCapacity))
+      intercept[Upstream4xxResponse](await(connector.retrieveCompletionCapacity))
     }
 
     "throw a Exception when something unexpected happened" in new Setup {
@@ -124,6 +125,54 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
         .thenReturn(Future.successful(validContactDetails))
 
       await(connector.retrieveContactDetails(regId)) shouldBe Some(validContactDetails)
+    }
+
+    "return no Contact Details if contact details are not found in Business Registration" in new Setup {
+      when(mockWSHttp.GET[PAYEContactDetails](ArgumentMatchers.contains(s"/business-registration/$regId/contact-details"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new NotFoundException("")))
+
+      await(connector.retrieveContactDetails(regId)) shouldBe None
+    }
+
+    "return no Contact Details if bad request aws made to Business Registration" in new Setup {
+      when(mockWSHttp.GET[PAYEContactDetails](ArgumentMatchers.contains(s"/business-registration/$regId/contact-details"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new BadRequestException("")))
+
+      await(connector.retrieveContactDetails(regId)) shouldBe None
+    }
+
+    "return no Contact Details if Business Registration returns a 4xx" in new Setup {
+      when(mockWSHttp.GET[PAYEContactDetails](ArgumentMatchers.contains(s"/business-registration/$regId/contact-details"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new Upstream4xxResponse("412", 412, 412)))
+
+      await(connector.retrieveContactDetails(regId)) shouldBe None
+    }
+
+    "return no Contact Details if Business Registration does not respond" in new Setup {
+      when(mockWSHttp.GET[PAYEContactDetails](ArgumentMatchers.contains(s"/business-registration/$regId/contact-details"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new Upstream5xxResponse("Timed out", 502, 502)))
+
+      await(connector.retrieveContactDetails(regId)) shouldBe None
+    }
+  }
+
+  "upsertContactDetails" should {
+    val regId = "12345"
+
+    val validContactDetails = PAYEContactDetails("Test Name", DigitalContactDetails(Some("email@test.test"), Some("012345"), Some("543210")))
+
+    "return PAYE Contact Details if contact details are stored in Business Registration" in new Setup {
+      mockHttpPOST[PAYEContactDetails, JsValue]("testBusinessRegUrl/business-registration/$regId/contact-details", Json.obj())
+
+      await(connector.upsertContactDetails(regId, validContactDetails)) shouldBe validContactDetails
+    }
+
+    "return Contact Details if contact details are not stored in Business Registration" in new Setup {
+      when(mockWSHttp.POST[PAYEContactDetails, JsValue](ArgumentMatchers.anyString(), ArgumentMatchers.any[PAYEContactDetails](), ArgumentMatchers.any())
+        (ArgumentMatchers.any[Writes[PAYEContactDetails]](), ArgumentMatchers.any[HttpReads[JsValue]](), ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.failed(new NotFoundException("")))
+
+      await(connector.upsertContactDetails(regId, validContactDetails)) shouldBe validContactDetails
     }
   }
 }

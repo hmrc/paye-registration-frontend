@@ -22,6 +22,7 @@ import enums.DownstreamOutcome
 import fixtures.{PAYERegistrationFixture, S4LFixture}
 import models.Address
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import models.view.PAYEContactDetails
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.http.Status
@@ -29,7 +30,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Call, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.{AddressLookupService, CompanyDetailsService, PAYEContactService}
+import services.{AddressLookupService, CompanyDetailsService, PAYEContactService, PrepopulationService}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -41,6 +42,9 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
   val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
   val mockAddressLookupService = mock[AddressLookupService]
   val mockMessagesApi = mock[MessagesApi]
+  val mockPrepopService = mock[PrepopulationService]
+
+  val regId = "12345"
 
   class Setup {
     val testController = new PAYEContactCtrl {
@@ -51,10 +55,11 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val messagesApi = fakeApplication.injector.instanceOf[MessagesApi]
       override val authConnector = mockAuthConnector
       override val payeRegistrationConnector = mockPayeRegistrationConnector
+      override val prepopService = mockPrepopService
 
       override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(CurrentProfile(
-          "12345",
+          regId,
           CompanyRegistrationProfile("held", "txId"),
           "ENG",
           payeRegistrationSubmitted = false
@@ -82,11 +87,29 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       }
     }
 
+    "return an OK with data from prepopulation" in new Setup {
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
+
+      when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(emptyPAYEContactView)
+
+      when(mockPrepopService.getPAYEContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(validPAYEContactView.contactDetails)
+
+      AuthBuilder.showWithAuthorisedUser(testController.payeContactDetails, mockAuthConnector) {
+        (result: Future[Result])  =>
+          status(result) shouldBe OK
+      }
+    }
+
     "return an OK without data" in new Setup {
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
 
       when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(emptyPAYEContactView)
+
+      when(mockPrepopService.getPAYEContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(None)
 
       AuthBuilder.showWithAuthorisedUser(testController.payeContactDetails, mockAuthConnector) {
         (result: Future[Result])  =>
@@ -139,6 +162,9 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
+      when(mockPrepopService.saveContactDetails(ArgumentMatchers.eq(regId), ArgumentMatchers.any[PAYEContactDetails]())(ArgumentMatchers.any[HeaderCarrier]))
+        .thenReturn(Future.successful(validPAYEContactDetails))
+
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYEContactDetails, mockAuthConnector, request) {
         result =>
           status(result) shouldBe Status.INTERNAL_SERVER_ERROR
@@ -153,6 +179,9 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
       when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
+
+      when(mockPrepopService.saveContactDetails(ArgumentMatchers.eq(regId), ArgumentMatchers.any[PAYEContactDetails]())(ArgumentMatchers.any[HeaderCarrier]))
+        .thenReturn(Future.failed(new RuntimeException))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYEContactDetails, mockAuthConnector, request) {
         result =>
