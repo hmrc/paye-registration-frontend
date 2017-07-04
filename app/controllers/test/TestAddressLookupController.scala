@@ -33,36 +33,39 @@ class TestAddressLookupController @Inject()(
                                              injCompanyDetailsService: CompanyDetailsService,
                                              injKeystoreConnector: KeystoreConnector,
                                              injPayeRegistrationConnector: PAYERegistrationConnector,
-                                             injPAYEContactService: PAYEContactService)
+                                             injPAYEContactService: PAYEContactService,
+                                             injPrepopulationService: PrepopulationService)
   extends TestAddressLookupCtrl {
   val authConnector = FrontendAuthConnector
   val companyDetailsService = injCompanyDetailsService
   val payeContactService = injPAYEContactService
   val keystoreConnector = injKeystoreConnector
   val payeRegistrationConnector = injPayeRegistrationConnector
+  val prepopService = injPrepopulationService
 }
 
 trait TestAddressLookupCtrl extends FrontendController with Actions with SessionProfile {
   val companyDetailsService: CompanyDetailsSrv
   val payeContactService: PAYEContactSrv
   val keystoreConnector: KeystoreConnect
+  val prepopService: PrepopulationSrv
 
   val noLookupPPOBAddress = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         withCurrentProfile { profile =>
-          companyDetailsService.submitPPOBAddr(
-            Address(
-              line1 = "13 Test Street",
-              line2 = "No Lookup Town",
-              line3 = Some("NoLookupShire"),
-              line4 = None,
-              postCode = None,
-              country = Some("UK")
-            ),
-            profile.registrationID,
-            profile.companyTaxRegistration.transactionId
-          ) map {
+          val address = Address(
+            line1 = "13 Test Street",
+            line2 = "No Lookup Town",
+            line3 = Some("NoLookupShire"),
+            line4 = None,
+            postCode = None,
+            country = Some("UK")
+          )
+          for {
+            res <- companyDetailsService.submitPPOBAddr(address, profile.registrationID, profile.companyTaxRegistration.transactionId)
+            _ <- prepopService.saveAddress(profile.registrationID, address)
+          } yield res match {
             case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
             case DownstreamOutcome.Failure => InternalServerError("Couldn't save mock PPOB Address")
           }
@@ -73,19 +76,20 @@ trait TestAddressLookupCtrl extends FrontendController with Actions with Session
     implicit user =>
       implicit request =>
         withCurrentProfile { profile =>
-          payeContactService.submitCorrespondence(
-            Address(
-              line1 = "13 Correspondence Street",
-              line2 = "No Lookup Town",
-              line3 = Some("NoLookupShire"),
-              line4 = None,
-              postCode = Some("TE3 3NL"),
-              country = None
-            ),
-            profile.registrationID
-          ) map {
+          val address = Address(
+            line1 = "13 Correspondence Street",
+            line2 = "No Lookup Town",
+            line3 = Some("NoLookupShire"),
+            line4 = None,
+            postCode = Some("TE3 3NL"),
+            country = None
+          )
+          for {
+            res <- payeContactService.submitCorrespondence(address, profile.registrationID)
+            _ <- prepopService.saveAddress(profile.registrationID, address)
+          } yield res match {
             case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
-            case DownstreamOutcome.Failure => InternalServerError("Couldn't save mock PPOB Address")
+            case DownstreamOutcome.Failure => InternalServerError("Couldn't save mock Correspondence Address")
           }
         }
   }

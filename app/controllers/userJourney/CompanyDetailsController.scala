@@ -23,7 +23,8 @@ import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
 import enums.DownstreamOutcome
 import forms.companyDetails.{BusinessContactDetailsForm, PPOBForm, TradingNameForm}
-import models.view.{AddressChoice, ChosenAddress, Other, PPOBAddress, ROAddress, TradingName}
+import models.view.{AddressChoice, ChosenAddress, Other, PPOBAddress, PrepopAddress, ROAddress, TradingName}
+import play.api.Logger
 import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
@@ -32,6 +33,7 @@ import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.SessionProfile
 import views.html.pages.companyDetails.{confirmROAddress, businessContactDetails => BusinessContactDetailsPage, ppobAddress => PPOBAddressPage, tradingName => TradingNamePage}
+import common.exceptions.DownstreamExceptions.S4LFetchException
 
 import scala.concurrent.Future
 
@@ -164,9 +166,12 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
     implicit user =>
       implicit request =>
         withCurrentProfile { profile =>
-          companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId).map { companyDetails =>
+          for {
+            companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+            prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress)
+          } yield {
             val addressMap = companyDetailsService.getPPOBPageAddresses(companyDetails)
-            Ok(PPOBAddressPage(PPOBForm.form.fill(ChosenAddress(PPOBAddress)), addressMap.get("ro"), addressMap.get("ppob")))
+            Ok(PPOBAddressPage(PPOBForm.form.fill(ChosenAddress(PPOBAddress)), addressMap.get("ro"), addressMap.get("ppob"), prepopAddresses))
           }
         }
   }
@@ -176,10 +181,12 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
       implicit request =>
         withCurrentProfile { profile =>
           PPOBForm.form.bindFromRequest.fold(
-            errs => companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map {
-              details =>
+            errs => for {
+              details <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+              prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, details.roAddress, details.ppobAddress)
+            } yield {
                 val addressMap = companyDetailsService.getPPOBPageAddresses(details)
-                BadRequest(PPOBAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob")))
+                BadRequest(PPOBAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob"), prepopAddresses))
             },
             success => success.chosenAddress match {
               case PPOBAddress =>
@@ -191,6 +198,17 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
                 addressLookupService.buildAddressLookupUrl("payereg1", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()) map {
                   redirectUrl => Redirect(redirectUrl)
                 }
+              case prepop: PrepopAddress => (for {
+                prepopAddress <- prepopService.getAddress(profile.registrationID, prepop.index)
+                res <- companyDetailsService.submitPPOBAddr(prepopAddress, profile.registrationID, profile.companyTaxRegistration.transactionId)
+              } yield res match {
+                case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
+                case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+              }) recover {
+                case e: S4LFetchException =>
+                  Logger.warn(s"[CompanyDetailsController] [submitPPOBAddress] - Error while saving PPOB Address with a PrepopAddress: ${e.getMessage}")
+                  InternalServerError(views.html.pages.error.restart())
+              }
             }
           )
         }
@@ -203,6 +221,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
           for {
             Some(address) <- addressLookupService.getAddress
             res <- companyDetailsService.submitPPOBAddr(address, profile.registrationID, profile.companyTaxRegistration.transactionId)
+            _ <- prepopService.saveAddress(profile.registrationID, address)
           } yield res match {
             case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
             case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())

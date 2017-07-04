@@ -425,6 +425,36 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       json shouldBe Json.parse(updatedPayeDoc)
     }
+
+    "return an error page when fail saving in PAYE Registration with a prepop address" in {
+      val csrfToken = UUID.randomUUID().toString
+      val addresses =
+        s"""{
+           |  "1": {
+           |    "line1": "prepopLine11",
+           |    "line2": "prepopLine22",
+           |    "line3": "prepopLine33",
+           |    "postCode": "prepopPC1"
+           |  }
+           |}""".stripMargin
+
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubGet(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+      stubS4LGet(regId, CacheKeys.PrePopAddresses.toString, addresses)
+
+      val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
+      val fResponse = buildClient("/where-to-send-post").
+        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
+        post(Map(
+          "csrfToken" -> Seq("xxx-ignored-xxx"),
+          "chosenAddress" -> Seq("prepopAddress13")
+        ))
+
+      val response = await(fResponse)
+      response.status shouldBe 500
+    }
   }
 
   "GET savePAYECorrespondenceAddress" should {
@@ -486,7 +516,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       stubGet(s"/paye-registration/$regId/contact-correspond-paye", 200, updatedPayeDoc)
       stubPost(s"/business-registration/${regId}/addresses", 200, newAddress2BusReg)
       stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
-      stubGet(s"/api/confirmed?id=$addressLookupID", 200, addressFromALF)
+      stubGet(s"/api/confirmed\\?id\\=$addressLookupID", 200, addressFromALF)
 
       val response = await(buildClient(s"/return-from-address-for-corresp-addr?id=$addressLookupID")
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())

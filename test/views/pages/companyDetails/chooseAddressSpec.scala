@@ -80,7 +80,7 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
   )
 
   "The PPOB Address screen without PPOB Address" should {
-    lazy val view = PPOBAddressPage(PPOBForm.form, Some(testROAddress), None)
+    lazy val view = PPOBAddressPage(PPOBForm.form, Some(testROAddress), None, Map.empty[Int, Address])
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct title" in {
@@ -113,7 +113,7 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
   }
 
   "The PPOB Address screen with PPOB Address" should {
-    lazy val view = PPOBAddressPage(PPOBForm.form, Some(testROAddress), Some(testPPOBAddress))
+    lazy val view = PPOBAddressPage(PPOBForm.form, Some(testROAddress), Some(testPPOBAddress), Map.empty[Int, Address])
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct name for radio button ppobAddress" in {
@@ -129,8 +129,37 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
     }
   }
 
+  "The PPOB Address screen with Prepop Addresses" should {
+    lazy val view = PPOBAddressPage(PPOBForm.form, Some(testROAddress), Some(testPPOBAddress), testListPrepopAddresses)
+    lazy val document = Jsoup.parse(view.body)
+
+    "have the correct name for radio button prepopaddress0" in {
+      document.getElementById("chosenAddress-prepopaddress0").attr("name") shouldBe "chosenAddress"
+    }
+
+    "have the correct value for radio button prepopaddress0" in {
+      document.getElementById("chosenAddress-prepopaddress0").attr("value") shouldBe "prepopAddress0"
+    }
+
+    "have the correct text for radio button prepopaddress0" in {
+      document.getElementById("prepopaddress0-address-line-1").text shouldBe "testPPAL01"
+    }
+
+    "have the correct name for radio button prepopaddress1" in {
+      document.getElementById("chosenAddress-prepopaddress1").attr("name") shouldBe "chosenAddress"
+    }
+
+    "have the correct value for radio button prepopaddress1" in {
+      document.getElementById("chosenAddress-prepopaddress1").attr("value") shouldBe "prepopAddress1"
+    }
+
+    "have the correct text for radio button prepopaddress1" in {
+      document.getElementById("prepopaddress1-address-line-1").text shouldBe "testPPAL11"
+    }
+  }
+
   "The Correspondence Address screen without Correspondence Address" should {
-    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), None, Map[Int, Address]())
+    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), None, Map.empty[Int, Address])
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct title" in {
@@ -163,7 +192,7 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
   }
 
   "The Correspondence Address screen with Correspondence Address" should {
-    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), Some(testCorrespondenceAddress), Map[Int, Address]())
+    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), Some(testCorrespondenceAddress), Map.empty[Int, Address])
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct name for radio button correspondenceAddress" in {
