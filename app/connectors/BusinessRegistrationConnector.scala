@@ -121,7 +121,7 @@ trait BusinessRegistrationConnect {
   def upsertAddress(regId: String, address: Address)(implicit hc: HeaderCarrier): Future[Address] = {
     val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
     implicit val wts = Address.prePopWrites
-    http.POST[Address, JsValue](s"$businessRegUrl/business-registration/$regId/addresses", address) map {
+    http.POST[Address, HttpResponse](s"$businessRegUrl/business-registration/$regId/addresses", address) map {
       _ =>
         businessRegistrationTimer.stop()
         address

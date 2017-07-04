@@ -349,6 +349,9 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
+      when(mockPrepopulationService.getPrePopAddresses(ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(Map.empty[Int, Address]))
+
       when(mockCompanyDetailsService.getPPOBPageAddresses(ArgumentMatchers.any()))
         .thenReturn(addressMap)
 
@@ -364,9 +367,11 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
         "chosenAddress" -> ""
       )
 
-
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
+
+      when(mockPrepopulationService.getPrePopAddresses(ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(Map.empty[Int, Address]))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitPPOBAddress, mockAuthConnector, request) { result =>
         status(result) shouldBe BAD_REQUEST
@@ -414,6 +419,31 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
         status(result) shouldBe SEE_OTHER
       }
     }
+
+    "redirect to error page when fail saving PPOB Address" in new Setup {
+      val request = FakeRequest().withFormUrlEncodedBody(
+        "chosenAddress" -> "prepopAddress13"
+      )
+
+      val address = Address(
+        "testL1",
+        "testL2",
+        Some("testL3"),
+        Some("testL4"),
+        Some("testPostCode"),
+        None
+      )
+
+      when(mockPrepopulationService.getAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(address))
+
+      when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(DownstreamOutcome.Failure))
+
+      AuthBuilder.submitWithAuthorisedUser(controller.submitPPOBAddress, mockAuthConnector, request) { result =>
+        status(result) shouldBe INTERNAL_SERVER_ERROR
+      }
+    }
   }
 
   "savePPOBAddress" should {
@@ -438,6 +468,9 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
+      when(mockPrepopulationService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(expected.get))
+
       AuthBuilder.showWithAuthorisedUser(controller.savePPOBAddress, mockAuthConnector) { result =>
         status(result) shouldBe SEE_OTHER
       }
@@ -459,6 +492,9 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
       when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
+
+      when(mockPrepopulationService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(expected.get))
 
       AuthBuilder.showWithAuthorisedUser(controller.savePPOBAddress, mockAuthConnector) { result =>
         status(result) shouldBe INTERNAL_SERVER_ERROR
