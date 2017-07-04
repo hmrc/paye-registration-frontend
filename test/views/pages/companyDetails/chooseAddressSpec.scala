@@ -17,13 +17,14 @@
 package views.pages.companyDetails
 
 import forms.companyDetails.PPOBForm
+import forms.payeContactDetails.CorrespondenceAddressForm
 import models.Address
-import models.view.AddressChoice
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.test.FakeRequest
 import testHelpers.PAYERegSpec
 import views.html.pages.companyDetails.{ppobAddress => PPOBAddressPage}
+import views.html.pages.payeContact.{correspondenceAddress => CorrespondenceAddressPage}
 
 class chooseAddressSpec extends PAYERegSpec with I18nSupport {
   implicit val request = FakeRequest()
@@ -49,11 +50,40 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
       None
     )
 
+  val testCorrespondenceAddress =
+    Address(
+      "testCAL65",
+      "testCAL66",
+      Some("testCAL33"),
+      Some("testCAL44"),
+      Some("testCAPostCode"),
+      None
+    )
+
+  val testListPrepopAddresses = Map(
+    0 -> Address(
+      "testPPAL01",
+      "testPPAL02",
+      Some("testPPAL03"),
+      Some("testPPAL04"),
+      Some("testPPAPostCode01"),
+      None
+    ),
+    1 -> Address(
+      "testPPAL11",
+      "testPPAL12",
+      Some("testPPAL13"),
+      Some("testPPAL14"),
+      Some("testPPAPostCode11"),
+      None
+    )
+  )
+
   "The PPOB Address screen without PPOB Address" should {
-    lazy val view = PPOBAddressPage(PPOBForm.form, Some(testROAddress), None)
+    lazy val view = PPOBAddressPage(PPOBForm.form, Some(testROAddress), None, Map.empty[Int, Address])
     lazy val document = Jsoup.parse(view.body)
 
-    "have the company company in the page title" in {
+    "have the correct title" in {
       document.getElementById("pageHeading").text shouldBe messagesApi("pages.ppobAddress.heading")
     }
 
@@ -62,7 +92,7 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
     }
 
     "have the correct value for radio button roAddress" in {
-      document.getElementById("chosenAddress-roaddress").attr("value") shouldBe AddressChoice.roAddress.toString
+      document.getElementById("chosenAddress-roaddress").attr("value") shouldBe "roAddress"
     }
 
     "have the correct text for radio button roAddress" in {
@@ -78,12 +108,12 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
     }
 
     "have the correct value for radio button other" in {
-      document.getElementById("chosenAddress-other").attr("value") shouldBe AddressChoice.other.toString
+      document.getElementById("chosenAddress-other").attr("value") shouldBe "other"
     }
   }
 
   "The PPOB Address screen with PPOB Address" should {
-    lazy val view = PPOBAddressPage(PPOBForm.form, Some(testROAddress), Some(testPPOBAddress))
+    lazy val view = PPOBAddressPage(PPOBForm.form, Some(testROAddress), Some(testPPOBAddress), Map.empty[Int, Address])
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct name for radio button ppobAddress" in {
@@ -91,11 +121,119 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
     }
 
     "have the correct value for radio button ppobAddress" in {
-      document.getElementById("chosenAddress-ppobaddress").attr("value") shouldBe AddressChoice.ppobAddress.toString
+      document.getElementById("chosenAddress-ppobaddress").attr("value") shouldBe "ppobAddress"
     }
 
     "have the correct text for radio button ppobAddress" in {
       document.getElementById("ppob-address-line-1").text shouldBe "testL65"
+    }
+  }
+
+  "The PPOB Address screen with Prepop Addresses" should {
+    lazy val view = PPOBAddressPage(PPOBForm.form, Some(testROAddress), Some(testPPOBAddress), testListPrepopAddresses)
+    lazy val document = Jsoup.parse(view.body)
+
+    "have the correct name for radio button prepopaddress0" in {
+      document.getElementById("chosenAddress-prepopaddress0").attr("name") shouldBe "chosenAddress"
+    }
+
+    "have the correct value for radio button prepopaddress0" in {
+      document.getElementById("chosenAddress-prepopaddress0").attr("value") shouldBe "prepopAddress0"
+    }
+
+    "have the correct text for radio button prepopaddress0" in {
+      document.getElementById("prepopaddress0-address-line-1").text shouldBe "testPPAL01"
+    }
+
+    "have the correct name for radio button prepopaddress1" in {
+      document.getElementById("chosenAddress-prepopaddress1").attr("name") shouldBe "chosenAddress"
+    }
+
+    "have the correct value for radio button prepopaddress1" in {
+      document.getElementById("chosenAddress-prepopaddress1").attr("value") shouldBe "prepopAddress1"
+    }
+
+    "have the correct text for radio button prepopaddress1" in {
+      document.getElementById("prepopaddress1-address-line-1").text shouldBe "testPPAL11"
+    }
+  }
+
+  "The Correspondence Address screen without Correspondence Address" should {
+    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), None, Map.empty[Int, Address])
+    lazy val document = Jsoup.parse(view.body)
+
+    "have the correct title" in {
+      document.getElementById("pageHeading").text shouldBe messagesApi("pages.correspondenceAddress.title")
+    }
+
+    "have the correct name for radio button roAddress" in {
+      document.getElementById("chosenAddress-roaddress").attr("name") shouldBe "chosenAddress"
+    }
+
+    "have the correct value for radio button roAddress" in {
+      document.getElementById("chosenAddress-roaddress").attr("value") shouldBe "roAddress"
+    }
+
+    "have the correct text for radio button roAddress" in {
+      document.getElementById("ro-address-line-1").text shouldBe "testL1"
+    }
+
+    "not have the radio button correspondenceAddress" in {
+      an[NullPointerException] shouldBe thrownBy(document.getElementById("chosenAddress-correspondenceaddress").attr("name"))
+    }
+
+    "have the correct name for radio button other" in {
+      document.getElementById("chosenAddress-other").attr("name") shouldBe "chosenAddress"
+    }
+
+    "have the correct value for radio button other" in {
+      document.getElementById("chosenAddress-other").attr("value") shouldBe "other"
+    }
+  }
+
+  "The Correspondence Address screen with Correspondence Address" should {
+    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), Some(testCorrespondenceAddress), Map.empty[Int, Address])
+    lazy val document = Jsoup.parse(view.body)
+
+    "have the correct name for radio button correspondenceAddress" in {
+      document.getElementById("chosenAddress-correspondenceaddress").attr("name") shouldBe "chosenAddress"
+    }
+
+    "have the correct value for radio button correspondenceAddress" in {
+      document.getElementById("chosenAddress-correspondenceaddress").attr("value") shouldBe "correspondenceAddress"
+    }
+
+    "have the correct text for radio button correspondenceAddress" in {
+      document.getElementById("correspondence-address-line-1").text shouldBe "testCAL65"
+    }
+  }
+
+  "The Correspondence Address screen with Prepop Addresses" should {
+    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), Some(testCorrespondenceAddress), testListPrepopAddresses)
+    lazy val document = Jsoup.parse(view.body)
+
+    "have the correct name for radio button prepopaddress0" in {
+      document.getElementById("chosenAddress-prepopaddress0").attr("name") shouldBe "chosenAddress"
+    }
+
+    "have the correct value for radio button prepopaddress0" in {
+      document.getElementById("chosenAddress-prepopaddress0").attr("value") shouldBe "prepopAddress0"
+    }
+
+    "have the correct text for radio button prepopaddress0" in {
+      document.getElementById("prepopaddress0-address-line-1").text shouldBe "testPPAL01"
+    }
+
+    "have the correct name for radio button prepopaddress1" in {
+      document.getElementById("chosenAddress-prepopaddress1").attr("name") shouldBe "chosenAddress"
+    }
+
+    "have the correct value for radio button prepopaddress1" in {
+      document.getElementById("chosenAddress-prepopaddress1").attr("value") shouldBe "prepopAddress1"
+    }
+
+    "have the correct text for radio button prepopaddress1" in {
+      document.getElementById("prepopaddress1-address-line-1").text shouldBe "testPPAL11"
     }
   }
 }

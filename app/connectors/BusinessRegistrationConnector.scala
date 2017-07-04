@@ -19,6 +19,7 @@ package connectors
 import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
+import models.Address
 import models.external.BusinessProfile
 import models.view.PAYEContactDetails
 import play.api.Logger
@@ -100,6 +101,35 @@ trait BusinessRegistrationConnect {
         businessRegistrationTimer.stop()
         logResponse(e, "upsertContactDetails", "upserting contact details")
         contactDetails
+    }
+  }
+
+  def retrieveAddresses(regId: String)(implicit hc: HeaderCarrier): Future[Seq[Address]] = {
+    val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
+    http.GET[JsValue](s"$businessRegUrl/business-registration/$regId/addresses") map {
+      json =>
+        businessRegistrationTimer.stop()
+        json.\("addresses").as[Seq[JsValue]].map(_.as[Address](Address.prePopReads))
+    } recover {
+      case ex =>
+        businessRegistrationTimer.stop()
+        logResponse(ex, "retrieveAddresses", "fetching addresses from pre-pop", Some(regId))
+        Seq.empty
+    }
+  }
+
+  def upsertAddress(regId: String, address: Address)(implicit hc: HeaderCarrier): Future[Address] = {
+    val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
+    implicit val wts = Address.prePopWrites
+    http.POST[Address, HttpResponse](s"$businessRegUrl/business-registration/$regId/addresses", address) map {
+      _ =>
+        businessRegistrationTimer.stop()
+        address
+    } recover {
+      case e: Exception =>
+        businessRegistrationTimer.stop()
+        logResponse(e, "upsertAddress", "upserting address")
+        address
     }
   }
 
