@@ -23,8 +23,7 @@ import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
 import enums.DownstreamOutcome
 import forms.payeContactDetails.{CorrespondenceAddressForm, PAYEContactDetailsForm}
-import models.view.PAYEContact
-import models.view.{AddressChoice, ChosenAddress}
+import models.view._
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
@@ -33,6 +32,7 @@ import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.SessionProfile
 import views.html.pages.payeContact.{correspondenceAddress => PAYECorrespondenceAddressPage, payeContactDetails => PAYEContactDetailsPage}
+import common.exceptions.DownstreamExceptions.S4LFetchException
 
 import scala.concurrent.Future
 
@@ -43,8 +43,8 @@ class PAYEContactController @Inject()(
                                        injAddressLookupService: AddressLookupService,
                                        injKeystoreConnector: KeystoreConnector,
                                        injPayeRegistrationConnector: PAYERegistrationConnector,
-                                       injPrepopulationService: PrepopulationService,
-                                       injMessagesApi: MessagesApi)
+                                       injMessagesApi: MessagesApi,
+                                       injPrepopulationService: PrepopulationService)
   extends PAYEContactCtrl {
   val authConnector = FrontendAuthConnector
   val companyDetailsService = injCompanyDetailsService
@@ -119,9 +119,13 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
           for {
             payeContact <- payeContactService.getPAYEContact(profile.registrationID)
             companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+            prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, payeContact.correspondenceAddress)
           } yield {
             val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
-            Ok(PAYECorrespondenceAddressPage(CorrespondenceAddressForm.form.fill(ChosenAddress(AddressChoice.correspondenceAddress)), addressMap.get("ro"), addressMap.get("correspondence")))
+            Ok(PAYECorrespondenceAddressPage(CorrespondenceAddressForm.form.fill(ChosenAddress(CorrespondenceAddress)),
+                                            addressMap.get("ro"),
+                                            addressMap.get("correspondence"),
+                                            prepopAddresses))
           }
         }
   }
@@ -134,24 +138,40 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
             errs => for {
               payeContact <- payeContactService.getPAYEContact(profile.registrationID)
               companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+              prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, payeContact.correspondenceAddress)
             } yield {
               val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
-              BadRequest(PAYECorrespondenceAddressPage(errs, addressMap.get("ro"), addressMap.get("correspondence")))
+              BadRequest(PAYECorrespondenceAddressPage(errs, addressMap.get("ro"), addressMap.get("correspondence"), prepopAddresses))
             },
             success => success.chosenAddress match {
-              case AddressChoice.correspondenceAddress =>
+              case CorrespondenceAddress =>
                 Future.successful(Redirect(controllers.userJourney.routes.SummaryController.summary()))
-              case AddressChoice.roAddress => for {
+              case ROAddress => for {
                 companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
                 res <- payeContactService.submitCorrespondence(companyDetails.roAddress, profile.registrationID)
               } yield res match {
                 case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
                 case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
               }
-              case AddressChoice.other =>
+              case Other =>
                 addressLookupService.buildAddressLookupUrl("payereg2", controllers.userJourney.routes.PAYEContactController.savePAYECorrespondenceAddress()) map {
                   redirectUrl => Redirect(redirectUrl)
                 }
+              case prepop: PrepopAddress => (
+                for {
+                  prepopAddress <- prepopService.getAddress(profile.registrationID, prepop.index)
+                  res <- payeContactService.submitCorrespondence(prepopAddress, profile.registrationID)
+                } yield res match {
+                  case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
+                  case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+                }) recover {
+                  case e: S4LFetchException =>
+                    Logger.warn(s"[PAYEContactController] [submitPAYECorrespondenceAddress] - Error while saving Correspondence Address with a PrepopAddress: ${e.getMessage}")
+                    InternalServerError(views.html.pages.error.restart())
+                }
+              case PPOBAddress =>
+                Logger.warn("PPOB address returned as selected address in Correspondence Address page")
+                Future.successful(InternalServerError(views.html.pages.error.restart()))
             }
           )
         }
@@ -164,6 +184,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
           for {
             Some(address) <- addressLookupService.getAddress
             res <- payeContactService.submitCorrespondence(address, profile.registrationID)
+            _ <- prepopService.saveAddress(profile.registrationID, address)
           } yield res match {
             case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
             case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())

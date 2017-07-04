@@ -1,9 +1,9 @@
 @import helpers.templates.{addressDisplay, payeInputRadioGroup}
 @import models.Address
-@import models.view.ChosenAddress
+@import models.view.{ChosenAddress, PrepopAddress}
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
-@(chooseAddressForm: Form[ChosenAddress], roAddress: Option[Address], ppobAddress: Option[Address])(implicit request: Request[_], messages: Messages)
+@(chooseAddressForm: Form[ChosenAddress], roAddress: Option[Address], ppobAddress: Option[Address], prepopAddresses: Map[Int, Address])(implicit request: Request[_], messages: Messages)
 
 @main_template(title = messages("pages.ppobAddress.title")) {
     @govHelpers.errorSummary(
@@ -26,10 +26,11 @@
             @payeInputRadioGroup(
                 field = chooseAddressForm("chosenAddress"),
                 Seq(
-                    roAddress.map("roAddress" -> addressDisplay(_, "ro").toString),
                     ppobAddress.map("ppobAddress" -> addressDisplay(_, "ppob").toString),
-                    Some("other" -> messages("pages.ppobAddress.other"))
-                ).flatten,
+                    roAddress.map("roAddress" -> addressDisplay(_, "ro").toString)
+                ).flatten.++(
+                    prepopAddresses.map {case (k, v) => s"${PrepopAddress.prefix}$k" -> addressDisplay(v, s"${PrepopAddress.prefix.toLowerCase}$k").toString}.toList
+                ).:+("other" -> messages("pages.ppobAddress.other")),
                 '_legend -> messages("pages.ppobAddress.legend"),
                 '_legendID -> "chosenAddress",
                 '_helpText -> None,

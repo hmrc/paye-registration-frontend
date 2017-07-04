@@ -18,6 +18,7 @@ package models
 
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
+import play.api.libs.functional.syntax._
 import utils.{Formatters, Validators}
 
 case class Address(line1: String,
@@ -43,14 +44,18 @@ object Address {
     trimmed map(_.substring(0, if(trimmed.get.length > trimTo) trimTo else trimmed.get.length))
   }
 
+  def validatePostcode(unvalidatedPostcode: Option[String]): Either[String, String] = {
+    unvalidatedPostcode match {
+      case Some(pc) if pc.matches(Validators.postcodeRegex) => Right(pc)
+      case Some(_) => Left("Invalid postcode")
+      case _ => Left("No postcode")
+    }
+  }
+
   val adressLookupReads: Reads[Address] = new Reads[Address] {
     def reads(json: JsValue): JsResult[Address] = {
       val unvalidatedPostCode = json.\("address").\("postcode").asOpt[String](Formatters.normalizeTrimmedReads)
-      val validatedPostcode   = unvalidatedPostCode match {
-        case Some(pc) if pc.matches(Validators.postcodeRegex) => Right(pc)
-        case Some(_) => Left("Invalid postcode")
-        case _ => Left("No postcode")
-      }
+      val validatedPostcode   = validatePostcode(unvalidatedPostCode)
 
       val addressLines  = json.\("address").\("lines").as[JsArray].as[List[String]](Formatters.normalizeTrimmedListReads)
       val countryName   = json.\("address").\("country").\("name").asOpt[String](Formatters.normalizeTrimmedReads)
@@ -147,4 +152,42 @@ object Address {
       }
     }
   }
+
+  val prePopReads: Reads[Address] = new Reads[Address] {
+    override def reads(json: JsValue): JsResult[Address] = {
+      val unvalidatedPostcode = json.\("postcode").asOpt[String](Formatters.normalizeTrimmedReads)
+      val validatedPostcode = validatePostcode(unvalidatedPostcode).right.toOption
+
+      val ctry = validatedPostcode match {
+        case None    => json.\("country").asOpt[String](Formatters.normalizeTrimmedReads)
+        case Some(_) => None
+      }
+
+      if(validatedPostcode.isDefined || ctry.isDefined) {
+        JsSuccess(Address(
+          line1 = json.\("addressLine1").as[String],
+          line2 = json.\("addressLine2").as[String],
+          line3 = json.\("addressLine3").asOpt[String],
+          line4 = json.\("addressLine4").asOpt[String],
+          postCode = validatedPostcode,
+          country = ctry,
+          auditRef = json.\("auditRef").asOpt[String]
+        ))
+      } else {
+        JsError("Neither country nor valid postcode defined in PrePop Address")
+      }
+    }
+  }
+
+  val prePopWrites: Writes[Address] = (
+    (__ \ "addressLine1").write[String] and
+    (__ \ "addressLine2").write[String] and
+    (__ \ "addressLine3").writeNullable[String] and
+    (__ \ "addressLine4").writeNullable[String] and
+    (__ \ "postcode").writeNullable[String] and
+    (__ \ "country").writeNullable[String] and
+    (__ \ "auditRef").writeNullable[String]
+  )(unlift(Address.unapply))
+
+  val prePopFormat = Format(prePopReads, prePopWrites)
 }

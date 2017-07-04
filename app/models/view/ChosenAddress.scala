@@ -16,26 +16,54 @@
 
 package models.view
 
-import play.api.libs.json.{Format, Json, Reads, Writes}
+import play.api.Logger
 
-case class ChosenAddress (chosenAddress: AddressChoice.Value)
+class ConvertToPrepopAddressException(msg: String) extends Exception(msg)
 
-object AddressChoice extends Enumeration {
-  val roAddress             = Value
-  val ppobAddress           = Value
-  val correspondenceAddress = Value
-  val other                 = Value
-
-  def fromString(choice: String): Value = choice match {
-    case "roAddress"             => roAddress
-    case "ppobAddress"           => ppobAddress
-    case "correspondenceAddress" => correspondenceAddress
-    case "other"                 => other
+sealed trait AddressChoice
+object AddressChoice {
+  def fromString(s: String): AddressChoice = s match {
+    case "roAddress" => ROAddress
+    case "ppobAddress" => PPOBAddress
+    case "correspondenceAddress" => CorrespondenceAddress
+    case "other" => Other
+    case prepop => PrepopAddress.fromString(prepop)
   }
-
-  implicit val format = Format(Reads.enumNameReads(AddressChoice), Writes.enumNameWrites)
 }
 
-object ChosenAddress {
-  implicit val format = Json.format[ChosenAddress]
+case object ROAddress extends AddressChoice {
+  override def toString: String = "roAddress"
 }
+
+case object PPOBAddress extends AddressChoice {
+  override def toString: String = "ppobAddress"
+}
+
+case object CorrespondenceAddress extends AddressChoice {
+  override def toString: String = "correspondenceAddress"
+}
+
+case object Other extends AddressChoice {
+  override def toString: String = "other"
+}
+
+case class PrepopAddress(index: Int) extends AddressChoice {
+  override def toString: String = s"${PrepopAddress.prefix}$index"
+}
+object PrepopAddress {
+  val prefix = "prepopAddress"
+  val prepopRegex = s"${PrepopAddress.prefix}[0-9]+"
+
+  def fromString(s: String): PrepopAddress = {
+    if( s.matches(prepopRegex) ) {
+      val index = s.substring(prefix.length).toInt
+      PrepopAddress(index)
+    } else {
+      val errMsg = s"[PrepopAddress] [fromString] Could not convert from String to PrepopAddress for value $s not valid"
+      Logger.warn(errMsg)
+      throw new ConvertToPrepopAddressException(errMsg)
+    }
+  }
+}
+
+case class ChosenAddress (chosenAddress: AddressChoice)

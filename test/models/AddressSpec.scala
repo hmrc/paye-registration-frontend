@@ -683,5 +683,158 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
         shouldHaveErrors(res, JsPath(), Seq(ValidationError(err)))
       }
     }
+
+    "Reading Address from PrePop Json format" should {
+      def readPrePopAddress(json: JsValue) = Json.fromJson[Address](json)(Address.prePopFormat)
+      "succeed" when {
+        "All lines are defined" in {
+          val json = Json.parse(
+          """{
+            |  "addressLine1":"Line 1",
+            |  "addressLine2":"Line 2",
+            |  "addressLine3":"Line 3",
+            |  "addressLine4":"Line 4",
+            |  "country":"UK",
+            |  "postcode":"TE1 1ST",
+            |  "auditRef":"tstAuditRef"
+            |}
+          """.stripMargin
+          )
+          val addr = Address(
+            line1 = "Line 1",
+            line2 = "Line 2",
+            line3 = Some("Line 3"),
+            line4 = Some("Line 4"),
+            country = None,
+            postCode = Some("TE1 1ST"),
+            auditRef = Some("tstAuditRef")
+          )
+          readPrePopAddress(json) shouldBe JsSuccess(addr)
+        }
+        "First two lines and country are defined" in {
+          val json = Json.parse(
+            """{
+              |  "addressLine1":"Line 1",
+              |  "addressLine2":"Line 2",
+              |  "country":"UK"
+              |}
+            """.stripMargin
+          )
+          val addr = Address(
+            line1 = "Line 1",
+            line2 = "Line 2",
+            line3 = None,
+            line4 = None,
+            country = Some("UK"),
+            postCode = None
+          )
+          readPrePopAddress(json) shouldBe JsSuccess(addr)
+        }
+        "Postcode is invalid but country is defined" in {
+          val json = Json.parse(
+            """{
+              |  "addressLine1":"Line 1",
+              |  "addressLine2":"Line 2",
+              |  "country":"UK",
+              |  "postcode":"INVALID POSTCODE"
+              |}
+            """.stripMargin
+          )
+          val addr = Address(
+            line1 = "Line 1",
+            line2 = "Line 2",
+            line3 = None,
+            line4 = None,
+            country = Some("UK"),
+            postCode = None
+          )
+          readPrePopAddress(json) shouldBe JsSuccess(addr)
+        }
+      }
+      "fail" when {
+        "Not enough are defined" in {
+          val json = Json.parse(
+            """{
+              |  "addressLine1":"Line 1",
+              |  "country":"UK",
+              |  "postcode":"TE1 1ST"
+              |}
+            """.stripMargin
+          )
+          intercept[JsResultException](readPrePopAddress(json))
+        }
+      }
+      "Neither postcode nor country are defined" in {
+        val json = Json.parse(
+          """{
+            |  "addressLine1":"Line 1",
+            |  "addressLine2":"Line 2"
+            |}
+          """.stripMargin
+        )
+        val res = readPrePopAddress(json)
+        shouldHaveErrors(res, JsPath(), Seq(ValidationError("Neither country nor valid postcode defined in PrePop Address")))
+      }
+      "Postcode is invalid and no country defined" in {
+        val json = Json.parse(
+          """{
+            |  "addressLine1":"Line 1",
+            |  "addressLine2":"Line 2",
+            |  "postcode":"NotAPostcode"
+            |}
+          """.stripMargin
+        )
+        val res = readPrePopAddress(json)
+        shouldHaveErrors(res, JsPath(), Seq(ValidationError("Neither country nor valid postcode defined in PrePop Address")))
+      }
+    }
+
+    "Writing Address to PrePop Json format" should {
+      def writePrePopAddress(addr: Address) = Json.toJson[Address](addr)(Address.prePopWrites)
+      "succeed" when {
+        "All lines are defined" in {
+          val json = Json.parse(
+            """{
+              |  "addressLine1":"Line 1",
+              |  "addressLine2":"Line 2",
+              |  "addressLine3":"Line 3",
+              |  "addressLine4":"Line 4",
+              |  "postcode":"TE1 1ST",
+              |  "auditRef":"tstAuditRef"
+              |}
+            """.stripMargin
+          )
+          val addr = Address(
+            line1 = "Line 1",
+            line2 = "Line 2",
+            line3 = Some("Line 3"),
+            line4 = Some("Line 4"),
+            country = None,
+            postCode = Some("TE1 1ST"),
+            auditRef = Some("tstAuditRef")
+          )
+          writePrePopAddress(addr) shouldBe json
+        }
+        "First two lines and country are defined" in {
+          val json = Json.parse(
+            """{
+              |  "addressLine1":"Line 1",
+              |  "addressLine2":"Line 2",
+              |  "country":"UK"
+              |}
+            """.stripMargin
+          )
+          val addr = Address(
+            line1 = "Line 1",
+            line2 = "Line 2",
+            line3 = None,
+            line4 = None,
+            country = Some("UK"),
+            postCode = None
+          )
+          writePrePopAddress(addr) shouldBe json
+        }
+      }
+    }
   }
 }

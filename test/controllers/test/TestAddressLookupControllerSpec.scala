@@ -19,6 +19,7 @@ package controllers.test
 import builders.AuthBuilder
 import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
+import models.Address
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
@@ -26,7 +27,7 @@ import play.api.http.Status
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.{CompanyDetailsService, PAYEContactService}
+import services.{CompanyDetailsService, PAYEContactService, PrepopulationService}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -38,6 +39,7 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
   val mockCompanyDetailsService = mock[CompanyDetailsService]
   val mockPAYEContactService = mock[PAYEContactService]
   val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
+  val mockPrepopService = mock[PrepopulationService]
 
   class Setup {
     val controller = new TestAddressLookupCtrl {
@@ -46,6 +48,7 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
       override val companyDetailsService = mockCompanyDetailsService
       override val payeContactService = mockPAYEContactService
       override val keystoreConnector = mockKeystoreConnector
+      override val prepopService = mockPrepopService
 
       override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(CurrentProfile(
@@ -57,6 +60,15 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
       }
     }
   }
+
+  val address = Address(
+    line1 = "13 Test Street",
+    line2 = "No Lookup Town",
+    line3 = Some("NoLookupShire"),
+    line4 = None,
+    postCode = None,
+    country = Some("UK")
+  )
 
   "calling the noLookup action for PPOB Address" should {
 
@@ -70,6 +82,9 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
       when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
+      when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(address))
+
       AuthBuilder.showWithAuthorisedUser(controller.noLookupPPOBAddress, mockAuthConnector) {
         (response: Future[Result]) =>
           status(response) shouldBe Status.INTERNAL_SERVER_ERROR
@@ -79,6 +94,9 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
     "return 303 when the mocked address is successfully submitted" in new Setup {
       when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
+
+      when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(address))
 
       AuthBuilder.showWithAuthorisedUser(controller.noLookupPPOBAddress, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -99,6 +117,9 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
     "return 500 when the mocked address can't be submitted" in new Setup {
       when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
 
+      when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(address))
+
       AuthBuilder.showWithAuthorisedUser(controller.noLookupCorrespondenceAddress, mockAuthConnector) {
         (response: Future[Result]) =>
           status(response) shouldBe Status.INTERNAL_SERVER_ERROR
@@ -107,6 +128,9 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
 
     "return 303 when the mocked address is successfully submitted" in new Setup {
       when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+
+      when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(address))
 
       AuthBuilder.showWithAuthorisedUser(controller.noLookupCorrespondenceAddress, mockAuthConnector) {
         (response: Future[Result]) =>
