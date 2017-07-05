@@ -47,7 +47,7 @@ pages.welcome.bullet.timeToComplete                     = provide employees with
 pages.welcome.bullet.timeToProcess                      = claim tax back from Construction Industry Scheme (CIS) payments
 pages.welcome.2months                                   = You can''t register as an employer more than 2 months before you start paying people, including company directors.
 pages.welcome.nino                                      = You''ll need the National Insurance number of at least one company director.
-pages.welcome.application                               = Your application shouldn''t take more than 15 minutes to complete. Please allow 2 weeks for HMRC to process it.
+pages.welcome.application                               = Your application shouldn''t take more than 15 minutes to complete. You'll need to allow 2 weeks for HMRC to process it.
 
 ## Company Eligibility
 pages.companyEligibility.title                          = Do any of the following apply to you?
@@ -292,7 +292,7 @@ pages.confirmation.reference                            = Your reference number 
 pages.confirmation.heading2                             = What happens next?
 pages.confirmation.p1                                   = If your application is successful we''ll send you:
 pages.confirmation.bullet1                              = a letter with your PAYE and Accounts Office reference numbers within 5 working days of the company registering with Companies House
-pages.confirmation.bullet2                              = an activation PIN for PAYE Online within 10 working days of the company registering with Companies House
+pages.confirmation.bullet2                              = an activation pin for PAYE Online within 10 working days of the company registering with Companies House
 pages.confirmation.p2                                   = You''ll need these to send payroll information to HMRC.
 pages.confirmation.heading3                             = What you can do now
 pages.confirmation.p3                                   = Find out: 
