@@ -194,6 +194,7 @@ pages.natureOfBusiness.textArea.label                   = Business activities de
 ## Director Details Page
 pages.directorDetails.title1Director                    = What is the director''s National Insurance number?
 pages.directorDetails.titleMultipleDirectors            = Enter the National Insurance number of at least one company director
+pages.directorDetails.legend                            = Enter the National Insurance number of at least one company director
 pages.directorDetails.heading1Director                  = What is the director''s National Insurance number?
 pages.directorDetails.headingMultipleDirectors          = Enter the National Insurance number of at least one company director
 pages.directorDetails.errors.noneCompleted              = Enter at least one director''s National Insurance number
