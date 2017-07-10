@@ -59,20 +59,20 @@ trait PrepopulationSrv {
     }
   }
 
-  def getPrePopAddresses(regId: String, roAddress: Address, otherAddress: Option[Address])(implicit hc: HeaderCarrier): Future[Map[Int,Address]] = {
+  def getPrePopAddresses(regId: String, roAddress: Address, ppobAddress: Option[Address], otherAddress: Option[Address])(implicit hc: HeaderCarrier): Future[Map[Int,Address]] = {
     busRegConnector.retrieveAddresses(regId) flatMap {
       addresses =>
-        val filteredAddresses = filterAddresses(addresses, roAddress, otherAddress)
+        val filteredAddresses = filterAddresses(addresses, Seq(Some(roAddress), ppobAddress, otherAddress).flatten)
         s4LService.saveIntMap[Address](CacheKeys.PrePopAddresses.toString, filteredAddresses, regId) map {
         _ => filteredAddresses
       }
     }
   }
 
-  private[services] def filterAddresses(addresses: Seq[Address], roAddress: Address, otherAddress: Option[Address]): Map[Int, Address] = {
+  private[services] def filterAddresses(addresses: Seq[Address], addressesToExclude: Seq[Address]): Map[Int, Address] = {
     addresses
       .distinct
-      .filterNot(addr => roAddress == addr || otherAddress.contains(addr))
+      .filterNot(addr => addressesToExclude.contains(addr))
       .zipWithIndex.map{_.swap}.toMap
   }
 

@@ -115,43 +115,34 @@ class PrepopulationServiceSpec extends PAYERegSpec {
   }
 
   "FilterAddresses" should {
-    "return an address map when no duplicates and RO is different" in new Setup {
+    "return an address map when no duplicates and no address is different" in new Setup {
       val addresses = Seq(addr1, addr2)
       val resMap = Map(0 -> addr1, 1 -> addr2)
-      val roAddress = addr3
-      val otherAddressOpt = None
-      service.filterAddresses(addresses, roAddress, otherAddressOpt) shouldBe resMap
+      service.filterAddresses(addresses, Seq(addr3)) shouldBe resMap
     }
 
     "filter out duplicates" in new Setup {
       val addresses = Seq(addr1, addr2, addr1)
       val resMap = Map(0 -> addr1, 1 -> addr2)
-      val roAddress = addr3
-      val otherAddressOpt = None
-      service.filterAddresses(addresses, roAddress, otherAddressOpt) shouldBe resMap
+      service.filterAddresses(addresses, Seq(addr3)) shouldBe resMap
     }
 
-    "filter out RO address when it is the same as one of the passed addresses" in new Setup {
+    "filter out address when it is the same as one of the passed addresses" in new Setup {
       val addresses = Seq(addr1, addr2, addr3)
       val resMap = Map(0 -> addr2, 1 -> addr3)
-      val roAddress = addr1
-      val otherAddressOpt = None
-      service.filterAddresses(addresses, roAddress, otherAddressOpt) shouldBe resMap
+      service.filterAddresses(addresses, Seq(addr1)) shouldBe resMap
     }
 
-    "filter out Other address when it is the same as one of the passed addresses" in new Setup {
+    "filter out multiple addresses when it is the same as one of the passed addresses" in new Setup {
       val addresses = Seq(addr1, addr2, addr3)
       val resMap = Map(0 -> addr2)
-      val roAddress = addr3
-      val otherAddressOpt = Some(addr1)
-      service.filterAddresses(addresses, roAddress, otherAddressOpt) shouldBe resMap
+      service.filterAddresses(addresses, Seq(addr1, addr3)) shouldBe resMap
     }
+
     "handle an empty list" in new Setup {
       val addresses = Seq.empty
       val resMap = Map.empty
-      val roAddress = addr3
-      val otherAddressOpt = None
-      service.filterAddresses(addresses, roAddress, otherAddressOpt) shouldBe resMap
+      service.filterAddresses(addresses, Seq(addr3, addr2)) shouldBe resMap
     }
   }
 
@@ -164,7 +155,7 @@ class PrepopulationServiceSpec extends PAYERegSpec {
           (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Address]]()))
         .thenReturn(Future.successful(CacheMap("PrePopAddresses", Map.empty)))
 
-      await(service.getPrePopAddresses(regId, addr3, None)) shouldBe Map(0 -> addr1, 1 -> addr2)
+      await(service.getPrePopAddresses(regId, addr3, None, None)) shouldBe Map(0 -> addr1, 1 -> addr2)
     }
   }
 

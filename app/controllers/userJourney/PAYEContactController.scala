@@ -119,7 +119,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
           for {
             payeContact <- payeContactService.getPAYEContact(profile.registrationID)
             companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-            prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, payeContact.correspondenceAddress)
+            prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress, payeContact.correspondenceAddress)
           } yield {
             val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
             Ok(PAYECorrespondenceAddressPage(CorrespondenceAddressForm.form.fill(ChosenAddress(CorrespondenceAddress)),
@@ -138,7 +138,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
             errs => for {
               payeContact <- payeContactService.getPAYEContact(profile.registrationID)
               companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-              prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, payeContact.correspondenceAddress)
+              prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress, payeContact.correspondenceAddress)
             } yield {
               val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
               BadRequest(PAYECorrespondenceAddressPage(errs, addressMap.get("ro"), addressMap.get("correspondence"), prepopAddresses))
