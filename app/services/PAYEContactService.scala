@@ -65,9 +65,17 @@ trait PAYEContactSrv  {
 
   def getCorrespondenceAddresses(correspondenceAddress: Option[Address], companyDetails: CompanyDetailsView): Map[String, Address] = {
     correspondenceAddress map {
-      case address@companyDetails.roAddress => Map("correspondence" -> address)
-      case addr: Address => Map("ro" -> companyDetails.roAddress, "correspondence" -> addr)
-    } getOrElse Map("ro" -> companyDetails.roAddress)
+      case address@companyDetails.roAddress if companyDetails.ppobAddress.contains(companyDetails.roAddress) => Map("correspondence" -> address)
+      case address@companyDetails.roAddress => Map("correspondence" -> address) ++ companyDetails.ppobAddress.map(("ppob", _)).toMap
+      case addr: Address if companyDetails.ppobAddress.contains(addr) => Map("ro" -> companyDetails.roAddress, "correspondence" -> addr)
+      case addr: Address => Map("ro" -> companyDetails.roAddress, "correspondence" -> addr) ++ companyDetails.ppobAddress.map(("ppob", _)).toMap
+    } getOrElse {
+      if( companyDetails.ppobAddress.contains(companyDetails.roAddress) ) {
+        Map("ro" -> companyDetails.roAddress)
+      } else {
+        Map("ro" -> companyDetails.roAddress) ++ companyDetails.ppobAddress.map(("ppob", _)).toMap
+      }
+    }
   }
 
   def getPAYEContact(regId: String)(implicit hc: HeaderCarrier): Future[PAYEContactView] = {

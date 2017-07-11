@@ -124,6 +124,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
             val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
             Ok(PAYECorrespondenceAddressPage(CorrespondenceAddressForm.form.fill(ChosenAddress(CorrespondenceAddress)),
                                             addressMap.get("ro"),
+                                            addressMap.get("ppob"),
                                             addressMap.get("correspondence"),
                                             prepopAddresses))
           }
@@ -141,7 +142,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
               prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress, payeContact.correspondenceAddress)
             } yield {
               val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
-              BadRequest(PAYECorrespondenceAddressPage(errs, addressMap.get("ro"), addressMap.get("correspondence"), prepopAddresses))
+              BadRequest(PAYECorrespondenceAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob"), addressMap.get("correspondence"), prepopAddresses))
             },
             success => success.chosenAddress match {
               case CorrespondenceAddress =>

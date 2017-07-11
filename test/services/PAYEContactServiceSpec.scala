@@ -147,7 +147,24 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       line4 = None,
       postCode = Some("RO1 1RO")
     )
-    val detailsWithROAddress = CompanyDetailsView(
+
+    val ppobAddress = Address(
+      line1 = "PPOB tst line 1",
+      line2 = "PPOB tst line 2",
+      line3 = None,
+      line4 = None,
+      postCode = Some("PP1 1OB")
+    )
+
+    val detailsWithROAddressForAll = CompanyDetailsView(
+      companyName = "Tst Company",
+      tradingName = None,
+      roAddress = roAddress,
+      ppobAddress = Some(roAddress),
+      businessContactDetails = None
+    )
+
+    val detailsWithROAddressOnly = CompanyDetailsView(
       companyName = "Tst Company",
       tradingName = None,
       roAddress = roAddress,
@@ -155,17 +172,53 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       businessContactDetails = None
     )
 
-    "return a map with ro address when there is no correspondence address" in new Setup {
-      service.getCorrespondenceAddresses(None, detailsWithROAddress) shouldBe Map("ro" -> roAddress)
+    val detailsWithROAndPPOBAddress = CompanyDetailsView(
+      companyName = "Tst Company",
+      tradingName = None,
+      roAddress = roAddress,
+      ppobAddress = Some(ppobAddress),
+      businessContactDetails = None
+    )
+
+    "return a map with ro address only when there is no correspondence address and ppob is equal to ro address" in new Setup {
+      service.getCorrespondenceAddresses(None, detailsWithROAddressForAll) shouldBe Map("ro" -> roAddress)
     }
 
-    "return a map with ro and correspondence address when both addresses are different" in new Setup {
-      service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAddress)
+    "return a map with ro address only when there is no correspondence address and ppob is None" in new Setup {
+      service.getCorrespondenceAddresses(None, detailsWithROAddressOnly) shouldBe Map("ro" -> roAddress)
+    }
+
+    "return a map with ro and ppob addresses when there is no correspondence address" in new Setup {
+      service.getCorrespondenceAddresses(None, detailsWithROAndPPOBAddress) shouldBe Map("ro" -> roAddress, "ppob" -> ppobAddress)
+    }
+
+    "return a map with ro, ppob and correspondence addresses when all addresses are different" in new Setup {
+      service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAndPPOBAddress)
+        .shouldBe(Map("ro" -> roAddress, "correspondence" -> tstCorrespondenceAddress, "ppob" -> ppobAddress))
+    }
+
+    "return a map with ro and correspondence addresses when all addresses are different and ppob is None" in new Setup {
+      service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAddressOnly)
         .shouldBe(Map("ro" -> roAddress, "correspondence" -> tstCorrespondenceAddress))
     }
 
-    "return a map with correspondence address when both addresses are the same" in new Setup {
-      service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAddress.copy(roAddress = tstCorrespondenceAddress))
+    "return a map with correspondence address when all addresses are the same" in new Setup {
+      service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAddressForAll.copy(roAddress = tstCorrespondenceAddress, ppobAddress = Some(tstCorrespondenceAddress)))
+        .shouldBe(Map("correspondence" -> tstCorrespondenceAddress))
+    }
+
+    "return a map with ro and correspondence addresses when correspondence and ppob addresses are the same" in new Setup {
+      service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAndPPOBAddress.copy(ppobAddress = Some(tstCorrespondenceAddress)))
+        .shouldBe(Map("ro" -> roAddress, "correspondence" -> tstCorrespondenceAddress))
+    }
+
+    "return a map with ppob and correspondence addresses when correspondence and ro addresses are the same" in new Setup {
+      service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAndPPOBAddress.copy(roAddress = tstCorrespondenceAddress))
+        .shouldBe(Map("correspondence" -> tstCorrespondenceAddress, "ppob" -> ppobAddress))
+    }
+
+    "return a map with correspondence address when correspondence and ro addresses are the same and ppob is None" in new Setup {
+      service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAddressOnly.copy(roAddress = tstCorrespondenceAddress))
         .shouldBe(Map("correspondence" -> tstCorrespondenceAddress))
     }
   }
