@@ -145,34 +145,13 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
               BadRequest(PAYECorrespondenceAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob"), addressMap.get("correspondence"), prepopAddresses))
             },
             success => success.chosenAddress match {
-              case CorrespondenceAddress =>
-                Future.successful(Redirect(controllers.userJourney.routes.SummaryController.summary()))
-              case ROAddress => for {
-                companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-                res <- payeContactService.submitCorrespondence(companyDetails.roAddress, profile.registrationID)
-              } yield res match {
+              case Other => addressLookupService.buildAddressLookupUrl("payereg2", controllers.userJourney.routes.PAYEContactController.savePAYECorrespondenceAddress()) map {
+                redirectUrl => Redirect(redirectUrl)
+              }
+              case _ => payeContactService.submitCorrespondence(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) map {
                 case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
                 case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
               }
-              case Other =>
-                addressLookupService.buildAddressLookupUrl("payereg2", controllers.userJourney.routes.PAYEContactController.savePAYECorrespondenceAddress()) map {
-                  redirectUrl => Redirect(redirectUrl)
-                }
-              case prepop: PrepopAddress => (
-                for {
-                  prepopAddress <- prepopService.getAddress(profile.registrationID, prepop.index)
-                  res <- payeContactService.submitCorrespondence(prepopAddress, profile.registrationID)
-                } yield res match {
-                  case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
-                  case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-                }) recover {
-                  case e: S4LFetchException =>
-                    Logger.warn(s"[PAYEContactController] [submitPAYECorrespondenceAddress] - Error while saving Correspondence Address with a PrepopAddress: ${e.getMessage}")
-                    InternalServerError(views.html.pages.error.restart())
-                }
-              case PPOBAddress =>
-                Logger.warn("PPOB address returned as selected address in Correspondence Address page")
-                Future.successful(InternalServerError(views.html.pages.error.restart()))
             }
           )
         }
@@ -184,7 +163,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
         withCurrentProfile { profile =>
           for {
             Some(address) <- addressLookupService.getAddress
-            res <- payeContactService.submitCorrespondence(address, profile.registrationID)
+            res <- payeContactService.saveCorrespondenceAddress(profile.registrationID, address )
             _ <- prepopService.saveAddress(profile.registrationID, address)
           } yield res match {
             case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())

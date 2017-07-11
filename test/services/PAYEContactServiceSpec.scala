@@ -39,6 +39,8 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
   val mockCohoAPIConnector = mock[IncorporationInformationConnector]
   val mockCoHoService = mock[IncorporationInformationService]
   val mockS4LService = mock[S4LService]
+  val mockCompanyDetailsService = mock[CompanyDetailsService]
+  val mockPrepopulationService = mock[PrepopulationService]
 
   val returnHttpResponse = HttpResponse(200)
 
@@ -47,6 +49,8 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       val payeRegConnector = mockPAYERegConnector
       val s4LService = mockS4LService
       val keystoreConnector = mockKeystoreConnector
+      val companyDetailsService = mockCompanyDetailsService
+      val prepopService = mockPrepopulationService
     }
   }
 
@@ -324,7 +328,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
     }
   }
 
-  "Calling submitCorrespondence" should {
+  "Calling saveCorrespondenceAddress" should {
 
     val tstCorrespondenceAddress = Address(
       line1 = "tst line 1",
@@ -340,7 +344,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
-      await(service.submitCorrespondence(tstCorrespondenceAddress, "54321")) shouldBe DownstreamOutcome.Success
+      await(service.saveCorrespondenceAddress("54321", tstCorrespondenceAddress)) shouldBe DownstreamOutcome.Success
     }
   }
 }
