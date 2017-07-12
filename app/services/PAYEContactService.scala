@@ -19,16 +19,20 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import audit.{CorrespondenceAddressAuditEvent, CorrespondenceAddressAuditEventDetail}
-import config.{FrontendAuditConnector, FrontendAuthConnector}
 import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
+import audit.{AmendedPAYEContactDetailsEvent, AmendedPAYEContactDetailsEventDetail, AuditPAYEContactDetails}
+import config.{FrontendAuditConnector, FrontendAuthConnector}
 import enums.CacheKeys
 import models.Address
-import models.view.{PAYEContactDetails, CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
+import models.view.{CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
 import models.api.{PAYEContact => PAYEContactAPI}
 import enums.DownstreamOutcome
 import models.external.{UserDetailsModel, UserIds}
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.AuditEvent
+import models.auth.UserIds
+import models.view.PAYEContactDetails
+import play.api.libs.json.JsObject
+import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -114,10 +118,24 @@ trait PAYEContactSrv  {
     )
   }
 
-  def submitPayeContactDetails(viewData: PAYEContactDetails, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    getPAYEContact(regId) flatMap {
-      data => submitPAYEContact(PAYEContactView(Some(viewData), data.correspondenceAddress), regId)
-    }
+  def dataHasNotChanged(s4lData: Option[PAYEContactDetails], viewData: PAYEContactDetails): Boolean = if(s4lData.isDefined) flattenData(viewData) == flattenData(s4lData.get) else false
+
+  def submitPayeContactDetails(viewData: PAYEContactDetails, s4lData: Option[PAYEContactDetails], regId: String)
+                              (implicit hc: HeaderCarrier, authContext: AuthContext): Future[DownstreamOutcome.Value] = {
+    for {
+      cachedContactData <- getPAYEContact(regId)
+      submitted         <- submitPAYEContact(PAYEContactView(Some(viewData), cachedContactData.correspondenceAddress), regId)
+      ids               <- authConnector.getIds[UserIds](authContext)
+      authId            <- authConnector.getUserDetails[JsObject](authContext)
+      eventDetail       = AmendedPAYEContactDetailsEventDetail(
+        externalUserId = ids.externalId,
+        authProviderId = authId.\("authProviderId").as[String],
+        journeyId = regId,
+        previousPAYEContactDetails = convertPAYEContactViewToAudit(s4lData.get),
+        newPAYEContactDetails = convertPAYEContactViewToAudit(viewData)
+      )
+      _                 <- if(dataHasNotChanged(s4lData, viewData)) auditConnector.sendEvent(new AmendedPAYEContactDetailsEvent(eventDetail)) else Future.successful(AuditResult.Disabled)
+    } yield submitted
   }
 
   def submitCorrespondence(regId: String, correspondenceAddress: Address)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
@@ -137,5 +155,18 @@ trait PAYEContactSrv  {
       event
     }
   }
+
+  private[services] def flattenData(data: PAYEContactDetails) = data.copy(name = data.name.trim.replace(" ", ""), digitalContactDetails = data.digitalContactDetails.copy(
+    email         = data.digitalContactDetails.email map(_.trim.replace(" ", "")),
+    phoneNumber   = data.digitalContactDetails.phoneNumber map(_.trim.replace(" ", "")),
+    mobileNumber  = data.digitalContactDetails.mobileNumber map(_.trim.replace(" ", "")))
+  )
+
+  private def convertPAYEContactViewToAudit(viewData: PAYEContactDetails) = AuditPAYEContactDetails(
+    contactName   = viewData.name,
+    email         = viewData.digitalContactDetails.email,
+    mobileNumber  = viewData.digitalContactDetails.mobileNumber,
+    phoneNumber   = viewData.digitalContactDetails.phoneNumber
+  )
 }
 

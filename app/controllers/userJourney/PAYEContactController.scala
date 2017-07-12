@@ -38,15 +38,14 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 
 @Singleton
-class PAYEContactController @Inject()(
-                                       injCompanyDetailsService: CompanyDetailsService,
-                                       injPAYEContactService: PAYEContactService,
-                                       injAddressLookupService: AddressLookupService,
-                                       injKeystoreConnector: KeystoreConnector,
-                                       injPayeRegistrationConnector: PAYERegistrationConnector,
-                                       injMessagesApi: MessagesApi,
-                                       injPrepopulationService: PrepopulationService)
-  extends PAYEContactCtrl {
+class PAYEContactController @Inject()(injCompanyDetailsService: CompanyDetailsService,
+                                      injPAYEContactService: PAYEContactService,
+                                      injAddressLookupService: AddressLookupService,
+                                      injKeystoreConnector: KeystoreConnector,
+                                      injPayeRegistrationConnector: PAYERegistrationConnector,
+                                      injMessagesApi: MessagesApi,
+                                      injPrepopulationService: PrepopulationService,
+                                      injS4lService: S4LService) extends PAYEContactCtrl {
   val authConnector = FrontendAuthConnector
   val companyDetailsService = injCompanyDetailsService
   val payeContactService = injPAYEContactService
@@ -55,6 +54,7 @@ class PAYEContactController @Inject()(
   val messagesApi = injMessagesApi
   val payeRegistrationConnector = injPayeRegistrationConnector
   val prepopService = injPrepopulationService
+  val s4lService = injS4lService
 }
 
 trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
@@ -64,6 +64,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
   val addressLookupService: AddressLookupSrv
   val keystoreConnector: KeystoreConnect
   val prepopService: PrepopulationSrv
+  val s4lService: S4LSrv
 
   val payeContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
@@ -90,21 +91,16 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
             errs => companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
               .map (details => BadRequest(PAYEContactDetailsPage(details.companyName, errs))),
             success => {
-              val trimmed = success.copy(
-                digitalContactDetails = success.digitalContactDetails.copy(
-                  email         = success.digitalContactDetails.email map(_.trim),
-                  phoneNumber   = success.digitalContactDetails.phoneNumber map(_.trim),
-                  mobileNumber  = success.digitalContactDetails.mobileNumber map(_.trim)
-                )
-              )
-
-              prepopService.saveContactDetails(profile.registrationID, trimmed) map {
-                _ => Logger.info(s"Successfully saved Contact Details to Prepopulation for regId: ${profile.registrationID}")
-              } recover {
-                case _ => Logger.warn(s"Failed to save Contact Details to Prepopulation for regId: ${profile.registrationID}")
-              }
-
-              payeContactService.submitPayeContactDetails(trimmed, profile.registrationID) map {
+              val trimmed = trimPAYEContactDetails(success)
+              for {
+                s4lData <- s4lService.fetchAndGet[PAYEContactDetails]("PrepopPAYEContactDetails", profile.registrationID)
+                _             <- prepopService.saveContactDetails(profile.registrationID, trimmed) map {
+                  _ => Logger.info(s"Successfully saved Contact Details to Prepopulation for regId: ${profile.registrationID}")
+                } recover {
+                  case _ => Logger.warn(s"Failed to save Contact Details to Prepopulation for regId: ${profile.registrationID}")
+                }
+                submittedResponse <- payeContactService.submitPayeContactDetails(trimmed, s4lData, profile.registrationID)
+              } yield submittedResponse match {
                 case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
                 case DownstreamOutcome.Success => Redirect(routes.PAYEContactController.payeCorrespondenceAddress())
               }
@@ -213,4 +209,12 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
           }
         }
   }
+
+  private def trimPAYEContactDetails(details: PAYEContactDetails) = details.copy(
+    digitalContactDetails = details.digitalContactDetails.copy(
+      email         = details.digitalContactDetails.email map(_.trim),
+      phoneNumber   = details.digitalContactDetails.phoneNumber map(_.trim),
+      mobileNumber  = details.digitalContactDetails.mobileNumber map(_.trim)
+    )
+  )
 }

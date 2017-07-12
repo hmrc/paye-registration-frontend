@@ -95,6 +95,9 @@ class PrepopulationServiceSpec extends PAYERegSpec {
       when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(validContactDetails)))
 
+      when(mockS4LService.saveForm[PAYEContactDetails](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(CacheMap("PrepopPAYEContactDetails", Map.empty)))
+
       await(service.getPAYEContactDetails(regId)) shouldBe Some(validContactDetails)
     }
     "return no contact details" in new Setup {
