@@ -18,13 +18,19 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import connectors._
+import audit.{CorrespondenceAddressAuditEvent, CorrespondenceAddressAuditEventDetail}
+import config.{FrontendAuditConnector, FrontendAuthConnector}
+import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.CacheKeys
 import models.Address
-import models.view.{CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
+import models.view.{PAYEContactDetails, CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
 import models.api.{PAYEContact => PAYEContactAPI}
 import enums.DownstreamOutcome
-import models.view.PAYEContactDetails
+import models.external.{UserDetailsModel, UserIds}
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.model.AuditEvent
+import uk.gov.hmrc.play.frontend.auth.AuthContext
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -32,15 +38,24 @@ import scala.concurrent.Future
 
 @Singleton
 class PAYEContactService @Inject()(injPAYERegistrationConnector: PAYERegistrationConnector,
-                                   injS4LService: S4LService) extends PAYEContactSrv {
+                                   injS4LService: S4LService,
+                                   injCompanyDetailsService: CompanyDetailsService,
+                                   injPrepopulationService: PrepopulationService) extends PAYEContactSrv {
   override val payeRegConnector = injPAYERegistrationConnector
   override val s4LService = injS4LService
+  override val companyDetailsService = injCompanyDetailsService
+  override val prepopService = injPrepopulationService
+  override val authConnector = FrontendAuthConnector
+  override val auditConnector = FrontendAuditConnector
 }
 
 trait PAYEContactSrv  {
   val payeRegConnector: PAYERegistrationConnect
   val s4LService: S4LSrv
-
+  val companyDetailsService: CompanyDetailsSrv
+  val prepopService: PrepopulationSrv
+  val authConnector: AuthConnector
+  val auditConnector: AuditConnector
 
   private[services] def viewToAPI(viewData: PAYEContactView): Either[PAYEContactView, PAYEContactAPI] = viewData match {
     case PAYEContactView(Some(contactDetails), Some(correspondenceAddress)) =>
@@ -65,9 +80,17 @@ trait PAYEContactSrv  {
 
   def getCorrespondenceAddresses(correspondenceAddress: Option[Address], companyDetails: CompanyDetailsView): Map[String, Address] = {
     correspondenceAddress map {
-      case address@companyDetails.roAddress => Map("correspondence" -> address)
-      case addr: Address => Map("ro" -> companyDetails.roAddress, "correspondence" -> addr)
-    } getOrElse Map("ro" -> companyDetails.roAddress)
+      case address@companyDetails.roAddress if companyDetails.ppobAddress.contains(companyDetails.roAddress) => Map("correspondence" -> address)
+      case address@companyDetails.roAddress => Map("correspondence" -> address) ++ companyDetails.ppobAddress.map(("ppob", _)).toMap
+      case addr: Address if companyDetails.ppobAddress.contains(addr) => Map("ro" -> companyDetails.roAddress, "correspondence" -> addr)
+      case addr: Address => Map("ro" -> companyDetails.roAddress, "correspondence" -> addr) ++ companyDetails.ppobAddress.map(("ppob", _)).toMap
+    } getOrElse {
+      if( companyDetails.ppobAddress.contains(companyDetails.roAddress) ) {
+        Map("ro" -> companyDetails.roAddress)
+      } else {
+        Map("ro" -> companyDetails.roAddress) ++ companyDetails.ppobAddress.map(("ppob", _)).toMap
+      }
+    }
   }
 
   def getPAYEContact(regId: String)(implicit hc: HeaderCarrier): Future[PAYEContactView] = {
@@ -97,9 +120,21 @@ trait PAYEContactSrv  {
     }
   }
 
-  def submitCorrespondence(correspondenceAddress: Address, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def submitCorrespondence(regId: String, correspondenceAddress: Address)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     getPAYEContact(regId) flatMap {
       data => submitPAYEContact(PAYEContactView(data.contactDetails, Some(correspondenceAddress)), regId)
+    }
+  }
+
+  def auditCorrespondenceAddress(regId: String, addressUsed: String)(implicit user: AuthContext, hc: HeaderCarrier): Future[AuditEvent] = {
+    for {
+      userIds <- authConnector.getIds[UserIds](user)
+      userDetails <- authConnector.getUserDetails[UserDetailsModel](user)
+    } yield {
+      val event = new CorrespondenceAddressAuditEvent(CorrespondenceAddressAuditEventDetail(userIds.externalId, userDetails.authProviderId, regId, addressUsed))
+      auditConnector.sendEvent(event)
+
+      event
     }
   }
 }

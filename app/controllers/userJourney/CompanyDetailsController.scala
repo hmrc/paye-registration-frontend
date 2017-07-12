@@ -168,7 +168,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
         withCurrentProfile { profile =>
           for {
             companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-            prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress)
+            prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress, None)
           } yield {
             val addressMap = companyDetailsService.getPPOBPageAddresses(companyDetails)
             Ok(PPOBAddressPage(PPOBForm.form.fill(ChosenAddress(PPOBAddress)), addressMap.get("ro"), addressMap.get("ppob"), prepopAddresses))
@@ -183,7 +183,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
           PPOBForm.form.bindFromRequest.fold(
             errs => for {
               details <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-              prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, details.roAddress, details.ppobAddress)
+              prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, details.roAddress, details.ppobAddress, None)
             } yield {
                 val addressMap = companyDetailsService.getPPOBPageAddresses(details)
                 BadRequest(PPOBAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob"), prepopAddresses))

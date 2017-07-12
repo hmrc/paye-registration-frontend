@@ -16,13 +16,14 @@
 
 package controllers.userJourney
 
+import audit.{CorrespondenceAddressAuditEvent, CorrespondenceAddressAuditEventDetail}
 import builders.AuthBuilder
 import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
 import fixtures.{PAYERegistrationFixture, S4LFixture}
 import models.Address
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
-import models.view.PAYEContactDetails
+import models.view.{AddressChoice, PAYEContactDetails}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.http.Status
@@ -32,6 +33,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.{AddressLookupService, CompanyDetailsService, PAYEContactService, PrepopulationService}
 import testHelpers.PAYERegSpec
+import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -205,7 +207,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
-      when(mockPrepopService.getPrePopAddresses(ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPrepopService.getPrePopAddresses(ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Map.empty[Int, Address]))
 
       when(mockPAYEContactService.getCorrespondenceAddresses(ArgumentMatchers.any(), ArgumentMatchers.any()))
@@ -218,6 +220,15 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
   }
 
   "submitPAYECorrespondenceAddress" should {
+    implicit val hc = HeaderCarrier()
+
+    val auditEvent = new CorrespondenceAddressAuditEvent(CorrespondenceAddressAuditEventDetail(
+      "testExternalUserId",
+      "testAuthProviderId",
+      "testRegID",
+      "testAddressUsed"
+    ))
+
     "return a BAD_REQUEST" in new Setup {
       val request = FakeRequest().withFormUrlEncodedBody(
         "chosenAddress" -> ""
@@ -261,12 +272,48 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
-      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.any[Address](), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
+
+      when(mockPAYEContactService.auditCorrespondenceAddress(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[AuthContext](), ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(auditEvent))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/register-for-paye/check-and-confirm-your-answers")
+      }
+    }
+
+    "redirect to summary if ppob is chosen" in new Setup {
+      val request = FakeRequest().withFormUrlEncodedBody(
+        "chosenAddress" -> "ppobAddress"
+      )
+
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(validCompanyDetailsViewModel))
+
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(DownstreamOutcome.Success))
+
+      when(mockPAYEContactService.auditCorrespondenceAddress(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[AuthContext](), ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(auditEvent))
+
+      AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("/register-for-paye/check-and-confirm-your-answers")
+      }
+    }
+
+    "return a 500 in case of DownstreamOutcome FAILURE when saving with a missing PPOB Address" in new Setup {
+      val request = FakeRequest().withFormUrlEncodedBody(
+        "chosenAddress" -> "ppobAddress"
+      )
+
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(validCompanyDetailsViewModel.copy(ppobAddress = None)))
+
+      AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
+        status(result) shouldBe INTERNAL_SERVER_ERROR
       }
     }
 
@@ -278,7 +325,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
-      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.any[Address](), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
@@ -299,16 +346,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       }
     }
 
-    "show an error page if PPOB address choice is submitted, somehow" in new Setup {
-      val request = FakeRequest("GET", "/testuri?id=123456789").withFormUrlEncodedBody(
-        "chosenAddress" -> "ppobAddress"
-      )
-
-      AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
-        status(result) shouldBe INTERNAL_SERVER_ERROR
-      }
-    }
-
     "show an error page when fail saving Correspondence Address" in new Setup {
       val request = FakeRequest().withFormUrlEncodedBody(
         "chosenAddress" -> "prepopAddress13"
@@ -326,7 +363,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockPrepopService.getAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(address))
 
-      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
@@ -353,7 +390,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockAddressLookupService.getAddress(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[_]]()))
         .thenReturn(Future.successful(expected))
 
-      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
@@ -378,7 +415,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockAddressLookupService.getAddress(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[_]]()))
         .thenReturn(Future.successful(expected))
 
-      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))

@@ -20,7 +20,6 @@ import java.net.{URLDecoder, URLEncoder}
 import java.util.UUID
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import play.api.http.HeaderNames
 import play.api.libs.Crypto
 import play.api.libs.ws.WSCookie
 import uk.gov.hmrc.crypto.{CompositeSymmetricCrypto, Crypted, PlainText}
@@ -65,11 +64,35 @@ trait LoginStub extends SessionCookieBaker {
                |    "levelOfAssurance": "2",
                |    "confidenceLevel" : 50,
                |    "credentialStrength": "strong",
+               |    "userDetailsLink": "/user-details/id/1234567890",
+               |    "ids": "/auth/oid/1234567890/ids",
                |    "legacyOid":"1234567890"
                |}
                |
             """.stripMargin
           )))
+
+    stubFor(get(urlMatching("/user-details/id/1234567890"))
+      .willReturn(
+        aResponse().
+          withStatus(200).
+          withBody(s"""{
+                      |  "name": "testUserName",
+                      |  "email": "testUserEmail",
+                      |  "affinityGroup": "testAffinityGroup",
+                      |  "authProviderId": "testAuthProviderId",
+                      |  "authProviderType": "testAuthProviderType"
+                      |}""".stripMargin)
+      )
+    )
+
+    stubFor(get(urlMatching("/auth/oid/1234567890/ids"))
+      .willReturn(
+        aResponse().
+          withStatus(200).
+          withBody("""{"internalId":"Int-xxx","externalId":"Ext-xxx"}""")
+      )
+    )
   }
 
   val userId = "/auth/oid/1234567890"

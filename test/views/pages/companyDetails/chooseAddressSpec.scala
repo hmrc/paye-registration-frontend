@@ -159,7 +159,7 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
   }
 
   "The Correspondence Address screen without Correspondence Address" should {
-    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), None, Map.empty[Int, Address])
+    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), Some(testPPOBAddress), None, Map.empty[Int, Address])
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct title" in {
@@ -178,6 +178,18 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
       document.getElementById("ro-address-line-1").text shouldBe "testL1"
     }
 
+    "have the correct name for radio button ppobAddress" in {
+      document.getElementById("chosenAddress-ppobaddress").attr("name") shouldBe "chosenAddress"
+    }
+
+    "have the correct value for radio button ppobAddress" in {
+      document.getElementById("chosenAddress-ppobaddress").attr("value") shouldBe "ppobAddress"
+    }
+
+    "have the correct text for radio button ppobAddress" in {
+      document.getElementById("ppob-address-line-1").text shouldBe "testL65"
+    }
+
     "not have the radio button correspondenceAddress" in {
       an[NullPointerException] shouldBe thrownBy(document.getElementById("chosenAddress-correspondenceaddress").attr("name"))
     }
@@ -192,7 +204,7 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
   }
 
   "The Correspondence Address screen with Correspondence Address" should {
-    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), Some(testCorrespondenceAddress), Map.empty[Int, Address])
+    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), Some(testPPOBAddress), Some(testCorrespondenceAddress), Map.empty[Int, Address])
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct name for radio button correspondenceAddress" in {
@@ -209,7 +221,7 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
   }
 
   "The Correspondence Address screen with Prepop Addresses" should {
-    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), Some(testCorrespondenceAddress), testListPrepopAddresses)
+    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), Some(testPPOBAddress), Some(testCorrespondenceAddress), testListPrepopAddresses)
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct name for radio button prepopaddress0" in {

@@ -115,7 +115,7 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
     }
 
     "return 500 when the mocked address can't be submitted" in new Setup {
-      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(address))
@@ -127,7 +127,7 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
     }
 
     "return 303 when the mocked address is successfully submitted" in new Setup {
-      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
 
       when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(address))

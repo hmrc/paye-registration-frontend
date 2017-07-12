@@ -16,17 +16,23 @@
 
 package services
 
+import audit.{CorrespondenceAddressAuditEvent, CorrespondenceAddressAuditEventDetail}
+import builders.AuthBuilder
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.PAYERegistrationFixture
 import models.{Address, DigitalContactDetails}
-import models.view.{PAYEContact => PAYEContactView, PAYEContactDetails, CompanyDetails => CompanyDetailsView}
+import models.view.{PAYEContactDetails, CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
 import models.api.{PAYEContact => PAYEContactAPI}
+import models.external.{UserDetailsModel, UserIds}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.Format
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.model.AuditEvent
+import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 
 import scala.concurrent.Future
@@ -39,6 +45,9 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
   val mockCohoAPIConnector = mock[IncorporationInformationConnector]
   val mockCoHoService = mock[IncorporationInformationService]
   val mockS4LService = mock[S4LService]
+  val mockCompanyDetailsService = mock[CompanyDetailsService]
+  val mockPrepopulationService = mock[PrepopulationService]
+  val mockAuditConnector = mock[AuditConnector]
 
   val returnHttpResponse = HttpResponse(200)
 
@@ -47,6 +56,10 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       val payeRegConnector = mockPAYERegConnector
       val s4LService = mockS4LService
       val keystoreConnector = mockKeystoreConnector
+      val companyDetailsService = mockCompanyDetailsService
+      val prepopService = mockPrepopulationService
+      val authConnector = mockAuthConnector
+      val auditConnector = mockAuditConnector
     }
   }
 
@@ -147,7 +160,24 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       line4 = None,
       postCode = Some("RO1 1RO")
     )
-    val detailsWithROAddress = CompanyDetailsView(
+
+    val ppobAddress = Address(
+      line1 = "PPOB tst line 1",
+      line2 = "PPOB tst line 2",
+      line3 = None,
+      line4 = None,
+      postCode = Some("PP1 1OB")
+    )
+
+    val detailsWithROAddressForAll = CompanyDetailsView(
+      companyName = "Tst Company",
+      tradingName = None,
+      roAddress = roAddress,
+      ppobAddress = Some(roAddress),
+      businessContactDetails = None
+    )
+
+    val detailsWithROAddressOnly = CompanyDetailsView(
       companyName = "Tst Company",
       tradingName = None,
       roAddress = roAddress,
@@ -155,17 +185,53 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       businessContactDetails = None
     )
 
-    "return a map with ro address when there is no correspondence address" in new Setup {
-      service.getCorrespondenceAddresses(None, detailsWithROAddress) shouldBe Map("ro" -> roAddress)
+    val detailsWithROAndPPOBAddress = CompanyDetailsView(
+      companyName = "Tst Company",
+      tradingName = None,
+      roAddress = roAddress,
+      ppobAddress = Some(ppobAddress),
+      businessContactDetails = None
+    )
+
+    "return a map with ro address only when there is no correspondence address and ppob is equal to ro address" in new Setup {
+      service.getCorrespondenceAddresses(None, detailsWithROAddressForAll) shouldBe Map("ro" -> roAddress)
     }
 
-    "return a map with ro and correspondence address when both addresses are different" in new Setup {
-      service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAddress)
+    "return a map with ro address only when there is no correspondence address and ppob is None" in new Setup {
+      service.getCorrespondenceAddresses(None, detailsWithROAddressOnly) shouldBe Map("ro" -> roAddress)
+    }
+
+    "return a map with ro and ppob addresses when there is no correspondence address" in new Setup {
+      service.getCorrespondenceAddresses(None, detailsWithROAndPPOBAddress) shouldBe Map("ro" -> roAddress, "ppob" -> ppobAddress)
+    }
+
+    "return a map with ro, ppob and correspondence addresses when all addresses are different" in new Setup {
+      service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAndPPOBAddress)
+        .shouldBe(Map("ro" -> roAddress, "correspondence" -> tstCorrespondenceAddress, "ppob" -> ppobAddress))
+    }
+
+    "return a map with ro and correspondence addresses when all addresses are different and ppob is None" in new Setup {
+      service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAddressOnly)
         .shouldBe(Map("ro" -> roAddress, "correspondence" -> tstCorrespondenceAddress))
     }
 
-    "return a map with correspondence address when both addresses are the same" in new Setup {
-      service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAddress.copy(roAddress = tstCorrespondenceAddress))
+    "return a map with correspondence address when all addresses are the same" in new Setup {
+      service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAddressForAll.copy(roAddress = tstCorrespondenceAddress, ppobAddress = Some(tstCorrespondenceAddress)))
+        .shouldBe(Map("correspondence" -> tstCorrespondenceAddress))
+    }
+
+    "return a map with ro and correspondence addresses when correspondence and ppob addresses are the same" in new Setup {
+      service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAndPPOBAddress.copy(ppobAddress = Some(tstCorrespondenceAddress)))
+        .shouldBe(Map("ro" -> roAddress, "correspondence" -> tstCorrespondenceAddress))
+    }
+
+    "return a map with ppob and correspondence addresses when correspondence and ro addresses are the same" in new Setup {
+      service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAndPPOBAddress.copy(roAddress = tstCorrespondenceAddress))
+        .shouldBe(Map("correspondence" -> tstCorrespondenceAddress, "ppob" -> ppobAddress))
+    }
+
+    "return a map with correspondence address when correspondence and ro addresses are the same and ppob is None" in new Setup {
+      service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAddressOnly.copy(roAddress = tstCorrespondenceAddress))
         .shouldBe(Map("correspondence" -> tstCorrespondenceAddress))
     }
   }
@@ -271,7 +337,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
     }
   }
 
-  "Calling submitCorrespondence" should {
+  "Calling saveCorrespondenceAddress" should {
 
     val tstCorrespondenceAddress = Address(
       line1 = "tst line 1",
@@ -287,7 +353,49 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
-      await(service.submitCorrespondence(tstCorrespondenceAddress, "54321")) shouldBe DownstreamOutcome.Success
+      await(service.submitCorrespondence("54321", tstCorrespondenceAddress)) shouldBe DownstreamOutcome.Success
+    }
+  }
+
+  "Calling auditCorrespondenceAddress" should {
+    implicit val user = AuthBuilder.createTestUser
+
+    val userDetails = UserDetailsModel(
+      "testName",
+      "testEmail",
+      "testAffinityGroup",
+      None,
+      None,
+      None,
+      None,
+      "testAuthProviderId",
+      "testAuthProviderType"
+    )
+
+    val userIds = UserIds(
+      "testInternalId",
+      "testExternalId"
+    )
+
+    val addressUsed = "testAddressUsed"
+
+    val expectedAuditEvent = new CorrespondenceAddressAuditEvent(CorrespondenceAddressAuditEventDetail(
+      "testExternalId",
+      "testAuthProviderId",
+      testRegId,
+      addressUsed
+    ))
+
+    "send an audit event with the correct detail" in new Setup {
+      when(mockAuthConnector.getIds[UserIds](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(userIds))
+
+      when(mockAuthConnector.getUserDetails[UserDetailsModel](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(userDetails))
+
+      val response = await(service.auditCorrespondenceAddress(testRegId, addressUsed))
+      response.auditSource shouldBe "paye-registration-frontend"
+      response.auditType shouldBe "correspondenceAddress"
     }
   }
 }

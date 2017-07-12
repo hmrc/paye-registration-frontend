@@ -130,7 +130,7 @@ class RegistrationAuditEventSpec extends UnitSpec {
 
       val result = Json.toJson[ExtendedDataEvent](event)
 
-      (result \ "auditSource").as[String] shouldBe "paye-registration"
+      (result \ "auditSource").as[String] shouldBe "paye-registration-frontend"
       (result \ "auditType").as[String] shouldBe auditType
 
       (result \ "detail").as[JsObject] shouldBe Json.obj()
