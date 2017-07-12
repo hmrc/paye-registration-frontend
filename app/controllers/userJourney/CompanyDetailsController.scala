@@ -29,11 +29,12 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import services._
-import uk.gov.hmrc.play.frontend.auth.Actions
+import uk.gov.hmrc.play.frontend.auth.{Actions, AuthContext}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.SessionProfile
 import views.html.pages.companyDetails.{confirmROAddress, businessContactDetails => BusinessContactDetailsPage, ppobAddress => PPOBAddressPage, tradingName => TradingNamePage}
 import common.exceptions.DownstreamExceptions.S4LFetchException
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
@@ -188,33 +189,40 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
                 val addressMap = companyDetailsService.getPPOBPageAddresses(details)
                 BadRequest(PPOBAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob"), prepopAddresses))
             },
-            success => success.chosenAddress match {
-              case PPOBAddress =>
-                Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
-              case ROAddress =>
-                companyDetailsService.copyROAddrToPPOBAddr(profile.registrationID, profile.companyTaxRegistration.transactionId)
-                  .map (_ => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
-              case Other =>
-                addressLookupService.buildAddressLookupUrl("payereg1", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()) map {
-                  redirectUrl => Redirect(redirectUrl)
-                }
-              case prepop: PrepopAddress => (for {
-                  prepopAddress <- prepopService.getAddress(profile.registrationID, prepop.index)
-                  res <- companyDetailsService.submitPPOBAddr(prepopAddress, profile.registrationID, profile.companyTaxRegistration.transactionId)
-                } yield res match {
-                  case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
-                  case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-                }) recover {
-                  case e: S4LFetchException =>
-                    Logger.warn(s"[CompanyDetailsController] [submitPPOBAddress] - Error while saving PPOB Address with a PrepopAddress: ${e.getMessage}")
-                    InternalServerError(views.html.pages.error.restart())
-                }
-              case CorrespondenceAddress =>
-                Logger.warn("[CompanyDetailsController] [submitPPOBAddress] - Correspondence address returned as selected address in PPOB Address page")
-                Future.successful(InternalServerError(views.html.pages.error.restart()))
+            success => submitPPOBAddressChoice(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
+              case DownstreamOutcome.Success => Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
+              case DownstreamOutcome.Failure => Future.successful(InternalServerError(views.html.pages.error.restart()))
+              case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("payereg1", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()) map {
+                redirectUrl => Redirect(redirectUrl)
+              }
             }
           )
         }
+  }
+
+  private def submitPPOBAddressChoice(regId: String, txId: String, choice: AddressChoice)(implicit user: AuthContext, hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    choice match {
+      case PPOBAddress =>
+        Future.successful(DownstreamOutcome.Success)
+      case ROAddress =>
+        for {
+          res <- companyDetailsService.copyROAddrToPPOBAddr(regId, txId)
+          _ <- companyDetailsService.auditPPOBAddress(regId)
+        } yield res
+      case Other =>
+        Future.successful(DownstreamOutcome.Redirect)
+      case prepop: PrepopAddress => (for {
+        prepopAddress <- prepopService.getAddress(regId, prepop.index)
+        res <- companyDetailsService.submitPPOBAddr(prepopAddress, regId, txId)
+      } yield res) recover {
+        case e: S4LFetchException =>
+          Logger.warn(s"[CompanyDetailsController] [submitPPOBAddressChoice] - Error while saving PPOB Address with a PrepopAddress: ${e.getMessage}")
+          DownstreamOutcome.Failure
+      }
+      case CorrespondenceAddress =>
+        Logger.warn("[CompanyDetailsController] [submitPPOBAddressChoice] - Correspondence address returned as selected address in PPOB Address page")
+        Future.successful(DownstreamOutcome.Failure)
+    }
   }
 
   val savePPOBAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {

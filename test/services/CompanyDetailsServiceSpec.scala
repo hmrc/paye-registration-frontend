@@ -28,6 +28,7 @@ import org.mockito.Mockito._
 import play.api.libs.json.{Format, Json}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 
 import scala.concurrent.Future
@@ -41,6 +42,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   val mockCohoAPIConnector = mock[IncorporationInformationConnector]
   val mockCoHoService = mock[IncorporationInformationService]
   val mockS4LService = mock[S4LService]
+  val mockAuditConnector = mock[AuditConnector]
 
   val returnHttpResponse = HttpResponse(200)
 
@@ -51,6 +53,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
       override val s4LService: S4LSrv = mockS4LService
       override val cohoAPIConnector: IncorporationInformationConnect = mockCohoAPIConnector
+      override val authConnector = mockAuthConnector
+      override val auditConnector = mockAuditConnector
     }
   }
 
@@ -61,6 +65,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
       override val s4LService: S4LSrv = mockS4LService
       override val cohoAPIConnector: IncorporationInformationConnect = mockCohoAPIConnector
+      override val authConnector = mockAuthConnector
+      override val auditConnector = mockAuditConnector
 
       override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
         Future.successful(CompanyDetailsView("test compay name", None, validROAddress, None, None))
@@ -79,6 +85,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
       override val s4LService: S4LSrv = mockS4LService
       override val cohoAPIConnector: IncorporationInformationConnect = mockCohoAPIConnector
+      override val authConnector = mockAuthConnector
+      override val auditConnector = mockAuditConnector
 
       override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
         Future.successful(validCompanyDetailsViewModel)
@@ -97,6 +105,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
       override val s4LService: S4LSrv = mockS4LService
       override val cohoAPIConnector: IncorporationInformationConnect = mockCohoAPIConnector
+      override val authConnector = mockAuthConnector
+      override val auditConnector = mockAuditConnector
 
       override def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
         validCompanyDetailsViewModel

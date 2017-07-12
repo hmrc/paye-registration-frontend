@@ -18,11 +18,18 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
+import audit.{PPOBAddressAuditEvent, PPOBAddressAuditEventDetail}
+import config.{FrontendAuditConnector, FrontendAuthConnector}
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
+import models.external.{UserDetailsModel, UserIds}
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.{Address, DigitalContactDetails}
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.model.AuditEvent
+import uk.gov.hmrc.play.frontend.auth.AuthContext
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.RegistrationWhitelist
 
@@ -41,6 +48,8 @@ class CompanyDetailsService @Inject()(injPAYERegistrationConnector: PAYERegistra
   override val cohoAPIConnector = injCohoAPIConnector
   override val cohoService = injCoHoAPIService
   override val s4LService = injS4LService
+  override val authConnector = FrontendAuthConnector
+  override val auditConnector = FrontendAuditConnector
 }
 
 trait CompanyDetailsSrv extends RegistrationWhitelist {
@@ -50,6 +59,8 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
   val cohoAPIConnector: IncorporationInformationConnect
   val cohoService: IncorporationInformationSrv
   val s4LService: S4LSrv
+  val authConnector: AuthConnector
+  val auditConnector: AuditConnector
 
   def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
     s4LService.fetchAndGet[CompanyDetailsView](CacheKeys.CompanyDetails.toString, regId) flatMap {
@@ -122,6 +133,18 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
       details <- getCompanyDetails(regId, txId)
       outcome <- saveCompanyDetails(details.copy(businessContactDetails = Some(businessContact)), regId)
     } yield outcome
+  }
+
+  def auditPPOBAddress(regId: String)(implicit user: AuthContext, hc: HeaderCarrier): Future[AuditEvent] = {
+    for {
+      userIds <- authConnector.getIds[UserIds](user)
+      userDetails <- authConnector.getUserDetails[UserDetailsModel](user)
+    } yield {
+      val event = new PPOBAddressAuditEvent(PPOBAddressAuditEventDetail(userIds.externalId, userDetails.authProviderId, regId))
+      auditConnector.sendEvent(event)
+
+      event
+    }
   }
 
   private[services] def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {

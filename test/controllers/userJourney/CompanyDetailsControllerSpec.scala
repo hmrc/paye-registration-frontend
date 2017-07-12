@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import audit.{PPOBAddressAuditEvent, PPOBAddressAuditEventDetail}
 import builders.AuthBuilder
 import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
@@ -33,6 +34,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services._
 import testHelpers.PAYERegSpec
+import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -393,13 +395,23 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "redirect to business contact details if ro is chosen" in new Setup {
+      implicit val hc = HeaderCarrier()
+      
       val request = FakeRequest().withFormUrlEncodedBody(
         "chosenAddress" -> "roAddress"
       )
 
+      val auditEvent = new PPOBAddressAuditEvent(PPOBAddressAuditEventDetail(
+        "testExternalUserId",
+        "testAuthProviderId",
+        "testRegID"
+      ))
 
       when(mockCompanyDetailsService.copyROAddrToPPOBAddr(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
+
+      when(mockCompanyDetailsService.auditPPOBAddress(ArgumentMatchers.anyString())(ArgumentMatchers.any[AuthContext](), ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(auditEvent))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitPPOBAddress, mockAuthConnector, request) { result =>
         status(result) shouldBe SEE_OTHER
