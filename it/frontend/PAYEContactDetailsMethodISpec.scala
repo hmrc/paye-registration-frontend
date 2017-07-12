@@ -23,9 +23,8 @@ import enums.CacheKeys
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
-import play.api.libs.json.Json
+import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeApplication
-
 
 class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
                                     with LoginStub
@@ -454,6 +453,146 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
       response.status shouldBe 500
+    }
+
+    "send a correct Audit Event when roAddress has been chosen" in {
+      val auditEvent =
+        s"""{
+           |  "auditSource" : "paye-registration-frontend",
+           |  "auditType" : "correspondenceAddress",
+           |  "detail" : {
+           |    "journeyId" : "$regId",
+           |    "addressUsed" : "RegisteredOffice"
+           |  },
+           |  "tags" : {
+           |     "clientIP" : "-",
+           |     "X-Session-ID" : "session-12345",
+           |     "X-Request-ID" : "-",
+           |     "clientPort" : "-",
+           |     "Authorization" : "-",
+           |     "transactionName" : "correspondenceAddress"
+           |   }
+           |}""".stripMargin
+
+      val roDoc = s"""{"line1":"11", "line2":"22", "postCode":"pc1 1pc"}"""
+      val payeDoc =s"""{
+                      |  "companyName": "${companyName}",
+                      |  "tradingNAme": "testName",
+                      |  "roAddress": ${roDoc},
+                      |  "ppobAddress": ${roDoc},
+                      |  "businessContactDetails": {
+                      |    "email": "email@email.zzz",
+                      |    "mobileNumber": "1234567890",
+                      |    "phoneNumber": "0987654321"
+                      |  }
+                      |}""".stripMargin
+
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubPatch(s"/paye-registration/$regId/contact-correspond-paye", 200, updatedPayeDoc)
+      stubGet(s"/paye-registration/$regId/company-details", 200, payeDoc)
+      stubS4LGet(regId, CacheKeys.CompanyDetails.toString, payeDoc)
+      stubS4LGet(regId, CacheKeys.PAYEContact.toString, updatedPayeDoc)
+      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+      stubS4LPut(regId, CacheKeys.CompanyDetails.toString, dummyS4LResponse)
+
+      val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
+      val fResponse = buildClient("/where-to-send-post").
+        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
+        post(Map(
+          "csrfToken" -> Seq("xxx-ignored-xxx"),
+          "chosenAddress" -> Seq("roAddress")
+        ))
+
+      val response = await(fResponse)
+      response.status shouldBe 303
+      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/check-and-confirm-your-answers")
+
+      val reqPosts = findAll(postRequestedFor(urlMatching(s"/write/audit")))
+      val captorPost = reqPosts.get(0)
+      val json = Json.parse(captorPost.getBodyAsString)
+
+      (json \ "auditSource").as[JsString].value shouldBe "paye-registration-frontend"
+      (json \ "auditType").as[JsString].value shouldBe "correspondenceAddress"
+      (json \ "detail" \ "externalUserId").as[JsString].value shouldBe "Ext-xxx"
+      (json \ "detail" \ "authProviderId").as[JsString].value shouldBe "testAuthProviderId"
+      (json \ "detail" \ "journeyId").as[JsString].value shouldBe regId
+      (json \ "detail" \ "addressUsed").as[JsString].value shouldBe "RegisteredOffice"
+    }
+
+    "send a correct Audit Event when ppobAddress has been chosen" in {
+      val auditEvent =
+        s"""{
+           |  "auditSource" : "paye-registration-frontend",
+           |  "auditType" : "correspondenceAddress",
+           |  "detail" : {
+           |    "journeyId" : "$regId",
+           |    "addressUsed" : "RegisteredOffice"
+           |  },
+           |  "tags" : {
+           |     "clientIP" : "-",
+           |     "X-Session-ID" : "session-12345",
+           |     "X-Request-ID" : "-",
+           |     "clientPort" : "-",
+           |     "Authorization" : "-",
+           |     "transactionName" : "correspondenceAddress"
+           |   }
+           |}""".stripMargin
+
+      val roDoc = s"""{"line1":"11", "line2":"22", "postCode":"pc1 1pc"}"""
+      val payeDoc =s"""{
+                      |  "companyName": "${companyName}",
+                      |  "tradingNAme": "testName",
+                      |  "roAddress": ${roDoc},
+                      |  "ppobAddress": ${roDoc},
+                      |  "businessContactDetails": {
+                      |    "email": "email@email.zzz",
+                      |    "mobileNumber": "1234567890",
+                      |    "phoneNumber": "0987654321"
+                      |  }
+                      |}""".stripMargin
+
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubPatch(s"/paye-registration/$regId/contact-correspond-paye", 200, updatedPayeDoc)
+      stubGet(s"/paye-registration/$regId/company-details", 200, payeDoc)
+      stubS4LGet(regId, CacheKeys.CompanyDetails.toString, payeDoc)
+      stubS4LGet(regId, CacheKeys.PAYEContact.toString, updatedPayeDoc)
+      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+      stubS4LPut(regId, CacheKeys.CompanyDetails.toString, dummyS4LResponse)
+
+      val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
+      val fResponse = buildClient("/where-to-send-post").
+        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
+        post(Map(
+          "csrfToken" -> Seq("xxx-ignored-xxx"),
+          "chosenAddress" -> Seq("ppobAddress")
+        ))
+
+      val response = await(fResponse)
+      response.status shouldBe 303
+      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/check-and-confirm-your-answers")
+
+      val reqPosts = findAll(postRequestedFor(urlMatching(s"/write/audit")))
+      val captorPost = reqPosts.get(0)
+      val json = Json.parse(captorPost.getBodyAsString)
+
+      (json \ "auditSource").as[JsString].value shouldBe "paye-registration-frontend"
+      (json \ "auditType").as[JsString].value shouldBe "correspondenceAddress"
+      (json \ "detail" \ "externalUserId").as[JsString].value shouldBe "Ext-xxx"
+      (json \ "detail" \ "authProviderId").as[JsString].value shouldBe "testAuthProviderId"
+      (json \ "detail" \ "journeyId").as[JsString].value shouldBe regId
+      (json \ "detail" \ "addressUsed").as[JsString].value shouldBe "PrincipalPlaceOfBusiness"
     }
   }
 

@@ -85,7 +85,7 @@ trait TestAddressLookupCtrl extends FrontendController with Actions with Session
             country = None
           )
           for {
-            res <- payeContactService.saveCorrespondenceAddress(profile.registrationID, address)
+            res <- payeContactService.submitCorrespondence(profile.registrationID, address)
             _ <- prepopService.saveAddress(profile.registrationID, address)
           } yield res match {
             case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())

@@ -16,23 +16,20 @@
 
 package utils
 
-import common.exceptions.InternalExceptions
 import connectors.{KeystoreConnect, PAYERegistrationConnector}
-import enums.{CacheKeys, PAYEStatus}
+import enums.CacheKeys
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import play.api.mvc.Result
 import play.api.mvc.Results.Ok
 import testHelpers.PAYERegSpec
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.http.HeaderCarrier
-import org.mockito.Mockito.when
-import org.mockito.ArgumentMatchers
 import play.api.test.FakeRequest
 
 import scala.concurrent.Future
 
 
-class SessionProfileSpec extends PAYERegSpec with DateUtil with InternalExceptions {
+class SessionProfileSpec extends PAYERegSpec {
 
   val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
 

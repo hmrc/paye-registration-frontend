@@ -41,7 +41,7 @@ import audit.TagSet.ALL_TAGS
 abstract class RegistrationAuditEvent(auditType: String, transactionName : Option[String], detail: JsObject, tagSet: TagSet = ALL_TAGS)
                                      (implicit hc: HeaderCarrier, optReq: Option[Request[AnyContent]] = None)
   extends ExtendedDataEvent(
-    auditSource = "paye-registration",
+    auditSource = "paye-registration-frontend",
     auditType = auditType,
     detail = detail,
     tags = buildTags(transactionName.getOrElse(auditType), tagSet)
@@ -49,7 +49,6 @@ abstract class RegistrationAuditEvent(auditType: String, transactionName : Optio
 
 object RegistrationAuditEvent {
 
-  val EXTERNAL_ID = "externalId"
   val EXTERNAL_USER_ID = "externalUserId"
   val AUTH_PROVIDER_ID = "authProviderId"
   val JOURNEY_ID = "journeyId"
@@ -88,6 +87,3 @@ object RegistrationAuditEvent {
     if (tagSet.path) optReq.fold(Map[String, String]())(req => Map(PATH -> req.path)) else Map()
   }
 }
-
-class AmendCompletionCapacityEvent(regId: String, details: JsObject)(implicit hc: HeaderCarrier)
-  extends RegistrationAuditEvent("completionCapacityAmendment", None, details.++(Json.obj(RegistrationAuditEvent.JOURNEY_ID -> regId)))(hc)

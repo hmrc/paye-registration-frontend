@@ -16,17 +16,23 @@
 
 package services
 
+import audit.{CorrespondenceAddressAuditEvent, CorrespondenceAddressAuditEventDetail}
+import builders.AuthBuilder
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.PAYERegistrationFixture
 import models.{Address, DigitalContactDetails}
-import models.view.{PAYEContact => PAYEContactView, PAYEContactDetails, CompanyDetails => CompanyDetailsView}
+import models.view.{PAYEContactDetails, CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
 import models.api.{PAYEContact => PAYEContactAPI}
+import models.external.{UserDetailsModel, UserIds}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.Format
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.model.AuditEvent
+import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 
 import scala.concurrent.Future
@@ -41,6 +47,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
   val mockS4LService = mock[S4LService]
   val mockCompanyDetailsService = mock[CompanyDetailsService]
   val mockPrepopulationService = mock[PrepopulationService]
+  val mockAuditConnector = mock[AuditConnector]
 
   val returnHttpResponse = HttpResponse(200)
 
@@ -51,6 +58,8 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       val keystoreConnector = mockKeystoreConnector
       val companyDetailsService = mockCompanyDetailsService
       val prepopService = mockPrepopulationService
+      val authConnector = mockAuthConnector
+      val auditConnector = mockAuditConnector
     }
   }
 
@@ -344,7 +353,49 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
-      await(service.saveCorrespondenceAddress("54321", tstCorrespondenceAddress)) shouldBe DownstreamOutcome.Success
+      await(service.submitCorrespondence("54321", tstCorrespondenceAddress)) shouldBe DownstreamOutcome.Success
+    }
+  }
+
+  "Calling auditCorrespondenceAddress" should {
+    implicit val user = AuthBuilder.createTestUser
+
+    val userDetails = UserDetailsModel(
+      "testName",
+      "testEmail",
+      "testAffinityGroup",
+      None,
+      None,
+      None,
+      None,
+      "testAuthProviderId",
+      "testAuthProviderType"
+    )
+
+    val userIds = UserIds(
+      "testInternalId",
+      "testExternalId"
+    )
+
+    val addressUsed = "testAddressUsed"
+
+    val expectedAuditEvent = new CorrespondenceAddressAuditEvent(CorrespondenceAddressAuditEventDetail(
+      "testExternalId",
+      "testAuthProviderId",
+      testRegId,
+      addressUsed
+    ))
+
+    "send an audit event with the correct detail" in new Setup {
+      when(mockAuthConnector.getIds[UserIds](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(userIds))
+
+      when(mockAuthConnector.getUserDetails[UserDetailsModel](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(userDetails))
+
+      val response = await(service.auditCorrespondenceAddress(testRegId, addressUsed))
+      response.auditSource shouldBe "paye-registration-frontend"
+      response.auditType shouldBe "correspondenceAddress"
     }
   }
 }

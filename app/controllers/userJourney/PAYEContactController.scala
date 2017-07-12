@@ -28,11 +28,12 @@ import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import services._
-import uk.gov.hmrc.play.frontend.auth.Actions
+import uk.gov.hmrc.play.frontend.auth.{Actions, AuthContext}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.SessionProfile
 import views.html.pages.payeContact.{correspondenceAddress => PAYECorrespondenceAddressPage, payeContactDetails => PAYEContactDetailsPage}
-import common.exceptions.DownstreamExceptions.S4LFetchException
+import common.exceptions.DownstreamExceptions.{PPOBAddressNotFoundException, S4LFetchException}
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
@@ -144,17 +145,58 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
               val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
               BadRequest(PAYECorrespondenceAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob"), addressMap.get("correspondence"), prepopAddresses))
             },
-            success => success.chosenAddress match {
-              case Other => addressLookupService.buildAddressLookupUrl("payereg2", controllers.userJourney.routes.PAYEContactController.savePAYECorrespondenceAddress()) map {
+            success => submitCorrespondenceAddress(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
+              case DownstreamOutcome.Success => Future.successful(Redirect(controllers.userJourney.routes.SummaryController.summary()))
+              case DownstreamOutcome.Failure => Future.successful(InternalServerError(views.html.pages.error.restart()))
+              case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("payereg2", controllers.userJourney.routes.PAYEContactController.savePAYECorrespondenceAddress()) map {
                 redirectUrl => Redirect(redirectUrl)
-              }
-              case _ => payeContactService.submitCorrespondence(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) map {
-                case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
-                case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
               }
             }
           )
         }
+  }
+
+  private def submitCorrespondenceAddress(regId: String, txId: String, choice: AddressChoice)(implicit user: AuthContext, hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    choice match {
+      case CorrespondenceAddress =>
+        Future.successful(DownstreamOutcome.Success)
+      case ROAddress => submitCorrespondenceWithROAddress(regId, txId)
+      case prepop: PrepopAddress => submitCorrespondenceWithPrepopAddress(regId, prepop)
+      case PPOBAddress => submitCorrespondenceWithPPOBAddress(regId, txId)
+      case Other =>
+        Future.successful(DownstreamOutcome.Redirect)
+    }
+  }
+
+  private def submitCorrespondenceWithROAddress(regId: String, txId: String)(implicit user: AuthContext, hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    for {
+      companyDetails <- companyDetailsService.getCompanyDetails(regId, txId)
+      res <- payeContactService.submitCorrespondence(regId, companyDetails.roAddress)
+      _ <- payeContactService.auditCorrespondenceAddress(regId, "RegisteredOffice")
+    } yield res
+  }
+
+  private def submitCorrespondenceWithPPOBAddress(regId: String, txId: String)(implicit user: AuthContext, hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    (for {
+      companyDetails <- companyDetailsService.getCompanyDetails(regId, txId)
+      res <- payeContactService.submitCorrespondence(regId, companyDetails.ppobAddress.getOrElse(throw new PPOBAddressNotFoundException))
+      _ <- payeContactService.auditCorrespondenceAddress(regId, "PrincipalPlaceOfBusiness")
+    } yield res) recover {
+      case _: PPOBAddressNotFoundException =>
+        Logger.warn(s"[PAYEContactService] [submitCorrespondenceWithPPOBAddress] - Error while saving Correspondence Address with a PPOBAddress which is missing")
+        DownstreamOutcome.Failure
+    }
+  }
+
+  private def submitCorrespondenceWithPrepopAddress(regId: String, prepop: PrepopAddress)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    (for {
+      prepopAddress <- prepopService.getAddress(regId, prepop.index)
+      res <- payeContactService.submitCorrespondence(regId, prepopAddress)
+    } yield res) recover {
+      case e: S4LFetchException =>
+        Logger.warn(s"[PAYEContactService] [submitCorrespondenceWithPrepopAddress] - Error while saving Correspondence Address with a PrepopAddress: ${e.getMessage}")
+        DownstreamOutcome.Failure
+    }
   }
 
   val savePAYECorrespondenceAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
@@ -163,7 +205,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
         withCurrentProfile { profile =>
           for {
             Some(address) <- addressLookupService.getAddress
-            res <- payeContactService.saveCorrespondenceAddress(profile.registrationID, address )
+            res <- payeContactService.submitCorrespondence(profile.registrationID, address )
             _ <- prepopService.saveAddress(profile.registrationID, address)
           } yield res match {
             case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
