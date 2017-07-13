@@ -135,6 +135,12 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
     } yield outcome
   }
 
+  def flattenData(details: DigitalContactDetails): DigitalContactDetails = details.copy(
+    email = details.email map(_.trim.replace(" ", "").toLowerCase),
+    mobileNumber = details.mobileNumber map(_.trim.replace(" ", "").toLowerCase),
+    phoneNumber = details.phoneNumber map(_.trim.replace(" ","").toLowerCase)
+  )
+
   def auditPPOBAddress(regId: String)(implicit user: AuthContext, hc: HeaderCarrier): Future[AuditEvent] = {
     for {
       userIds <- authConnector.getIds[UserIds](user)
