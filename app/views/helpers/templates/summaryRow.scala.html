@@ -6,21 +6,19 @@
     @ans<br>
 }
 
-<tbody>
-    <tr>
-        <td id="@{row.id}Question">@Html(Messages(s"pages.summary.${row.commonQuestionKey.getOrElse(row.id)}.question", row.questionArgs.getOrElse(Nil):_*))</td>
-        <td id="@{row.id}Answer">
-            @for(answer <- row.answers) {
-                @answer.fold(
-                messageKey => Messages(s"pages.summary.${row.id}.answers.$messageKey"),
-                ans => displayAnswer(ans)
-                )
-            }
-        <td>
-            @row.changeLink.map { linkLocation =>
-            <a href="@linkLocation" id="@{row.id}ChangeLink">@Messages("app.common.change")</a>
-            <span class ="visually-hidden" id="@{row.id}HelpText">@Messages(s"pages.summary.${row.id}.hiddenChangeText")</span>
-            }
-        </td>
-    </tr>
-</tbody>
+<tr>
+    <td class="question" id="@{row.id}Question">@Html(Messages(s"pages.summary.${row.commonQuestionKey.getOrElse(row.id)}.question", row.questionArgs.getOrElse(Nil):_*))</td>
+    <td class="answer" id="@{row.id}Answer">
+        @for(answer <- row.answers) {
+            @answer.fold(
+            messageKey => Messages(s"pages.summary.${row.id}.answers.$messageKey"),
+            ans => displayAnswer(ans)
+            )
+        }
+    <td class="change">
+        @row.changeLink.map { linkLocation =>
+        <a href="@linkLocation" id="@{row.id}ChangeLink">@Messages("app.common.change")</a>
+        <span class ="visuallyhidden" id="@{row.id}HelpText">@Messages(s"pages.summary.${row.id}.hiddenChangeText")</span>
+        }
+    </td>
+</tr>

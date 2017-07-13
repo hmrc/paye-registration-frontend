@@ -8,7 +8,8 @@
   mainContent: Html = HtmlFormat.empty,
   serviceInfoContent: Html = HtmlFormat.empty,
   pageScripts: Option[Html] = None,
-  backEnabled : Boolean)(implicit request: Request[_], messages: Messages)
+  backEnabled : Boolean,
+  pageCSS: Option[Html] = None)(implicit request: Request[_], messages: Messages)
 
 @import layouts.{govuk_template => hmrcGovUkTemplate}
 @import uk.gov.hmrc.play.views.html.{helpers => uiHelpers, layouts => uiLayouts}
@@ -20,6 +21,7 @@
       headScripts = None)
     <meta name="format-detection" content="telephone=no" />
     <link rel="stylesheet" href="@routes.Assets.at("stylesheets/paye.css")">
+    @pageCSS
 }
 
 @headerNavLinks = {
