@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
-import enums.DownstreamOutcome
+import enums.{CacheKeys, DownstreamOutcome}
 import forms.companyDetails.{BusinessContactDetailsForm, PPOBForm, TradingNameForm}
 import models.view._
 import play.api.Logger
@@ -131,9 +131,16 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
               details.businessContactDetails match {
                 case Some(bcd) => Future.successful(Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form.fill(bcd))))
                 case _ =>
-                  prepopService.getBusinessContactDetails(profile.registrationID) map {
-                    case Some(prepopBCD) => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form.fill(prepopBCD)))
-                    case _ => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form))
+                  prepopService.getBusinessContactDetails(profile.registrationID) flatMap {
+                    case Some(prepopBCD) => {
+                      s4LService.saveForm[CompanyDetails](
+                        CacheKeys.CompanyDetails.toString,
+                        details.copy(businessContactDetails = Some(prepopBCD)),
+                        profile.registrationID) map {
+                          _ => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form.fill(prepopBCD)))
+                        }
+                    }
+                    case _ => Future.successful(Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form)))
                   }
               }
           }
