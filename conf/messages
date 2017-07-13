@@ -205,71 +205,70 @@ pages.summary.heading                                   = Check and confirm your
 
 
 pages.summary.employees.sectionHeading                  = Employment information
-pages.summary.employees.question                        = Employing staff
+pages.summary.employees.question                        = Over the next 2 months will you pay any staff, including yourself?
 pages.summary.employees.answers.true                    = Yes
 pages.summary.employees.answers.false                   = No
-pages.summary.employees.hiddenChangeText                = Change the company''s employment information
+pages.summary.employees.hiddenChangeText                = whether over the next 2 months you will pay any staff.
 
-pages.summary.companyPension.question                   = Paying out a company pension in the next 2 months
+pages.summary.companyPension.question                   = Will you make pension payments to a former employee or their dependants in the next 2 months?
 pages.summary.companyPension.answers.true               = Yes
 pages.summary.companyPension.answers.false              = No
-pages.summary.companyPension.hiddenChangeText           = Change the company''s pension scheme
+pages.summary.companyPension.hiddenChangeText           = whether you will make pension payments to a former employee or their dependants in the next 2 months.
 
-pages.summary.subcontractors.question                   = Employing subcontractors in the construction industry
+pages.summary.subcontractors.question                   = Will you employ subcontractors in the construction industry?
 pages.summary.subcontractors.answers.true               = Yes
 pages.summary.subcontractors.answers.false              = No
-pages.summary.subcontractors.hiddenChangeText           = Change the company''s subcontractor information
+pages.summary.subcontractors.hiddenChangeText           = whether you will employ subcontractors in the construction industry.
 
-pages.summary.firstPaymentDate.question                 = PAYE scheme start date
-pages.summary.firstPaymentDate.hiddenChangeText         = Change the company''s first payment date
-
+pages.summary.firstPaymentDate.question                 = What do you want your PAYE start date to be?
+pages.summary.firstPaymentDate.hiddenChangeText         = your PAYE start date.
 
 pages.summary.completionCapacity.sectionHeading         = About you
-pages.summary.completionCapacity.question               = Your relationship to the company
+pages.summary.completionCapacity.question               = What is your relationship to the company?
 pages.summary.completionCapacity.answers.director       = Director
 pages.summary.completionCapacity.answers.agent          = Agent
-pages.summary.completionCapacity.hiddenChangeText       = Change your relationship to the business
+pages.summary.completionCapacity.hiddenChangeText       = your relationship to the company.
 
 pages.summary.companyDetails.sectionHeading             = Company information
-pages.summary.tradingName.question                      = Other trading name
+pages.summary.tradingName.question                      = Will your company trade under another name?
 pages.summary.tradingName.answers.noAnswerGiven         = No
-pages.summary.tradingName.hiddenChangeText              = Change the company's trading name
+pages.summary.tradingName.hiddenChangeText              = whether your company will trade under another name.
 
-pages.summary.roAddress.question                        = Registered office address
-pages.summary.ppobAddress.question                      = Principal place of business
-pages.summary.ppobAddress.hiddenChangeText              = Change the company's principal place of business address
+pages.summary.roAddress.question                        = What is your company''s registered office address?
+pages.summary.roAddress.hiddenChangeText                = your company''s registered office address.
+
+pages.summary.ppobAddress.question                      = Where will the company carry out most of its business activities?
+pages.summary.ppobAddress.hiddenChangeText              = where your company will carry out most of its business activities.
 
 pages.summary.businessContactDetails.sectionHeading     = Company contact details
-pages.summary.businessEmail.question                    = Email address
-pages.summary.mobileNumber.question                     = Mobile number
-pages.summary.businessTelephone.question                = Phone number
+pages.summary.businessEmail.question                    = What is the company contact''s email address?
 pages.summary.businessEmail.answers.noAnswerGiven       = '
+pages.summary.businessEmail.hiddenChangeText            = the company contact''s email address.
+pages.summary.mobileNumber.question                     = What is the company contact''s mobile number?
 pages.summary.mobileNumber.answers.noAnswerGiven        = '
+pages.summary.mobileNumber.hiddenChangeText             = the company contact''s mobile number.
+pages.summary.businessTelephone.question                = What is the company contact''s phone number?
 pages.summary.businessTelephone.answers.noAnswerGiven   = '
-pages.summary.businessEmail.hiddenChangeText            = Change the company''s business email
-pages.summary.mobileNumber.hiddenChangeText             = Change the company''s mobile number
-pages.summary.businessTelephone.hiddenChangeText        = Change the company''s business telephone
+pages.summary.businessTelephone.hiddenChangeText        = the company contact''s phone number.
 
-
-
-pages.summary.natureOfBusiness.question                 = Business activities
-pages.summary.natureOfBusiness.hiddenChangeText         = Change the business''s activities
+pages.summary.natureOfBusiness.question                 = What does your company do?
+pages.summary.natureOfBusiness.hiddenChangeText         = what your company does.
 
 pages.summary.directorDetails.sectionHeading            = Director details
 pages.summary.director.question                         = {0}''s National Insurance number
 
 pages.summary.payeContactDetails.sectionHeading         = PAYE contact details
-pages.summary.contactName.question                      = Contact name
-pages.summary.emailPAYEContact.question                 = Email address
-pages.summary.mobileNumberPAYEContact.question          = Mobile number
-pages.summary.phoneNumberPAYEContact.question           = Daytime telephone
-pages.summary.correspondenceAddress.question            = Correspondence address
+pages.summary.contactName.question                      = What is the name of the company''s PAYE contact?
+pages.summary.emailPAYEContact.question                 = What is the email address of the company''s PAYE contact?
+pages.summary.mobileNumberPAYEContact.question          = What is the mobile number of the company''s PAYE contact?
+pages.summary.phoneNumberPAYEContact.question           = What is the phone number of the company''s PAYE contact?
+pages.summary.correspondenceAddress.question            = Where should we send PAYE-related post to?
 
-pages.summary.contactName.hiddenChangeText              = Change the PAYE contact name
-pages.summary.emailPAYEContact.hiddenChangeText         = Change the PAYE contact email address
-pages.summary.mobileNumberPAYEContact.hiddenChangeText  = Change the PAYE contact mobile number
-pages.summary.phoneNumberPAYEContact.hiddenChangeText   = Change the PAYE contact daytime telephone number
-pages.summary.correspondenceAddress.hiddenChangeText    = Change the PAYE contact correspondence address
+pages.summary.contactName.hiddenChangeText              = the name of the company''s PAYE contact.
+pages.summary.emailPAYEContact.hiddenChangeText         = the email address of the company''s PAYE contact.
+pages.summary.mobileNumberPAYEContact.hiddenChangeText  = the mobile number of the company''s PAYE contact.
+pages.summary.phoneNumberPAYEContact.hiddenChangeText   = the phone number of the company''s PAYE contact.
+pages.summary.correspondenceAddress.hiddenChangeText    = where we should send PAYE-related post to.
 
 pages.summary.emailPAYEContact.answers.noAnswerGiven = '
 pages.summary.mobileNumberPAYEContact.answers.noAnswerGiven = '
