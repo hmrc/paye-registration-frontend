@@ -22,7 +22,7 @@ import enums.CacheKeys
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsObject, JsString, Json}
 import play.api.test.FakeApplication
 import play.api.http.HeaderNames
 
@@ -566,8 +566,9 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
   }
 
   "POST PPOB Address" should {
-    "save to microservice with full company details data" in {
+    "save to microservice with full company details data and send Audit Event" in {
       setupSimpleAuthMocks()
+      stubSuccessfulLogin()
 
       stubPayeRegDocumentStatus(regId)
 
@@ -615,10 +616,22 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val captor = crPuts.get(0)
       val json = Json.parse(captor.getBodyAsString)
       (json \ "ppobAddress").as[JsObject].toString() shouldBe roDoc
+
+      val reqPosts = findAll(postRequestedFor(urlMatching(s"/write/audit")))
+      val captorPost = reqPosts.get(0)
+      val jsonAudit = Json.parse(captorPost.getBodyAsString)
+
+      (jsonAudit \ "auditSource").as[JsString].value shouldBe "paye-registration-frontend"
+      (jsonAudit \ "auditType").as[JsString].value shouldBe "registeredOfficeUsedAsPrincipalPlaceOfBusiness"
+      (jsonAudit \ "detail" \ "externalUserId").as[JsString].value shouldBe "Ext-xxx"
+      (jsonAudit \ "detail" \ "authProviderId").as[JsString].value shouldBe "testAuthProviderId"
+      (jsonAudit \ "detail" \ "journeyId").as[JsString].value shouldBe regId
+      (jsonAudit \ "detail" \ "registeredOfficeAddress").as[JsString].value shouldBe "true"
     }
 
-    "save to save for later with incomplete company details data" in {
+    "save to save for later with incomplete company details data and send Audit Event" in {
       setupSimpleAuthMocks()
+      stubSuccessfulLogin()
 
       stubPayeRegDocumentStatus(regId)
 
@@ -657,9 +670,16 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       response.status shouldBe 303
       response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/business-contact-details")
+
+      val reqPosts = findAll(postRequestedFor(urlMatching(s"/write/audit")))
+      val captorPost = reqPosts.get(0)
+      val jsonAudit = Json.parse(captorPost.getBodyAsString)
+
+      (jsonAudit \ "auditSource").as[JsString].value shouldBe "paye-registration-frontend"
+      (jsonAudit \ "auditType").as[JsString].value shouldBe "registeredOfficeUsedAsPrincipalPlaceOfBusiness"
     }
 
-    "save to microservice with full company details data and prepop address" in {
+    "save to microservice with full company details data and prepop address and no Audit Event sent" in {
       val csrfToken = UUID.randomUUID().toString
       val addresses =
         s"""{
@@ -731,6 +751,9 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val json = Json.parse(captor.getBodyAsString)
 
       json shouldBe Json.parse(updatedPayeDoc)
+
+      val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
+      reqPostsAudit.size shouldBe 0
     }
 
     "return an error page when fail saving to microservice with full company details data and prepop address" in {
