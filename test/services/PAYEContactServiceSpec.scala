@@ -25,7 +25,6 @@ import models.{Address, DigitalContactDetails}
 import models.view.{PAYEContactDetails, CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
 import models.api.{PAYEContact => PAYEContactAPI}
 import models.external.{UserDetailsModel, UserIds}
-import models.auth.UserIds
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.{Format, JsObject, Json}
@@ -335,53 +334,33 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
     )
 
     "return true" when {
-      "both data sets match" in new Setup {
-        val dataChanged = service.dataHasNotChanged(Some(s4lData), viewData)
-        dataChanged shouldBe true
-      }
-
-      "data sets contain spaces but the same data" in new Setup {
-        val changedData = viewData.copy(
-          name = "test Name",
-          digitalContactDetails = viewData.digitalContactDetails.copy(
-            email = Some("test@ email.com"),
-            phoneNumber = Some("123 456 7890"),
-            mobileNumber = Some("1234 56789 0")
-          )
-        )
-        val dataChanged = service.dataHasNotChanged(Some(s4lData), service.flattenData(changedData))
-        dataChanged shouldBe true
-      }
-    }
-
-    "return false" when {
       "s4lData is not defined" in new Setup {
-        val dataChanged = service.dataHasNotChanged(None, viewData)
-        dataChanged shouldBe false
+        val dataChanged = service.dataHasNotChanged(viewData, None)
+        dataChanged shouldBe true
       }
 
       "the data sets don't match (name)" in new Setup {
         val changedData = viewData.copy(name = "testName1")
-        val dataChanged = service.dataHasNotChanged(Some(s4lData), changedData)
-        dataChanged shouldBe false
+        val dataChanged = service.dataHasNotChanged(changedData, Some(s4lData))
+        dataChanged shouldBe true
       }
 
       "the data sets don't match (email)" in new Setup {
         val changedData = viewData.copy(digitalContactDetails = viewData.digitalContactDetails.copy(email = Some("test1@email.com")))
-        val dataChanged = service.dataHasNotChanged(Some(s4lData), changedData)
-        dataChanged shouldBe false
+        val dataChanged = service.dataHasNotChanged(changedData, Some(s4lData))
+        dataChanged shouldBe true
       }
 
       "the data sets don't match (phone)" in new Setup {
         val changedData = viewData.copy(digitalContactDetails = viewData.digitalContactDetails.copy(phoneNumber = Some("0987766454321")))
-        val dataChanged = service.dataHasNotChanged(Some(s4lData), changedData)
-        dataChanged shouldBe false
+        val dataChanged = service.dataHasNotChanged(changedData, Some(s4lData))
+        dataChanged shouldBe true
       }
 
       "the data sets don't match (mobile)" in new Setup {
         val changedData = viewData.copy(digitalContactDetails = viewData.digitalContactDetails.copy(mobileNumber = Some("0987766454321")))
-        val dataChanged = service.dataHasNotChanged(Some(s4lData), changedData)
-        dataChanged shouldBe false
+        val dataChanged = service.dataHasNotChanged(changedData, Some(s4lData))
+        dataChanged shouldBe true
       }
 
       "the data sets don't match" in new Setup {
@@ -393,8 +372,8 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
             mobileNumber = Some("124134")
           )
         )
-        val dataChanged = service.dataHasNotChanged(Some(s4lData), changedData)
-        dataChanged shouldBe false
+        val dataChanged = service.dataHasNotChanged(changedData, Some(s4lData))
+        dataChanged shouldBe true
       }
 
       "the data sets don't match (contains Nones)" in new Setup {
@@ -406,7 +385,27 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
             mobileNumber = None
           )
         )
-        val dataChanged = service.dataHasNotChanged(Some(s4lData), changedData)
+        val dataChanged = service.dataHasNotChanged(changedData, Some(s4lData))
+        dataChanged shouldBe true
+      }
+    }
+
+    "return false" when {
+      "both data sets match" in new Setup {
+        val dataChanged = service.dataHasNotChanged(viewData, Some(s4lData))
+        dataChanged shouldBe false
+      }
+
+      "data sets contain spaces but the same data" in new Setup {
+        val changedData = viewData.copy(
+          name = "test Name",
+          digitalContactDetails = viewData.digitalContactDetails.copy(
+            email = Some("test@ email.com"),
+            phoneNumber = Some("123 456 7890"),
+            mobileNumber = Some("1234 56789 0")
+          )
+        )
+        val dataChanged = service.dataHasNotChanged(service.flattenData(changedData), Some(s4lData))
         dataChanged shouldBe false
       }
     }
@@ -440,7 +439,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
       when(mockAuthConnector.getUserDetails[JsObject](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(authProviderId))
 
-      await(service.submitPayeContactDetails(tstContactDetails, Some(tstContactDetails), "54321")) shouldBe DownstreamOutcome.Success
+      await(service.submitPayeContactDetails("12345", tstContactDetails)) shouldBe DownstreamOutcome.Success
     }
 
     "save a copy of paye contact" in new Setup {
@@ -462,7 +461,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
       when(mockAuditConnector.sendEvent(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(AuditResult.Success))
 
-      await(service.submitPayeContactDetails(tstContactDetails, Some(tstContactDetails.copy(name = "t")), "54321")) shouldBe DownstreamOutcome.Success
+      await(service.submitPayeContactDetails("12345", tstContactDetails)) shouldBe DownstreamOutcome.Success
     }
   }
 

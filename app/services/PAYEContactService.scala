@@ -29,7 +29,6 @@ import models.api.{PAYEContact => PAYEContactAPI}
 import enums.DownstreamOutcome
 import models.external.{UserDetailsModel, UserIds}
 import uk.gov.hmrc.play.audit.model.AuditEvent
-import models.auth.UserIds
 import models.view.PAYEContactDetails
 import play.api.libs.json.JsObject
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
@@ -118,24 +117,35 @@ trait PAYEContactSrv  {
     )
   }
 
-  def dataHasNotChanged(s4lData: Option[PAYEContactDetails], viewData: PAYEContactDetails): Boolean = if(s4lData.isDefined) flattenData(viewData) == flattenData(s4lData.get) else false
-
-  def submitPayeContactDetails(viewData: PAYEContactDetails, s4lData: Option[PAYEContactDetails], regId: String)
+  def submitPayeContactDetails(regId: String, viewData: PAYEContactDetails)
                               (implicit hc: HeaderCarrier, authContext: AuthContext): Future[DownstreamOutcome.Value] = {
     for {
       cachedContactData <- getPAYEContact(regId)
+      _                 <- auditPAYEContactDetails(regId, viewData, cachedContactData.contactDetails)
       submitted         <- submitPAYEContact(PAYEContactView(Some(viewData), cachedContactData.correspondenceAddress), regId)
-      ids               <- authConnector.getIds[UserIds](authContext)
-      authId            <- authConnector.getUserDetails[JsObject](authContext)
-      eventDetail       = AmendedPAYEContactDetailsEventDetail(
-        externalUserId = ids.externalId,
-        authProviderId = authId.\("authProviderId").as[String],
-        journeyId = regId,
-        previousPAYEContactDetails = convertPAYEContactViewToAudit(s4lData.get),
-        newPAYEContactDetails = convertPAYEContactViewToAudit(viewData)
-      )
-      _                 <- if(!dataHasNotChanged(s4lData, viewData)) auditConnector.sendEvent(new AmendedPAYEContactDetailsEvent(eventDetail)) else Future.successful(AuditResult.Disabled)
     } yield submitted
+  }
+
+  def dataHasNotChanged(viewData: PAYEContactDetails, s4lData: Option[PAYEContactDetails]): Boolean = if(s4lData.isDefined) flattenData(viewData) != flattenData(s4lData.get) else true
+
+  def auditPAYEContactDetails(regId: String, viewData: PAYEContactDetails, s4lData: Option[PAYEContactDetails])
+                             (implicit authContext: AuthContext, headerCarrier: HeaderCarrier): Future[AuditResult] = {
+    if(!dataHasNotChanged(viewData, s4lData)) {
+      for {
+        ids               <- authConnector.getIds[UserIds](authContext)
+        authId            <- authConnector.getUserDetails[JsObject](authContext)
+        eventDetail       = AmendedPAYEContactDetailsEventDetail(
+          externalUserId             = ids.externalId,
+          authProviderId             = authId.\("authProviderId").as[String],
+          journeyId                  = regId,
+          previousPAYEContactDetails = convertPAYEContactViewToAudit(s4lData.get),
+          newPAYEContactDetails      = convertPAYEContactViewToAudit(viewData)
+        )
+        auditResult       <- auditConnector.sendEvent(new AmendedPAYEContactDetailsEvent(eventDetail))
+      } yield auditResult
+    } else {
+      Future.successful(AuditResult.Disabled)
+    }
   }
 
   def submitCorrespondence(regId: String, correspondenceAddress: Address)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
@@ -157,9 +167,9 @@ trait PAYEContactSrv  {
   }
 
   private[services] def flattenData(data: PAYEContactDetails) = data.copy(name = data.name.trim.replace(" ", ""), digitalContactDetails = data.digitalContactDetails.copy(
-    email         = data.digitalContactDetails.email map(_.trim.replace(" ", "")),
-    phoneNumber   = data.digitalContactDetails.phoneNumber map(_.trim.replace(" ", "")),
-    mobileNumber  = data.digitalContactDetails.mobileNumber map(_.trim.replace(" ", "")))
+    email         = data.digitalContactDetails.email map(_.trim.replace(" ", "").toLowerCase),
+    phoneNumber   = data.digitalContactDetails.phoneNumber map(_.trim.replace(" ", "").toLowerCase),
+    mobileNumber  = data.digitalContactDetails.mobileNumber map(_.trim.replace(" ", "").toLowerCase))
   )
 
   private def convertPAYEContactViewToAudit(viewData: PAYEContactDetails) = AuditPAYEContactDetails(

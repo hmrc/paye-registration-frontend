@@ -50,12 +50,7 @@ trait PrepopulationSrv {
   }
 
   def getPAYEContactDetails(regId: String)(implicit hc: HeaderCarrier): Future[Option[PAYEContactDetails]] = {
-    busRegConnector.retrieveContactDetails(regId) flatMap {
-      case Some(prepopData) => s4LService.saveForm[PAYEContactDetails]("PrepopPAYEContactDetails", prepopData, regId) map {
-        _ => Some(prepopData)
-      }
-      case _ => Future.successful(None)
-    }
+    busRegConnector.retrieveContactDetails(regId)
   }
 
   def saveContactDetails(regId: String, contactDetails: PAYEContactDetails)(implicit hc: HeaderCarrier): Future[PAYEContactDetails] = {

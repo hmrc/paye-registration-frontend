@@ -35,6 +35,7 @@ import services.{AddressLookupService, CompanyDetailsService, PAYEContactService
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import services._
 import testHelpers.PAYERegSpec
+import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -100,6 +101,9 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
       when(mockPrepopService.getPAYEContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(validPAYEContactView.contactDetails)
+
+      when(mockS4LService.saveForm(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
       AuthBuilder.showWithAuthorisedUser(testController.payeContactDetails, mockAuthConnector) {
         (result: Future[Result])  =>
@@ -176,7 +180,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockS4LService.fetchAndGet[PAYEContactDetails](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(testContactDetails)))
 
-      when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       when(mockPrepopService.saveContactDetails(ArgumentMatchers.eq(regId), ArgumentMatchers.any[PAYEContactDetails]())(ArgumentMatchers.any[HeaderCarrier]))
@@ -194,7 +198,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "digitalContact.contactEmail" -> "tata@test.com"
       )
 
-      when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
+      when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       when(mockPrepopService.saveContactDetails(ArgumentMatchers.eq(regId), ArgumentMatchers.any[PAYEContactDetails]())(ArgumentMatchers.any[HeaderCarrier]))

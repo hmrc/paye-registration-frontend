@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
-import enums.DownstreamOutcome
+import enums.{CacheKeys, DownstreamOutcome}
 import forms.payeContactDetails.{CorrespondenceAddressForm, PAYEContactDetailsForm}
 import models.view._
 import play.api.Logger
@@ -72,8 +72,12 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
         withCurrentProfile { profile =>
           for {
             companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-            payeContact <- payeContactService.getPAYEContact(profile.registrationID) flatMap {
-              case PAYEContact(None, _) => prepopService.getPAYEContactDetails(profile.registrationID) map { res => PAYEContact(res, None) }
+            payeContact    <- payeContactService.getPAYEContact(profile.registrationID) flatMap {
+              case PAYEContact(None, addr) => prepopService.getPAYEContactDetails(profile.registrationID) flatMap {
+                res => s4lService.saveForm[PAYEContact](CacheKeys.PAYEContact.toString, PAYEContact(res, addr), profile.registrationID) map {
+                  _ => PAYEContact(res, addr)
+                }
+              }
               case other => Future.successful(other)
             }
           } yield payeContact match {
@@ -93,13 +97,13 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
             success => {
               val trimmed = trimPAYEContactDetails(success)
               for {
-                s4lData <- s4lService.fetchAndGet[PAYEContactDetails]("PrepopPAYEContactDetails", profile.registrationID)
+                s4lData <- s4lService.fetchAndGet[PAYEContact](CacheKeys.PAYEContact.toString, profile.registrationID)
                 _       <- prepopService.saveContactDetails(profile.registrationID, trimmed) map {
                   _ => Logger.info(s"Successfully saved Contact Details to Prepopulation for regId: ${profile.registrationID}")
                 } recover {
                   case _ => Logger.warn(s"Failed to save Contact Details to Prepopulation for regId: ${profile.registrationID}")
                 }
-                submittedResponse <- payeContactService.submitPayeContactDetails(trimmed, s4lData, profile.registrationID)
+                submittedResponse <- payeContactService.submitPayeContactDetails(profile.registrationID, trimmed)
               } yield submittedResponse match {
                 case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
                 case DownstreamOutcome.Success => Redirect(routes.PAYEContactController.payeCorrespondenceAddress())

@@ -77,6 +77,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, dummyS4LResponse)
 
       val response = await(buildClient("/who-should-we-contact")
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
@@ -117,6 +118,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/PrepopPAYEContactDetails", 200, dummyS4LResponse)
       stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
       stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, dummyS4LResponse)
 
       val response = await(buildClient("/who-should-we-contact")
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
