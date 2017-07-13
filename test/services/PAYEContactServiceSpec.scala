@@ -31,7 +31,7 @@ import org.mockito.Mockito.when
 import play.api.libs.json.{Format, JsObject, Json}
 import testHelpers.{AuthHelpers, PAYERegSpec}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 
 import scala.concurrent.Future
@@ -423,7 +423,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
       )
     )
 
-    "save a copy of paye contact" in new Setup {
+    "save a copy of paye contact (no audit)" in new Setup {
       implicit val context = buildAuthContext
 
       val testUserIds = UserIds(internalId = "int-12345", externalId = "ext-12345")
@@ -441,6 +441,28 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
         .thenReturn(Future.successful(authProviderId))
 
       await(service.submitPayeContactDetails(tstContactDetails, Some(tstContactDetails), "54321")) shouldBe DownstreamOutcome.Success
+    }
+
+    "save a copy of paye contact" in new Setup {
+      implicit val context = buildAuthContext
+
+      val testUserIds = UserIds(internalId = "int-12345", externalId = "ext-12345")
+      val authProviderId = Json.obj(
+        "authProviderId" -> "ap-12345"
+      )
+
+      when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[PAYEContactView]]()))
+        .thenReturn(Future.successful(Some(PAYEContactView(None, None))))
+      when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
+      when(mockAuthConnector.getIds[UserIds](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(testUserIds))
+      when(mockAuthConnector.getUserDetails[JsObject](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(authProviderId))
+      when(mockAuditConnector.sendEvent(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(AuditResult.Success))
+
+      await(service.submitPayeContactDetails(tstContactDetails, Some(tstContactDetails.copy(name = "t")), "54321")) shouldBe DownstreamOutcome.Success
     }
   }
 

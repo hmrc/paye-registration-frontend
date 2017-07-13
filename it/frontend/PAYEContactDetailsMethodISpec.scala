@@ -109,11 +109,13 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
            |}
          """.stripMargin
 
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+
       stubGet(s"/paye-registration/$regId/company-details", 404, "")
       stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")
       stubGet(s"/business-registration/$regId/contact-details", 200, validPrepopResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/PrepopPAYEContactDetails", 200, dummyS4LResponse)
       stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
-      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
 
       val response = await(buildClient("/who-should-we-contact")
@@ -178,6 +180,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
       stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, dummyS4LResponse)
+      stubGet(s"/save4later/paye-registration-frontend/${regId}/data/PrepopPAYEContactDetails", 200, updatedContactDetail)
       stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
       stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
 

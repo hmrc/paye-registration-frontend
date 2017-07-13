@@ -94,7 +94,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
               val trimmed = trimPAYEContactDetails(success)
               for {
                 s4lData <- s4lService.fetchAndGet[PAYEContactDetails]("PrepopPAYEContactDetails", profile.registrationID)
-                _             <- prepopService.saveContactDetails(profile.registrationID, trimmed) map {
+                _       <- prepopService.saveContactDetails(profile.registrationID, trimmed) map {
                   _ => Logger.info(s"Successfully saved Contact Details to Prepopulation for regId: ${profile.registrationID}")
                 } recover {
                   case _ => Logger.warn(s"Failed to save Contact Details to Prepopulation for regId: ${profile.registrationID}")

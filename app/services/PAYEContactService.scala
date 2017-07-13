@@ -134,7 +134,7 @@ trait PAYEContactSrv  {
         previousPAYEContactDetails = convertPAYEContactViewToAudit(s4lData.get),
         newPAYEContactDetails = convertPAYEContactViewToAudit(viewData)
       )
-      _                 <- if(dataHasNotChanged(s4lData, viewData)) auditConnector.sendEvent(new AmendedPAYEContactDetailsEvent(eventDetail)) else Future.successful(AuditResult.Disabled)
+      _                 <- if(!dataHasNotChanged(s4lData, viewData)) auditConnector.sendEvent(new AmendedPAYEContactDetailsEvent(eventDetail)) else Future.successful(AuditResult.Disabled)
     } yield submitted
   }
 

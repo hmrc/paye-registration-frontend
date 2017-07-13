@@ -21,7 +21,7 @@ import builders.AuthBuilder
 import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
 import fixtures.{PAYERegistrationFixture, S4LFixture}
-import models.Address
+import models.{Address, DigitalContactDetails}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import models.view.PAYEContactDetails
 import org.mockito.ArgumentMatchers
@@ -163,6 +163,18 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "name" -> "tata",
         "digitalContact.contactEmail" -> "tata@test.com"
       )
+
+      val testContactDetails = PAYEContactDetails(
+        name = "tata",
+        digitalContactDetails = DigitalContactDetails(
+          email = Some("tata@test.com"),
+          mobileNumber = None,
+          phoneNumber = None
+        )
+      )
+
+      when(mockS4LService.fetchAndGet[PAYEContactDetails](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(testContactDetails)))
 
       when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
