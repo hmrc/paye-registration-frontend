@@ -166,7 +166,7 @@ trait PAYEContactSrv  {
     }
   }
 
-  private[services] def flattenData(data: PAYEContactDetails) = data.copy(name = data.name.trim.replace(" ", ""), digitalContactDetails = data.digitalContactDetails.copy(
+  private[services] def flattenData(data: PAYEContactDetails) = data.copy(name = data.name.trim.replace(" ", "").toLowerCase, digitalContactDetails = data.digitalContactDetails.copy(
     email         = data.digitalContactDetails.email map(_.trim.replace(" ", "").toLowerCase),
     phoneNumber   = data.digitalContactDetails.phoneNumber map(_.trim.replace(" ", "").toLowerCase),
     mobileNumber  = data.digitalContactDetails.mobileNumber map(_.trim.replace(" ", "").toLowerCase))
