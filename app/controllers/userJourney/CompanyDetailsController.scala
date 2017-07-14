@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
-import enums.DownstreamOutcome
+import enums.{CacheKeys, DownstreamOutcome}
 import forms.companyDetails.{BusinessContactDetailsForm, PPOBForm, TradingNameForm}
 import models.view._
 import play.api.Logger
@@ -34,6 +34,7 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.SessionProfile
 import views.html.pages.companyDetails.{confirmROAddress, businessContactDetails => BusinessContactDetailsPage, ppobAddress => PPOBAddressPage, tradingName => TradingNamePage}
 import common.exceptions.DownstreamExceptions.S4LFetchException
+import models.external.CurrentProfile
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -127,17 +128,23 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
       implicit request =>
         withCurrentProfile { profile =>
           companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) flatMap {
-            details =>
-              details.businessContactDetails match {
-                case Some(bcd) => Future.successful(Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form.fill(bcd))))
-                case _ =>
-                  prepopService.getBusinessContactDetails(profile.registrationID) map {
-                    case Some(prepopBCD) => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form.fill(prepopBCD)))
-                    case _ => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form))
-                  }
-              }
+            details => details.businessContactDetails match {
+              case Some(bcd) => Future.successful(Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form.fill(bcd))))
+              case None      => prepopAndShowBusinessContactDetails(profile, details)
+            }
           }
         }
+  }
+
+  def prepopAndShowBusinessContactDetails(profile: CurrentProfile, details: CompanyDetails)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
+    prepopService.getBusinessContactDetails(profile.registrationID) flatMap {
+      case Some(prepopBCD) =>
+        val copiedDetails = details.copy(businessContactDetails = Some(prepopBCD))
+        s4LService.saveForm[CompanyDetails](CacheKeys.CompanyDetails.toString, copiedDetails, profile.registrationID) map {
+          _ => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form.fill(prepopBCD)))
+        }
+      case _ => Future.successful(Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form)))
+    }
   }
 
   val submitBusinessContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
@@ -145,15 +152,11 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
       implicit request =>
         withCurrentProfile { profile =>
           BusinessContactDetailsForm.form.bindFromRequest.fold(
-            errs => companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map (
-                      details => BadRequest(BusinessContactDetailsPage(details.companyName, errs))
-                    ),
+            errs => companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+              details => BadRequest(BusinessContactDetailsPage(details.companyName, errs))
+            },
             success => {
-              val trimmed = success.copy(
-                email = success.email map(_.trim),
-                phoneNumber = success.phoneNumber map(_.trim),
-                mobileNumber = success.mobileNumber map(_.trim)
-              )
+              val trimmed = success.copy(email = success.email map(_.trim), phoneNumber = success.phoneNumber map(_.trim), mobileNumber = success.mobileNumber map(_.trim))
               companyDetailsService.submitBusinessContact(trimmed, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
                 case DownstreamOutcome.Success => Redirect(routes.NatureOfBusinessController.natureOfBusiness())
                 case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())

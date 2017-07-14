@@ -16,6 +16,7 @@
 
 package services
 
+import builders.AuthBuilder
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, PAYERegistrationFixture, S4LFixture}
@@ -45,6 +46,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   val mockAuditConnector = mock[AuditConnector]
 
   val returnHttpResponse = HttpResponse(200)
+
+  implicit val testContext = AuthBuilder.createTestUser
 
   class Setup {
     val service = new CompanyDetailsSrv {
