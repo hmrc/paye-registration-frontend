@@ -74,13 +74,6 @@ trait PAYEContactSrv  {
     s4LService.saveForm[PAYEContactView](CacheKeys.PAYEContact.toString, viewData, regId).map(_ => viewData)
   }
 
-  private[services] def convertOrCreatePAYEContactView(oAPI: Option[PAYEContactAPI])(implicit hc: HeaderCarrier): PAYEContactView = {
-    oAPI match {
-      case Some(detailsAPI) => apiToView(detailsAPI)
-      case None => PAYEContactView(None, None)
-    }
-  }
-
   def getCorrespondenceAddresses(correspondenceAddress: Option[Address], companyDetails: CompanyDetailsView): Map[String, Address] = {
     correspondenceAddress map {
       case address@companyDetails.roAddress if companyDetails.ppobAddress.contains(companyDetails.roAddress) => Map("correspondence" -> address)
