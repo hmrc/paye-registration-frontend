@@ -10,14 +10,6 @@
     )
     <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.directorEligibility.heading")</h1>
 
-    <div class="spaced-below">
-        <p>@Messages("pages.directorEligibility.headList")</p>
-        <ul class="list list-bullet">
-            <li>@Messages("pages.directorEligibility.list1")</li>
-            <li>@Messages("pages.directorEligibility.list2")</li>
-        </ul>
-    </div>
-
     @govHelpers.form(action = controllers.userJourney.routes.EligibilityController.submitDirectorEligibility()) {
         <div class="inline form-group">
         @payeInputRadioGroup(
