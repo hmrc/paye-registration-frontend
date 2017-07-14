@@ -129,7 +129,7 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
     } yield outcome
   }
 
-  def submitBusinessContact(businessContact: DigitalContactDetails, regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def submitBusinessContact(businessContact: DigitalContactDetails, regId: String, txId: String)(implicit hc: HeaderCarrier, authContext: AuthContext): Future[DownstreamOutcome.Value] = {
     for {
       details <- getCompanyDetails(regId, txId)
       _       <- auditBusinessContactDetails(regId,businessContact,details.businessContactDetails)
@@ -144,9 +144,9 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
         ids               <- authConnector.getIds[UserIds](authContext)
         authId            <- authConnector.getUserDetails[JsObject](authContext)
         eventDetail       = AmendedBusinessContactDetailsEventDetail(
-          externalUserId             = ids.externalId,
-          authProviderId             = authId.\("authProviderId").as[String],
-          journeyId                  = regId,
+          externalUserId         = ids.externalId,
+          authProviderId         = authId.\("authProviderId").as[String],
+          journeyId              = regId,
           previousContactDetails = convertBusinessContactViewToAudit(s4lData.get),
           newContactDetails      = convertBusinessContactViewToAudit(viewData)
         )
