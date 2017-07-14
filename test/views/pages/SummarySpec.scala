@@ -371,4 +371,35 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
       document.getElementById(s"director1$suffixIdChangeLink").attr("href") shouldBe controllers.userJourney.routes.DirectorDetailsController.directorDetails().toString
     }
   }
+
+  "The summary page, each section" should {
+    lazy val summaryModelCompletionCapacity: Summary = Summary(
+      Seq(
+        SummarySection(
+          id = "completionCapacity",
+          Seq(
+            SummaryRow(
+              id ="completionCapacity",
+              answers = List(Left("director")),
+              changeLink = Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+            )
+          )
+        )
+      )
+    )
+
+    lazy val view = summary(summaryModelCompletionCapacity)
+    lazy val document = Jsoup.parse(view.body)
+
+    "have a hidden table header with correct header texts" in {
+      val thead = document.getElementById(s"completionCapacityTable").child(1)
+      val listTHs = thead.child(0).children
+
+      thead.attr("class") shouldBe "visuallyhidden"
+      listTHs.size shouldBe 3
+      listTHs.get(0).text shouldBe "We asked for"
+      listTHs.get(1).text shouldBe "You answered"
+      listTHs.get(2).text shouldBe "Change your answer"
+    }
+  }
 }

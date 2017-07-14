@@ -8,7 +8,7 @@
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.summary.heading")</h1>
 
     @for(section <- summaryModel.sections) {
-        <table class="check-your-answers multiple-sections">
+        <table class="check-your-answers multiple-sections" id="@{section.id}Table">
             <caption class="heading-medium" id="@{section.id}SectionHeading">@Messages(s"pages.summary.${section.id}.sectionHeading")</caption>
             <thead class="visuallyhidden">
                 <tr>
