@@ -47,7 +47,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
   val mockAddressLookupService = mock[AddressLookupService]
   val mockMessagesApi = mock[MessagesApi]
   val mockPrepopService = mock[PrepopulationService]
-  val mockS4LService = mock[S4LService]
 
   val regId = "12345"
 
@@ -61,7 +60,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val authConnector = mockAuthConnector
       override val payeRegistrationConnector = mockPayeRegistrationConnector
       override val prepopService = mockPrepopService
-      override val s4lService = mockS4LService
 
       override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(CurrentProfile(
@@ -98,12 +96,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
       when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(emptyPAYEContactView)
-
-      when(mockPrepopService.getPAYEContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(validPAYEContactView.contactDetails)
-
-      when(mockS4LService.saveForm(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
       AuthBuilder.showWithAuthorisedUser(testController.payeContactDetails, mockAuthConnector) {
         (result: Future[Result])  =>
@@ -168,23 +160,8 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "digitalContact.contactEmail" -> "tata@test.com"
       )
 
-      val testContactDetails = PAYEContactDetails(
-        name = "tata",
-        digitalContactDetails = DigitalContactDetails(
-          email = Some("tata@test.com"),
-          mobileNumber = None,
-          phoneNumber = None
-        )
-      )
-
-      when(mockS4LService.fetchAndGet[PAYEContactDetails](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(testContactDetails)))
-
       when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
-
-      when(mockPrepopService.saveContactDetails(ArgumentMatchers.eq(regId), ArgumentMatchers.any[PAYEContactDetails]())(ArgumentMatchers.any[HeaderCarrier]))
-        .thenReturn(Future.successful(validPAYEContactDetails))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYEContactDetails, mockAuthConnector, request) {
         result =>

@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
-import enums.{CacheKeys, DownstreamOutcome}
+import enums.DownstreamOutcome
 import forms.payeContactDetails.{CorrespondenceAddressForm, PAYEContactDetailsForm}
 import models.view._
 import play.api.Logger
@@ -44,8 +44,7 @@ class PAYEContactController @Inject()(injCompanyDetailsService: CompanyDetailsSe
                                       injKeystoreConnector: KeystoreConnector,
                                       injPayeRegistrationConnector: PAYERegistrationConnector,
                                       injMessagesApi: MessagesApi,
-                                      injPrepopulationService: PrepopulationService,
-                                      injS4lService: S4LService) extends PAYEContactCtrl {
+                                      injPrepopulationService: PrepopulationService) extends PAYEContactCtrl {
   val authConnector = FrontendAuthConnector
   val companyDetailsService = injCompanyDetailsService
   val payeContactService = injPAYEContactService
@@ -54,7 +53,6 @@ class PAYEContactController @Inject()(injCompanyDetailsService: CompanyDetailsSe
   val messagesApi = injMessagesApi
   val payeRegistrationConnector = injPayeRegistrationConnector
   val prepopService = injPrepopulationService
-  val s4lService = injS4lService
 }
 
 trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
@@ -64,7 +62,6 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
   val addressLookupService: AddressLookupSrv
   val keystoreConnector: KeystoreConnect
   val prepopService: PrepopulationSrv
-  val s4lService: S4LSrv
 
   val payeContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
@@ -72,14 +69,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
         withCurrentProfile { profile =>
           for {
             companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-            payeContact    <- payeContactService.getPAYEContact(profile.registrationID) flatMap {
-              case PAYEContact(None, addr) => prepopService.getPAYEContactDetails(profile.registrationID) flatMap {
-                res => s4lService.saveForm[PAYEContact](CacheKeys.PAYEContact.toString, PAYEContact(res, addr), profile.registrationID) map {
-                  _ => PAYEContact(res, addr)
-                }
-              }
-              case other => Future.successful(other)
-            }
+            payeContact    <- payeContactService.getPAYEContact(profile.registrationID)
           } yield payeContact match {
             case PAYEContact(Some(contactDetails), _) => Ok(PAYEContactDetailsPage(companyDetails.companyName, PAYEContactDetailsForm.form.fill(contactDetails)))
             case _ => Ok(PAYEContactDetailsPage(companyDetails.companyName, PAYEContactDetailsForm.form))
@@ -96,15 +86,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
               .map (details => BadRequest(PAYEContactDetailsPage(details.companyName, errs))),
             success => {
               val trimmed = trimPAYEContactDetails(success)
-              for {
-                s4lData <- s4lService.fetchAndGet[PAYEContact](CacheKeys.PAYEContact.toString, profile.registrationID)
-                _       <- prepopService.saveContactDetails(profile.registrationID, trimmed) map {
-                  _ => Logger.info(s"Successfully saved Contact Details to Prepopulation for regId: ${profile.registrationID}")
-                } recover {
-                  case _ => Logger.warn(s"Failed to save Contact Details to Prepopulation for regId: ${profile.registrationID}")
-                }
-                submittedResponse <- payeContactService.submitPayeContactDetails(profile.registrationID, trimmed)
-              } yield submittedResponse match {
+              payeContactService.submitPayeContactDetails(profile.registrationID, trimmed) map {
                 case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
                 case DownstreamOutcome.Success => Redirect(routes.PAYEContactController.payeCorrespondenceAddress())
               }
