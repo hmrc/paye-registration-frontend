@@ -38,15 +38,13 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 
 @Singleton
-class PAYEContactController @Inject()(
-                                       injCompanyDetailsService: CompanyDetailsService,
-                                       injPAYEContactService: PAYEContactService,
-                                       injAddressLookupService: AddressLookupService,
-                                       injKeystoreConnector: KeystoreConnector,
-                                       injPayeRegistrationConnector: PAYERegistrationConnector,
-                                       injMessagesApi: MessagesApi,
-                                       injPrepopulationService: PrepopulationService)
-  extends PAYEContactCtrl {
+class PAYEContactController @Inject()(injCompanyDetailsService: CompanyDetailsService,
+                                      injPAYEContactService: PAYEContactService,
+                                      injAddressLookupService: AddressLookupService,
+                                      injKeystoreConnector: KeystoreConnector,
+                                      injPayeRegistrationConnector: PAYERegistrationConnector,
+                                      injMessagesApi: MessagesApi,
+                                      injPrepopulationService: PrepopulationService) extends PAYEContactCtrl {
   val authConnector = FrontendAuthConnector
   val companyDetailsService = injCompanyDetailsService
   val payeContactService = injPAYEContactService
@@ -71,10 +69,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
         withCurrentProfile { profile =>
           for {
             companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-            payeContact <- payeContactService.getPAYEContact(profile.registrationID) flatMap {
-              case PAYEContact(None, _) => prepopService.getPAYEContactDetails(profile.registrationID) map { res => PAYEContact(res, None) }
-              case other => Future.successful(other)
-            }
+            payeContact    <- payeContactService.getPAYEContact(profile.registrationID)
           } yield payeContact match {
             case PAYEContact(Some(contactDetails), _) => Ok(PAYEContactDetailsPage(companyDetails.companyName, PAYEContactDetailsForm.form.fill(contactDetails)))
             case _ => Ok(PAYEContactDetailsPage(companyDetails.companyName, PAYEContactDetailsForm.form))
@@ -90,21 +85,8 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
             errs => companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
               .map (details => BadRequest(PAYEContactDetailsPage(details.companyName, errs))),
             success => {
-              val trimmed = success.copy(
-                digitalContactDetails = success.digitalContactDetails.copy(
-                  email         = success.digitalContactDetails.email map(_.trim),
-                  phoneNumber   = success.digitalContactDetails.phoneNumber map(_.trim),
-                  mobileNumber  = success.digitalContactDetails.mobileNumber map(_.trim)
-                )
-              )
-
-              prepopService.saveContactDetails(profile.registrationID, trimmed) map {
-                _ => Logger.info(s"Successfully saved Contact Details to Prepopulation for regId: ${profile.registrationID}")
-              } recover {
-                case _ => Logger.warn(s"Failed to save Contact Details to Prepopulation for regId: ${profile.registrationID}")
-              }
-
-              payeContactService.submitPayeContactDetails(trimmed, profile.registrationID) map {
+              val trimmed = trimPAYEContactDetails(success)
+              payeContactService.submitPayeContactDetails(profile.registrationID, trimmed) map {
                 case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
                 case DownstreamOutcome.Success => Redirect(routes.PAYEContactController.payeCorrespondenceAddress())
               }
@@ -213,4 +195,12 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
           }
         }
   }
+
+  private def trimPAYEContactDetails(details: PAYEContactDetails) = details.copy(
+    digitalContactDetails = details.digitalContactDetails.copy(
+      email         = details.digitalContactDetails.email map(_.trim),
+      phoneNumber   = details.digitalContactDetails.phoneNumber map(_.trim),
+      mobileNumber  = details.digitalContactDetails.mobileNumber map(_.trim)
+    )
+  )
 }

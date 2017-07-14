@@ -19,16 +19,19 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import audit.{CorrespondenceAddressAuditEvent, CorrespondenceAddressAuditEventDetail}
-import config.{FrontendAuditConnector, FrontendAuthConnector}
 import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
+import audit.{AmendedPAYEContactDetailsEvent, AmendedPAYEContactDetailsEventDetail, AuditPAYEContactDetails}
+import config.{FrontendAuditConnector, FrontendAuthConnector}
 import enums.CacheKeys
 import models.Address
 import models.view.{PAYEContactDetails, CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
 import models.api.{PAYEContact => PAYEContactAPI}
 import enums.DownstreamOutcome
 import models.external.{UserDetailsModel, UserIds}
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import play.api.Logger
 import uk.gov.hmrc.play.audit.model.AuditEvent
+import play.api.libs.json.JsObject
+import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -71,13 +74,6 @@ trait PAYEContactSrv  {
     s4LService.saveForm[PAYEContactView](CacheKeys.PAYEContact.toString, viewData, regId).map(_ => viewData)
   }
 
-  private[services] def convertOrCreatePAYEContactView(oAPI: Option[PAYEContactAPI])(implicit hc: HeaderCarrier): PAYEContactView = {
-    oAPI match {
-      case Some(detailsAPI) => apiToView(detailsAPI)
-      case None => PAYEContactView(None, None)
-    }
-  }
-
   def getCorrespondenceAddresses(correspondenceAddress: Option[Address], companyDetails: CompanyDetailsView): Map[String, Address] = {
     correspondenceAddress map {
       case address@companyDetails.roAddress if companyDetails.ppobAddress.contains(companyDetails.roAddress) => Map("correspondence" -> address)
@@ -96,10 +92,21 @@ trait PAYEContactSrv  {
   def getPAYEContact(regId: String)(implicit hc: HeaderCarrier): Future[PAYEContactView] = {
     s4LService.fetchAndGet[PAYEContactView](CacheKeys.PAYEContact.toString, regId) flatMap {
       case Some(contactDetails) => Future.successful(contactDetails)
-      case None => for {
-        oDetails <- payeRegConnector.getPAYEContact(regId)
-      } yield convertOrCreatePAYEContactView(oDetails)
+      case None => getPAYEContactView(regId)
     }
+  }
+
+  private[services] def getPAYEContactView(regId: String)(implicit hc: HeaderCarrier): Future[PAYEContactView] = {
+    for {
+      view <- payeRegConnector.getPAYEContact(regId) flatMap {
+        case Some(payeRegContactDetails) => Future.successful(apiToView(payeRegContactDetails))
+        case None => prepopService.getPAYEContactDetails(regId) flatMap {
+          case Some(prepopContactDetails) => Future.successful(PAYEContactView(Some(prepopContactDetails), None))
+          case None => Future.successful(PAYEContactView(None, None))
+        }
+      }
+      _ <- s4LService.saveForm[PAYEContactView](CacheKeys.PAYEContact.toString, view, regId)
+    } yield view
   }
 
   def submitPAYEContact(viewModel: PAYEContactView, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
@@ -114,10 +121,50 @@ trait PAYEContactSrv  {
     )
   }
 
-  def submitPayeContactDetails(viewData: PAYEContactDetails, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    getPAYEContact(regId) flatMap {
-      data => submitPAYEContact(PAYEContactView(Some(viewData), data.correspondenceAddress), regId)
-    }
+  def submitPayeContactDetails(regId: String, newViewData: PAYEContactDetails)
+                              (implicit hc: HeaderCarrier, authContext: AuthContext): Future[DownstreamOutcome.Value] = {
+    for {
+      cachedContactData <- getPAYEContact(regId) flatMap {
+        case currentView if currentView.contactDetails.isEmpty && currentView.correspondenceAddress.isEmpty =>
+          Future.successful(currentView)
+        case currentView if dataHasChanged(newViewData, currentView.contactDetails) =>
+          for {
+            _ <- auditPAYEContactDetails(regId, newViewData, currentView.contactDetails)
+            _ <- prepopService.saveContactDetails(regId, newViewData) map {
+              _ => Logger.info(s"[PAYEContactService] [submitPayeContactDetails] Successfully saved Contact Details to Prepopulation for regId: $regId")
+            }
+          } yield currentView
+        case currentView =>
+          Future.successful(currentView)
+      }
+      submitted <- submitPAYEContact(PAYEContactView(Some(newViewData), cachedContactData.correspondenceAddress), regId)
+    } yield submitted
+  }
+
+  def dataHasChanged(viewData: PAYEContactDetails, s4lData: Option[PAYEContactDetails]): Boolean = s4lData.exists(flattenData(viewData) != flattenData(_))
+
+  def auditPAYEContactDetails(regId: String, viewData: PAYEContactDetails, s4lData: Option[PAYEContactDetails])
+                             (implicit authContext: AuthContext, headerCarrier: HeaderCarrier): Future[AuditResult] = {
+
+    def convertPAYEContactViewToAudit(viewData: PAYEContactDetails) = AuditPAYEContactDetails(
+      contactName   = viewData.name,
+      email         = viewData.digitalContactDetails.email,
+      mobileNumber  = viewData.digitalContactDetails.mobileNumber,
+      phoneNumber   = viewData.digitalContactDetails.phoneNumber
+    )
+
+    for {
+      ids               <- authConnector.getIds[UserIds](authContext)
+      authId            <- authConnector.getUserDetails[JsObject](authContext)
+      eventDetail       = AmendedPAYEContactDetailsEventDetail(
+        externalUserId             = ids.externalId,
+        authProviderId             = authId.\("authProviderId").as[String],
+        journeyId                  = regId,
+        previousPAYEContactDetails = convertPAYEContactViewToAudit(s4lData.get),
+        newPAYEContactDetails      = convertPAYEContactViewToAudit(viewData)
+      )
+      auditResult       <- auditConnector.sendEvent(new AmendedPAYEContactDetailsEvent(eventDetail))
+    } yield auditResult
   }
 
   def submitCorrespondence(regId: String, correspondenceAddress: Address)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
@@ -137,5 +184,11 @@ trait PAYEContactSrv  {
       event
     }
   }
+
+  private[services] def flattenData(data: PAYEContactDetails) = data.copy(name = data.name.trim.replace(" ", "").toLowerCase, digitalContactDetails = data.digitalContactDetails.copy(
+    email         = data.digitalContactDetails.email map(_.trim.replace(" ", "").toLowerCase),
+    phoneNumber   = data.digitalContactDetails.phoneNumber map(_.trim.replace(" ", "").toLowerCase),
+    mobileNumber  = data.digitalContactDetails.mobileNumber map(_.trim.replace(" ", "").toLowerCase))
+  )
 }
 

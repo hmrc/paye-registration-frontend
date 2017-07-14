@@ -21,9 +21,9 @@ import builders.AuthBuilder
 import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
 import fixtures.{PAYERegistrationFixture, S4LFixture}
-import models.Address
+import models.{Address, DigitalContactDetails}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
-import models.view.{AddressChoice, PAYEContactDetails}
+import models.view.PAYEContactDetails
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.http.Status
@@ -32,8 +32,10 @@ import play.api.mvc.{Call, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.{AddressLookupService, CompanyDetailsService, PAYEContactService, PrepopulationService}
-import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.frontend.auth.AuthContext
+import services._
+import testHelpers.PAYERegSpec
+import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -94,9 +96,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
       when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(emptyPAYEContactView)
-
-      when(mockPrepopService.getPAYEContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(validPAYEContactView.contactDetails)
 
       AuthBuilder.showWithAuthorisedUser(testController.payeContactDetails, mockAuthConnector) {
         (result: Future[Result])  =>
@@ -161,11 +160,8 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "digitalContact.contactEmail" -> "tata@test.com"
       )
 
-      when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
-
-      when(mockPrepopService.saveContactDetails(ArgumentMatchers.eq(regId), ArgumentMatchers.any[PAYEContactDetails]())(ArgumentMatchers.any[HeaderCarrier]))
-        .thenReturn(Future.successful(validPAYEContactDetails))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYEContactDetails, mockAuthConnector, request) {
         result =>
@@ -179,7 +175,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "digitalContact.contactEmail" -> "tata@test.com"
       )
 
-      when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       when(mockPrepopService.saveContactDetails(ArgumentMatchers.eq(regId), ArgumentMatchers.any[PAYEContactDetails]())(ArgumentMatchers.any[HeaderCarrier]))

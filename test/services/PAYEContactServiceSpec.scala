@@ -27,17 +27,15 @@ import models.api.{PAYEContact => PAYEContactAPI}
 import models.external.{UserDetailsModel, UserIds}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import play.api.libs.json.Format
-import testHelpers.PAYERegSpec
+import play.api.libs.json.{Format, JsObject, Json}
+import testHelpers.{AuthHelpers, PAYERegSpec}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.audit.model.AuditEvent
-import uk.gov.hmrc.play.frontend.auth.AuthContext
+import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 
 import scala.concurrent.Future
 
-class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
+class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture with AuthHelpers {
   implicit val hc = HeaderCarrier()
 
   val mockPAYERegConnector = mock[PAYERegistrationConnector]
@@ -244,22 +242,18 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
 
       await(service.getPAYEContact(testRegId)) shouldBe validPAYEContactView
     }
+
     "return the correct View response when PAYE Contact are returned from the connector" in new Setup {
       when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(None))
       when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(Some(validPAYEContactAPI)))
 
+      when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.anyString())
+        (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[PAYEContactView]]()))
+        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
+
       await(service.getPAYEContact(testRegId)) shouldBe validPAYEContactView
-    }
-
-    "return None when no PAYE Contact are returned from the connector" in new Setup {
-      when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-      .thenReturn(Future.successful(None))
-      when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-      .thenReturn(Future.successful(None))
-
-      await(service.getPAYEContact(testRegId)) shouldBe emptyPAYEContactView
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
@@ -276,6 +270,37 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       an[Exception] shouldBe thrownBy(await(service.getPAYEContact(testRegId)))
     }
 
+    "return the correct View response when PAYE Contact are returned from Prepopulation" in new Setup {
+      when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(None))
+      when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(None))
+
+      when(mockPrepopulationService.getPAYEContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(validPAYEContactView.contactDetails))
+
+      when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.anyString())
+        (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[PAYEContactView]]()))
+        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
+
+      await(service.getPAYEContact(testRegId)) shouldBe validPAYEContactView.copy(correspondenceAddress = None)
+    }
+
+    "return None when no PAYE Contact are returned from the connector and Prepopulation" in new Setup {
+      when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(None))
+      when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(None))
+
+      when(mockPrepopulationService.getPAYEContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(None))
+
+      when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.anyString())
+        (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[PAYEContactView]]()))
+        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
+
+      await(service.getPAYEContact(testRegId)) shouldBe emptyPAYEContactView
+    }
   }
 
   "Calling submitPAYEContact" should {
@@ -316,6 +341,103 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
     }
   }
 
+  "dataChanged" should {
+    val viewData = PAYEContactDetails(
+      name = "testName",
+      digitalContactDetails = DigitalContactDetails(
+        email         = Some("test@email.com"),
+        phoneNumber   = Some("1234567890"),
+        mobileNumber  = Some("1234567890")
+      )
+    )
+
+    val s4lData = PAYEContactDetails(
+      name = "testName",
+      digitalContactDetails = DigitalContactDetails(
+        email         = Some("test@email.com"),
+        phoneNumber   = Some("1234567890"),
+        mobileNumber  = Some("1234567890")
+      )
+    )
+
+    "return true" when {
+      "the data sets don't match (name)" in new Setup {
+        val changedData = viewData.copy(name = "testName1")
+        val dataChanged = service.dataHasChanged(changedData, Some(s4lData))
+        dataChanged shouldBe true
+      }
+
+      "the data sets don't match (email)" in new Setup {
+        val changedData = viewData.copy(digitalContactDetails = viewData.digitalContactDetails.copy(email = Some("test1@email.com")))
+        val dataChanged = service.dataHasChanged(changedData, Some(s4lData))
+        dataChanged shouldBe true
+      }
+
+      "the data sets don't match (phone)" in new Setup {
+        val changedData = viewData.copy(digitalContactDetails = viewData.digitalContactDetails.copy(phoneNumber = Some("0987766454321")))
+        val dataChanged = service.dataHasChanged(changedData, Some(s4lData))
+        dataChanged shouldBe true
+      }
+
+      "the data sets don't match (mobile)" in new Setup {
+        val changedData = viewData.copy(digitalContactDetails = viewData.digitalContactDetails.copy(mobileNumber = Some("0987766454321")))
+        val dataChanged = service.dataHasChanged(changedData, Some(s4lData))
+        dataChanged shouldBe true
+      }
+
+      "the data sets don't match" in new Setup {
+        val changedData = viewData.copy(
+          name = "testNewName",
+          digitalContactDetails = viewData.digitalContactDetails.copy(
+            email = Some("newTest@email.com"),
+            phoneNumber = Some("0987766454321"),
+            mobileNumber = Some("124134")
+          )
+        )
+        val dataChanged = service.dataHasChanged(changedData, Some(s4lData))
+        dataChanged shouldBe true
+      }
+
+      "the data sets don't match (contains Nones)" in new Setup {
+        val changedData = viewData.copy(
+          name = "testNewName",
+          digitalContactDetails = viewData.digitalContactDetails.copy(
+            email = None,
+            phoneNumber = Some("0987766454321"),
+            mobileNumber = None
+          )
+        )
+        val dataChanged = service.dataHasChanged(changedData, Some(s4lData))
+        dataChanged shouldBe true
+      }
+    }
+
+    "return false" when {
+      "s4lData is not defined" in new Setup {
+        val dataChanged = service.dataHasChanged(viewData, None)
+        dataChanged shouldBe false
+      }
+
+      "both data sets match" in new Setup {
+        val dataChanged = service.dataHasChanged(viewData, Some(s4lData))
+        dataChanged shouldBe false
+      }
+
+      "data sets contain spaces but the same data" in new Setup {
+        val changedData = viewData.copy(
+          name = "test Name",
+          digitalContactDetails = viewData.digitalContactDetails.copy(
+            email = Some("test@ email.com"),
+            phoneNumber = Some("123 456 7890"),
+            mobileNumber = Some("1234 56789 0")
+          )
+        )
+        val dataChanged = service.dataHasChanged(service.flattenData(changedData), Some(s4lData))
+        dataChanged shouldBe false
+      }
+    }
+  }
+
   "Calling submitPAYEContactDetails" should {
 
     val tstContactDetails = PAYEContactDetails(
@@ -327,13 +449,46 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       )
     )
 
-    "save a copy of paye contact" in new Setup {
+    "save a copy of paye contact (no audit)" in new Setup {
+      implicit val context = buildAuthContext
+
+      val testUserIds = UserIds(internalId = "int-12345", externalId = "ext-12345")
+      val authProviderId = Json.obj(
+        "authProviderId" -> "ap-12345"
+      )
+
       when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[PAYEContactView]]()))
         .thenReturn(Future.successful(Some(PAYEContactView(None, None))))
       when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
+      when(mockAuthConnector.getIds[UserIds](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(testUserIds))
+      when(mockAuthConnector.getUserDetails[JsObject](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(authProviderId))
 
-      await(service.submitPayeContactDetails(tstContactDetails, "54321")) shouldBe DownstreamOutcome.Success
+      await(service.submitPayeContactDetails("12345", tstContactDetails)) shouldBe DownstreamOutcome.Success
+    }
+
+    "save a copy of paye contact" in new Setup {
+      implicit val context = buildAuthContext
+
+      val testUserIds = UserIds(internalId = "int-12345", externalId = "ext-12345")
+      val authProviderId = Json.obj(
+        "authProviderId" -> "ap-12345"
+      )
+
+      when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[PAYEContactView]]()))
+        .thenReturn(Future.successful(Some(PAYEContactView(None, None))))
+      when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
+      when(mockAuthConnector.getIds[UserIds](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(testUserIds))
+      when(mockAuthConnector.getUserDetails[JsObject](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(authProviderId))
+      when(mockAuditConnector.sendEvent(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(AuditResult.Success))
+
+      await(service.submitPayeContactDetails("12345", tstContactDetails)) shouldBe DownstreamOutcome.Success
     }
   }
 

@@ -31,7 +31,7 @@ import scala.concurrent.Future
 @Singleton
 class
 PrepopulationService @Inject()(injBusinessRegistrationConnector: BusinessRegistrationConnector,
-                                     injS4LService: S4LService) extends PrepopulationSrv {
+                               injS4LService: S4LService) extends PrepopulationSrv {
   override val busRegConnector = injBusinessRegistrationConnector
   override val s4LService = injS4LService
 }
@@ -54,9 +54,7 @@ trait PrepopulationSrv {
   }
 
   def saveContactDetails(regId: String, contactDetails: PAYEContactDetails)(implicit hc: HeaderCarrier): Future[PAYEContactDetails] = {
-    busRegConnector.upsertContactDetails(regId, contactDetails) map {
-      _ => contactDetails
-    }
+    busRegConnector.upsertContactDetails(regId, contactDetails) map(_ => contactDetails)
   }
 
   def getPrePopAddresses(regId: String, roAddress: Address, ppobAddress: Option[Address], otherAddress: Option[Address])(implicit hc: HeaderCarrier): Future[Map[Int,Address]] = {
