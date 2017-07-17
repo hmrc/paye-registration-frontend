@@ -361,6 +361,11 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
     )
 
     "return true" when {
+      "s4lData is not defined" in new Setup {
+        val dataChanged = service.dataHasChanged(viewData, None)
+        dataChanged shouldBe true
+      }
+
       "the data sets don't match (name)" in new Setup {
         val changedData = viewData.copy(name = "testName1")
         val dataChanged = service.dataHasChanged(changedData, Some(s4lData))
@@ -413,11 +418,6 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
     }
 
     "return false" when {
-      "s4lData is not defined" in new Setup {
-        val dataChanged = service.dataHasChanged(viewData, None)
-        dataChanged shouldBe false
-      }
-
       "both data sets match" in new Setup {
         val dataChanged = service.dataHasChanged(viewData, Some(s4lData))
         dataChanged shouldBe false
@@ -465,6 +465,8 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
         .thenReturn(Future.successful(testUserIds))
       when(mockAuthConnector.getUserDetails[JsObject](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(authProviderId))
+      when(mockPrepopulationService.saveContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(tstContactDetails))
 
       await(service.submitPayeContactDetails("12345", tstContactDetails)) shouldBe DownstreamOutcome.Success
     }
@@ -487,6 +489,8 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
         .thenReturn(Future.successful(authProviderId))
       when(mockAuditConnector.sendEvent(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(AuditResult.Success))
+      when(mockPrepopulationService.saveContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(tstContactDetails))
 
       await(service.submitPayeContactDetails("12345", tstContactDetails)) shouldBe DownstreamOutcome.Success
     }
