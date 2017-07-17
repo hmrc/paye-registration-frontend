@@ -132,8 +132,6 @@ trait PAYEContactSrv  {
             _ <- auditPAYEContactDetails(regId, newViewData, currentView.contactDetails)
             _ <- prepopService.saveContactDetails(regId, newViewData) map {
               _ => Logger.info(s"[PAYEContactService] [submitPayeContactDetails] Successfully saved Contact Details to Prepopulation for regId: $regId")
-            } recover {
-              case _ => Logger.warn(s"[PAYEContactService] [submitPayeContactDetails] Failed to save Contact Details to Prepopulation for regId: $regId")
             }
           } yield currentView
         case currentView =>
@@ -143,7 +141,7 @@ trait PAYEContactSrv  {
     } yield submitted
   }
 
-  def dataHasChanged(viewData: PAYEContactDetails, s4lData: Option[PAYEContactDetails]): Boolean = s4lData.exists(flattenData(viewData) != flattenData(_))
+  def dataHasChanged(viewData: PAYEContactDetails, s4lData: Option[PAYEContactDetails]): Boolean = s4lData.isEmpty || s4lData.exists(flattenData(viewData) != flattenData(_))
 
   def auditPAYEContactDetails(regId: String, viewData: PAYEContactDetails, s4lData: Option[PAYEContactDetails])
                              (implicit authContext: AuthContext, headerCarrier: HeaderCarrier): Future[AuditResult] = {
