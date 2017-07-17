@@ -16,6 +16,7 @@
 
 package audit
 
+import models.DigitalContactDetails
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -25,7 +26,19 @@ class AmendedBusinessContactDetailsEventSpec extends UnitSpec {
 
   "AmendedBusinessContactDetailsEventDetail" should {
     "construct a full set of Json" in {
-      val testModel = AmendedBusinessContactDetailsEventDetail(externalUserId, authProviderId, "testRegId", AuditBusinessContactDetails(Some("test@email.com"),Some("1234567890"),Some("1234567892")), AuditBusinessContactDetails(Some("sample@googlemail.com"), Some("7890564320"), Some("1234567892")))
+      val testModel = AmendedBusinessContactDetailsEventDetail(
+        externalUserId,
+        authProviderId,
+        "testRegId",
+        DigitalContactDetails(
+          Some("test@email.com"),
+          Some("1234567890"),
+          Some("1234567892")),
+        DigitalContactDetails(
+          Some("sample@googlemail.com"),
+          Some("7890564320"),
+          Some("1234567892"))
+      )
 
       val expectedJson = Json.parse(
         """
@@ -47,7 +60,7 @@ class AmendedBusinessContactDetailsEventSpec extends UnitSpec {
         """.stripMargin
       )
 
-      val result = Json.toJson[AmendedBusinessContactDetailsEventDetail](testModel)(AmendedBusinessContactDetailsEventDetail.amendedBusinessContactDetailsEventFormat)
+      val result = Json.toJson[AmendedBusinessContactDetailsEventDetail](testModel)
       result shouldBe expectedJson
     }
 

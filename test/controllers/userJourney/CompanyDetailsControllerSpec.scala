@@ -35,6 +35,7 @@ import play.api.test.Helpers._
 import services._
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -415,7 +416,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       when(mockCompanyDetailsService.auditPPOBAddress(ArgumentMatchers.anyString())(ArgumentMatchers.any[AuthContext](), ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future.successful(auditEvent))
+        .thenReturn(Future.successful(AuditResult.Success))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitPPOBAddress, mockAuthConnector, request) { result =>
         status(result) shouldBe SEE_OTHER

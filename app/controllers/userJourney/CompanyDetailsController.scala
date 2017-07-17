@@ -130,21 +130,10 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
           companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) flatMap {
             details => details.businessContactDetails match {
               case Some(bcd) => Future.successful(Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form.fill(bcd))))
-              case None      => prepopAndShowBusinessContactDetails(profile, details)
+              case None      => Future.successful(Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form)))
             }
           }
         }
-  }
-
-  def prepopAndShowBusinessContactDetails(profile: CurrentProfile, details: CompanyDetails)(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
-    prepopService.getBusinessContactDetails(profile.registrationID) flatMap {
-      case Some(prepopBCD) =>
-        val copiedDetails = details.copy(businessContactDetails = Some(prepopBCD))
-        s4LService.saveForm[CompanyDetails](CacheKeys.CompanyDetails.toString, copiedDetails, profile.registrationID) map {
-          _ => Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form.fill(prepopBCD)))
-        }
-      case _ => Future.successful(Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form)))
-    }
   }
 
   val submitBusinessContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {

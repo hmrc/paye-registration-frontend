@@ -17,37 +17,31 @@
 package audit
 
 
-import play.api.libs.json.{Format, JsObject, Json, __}
-import play.api.libs.functional.syntax._
+import audit.RegistrationAuditEvent.{AUTH_PROVIDER_ID, EXTERNAL_USER_ID, JOURNEY_ID}
+import models.DigitalContactDetails
+import play.api.libs.json.{JsObject, JsValue, Json, Writes, __}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-case class AuditBusinessContactDetails(email: Option[String],
-                                   mobileNumber: Option[String],
-                                   phoneNumber: Option[String])
-
-object AuditBusinessContactDetails {
-  implicit val auditBusinessContactDetailsFormat: Format[AuditBusinessContactDetails] = (
-      (__ \ "email").formatNullable[String] and
-      (__ \ "mobileNumber").formatNullable[String] and
-      (__ \ "phoneNumber").formatNullable[String]
-    )(AuditBusinessContactDetails.apply, unlift(AuditBusinessContactDetails.unapply))
-}
-
 case class AmendedBusinessContactDetailsEventDetail(externalUserId: String,
-                                              authProviderId: String,
-                                              journeyId: String,
-                                              previousContactDetails: AuditBusinessContactDetails,
-                                              newContactDetails: AuditBusinessContactDetails)
+                                                    authProviderId: String,
+                                                    regId: String,
+                                                    previousContactDetails: DigitalContactDetails,
+                                                    newContactDetails: DigitalContactDetails)
 
 object AmendedBusinessContactDetailsEventDetail {
-  implicit val amendedBusinessContactDetailsEventFormat: Format[AmendedBusinessContactDetailsEventDetail] = (
-    (__ \ "externalUserId").format[String] and
-      (__ \ "authProviderId").format[String] and
-      (__ \ "journeyId").format[String] and
-      (__ \ "previousContactDetails").format[AuditBusinessContactDetails] and
-      (__ \ "newContactDetails").format[AuditBusinessContactDetails]
-    )(AmendedBusinessContactDetailsEventDetail.apply, unlift(AmendedBusinessContactDetailsEventDetail.unapply))
+  private val PREVIOUS_CONTACT_DETAILS = "previousContactDetails"
+  private val NEW_CONTACT_DETAILS = "newContactDetails"
+
+  implicit val writes = new Writes[AmendedBusinessContactDetailsEventDetail] {
+    override def writes(detail: AmendedBusinessContactDetailsEventDetail): JsValue = Json.obj(
+      EXTERNAL_USER_ID -> detail.externalUserId,
+      AUTH_PROVIDER_ID -> detail.authProviderId,
+      JOURNEY_ID -> detail.regId,
+      PREVIOUS_CONTACT_DETAILS -> detail.previousContactDetails,
+      NEW_CONTACT_DETAILS -> detail.newContactDetails
+    )
+  }
 }
 
 class AmendedBusinessContactDetailsEvent(detail: AmendedBusinessContactDetailsEventDetail)(implicit hc: HeaderCarrier)
-  extends RegistrationAuditEvent("businessContactDetailsAmendment", None, Json.toJson(detail).as[JsObject])(hc)
+  extends RegistrationAuditEvent("businessContactAmendment", None, Json.toJson(detail).as[JsObject])(hc)
