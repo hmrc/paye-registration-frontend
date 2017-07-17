@@ -125,8 +125,6 @@ trait PAYEContactSrv  {
                               (implicit hc: HeaderCarrier, authContext: AuthContext): Future[DownstreamOutcome.Value] = {
     for {
       cachedContactData <- getPAYEContact(regId) flatMap {
-        case currentView if currentView.contactDetails.isEmpty && currentView.correspondenceAddress.isEmpty =>
-          Future.successful(currentView)
         case currentView if dataHasChanged(newViewData, currentView.contactDetails) =>
           for {
             _ <- auditPAYEContactDetails(regId, newViewData, currentView.contactDetails)
@@ -141,7 +139,7 @@ trait PAYEContactSrv  {
     } yield submitted
   }
 
-  def dataHasChanged(viewData: PAYEContactDetails, s4lData: Option[PAYEContactDetails]): Boolean = s4lData.exists(flattenData(viewData) != flattenData(_))
+  def dataHasChanged(viewData: PAYEContactDetails, s4lData: Option[PAYEContactDetails]): Boolean = s4lData.isEmpty || s4lData.exists(flattenData(viewData) != flattenData(_))
 
   def auditPAYEContactDetails(regId: String, viewData: PAYEContactDetails, s4lData: Option[PAYEContactDetails])
                              (implicit authContext: AuthContext, headerCarrier: HeaderCarrier): Future[AuditResult] = {
@@ -153,18 +151,22 @@ trait PAYEContactSrv  {
       phoneNumber   = viewData.digitalContactDetails.phoneNumber
     )
 
-    for {
-      ids               <- authConnector.getIds[UserIds](authContext)
-      authId            <- authConnector.getUserDetails[JsObject](authContext)
-      eventDetail       = AmendedPAYEContactDetailsEventDetail(
-        externalUserId             = ids.externalId,
-        authProviderId             = authId.\("authProviderId").as[String],
-        journeyId                  = regId,
-        previousPAYEContactDetails = convertPAYEContactViewToAudit(s4lData.get),
-        newPAYEContactDetails      = convertPAYEContactViewToAudit(viewData)
-      )
-      auditResult       <- auditConnector.sendEvent(new AmendedPAYEContactDetailsEvent(eventDetail))
-    } yield auditResult
+    if( s4lData.nonEmpty ) {
+      for {
+        ids <- authConnector.getIds[UserIds](authContext)
+        authId <- authConnector.getUserDetails[JsObject](authContext)
+        eventDetail = AmendedPAYEContactDetailsEventDetail(
+          externalUserId = ids.externalId,
+          authProviderId = authId.\("authProviderId").as[String],
+          journeyId = regId,
+          previousPAYEContactDetails = convertPAYEContactViewToAudit(s4lData.get),
+          newPAYEContactDetails = convertPAYEContactViewToAudit(viewData)
+        )
+        auditResult <- auditConnector.sendEvent(new AmendedPAYEContactDetailsEvent(eventDetail))
+      } yield auditResult
+    } else {
+      Future.successful(AuditResult.Disabled)
+    }
   }
 
   def submitCorrespondence(regId: String, correspondenceAddress: Address)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
