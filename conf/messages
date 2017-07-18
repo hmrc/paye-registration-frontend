@@ -203,6 +203,9 @@ pages.directorDetails.name-suffix                       = {0}''s National Insura
 pages.summary.title                                     = Check and confirm your answers
 pages.summary.heading                                   = Check and confirm your answers
 
+pages.summary.weAsked                                   = We asked
+pages.summary.youSaid                                   = You said
+pages.summary.youCan                                    = You can
 
 pages.summary.employees.sectionHeading                  = Employment information
 pages.summary.employees.question                        = Over the next 2 months will you pay any staff, including yourself?

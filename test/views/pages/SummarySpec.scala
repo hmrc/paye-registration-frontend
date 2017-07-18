@@ -397,9 +397,9 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
 
       thead.attr("class") shouldBe "visuallyhidden"
       listTHs.size shouldBe 3
-      listTHs.get(0).text shouldBe "We asked for"
-      listTHs.get(1).text shouldBe "You answered"
-      listTHs.get(2).text shouldBe "Change your answer"
+      listTHs.get(0).text shouldBe "We asked"
+      listTHs.get(1).text shouldBe "You said"
+      listTHs.get(2).text shouldBe "You can"
     }
   }
 }
