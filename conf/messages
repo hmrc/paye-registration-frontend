@@ -50,20 +50,13 @@ pages.welcome.nino                                      = You''ll need the Natio
 pages.welcome.application                               = Your application shouldn''t take more than 15 minutes to complete. You''ll need to allow 2 weeks for HMRC to process it.
 
 ## Company Eligibility
-pages.companyEligibility.title                          = Do any of the following apply to you?
-pages.companyEligibility.heading                        = Do any of the following apply to you?
-pages.companyEligibility.list1                          = responsible for paying sick pay to the employees of other companies
-pages.companyEligibility.list2                          = appointed by a creditor to run a company that can''t pay its debts and you''re responsible for paying its employees
-pages.companyEligibility.list3                          = an employer based outside the UK who''s not liable to pay UK National Insurance
-pages.companyEligibility.headList                       = Tell us if you''re:
+pages.companyEligibility.title                          = Is the company an offshore employer outside the European Economic Area that doesn''t pay UK National Insurance?
+pages.companyEligibility.heading                        = Is the company an offshore employer outside the European Economic Area that doesn''t pay UK National Insurance?
 pages.companyEligibility.error                          = Tell us if any of the following apply to you
 
 ## Director Eligibility
-pages.directorEligibility.title                         = Are you any of the following?
-pages.directorEligibility.heading                       = Are you any of the following?
-pages.directorEligibility.headList                      = Tell us if you''re:
-pages.directorEligibility.list1                         = an employee responsible for deducting and paying your own Income Tax or National Insurance (this includes registrars, Roman Catholic priests and certain other employees of foreign embassies and consulates)
-pages.directorEligibility.list2                         = responsible for deducting and paying Income Tax and National Insurance on non-cash payments you make to your own or other people''s employees
+pages.directorEligibility.title                         = Does the company provide non-cash awards to employees and pay any tax due in a Taxed Award Scheme?
+pages.directorEligibility.heading                       = Does the company provide non-cash awards to employees and pay any tax due in a Taxed Award Scheme?
 pages.directorEligibility.error                         = Tell us if any of the following apply to you
 
 ## Completion Capacity page

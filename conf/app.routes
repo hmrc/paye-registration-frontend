@@ -16,12 +16,12 @@ GET         /register-as-employer                             controllers.userJo
 POST        /register-as-employer                             controllers.userJourney.WelcomeController.submit
 
 ## COMPANY ELIGIBILITY
-GET         /do-any-of-the-following-apply                    controllers.userJourney.EligibilityController.companyEligibility
-POST        /do-any-of-the-following-apply                    controllers.userJourney.EligibilityController.submitCompanyEligibility
+GET         /offshore-employer                               controllers.userJourney.EligibilityController.companyEligibility
+POST        /offshore-employer                               controllers.userJourney.EligibilityController.submitCompanyEligibility
 
 ## DIRECTOR ELIGIBILITY
-GET         /are-you-any-of-the-following                     controllers.userJourney.EligibilityController.directorEligibility
-POST        /are-you-any-of-the-following                     controllers.userJourney.EligibilityController.submitDirectorEligibility
+GET         /provide-non-cash-awards                          controllers.userJourney.EligibilityController.directorEligibility
+POST        /provide-non-cash-awards                          controllers.userJourney.EligibilityController.submitDirectorEligibility
 
 ## COMPLETION CAPACITY
 GET         /relationship-to-company                          controllers.userJourney.CompletionCapacityController.completionCapacity
