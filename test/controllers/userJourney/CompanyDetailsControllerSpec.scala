@@ -34,6 +34,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services._
 import testHelpers.PAYERegSpec
+import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -284,6 +286,9 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
         when(mockPrepopulationService.getBusinessContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(validCompanyDetailsViewModel.businessContactDetails))
 
+        when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+          .thenReturn(Future.successful(CacheMap("key", Map.empty)))
+
         AuthBuilder.showWithAuthorisedUser(controller.businessContactDetails, mockAuthConnector) {
           result =>
             status(result) shouldBe OK
@@ -316,7 +321,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "show error page when there is an internal error" in new Setup {
-      when(mockCompanyDetailsService.submitBusinessContact(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.submitBusinessContact(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitBusinessContactDetails(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
@@ -328,7 +333,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "redirect to next page when the user submit valid data" in new Setup {
-      when(mockCompanyDetailsService.submitBusinessContact(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.submitBusinessContact(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitBusinessContactDetails(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
@@ -411,7 +416,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       when(mockCompanyDetailsService.auditPPOBAddress(ArgumentMatchers.anyString())(ArgumentMatchers.any[AuthContext](), ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future.successful(auditEvent))
+        .thenReturn(Future.successful(AuditResult.Success))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitPPOBAddress, mockAuthConnector, request) { result =>
         status(result) shouldBe SEE_OTHER

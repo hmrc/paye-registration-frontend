@@ -20,6 +20,7 @@ import java.util.UUID
 import com.github.tomakehurst.wiremock.client.WireMock._
 import enums.CacheKeys
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
+import models.DigitalContactDetails
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
 import play.api.libs.json.{JsObject, JsString, Json}
@@ -878,7 +879,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
          |}""".stripMargin
     }
 
-    "get prepoulated from Business Registration" in {
+    "get prepopulated from Business Registration" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId, companyName)
@@ -906,7 +907,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       document.getElementById("phoneNumber").attr("value") shouldBe "0987654321"
     }
 
-    "get prepoulated from Paye Registration" in {
+    "get prepopulated from Paye Registration" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId, companyName)
@@ -941,7 +942,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       document.getElementById("phoneNumber").attr("value") shouldBe "0987654321"
     }
 
-    "not be prepoulated if no data is found in Business Registration or Paye Registration" in {
+    "not be prepopulated if no data is found in Business Registration or Paye Registration" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId, companyName)
@@ -971,7 +972,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       document.getElementById("phoneNumber").attr("value") shouldBe ""
     }
 
-    "not be prepoulated if no data is found in Paye Registration and error is returned from Business Registration" in {
+    "not be prepopulated if no data is found in Paye Registration and error is returned from Business Registration" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId, companyName)
@@ -999,6 +1000,135 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       document.getElementById("businessEmail").attr("value") shouldBe ""
       document.getElementById("mobileNumber").attr("value") shouldBe ""
       document.getElementById("phoneNumber").attr("value") shouldBe ""
+    }
+  }
+
+  "POST Business Contact Details" should {
+    val csrfToken = UUID.randomUUID().toString
+    val oldEmail = "oldEmail@email.co.uk"
+    val oldTelephoneNumber = "0987654321"
+    val oldMobileNumber = "1234567890"
+    val newEmail = "newEmail@email.biz.co.uk"
+    val newTelephoneNumber = "02123456789"
+    val newMobileNumber = "07123456789"
+
+    val roDoc = s"""{"line1":"1","line2":"2","postCode":"pc"}"""
+    val payeDoc =s"""{
+                    |  "companyName": "$companyName",
+                    |  "tradingName": {"differentName":false},
+                    |  "roAddress": $roDoc,
+                    |  "ppobAddress": $roDoc,
+                    |  "businessContactDetails": {
+                    |    "email": "$oldEmail",
+                    |    "phoneNumber": "$oldTelephoneNumber",
+                    |    "mobileNumber": "$oldMobileNumber"
+                    |  }
+                    |}""".stripMargin
+
+    val updatedPayeDoc =
+      s"""{
+         |  "companyName": "$companyName",
+         |  "roAddress": $roDoc,
+         |  "ppobAddress": $roDoc,
+         |  "businessContactDetails": {
+         |    "email": "$newEmail",
+         |    "phoneNumber": "$newTelephoneNumber",
+         |    "mobileNumber": "$newMobileNumber"
+         |  }
+         |}
+         """.stripMargin
+
+    "upsert the business contact details in PAYE Registration and send Audit Event if different from Prepopulation" in {
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      stubS4LGet(regId, CacheKeys.CompanyDetails.toString, payeDoc)
+      stubPatch(s"/paye-registration/${regId}/company-details", 200, updatedPayeDoc)
+      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+
+      val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
+      val fResponse = buildClient("/business-contact-details").
+        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
+        post(Map(
+          "csrfToken" -> Seq("xxx-ignored-xxx"),
+          "businessEmail" -> Seq(s"$newEmail"),
+          "phoneNumber" -> Seq(s"$newTelephoneNumber"),
+          "mobileNumber" -> Seq(s"$newMobileNumber")
+        ))
+
+      val response = await(fResponse)
+      response.status shouldBe 303
+      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/what-company-does")
+
+      val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
+      reqPostsAudit.size shouldBe 1
+      val captorPost = reqPostsAudit.get(0)
+      val jsonAudit = Json.parse(captorPost.getBodyAsString)
+
+      val previousContactDetails = DigitalContactDetails(
+        Some(oldEmail),
+        Some(oldMobileNumber),
+        Some(oldTelephoneNumber)
+      )
+
+      val newContactDetails = DigitalContactDetails(
+        Some(newEmail),
+        Some(newMobileNumber),
+        Some(newTelephoneNumber)
+      )
+
+      (jsonAudit \ "auditSource").as[JsString].value shouldBe "paye-registration-frontend"
+      (jsonAudit \ "auditType").as[JsString].value shouldBe "businessContactAmendment"
+      (jsonAudit \ "detail" \ "externalUserId").as[JsString].value shouldBe "Ext-xxx"
+      (jsonAudit \ "detail" \ "authProviderId").as[JsString].value shouldBe "testAuthProviderId"
+      (jsonAudit \ "detail" \ "journeyId").as[JsString].value shouldBe regId
+      (jsonAudit \ "detail" \ "previousContactDetails").as[DigitalContactDetails] shouldBe previousContactDetails
+      (jsonAudit \ "detail" \ "newContactDetails").as[DigitalContactDetails] shouldBe newContactDetails
+    }
+
+    "upsert the business contact details in PAYE Registration with Prepopulation data and don't send Audit Event" in {
+      val contactDetails = {
+        s"""
+           |{
+           |  "firstName": "fName",
+           |  "middleName": "mName",
+           |  "surname": "sName",
+           |  "email": "$newEmail",
+           |  "telephoneNumber": "$newTelephoneNumber",
+           |  "mobileNumber": "$newMobileNumber"
+           |}""".stripMargin
+      }
+
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      stubGet(s"/business-registration/$regId/contact-details", 200, contactDetails)
+      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubGet(s"/save4later/paye-registration-frontend/${regId}/${CacheKeys.CompanyDetails.toString}", 404, "")
+      stubGet(s"/paye-registration/${regId}/company-details", 404, "")
+      stubPatch(s"/paye-registration/${regId}/company-details", 200, updatedPayeDoc)
+      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
+
+      val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
+      val fResponse = buildClient("/business-contact-details").
+        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
+        post(Map(
+          "csrfToken" -> Seq("xxx-ignored-xxx"),
+          "businessEmail" -> Seq(s"$newEmail"),
+          "phoneNumber" -> Seq(s"$newTelephoneNumber"),
+          "mobileNumber" -> Seq(s"$newMobileNumber")
+        ))
+
+      val response = await(fResponse)
+      response.status shouldBe 303
+      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/what-company-does")
+
+      val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
+      reqPostsAudit.size shouldBe 0
     }
   }
 }

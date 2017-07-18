@@ -16,11 +16,12 @@
 
 package services
 
+import builders.AuthBuilder
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, PAYERegistrationFixture, S4LFixture}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
-import models.external.{CoHoCompanyDetailsModel, CompanyRegistrationProfile}
+import models.external.{CoHoCompanyDetailsModel, CompanyRegistrationProfile, UserDetailsModel, UserIds}
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
@@ -28,7 +29,7 @@ import org.mockito.Mockito._
 import play.api.libs.json.{Format, Json}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 
 import scala.concurrent.Future
@@ -43,8 +44,11 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   val mockCoHoService = mock[IncorporationInformationService]
   val mockS4LService = mock[S4LService]
   val mockAuditConnector = mock[AuditConnector]
+  val mockPrepopulationService = mock[PrepopulationService]
 
   val returnHttpResponse = HttpResponse(200)
+
+  implicit val testContext = AuthBuilder.createTestUser
 
   class Setup {
     val service = new CompanyDetailsSrv {
@@ -55,6 +59,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val cohoAPIConnector: IncorporationInformationConnect = mockCohoAPIConnector
       override val authConnector = mockAuthConnector
       override val auditConnector = mockAuditConnector
+      override val prepopService = mockPrepopulationService
     }
   }
 
@@ -67,6 +72,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val cohoAPIConnector: IncorporationInformationConnect = mockCohoAPIConnector
       override val authConnector = mockAuthConnector
       override val auditConnector = mockAuditConnector
+      override val prepopService = mockPrepopulationService
 
       override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
         Future.successful(CompanyDetailsView("test compay name", None, validROAddress, None, None))
@@ -87,6 +93,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val cohoAPIConnector: IncorporationInformationConnect = mockCohoAPIConnector
       override val authConnector = mockAuthConnector
       override val auditConnector = mockAuditConnector
+      override val prepopService = mockPrepopulationService
 
       override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
         Future.successful(validCompanyDetailsViewModel)
@@ -107,6 +114,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val cohoAPIConnector: IncorporationInformationConnect = mockCohoAPIConnector
       override val authConnector = mockAuthConnector
       override val auditConnector = mockAuditConnector
+      override val prepopService = mockPrepopulationService
 
       override def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
         validCompanyDetailsViewModel
@@ -271,6 +279,12 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
         roAddress = tstROAddress
       )
 
+      val tstDigitalContactDetails = DigitalContactDetails(
+        email = Some("test@email.uk"),
+        mobileNumber = None,
+        phoneNumber = None
+      )
+
       when(mockS4LService.fetchAndGet(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(None))
 
@@ -280,13 +294,16 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockCoHoService.getStoredCompanyDetails()(ArgumentMatchers.any()))
         .thenReturn(Future.successful(tstCompanyDetailsModel))
 
+      when(mockPrepopulationService.getBusinessContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(tstDigitalContactDetails)))
+
       when(mockS4LService.saveForm(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
       when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(companyProfile("txId")))
 
-      await(service.getCompanyDetails("54321", "txId")) shouldBe CompanyDetailsView("tstCompanyName", None, tstROAddress, None, None)
+      await(service.getCompanyDetails("54321", "txId")) shouldBe CompanyDetailsView("tstCompanyName", None, tstROAddress, None, Some(tstDigitalContactDetails))
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
@@ -398,6 +415,32 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
   "Calling submitBusinessContact" should {
     "return a success response when submit is completed successfully" in new CompanyDetailsMockedSetup {
+      val userDetails = UserDetailsModel(
+        "testName",
+        "testEmail",
+        "testAffinityGroup",
+        None,
+        None,
+        None,
+        None,
+        "testAuthProviderId",
+        "testAuthProviderType"
+      )
+
+      val userIds = UserIds(
+        "testInternalId",
+        "testExternalId"
+      )
+
+      when(mockAuthConnector.getIds[UserIds](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(userIds))
+
+      when(mockAuthConnector.getUserDetails[UserDetailsModel](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(userDetails))
+
+      when(mockAuditConnector.sendEvent(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(AuditResult.Success))
+
       await(service.submitBusinessContact(validBusinessContactModel, "54322", "txId")) shouldBe DownstreamOutcome.Success
     }
 
