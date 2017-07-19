@@ -103,7 +103,8 @@ pages.ppobAddress.itmaybeIntro                          = It may be:
 pages.ppobAddress.ppobAddressRules1                     = your home
 pages.ppobAddress.ppobAddressRules2                     = a private commercial office
 pages.ppobAddress.ppobAddressRules3                     = a studio or workshop
-pages.ppobAddress.peopleIntro1                          = People running mobile businesses (for example, plumbers or consultants) usually use the address where they keep their stock or equipment.
+pages.ppobAddress.peopleIntro1                          = This can be your home, a commercial office, a studio or workshop. You or the company don’t need to own the property.
+pages.ppobAddress.peopleIntro2                          = For mobile businesses, it’s usually where the company keeps its stock or equipment.
 
 ##Correspondence Address
 pages.correspondenceAddress.title                       = Where should we send post to?
