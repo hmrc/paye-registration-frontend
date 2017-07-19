@@ -55,6 +55,8 @@ trait DirectorDetailsCtrl extends FrontendController with Actions with I18nSuppo
               val ninos = directorDetailsService.createDirectorNinos(directors)
               val names = directorDetailsService.createDisplayNamesMap(directors)
               Ok(DirectorDetailsPage(DirectorDetailsForm.form.fill(ninos), names))
+          }recover {
+            case _ => InternalServerError(views.html.pages.error.restart())
           }
         }
   }

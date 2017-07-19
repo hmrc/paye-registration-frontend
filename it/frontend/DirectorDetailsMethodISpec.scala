@@ -96,6 +96,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
       document.getElementsByClass("form-field").size shouldBe 2
 
       val list = document.getElementsByClass("form-label")
+
       def get(n: Int) = list.get(n).text
 
       get(0) shouldBe s"faulty default's National Insurance number For example, QQ 12 34 56 C"
@@ -158,6 +159,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
       document.getElementsByClass("form-field").size shouldBe 1
 
       val list = document.getElementsByClass("form-label")
+
       def get(n: Int) = list.get(n).text
 
       get(0).contains("Error fetching name") shouldBe true
@@ -227,10 +229,38 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
       document.getElementsByClass("form-field").size shouldBe 2
 
       val list = document.getElementsByClass("form-label")
+
       def get(n: Int) = list.get(n).text
 
       get(0) shouldBe s"test1 testa's National Insurance number For example, QQ 12 34 56 C"
       get(1) shouldBe s"a c's National Insurance number"
+    }
+
+    "should throw error when no valid directors are returned" in {
+      setupSimpleAuthMocks()
+
+      stubSuccessfulLogin()
+
+      stubPayeRegDocumentStatus(regId)
+
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+
+      stubGet(s"/paye-registration/${regId}/directors", 404, "")
+
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/DirectorDetails", 200, dummyS4LResponse)
+
+      stubGet(s"/incorporation-information/12345/officer-list", 404, "")
+
+      val fResponse = buildClient("/director-national-insurance-number").
+        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        get()
+
+      val response = await(fResponse)
+
+      response.status shouldBe 500
     }
   }
 }
