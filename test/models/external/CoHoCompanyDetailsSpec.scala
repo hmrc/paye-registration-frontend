@@ -61,7 +61,7 @@ class CoHoCompanyDetailsSpec extends PAYERegSpec {
           |}""".stripMargin)
 
       val tstModel2 = CoHoCompanyDetailsModel(
-        companyName = "Test Company",
+        companyName = "Tést Compàny",
         roAddress = Address(
           "1 test street",
           "Testford",
