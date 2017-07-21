@@ -16,14 +16,14 @@
 
 package forms.payeContactDetails
 
-import forms.helpers.OneOfManyForm
+import forms.helpers.{OneOfManyForm, PhoneNoForm}
 import models.DigitalContactDetails
 import models.view.PAYEContactDetails
 import play.api.data.Form
 import play.api.data.Forms._
 import utils.Validators._
 
-object PAYEContactDetailsForm extends OneOfManyForm {
+object PAYEContactDetailsForm extends OneOfManyForm with PhoneNoForm {
 
   override val optionalFields: Seq[String] = Seq("digitalContact.contactEmail", "digitalContact.mobileNumber", "digitalContact.phoneNumber")
   override val noFieldsCompletedMessage: String = "pages.payeContact.noFieldsCompleted"
@@ -33,8 +33,8 @@ object PAYEContactDetailsForm extends OneOfManyForm {
     "name" -> text.verifying(nameValidation),
     "digitalContact" -> mapping(
         "contactEmail" -> oneOfManyErrorTarget.verifying(optionalValidation(emailValidation)),
-        "mobileNumber" -> optional(text.verifying(mobilePhoneNumberValidation)),
-        "phoneNumber" -> optional(text.verifying(phoneNumberValidation))
+        "mobileNumber" -> phoneNoField("errors.invalid.mobileNumber"),
+        "phoneNumber" -> phoneNoField("errors.invalid.phoneNumber")
       )(DigitalContactDetails.apply)(DigitalContactDetails.unapply)
     )(PAYEContactDetails.apply)(PAYEContactDetails.unapply).verifying()
   )

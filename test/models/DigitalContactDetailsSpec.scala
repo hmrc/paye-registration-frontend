@@ -16,10 +16,11 @@
 
 package models
 
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.data.validation.ValidationError
+import play.api.libs.json.{JsPath, JsSuccess, Json}
 import testHelpers.PAYERegSpec
 
-class DigitalContactDetailsSpec extends PAYERegSpec {
+class DigitalContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
 
   "BusinessContactDetails with full data" should {
     val targetJsonMax = Json.parse(
@@ -175,6 +176,58 @@ class DigitalContactDetailsSpec extends PAYERegSpec {
 
     "write to Json" in {
       Json.toJson[DigitalContactDetails](model)(DigitalContactDetails.prepopWrites) shouldBe json
+    }
+  }
+
+  "BusinessContactDetails from Prepopulation Service" should {
+    val err = "No digital contact details defined\n" +
+      s"Lines defined:\n" +
+      s"email: false\n" +
+      s"mobile: false\n" +
+      s"phone: false\n"
+
+    "read successfully from Json" in {
+      val targetJsonMax = Json.parse(
+        s"""{
+           |  "email":"test@email.com",
+           |  "mobileNumber":"0794 300 01 11 45 67",
+           |  "telephoneNumber":"0 16 13 85 03 20 98 76"
+           |}""".stripMargin)
+
+      val maxModel = DigitalContactDetails(
+        email = Some("test@email.com"),
+        mobileNumber = Some("0794 300 01 11 45 67"),
+        phoneNumber = Some("016138503209876")
+      )
+
+      Json.fromJson[DigitalContactDetails](targetJsonMax)(DigitalContactDetails.prepopReads) shouldBe JsSuccess(maxModel)
+    }
+
+    "return an error when read from Json with no contact details" in {
+      val json = Json.parse(s"""{}""".stripMargin)
+
+      val result = Json.fromJson[DigitalContactDetails](json)(DigitalContactDetails.prepopReads)
+      shouldHaveErrors(result, JsPath(), Seq(ValidationError(err)))
+    }
+
+    "return an error when read from Json with no valid phone number with less than 10 digits" in {
+      val json = Json.parse(
+        s"""{
+           |  "mobileNumber": "343534098"
+           |}""".stripMargin)
+
+      val result = Json.fromJson[DigitalContactDetails](json)(DigitalContactDetails.prepopReads)
+      shouldHaveErrors(result, JsPath(), Seq(ValidationError(err)))
+    }
+
+    "return an error when read from Json with no valid phone number with more than 20 digits" in {
+      val json = Json.parse(
+        s"""{
+           |  "mobileNumber": "012345678901234567891"
+           |}""".stripMargin)
+
+      val result = Json.fromJson[DigitalContactDetails](json)(DigitalContactDetails.prepopReads)
+      shouldHaveErrors(result, JsPath(), Seq(ValidationError(err)))
     }
   }
 }

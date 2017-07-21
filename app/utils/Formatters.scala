@@ -18,23 +18,22 @@ package utils
 
 import java.text.Normalizer
 
+import play.api.data.validation._
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json._
 
 object Formatters {
   def ninoFormatter(nino: String): String = nino.grouped(2).mkString(" ")
 
+  private def normalize(s: String): String = Normalizer.normalize(s, Normalizer.Form.NFKD).replaceAll("\\p{M}", "").trim
+
   lazy val normalizeTrimmedReads = new Reads[String] {
-    override def reads(json: JsValue): JsResult[String] = Json.fromJson[String](json).flatMap {
-      s =>
-        val normalized = Normalizer.normalize(s, Normalizer.Form.NFKD)
-        JsSuccess(normalized.replaceAll("\\p{M}", "").trim)
-    }
+    override def reads(json: JsValue): JsResult[String] = Json.fromJson[String](json) flatMap (s => JsSuccess(normalize(s)))
   }
 
   lazy val normalizeTrimmedListReads = new Reads[List[String]] {
     override def reads(json: JsValue): JsResult[List[String]] = Json.fromJson[List[String]](json).flatMap {
-      l => JsSuccess(l.map(Normalizer.normalize(_, Normalizer.Form.NFKD).replaceAll("\\p{M}", "").trim))
+      l => JsSuccess(l map (normalize _))
     }
   }
 
@@ -52,5 +51,23 @@ object Formatters {
         val ret: (String, JsValueWrapper) = s.toString -> Json.toJson[V](o)
         ret
       }.toSeq:_*)
+  }
+
+  def phoneNoReads(errMsg: String) = new Reads[String] {
+    override def reads(json: JsValue): JsResult[String] = {
+      normalizeTrimmedReads.reads(json) flatMap { input =>
+        Validators.isValidPhoneNo(input, errMsg) match {
+          case Right(phone) => JsSuccess(phone)
+          case Left(err) => JsError(err)
+        }
+      }
+    }
+  }
+
+  lazy val emailReads = Reads.StringReads.filter(ValidationError("Invalid email")) {
+    email => Validators.emailValidation(normalize(email)) match {
+      case e: Invalid => false
+      case _ => true
+    }
   }
 }

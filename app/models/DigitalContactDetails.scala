@@ -16,7 +16,9 @@
 
 package models
 
-import play.api.libs.json.{JsObject, Json, Writes}
+import play.api.Logger
+import play.api.libs.json.{JsError, JsObject, JsResult, JsSuccess, JsValue, Json, Reads, Writes}
+import utils.Formatters
 
 case class DigitalContactDetails(email : Option[String],
                                   mobileNumber : Option[String],
@@ -24,6 +26,28 @@ case class DigitalContactDetails(email : Option[String],
 
 object DigitalContactDetails {
   implicit val format = Json.format[DigitalContactDetails]
+
+  val prepopReads: Reads[DigitalContactDetails] = new Reads[DigitalContactDetails] {
+    override def reads(json: JsValue): JsResult[DigitalContactDetails] = {
+      val oEmail = json.\("email").asOpt[String](Formatters.emailReads)
+      val oPhone = json.\("telephoneNumber").asOpt[String](Formatters.phoneNoReads("Telephone Number from Prepopulation is invalid"))
+      val oMobile = json.\("mobileNumber").asOpt[String](Formatters.phoneNoReads("Mobile Number from Prepopulation is invalid"))
+
+      def incorrectDigitalContactDetails(msg: String): String = {
+        s"$msg\n" +
+          s"Lines defined:\n" +
+          s"email: ${oEmail.isDefined}\n" +
+          s"mobile: ${oMobile.isDefined}\n" +
+          s"phone: ${oPhone.isDefined}\n"
+      }
+
+      if (oEmail.isEmpty && oMobile.isEmpty && oPhone.isEmpty) {
+        JsError(incorrectDigitalContactDetails(s"No digital contact details defined"))
+      } else {
+        JsSuccess(DigitalContactDetails(oEmail, oMobile, oPhone))
+      }
+    }
+  }
 
   val prepopWrites: Writes[DigitalContactDetails] = new Writes[DigitalContactDetails] {
     def writes(contactDetails: DigitalContactDetails): JsObject = {

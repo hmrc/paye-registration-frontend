@@ -94,7 +94,48 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       document.getElementById("digitalContact.phoneNumber").attr("value") shouldBe ""
     }
 
-    "Return an unpopulated page if PayeReg returns a NotFound response" in {
+    "Return an unpopulated page if PayeReg returns a NotFound response and corrupted data is returned from Business Registration" in {
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubKeystoreMetadata(SessionId, regId, companyName)
+
+      val invalidPrepopResponse =
+        s"""
+           |{
+           |   "firstName": "fName",
+           |   "middleName": "mName1 mName2",
+           |   "surname": "sName",
+           |   "email": "email1",
+           |   "telephoneNumber": "012345",
+           |   "mobileNumber": "543210"
+           |}
+         """.stripMargin
+
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+
+      stubGet(s"/paye-registration/$regId/company-details", 404, "")
+      stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")
+      stubGet(s"/business-registration/$regId/contact-details", 200, invalidPrepopResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/PrepopPAYEContactDetails", 200, dummyS4LResponse)
+      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, dummyS4LResponse)
+
+      val response = await(buildClient("/who-should-we-contact")
+        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .get())
+
+      response.status shouldBe 200
+
+      val document = Jsoup.parse(response.body)
+      document.title() shouldBe "Who should we contact about the company's PAYE?"
+      document.getElementById("name").attr("value") shouldBe ""
+      document.getElementById("digitalContact.contactEmail").attr("value") shouldBe ""
+      document.getElementById("digitalContact.mobileNumber").attr("value") shouldBe ""
+      document.getElementById("digitalContact.phoneNumber").attr("value") shouldBe ""
+    }
+
+    "Return a prepopulated page if PayeReg returns a NotFound response and data is returned from Business Registration" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId, companyName)
@@ -105,9 +146,9 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
            |   "firstName": "fName",
            |   "middleName": "mName1 mName2",
            |   "surname": "sName",
-           |   "email": "email1",
-           |   "telephoneNumber": "012345",
-           |   "mobileNumber": "543210"
+           |   "email": "email1@email.co.uk",
+           |   "telephoneNumber": "012345012345",
+           |   "mobileNumber": "543210543210"
            |}
          """.stripMargin
 
@@ -130,9 +171,9 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       val document = Jsoup.parse(response.body)
       document.title() shouldBe "Who should we contact about the company's PAYE?"
       document.getElementById("name").attr("value") shouldBe "fName mName1 mName2 sName"
-      document.getElementById("digitalContact.contactEmail").attr("value") shouldBe "email1"
-      document.getElementById("digitalContact.mobileNumber").attr("value") shouldBe "543210"
-      document.getElementById("digitalContact.phoneNumber").attr("value") shouldBe "012345"
+      document.getElementById("digitalContact.contactEmail").attr("value") shouldBe "email1@email.co.uk"
+      document.getElementById("digitalContact.mobileNumber").attr("value") shouldBe "543210543210"
+      document.getElementById("digitalContact.phoneNumber").attr("value") shouldBe "012345012345"
     }
   }
 

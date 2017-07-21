@@ -32,31 +32,26 @@ object PAYEContactDetails {
       val oFirstName = json.\("firstName").asOpt[String](Formatters.normalizeTrimmedReads)
       val oMiddleName = json.\("middleName").asOpt[String](Formatters.normalizeTrimmedReads)
       val oLastName = json.\("surname").asOpt[String](Formatters.normalizeTrimmedReads)
-      val oEmail = json.\("email").asOpt[String](Formatters.normalizeTrimmedReads)
-      val oPhone = json.\("telephoneNumber").asOpt[String](Formatters.normalizeTrimmedReads)
-      val oMobile = json.\("mobileNumber").asOpt[String](Formatters.normalizeTrimmedReads)
 
       def incorrectContactDetails(msg: String): String = {
         s"$msg\n" +
           s"Lines defined:\n" +
           s"firstName: ${oFirstName.isDefined}\n" +
           s"middleName: ${oMiddleName.isDefined}\n" +
-          s"surname: ${oLastName.isDefined}\n" +
-          s"email: ${oEmail.isDefined}\n" +
-          s"mobile: ${oMobile.isDefined}\n" +
-          s"phone: ${oPhone.isDefined}\n"
+          s"surname: ${oLastName.isDefined}\n"
       }
 
       if(oFirstName.isEmpty && oMiddleName.isEmpty && oLastName.isEmpty) {
         JsError(incorrectContactDetails(s"No name components defined"))
-      } else if (oEmail.isEmpty && oMobile.isEmpty && oPhone.isEmpty) {
-        JsError(incorrectContactDetails(s"No contact details defined"))
       } else {
-        JsSuccess(
-          PAYEContactDetails(
-            name                  = Seq(oFirstName, oMiddleName, oLastName).flatten.mkString(" "),
-            digitalContactDetails = DigitalContactDetails(oEmail, oMobile, oPhone))
-        )
+        DigitalContactDetails.prepopReads.reads(json) match {
+          case jsSuccess: JsSuccess[DigitalContactDetails] => JsSuccess(
+            PAYEContactDetails(
+              name                  = Seq(oFirstName, oMiddleName, oLastName).flatten.mkString(" "),
+              digitalContactDetails = jsSuccess.value)
+            )
+          case jsErr: JsError => jsErr
+        }
       }
     }
   }
