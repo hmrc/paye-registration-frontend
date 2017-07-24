@@ -99,8 +99,8 @@ pages.ppobAddress.title                                 = Where will the company
 pages.ppobAddress.heading                               = Where will the company carry out most of its business activities?
 pages.ppobAddress.other                                 = A different address
 pages.ppobAddress.addressChoice.noEntry                 = Tell us where you''ll carry out most of your business activities
-pages.ppobAddress.peopleIntro1                          = This can be your home, a commercial office, a studio or workshop. You or the company don’t need to own the property.
-pages.ppobAddress.peopleIntro2                          = For mobile businesses, it’s usually where the company keeps its stock or equipment.
+pages.ppobAddress.peopleIntro1                          = This can be your home, a commercial office, a studio or workshop. You or the company don''t need to own the property.
+pages.ppobAddress.peopleIntro2                          = For mobile businesses, it''s usually where the company keeps its stock or equipment.
 
 ##Correspondence Address
 pages.correspondenceAddress.title                       = Where should we send post to?
