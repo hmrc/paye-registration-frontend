@@ -18,9 +18,6 @@ package utils
 
 import java.time.LocalDate
 
-import models.view.UserEnteredNino
-import play.api.data.Forms._
-import play.api.data.Mapping
 import play.api.data.validation.{ValidationError, _}
 
 object Validators extends DateUtil {
@@ -45,6 +42,16 @@ object Validators extends DateUtil {
     case _ => Valid
   })
 
+  def isValidPhoneNo(phone: String, msgError: String): Either[String, String] = {
+    def isValidNumberCount(s: String) = s.replaceAll(" ", "").matches("[0-9]{10,20}")
+
+    (isValidNumberCount(phone), phone.trim.matches(phoneNoTypeRegex.toString)) match {
+      case (true, true) => Right(phone.trim)
+      case (true, false) => Right(phone.replaceAll(" ", ""))
+      case (false, _) => Left(msgError)
+    }
+  }
+
   val emailValidation: Constraint[String] = Constraint("constraints.emailCheck")({
     text =>
       val errors = text.trim match {
@@ -53,24 +60,6 @@ object Validators extends DateUtil {
         case _ => Nil
       }
       if(errors.isEmpty) Valid else Invalid(errors)
-  })
-
-  val phoneNumberValidation: Constraint[String] = Constraint("constraints.phoneNumberCheck")({
-    text =>
-      val errors = text.trim match {
-        case phoneNoTypeRegex() => Nil
-        case _ => Seq(ValidationError("errors.invalid.phoneNumber"))
-      }
-      if (errors.isEmpty) Valid else Invalid(errors)
-  })
-
-  val mobilePhoneNumberValidation: Constraint[String] = Constraint("constraints.mobilePhoneNumberCheck")({
-    text =>
-      val errors = text.trim match {
-        case phoneNoTypeRegex() => Nil
-        case _ => Seq(ValidationError("errors.invalid.mobileNumber"))
-      }
-      if (errors.isEmpty) Valid else Invalid(errors)
   })
 
   val nameValidation: Constraint[String] = Constraint("constraints.nameCheck")({

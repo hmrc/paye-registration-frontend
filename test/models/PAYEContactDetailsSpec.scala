@@ -231,10 +231,7 @@ class PAYEContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
       s"Lines defined:\n" +
       s"firstName: false\n" +
       s"middleName: false\n" +
-      s"surname: false\n" +
-      s"email: true\n" +
-      s"mobile: false\n" +
-      s"phone: true\n"
+      s"surname: false\n"
 
     "return an error when read from Json" in {
       val result = Json.fromJson[PAYEContactDetails](json)(PAYEContactDetails.prepopReads)
@@ -251,11 +248,8 @@ class PAYEContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
          |  "firstName": "tstFirstName"
          |}""".stripMargin)
 
-    val err = "No contact details defined\n" +
+    val err = "No digital contact details defined\n" +
       s"Lines defined:\n" +
-      s"firstName: true\n" +
-      s"middleName: false\n" +
-      s"surname: false\n" +
       s"email: false\n" +
       s"mobile: false\n" +
       s"phone: false\n"

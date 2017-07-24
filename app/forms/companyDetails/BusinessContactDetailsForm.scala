@@ -16,13 +16,13 @@
 
 package forms.companyDetails
 
-import forms.helpers.OneOfManyForm
+import forms.helpers.{OneOfManyForm, PhoneNoForm}
 import models.DigitalContactDetails
 import play.api.data.Form
 import play.api.data.Forms._
 import utils.Validators._
 
-object BusinessContactDetailsForm extends OneOfManyForm {
+object BusinessContactDetailsForm extends OneOfManyForm with PhoneNoForm {
 
   override val optionalFields = Seq("businessEmail", "mobileNumber", "phoneNumber")
   override val noFieldsCompletedMessage = "pages.businessContact.noFieldsCompleted"
@@ -30,8 +30,8 @@ object BusinessContactDetailsForm extends OneOfManyForm {
   val form = Form(
     mapping(
       "businessEmail" -> oneOfManyErrorTarget.verifying(optionalValidation(emailValidation)),
-      "mobileNumber" -> optional(text.verifying(mobilePhoneNumberValidation)),
-      "phoneNumber" -> optional(text.verifying(phoneNumberValidation))
+      "mobileNumber" -> phoneNoField("errors.invalid.mobileNumber"),
+      "phoneNumber" -> phoneNoField("errors.invalid.phoneNumber")
     )(DigitalContactDetails.apply)(DigitalContactDetails.unapply).verifying()
   )
 }
