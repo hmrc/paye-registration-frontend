@@ -18,6 +18,7 @@ package connectors
 
 import javax.inject.{Inject, Singleton}
 
+import com.codahale.metrics.{Counter, Timer}
 import config.PAYEShortLivedCache
 import play.api.libs.json.Format
 import services.{MetricsService, MetricsSrv}
@@ -31,6 +32,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class S4LConnector @Inject()(payeShortLivedCache: PAYEShortLivedCache, injMetrics: MetricsService) extends S4LConnect {
   val shortCache : ShortLivedCache = payeShortLivedCache
   val metricsService = injMetrics
+  val successCounter = metricsService.s4lSuccessResponseCounter
+  val emptyResponseCounter = metricsService.s4lEmptyResponseCounter
+  val failedCounter = metricsService.s4lFailedResponseCounter
+  def timer = metricsService.s4lResponseTimer.time()
 }
 
 trait S4LConnect {
@@ -38,35 +43,32 @@ trait S4LConnect {
   val shortCache : ShortLivedCache
   val metricsService: MetricsSrv
 
+  val successCounter: Counter
+  val emptyResponseCounter: Counter
+  val failedCounter: Counter
+  def timer: Timer.Context
+
   def saveForm[T](userId: String, formId: String, data: T)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {
-    val s4lTimer = metricsService.s4lResponseTimer.time()
-    shortCache.cache[T](userId, formId, data) map { saved =>
-      s4lTimer.stop()
-      saved
+    metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
+      shortCache.cache[T](userId, formId, data)
     }
   }
 
   def fetchAndGet[T](userId: String, formId: String)(implicit hc: HeaderCarrier, format: Format[T]): Future[Option[T]] = {
-    val s4lTimer = metricsService.s4lResponseTimer.time()
-    shortCache.fetchAndGetEntry[T](userId, formId) map { fG =>
-      s4lTimer.stop()
-      fG
+    metricsService.processOptionalDataWithMetrics(successCounter, emptyResponseCounter, timer) {
+      shortCache.fetchAndGetEntry[T](userId, formId)
     }
   }
 
   def clear(userId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    val s4lTimer = metricsService.s4lResponseTimer.time()
-    shortCache.remove(userId) map { cleared =>
-      s4lTimer.stop()
-      cleared
+    metricsService.processHttpResponseWithMetrics(successCounter, failedCounter, timer) {
+      shortCache.remove(userId)
     }
   }
 
   def fetchAll(userId: String)(implicit hc: HeaderCarrier): Future[Option[CacheMap]] = {
-    val s4lTimer = metricsService.s4lResponseTimer.time()
-    shortCache.fetch(userId) map { fetched =>
-      s4lTimer.stop()
-      fetched
+    metricsService.processOptionalDataWithMetrics(successCounter, failedCounter, timer) {
+      shortCache.fetch(userId)
     }
   }
 }

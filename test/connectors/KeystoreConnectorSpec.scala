@@ -32,6 +32,10 @@ class KeystoreConnectorSpec extends PAYERegSpec {
   val connector = new KeystoreConnect {
     override val metricsService = new MockMetrics
     override val sessionCache = mockSessionCache
+    override val successCounter = metricsService.keystoreSuccessResponseCounter
+    override val failedCounter = metricsService.keystoreFailedResponseCounter
+    override val emptyResponseCounter = metricsService.keystoreFailedResponseCounter
+    override def timer = metricsService.keystoreResponseTimer.time()
   }
 
   implicit val hc : HeaderCarrier = HeaderCarrier()

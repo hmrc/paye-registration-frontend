@@ -32,19 +32,17 @@ import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
 
-class S4LConnectorSpec  extends UnitSpec with MockitoSugar with WithFakeApplication {
-
-  override lazy val fakeApplication = FakeApplication(additionalConfiguration = Map(
-    "Test.microservices.services.cachable.short-lived.cache.host" -> "test-only",
-    "Test.microservices.services.cachable.short-lived.cache.port" -> 99999,
-    "Test.microservices.services.cachable.short-lived.cache.domain" -> "save4later"
-  ))
+class S4LConnectorSpec extends UnitSpec with MockitoSugar {
 
   val mockShortLivedCache = mock[PAYEShortLivedCache]
 
   val S4LConnectorTest = new S4LConnect {
     override val metricsService = new MockMetrics
     override val shortCache = mockShortLivedCache
+    override val successCounter = metricsService.s4lSuccessResponseCounter
+    override val failedCounter = metricsService.s4lFailedResponseCounter
+    override val emptyResponseCounter = metricsService.s4lEmptyResponseCounter
+    override def timer = metricsService.s4lResponseTimer.time()
   }
 
   implicit val hc: HeaderCarrier = HeaderCarrier()

@@ -17,6 +17,7 @@
 package connectors
 
 import fixtures.BusinessRegistrationFixture
+import mocks.MockMetrics
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.{JsObject, Json}
@@ -27,10 +28,17 @@ import scala.concurrent.Future
 
 class AddressLookupConnectorSpec extends PAYERegSpec with BusinessRegistrationFixture {
 
+  val mockMetrics = new MockMetrics
+
   trait Setup {
-    val connector = new AddressLookupConnector {
+    val connector = new AddressLookupConnect {
       override val addressLookupFrontendUrl = "testBusinessRegUrl"
+      override val payeRegistrationUrl = "testPayeRegistrationUrl"
       override val http = mockWSHttp
+      override val metricsService = mockMetrics
+      override val successCounter = metricsService.addressLookupSuccessResponseCounter
+      override val failedCounter = metricsService.addressLookupFailedResponseCounter
+      override def timer = metricsService.addressLookupResponseTimer.time()
     }
   }
 
