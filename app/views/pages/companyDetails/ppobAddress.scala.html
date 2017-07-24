@@ -12,14 +12,8 @@
     )
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.ppobAddress.heading")</h1>
-
-      <p>@Messages("pages.ppobAddress.itmaybeIntro")</p>
-     <ul class="list list-bullet">
-       <li>@Messages("pages.ppobAddress.ppobAddressRules1")</li>
-       <li>@Messages("pages.ppobAddress.ppobAddressRules2")</li>
-       <li>@Messages("pages.ppobAddress.ppobAddressRules3")</li>
-    </ul>
        <p>@Messages("pages.ppobAddress.peopleIntro1")</p>
+       <p>@Messages("pages.ppobAddress.peopleIntro2")</p>
 
     @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.submitPPOBAddress) {
         <div class="form-group">
