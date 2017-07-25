@@ -107,17 +107,4 @@ trait MetricsSrv {
       case _       => failedCount.inc(1); None
     }
   }
-
-  def processHttpResponseWithMetrics(success: Counter, failed: Counter, timer: Timer.Context)(f: => Future[HttpResponse]) = {
-    f map { response =>
-      timer.stop()
-      success.inc(1)
-      response
-    } recover {
-      case e =>
-        timer.stop()
-        failed.inc(1)
-        throw e
-    }
-  }
 }

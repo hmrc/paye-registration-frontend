@@ -61,7 +61,7 @@ trait S4LConnect {
   }
 
   def clear(userId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    metricsService.processHttpResponseWithMetrics(successCounter, failedCounter, timer) {
+    metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
       shortCache.remove(userId)
     }
   }

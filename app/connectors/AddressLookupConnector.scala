@@ -69,7 +69,7 @@ trait AddressLookupConnect {
     val continue     = s"$payeRegistrationUrl${call.url}"
     val continueJson = Json.obj("continueUrl" -> s"$continue")
 
-    metricsService.processHttpResponseWithMetrics(successCounter, failedCounter, timer) {
+    metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
       http.POST[JsObject, HttpResponse](postUrl, continueJson)
     } map {
       _.header("Location").getOrElse {

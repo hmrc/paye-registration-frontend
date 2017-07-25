@@ -66,7 +66,7 @@ trait KeystoreConnect {
   }
 
   def remove()(implicit hc : HeaderCarrier) : Future[HttpResponse] = {
-    metricsService.processHttpResponseWithMetrics(successCounter, failedCounter, timer) {
+    metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
       sessionCache.remove()
     }
   }
