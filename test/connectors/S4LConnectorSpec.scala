@@ -27,7 +27,7 @@ import play.api.test.FakeApplication
 import play.api.test.Helpers._
 import services.MetricsSrv
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
@@ -91,5 +91,12 @@ class S4LConnectorSpec extends UnitSpec with MockitoSugar {
       val result = S4LConnectorTest.fetchAll("testUserId")
       await(result).get shouldBe cacheMap
     }
+    "return an Upstream response when a failure occurs on the fetch (and then returned from metrics)" in {
+      when(mockShortLivedCache.fetch(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.failed(Upstream4xxResponse("400", 400, 400)))
+    val result =  intercept[Upstream4xxResponse] {await(S4LConnectorTest.fetchAll("testUserId"))}
+     await(result) shouldBe Upstream4xxResponse("400", 400, 400)
+    }
+
   }
 }

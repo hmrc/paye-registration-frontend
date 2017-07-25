@@ -93,6 +93,11 @@ trait MetricsSrv {
     f map { data =>
       timer.stop()
       processOptionalDataResponse[T](data)(success, failed)
+    }recover{
+      case e =>
+        timer.stop()
+        failed.inc(1)
+        throw e
     }
   }
 
@@ -106,22 +111,13 @@ trait MetricsSrv {
   def processHttpResponseWithMetrics(success: Counter, failed: Counter, timer: Timer.Context)(f: => Future[HttpResponse]) = {
     f map { response =>
       timer.stop()
-      processHttpResponse(response)(success, failed)
-    }
-  }
-
-  private def processHttpResponse(response: HttpResponse)(successCount: Counter, failedCount: Counter) : HttpResponse = {
-    class Contains(r : Range) {
-      def unapply(i : Int) : Boolean = r contains i
-    }
-    val success   = new Contains(200 to 226)
-    val redirect  = new Contains(300 to 308)
-    val client    = new Contains(400 to 499)
-    val server    = new Contains(500 to 599)
-
-    response.status match {
-      case success() | redirect() => successCount.inc(1); response
-      case client() | server()    => failedCount.inc(1); response
+      success.inc(1)
+      response
+    } recover {
+      case e =>
+        timer.stop()
+        failed.inc(1)
+        throw e
     }
   }
 }
