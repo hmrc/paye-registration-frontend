@@ -179,7 +179,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
 
     "return 400 when a user enters no data" in new Setup {
       when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
-      when(mockCoHoService.getStoredCompanyDetails()(ArgumentMatchers.any())).thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
+      when(mockCoHoService.getCompanyDetails()(ArgumentMatchers.any())).thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
       )) {
         result =>
@@ -188,7 +188,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "return 400 when a user enters invalid data" in new Setup {
-      when(mockCoHoService.getStoredCompanyDetails()(ArgumentMatchers.any())).thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
+      when(mockCoHoService.getCompanyDetails()(ArgumentMatchers.any())).thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "differentName" -> "true"
       )) {

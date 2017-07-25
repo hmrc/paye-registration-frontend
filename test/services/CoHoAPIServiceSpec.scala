@@ -26,7 +26,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
 
 import scala.concurrent.Future
 
@@ -47,42 +47,26 @@ class CoHoAPIServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFi
 
   implicit val hc = HeaderCarrier()
 
-  "fetchAndStoreCompanyDetails" should {
+  "Calling getCompanyDetails" should {
+    "return the Company Details from Incorportation Information service" in new Setup {
+      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(IncorpInfoSuccessResponse(validCoHoCompanyDetailsResponse)))
 
-    "return a successful DownstreamOutcome for a successful response from the CoHo API" in new Setup {
-      mockKeystoreFetchAndGet[BusinessProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
-      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(tstSuccessResult))
-      mockKeystoreCache[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, CacheMap("map", Map.empty))
-
-      await(service.fetchAndStoreCoHoCompanyDetails("regId", "txId")) shouldBe DownstreamOutcome.Success
+      await(service.getCompanyDetails("regId", "txId")) shouldBe validCoHoCompanyDetailsResponse
     }
 
-    "return a failed DownstreamOutcome for a Bad Request response from the CoHo API" in new Setup {
-      mockKeystoreFetchAndGet[BusinessProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
-      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(tstBadRequestResult))
+    "throw a BadRequestException when Bad Request response is returned from Incorporation Information" in new Setup {
+      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(IncorpInfoBadRequestResponse))
 
-      await(service.fetchAndStoreCoHoCompanyDetails("regId", "txId")) shouldBe DownstreamOutcome.Failure
+      a[BadRequestException] shouldBe thrownBy(await(service.getCompanyDetails("regId", "txId")))
     }
 
-    "return a failed DownstreamOutcome for an Internal Exception response from the CoHo API" in new Setup {
-      mockKeystoreFetchAndGet[BusinessProfile](CacheKeys.CurrentProfile.toString, Some(validCurrentProfileResponse))
-      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(tstInternalErrorResult))
+    "throw a Exception when IncorpInfoErrorResponse is returned from Incorporation Information" in new Setup {
+      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(IncorpInfoErrorResponse(new Exception)))
 
-      await(service.fetchAndStoreCoHoCompanyDetails("regId", "txId")) shouldBe DownstreamOutcome.Failure
-    }
-  }
-
-  "Calling getCompanyName" should {
-    "return the Company Name when there is a CoHo company details model stored in keystore" in new Setup {
-      mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, Some(validCoHoCompanyDetailsResponse))
-
-      await(service.getStoredCompanyDetails()) shouldBe validCoHoCompanyDetailsResponse
-    }
-
-    "throw a CompanyDetailsNotFoundException when there is no CoHo company details model stored in keystore" in new Setup {
-      mockKeystoreFetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, None)
-
-      a[CompanyDetailsNotFoundException] shouldBe thrownBy(await(service.getStoredCompanyDetails()))
+      a[Exception] shouldBe thrownBy(await(service.getCompanyDetails("regId", "txId")))
     }
   }
 

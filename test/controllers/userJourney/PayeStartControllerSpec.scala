@@ -19,7 +19,7 @@ package controllers.userJourney
 import builders.AuthBuilder
 import connectors.CompanyRegistrationConnector
 import enums.{AccountTypes, DownstreamOutcome, RegistrationDeletion}
-import fixtures.PAYERegistrationFixture
+import fixtures.{CoHoAPIFixture, PAYERegistrationFixture}
 import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
@@ -31,11 +31,11 @@ import play.api.test.FakeRequest
 import services.{CurrentProfileService, IncorporationInformationService, PAYERegistrationService}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier, NotFoundException}
 
 import scala.concurrent.Future
 
-class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture with BeforeAndAfterEach {
+class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture with BeforeAndAfterEach with CoHoAPIFixture {
 
   val mockCurrentProfileService = mock[CurrentProfileService]
   val mockCoHoAPIService = mock[IncorporationInformationService]
@@ -96,15 +96,31 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
       }
     }
 
-    "show an Error page for an authorised user with a registration ID but no CoHo Company Details" in new Setup {
+    "show an Error page for an authorised user with a registration ID but a Bad Request exception is returned from Incorporation Information" in new Setup {
       when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]()))
         .thenReturn(AccountTypes.Organisation)
 
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("held")))
 
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(DownstreamOutcome.Failure)
+      when(mockCoHoAPIService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new BadRequestException("test")))
+
+      AuthBuilder.showWithAuthorisedUser(controller.startPaye, mockAuthConnector) {
+        result =>
+          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      }
+    }
+
+    "show an Error page for an authorised user with a registration ID but an Exception is returned from Incorporation Information" in new Setup {
+      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]()))
+        .thenReturn(AccountTypes.Organisation)
+
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validCurrentProfile("held")))
+
+      when(mockCoHoAPIService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new Exception("test")))
 
       AuthBuilder.showWithAuthorisedUser(controller.startPaye, mockAuthConnector) {
         result =>
@@ -118,8 +134,8 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
 
       mockFetchCurrentProfile()
 
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(DownstreamOutcome.Success)
+      when(mockCoHoAPIService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
 
       when(mockPAYERegService.assertRegistrationFootprint(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(DownstreamOutcome.Failure)
@@ -136,8 +152,8 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("held")))
 
-      when(mockCoHoAPIService.fetchAndStoreCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(DownstreamOutcome.Success)
+      when(mockCoHoAPIService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
 
       when(mockPAYERegService.assertRegistrationFootprint(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(DownstreamOutcome.Success)

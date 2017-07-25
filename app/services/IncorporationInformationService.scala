@@ -18,13 +18,12 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import models.api.Director
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import models.view.Directors
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -41,26 +40,11 @@ trait IncorporationInformationSrv {
   val incorpInfoConnector : IncorporationInformationConnect
   val keystoreConnector : KeystoreConnect
 
-  def fetchAndStoreCoHoCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    for {
-      coHoResp <- incorpInfoConnector.getCoHoCompanyDetails(regId, txId)
-      outcome <- processCoHoResponse(coHoResp)
-    } yield outcome
-  }
-
-  private def processCoHoResponse(resp: IncorpInfoResponse)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    resp match {
-      case IncorpInfoSuccessResponse(companyDetails) =>
-        keystoreConnector.cache[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString, companyDetails) map {
-          cacheMap => DownstreamOutcome.Success
-        }
-      case _ => Future.successful(DownstreamOutcome.Failure)
-    }
-  }
-
-  def getStoredCompanyDetails()(implicit hc: HeaderCarrier): Future[CoHoCompanyDetailsModel] = {
-    keystoreConnector.fetchAndGet[CoHoCompanyDetailsModel](CacheKeys.CoHoCompanyDetails.toString) map {
-      _.getOrElse(throw new CompanyDetailsNotFoundException())
+  def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CoHoCompanyDetailsModel] = {
+    incorpInfoConnector.getCoHoCompanyDetails(regId, txId) map {
+      case IncorpInfoSuccessResponse(companyDetails) => companyDetails
+      case IncorpInfoBadRequestResponse => throw new BadRequestException(s"Received a BadRequest status code when expecting company details for regId: $regId / TX-ID: $txId")
+      case IncorpInfoErrorResponse(ex) => throw ex
     }
   }
 

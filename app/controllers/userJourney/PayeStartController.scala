@@ -22,7 +22,7 @@ import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors._
 import enums.{AccountTypes, CacheKeys, DownstreamOutcome, RegistrationDeletion}
-import models.external.CurrentProfile
+import models.external.{CoHoCompanyDetailsModel, CurrentProfile}
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
@@ -72,7 +72,7 @@ trait PayeStartCtrl extends FrontendController with Actions with I18nSupport {
         hasOrgAffinity {
           checkAndStoreCurrentProfile {
             profile =>
-              checkAndStoreCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) {
+              fetchCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) {
                 assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId){
                   Redirect(controllers.userJourney.routes.WelcomeController.show())
                 }
@@ -117,10 +117,9 @@ trait PayeStartCtrl extends FrontendController with Actions with I18nSupport {
     }
   }
 
-  private def checkAndStoreCompanyDetails(regId: String, txID: String)(f: => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
-    coHoAPIService.fetchAndStoreCoHoCompanyDetails(regId, txID) flatMap {
-      case DownstreamOutcome.Success => f
-      case DownstreamOutcome.Failure => Future.successful(InternalServerError(views.html.pages.error.restart()))
+  private def fetchCompanyDetails(regId: String, txID: String)(f: => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+    coHoAPIService.getCompanyDetails(regId, txID) flatMap(_ => f) recover {
+      case ex => InternalServerError(views.html.pages.error.restart())
     }
   }
 

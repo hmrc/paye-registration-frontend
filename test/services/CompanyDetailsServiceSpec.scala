@@ -291,7 +291,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
-      when(mockCoHoService.getStoredCompanyDetails()(ArgumentMatchers.any()))
+      when(mockCoHoService.getCompanyDetails()(ArgumentMatchers.any()))
         .thenReturn(Future.successful(tstCompanyDetailsModel))
 
       when(mockPrepopulationService.getBusinessContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))

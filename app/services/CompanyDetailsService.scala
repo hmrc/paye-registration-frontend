@@ -83,7 +83,7 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
     oAPI match {
       case Some(detailsAPI) => Future.successful(apiToView(detailsAPI))
       case None => for {
-        details <- cohoService.getStoredCompanyDetails
+        details <- cohoService.getCompanyDetails
         oPrepopBCD <- prepopService.getBusinessContactDetails(regId)
       } yield CompanyDetailsView(details.companyName, None, details.roAddress, None, oPrepopBCD)
     }
