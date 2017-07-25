@@ -27,24 +27,22 @@ import play.api.test.FakeApplication
 import play.api.test.Helpers._
 import services.MetricsSrv
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
 
-class S4LConnectorSpec  extends UnitSpec with MockitoSugar with WithFakeApplication {
-
-  override lazy val fakeApplication = FakeApplication(additionalConfiguration = Map(
-    "Test.microservices.services.cachable.short-lived.cache.host" -> "test-only",
-    "Test.microservices.services.cachable.short-lived.cache.port" -> 99999,
-    "Test.microservices.services.cachable.short-lived.cache.domain" -> "save4later"
-  ))
+class S4LConnectorSpec extends UnitSpec with MockitoSugar {
 
   val mockShortLivedCache = mock[PAYEShortLivedCache]
 
   val S4LConnectorTest = new S4LConnect {
     override val metricsService = new MockMetrics
     override val shortCache = mockShortLivedCache
+    override val successCounter = metricsService.s4lSuccessResponseCounter
+    override val failedCounter = metricsService.s4lFailedResponseCounter
+    override val emptyResponseCounter = metricsService.s4lEmptyResponseCounter
+    override def timer = metricsService.s4lResponseTimer.time()
   }
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -93,5 +91,12 @@ class S4LConnectorSpec  extends UnitSpec with MockitoSugar with WithFakeApplicat
       val result = S4LConnectorTest.fetchAll("testUserId")
       await(result).get shouldBe cacheMap
     }
+    "return an Upstream response when a failure occurs on the fetch (and then returned from metrics)" in {
+      when(mockShortLivedCache.fetch(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.failed(Upstream4xxResponse("400", 400, 400)))
+    val result =  intercept[Upstream4xxResponse] {await(S4LConnectorTest.fetchAll("testUserId"))}
+     await(result) shouldBe Upstream4xxResponse("400", 400, 400)
+    }
+
   }
 }

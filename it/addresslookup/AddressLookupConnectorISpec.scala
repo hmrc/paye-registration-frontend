@@ -23,6 +23,7 @@ import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.mvc.Call
+import services.MetricsService
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 class AddressLookupConnectorISpec extends IntegrationSpecBase {
@@ -70,7 +71,8 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
     )
 
     "get an address from a 200" in {
-      val addressLookupConnector = new AddressLookupConnector()
+      lazy val metrics = app.injector.instanceOf(classOf[MetricsService])
+      val addressLookupConnector = new AddressLookupConnector(metrics)
 
       def getAddress = addressLookupConnector.getAddress(testId)
 
@@ -106,7 +108,8 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
         country = None
       )
 
-      val addressLookupConnector = new AddressLookupConnector()
+      lazy val metrics = app.injector.instanceOf(classOf[MetricsService])
+      val addressLookupConnector = new AddressLookupConnector(metrics)
 
       def getAddress = addressLookupConnector.getAddress(testId)
 
@@ -129,7 +132,8 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
       lazy val call: Call = controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()
       val tstALFUrl = """/test-alf/start-url"""
 
-      val addressLookupConnector = new AddressLookupConnector()
+      lazy val metrics = app.injector.instanceOf(classOf[MetricsService])
+      val addressLookupConnector = new AddressLookupConnector(metrics)
 
       def getOnRamp = addressLookupConnector.getOnRampUrl(query, call)
 
@@ -150,7 +154,8 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
       lazy val call: Call = controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()
       val tstALFUrl = """/test-alf/start-url"""
 
-      val addressLookupConnector = new AddressLookupConnector()
+      lazy val metrics = app.injector.instanceOf(classOf[MetricsService])
+      val addressLookupConnector = new AddressLookupConnector(metrics)
 
       def getOnRamp = addressLookupConnector.getOnRampUrl(query, call)
 

@@ -46,6 +46,9 @@ class IncorporationInformationConnectorSpec extends PAYERegSpec with CoHoAPIFixt
       val incorpInfoUri = testUri
       override val http : WSHttp = mockWSHttp
       override val metricsService = new MockMetrics
+      override val successCounter = metricsService.companyDetailsSuccessResponseCounter
+      override val failedCounter = metricsService.companyDetailsFailedResponseCounter
+      override def timer = metricsService.incorpInfoResponseTimer.time()
     }
   }
 

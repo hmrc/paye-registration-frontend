@@ -18,6 +18,7 @@ package connectors
 
 import javax.inject.{Inject, Singleton}
 
+import com.codahale.metrics.{Counter, Timer}
 import config.PAYESessionCache
 import play.api.libs.json.Format
 import services.{MetricsService, MetricsSrv}
@@ -31,41 +32,42 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class KeystoreConnector @Inject()(payeSessionCache: PAYESessionCache, injMetrics: MetricsService) extends KeystoreConnect {
   val sessionCache : SessionCache = payeSessionCache
   val metricsService = injMetrics
+  val successCounter        = metricsService.keystoreSuccessResponseCounter
+  val emptyResponseCounter  = metricsService.keystoreEmptyResponseCounter
+  val failedCounter         = metricsService.keystoreFailedResponseCounter
+  def timer                 = metricsService.keystoreResponseTimer.time()
 }
 
 trait KeystoreConnect {
   val sessionCache: SessionCache
   val metricsService: MetricsSrv
 
+  val successCounter: Counter
+  val emptyResponseCounter: Counter
+  val failedCounter: Counter
+  def timer: Timer.Context
+
   def cache[T](formId: String, body : T)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {
-    val keystoreTimer = metricsService.keystoreResponseTimer.time()
-    sessionCache.cache[T](formId, body) map { saved =>
-      keystoreTimer.stop()
-      saved
+    metricsService.processDataResponseWithMetrics[CacheMap](successCounter, failedCounter, timer) {
+      sessionCache.cache[T](formId, body)
     }
   }
 
   def fetch()(implicit hc : HeaderCarrier) : Future[Option[CacheMap]] = {
-    val keystoreTimer = metricsService.keystoreResponseTimer.time()
-    sessionCache.fetch() map { fetched =>
-      keystoreTimer.stop()
-      fetched
+    metricsService.processOptionalDataWithMetrics[CacheMap](successCounter, emptyResponseCounter, timer) {
+      sessionCache.fetch()
     }
   }
 
   def fetchAndGet[T](key : String)(implicit hc: HeaderCarrier, format: Format[T]): Future[Option[T]] = {
-    val keystoreTimer = metricsService.keystoreResponseTimer.time()
-    sessionCache.fetchAndGetEntry(key) map { fG =>
-      keystoreTimer.stop()
-      fG
+    metricsService.processOptionalDataWithMetrics[T](successCounter, emptyResponseCounter, timer) {
+      sessionCache.fetchAndGetEntry(key)
     }
   }
 
   def remove()(implicit hc : HeaderCarrier) : Future[HttpResponse] = {
-    val keystoreTimer = metricsService.keystoreResponseTimer.time()
-    sessionCache.remove() map { httpResponse =>
-      keystoreTimer.stop()
-      httpResponse
+    metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
+      sessionCache.remove()
     }
   }
 }

@@ -18,6 +18,7 @@ package connectors
 
 import javax.inject.{Inject, Singleton}
 
+import com.codahale.metrics.{Counter, Timer}
 import common.exceptions.DownstreamExceptions.OfficerListNotFoundException
 import config.WSHttp
 import models.external.{CoHoCompanyDetailsModel, OfficerList}
@@ -38,6 +39,10 @@ class IncorporationInformationConnector @Inject()(injMetrics: MetricsService) ex
   lazy val incorpInfoUri = getConfString("incorporation-information.uri","")
   val http : WSHttp = WSHttp
   val metricsService = injMetrics
+
+  val successCounter = metricsService.companyDetailsSuccessResponseCounter
+  val failedCounter  = metricsService.companyDetailsFailedResponseCounter
+  def timer          = metricsService.incorpInfoResponseTimer.time()
 }
 
 sealed trait IncorpInfoResponse
@@ -52,21 +57,28 @@ trait IncorporationInformationConnect extends RegistrationWhitelist {
   val http: WSHttp
   val metricsService: MetricsSrv
 
+  val successCounter: Counter
+  val failedCounter: Counter
+  def timer: Timer.Context
+
   def getCoHoCompanyDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[IncorpInfoResponse] = {
     ifRegIdNotWhitelisted(regId) {
       implicit val rds = CoHoCompanyDetailsModel.incorpInfoReads
-      val incorpInfoTimer = metricsService.incorpInfoResponseTimer.time()
+      val incorpInfoTimer = timer
       http.GET[CoHoCompanyDetailsModel](s"$incorpInfoUrl$incorpInfoUri/$transactionId/company-profile") map { res =>
         incorpInfoTimer.stop()
+        successCounter.inc(1)
         IncorpInfoSuccessResponse(res)
       } recover {
         case badRequestErr: BadRequestException =>
           Logger.error(s"[IncorporationInformationConnector] [getCoHoCompanyDetails] - Received a BadRequest status code when expecting company details for regId: $regId / TX-ID: $transactionId")
           incorpInfoTimer.stop()
+          failedCounter.inc(1)
           IncorpInfoBadRequestResponse
         case ex: Exception =>
           Logger.error(s"[IncorporationInformationConnector] [getCoHoCompanyDetails] - Received an error when expecting company details for regId: $regId / TX-ID: $transactionId - error: ${ex.getMessage}")
           incorpInfoTimer.stop()
+          failedCounter.inc(1)
           IncorpInfoErrorResponse(ex)
       }
     }
