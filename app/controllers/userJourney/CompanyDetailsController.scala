@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
-import enums.{CacheKeys, DownstreamOutcome}
+import enums.DownstreamOutcome
 import forms.companyDetails.{BusinessContactDetailsForm, PPOBForm, TradingNameForm}
 import models.view._
 import play.api.Logger
@@ -31,10 +31,9 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import services._
 import uk.gov.hmrc.play.frontend.auth.{Actions, AuthContext}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.SessionProfile
+import utils.{SessionProfile, UpToDateCompanyDetails}
 import views.html.pages.companyDetails.{confirmROAddress, businessContactDetails => BusinessContactDetailsPage, ppobAddress => PPOBAddressPage, tradingName => TradingNamePage}
 import common.exceptions.DownstreamExceptions.S4LFetchException
-import models.external.CurrentProfile
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -44,7 +43,7 @@ class CompanyDetailsController @Inject()(
                                           injS4LService: S4LService,
                                           injKeystoreConnector: KeystoreConnector,
                                           injCompanyDetailsService: CompanyDetailsService,
-                                          injCohoService: IncorporationInformationService,
+                                          injIncorporationInformationService: IncorporationInformationService,
                                           injMessagesApi: MessagesApi,
                                           injPayeRegistrationConnector: PAYERegistrationConnector,
                                           injAddressLookupService: AddressLookupService,
@@ -54,41 +53,41 @@ class CompanyDetailsController @Inject()(
   val s4LService = injS4LService
   val keystoreConnector = injKeystoreConnector
   val companyDetailsService = injCompanyDetailsService
-  val cohoService = injCohoService
+  val incorpInfoService = injIncorporationInformationService
   val messagesApi = injMessagesApi
   val addressLookupService = injAddressLookupService
   val payeRegistrationConnector = injPayeRegistrationConnector
   val prepopService = injPrepopulationService
 }
 
-trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
+trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSupport with SessionProfile with UpToDateCompanyDetails {
   val s4LService: S4LSrv
   val keystoreConnector: KeystoreConnect
   val companyDetailsService: CompanyDetailsSrv
-  val cohoService: IncorporationInformationSrv
+  val incorpInfoService: IncorporationInformationSrv
   val addressLookupService: AddressLookupSrv
   val prepopService: PrepopulationSrv
 
   val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user => implicit request =>
       withCurrentProfile { profile =>
-          for {
-            companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-          } yield companyDetails.tradingName match {
+        withLatestCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) { companyDetails =>
+          companyDetails.tradingName match {
             case Some(model) => Ok(TradingNamePage(TradingNameForm.form.fill(model), companyDetails.companyName))
             case _ => Ok(TradingNamePage(TradingNameForm.form, companyDetails.companyName))
           }
         }
+      }
   }
 
   val submitTradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     withCurrentProfile { profile =>
       TradingNameForm.form.bindFromRequest.fold(
-        errors => badRequestResponse(errors),
+        errors => badRequestResponse(profile.registrationID, profile.companyTaxRegistration.transactionId, errors),
         success => {
           val validatedForm = TradingNameForm.validateForm(TradingNameForm.form.fill(success))
           if (validatedForm.hasErrors) {
-            badRequestResponse(validatedForm)
+            badRequestResponse(profile.registrationID, profile.companyTaxRegistration.transactionId, validatedForm)
           } else {
             val trimmedTradingName = success.copy(tradingName = success.tradingName.map(_.trim))
             companyDetailsService.submitTradingName(trimmedTradingName, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
@@ -105,9 +104,9 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
     implicit user =>
       implicit request =>
         withCurrentProfile { profile =>
-          for {
-            companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-          } yield Ok(confirmROAddress(companyDetails.companyName, companyDetails.roAddress))
+          withLatestCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) { companyDetails =>
+            Ok(confirmROAddress(companyDetails.companyName, companyDetails.roAddress))
+          }
         }
   }
 
@@ -117,9 +116,9 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
         Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.ppobAddress()))
   }
 
-  private def badRequestResponse(form: Form[TradingName])(implicit request: Request[AnyContent]): Future[Result] = {
-    cohoService.getCompanyDetails map {
-      details => BadRequest(TradingNamePage(form, details.companyName))
+  private def badRequestResponse(regId: String, txID: String, form: Form[TradingName])(implicit request: Request[AnyContent]): Future[Result] = {
+    withLatestCompanyDetails(regId, txID) { details =>
+      BadRequest(TradingNamePage(form, details.companyName))
     }
   }
 
@@ -129,8 +128,8 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
         withCurrentProfile { profile =>
           companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) flatMap {
             details => details.businessContactDetails match {
-              case Some(bcd) => Future.successful(Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form.fill(bcd))))
-              case None      => Future.successful(Ok(BusinessContactDetailsPage(details.companyName, BusinessContactDetailsForm.form)))
+              case Some(bcd) => Future.successful(Ok(BusinessContactDetailsPage(BusinessContactDetailsForm.form.fill(bcd))))
+              case None      => Future.successful(Ok(BusinessContactDetailsPage(BusinessContactDetailsForm.form)))
             }
           }
         }
@@ -141,9 +140,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
       implicit request =>
         withCurrentProfile { profile =>
           BusinessContactDetailsForm.form.bindFromRequest.fold(
-            errs => companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map {
-              details => BadRequest(BusinessContactDetailsPage(details.companyName, errs))
-            },
+            errs => Future.successful(BadRequest(BusinessContactDetailsPage(errs))),
             success => {
               val trimmed = success.copy(email = success.email map(_.trim), phoneNumber = success.phoneNumber map(_.trim), mobileNumber = success.mobileNumber map(_.trim))
               companyDetailsService.submitBusinessContact(trimmed, profile.registrationID, profile.companyTaxRegistration.transactionId) map {

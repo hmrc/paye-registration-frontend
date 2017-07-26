@@ -16,21 +16,17 @@
 
 package services
 
-import common.exceptions.DownstreamExceptions.CompanyDetailsNotFoundException
 import connectors._
-import enums.{CacheKeys, DownstreamOutcome}
 import fixtures.{CoHoAPIFixture, KeystoreFixture}
-import models.external.{BusinessProfile, CoHoCompanyDetailsModel}
 import models.view.Directors
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
 
 import scala.concurrent.Future
 
-class CoHoAPIServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFixture {
+class IncorporationInformationServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFixture {
 
   val mockCoHoAPIConnector = mock[IncorporationInformationConnector]
 

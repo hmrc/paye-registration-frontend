@@ -38,7 +38,6 @@ import scala.concurrent.Future
 class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture with BeforeAndAfterEach with CoHoAPIFixture {
 
   val mockCurrentProfileService = mock[CurrentProfileService]
-  val mockCoHoAPIService = mock[IncorporationInformationService]
   val mockPAYERegService = mock[PAYERegistrationService]
   val mockCompanyRegistrationConnector = mock[CompanyRegistrationConnector]
 
@@ -46,7 +45,6 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
     val controller = new PayeStartCtrl{
       override val authConnector = mockAuthConnector
       override val currentProfileService = mockCurrentProfileService
-      override val coHoAPIService = mockCoHoAPIService
       override val payeRegistrationService = mockPAYERegService
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
       override val compRegFEURL: String = "testUrl"
@@ -96,46 +94,11 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
       }
     }
 
-    "show an Error page for an authorised user with a registration ID but a Bad Request exception is returned from Incorporation Information" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]()))
-        .thenReturn(AccountTypes.Organisation)
-
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCurrentProfile("held")))
-
-      when(mockCoHoAPIService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.failed(new BadRequestException("test")))
-
-      AuthBuilder.showWithAuthorisedUser(controller.startPaye, mockAuthConnector) {
-        result =>
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-      }
-    }
-
-    "show an Error page for an authorised user with a registration ID but an Exception is returned from Incorporation Information" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]()))
-        .thenReturn(AccountTypes.Organisation)
-
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCurrentProfile("held")))
-
-      when(mockCoHoAPIService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.failed(new Exception("test")))
-
-      AuthBuilder.showWithAuthorisedUser(controller.startPaye, mockAuthConnector) {
-        result =>
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-      }
-    }
-
     "show an Error page for an authorised user with a registration ID and CoHo Company Details, with an error response from the microservice" in new Setup {
       when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]()))
         .thenReturn(AccountTypes.Organisation)
 
       mockFetchCurrentProfile()
-
-      when(mockCoHoAPIService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
 
       when(mockPAYERegService.assertRegistrationFootprint(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(DownstreamOutcome.Failure)
@@ -151,9 +114,6 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
 
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("held")))
-
-      when(mockCoHoAPIService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
 
       when(mockPAYERegService.assertRegistrationFootprint(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(DownstreamOutcome.Success)

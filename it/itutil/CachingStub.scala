@@ -31,8 +31,7 @@ trait CachingStub {
   implicit lazy val encryptionFormat = new JsonEncryptor[JsObject]()
 
   def stubKeystoreMetadata(session: String,
-                           regId: String,
-                           companyName: String) = {
+                           regId: String) = {
 
     val keystoreUrl = s"/keystore/paye-registration-frontend/$session"
     stubFor(get(urlMatching(keystoreUrl))
@@ -50,14 +49,6 @@ trait CachingStub {
                |      "transactionId": "12345"
                |   },
                |   "language": "ENG"
-               |  },
-               |  "CoHoCompanyDetails": {
-               |    "company_name": "$companyName",
-               |    "registered_office_address": {
-               |      "line1":"Line1",
-               |      "line2":"Line2",
-               |      "postCode":"TE1 1ST"
-               |    }
                |  }
                |}
                |}""".stripMargin

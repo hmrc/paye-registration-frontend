@@ -29,14 +29,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class DirectorDetailsService @Inject()(
-                                        payeRegistrationConn: PAYERegistrationConnector,
-                                        coHoAPIServ: IncorporationInformationService,
-                                        s4LServ: S4LService) extends DirectorDetailsSrv {
+class DirectorDetailsService @Inject()(injPayeRegistrationConnector: PAYERegistrationConnector,
+                                       injIncorporationInformationService: IncorporationInformationService,
+                                       injS4LService: S4LService) extends DirectorDetailsSrv {
 
-  override val payeRegConnector = payeRegistrationConn
-  override val incorpInfoService = coHoAPIServ
-  override val s4LService = s4LServ
+  override val payeRegConnector = injPayeRegistrationConnector
+  override val incorpInfoService = injIncorporationInformationService
+  override val s4LService = injS4LService
 }
 
 trait DirectorDetailsSrv extends RegistrationWhitelist {

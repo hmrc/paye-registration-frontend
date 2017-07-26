@@ -80,8 +80,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
 
     "return an OK with data from registration" in new Setup {
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
-
       when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(validPAYEContactView)
 
@@ -92,8 +90,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
 
     "return an OK with data from prepopulation" in new Setup {
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
-
       when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(emptyPAYEContactView)
 
@@ -104,8 +100,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
     }
 
     "return an OK without data" in new Setup {
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
-
       when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(emptyPAYEContactView)
 
@@ -131,9 +125,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "name" -> ""
       )
 
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCompanyDetailsViewModel))
-
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYEContactDetails, mockAuthConnector, request) {
         result =>
           status(result) shouldBe BAD_REQUEST
@@ -144,9 +135,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       val request = FakeRequest().withFormUrlEncodedBody(
         "name" -> "teeeeeeest"
       )
-
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCompanyDetailsViewModel))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYEContactDetails, mockAuthConnector, request) {
         result =>

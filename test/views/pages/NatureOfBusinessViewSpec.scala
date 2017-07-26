@@ -27,10 +27,9 @@ class NatureOfBusinessViewSpec extends PAYERegSpec with I18nSupport {
 
   implicit val request = FakeRequest()
   implicit val messagesApi : MessagesApi = injector.instanceOf[MessagesApi]
-  val companyName = "Company Limited"
 
   "The nature of business screen" should {
-    lazy val view = natureOfBusiness(NatureOfBusinessForm.form, companyName)
+    lazy val view = natureOfBusiness(NatureOfBusinessForm.form)
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct title" in {
@@ -38,7 +37,7 @@ class NatureOfBusinessViewSpec extends PAYERegSpec with I18nSupport {
     }
 
     "have the correct lede paragraph" in {
-      document.getElementById("lede-paragraph").text shouldBe messagesApi("pages.natureOfBusiness.lede", companyName)
+      document.getElementById("lede-paragraph").text shouldBe messagesApi("pages.natureOfBusiness.lede")
     }
 
     "have the correct hint text" in {

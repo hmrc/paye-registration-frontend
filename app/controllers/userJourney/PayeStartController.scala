@@ -22,7 +22,7 @@ import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors._
 import enums.{AccountTypes, CacheKeys, DownstreamOutcome, RegistrationDeletion}
-import models.external.{CoHoCompanyDetailsModel, CurrentProfile}
+import models.external.CurrentProfile
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
@@ -36,7 +36,6 @@ import scala.concurrent.Future
 
 @Singleton
 class PayeStartController @Inject()(injCurrentProfileService: CurrentProfileService,
-                                    injCoHoAPIService: IncorporationInformationService,
                                     injPayeRegistrationService: PAYERegistrationService,
                                     injKeystoreConnector: KeystoreConnector,
                                     injBusinessRegistrationConnector: BusinessRegistrationConnector,
@@ -45,7 +44,6 @@ class PayeStartController @Inject()(injCurrentProfileService: CurrentProfileServ
   val authConnector = FrontendAuthConnector
   val messagesApi = injMessagesApi
   val currentProfileService = injCurrentProfileService
-  val coHoAPIService = injCoHoAPIService
   val payeRegistrationService = injPayeRegistrationService
   val keystoreConnector = injKeystoreConnector
   val businessRegistrationConnector = injBusinessRegistrationConnector
@@ -57,7 +55,6 @@ class PayeStartController @Inject()(injCurrentProfileService: CurrentProfileServ
 trait PayeStartCtrl extends FrontendController with Actions with I18nSupport {
 
   val currentProfileService: CurrentProfileSrv
-  val coHoAPIService: IncorporationInformationSrv
   val payeRegistrationService: PAYERegistrationSrv
   val keystoreConnector: KeystoreConnect
   val businessRegistrationConnector: BusinessRegistrationConnect
@@ -72,10 +69,8 @@ trait PayeStartCtrl extends FrontendController with Actions with I18nSupport {
         hasOrgAffinity {
           checkAndStoreCurrentProfile {
             profile =>
-              fetchCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) {
-                assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId){
-                  Redirect(controllers.userJourney.routes.WelcomeController.show())
-                }
+              assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId){
+                Redirect(controllers.userJourney.routes.WelcomeController.show())
               }
           }
         }
@@ -114,12 +109,6 @@ trait PayeStartCtrl extends FrontendController with Actions with I18nSupport {
     } recover {
       case ex: NotFoundException => Redirect(s"$compRegFEURL$compRegFEURI/start")
       case _ => InternalServerError(views.html.pages.error.restart())
-    }
-  }
-
-  private def fetchCompanyDetails(regId: String, txID: String)(f: => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
-    coHoAPIService.getCompanyDetails(regId, txID) flatMap(_ => f) recover {
-      case ex => InternalServerError(views.html.pages.error.restart())
     }
   }
 

@@ -32,16 +32,16 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.SessionProfile
 import views.html.pages.{natureOfBusiness => NatureOfBusinessPage}
 
+import scala.concurrent.Future
+
 @Singleton
 class NatureOfBusinessController @Inject()(injMessagesApi: MessagesApi,
                                            injNatureOfBusinessService: NatureOfBusinessService,
                                            injKeystoreConnector: KeystoreConnector,
-                                           injPayeRegistrationConnector: PAYERegistrationConnector,
-                                           injCompanyDetailsService: CompanyDetailsService) extends NatureOfBusinessCtrl {
+                                           injPayeRegistrationConnector: PAYERegistrationConnector) extends NatureOfBusinessCtrl {
   val authConnector = FrontendAuthConnector
   implicit val messagesApi = injMessagesApi
   val natureOfBusinessService = injNatureOfBusinessService
-  val companyDetailsService = injCompanyDetailsService
   val keystoreConnector = injKeystoreConnector
   val payeRegistrationConnector = injPayeRegistrationConnector
 }
@@ -51,19 +51,15 @@ trait NatureOfBusinessCtrl extends FrontendController with Actions with I18nSupp
   val authConnector: AuthConnector
   implicit val messagesApi: MessagesApi
   val natureOfBusinessService: NatureOfBusinessSrv
-  val companyDetailsService: CompanyDetailsSrv
   val keystoreConnector: KeystoreConnect
 
   val natureOfBusiness: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
         withCurrentProfile { profile =>
-          for {
-            companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-            nob <- natureOfBusinessService.getNatureOfBusiness(profile.registrationID)
-          } yield nob match {
-            case Some(model) => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form.fill(model), companyDetails.companyName))
-            case None => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form, companyDetails.companyName))
+          natureOfBusinessService.getNatureOfBusiness(profile.registrationID) map {
+            case Some(model) => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form.fill(model)))
+            case None => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form))
           }
         }
   }
@@ -73,12 +69,7 @@ trait NatureOfBusinessCtrl extends FrontendController with Actions with I18nSupp
       implicit request =>
         withCurrentProfile { profile =>
           NatureOfBusinessForm.form.bindFromRequest.fold(
-            errors => {
-              companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map {
-                details =>
-                  BadRequest(NatureOfBusinessPage(errors, details.companyName))
-              }
-            },
+            errors => Future.successful(BadRequest(NatureOfBusinessPage(errors))),
             success => {
               natureOfBusinessService.saveNatureOfBusiness(success, profile.registrationID) map {
                 case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.DirectorDetailsController.directorDetails())

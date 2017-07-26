@@ -18,7 +18,7 @@ package utils
 
 import common.exceptions.InternalExceptions
 import connectors.{KeystoreConnect, PAYERegistrationConnect}
-import enums.{CacheKeys, PAYEStatus}
+import enums.CacheKeys
 import models.external.CurrentProfile
 import play.api.mvc.{Request, Result}
 import play.api.mvc.Results.Redirect

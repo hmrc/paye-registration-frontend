@@ -68,20 +68,16 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
   "GET Director Details" should {
     "show the page with a default list of Directors if the regId is part of the whitelist" in {
       val regIdWhitelisted = "regWhitelist123"
-      val defaultCompanyName = "TEST-DEFAULT-COMPANY-NAME"
 
       setupSimpleAuthMocks()
-
       stubSuccessfulLogin()
-
       stubPayeRegDocumentStatus(regIdWhitelisted)
+      stubKeystoreMetadata(SessionId, regIdWhitelisted)
 
-      stubKeystoreMetadata(SessionId, regIdWhitelisted, companyName)
-
-      stubGet(s"/save4later/paye-registration-frontend/${regIdWhitelisted}", 404, "")
+      stubGet(s"/save4later/paye-registration-frontend/$regIdWhitelisted", 404, "")
 
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/save4later/paye-registration-frontend/${regIdWhitelisted}/data/DirectorDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regIdWhitelisted/data/DirectorDetails", 200, dummyS4LResponse)
 
       val fResponse = buildClient("/director-national-insurance-number").
         withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
@@ -110,14 +106,14 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       stubPayeRegDocumentStatus(regId)
 
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
-      stubGet(s"/paye-registration/${regId}/directors", 404, "")
+      stubGet(s"/paye-registration/$regId/directors", 404, "")
 
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/DirectorDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/DirectorDetails", 200, dummyS4LResponse)
 
       val tstOfficerListJson =
         """
@@ -172,14 +168,14 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       stubPayeRegDocumentStatus(regId)
 
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
-      stubGet(s"/paye-registration/${regId}/directors", 404, "")
+      stubGet(s"/paye-registration/$regId/directors", 404, "")
 
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/DirectorDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/DirectorDetails", 200, dummyS4LResponse)
 
       val tstOfficerListJson =
         """
@@ -243,14 +239,14 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       stubPayeRegDocumentStatus(regId)
 
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
-      stubGet(s"/paye-registration/${regId}/directors", 404, "")
+      stubGet(s"/paye-registration/$regId/directors", 404, "")
 
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/DirectorDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/DirectorDetails", 200, dummyS4LResponse)
 
       stubGet(s"/incorporation-information/12345/officer-list", 404, "")
 

@@ -115,7 +115,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
 
         setupSimpleAuthMocks()
         stubSuccessfulLogin()
-        stubKeystoreMetadata(SessionId, regId, companyName)
+        stubKeystoreMetadata(SessionId, regId)
         stubKeystoreDelete(SessionId)
 
         stubFor(delete(urlMatching(s"/paye-registration/$regId/delete"))
@@ -142,7 +142,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
 
         setupSimpleAuthMocks()
         stubSuccessfulLogin()
-        stubKeystoreMetadata(SessionId, regId, companyName)
+        stubKeystoreMetadata(SessionId, regId)
 
         stubFor(delete(urlMatching(s"/paye-registration/$regId/delete"))
           .willReturn(
@@ -167,7 +167,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
 
         setupSimpleAuthMocks()
         stubSuccessfulLogin()
-        stubKeystoreMetadata(SessionId, regId, companyName)
+        stubKeystoreMetadata(SessionId, regId)
 
         stubFor(delete(urlMatching(s"/paye-registration/$regId/delete"))
           .willReturn(

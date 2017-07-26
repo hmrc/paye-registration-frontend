@@ -19,7 +19,6 @@ package controllers.userJourney
 import builders.AuthBuilder
 import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
-import fixtures.S4LFixture
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import models.view.NatureOfBusiness
 import org.mockito.ArgumentMatchers
@@ -28,23 +27,21 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.{CompanyDetailsSrv, NatureOfBusinessSrv}
+import services.NatureOfBusinessSrv
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
+class NatureOfBusinessControllerSpec extends PAYERegSpec {
 
   val mockNatureOfBusinessService = mock[NatureOfBusinessSrv]
-  val mockCompanyDetailsService = mock[CompanyDetailsSrv]
   val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
 
   class Setup {
     val testController = new NatureOfBusinessCtrl {
       override val authConnector = mockAuthConnector
       override val natureOfBusinessService = mockNatureOfBusinessService
-      override val companyDetailsService = mockCompanyDetailsService
       override val keystoreConnector = mockKeystoreConnector
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
       override val payeRegistrationConnector = mockPayeRegistrationConnector
@@ -73,9 +70,6 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
       when(mockNatureOfBusinessService.getNatureOfBusiness(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Some(testNOB)))
 
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(validCompanyDetailsViewModel)
-
       AuthBuilder.showWithAuthorisedUser(testController.natureOfBusiness, mockAuthConnector) {
         (result: Future[Result])  =>
           status(result) shouldBe OK
@@ -85,9 +79,6 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
     "return an OK when there is no nature of business in the microservice" in new Setup {
       when(mockNatureOfBusinessService.getNatureOfBusiness(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(None))
-
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(validCompanyDetailsViewModel)
 
       AuthBuilder.showWithAuthorisedUser(testController.natureOfBusiness, mockAuthConnector) {
         (result: Future[Result])  =>
@@ -108,9 +99,6 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
         "description" -> ""
       )
 
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(validCompanyDetailsViewModel)
-
       AuthBuilder.submitWithAuthorisedUser(testController.submitNatureOfBusiness, mockAuthConnector, request) {
         result =>
           status(result) shouldBe BAD_REQUEST
@@ -121,9 +109,6 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
       val request = FakeRequest().withFormUrlEncodedBody(
         "description" -> "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       )
-
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(validCompanyDetailsViewModel)
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitNatureOfBusiness, mockAuthConnector, request) {
         result =>
@@ -147,9 +132,6 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec with S4LFixture {
       )
       when(mockNatureOfBusinessService.saveNatureOfBusiness(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
-
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(validCompanyDetailsViewModel)
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitNatureOfBusiness, mockAuthConnector, request) {
         result =>

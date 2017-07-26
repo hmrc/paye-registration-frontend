@@ -2,9 +2,7 @@
 @import helpers.templates.payeTextArea
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
-@(sicForm: Form[NatureOfBusiness], companyName: String)(implicit request: Request[_], messages: Messages)
-
-@name(id: String) = @{s"""<span id="$id">$companyName</span>"""}
+@(sicForm: Form[NatureOfBusiness])(implicit request: Request[_], messages: Messages)
 
 @main_template(title = messages("pages.natureOfBusiness.title")) {
 
@@ -15,7 +13,7 @@
     <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages("pages.natureOfBusiness.heading"))</h1>
 
     <div class="form-group">
-        <p id="lede-paragraph">@Html(messages("pages.natureOfBusiness.lede", name("company-lede")))</p>
+        <p id="lede-paragraph">@Messages("pages.natureOfBusiness.lede")</p>
     </div>
 
     @govHelpers.form(action = controllers.userJourney.routes.NatureOfBusinessController.submitNatureOfBusiness()) {
