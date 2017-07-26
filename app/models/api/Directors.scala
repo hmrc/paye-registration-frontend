@@ -39,7 +39,7 @@ object Name {
     (__ \ "forename").readNullable[String](Formatters.normalizeTrimmedReads) and
       (__ \ "other_forenames").readNullable[String](Formatters.normalizeTrimmedReads) and
       (__ \ "surname").read[String](Formatters.normalizeTrimmedReads) and
-      (__ \ "title").readNullable[String](Formatters.normalizeTrimmedReads)
+      (__ \ "title").readNullable[String](Formatters.normalizeTrimmedFullStopReads)
   )(Name.apply _)
 }
 

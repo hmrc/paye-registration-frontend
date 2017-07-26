@@ -79,7 +79,7 @@ trait TestIncorpInfoConnect {
          |        },
          |        {
          |            "name_elements" : {
-         |                "title" : "Mx",
+         |                "title" : "Mx.",
          |                "forename" : "Jingly",
          |                "surname" : "Jingles"
          |            },
