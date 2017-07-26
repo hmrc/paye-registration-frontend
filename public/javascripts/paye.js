@@ -1,4 +1,7 @@
 $(document).ready($(function() {
+     $(".error-summary #description-error-summary").click(function(){
+        $("#description").focus()
+    })
 
     var director = $("#completionCapacity-director");
     var agent = $("#completionCapacity-agent");
