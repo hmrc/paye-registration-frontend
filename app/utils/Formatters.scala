@@ -31,6 +31,12 @@ object Formatters {
     override def reads(json: JsValue): JsResult[String] = Json.fromJson[String](json) flatMap (s => JsSuccess(normalize(s)))
   }
 
+  lazy val normalizeTrimmedFullStopReads = new Reads[String] {
+    override def reads(json: JsValue): JsResult[String] = Json.fromJson[String](json) flatMap {
+      s => JsSuccess(normalize(s).replace(".",""))
+    }
+  }
+
   lazy val normalizeTrimmedListReads = new Reads[List[String]] {
     override def reads(json: JsValue): JsResult[List[String]] = Json.fromJson[List[String]](json).flatMap {
       l => JsSuccess(l map (normalize _))

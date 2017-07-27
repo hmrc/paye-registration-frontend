@@ -70,7 +70,7 @@ class OfficerListSpec extends PAYERegSpec {
       |   },
       |   {
       |      "name_elements":{
-      |         "title":"Mx",
+      |         "title":"Mx.",
       |         "forename":"Jingly",
       |         "surname":"Jingles"
       |      },
@@ -141,7 +141,7 @@ class OfficerListSpec extends PAYERegSpec {
           |   },
           |   {
           |      "name_elements":{
-          |         "title":"Mx",
+          |         "title":"Mx.",
           |         "forename":"Jingly",
           |         "surname":"Jinglés"
           |      },
