@@ -32,11 +32,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class PAYERegistrationService @Inject()(payeRegistrationConn: PAYERegistrationConnector,
+class PAYERegistrationService @Inject()(injPayeRegistrationConnector: PAYERegistrationConnector,
                                         injKeystoreConnector: KeystoreConnector,
                                         injCurrentProfileService: CurrentProfileService,
                                         injS4LService: S4LService) extends PAYERegistrationSrv {
-  override val payeRegistrationConnector = payeRegistrationConn
+  override val payeRegistrationConnector = injPayeRegistrationConnector
   override val authConnector = FrontendAuthConnector
   override val keyStoreConnector = injKeystoreConnector
   override val currentProfileService = injCurrentProfileService

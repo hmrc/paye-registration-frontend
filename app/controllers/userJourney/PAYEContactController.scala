@@ -67,12 +67,9 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
     implicit user =>
       implicit request =>
         withCurrentProfile { profile =>
-          for {
-            companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-            payeContact    <- payeContactService.getPAYEContact(profile.registrationID)
-          } yield payeContact match {
-            case PAYEContact(Some(contactDetails), _) => Ok(PAYEContactDetailsPage(companyDetails.companyName, PAYEContactDetailsForm.form.fill(contactDetails)))
-            case _ => Ok(PAYEContactDetailsPage(companyDetails.companyName, PAYEContactDetailsForm.form))
+          payeContactService.getPAYEContact(profile.registrationID) map {
+            case PAYEContact(Some(contactDetails), _) => Ok(PAYEContactDetailsPage(PAYEContactDetailsForm.form.fill(contactDetails)))
+            case _ => Ok(PAYEContactDetailsPage(PAYEContactDetailsForm.form))
           }
         }
   }
@@ -82,8 +79,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
       implicit request =>
         withCurrentProfile { profile =>
           PAYEContactDetailsForm.form.bindFromRequest.fold(
-            errs => companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-              .map (details => BadRequest(PAYEContactDetailsPage(details.companyName, errs))),
+            errs => Future.successful(BadRequest(PAYEContactDetailsPage(errs))),
             success => {
               val trimmed = trimPAYEContactDetails(success)
               payeContactService.submitPayeContactDetails(profile.registrationID, trimmed) map {

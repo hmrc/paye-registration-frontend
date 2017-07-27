@@ -1,12 +1,12 @@
 @import helpers.templates.{oneOfManyErrorWrapper, payeErrorSummary}
 @import models.DigitalContactDetails
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
-@(companyName: String, contactForm: Form[DigitalContactDetails])(implicit request: Request[_], messages: Messages)
+@(contactForm: Form[DigitalContactDetails])(implicit request: Request[_], messages: Messages)
 
 @formContent = {
     <fieldset>
         <legend class="visuallyhidden">
-            @Html(messages("pages.businessContact.heading", s"<span id='companyName'>$companyName</span>"))
+            @Messages("pages.businessContact.heading")
         </legend>
         <div class="form-group">
             @govHelpers.input(
@@ -44,7 +44,7 @@
         messages("app.common.errorSummaryLabel"), contactForm
     )
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages("pages.businessContact.heading", s"<span>$companyName</span>"))</h1>
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.businessContact.heading")</h1>
 
     <p id="p1">@messages("pages.businessContactDetails.p1")</p>
     <div class="form-group">

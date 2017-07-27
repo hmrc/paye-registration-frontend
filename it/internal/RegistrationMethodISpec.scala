@@ -79,7 +79,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
       val fResponse = buildClientInternal(s"/4/delete").
         withHeaders("X-Session-ID" -> SessionId).
@@ -104,12 +104,13 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       val companyRegistrationResp =
         s"""{
-           |   "status": "held",
+           |   "status": "draft",
            |   "confirmationReferences": {
-           |     "transaction-id": "000-434-${regId}"
+           |     "transaction-id": "000-434-$regId"
            |   }
            |}""".stripMargin
 
+      stubGet(s"/paye-registration/$regId/status", 200, """{"status": "draft"}""")
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfile).toString)
       stubGet(s"/incorporation-frontend-stubs/$regId/corporation-tax-registration", 200, companyRegistrationResp)
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
@@ -129,11 +130,11 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
-      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 204, "")
+      stubDelete(s"/save4later/paye-registration-frontend/$regId", 204, "")
 
-      stubDelete(s"/paye-registration/${regId}/delete-in-progress", 412, "")
+      stubDelete(s"/paye-registration/$regId/delete-in-progress", 412, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
         withHeaders("X-Session-ID" -> SessionId).
@@ -149,11 +150,11 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
-      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 204, "")
+      stubDelete(s"/save4later/paye-registration-frontend/$regId", 204, "")
 
-      stubDelete(s"/paye-registration/${regId}/delete-in-progress", 404, "")
+      stubDelete(s"/paye-registration/$regId/delete-in-progress", 404, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
         withHeaders("X-Session-ID" -> SessionId).
@@ -169,11 +170,11 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
-      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 204, "")
+      stubDelete(s"/save4later/paye-registration-frontend/$regId", 204, "")
 
-      stubDelete(s"/paye-registration/${regId}/delete-in-progress", 403, "")
+      stubDelete(s"/paye-registration/$regId/delete-in-progress", 403, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
         withHeaders("X-Session-ID" -> SessionId).
@@ -189,11 +190,11 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
-      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 204, "")
+      stubDelete(s"/save4later/paye-registration-frontend/$regId", 204, "")
 
-      stubDelete(s"/paye-registration/${regId}/delete-in-progress", 500, "")
+      stubDelete(s"/paye-registration/$regId/delete-in-progress", 500, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
         withHeaders("X-Session-ID" -> SessionId).
@@ -209,9 +210,9 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
-      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 500, "")
+      stubDelete(s"/save4later/paye-registration-frontend/$regId", 500, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
         withHeaders("X-Session-ID" -> SessionId).
@@ -227,11 +228,11 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
-      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 204, "")
+      stubDelete(s"/save4later/paye-registration-frontend/$regId", 204, "")
 
-      stubDelete(s"/paye-registration/${regId}/delete-in-progress", 200, "")
+      stubDelete(s"/paye-registration/$regId/delete-in-progress", 200, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
         withHeaders("X-Session-ID" -> SessionId).

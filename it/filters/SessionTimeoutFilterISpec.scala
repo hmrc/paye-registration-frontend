@@ -48,8 +48,8 @@ class SessionTimeoutFilterISpec extends IntegrationSpecBase
     "microservice.services.paye-registration.port" -> s"$mockPort",
     "microservice.services.company-registration.host" -> s"$mockHost",
     "microservice.services.company-registration.port" -> s"$mockPort",
-    "microservice.services.coho-api.host" -> s"$mockHost",
-    "microservice.services.coho-api.port" -> s"$mockPort",
+    "microservice.services.incorporation-information.host" -> s"$mockHost",
+    "microservice.services.incorporation-information.port" -> s"$mockPort",
     "session.timeoutSeconds" -> "10"
   ))
 
@@ -58,35 +58,46 @@ class SessionTimeoutFilterISpec extends IntegrationSpecBase
   }
 
   val regId = "3"
+  val txId = "12345"
   val companyName = "Foo Ltd"
 
   "GET trading name" should {
     "redirect to the sign in page" when {
       "the user has signed in but the session has timed out" in {
-        val txId = "12345"
         val tradingName = "Foo Trading"
         setupSimpleAuthMocks()
-
         stubSuccessfulLogin()
-
         stubPayeRegDocumentStatus(regId)
+        stubKeystoreMetadata(SessionId, regId)
 
-        stubKeystoreMetadata(SessionId, regId, companyName)
-
-        stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+        val companyProfileDoc =
+          """
+            |{
+            |  "company_name":"$companyName",
+            |  "registered_office_address":{
+            |    "premises":"1",
+            |    "address_line_1":"test street",
+            |    "locality":"Testford",
+            |    "country":"UK",
+            |    "postal_code":"TE2 2ST"
+            |  }
+            |}
+          """.stripMargin
+        stubGet(s"/incorporation-information/$txId/company-profile", 200, companyProfileDoc)
+        stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
         val roDoc = s"""{"line1":"1", "line2":"2", "postCode":"pc"}"""
         val payeDoc =
           s"""{
-             |"companyName": "${companyName}",
-             |"tradingName": "${tradingName}",
-             |"roAddress": ${roDoc},
-             |"ppobAddress": ${roDoc},
+             |"companyName": "$companyName",
+             |"tradingName": "$tradingName",
+             |"roAddress": $roDoc,
+             |"ppobAddress": $roDoc,
              |"businessContactDetails": {}
              |}""".stripMargin
-        stubGet(s"/paye-registration/${regId}/company-details", 200, payeDoc)
+        stubGet(s"/paye-registration/$regId/company-details", 200, payeDoc)
         val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-        stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
+        stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
 
         val fResponse = buildClient("/trading-name").
           withHeaders(HeaderNames.COOKIE -> getSessionCookie()).

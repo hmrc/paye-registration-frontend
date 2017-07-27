@@ -44,7 +44,7 @@ import scala.concurrent.Future
 class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYERegistrationFixture with CoHoAPIFixture {
   val mockS4LService = mock[S4LService]
   val mockCompanyDetailsService = mock[CompanyDetailsService]
-  val mockCoHoService = mock[IncorporationInformationService]
+  val mockIncorpInfoService = mock[IncorporationInformationService]
   val mockAddressLookupService = mock[AddressLookupService]
   val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
   val mockPrepopulationService = mock[PrepopulationService]
@@ -56,7 +56,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       override val payeRegistrationConnector = mockPayeRegistrationConnector
       override val authConnector = mockAuthConnector
       override val companyDetailsService = mockCompanyDetailsService
-      override val cohoService = mockCoHoService
+      override val incorpInfoService = mockIncorpInfoService
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
       override val addressLookupService = mockAddressLookupService
       override val prepopService = mockPrepopulationService
@@ -85,7 +85,14 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "show the correctly pre-populated trading name page when data has already been entered" in new Setup {
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(validCompanyDetailsViewModel))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validCompanyDetailsViewModel))
+
+      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
+
+      when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -101,7 +108,14 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     "show the correctly pre-populated trading name page when negative data has already been entered" in new Setup {
       val cName = "Tst Company Name"
       val negativeTradingNameCompanyDetails = validCompanyDetailsViewModel.copy(tradingName = Some(negativeTradingNameViewModel))
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(negativeTradingNameCompanyDetails))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(negativeTradingNameCompanyDetails))
+
+      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
+
+      when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -117,7 +131,14 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     "show a blank trading name page when no Trading Name data has been entered" in new Setup {
       val cName = "Tst Company Name"
       val noTradingNameCompanyDetails = validCompanyDetailsViewModel.copy(tradingName = None)
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(noTradingNameCompanyDetails))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(noTradingNameCompanyDetails))
+
+      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
+
+      when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         (response: Future[Result]) =>
@@ -133,7 +154,14 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     "show a blank trading name page when no Company Details data has been entered" in new Setup {
       val cName = "Tst Company Name"
       val defaultCompanyDetailsView = CompanyDetailsView(cName, None, validROAddress, None, None)
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(defaultCompanyDetailsView))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(defaultCompanyDetailsView))
+
+      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
+
+      when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
       AuthBuilder.showWithAuthorisedUser(controller.tradingName, mockAuthConnector) {
         response =>
@@ -155,7 +183,9 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       redirectLocation(result).getOrElse("NO REDIRECT LOCATION!").contains("/gg/sign-in") shouldBe true
     }
     "redirect to the confirm ro address page when a user enters valid data" in new Setup {
-      when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(DownstreamOutcome.Success))
+
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "differentName" -> "true",
         "tradingName" -> "Tradez R us"
@@ -167,7 +197,9 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "show an error page when there is an error response from the microservice" in new Setup {
-      when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
+      when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(DownstreamOutcome.Failure))
+
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "differentName" -> "true",
         "tradingName" -> "Tradez R us"
@@ -178,8 +210,12 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "return 400 when a user enters no data" in new Setup {
-      when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
-      when(mockCoHoService.getStoredCompanyDetails()(ArgumentMatchers.any())).thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
+      when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(DownstreamOutcome.Success))
+
+      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
+
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
       )) {
         result =>
@@ -188,7 +224,9 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "return 400 when a user enters invalid data" in new Setup {
-      when(mockCoHoService.getStoredCompanyDetails()(ArgumentMatchers.any())).thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
+      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
+
       AuthBuilder.submitWithAuthorisedUser(controller.submitTradingName(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
         "differentName" -> "true"
       )) {

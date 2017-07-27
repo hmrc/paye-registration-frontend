@@ -70,15 +70,15 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     "not be prepopulated if no data is found in Paye Registration and error is returned from Business Registration" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
       stubGet(s"/paye-registration/$regId/company-details", 404, "")
       stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")
       stubGet(s"/business-registration/$regId/contact-details", 403, "")
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/PAYEContact", 200, dummyS4LResponse)
 
       val response = await(buildClient("/who-should-we-contact")
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
@@ -97,7 +97,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     "Return an unpopulated page if PayeReg returns a NotFound response and corrupted data is returned from Business Registration" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
       val invalidPrepopResponse =
         s"""
@@ -117,9 +117,9 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")
       stubGet(s"/business-registration/$regId/contact-details", 200, invalidPrepopResponse)
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/PrepopPAYEContactDetails", 200, dummyS4LResponse)
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, dummyS4LResponse)
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/PAYEContact", 200, dummyS4LResponse)
 
       val response = await(buildClient("/who-should-we-contact")
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
@@ -138,7 +138,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     "Return a prepopulated page if PayeReg returns a NotFound response and data is returned from Business Registration" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
       val validPrepopResponse =
         s"""
@@ -158,9 +158,9 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")
       stubGet(s"/business-registration/$regId/contact-details", 200, validPrepopResponse)
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/PrepopPAYEContactDetails", 200, dummyS4LResponse)
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, dummyS4LResponse)
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/PAYEContact", 200, dummyS4LResponse)
 
       val response = await(buildClient("/who-should-we-contact")
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
@@ -192,7 +192,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     "upsert the contact details in Business Registration" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
       val currentPayeDoc =
         s"""{
@@ -219,8 +219,8 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
            |}""".stripMargin
 
       stubS4LGet(regId, CacheKeys.PAYEContact.toString, currentPayeDoc)
-      stubGet(s"/paye-registration/${regId}/contact-correspond-paye", 200, currentPayeDoc)
-      stubPatch(s"/paye-registration/${regId}/contact-correspond-paye", 200, updatedPayeDoc)
+      stubGet(s"/paye-registration/$regId/contact-correspond-paye", 200, currentPayeDoc)
+      stubPatch(s"/paye-registration/$regId/contact-correspond-paye", 200, updatedPayeDoc)
 
       val updatedContactDetail =
         s"""
@@ -231,15 +231,15 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
            |   "mobileNumber": "$newMobileNumber"
            |}
        """.stripMargin
-      stubPost(s"/business-registration/${regId}/contact-details", 200, updatedContactDetail)
+      stubPost(s"/business-registration/$regId/contact-details", 200, updatedContactDetail)
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
 
       stubGet(s"/paye-registration/$regId/company-details", 404, "")
 
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, dummyS4LResponse)
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
-      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/PAYEContact", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
+      stubDelete(s"/save4later/paye-registration-frontend/$regId", 200, "")
 
       val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
       val fResponse = buildClient("/who-should-we-contact").
@@ -256,7 +256,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status shouldBe 303
       response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/where-to-send-post")
 
-      val reqPosts = findAll(postRequestedFor(urlMatching(s"/business-registration/${regId}/contact-details")))
+      val reqPosts = findAll(postRequestedFor(urlMatching(s"/business-registration/$regId/contact-details")))
       val captor = reqPosts.get(0)
       val json = Json.parse(captor.getBodyAsString)
 
@@ -329,16 +329,16 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
-      stubGet(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, "")
-      stubGet(s"/paye-registration/${regId}/contact-correspond-paye", 404, "")
+      stubGet(s"/save4later/paye-registration-frontend/$regId/data/PAYEContact", 200, "")
+      stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")
       stubGet(s"/business-registration/$regId/contact-details", 200, prepopContactJson)
 
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, dummyS4LResponse)
-      stubPatch(s"/paye-registration/${regId}/contact-correspond-paye", 200, updatedPayeDoc)
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/PAYEContact", 200, dummyS4LResponse)
+      stubPatch(s"/paye-registration/$regId/contact-correspond-paye", 200, updatedPayeDoc)
 
       val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
       val fResponse = buildClient("/who-should-we-contact").
@@ -355,7 +355,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status shouldBe 303
       response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/where-to-send-post")
 
-      val reqPosts = findAll(postRequestedFor(urlMatching(s"/business-registration/${regId}/contact-details")))
+      val reqPosts = findAll(postRequestedFor(urlMatching(s"/business-registration/$regId/contact-details")))
       reqPosts.size shouldBe 0
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
@@ -371,10 +371,10 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     val roDoc = s"""{"line1":"1", "line2":"2", "postCode":"pc"}"""
     val payeDoc =
       s"""{
-         |"companyName": "${companyName}",
-         |"tradingName": "${tradingName}",
-         |"roAddress": ${roDoc},
-         |"ppobAddress": ${roDoc},
+         |"companyName": "$companyName",
+         |"tradingName": "$tradingName",
+         |"roAddress": $roDoc,
+         |"ppobAddress": $roDoc,
          |"businessContactDetails": {}
          |}""".stripMargin
 
@@ -393,17 +393,17 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     "not be prepopulated if an error is returned from Business Registration" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
       stubGet(s"/business-registration/$regId/contact-details", 200, prepopContactJson)
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")
       stubGet(s"/paye-registration/$regId/company-details", 200, payeDoc)
       stubGet(s"/business-registration/$regId/addresses", 403, "")
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, dummyS4LResponse)
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PrePopAddresses", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/PAYEContact", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/PrePopAddresses", 200, dummyS4LResponse)
 
       val response = await(buildClient("/where-to-send-post")
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
@@ -443,17 +443,17 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
       stubGet(s"/business-registration/$regId/contact-details", 200, prepopContactJson)
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")
       stubGet(s"/paye-registration/$regId/company-details", 200, payeDoc)
       stubGet(s"/business-registration/$regId/addresses", 200, addresses)
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, dummyS4LResponse)
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PrePopAddresses", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/PAYEContact", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/PrePopAddresses", 200, dummyS4LResponse)
 
       val response = await(buildClient("/where-to-send-post")
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
@@ -485,17 +485,17 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
       stubGet(s"/business-registration/$regId/contact-details", 200, prepopContactJson)
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")
       stubGet(s"/paye-registration/$regId/company-details", 200, payeDoc)
       stubGet(s"/business-registration/$regId/addresses", 200, addresses)
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, dummyS4LResponse)
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PrePopAddresses", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/PAYEContact", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/PrePopAddresses", 200, dummyS4LResponse)
 
       val response = await(buildClient("/where-to-send-post")
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
@@ -561,16 +561,16 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     "upsert PAYE Contact Details in PAYE Registration with a prepop address" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, dummyS4LResponse)
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/PAYEContact", 200, dummyS4LResponse)
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       stubS4LGet(regId, CacheKeys.PrePopAddresses.toString, addresses)
       stubPatch(s"/paye-registration/$regId/contact-correspond-paye", 200, updatedPayeDoc)
       stubGet(s"/paye-registration/$regId/contact-correspond-paye", 200, updatedPayeDoc)
 
-      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+      stubDelete(s"/save4later/paye-registration-frontend/$regId", 200, "")
 
       val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
       val fResponse = buildClient("/where-to-send-post").
@@ -584,7 +584,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status shouldBe 303
       response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/check-and-confirm-your-answers")
 
-      val reqPosts = findAll(patchRequestedFor(urlMatching(s"/paye-registration/${regId}/contact-correspond-paye")))
+      val reqPosts = findAll(patchRequestedFor(urlMatching(s"/paye-registration/$regId/contact-correspond-paye")))
       val captor = reqPosts.get(0)
       val json = Json.parse(captor.getBodyAsString)
 
@@ -605,8 +605,8 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId, companyName)
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+      stubKeystoreMetadata(SessionId, regId)
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 200, "")
       stubS4LGet(regId, CacheKeys.PrePopAddresses.toString, addresses)
 
       val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
@@ -622,30 +622,12 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     }
 
     "send a correct Audit Event when roAddress has been chosen" in {
-      val auditEvent =
-        s"""{
-           |  "auditSource" : "paye-registration-frontend",
-           |  "auditType" : "correspondenceAddress",
-           |  "detail" : {
-           |    "journeyId" : "$regId",
-           |    "addressUsed" : "RegisteredOffice"
-           |  },
-           |  "tags" : {
-           |     "clientIP" : "-",
-           |     "X-Session-ID" : "session-12345",
-           |     "X-Request-ID" : "-",
-           |     "clientPort" : "-",
-           |     "Authorization" : "-",
-           |     "transactionName" : "correspondenceAddress"
-           |   }
-           |}""".stripMargin
-
       val roDoc = s"""{"line1":"11", "line2":"22", "postCode":"pc1 1pc"}"""
       val payeDoc =s"""{
-                      |  "companyName": "${companyName}",
+                      |  "companyName": "$companyName",
                       |  "tradingNAme": "testName",
-                      |  "roAddress": ${roDoc},
-                      |  "ppobAddress": ${roDoc},
+                      |  "roAddress": $roDoc,
+                      |  "ppobAddress": $roDoc,
                       |  "businessContactDetails": {
                       |    "email": "email@email.zzz",
                       |    "mobileNumber": "1234567890",
@@ -657,14 +639,14 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       stubPatch(s"/paye-registration/$regId/contact-correspond-paye", 200, updatedPayeDoc)
       stubGet(s"/paye-registration/$regId/company-details", 200, payeDoc)
       stubS4LGet(regId, CacheKeys.CompanyDetails.toString, payeDoc)
       stubS4LGet(regId, CacheKeys.PAYEContact.toString, updatedPayeDoc)
-      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+      stubDelete(s"/save4later/paye-registration-frontend/$regId", 200, "")
       stubS4LPut(regId, CacheKeys.CompanyDetails.toString, dummyS4LResponse)
 
       val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
@@ -692,30 +674,12 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     }
 
     "send a correct Audit Event when ppobAddress has been chosen" in {
-      val auditEvent =
-        s"""{
-           |  "auditSource" : "paye-registration-frontend",
-           |  "auditType" : "correspondenceAddress",
-           |  "detail" : {
-           |    "journeyId" : "$regId",
-           |    "addressUsed" : "RegisteredOffice"
-           |  },
-           |  "tags" : {
-           |     "clientIP" : "-",
-           |     "X-Session-ID" : "session-12345",
-           |     "X-Request-ID" : "-",
-           |     "clientPort" : "-",
-           |     "Authorization" : "-",
-           |     "transactionName" : "correspondenceAddress"
-           |   }
-           |}""".stripMargin
-
       val roDoc = s"""{"line1":"11", "line2":"22", "postCode":"pc1 1pc"}"""
       val payeDoc =s"""{
-                      |  "companyName": "${companyName}",
+                      |  "companyName": "$companyName",
                       |  "tradingNAme": "testName",
-                      |  "roAddress": ${roDoc},
-                      |  "ppobAddress": ${roDoc},
+                      |  "roAddress": $roDoc,
+                      |  "ppobAddress": $roDoc,
                       |  "businessContactDetails": {
                       |    "email": "email@email.zzz",
                       |    "mobileNumber": "1234567890",
@@ -727,14 +691,14 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       stubPatch(s"/paye-registration/$regId/contact-correspond-paye", 200, updatedPayeDoc)
       stubGet(s"/paye-registration/$regId/company-details", 200, payeDoc)
       stubS4LGet(regId, CacheKeys.CompanyDetails.toString, payeDoc)
       stubS4LGet(regId, CacheKeys.PAYEContact.toString, updatedPayeDoc)
-      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+      stubDelete(s"/save4later/paye-registration-frontend/$regId", 200, "")
       stubS4LPut(regId, CacheKeys.CompanyDetails.toString, dummyS4LResponse)
 
       val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
@@ -815,15 +779,15 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId, companyName)
+      stubKeystoreMetadata(SessionId, regId)
 
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/PAYEContact", 200, dummyS4LResponse)
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/PAYEContact", 200, dummyS4LResponse)
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       stubPatch(s"/paye-registration/$regId/contact-correspond-paye", 200, updatedPayeDoc)
       stubGet(s"/paye-registration/$regId/contact-correspond-paye", 200, updatedPayeDoc)
-      stubPost(s"/business-registration/${regId}/addresses", 200, newAddress2BusReg)
-      stubDelete(s"/save4later/paye-registration-frontend/${regId}", 200, "")
+      stubPost(s"/business-registration/$regId/addresses", 200, newAddress2BusReg)
+      stubDelete(s"/save4later/paye-registration-frontend/$regId", 200, "")
       stubGet(s"/api/confirmed\\?id\\=$addressLookupID", 200, addressFromALF)
 
       val response = await(buildClient(s"/return-from-address-for-corresp-addr?id=$addressLookupID")
@@ -833,7 +797,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status shouldBe 303
       response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/check-and-confirm-your-answers")
 
-      val reqPosts = findAll(postRequestedFor(urlMatching(s"/business-registration/${regId}/addresses")))
+      val reqPosts = findAll(postRequestedFor(urlMatching(s"/business-registration/$regId/addresses")))
       val captor = reqPosts.get(0)
       val json = Json.parse(captor.getBodyAsString)
 

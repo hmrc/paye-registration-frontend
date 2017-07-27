@@ -23,7 +23,7 @@ import config.{FrontendAuditConnector, FrontendAuthConnector}
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
-import models.external.{UserDetailsModel, UserIds}
+import models.external.{CoHoCompanyDetailsModel, UserDetailsModel, UserIds}
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.{Address, DigitalContactDetails}
 import play.api.libs.json.Json
@@ -39,16 +39,14 @@ import scala.concurrent.Future
 
 @Singleton
 class CompanyDetailsService @Inject()(injPAYERegistrationConnector: PAYERegistrationConnector,
-                                      injCoHoAPIService: IncorporationInformationService,
+                                      injIncorporationInformationService: IncorporationInformationService,
                                       injS4LService: S4LService,
                                       injCompRegConnector : CompanyRegistrationConnector,
-                                      injCohoAPIConnector: IncorporationInformationConnector,
                                       injPrepopulationService: PrepopulationService) extends CompanyDetailsSrv {
 
   override val payeRegConnector = injPAYERegistrationConnector
   override val compRegConnector = injCompRegConnector
-  override val cohoAPIConnector = injCohoAPIConnector
-  override val cohoService = injCoHoAPIService
+  override val incorpInfoService = injIncorporationInformationService
   override val s4LService = injS4LService
   override val authConnector = FrontendAuthConnector
   override val auditConnector = FrontendAuditConnector
@@ -59,8 +57,7 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
 
   val payeRegConnector: PAYERegistrationConnect
   val compRegConnector: CompanyRegistrationConnect
-  val cohoAPIConnector: IncorporationInformationConnect
-  val cohoService: IncorporationInformationSrv
+  val incorpInfoService: IncorporationInformationSrv
   val s4LService: S4LSrv
   val authConnector: AuthConnector
   val auditConnector: AuditConnector
@@ -73,17 +70,17 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
         oDetails <- ifRegIdNotWhitelisted(regId) {
           payeRegConnector.getCompanyDetails(regId)
         }
-        details  <- convertOrCreateCompanyDetailsView(regId, oDetails)
+        details  <- convertOrCreateCompanyDetailsView(regId, txId, oDetails)
         viewDetails <- saveToS4L(details, regId)
       } yield viewDetails
     }
   }
 
-  private[services] def convertOrCreateCompanyDetailsView(regId: String, oAPI: Option[CompanyDetailsAPI])(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+  private[services] def convertOrCreateCompanyDetailsView(regId: String, txId: String, oAPI: Option[CompanyDetailsAPI])(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
     oAPI match {
       case Some(detailsAPI) => Future.successful(apiToView(detailsAPI))
       case None => for {
-        details <- cohoService.getStoredCompanyDetails
+        details <- incorpInfoService.getCompanyDetails(regId, txId)
         oPrepopBCD <- prepopService.getBusinessContactDetails(regId)
       } yield CompanyDetailsView(details.companyName, None, details.roAddress, None, oPrepopBCD)
     }

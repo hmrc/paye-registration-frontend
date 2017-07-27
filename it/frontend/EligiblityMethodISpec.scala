@@ -15,15 +15,10 @@
  */
 package frontend
 
-import java.util.UUID
-
-import com.github.tomakehurst.wiremock.client.WireMock._
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
-import models.api.Eligibility
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
-import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeApplication
 
 
@@ -54,8 +49,8 @@ class EligiblityMethodISpec extends IntegrationSpecBase
     "microservice.services.paye-registration.port" -> s"$mockPort",
     "microservice.services.company-registration-frontend.www.url" -> s"$mockHost",
     "microservice.services.company-registration-frontend.www.uri" -> "/test-uri",
-    "microservice.services.coho-api.host" -> s"$mockHost",
-    "microservice.services.coho-api.port" -> s"$mockPort"
+    "microservice.services.incorporation-information.host" -> s"$mockHost",
+    "microservice.services.incorporation-information.port" -> s"$mockPort"
   ))
 
   override def beforeEach() {
@@ -73,9 +68,9 @@ class EligiblityMethodISpec extends IntegrationSpecBase
 
       stubPayeRegDocumentStatus(regId)
 
-      stubKeystoreMetadata(SessionId, regId, "companyName")
+      stubKeystoreMetadata(SessionId, regId)
 
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
       val eligibility =
         """
@@ -85,9 +80,9 @@ class EligiblityMethodISpec extends IntegrationSpecBase
           |}
         """.stripMargin
 
-      stubGet(s"/paye-registration/${regId}/eligibility", 200, eligibility)
+      stubGet(s"/paye-registration/$regId/eligibility", 200, eligibility)
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/CompanyDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
 
       val fResponse = buildClient("/offshore-employer").
         withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
@@ -117,9 +112,9 @@ class EligiblityMethodISpec extends IntegrationSpecBase
 
       stubPayeRegDocumentStatus(regId)
 
-      stubKeystoreMetadata(SessionId, regId, "companyName")
+      stubKeystoreMetadata(SessionId, regId)
 
-      stubGet(s"/save4later/paye-registration-frontend/${regId}", 404, "")
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
       val eligibility =
         """
@@ -129,9 +124,9 @@ class EligiblityMethodISpec extends IntegrationSpecBase
           |}
         """.stripMargin
 
-      stubGet(s"/paye-registration/${regId}/eligibility", 200, eligibility)
+      stubGet(s"/paye-registration/$regId/eligibility", 200, eligibility)
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/save4later/paye-registration-frontend/${regId}/data/DirectorDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/DirectorDetails", 200, dummyS4LResponse)
 
       val fResponse = buildClient("/provide-non-cash-awards").
         withHeaders(HeaderNames.COOKIE -> getSessionCookie()).

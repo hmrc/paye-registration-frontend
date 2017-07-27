@@ -40,8 +40,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
   val mockPAYERegConnector = mock[PAYERegistrationConnector]
   val mockCompRegConnector = mock[CompanyRegistrationConnector]
-  val mockCohoAPIConnector = mock[IncorporationInformationConnector]
-  val mockCoHoService = mock[IncorporationInformationService]
+  val mockIncorpInfoService = mock[IncorporationInformationService]
   val mockS4LService = mock[S4LService]
   val mockAuditConnector = mock[AuditConnector]
   val mockPrepopulationService = mock[PrepopulationService]
@@ -52,11 +51,10 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
   class Setup {
     val service = new CompanyDetailsSrv {
-      override val cohoService: IncorporationInformationSrv = mockCoHoService
+      override val incorpInfoService: IncorporationInformationSrv = mockIncorpInfoService
       override val compRegConnector: CompanyRegistrationConnect = mockCompRegConnector
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
       override val s4LService: S4LSrv = mockS4LService
-      override val cohoAPIConnector: IncorporationInformationConnect = mockCohoAPIConnector
       override val authConnector = mockAuthConnector
       override val auditConnector = mockAuditConnector
       override val prepopService = mockPrepopulationService
@@ -65,11 +63,10 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
   class NoCompanyDetailsMockedSetup {
     val service = new CompanyDetailsSrv {
-      override val cohoService: IncorporationInformationSrv = mockCoHoService
+      override val incorpInfoService: IncorporationInformationSrv = mockIncorpInfoService
       override val compRegConnector: CompanyRegistrationConnect = mockCompRegConnector
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
       override val s4LService: S4LSrv = mockS4LService
-      override val cohoAPIConnector: IncorporationInformationConnect = mockCohoAPIConnector
       override val authConnector = mockAuthConnector
       override val auditConnector = mockAuditConnector
       override val prepopService = mockPrepopulationService
@@ -86,11 +83,10 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
   class CompanyDetailsMockedSetup {
     val service = new CompanyDetailsSrv {
-      override val cohoService: IncorporationInformationSrv = mockCoHoService
+      override val incorpInfoService: IncorporationInformationSrv = mockIncorpInfoService
       override val compRegConnector: CompanyRegistrationConnect = mockCompRegConnector
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
       override val s4LService: S4LSrv = mockS4LService
-      override val cohoAPIConnector: IncorporationInformationConnect = mockCohoAPIConnector
       override val authConnector = mockAuthConnector
       override val auditConnector = mockAuditConnector
       override val prepopService = mockPrepopulationService
@@ -107,11 +103,10 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
   class APIConverterMockedSetup {
     val service = new CompanyDetailsSrv {
-      override val cohoService: IncorporationInformationSrv = mockCoHoService
+      override val incorpInfoService: IncorporationInformationSrv = mockIncorpInfoService
       override val compRegConnector: CompanyRegistrationConnect = mockCompRegConnector
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
       override val s4LService: S4LSrv = mockS4LService
-      override val cohoAPIConnector: IncorporationInformationConnect = mockCohoAPIConnector
       override val authConnector = mockAuthConnector
       override val auditConnector = mockAuditConnector
       override val prepopService = mockPrepopulationService
@@ -291,7 +286,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
-      when(mockCoHoService.getStoredCompanyDetails()(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(tstCompanyDetailsModel))
 
       when(mockPrepopulationService.getBusinessContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
