@@ -117,8 +117,8 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
   }
 
   private def badRequestResponse(regId: String, txID: String, form: Form[TradingName])(implicit request: Request[AnyContent]): Future[Result] = {
-    withLatestCompanyDetails(regId, txID) { details =>
-      BadRequest(TradingNamePage(form, details.companyName))
+    companyDetailsService.getCompanyDetails(regId, txID) map {
+      details => BadRequest(TradingNamePage(form, details.companyName))
     }
   }
 

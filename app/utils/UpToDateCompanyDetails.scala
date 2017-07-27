@@ -35,7 +35,7 @@ trait UpToDateCompanyDetails {
       oCoHoCompanyDetails <- incorpInfoService.getCompanyDetails(regId, txId) map(Some(_)) recover {case _ => None}
       companyDetails <- companyDetailsService.getCompanyDetails(regId, txId)
       details = oCoHoCompanyDetails.map(ch => companyDetails.copy(companyName = ch.companyName, roAddress = ch.roAddress)).getOrElse(companyDetails)
-      viewDetails <- s4LService.saveForm[CompanyDetails](CacheKeys.CompanyDetails.toString, details, regId).map(_ => details)
-    } yield f(viewDetails)
+      _ <- s4LService.saveForm[CompanyDetails](CacheKeys.CompanyDetails.toString, details, regId)
+    } yield f(details)
   }
 }
