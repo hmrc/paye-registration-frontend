@@ -65,6 +65,9 @@ trait BusinessRegistrationConnect {
         businessRegistrationTimer.stop()
         (json \ "completionCapacity").asOpt[String]
     } recover {
+      case notfound: NotFoundException =>
+        businessRegistrationTimer.stop()
+        None
       case e =>
         businessRegistrationTimer.stop()
         throw logResponse(e, "retrieveCompletionCapacity", "retrieving completion capacity")
@@ -92,7 +95,7 @@ trait BusinessRegistrationConnect {
   def upsertContactDetails(regId: String, contactDetails: PAYEContactDetails)(implicit hc: HeaderCarrier): Future[PAYEContactDetails] = {
     val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
     implicit val wts = PAYEContactDetails.prepopWrites
-    http.POST[PAYEContactDetails, JsValue](s"$businessRegUrl/business-registration/$regId/contact-details", contactDetails) map {
+    http.POST[PAYEContactDetails, HttpResponse](s"$businessRegUrl/business-registration/$regId/contact-details", contactDetails) map {
       _ =>
         businessRegistrationTimer.stop()
         contactDetails
@@ -111,6 +114,9 @@ trait BusinessRegistrationConnect {
         businessRegistrationTimer.stop()
         json.\("addresses").as[Seq[JsValue]].map(_.as[Address](Address.prePopReads))
     } recover {
+      case notfound: NotFoundException =>
+        businessRegistrationTimer.stop()
+        Seq.empty
       case ex =>
         businessRegistrationTimer.stop()
         logResponse(ex, "retrieveAddresses", "fetching addresses from pre-pop", Some(regId))
