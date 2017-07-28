@@ -26,6 +26,7 @@ app.common.companies-houseinfo                          = update it with Compani
 
 ## User error messages
 errors.invalid.email                                    = The email address you have provided is invalid
+errors.invalid.email.tooLong                            = Enter your email address using 70 characters or less
 errors.invalid.phoneNumber                              = The phone number you have provided is invalid
 errors.invalid.mobileNumber                             = The mobile phone number you have provided is invalid
 errors.invalid.nino                                     = National Insurance number is in the wrong format
@@ -114,7 +115,6 @@ pages.businessContact.heading                           = What are the company c
 pages.businessContactDetails.p1                         = Let us know how we can get in touch if we need more information about the company.
 pages.businessContactDetails.p2.indent                  = You need to provide at least one of the following contact details.
 pages.businessContact.email                             = Email address
-pages.businessContact.email.tooLong                     = Enter your email address using 70 characters or less
 pages.businessContact.mobile                            = Mobile number
 pages.businessContact.phone                             = Phone number
 pages.businessContact.noFieldsCompleted                 = Enter at least one company contact detail
