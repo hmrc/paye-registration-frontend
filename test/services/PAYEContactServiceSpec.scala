@@ -45,7 +45,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
   val mockS4LService = mock[S4LService]
   val mockCompanyDetailsService = mock[CompanyDetailsService]
   val mockPrepopulationService = mock[PrepopulationService]
-  val mockAuditConnector = mock[AuditConnector]
+  val mockAuditService = mock[AuditService]
 
   val returnHttpResponse = HttpResponse(200)
 
@@ -56,8 +56,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
       val keystoreConnector = mockKeystoreConnector
       val companyDetailsService = mockCompanyDetailsService
       val prepopService = mockPrepopulationService
-      val authConnector = mockAuthConnector
-      val auditConnector = mockAuditConnector
+      val auditService = mockAuditService
     }
   }
 
@@ -452,21 +451,8 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
     "save a copy of paye contact (no audit)" in new Setup {
       implicit val context = buildAuthContext
 
-      val testUserIds = UserIds(internalId = "int-12345", externalId = "ext-12345")
-      val authProviderId = Json.obj(
-        "authProviderId" -> "ap-12345"
-      )
-
       when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[PAYEContactView]]()))
-        .thenReturn(Future.successful(Some(PAYEContactView(None, None))))
-      when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
-      when(mockAuthConnector.getIds[UserIds](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(testUserIds))
-      when(mockAuthConnector.getUserDetails[JsObject](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(authProviderId))
-      when(mockPrepopulationService.saveContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(tstContactDetails))
+        .thenReturn(Future.successful(Some(PAYEContactView(Some(tstContactDetails), None))))
 
       await(service.submitPayeContactDetails("12345", tstContactDetails)) shouldBe DownstreamOutcome.Success
     }
@@ -474,20 +460,11 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
     "save a copy of paye contact" in new Setup {
       implicit val context = buildAuthContext
 
-      val testUserIds = UserIds(internalId = "int-12345", externalId = "ext-12345")
-      val authProviderId = Json.obj(
-        "authProviderId" -> "ap-12345"
-      )
-
       when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[PAYEContactView]]()))
         .thenReturn(Future.successful(Some(PAYEContactView(None, None))))
       when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
-      when(mockAuthConnector.getIds[UserIds](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(testUserIds))
-      when(mockAuthConnector.getUserDetails[JsObject](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(authProviderId))
-      when(mockAuditConnector.sendEvent(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockAuditService.auditPAYEContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(AuditResult.Success))
       when(mockPrepopulationService.saveContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(tstContactDetails))
@@ -513,48 +490,6 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
       await(service.submitCorrespondence("54321", tstCorrespondenceAddress)) shouldBe DownstreamOutcome.Success
-    }
-  }
-
-  "Calling auditCorrespondenceAddress" should {
-    implicit val user = AuthBuilder.createTestUser
-
-    val userDetails = UserDetailsModel(
-      "testName",
-      "testEmail",
-      "testAffinityGroup",
-      None,
-      None,
-      None,
-      None,
-      "testAuthProviderId",
-      "testAuthProviderType"
-    )
-
-    val userIds = UserIds(
-      "testInternalId",
-      "testExternalId"
-    )
-
-    val addressUsed = "testAddressUsed"
-
-    val expectedAuditEvent = new CorrespondenceAddressAuditEvent(CorrespondenceAddressAuditEventDetail(
-      "testExternalId",
-      "testAuthProviderId",
-      testRegId,
-      addressUsed
-    ))
-
-    "send an audit event with the correct detail" in new Setup {
-      when(mockAuthConnector.getIds[UserIds](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(userIds))
-
-      when(mockAuthConnector.getUserDetails[UserDetailsModel](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(userDetails))
-
-      val response = await(service.auditCorrespondenceAddress(testRegId, addressUsed))
-      response.auditSource shouldBe "paye-registration-frontend"
-      response.auditType shouldBe "correspondenceAddress"
     }
   }
 }

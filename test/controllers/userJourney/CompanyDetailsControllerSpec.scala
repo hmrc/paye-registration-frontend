@@ -48,6 +48,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
   val mockAddressLookupService = mock[AddressLookupService]
   val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
   val mockPrepopulationService = mock[PrepopulationService]
+  val mockAuditService = mock[AuditService]
 
   class Setup {
     val controller = new CompanyDetailsCtrl {
@@ -60,6 +61,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
       override val addressLookupService = mockAddressLookupService
       override val prepopService = mockPrepopulationService
+      override val auditService = mockAuditService
 
       override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(CurrentProfile(
@@ -453,7 +455,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       when(mockCompanyDetailsService.copyROAddrToPPOBAddr(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      when(mockCompanyDetailsService.auditPPOBAddress(ArgumentMatchers.anyString())(ArgumentMatchers.any[AuthContext](), ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockAuditService.auditPPOBAddress(ArgumentMatchers.anyString())(ArgumentMatchers.any[AuthContext](), ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(AuditResult.Success))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitPPOBAddress, mockAuthConnector, request) { result =>

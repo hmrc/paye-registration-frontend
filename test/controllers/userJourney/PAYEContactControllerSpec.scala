@@ -36,6 +36,7 @@ import uk.gov.hmrc.play.frontend.auth.AuthContext
 import services._
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -47,6 +48,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
   val mockAddressLookupService = mock[AddressLookupService]
   val mockMessagesApi = mock[MessagesApi]
   val mockPrepopService = mock[PrepopulationService]
+  val mockAuditService = mock[AuditService]
 
   val regId = "12345"
 
@@ -60,6 +62,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val authConnector = mockAuthConnector
       override val payeRegistrationConnector = mockPayeRegistrationConnector
       override val prepopService = mockPrepopService
+      override val auditService = mockAuditService
 
       override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(CurrentProfile(
@@ -206,13 +209,6 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
   "submitPAYECorrespondenceAddress" should {
     implicit val hc = HeaderCarrier()
 
-    val auditEvent = new CorrespondenceAddressAuditEvent(CorrespondenceAddressAuditEventDetail(
-      "testExternalUserId",
-      "testAuthProviderId",
-      "testRegID",
-      "testAddressUsed"
-    ))
-
     "return a BAD_REQUEST" in new Setup {
       val request = FakeRequest().withFormUrlEncodedBody(
         "chosenAddress" -> ""
@@ -259,8 +255,8 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      when(mockPAYEContactService.auditCorrespondenceAddress(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[AuthContext](), ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future.successful(auditEvent))
+      when(mockAuditService.auditCorrespondenceAddress(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[AuthContext](), ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(AuditResult.Success))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
         status(result) shouldBe SEE_OTHER
@@ -279,8 +275,8 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      when(mockPAYEContactService.auditCorrespondenceAddress(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[AuthContext](), ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future.successful(auditEvent))
+      when(mockAuditService.auditCorrespondenceAddress(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[AuthContext](), ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(AuditResult.Success))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
         status(result) shouldBe SEE_OTHER

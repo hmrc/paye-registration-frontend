@@ -43,13 +43,13 @@ import scala.concurrent.Future
 class PAYEContactService @Inject()(injPAYERegistrationConnector: PAYERegistrationConnector,
                                    injS4LService: S4LService,
                                    injCompanyDetailsService: CompanyDetailsService,
-                                   injPrepopulationService: PrepopulationService) extends PAYEContactSrv {
+                                   injPrepopulationService: PrepopulationService,
+                                   injAuditService: AuditService) extends PAYEContactSrv {
   override val payeRegConnector = injPAYERegistrationConnector
   override val s4LService = injS4LService
   override val companyDetailsService = injCompanyDetailsService
   override val prepopService = injPrepopulationService
-  override val authConnector = FrontendAuthConnector
-  override val auditConnector = FrontendAuditConnector
+  override val auditService = injAuditService
 }
 
 trait PAYEContactSrv  {
@@ -57,8 +57,7 @@ trait PAYEContactSrv  {
   val s4LService: S4LSrv
   val companyDetailsService: CompanyDetailsSrv
   val prepopService: PrepopulationSrv
-  val authConnector: AuthConnector
-  val auditConnector: AuditConnector
+  val auditService: AuditSrv
 
   private[services] def viewToAPI(viewData: PAYEContactView): Either[PAYEContactView, PAYEContactAPI] = viewData match {
     case PAYEContactView(Some(contactDetails), Some(correspondenceAddress)) =>
@@ -127,7 +126,7 @@ trait PAYEContactSrv  {
       cachedContactData <- getPAYEContact(regId) flatMap {
         case currentView if dataHasChanged(newViewData, currentView.contactDetails) =>
           for {
-            _ <- auditPAYEContactDetails(regId, newViewData, currentView.contactDetails)
+            _ <- auditService.auditPAYEContactDetails(regId, newViewData, currentView.contactDetails)
             _ <- prepopService.saveContactDetails(regId, newViewData) map {
               _ => Logger.info(s"[PAYEContactService] [submitPayeContactDetails] Successfully saved Contact Details to Prepopulation for regId: $regId")
             }
@@ -141,49 +140,9 @@ trait PAYEContactSrv  {
 
   def dataHasChanged(viewData: PAYEContactDetails, s4lData: Option[PAYEContactDetails]): Boolean = s4lData.isEmpty || s4lData.exists(flattenData(viewData) != flattenData(_))
 
-  def auditPAYEContactDetails(regId: String, newData: PAYEContactDetails, previousData: Option[PAYEContactDetails])
-                             (implicit authContext: AuthContext, headerCarrier: HeaderCarrier): Future[AuditResult] = {
-
-    def convertPAYEContactViewToAudit(viewData: PAYEContactDetails) = AuditPAYEContactDetails(
-      contactName   = viewData.name,
-      email         = viewData.digitalContactDetails.email,
-      mobileNumber  = viewData.digitalContactDetails.mobileNumber,
-      phoneNumber   = viewData.digitalContactDetails.phoneNumber
-    )
-
-    if( previousData.nonEmpty ) {
-      for {
-        ids <- authConnector.getIds[UserIds](authContext)
-        authId <- authConnector.getUserDetails[JsObject](authContext)
-        eventDetail = AmendedPAYEContactDetailsEventDetail(
-          externalUserId = ids.externalId,
-          authProviderId = authId.\("authProviderId").as[String],
-          journeyId = regId,
-          previousPAYEContactDetails = convertPAYEContactViewToAudit(previousData.get),
-          newPAYEContactDetails = convertPAYEContactViewToAudit(newData)
-        )
-        auditResult <- auditConnector.sendEvent(new AmendedPAYEContactDetailsEvent(eventDetail))
-      } yield auditResult
-    } else {
-      Future.successful(AuditResult.Disabled)
-    }
-  }
-
   def submitCorrespondence(regId: String, correspondenceAddress: Address)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     getPAYEContact(regId) flatMap {
       data => submitPAYEContact(PAYEContactView(data.contactDetails, Some(correspondenceAddress)), regId)
-    }
-  }
-
-  def auditCorrespondenceAddress(regId: String, addressUsed: String)(implicit user: AuthContext, hc: HeaderCarrier): Future[AuditEvent] = {
-    for {
-      userIds <- authConnector.getIds[UserIds](user)
-      userDetails <- authConnector.getUserDetails[UserDetailsModel](user)
-    } yield {
-      val event = new CorrespondenceAddressAuditEvent(CorrespondenceAddressAuditEventDetail(userIds.externalId, userDetails.authProviderId, regId, addressUsed))
-      auditConnector.sendEvent(event)
-
-      event
     }
   }
 

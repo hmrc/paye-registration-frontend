@@ -359,10 +359,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       reqPosts.size shouldBe 0
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      reqPostsAudit.size shouldBe 1
-      val captorPost = reqPostsAudit.get(0)
-      val jsonAudit = Json.parse(captorPost.getBodyAsString)
-      (jsonAudit \ "auditType").as[JsString].value should not be "payeContactDetailsAmendment"
+      reqPostsAudit.size shouldBe 0
     }
   }
 

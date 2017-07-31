@@ -42,8 +42,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
   val mockCompRegConnector = mock[CompanyRegistrationConnector]
   val mockIncorpInfoService = mock[IncorporationInformationService]
   val mockS4LService = mock[S4LService]
-  val mockAuditConnector = mock[AuditConnector]
   val mockPrepopulationService = mock[PrepopulationService]
+  val mockAuditService = mock[AuditService]
 
   val returnHttpResponse = HttpResponse(200)
 
@@ -55,9 +55,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val compRegConnector: CompanyRegistrationConnect = mockCompRegConnector
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
       override val s4LService: S4LSrv = mockS4LService
-      override val authConnector = mockAuthConnector
-      override val auditConnector = mockAuditConnector
       override val prepopService = mockPrepopulationService
+      override val auditService = mockAuditService
     }
   }
 
@@ -67,9 +66,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val compRegConnector: CompanyRegistrationConnect = mockCompRegConnector
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
       override val s4LService: S4LSrv = mockS4LService
-      override val authConnector = mockAuthConnector
-      override val auditConnector = mockAuditConnector
       override val prepopService = mockPrepopulationService
+      override val auditService = mockAuditService
 
       override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
         Future.successful(CompanyDetailsView("test compay name", None, validROAddress, None, None))
@@ -87,9 +85,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val compRegConnector: CompanyRegistrationConnect = mockCompRegConnector
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
       override val s4LService: S4LSrv = mockS4LService
-      override val authConnector = mockAuthConnector
-      override val auditConnector = mockAuditConnector
       override val prepopService = mockPrepopulationService
+      override val auditService = mockAuditService
 
       override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
         Future.successful(validCompanyDetailsViewModel)
@@ -107,9 +104,8 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
       override val compRegConnector: CompanyRegistrationConnect = mockCompRegConnector
       override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
       override val s4LService: S4LSrv = mockS4LService
-      override val authConnector = mockAuthConnector
-      override val auditConnector = mockAuditConnector
       override val prepopService = mockPrepopulationService
+      override val auditService = mockAuditService
 
       override def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
         validCompanyDetailsViewModel
@@ -410,30 +406,7 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
   "Calling submitBusinessContact" should {
     "return a success response when submit is completed successfully" in new CompanyDetailsMockedSetup {
-      val userDetails = UserDetailsModel(
-        "testName",
-        "testEmail",
-        "testAffinityGroup",
-        None,
-        None,
-        None,
-        None,
-        "testAuthProviderId",
-        "testAuthProviderType"
-      )
-
-      val userIds = UserIds(
-        "testInternalId",
-        "testExternalId"
-      )
-
-      when(mockAuthConnector.getIds[UserIds](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(userIds))
-
-      when(mockAuthConnector.getUserDetails[UserDetailsModel](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(userDetails))
-
-      when(mockAuditConnector.sendEvent(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockAuditService.auditBusinessContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(AuditResult.Success))
 
       await(service.submitBusinessContact(validBusinessContactModel, "54322", "txId")) shouldBe DownstreamOutcome.Success
