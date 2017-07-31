@@ -18,19 +18,12 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import audit._
-import config.{FrontendAuditConnector, FrontendAuthConnector}
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
-import models.external.{CoHoCompanyDetailsModel, UserDetailsModel, UserIds}
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.{Address, DigitalContactDetails}
-import play.api.libs.json.Json
-import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
-import uk.gov.hmrc.play.audit.model.AuditEvent
 import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.RegistrationWhitelist
 
@@ -42,15 +35,15 @@ class CompanyDetailsService @Inject()(injPAYERegistrationConnector: PAYERegistra
                                       injIncorporationInformationService: IncorporationInformationService,
                                       injS4LService: S4LService,
                                       injCompRegConnector : CompanyRegistrationConnector,
-                                      injPrepopulationService: PrepopulationService) extends CompanyDetailsSrv {
+                                      injPrepopulationService: PrepopulationService,
+                                      injAuditService: AuditService) extends CompanyDetailsSrv {
 
   override val payeRegConnector = injPAYERegistrationConnector
   override val compRegConnector = injCompRegConnector
   override val incorpInfoService = injIncorporationInformationService
   override val s4LService = injS4LService
-  override val authConnector = FrontendAuthConnector
-  override val auditConnector = FrontendAuditConnector
-  val prepopService = injPrepopulationService
+  override val prepopService = injPrepopulationService
+  override val auditService = injAuditService
 }
 
 trait CompanyDetailsSrv extends RegistrationWhitelist {
@@ -59,9 +52,8 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
   val compRegConnector: CompanyRegistrationConnect
   val incorpInfoService: IncorporationInformationSrv
   val s4LService: S4LSrv
-  val authConnector: AuthConnector
-  val auditConnector: AuditConnector
   val prepopService: PrepopulationSrv
+  val auditService: AuditSrv
 
   def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
     s4LService.fetchAndGet[CompanyDetailsView](CacheKeys.CompanyDetails.toString, regId) flatMap {
@@ -134,23 +126,13 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
     for {
       details <- getCompanyDetails(regId, txId) flatMap {
         case currentDetails if dataHasChanged(businessContact, currentDetails.businessContactDetails) =>
-          auditBusinessContactDetails(regId, businessContact, currentDetails.businessContactDetails.get) map {
+          auditService.auditBusinessContactDetails(regId, businessContact, currentDetails.businessContactDetails.get) map {
             _ => currentDetails
           }
         case currentDetails => Future.successful(currentDetails)
       }
       outcome <- saveCompanyDetails(details.copy(businessContactDetails = Some(businessContact)), regId)
     } yield outcome
-  }
-
-  def auditBusinessContactDetails(regId: String, newData: DigitalContactDetails, previousData: DigitalContactDetails)
-                             (implicit authContext: AuthContext, headerCarrier: HeaderCarrier): Future[AuditResult] = {
-    for {
-      ids         <- authConnector.getIds[UserIds](authContext)
-      authId      <- authConnector.getUserDetails[UserDetailsModel](authContext)
-      eventDetail = AmendedBusinessContactDetailsEventDetail(ids.externalId, authId.authProviderId, regId, previousData, newData)
-      auditResult <- auditConnector.sendEvent(new AmendedBusinessContactDetailsEvent(eventDetail))
-    } yield auditResult
   }
 
   private[services] def dataHasChanged(viewData: DigitalContactDetails, s4lData: Option[DigitalContactDetails]): Boolean = s4lData.exists(flattenData(viewData) != flattenData(_))
@@ -160,15 +142,6 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
     mobileNumber = details.mobileNumber map(_.trim.replace(" ", "").toLowerCase),
     phoneNumber = details.phoneNumber map(_.trim.replace(" ","").toLowerCase)
   )
-
-  def auditPPOBAddress(regId: String)(implicit user: AuthContext, hc: HeaderCarrier): Future[AuditResult] = {
-    for {
-      userIds     <- authConnector.getIds[UserIds](user)
-      userDetails <- authConnector.getUserDetails[UserDetailsModel](user)
-      event       = new PPOBAddressAuditEvent(PPOBAddressAuditEventDetail(userIds.externalId, userDetails.authProviderId, regId))
-      auditResult <- auditConnector.sendEvent(event)
-    } yield auditResult
-  }
 
   private[services] def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
     val tradingNameView = apiModel.tradingName.map {
@@ -195,6 +168,4 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
   private def tradingNameAPIValue(tradingNameView: TradingNameView): Option[String] = {
     if (tradingNameView.differentName) tradingNameView.tradingName else None
   }
-
-
 }

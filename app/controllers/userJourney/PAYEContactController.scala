@@ -44,7 +44,8 @@ class PAYEContactController @Inject()(injCompanyDetailsService: CompanyDetailsSe
                                       injKeystoreConnector: KeystoreConnector,
                                       injPayeRegistrationConnector: PAYERegistrationConnector,
                                       injMessagesApi: MessagesApi,
-                                      injPrepopulationService: PrepopulationService) extends PAYEContactCtrl {
+                                      injPrepopulationService: PrepopulationService,
+                                      injAuditService: AuditService) extends PAYEContactCtrl {
   val authConnector = FrontendAuthConnector
   val companyDetailsService = injCompanyDetailsService
   val payeContactService = injPAYEContactService
@@ -53,6 +54,7 @@ class PAYEContactController @Inject()(injCompanyDetailsService: CompanyDetailsSe
   val messagesApi = injMessagesApi
   val payeRegistrationConnector = injPayeRegistrationConnector
   val prepopService = injPrepopulationService
+  val auditService = injAuditService
 }
 
 trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
@@ -62,6 +64,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
   val addressLookupService: AddressLookupSrv
   val keystoreConnector: KeystoreConnect
   val prepopService: PrepopulationSrv
+  val auditService: AuditSrv
 
   val payeContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
@@ -150,7 +153,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
     for {
       companyDetails <- companyDetailsService.getCompanyDetails(regId, txId)
       res <- payeContactService.submitCorrespondence(regId, companyDetails.roAddress)
-      _ <- payeContactService.auditCorrespondenceAddress(regId, "RegisteredOffice")
+      _ <- auditService.auditCorrespondenceAddress(regId, "RegisteredOffice")
     } yield res
   }
 
@@ -158,7 +161,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
     (for {
       companyDetails <- companyDetailsService.getCompanyDetails(regId, txId)
       res <- payeContactService.submitCorrespondence(regId, companyDetails.ppobAddress.getOrElse(throw new PPOBAddressNotFoundException))
-      _ <- payeContactService.auditCorrespondenceAddress(regId, "PrincipalPlaceOfBusiness")
+      _ <- auditService.auditCorrespondenceAddress(regId, "PrincipalPlaceOfBusiness")
     } yield res) recover {
       case _: PPOBAddressNotFoundException =>
         Logger.warn(s"[PAYEContactService] [submitCorrespondenceWithPPOBAddress] - Error while saving Correspondence Address with a PPOBAddress which is missing")

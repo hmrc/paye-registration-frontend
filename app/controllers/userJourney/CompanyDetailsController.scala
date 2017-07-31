@@ -47,7 +47,8 @@ class CompanyDetailsController @Inject()(
                                           injMessagesApi: MessagesApi,
                                           injPayeRegistrationConnector: PAYERegistrationConnector,
                                           injAddressLookupService: AddressLookupService,
-                                          injPrepopulationService: PrepopulationService)
+                                          injPrepopulationService: PrepopulationService,
+                                          injAuditService: AuditService)
   extends CompanyDetailsCtrl {
   val authConnector = FrontendAuthConnector
   val s4LService = injS4LService
@@ -58,6 +59,7 @@ class CompanyDetailsController @Inject()(
   val addressLookupService = injAddressLookupService
   val payeRegistrationConnector = injPayeRegistrationConnector
   val prepopService = injPrepopulationService
+  val auditService = injAuditService
 }
 
 trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSupport with SessionProfile with UpToDateCompanyDetails {
@@ -67,6 +69,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
   val incorpInfoService: IncorporationInformationSrv
   val addressLookupService: AddressLookupSrv
   val prepopService: PrepopulationSrv
+  val auditService: AuditSrv
 
   val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user => implicit request =>
@@ -196,7 +199,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
       case ROAddress =>
         for {
           res <- companyDetailsService.copyROAddrToPPOBAddr(regId, txId)
-          _ <- companyDetailsService.auditPPOBAddress(regId)
+          _ <- auditService.auditPPOBAddress(regId)
         } yield res
       case Other =>
         Future.successful(DownstreamOutcome.Redirect)
