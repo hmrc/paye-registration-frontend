@@ -49,6 +49,29 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
       boundModel shouldBe model
     }
 
+    "Bind successfully with full data with email at full length" in {
+      val data = Map(
+        "name" -> "test Mary-Jane84 de l'aurore",
+        "digitalContact.contactEmail" -> "test@emailllllllllllllllllllllllllllllllllllllllllllllllllllllllll.com",
+        "digitalContact.mobileNumber" -> "01234567987",
+        "digitalContact.phoneNumber" -> "07798123456"
+      )
+      val model = PAYEContactDetails(
+        name = "test Mary-Jane84 de l'aurore",
+        DigitalContactDetails(
+          email = Some("test@emailllllllllllllllllllllllllllllllllllllllllllllllllllllllll.com"),
+          mobileNumber = Some("01234567987"),
+          phoneNumber = Some("07798123456")
+        )
+      )
+
+      val boundModel = testForm.bind(data).fold(
+        errors => errors,
+        success => success
+      )
+      boundModel shouldBe model
+    }
+
     "Bind successfully with minimal data (email)" in {
       val data = Map(
         "name" -> "testName",
@@ -184,6 +207,20 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
       )
       val boundForm = testForm.bind(data)
       val err = FormError("digitalContact.contactEmail", "errors.invalid.email")
+
+
+      boundForm.errors shouldBe Seq(err)
+    }
+
+    "Have the correct error if email is longer than 70 characters" in {
+      val data: Map[String,String] = Map(
+        "name" -> "testName",
+        "digitalContact.contactEmail" -> "test@emaillllllllllllllllllllllllllllllllllllllllllllllllllllllllll.com",
+        "digitalContact.mobileNumber" -> "",
+        "digitalContact.phoneNumber" -> ""
+      )
+      val boundForm = testForm.bind(data)
+      val err = FormError("digitalContact.contactEmail", "errors.invalid.email.tooLong")
 
 
       boundForm.errors shouldBe Seq(err)

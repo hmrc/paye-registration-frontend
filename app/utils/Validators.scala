@@ -38,25 +38,25 @@ object Validators extends DateUtil {
 
   def optionalValidation(constraint : Constraint[String]): Constraint[Option[String]] = Constraint("constraints.optional")({
     case Some(text: String)  if text != ""  => constraint(text)
-    case _ => Valid
+    case _                                  => Valid
   })
 
   def isValidPhoneNo(phone: String, msgError: String): Either[String, String] = {
     def isValidNumberCount(s: String) = s.replaceAll(" ", "").matches("[0-9]{10,20}")
 
     (isValidNumberCount(phone), phone.trim.matches(phoneNoTypeRegex.toString)) match {
-      case (true, true) => Right(phone.trim)
-      case (true, false) => Right(phone.replaceAll(" ", ""))
-      case (false, _) => Left(msgError)
+      case (true, true)   => Right(phone.trim)
+      case (true, false)  => Right(phone.replaceAll(" ", ""))
+      case (false, _)     => Left(msgError)
     }
   }
 
   val emailValidation: Constraint[String] = Constraint("constraints.emailCheck")({
     text =>
       val errors = text.trim match {
-        case tooLong if text.length >= 70       => Seq(ValidationError("errors.invalid.email.tooLong"))
+        case tooLong if text.length > 70        => Seq(ValidationError("errors.invalid.email.tooLong"))
         case wrong if !text.matches(emailRegex) => Seq(ValidationError("errors.invalid.email"))
-        case _ => Nil
+        case _                                  => Nil
       }
       if(errors.isEmpty) Valid else Invalid(errors)
   })
@@ -65,8 +65,8 @@ object Validators extends DateUtil {
     text =>
       val errors = text.trim match {
         case name if name.length <= 0 => Seq(ValidationError("pages.payeContact.nameMandatory"))
-        case nameRegex() => Nil
-        case _ => Seq(ValidationError("errors.invalid.name.invalidChars"))
+        case nameRegex()              => Nil
+        case _                        => Seq(ValidationError("errors.invalid.name.invalidChars"))
       }
       if (errors.isEmpty) Valid else Invalid(errors)
   })

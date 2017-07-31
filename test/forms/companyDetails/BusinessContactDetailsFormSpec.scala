@@ -44,6 +44,25 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
       boundModel shouldBe model
     }
 
+    "Bind successfully with full data with email at full length" in {
+      val data = Map(
+        "businessEmail" -> "test@emailllllllllllllllllllllllllllllllllllllllllllllllllllllllll.com",
+        "mobileNumber" -> "01234567987",
+        "phoneNumber" -> "07798123456"
+      )
+      val model = DigitalContactDetails(
+        email = Some("test@emailllllllllllllllllllllllllllllllllllllllllllllllllllllllll.com"),
+        mobileNumber = Some("01234567987"),
+        phoneNumber = Some("07798123456")
+      )
+
+      val boundModel = testForm.bind(data).fold(
+        errors => errors,
+        success => success
+      )
+      boundModel shouldBe model
+    }
+
     "Bind successfully with minimal data (email)" in {
       val data = Map(
         "businessEmail" -> "testEmail@testing.com",
