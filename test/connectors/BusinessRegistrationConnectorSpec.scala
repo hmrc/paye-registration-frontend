@@ -92,11 +92,12 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
       await(connector.retrieveCompletionCapacity) shouldBe None
     }
 
-    "throw a NotFoundException if the response code is a 404" in new Setup {
+    "return no CC if the Buisness Registration returns 404" in new Setup {
       when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains("/business-registration/business-tax-registration"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(new NotFoundException("Bad request")))
+        .thenReturn(Future.failed(new NotFoundException("Not Found")))
 
-      intercept[NotFoundException](await(connector.retrieveCompletionCapacity))
+      await(connector.retrieveCompletionCapacity) shouldBe None
+
     }
 
     "throw a Forbidden exception if the request has been deemed unauthorised" in new Setup {
@@ -133,7 +134,7 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
       await(connector.retrieveContactDetails(regId)) shouldBe None
     }
 
-    "return no Contact Details if bad request aws made to Business Registration" in new Setup {
+    "return no Contact Details if bad request was made to Business Registration" in new Setup {
       when(mockWSHttp.GET[PAYEContactDetails](ArgumentMatchers.contains(s"/business-registration/$regId/contact-details"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new BadRequestException("")))
 
@@ -230,6 +231,13 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
     "return an empty list of addresses in the case of an error" in new Setup{
       when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(Upstream4xxResponse("badRequest", 400, 400)))
+
+      await(connector.retrieveAddresses(regId)) shouldBe Seq.empty
+    }
+
+    "return an empty list of addresses if addresses are not found in BR & response code is 404" in new Setup {
+      when(mockWSHttp.GET[PAYEContactDetails](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new NotFoundException("")))
 
       await(connector.retrieveAddresses(regId)) shouldBe Seq.empty
     }
