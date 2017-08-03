@@ -66,7 +66,7 @@ pages.completionCapacity.legend                         = What is your relations
 pages.completionCapacity.director                       = Director
 pages.completionCapacity.agent                          = Agent - for example, an accountant
 pages.completionCapacity.other                          = Other - for example, a friend of the director
-pages.completionCapacity.other.label                    = Your relationship to the company
+pages.completionCapacity.other.label                    = Enter your relationship to the company
 pages.completionCapacity.error                          = Tell us your relationship to the business
 pages.completionCapacity.other.error                    = Enter your relationship to the business using 100 characters or less
 
