@@ -9,7 +9,7 @@ $(document).ready($(function() {
 
                 // Matches 1 or more characters at the start of the string followed by [ followed by one or more numbers, followed by ]
                 var regex = /^\w+\[\d+\]$/;
-                if(regex.test(element)){
+                if(regex.test(element) || element.indexOf('.') > -1){
                     $(object).prop("href", "javascript:document.getElementById('" + element + "').focus()")
                 }
             })
