@@ -28,6 +28,7 @@ import models.external.{UserDetailsModel, UserIds}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.{Format, JsObject, Json}
+import play.api.test.FakeRequest
 import testHelpers.{AuthHelpers, PAYERegSpec}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
@@ -450,6 +451,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
 
     "save a copy of paye contact (no audit)" in new Setup {
       implicit val context = buildAuthContext
+      implicit val request = FakeRequest()
 
       when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[PAYEContactView]]()))
         .thenReturn(Future.successful(Some(PAYEContactView(Some(tstContactDetails), None))))
@@ -459,12 +461,13 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
 
     "save a copy of paye contact" in new Setup {
       implicit val context = buildAuthContext
+      implicit val request = FakeRequest()
 
       when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[PAYEContactView]]()))
         .thenReturn(Future.successful(Some(PAYEContactView(None, None))))
       when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
-      when(mockAuditService.auditPAYEContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockAuditService.auditPAYEContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(AuditResult.Success))
       when(mockPrepopulationService.saveContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(tstContactDetails))

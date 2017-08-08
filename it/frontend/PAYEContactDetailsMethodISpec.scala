@@ -24,7 +24,7 @@ import enums.CacheKeys
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json.{JsObject, JsString, Json}
 import play.api.test.FakeApplication
 
 class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
@@ -300,6 +300,16 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       (jsonAudit \ "detail" \ "journeyId").as[JsString].value shouldBe regId
       (jsonAudit \ "detail" \ "previousPAYEContactDetails").as[AuditPAYEContactDetails] shouldBe previousPAYEContactDetails
       (jsonAudit \ "detail" \ "newPAYEContactDetails").as[AuditPAYEContactDetails] shouldBe newPAYEContactDetails
+
+      val tags = (jsonAudit \ "tags").as[JsObject].value
+      tags("clientIP") shouldBe Json.toJson("-")
+      tags("path") shouldBe Json.toJson("/register-for-paye/who-should-we-contact")
+      tags("clientPort") shouldBe Json.toJson("-")
+      tags.contains("X-Session-ID") shouldBe true
+      tags.contains("X-Request-ID") shouldBe true
+      tags.contains("deviceID") shouldBe true
+      tags("Authorization") shouldBe Json.toJson("-")
+      tags("transactionName") shouldBe Json.toJson("payeContactDetailsAmendment")
     }
 
     "not upsert the contact details in Business Registration and not send audit event if nothing has changed" in {
@@ -668,6 +678,8 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       (json \ "detail" \ "authProviderId").as[JsString].value shouldBe "testAuthProviderId"
       (json \ "detail" \ "journeyId").as[JsString].value shouldBe regId
       (json \ "detail" \ "addressUsed").as[JsString].value shouldBe "RegisteredOffice"
+
+
     }
 
     "send a correct Audit Event when ppobAddress has been chosen" in {
@@ -713,13 +725,24 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       val reqPosts = findAll(postRequestedFor(urlMatching(s"/write/audit")))
       val captorPost = reqPosts.get(0)
       val json = Json.parse(captorPost.getBodyAsString)
-
+      println("json")
       (json \ "auditSource").as[JsString].value shouldBe "paye-registration-frontend"
       (json \ "auditType").as[JsString].value shouldBe "correspondenceAddress"
       (json \ "detail" \ "externalUserId").as[JsString].value shouldBe "Ext-xxx"
       (json \ "detail" \ "authProviderId").as[JsString].value shouldBe "testAuthProviderId"
       (json \ "detail" \ "journeyId").as[JsString].value shouldBe regId
       (json \ "detail" \ "addressUsed").as[JsString].value shouldBe "PrincipalPlaceOfBusiness"
+
+      val tags = (json \ "tags").as[JsObject].value
+      println(tags)
+      tags("clientIP") shouldBe Json.toJson("-")
+      tags("path") shouldBe Json.toJson("/register-for-paye/where-to-send-post")
+      tags("clientPort") shouldBe Json.toJson("-")
+      tags.contains("X-Session-ID") shouldBe true
+      tags.contains("X-Request-ID") shouldBe true
+      tags.contains("deviceID") shouldBe true
+      tags("Authorization") shouldBe Json.toJson("-")
+      tags("transactionName") shouldBe Json.toJson("correspondenceAddress")
     }
   }
 

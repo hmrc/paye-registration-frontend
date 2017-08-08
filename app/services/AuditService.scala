@@ -24,6 +24,7 @@ import models.DigitalContactDetails
 import models.external.{UserDetailsModel, UserIds}
 import models.view.PAYEContactDetails
 import play.api.libs.json.JsObject
+import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
@@ -43,7 +44,7 @@ trait AuditSrv {
   val auditConnector: AuditConnector
 
   def auditBusinessContactDetails(regId: String, newData: DigitalContactDetails, previousData: DigitalContactDetails)
-                                 (implicit authContext: AuthContext, headerCarrier: HeaderCarrier): Future[AuditResult] = {
+                                 (implicit authContext: AuthContext, headerCarrier: HeaderCarrier, req:Request[AnyContent]): Future[AuditResult] = {
     for {
       ids         <- authConnector.getIds[UserIds](authContext)
       authId      <- authConnector.getUserDetails[UserDetailsModel](authContext)
@@ -52,7 +53,7 @@ trait AuditSrv {
     } yield auditResult
   }
 
-  def auditPPOBAddress(regId: String)(implicit user: AuthContext, hc: HeaderCarrier): Future[AuditResult] = {
+  def auditPPOBAddress(regId: String)(implicit user: AuthContext, hc: HeaderCarrier, req: Request[AnyContent]): Future[AuditResult] = {
     for {
       userIds     <- authConnector.getIds[UserIds](user)
       userDetails <- authConnector.getUserDetails[UserDetailsModel](user)
@@ -62,7 +63,7 @@ trait AuditSrv {
   }
 
   def auditPAYEContactDetails(regId: String, newData: PAYEContactDetails, previousData: Option[PAYEContactDetails])
-                             (implicit authContext: AuthContext, headerCarrier: HeaderCarrier): Future[AuditResult] = {
+                             (implicit authContext: AuthContext, headerCarrier: HeaderCarrier, req: Request[AnyContent]): Future[AuditResult] = {
 
     def convertPAYEContactViewToAudit(viewData: PAYEContactDetails) = AuditPAYEContactDetails(
       contactName   = viewData.name,
@@ -89,7 +90,7 @@ trait AuditSrv {
     }
   }
 
-  def auditCorrespondenceAddress(regId: String, addressUsed: String)(implicit user: AuthContext, hc: HeaderCarrier): Future[AuditResult] = {
+  def auditCorrespondenceAddress(regId: String, addressUsed: String)(implicit user: AuthContext, hc: HeaderCarrier, req: Request[AnyContent]): Future[AuditResult] = {
     for {
       userIds <- authConnector.getIds[UserIds](user)
       userDetails <- authConnector.getUserDetails[UserDetailsModel](user)

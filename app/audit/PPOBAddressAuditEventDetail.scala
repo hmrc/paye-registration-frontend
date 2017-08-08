@@ -18,6 +18,7 @@ package audit
 
 import audit.RegistrationAuditEvent.{AUTH_PROVIDER_ID, EXTERNAL_USER_ID, JOURNEY_ID}
 import play.api.libs.json.{JsObject, JsValue, Json, Writes}
+import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 case class PPOBAddressAuditEventDetail(externalUserId: String,
@@ -37,5 +38,5 @@ object PPOBAddressAuditEventDetail {
   }
 }
 
-class PPOBAddressAuditEvent(details: PPOBAddressAuditEventDetail)(implicit hc: HeaderCarrier)
-  extends RegistrationAuditEvent("registeredOfficeUsedAsPrincipalPlaceOfBusiness", None, Json.toJson(details).as[JsObject])(hc)
+class PPOBAddressAuditEvent(details: PPOBAddressAuditEventDetail)(implicit hc: HeaderCarrier, req: Request[AnyContent])
+  extends RegistrationAuditEvent("registeredOfficeUsedAsPrincipalPlaceOfBusiness", None, Json.toJson(details).as[JsObject])(hc, Some(req))

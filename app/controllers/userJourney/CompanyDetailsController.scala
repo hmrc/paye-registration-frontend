@@ -192,7 +192,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
         }
   }
 
-  private def submitPPOBAddressChoice(regId: String, txId: String, choice: AddressChoice)(implicit user: AuthContext, hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  private def submitPPOBAddressChoice(regId: String, txId: String, choice: AddressChoice)(implicit user: AuthContext, hc: HeaderCarrier, req: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
     choice match {
       case PPOBAddress =>
         Future.successful(DownstreamOutcome.Success)

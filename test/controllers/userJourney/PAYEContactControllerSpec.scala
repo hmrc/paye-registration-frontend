@@ -28,7 +28,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Call, Request, Result}
+import play.api.mvc.{AnyContent, Call, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.{AddressLookupService, CompanyDetailsService, PAYEContactService, PrepopulationService}
@@ -151,7 +151,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "digitalContact.contactEmail" -> "tata@test.com"
       )
 
-      when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYEContactDetails, mockAuthConnector, request) {
@@ -166,7 +166,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
         "digitalContact.contactEmail" -> "tata@test.com"
       )
 
-      when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
+      when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       when(mockPrepopService.saveContactDetails(ArgumentMatchers.eq(regId), ArgumentMatchers.any[PAYEContactDetails]())(ArgumentMatchers.any[HeaderCarrier]))
@@ -255,7 +255,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      when(mockAuditService.auditCorrespondenceAddress(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[AuthContext](), ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockAuditService.auditCorrespondenceAddress(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[AuthContext](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[AnyContent]]()))
         .thenReturn(Future.successful(AuditResult.Success))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>
@@ -275,7 +275,7 @@ class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYEReg
       when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      when(mockAuditService.auditCorrespondenceAddress(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[AuthContext](), ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockAuditService.auditCorrespondenceAddress(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[AuthContext](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[AnyContent]]()))
         .thenReturn(Future.successful(AuditResult.Success))
 
       AuthBuilder.submitWithAuthorisedUser(testController.submitPAYECorrespondenceAddress, mockAuthConnector, request) { result =>

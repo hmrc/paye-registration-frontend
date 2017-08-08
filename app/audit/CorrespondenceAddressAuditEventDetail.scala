@@ -18,6 +18,7 @@ package audit
 
 import audit.RegistrationAuditEvent.{AUTH_PROVIDER_ID, EXTERNAL_USER_ID, JOURNEY_ID}
 import play.api.libs.json.{JsObject, JsValue, Json, Writes}
+import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 case class CorrespondenceAddressAuditEventDetail(externalUserId: String,
@@ -38,5 +39,5 @@ object CorrespondenceAddressAuditEventDetail {
   }
 }
 
-class CorrespondenceAddressAuditEvent(details: CorrespondenceAddressAuditEventDetail)(implicit hc: HeaderCarrier)
-  extends RegistrationAuditEvent("correspondenceAddress", None, Json.toJson(details).as[JsObject])(hc)
+class CorrespondenceAddressAuditEvent(details: CorrespondenceAddressAuditEventDetail)(implicit hc: HeaderCarrier, req:Request[AnyContent])
+  extends RegistrationAuditEvent("correspondenceAddress", None, Json.toJson(details).as[JsObject])(hc, Some(req))

@@ -26,7 +26,7 @@ import forms.payeContactDetails.{CorrespondenceAddressForm, PAYEContactDetailsFo
 import models.view._
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, Request}
 import services._
 import uk.gov.hmrc.play.frontend.auth.{Actions, AuthContext}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -137,7 +137,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
         }
   }
 
-  private def submitCorrespondenceAddress(regId: String, txId: String, choice: AddressChoice)(implicit user: AuthContext, hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  private def submitCorrespondenceAddress(regId: String, txId: String, choice: AddressChoice)(implicit user: AuthContext, hc: HeaderCarrier, req: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
     choice match {
       case CorrespondenceAddress =>
         Future.successful(DownstreamOutcome.Success)
@@ -149,7 +149,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
     }
   }
 
-  private def submitCorrespondenceWithROAddress(regId: String, txId: String)(implicit user: AuthContext, hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  private def submitCorrespondenceWithROAddress(regId: String, txId: String)(implicit user: AuthContext, hc: HeaderCarrier, req: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
     for {
       companyDetails <- companyDetailsService.getCompanyDetails(regId, txId)
       res <- payeContactService.submitCorrespondence(regId, companyDetails.roAddress)
@@ -157,7 +157,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
     } yield res
   }
 
-  private def submitCorrespondenceWithPPOBAddress(regId: String, txId: String)(implicit user: AuthContext, hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  private def submitCorrespondenceWithPPOBAddress(regId: String, txId: String)(implicit user: AuthContext, hc: HeaderCarrier, req: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
     (for {
       companyDetails <- companyDetailsService.getCompanyDetails(regId, txId)
       res <- payeContactService.submitCorrespondence(regId, companyDetails.ppobAddress.getOrElse(throw new PPOBAddressNotFoundException))

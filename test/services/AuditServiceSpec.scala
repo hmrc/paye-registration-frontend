@@ -18,6 +18,7 @@ package services
 
 import models.DigitalContactDetails
 import models.view.PAYEContactDetails
+import play.api.test.FakeRequest
 import testHelpers.{AuthHelpers, PAYERegSpec}
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -48,6 +49,8 @@ class AuditServiceSpec extends PAYERegSpec with AuthHelpers {
     "not send audit event if there was no data initially" in new Setup {
       implicit val hc = HeaderCarrier(sessionId = Some(SessionId("session-123")))
       implicit val context = buildAuthContext
+
+      implicit val request = FakeRequest()
 
       await(service.auditPAYEContactDetails(regId, tstContactDetails, None)) shouldBe AuditResult.Disabled
     }

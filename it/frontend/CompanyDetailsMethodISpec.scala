@@ -23,7 +23,7 @@ import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import models.DigitalContactDetails
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
-import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.libs.json._
 import play.api.test.FakeApplication
 import play.api.http.HeaderNames
 
@@ -656,7 +656,18 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       (jsonAudit \ "detail" \ "authProviderId").as[JsString].value shouldBe "testAuthProviderId"
       (jsonAudit \ "detail" \ "journeyId").as[JsString].value shouldBe regId
       (jsonAudit \ "detail" \ "registeredOfficeAddress").as[JsString].value shouldBe "true"
+
+      val tags = (jsonAudit \ "tags").as[JsObject].value
+      tags("clientIP") shouldBe Json.toJson("-")
+      tags("path") shouldBe Json.toJson("/register-for-paye/where-company-carries-out-business-activities")
+      tags("clientPort") shouldBe Json.toJson("-")
+      tags.contains("X-Session-ID") shouldBe true
+      tags.contains("X-Request-ID") shouldBe true
+      tags.contains("deviceID") shouldBe true
+      tags("Authorization") shouldBe Json.toJson("-")
+      tags("transactionName") shouldBe Json.toJson("registeredOfficeUsedAsPrincipalPlaceOfBusiness")
     }
+
 
     "save to save for later with incomplete company details data and send Audit Event" in {
       setupSimpleAuthMocks()
@@ -1169,6 +1180,16 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       (jsonAudit \ "detail" \ "journeyId").as[JsString].value shouldBe regId
       (jsonAudit \ "detail" \ "previousContactDetails").as[DigitalContactDetails] shouldBe previousContactDetails
       (jsonAudit \ "detail" \ "newContactDetails").as[DigitalContactDetails] shouldBe newContactDetails
+
+      val tags = (jsonAudit \ "tags").as[JsObject].value
+      tags("clientIP") shouldBe Json.toJson("-")
+      tags("path") shouldBe Json.toJson("/register-for-paye/business-contact-details")
+      tags("clientPort") shouldBe Json.toJson("-")
+      tags.contains("X-Session-ID") shouldBe true
+      tags.contains("X-Request-ID") shouldBe true
+      tags.contains("deviceID") shouldBe true
+      tags("Authorization") shouldBe Json.toJson("-")
+      tags("transactionName") shouldBe Json.toJson("businessContactAmendment")
     }
 
     "upsert the business contact details in PAYE Registration with Prepopulation data and don't send Audit Event" in {

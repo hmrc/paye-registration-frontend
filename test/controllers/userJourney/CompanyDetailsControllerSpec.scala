@@ -29,7 +29,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Call, Request, Result}
+import play.api.mvc.{AnyContent, Call, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services._
@@ -361,7 +361,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "show error page when there is an internal error" in new Setup {
-      when(mockCompanyDetailsService.submitBusinessContact(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.submitBusinessContact(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitBusinessContactDetails(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
@@ -373,7 +373,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     }
 
     "redirect to next page when the user submit valid data" in new Setup {
-      when(mockCompanyDetailsService.submitBusinessContact(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.submitBusinessContact(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitBusinessContactDetails(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
@@ -442,7 +442,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
     "redirect to business contact details if ro is chosen" in new Setup {
       implicit val hc = HeaderCarrier()
       
-      val request = FakeRequest().withFormUrlEncodedBody(
+      implicit val request = FakeRequest().withFormUrlEncodedBody(
         "chosenAddress" -> "roAddress"
       )
 
@@ -455,7 +455,7 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
       when(mockCompanyDetailsService.copyROAddrToPPOBAddr(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      when(mockAuditService.auditPPOBAddress(ArgumentMatchers.anyString())(ArgumentMatchers.any[AuthContext](), ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockAuditService.auditPPOBAddress(ArgumentMatchers.anyString())(ArgumentMatchers.any[AuthContext](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[AnyContent]]()))
         .thenReturn(Future.successful(AuditResult.Success))
 
       AuthBuilder.submitWithAuthorisedUser(controller.submitPPOBAddress, mockAuthConnector, request) { result =>
