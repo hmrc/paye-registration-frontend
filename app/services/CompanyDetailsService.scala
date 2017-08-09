@@ -23,6 +23,7 @@ import enums.{CacheKeys, DownstreamOutcome}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.{Address, DigitalContactDetails}
+import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.RegistrationWhitelist
@@ -122,7 +123,7 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
     } yield outcome
   }
 
-  def submitBusinessContact(businessContact: DigitalContactDetails, regId: String, txId: String)(implicit hc: HeaderCarrier, authContext: AuthContext): Future[DownstreamOutcome.Value] = {
+  def submitBusinessContact(businessContact: DigitalContactDetails, regId: String, txId: String)(implicit hc: HeaderCarrier, authContext: AuthContext, req:Request[AnyContent]): Future[DownstreamOutcome.Value] = {
     for {
       details <- getCompanyDetails(regId, txId) flatMap {
         case currentDetails if dataHasChanged(businessContact, currentDetails.businessContactDetails) =>

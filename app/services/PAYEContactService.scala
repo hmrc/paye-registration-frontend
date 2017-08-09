@@ -31,6 +31,7 @@ import models.external.{UserDetailsModel, UserIds}
 import play.api.Logger
 import uk.gov.hmrc.play.audit.model.AuditEvent
 import play.api.libs.json.JsObject
+import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
@@ -121,7 +122,7 @@ trait PAYEContactSrv  {
   }
 
   def submitPayeContactDetails(regId: String, newViewData: PAYEContactDetails)
-                              (implicit hc: HeaderCarrier, authContext: AuthContext): Future[DownstreamOutcome.Value] = {
+                              (implicit hc: HeaderCarrier, authContext: AuthContext, req: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
     for {
       cachedContactData <- getPAYEContact(regId) flatMap {
         case currentView if dataHasChanged(newViewData, currentView.contactDetails) =>

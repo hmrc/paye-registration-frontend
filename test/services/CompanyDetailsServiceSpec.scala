@@ -27,6 +27,7 @@ import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.{Format, Json}
+import play.api.test.FakeRequest
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
@@ -406,13 +407,17 @@ class CompanyDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYEReg
 
   "Calling submitBusinessContact" should {
     "return a success response when submit is completed successfully" in new CompanyDetailsMockedSetup {
-      when(mockAuditService.auditBusinessContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockAuditService.auditBusinessContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(AuditResult.Success))
+
+      implicit val request = FakeRequest()
 
       await(service.submitBusinessContact(validBusinessContactModel, "54322", "txId")) shouldBe DownstreamOutcome.Success
     }
 
     "return a failure response when submit is not completed successfully" in new NoCompanyDetailsMockedSetup {
+
+      implicit val request = FakeRequest()
       await(service.submitBusinessContact(validBusinessContactModel, "54322", "txId")) shouldBe DownstreamOutcome.Failure
     }
   }

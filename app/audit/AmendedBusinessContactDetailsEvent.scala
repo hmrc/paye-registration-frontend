@@ -20,6 +20,7 @@ package audit
 import audit.RegistrationAuditEvent.{AUTH_PROVIDER_ID, EXTERNAL_USER_ID, JOURNEY_ID}
 import models.DigitalContactDetails
 import play.api.libs.json.{JsObject, JsValue, Json, Writes, __}
+import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 case class AmendedBusinessContactDetailsEventDetail(externalUserId: String,
@@ -43,5 +44,5 @@ object AmendedBusinessContactDetailsEventDetail {
   }
 }
 
-class AmendedBusinessContactDetailsEvent(detail: AmendedBusinessContactDetailsEventDetail)(implicit hc: HeaderCarrier)
-  extends RegistrationAuditEvent("businessContactAmendment", None, Json.toJson(detail).as[JsObject])(hc)
+class AmendedBusinessContactDetailsEvent(detail: AmendedBusinessContactDetailsEventDetail)(implicit hc: HeaderCarrier, req: Request[AnyContent])
+  extends RegistrationAuditEvent("businessContactAmendment", None, Json.toJson(detail).as[JsObject])(hc, Some(req))

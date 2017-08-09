@@ -18,6 +18,7 @@ package audit
 
 import play.api.libs.json.{Format, JsObject, Json, __}
 import play.api.libs.functional.syntax._
+import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 case class AuditPAYEContactDetails(contactName: String,
@@ -50,5 +51,5 @@ object AmendedPAYEContactDetailsEventDetail {
   )(AmendedPAYEContactDetailsEventDetail.apply, unlift(AmendedPAYEContactDetailsEventDetail.unapply))
 }
 
-class AmendedPAYEContactDetailsEvent(detail: AmendedPAYEContactDetailsEventDetail)(implicit hc: HeaderCarrier)
-  extends RegistrationAuditEvent("payeContactDetailsAmendment", None, Json.toJson(detail).as[JsObject])(hc)
+class AmendedPAYEContactDetailsEvent(detail: AmendedPAYEContactDetailsEventDetail)(implicit hc: HeaderCarrier, req: Request[AnyContent])
+  extends RegistrationAuditEvent("payeContactDetailsAmendment", None, Json.toJson(detail).as[JsObject])(hc, Some(req))
