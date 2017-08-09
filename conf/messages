@@ -179,7 +179,7 @@ pages.natureOfBusiness.title                            = What does the company 
 pages.natureOfBusiness.heading                          = What does the company do?
 pages.natureOfBusiness.lede                             = Describe the company''s main business activities including the type of goods or services it sells.
 pages.natureOfBusiness.hint                             = For example, cleaning services
-pages.natureOfBusiness.textArea.label                   = Business activities description
+pages.natureOfBusiness.textArea.label                   = Describe what the business does
 
 ## Director Details Page
 pages.directorDetails.title1Director                    = What is the director''s National Insurance number?
