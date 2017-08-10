@@ -19,11 +19,10 @@
     @govHelpers.form(action = controllers.userJourney.routes.NatureOfBusinessController.submitNatureOfBusiness()) {
 
         <div class="form-group">
-            <span id="hint-text" class="form-hint">@messages("pages.natureOfBusiness.hint")</span>
             @payeTextArea(
                 sicForm("description"),
                 '_inputClass -> "form-control--block",
-                '_labelClass -> "form-label visuallyhidden",
+                '_labelClass -> "form-label",
                 '_label -> messages("pages.natureOfBusiness.textArea.label"),
                 '_percentageWidth -> 98,
                 '_rows -> 5

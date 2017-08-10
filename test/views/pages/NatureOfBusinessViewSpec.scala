@@ -40,8 +40,5 @@ class NatureOfBusinessViewSpec extends PAYERegSpec with I18nSupport {
       document.getElementById("lede-paragraph").text shouldBe messagesApi("pages.natureOfBusiness.lede")
     }
 
-    "have the correct hint text" in {
-      document.getElementById("hint-text").text shouldBe messagesApi("pages.natureOfBusiness.hint")
-    }
   }
 }
