@@ -40,7 +40,7 @@ errors.invalid.name.invalidChars                        = Enter a contact name u
 pages.welcome.title                                     = Register as an employer
 pages.welcome.heading                                   = Register as an employer
 pages.welcome.heading.register                          = You must register if you:
-pages.welcome.bullet.pay                                = pay any employees - including company directors - £112 or more a week (this is the same as £486 a month or £5,824 a year)
+pages.welcome.bullet.pay                                = pay any employees - including company directors - £113 or more a week (this is the same as £490 a month or £5,876 a year)
 pages.welcome.bullet.subcontractors                     = use subcontractors for construction work
 pages.welcome.beforeStart                               = Before you start
 pages.welcome.otherWaysToRegister                       = You''ll need to use <a href={0}>another service to register</a> if you:
