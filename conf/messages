@@ -56,8 +56,14 @@ pages.companyEligibility.heading                        = Is the company an offs
 pages.companyEligibility.error                          = Tell us if any of the following apply to you
 
 ## Director Eligibility
-pages.directorEligibility.title                         = Does the company provide non-cash awards to employees and pay any tax due in a Taxed Award Scheme?
-pages.directorEligibility.heading                       = Does the company provide non-cash awards to employees and pay any tax due in a Taxed Award Scheme?
+pages.directorEligibility.title                         = Does the company pay out any non-cash incentive awards?
+pages.directorEligibility.heading                       = Does the company pay out any non-cash incentive awards?
+pages.employingStaff.directorEligibilityRulesIntro1     = This could be to anyone, not just your own staff.
+pages.employingStaff.directorEligibilityRulesIntro2     = Non-cash incentive awards include:
+pages.employingStaff.directorEligibility1               = vouchers - including ones that can be exchanged for cash
+pages.employingStaff.directorEligibility2               = any goods
+pages.employingStaff.directorEligibility3               = prizes for employer-run competitions
+pages.employingStaff.directorEligibility4               = holidays the company pays for
 pages.directorEligibility.error                         = Tell us if any of the following apply to you
 
 ## Completion Capacity page
