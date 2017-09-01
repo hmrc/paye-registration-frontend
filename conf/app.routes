@@ -20,8 +20,8 @@ GET         /offshore-employer                               controllers.userJou
 POST        /offshore-employer                               controllers.userJourney.EligibilityController.submitCompanyEligibility
 
 ## DIRECTOR ELIGIBILITY
-GET         /provide-non-cash-awards                          controllers.userJourney.EligibilityController.directorEligibility
-POST        /provide-non-cash-awards                          controllers.userJourney.EligibilityController.submitDirectorEligibility
+GET         /pay-non-cash-incentive-awards                          controllers.userJourney.EligibilityController.directorEligibility
+POST        /pay-non-cash-incentive-awards                         controllers.userJourney.EligibilityController.submitDirectorEligibility
 
 ## COMPLETION CAPACITY
 GET         /relationship-to-company                          controllers.userJourney.CompletionCapacityController.completionCapacity

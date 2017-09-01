@@ -128,7 +128,7 @@ class EligiblityMethodISpec extends IntegrationSpecBase
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/DirectorDetails", 200, dummyS4LResponse)
 
-      val fResponse = buildClient("/provide-non-cash-awards").
+      val fResponse = buildClient("/pay-non-cash-incentive-awards").
         withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
@@ -141,7 +141,7 @@ class EligiblityMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") shouldBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Does the company provide non-cash awards to employees and pay any tax due in a Taxed Award Scheme?"
+      document.title() shouldBe "Does the company pay out any non-cash incentive awards?"
       document.getElementById("isEligible-true").attr("checked") shouldBe ""
       document.getElementById("isEligible-false").attr("checked") shouldBe "checked"
     }
