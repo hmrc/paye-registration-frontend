@@ -64,7 +64,7 @@ pages.employingStaff.directorEligibility1               = vouchers - including o
 pages.employingStaff.directorEligibility2               = any goods
 pages.employingStaff.directorEligibility3               = prizes for employer-run competitions
 pages.employingStaff.directorEligibility4               = holidays the company pays for
-pages.directorEligibility.error                         = Tell us if any of the following apply to you
+pages.directorEligibility.error                         = Tell us if the company pays out non-cash incentive awards
 
 ## Completion Capacity page
 pages.completionCapacity.title                          = What is your relationship to the company?
