@@ -30,15 +30,11 @@ import utils.SessionProfile
 import views.html.pages.{directorDetails => DirectorDetailsPage}
 
 @Singleton
-class DirectorDetailsController @Inject()(injMessagesApi: MessagesApi,
-                                          injDirectorDetailsService: DirectorDetailsService,
-                                          injKeystoreConnector: KeystoreConnector,
-                                          injPayeRegistrationConnector: PAYERegistrationConnector) extends DirectorDetailsCtrl {
+class DirectorDetailsController @Inject()(val messagesApi: MessagesApi,
+                                          val directorDetailsService: DirectorDetailsService,
+                                          val keystoreConnector: KeystoreConnector,
+                                          val payeRegistrationConnector: PAYERegistrationConnector) extends DirectorDetailsCtrl {
   val authConnector = FrontendAuthConnector
-  val messagesApi = injMessagesApi
-  val directorDetailsService = injDirectorDetailsService
-  val keystoreConnector = injKeystoreConnector
-  val payeRegistrationConnector = injPayeRegistrationConnector
 }
 
 trait DirectorDetailsCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
@@ -50,11 +46,10 @@ trait DirectorDetailsCtrl extends FrontendController with Actions with I18nSuppo
     implicit user =>
       implicit request =>
         withCurrentProfile { profile =>
-          directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map {
-            directors =>
-              val ninos = directorDetailsService.createDirectorNinos(directors)
-              val names = directorDetailsService.createDisplayNamesMap(directors)
-              Ok(DirectorDetailsPage(DirectorDetailsForm.form.fill(ninos), names))
+          directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map { directors =>
+            val ninos = directorDetailsService.createDirectorNinos(directors)
+            val names = directorDetailsService.createDisplayNamesMap(directors)
+            Ok(DirectorDetailsPage(DirectorDetailsForm.form.fill(ninos), names))
           }recover {
             case _ => InternalServerError(views.html.pages.error.restart())
           }

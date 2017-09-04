@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.{CacheKeys, DownstreamOutcome}
-import models.api.Director
+import models.api.{Director, Name}
 import models.view.{Directors, Ninos, UserEnteredNino}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.RegistrationWhitelist
@@ -29,14 +29,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class DirectorDetailsService @Inject()(injPayeRegistrationConnector: PAYERegistrationConnector,
-                                       injIncorporationInformationService: IncorporationInformationService,
-                                       injS4LService: S4LService) extends DirectorDetailsSrv {
-
-  override val payeRegConnector = injPayeRegistrationConnector
-  override val incorpInfoService = injIncorporationInformationService
-  override val s4LService = injS4LService
-}
+class DirectorDetailsService @Inject()(val payeRegConnector: PAYERegistrationConnector,
+                                       val incorpInfoService: IncorporationInformationService,
+                                       val s4LService: S4LService) extends DirectorDetailsSrv
 
 trait DirectorDetailsSrv extends RegistrationWhitelist {
   val payeRegConnector: PAYERegistrationConnect
@@ -59,29 +54,28 @@ trait DirectorDetailsSrv extends RegistrationWhitelist {
     case _ => Left(viewData)
   }
 
-  private[services] def convertOrRetrieveDirectors(directorList: Seq[Director], transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
-    directorList match {
-      case Nil => for {
-        directors <- incorpInfoService.getDirectorDetails(transactionId)
-      } yield directors
-      case dirList => Future.successful(apiToView(dirList))
-    }
-  }
 
   private def saveToS4L(viewData: Directors, regId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
     s4LService.saveForm[Directors](CacheKeys.DirectorDetails.toString, viewData, regId).map(_ => viewData)
   }
 
   def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
-    s4LService.fetchAndGet(CacheKeys.DirectorDetails.toString, regId) flatMap {
-      case Some(directors) => Future.successful(directors)
-      case None => for {
-        regResponse <- ifRegIdNotWhitelisted(regId){
-          payeRegConnector.getDirectors(regId)
+    for {
+      iiDirectors       <- incorpInfoService.getDirectorDetails(transactionId)
+      backendDirectors  <- s4LService.fetchAndGet(CacheKeys.DirectorDetails.toString, regId) flatMap {
+        case Some(dirs) => Future.successful(dirs)
+        case None => for {
+          regResponse <- ifRegIdNotWhitelisted(regId) {
+            payeRegConnector.getDirectors(regId)
+          }
+        } yield {
+          apiToView(regResponse)
         }
-        directors <- convertOrRetrieveDirectors(regResponse, transactionId)
-        data <- saveToS4L(directors, regId)
-      } yield data
+      }
+      directors = if(directorsNotChanged(iiDirectors, backendDirectors)) backendDirectors else iiDirectors
+      _ <- saveToS4L(directors, regId)
+    } yield {
+      directors
     }
   }
 
@@ -97,9 +91,30 @@ trait DirectorDetailsSrv extends RegistrationWhitelist {
     )
   }
 
+
+
   def createDisplayNamesMap(directors: Directors): Map[String, String] = {
     directors.directorMapping.map {
-      case(k, v) => (k, List(v.name.forename, Some(v.name.surname)).flatten.mkString(" "))
+      case(k, v) => (k, List(v.name.title,v.name.forename,v.name.otherForenames, Some(v.name.surname)).flatten.mkString(" "))
+    }
+  }
+
+
+  def directorsNotChanged(iiDirectors: Directors, backendDirectors: Directors): Boolean = {
+    if(iiDirectors.directorMapping.seq.size == backendDirectors.directorMapping.seq.size) {
+      if (iiDirectors.directorMapping.map(_._2) // iterable[director]
+        .map(ii => ii.name) //iterable[Name]
+        .map(ii => backendDirectors //a == name
+        .directorMapping.map(_._2) //iterable[director]
+        .map(be => be.name) //iterable[Name]
+        .toList.contains(ii)).toList.contains(false)) {
+        false //something has changed
+      } else {
+        true //nothing has changed
+      }
+    }
+    else{
+      false
     }
   }
 

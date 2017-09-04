@@ -23,38 +23,31 @@
 }
 
 @hiddenDetailsContent = {
+    <p>@Html(Messages("pages.directorDetails.hiddenIntro", "https://ewf.companieshouse.gov.uk//seclogin?tc=1"))</p>
 
-          <p>@Html(Messages("pages.directorDetails.hiddenIntro", "https://ewf.companieshouse.gov.uk//seclogin?tc=1"))</p>
+    <p>@Html(Messages("pages.directorDetails.hiddenIntro2", "https://www.gov.uk/limited-company-formation/register-your-company"))</p>
 }
 
-@defining(if(directorNames.size > 1) {"MultipleDirectors"} else {"1Director"}) { msgSuffix =>
-    @main_template(title = messages(s"pages.directorDetails.title$msgSuffix")) {
+@main_template(title = messages(s"pages.directorDetails.title")) {
 
-        @payeErrorSummary(
-            messages("app.common.errorSummaryLabel"), ninoForm
-        )
+    @payeErrorSummary(
+        messages("app.common.errorSummaryLabel"), ninoForm
+    )
 
-        <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages(s"pages.directorDetails.heading$msgSuffix"))</h1>
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages(s"pages.directorDetails.heading"))</h1>
+
+    <div class="form-group">
+        @hiddenDetails("directors", Messages("pages.directorDetails.information.dropdown.header"), hiddenDetailsContent)
+    </div>
+
+    @govHelpers.form(action = controllers.userJourney.routes.DirectorDetailsController.submitDirectorDetails()) {
+
+        @oneOfManyErrorWrapper(ninoForm, formContent)
 
         <div class="form-group">
-            <div class="indent">
-                <p>@messages("pages.directorDetails.information.indent")</p>
-            </div>
+            <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
         </div>
-
-        @govHelpers.form(action = controllers.userJourney.routes.DirectorDetailsController.submitDirectorDetails()) {
-
-            @oneOfManyErrorWrapper(ninoForm, formContent)
-
-            <div class="form-group">
-                @hiddenDetails("directors", Messages("pages.directorDetails.information.dropdown.header"), hiddenDetailsContent)
-            </div>
-
-            <div class="form-group">
-                <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
-            </div>
-        }
-
     }
+
 }
 
