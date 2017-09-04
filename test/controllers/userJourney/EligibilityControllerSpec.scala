@@ -191,7 +191,7 @@ class EligibilityControllerSpec extends PAYERegSpec {
       )) {
         result =>
           status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/employ-subcontractors-construction-industry"
+          result.header.headers("Location") shouldBe "/register-for-paye/use-subcontractors-construction-industry"
       }
     }
   }

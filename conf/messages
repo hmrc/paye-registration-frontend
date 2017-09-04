@@ -148,12 +148,12 @@ pages.employingStaff.error                              = Tell us if over the ne
 
 
 ## Subcontractors Page
-pages.subcontractors.title                              = Will you employ subcontractors in the construction industry?
-pages.subcontractors.heading                            = Will you employ subcontractors in the construction industry?
-pages.subcontractors.legend                             = Will you employ subcontractors in the construction industry?
+pages.subcontractors.title                              = Will the company use subcontractors in the construction industry?
+pages.subcontractors.heading                            = Will the company use subcontractors in the construction industry?
+pages.subcontractors.legend                             = Will the company use subcontractors in the construction industry?
 pages.subcontractors.nameRulesIntro                     = We''ll register you with the Construction Industry Scheme (CIS) if you pay subcontractors to do construction work.
 pages.subcontractors.findout                            = Find out <a href="{0}">what work is covered by the CIS</a>
-pages.subcontractors.error                              = Tell us if the company will pay subcontractors to do work this year
+pages.subcontractors.error                              = Tell us if the company will use subcontractors in the construction industry
 
 ## Company Pension Page
 pages.companyPension.title                              = Will you make pension payments to a former employee or their dependants in the next 2 months?
@@ -221,7 +221,7 @@ pages.summary.companyPension.answers.true               = Yes
 pages.summary.companyPension.answers.false              = No
 pages.summary.companyPension.hiddenChangeText           = whether you will make pension payments to a former employee or their dependants in the next 2 months.
 
-pages.summary.subcontractors.question                   = Will you employ subcontractors in the construction industry?
+pages.summary.subcontractors.question                   = Will the company use subcontractors in the construction industry?
 pages.summary.subcontractors.answers.true               = Yes
 pages.summary.subcontractors.answers.false              = No
 pages.summary.subcontractors.hiddenChangeText           = whether you will employ subcontractors in the construction industry.

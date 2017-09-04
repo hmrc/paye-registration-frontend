@@ -49,8 +49,8 @@ GET         /employ-staff-next-two-months                     controllers.userJo
 POST        /employ-staff-next-two-months                     controllers.userJourney.EmploymentController.submitEmployingStaff
 
 ## SUBCONTRACTORS
-GET         /employ-subcontractors-construction-industry      controllers.userJourney.EmploymentController.subcontractors
-POST        /employ-subcontractors-construction-industry      controllers.userJourney.EmploymentController.submitSubcontractors
+GET         /use-subcontractors-construction-industry         controllers.userJourney.EmploymentController.subcontractors
+POST        /use-subcontractors-construction-industry         controllers.userJourney.EmploymentController.submitSubcontractors
 
 ## COMPANY PENSION
 GET         /make-pension-payment-next-two-months             controllers.userJourney.EmploymentController.companyPension
