@@ -101,22 +101,17 @@ trait DirectorDetailsSrv extends RegistrationWhitelist {
 
 
   def directorsNotChanged(iiDirectors: Directors, backendDirectors: Directors): Boolean = {
-    if(iiDirectors.directorMapping.seq.size == backendDirectors.directorMapping.seq.size) {
-      if (iiDirectors.directorMapping.map(_._2) // iterable[director]
-        .map(ii => ii.name) //iterable[Name]
-        .map(ii => backendDirectors
-        .directorMapping.map(_._2) //iterable[director]
-        .map(be => be.name) //iterable[Name]
-        .toList.contains(ii)).toList.contains(false)) {
-        false //something has changed
-      } else {
-        true //nothing has changed
-      }
+    val numberOfDirectorsAreTheSame = iiDirectors.directorMapping.seq.size == backendDirectors.directorMapping.seq.size
+
+    !{if(numberOfDirectorsAreTheSame) {
+      iiDirectors.directorMapping.values.map{ ii =>
+        backendDirectors.directorMapping.values.exists(_.name == ii.name)
+      }.toList
+    } else {
+      List(false)
+    }}.contains(false)
     }
-    else{
-      false //something has changed
-    }
-  }
+
 
   def createDirectorNinos(directors: Directors): Ninos = {
     Ninos((0 until directors.directorMapping.size).map {
