@@ -104,7 +104,7 @@ trait DirectorDetailsSrv extends RegistrationWhitelist {
     if(iiDirectors.directorMapping.seq.size == backendDirectors.directorMapping.seq.size) {
       if (iiDirectors.directorMapping.map(_._2) // iterable[director]
         .map(ii => ii.name) //iterable[Name]
-        .map(ii => backendDirectors //a == name
+        .map(ii => backendDirectors
         .directorMapping.map(_._2) //iterable[director]
         .map(be => be.name) //iterable[Name]
         .toList.contains(ii)).toList.contains(false)) {
@@ -114,7 +114,7 @@ trait DirectorDetailsSrv extends RegistrationWhitelist {
       }
     }
     else{
-      false
+      false //something has changed
     }
   }
 
