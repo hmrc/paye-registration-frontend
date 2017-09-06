@@ -54,6 +54,7 @@ object RegistrationAuditEvent {
   val JOURNEY_ID = "journeyId"
   val PATH = "path"
 
+
   def buildTags(transactionName: String, tagSet: TagSet)(implicit hc: HeaderCarrier, optReq: Option[Request[AnyContent]]) = {
     Map("transactionName" -> transactionName) ++
       buildClientIP(tagSet) ++

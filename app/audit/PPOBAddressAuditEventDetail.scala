@@ -21,6 +21,7 @@ import play.api.libs.json.{JsObject, JsValue, Json, Writes}
 import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
+
 case class PPOBAddressAuditEventDetail(externalUserId: String,
                                        authProviderId: String,
                                        regId: String)

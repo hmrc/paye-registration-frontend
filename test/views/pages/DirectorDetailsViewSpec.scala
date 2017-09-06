@@ -62,7 +62,7 @@ class DirectorDetailsViewSpec extends PAYERegSpec with I18nSupport {
     lazy val document = Jsoup.parse(view.body)
 
     "have the title for a single director" in {
-      document.getElementById("pageHeading").text shouldBe messagesApi("pages.directorDetails.title1Director")
+      document.getElementById("pageHeading").text shouldBe messagesApi("pages.directorDetails.title")
     }
 
     "display the directors name and prepopped Nino" in {
@@ -80,7 +80,7 @@ class DirectorDetailsViewSpec extends PAYERegSpec with I18nSupport {
     lazy val document = Jsoup.parse(view.body)
 
     "have the title for many directors" in {
-      document.getElementById("pageHeading").text shouldBe messagesApi("pages.directorDetails.titleMultipleDirectors")
+      document.getElementById("pageHeading").text shouldBe messagesApi("pages.directorDetails.title")
     }
 
     "have all directors shown" in {

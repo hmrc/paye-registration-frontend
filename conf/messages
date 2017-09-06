@@ -188,17 +188,16 @@ pages.natureOfBusiness.hint                             = For example, cleaning 
 pages.natureOfBusiness.textArea.label                   = Enter a description of what the company does
 
 ## Director Details Page
-pages.directorDetails.title1Director                    = What is the director''s National Insurance number?
-pages.directorDetails.titleMultipleDirectors            = Enter the National Insurance number of at least one company director
-pages.directorDetails.legend                            = Enter the National Insurance number of at least one company director
-pages.directorDetails.heading1Director                  = What is the director''s National Insurance number?
-pages.directorDetails.headingMultipleDirectors          = Enter the National Insurance number of at least one company director
+pages.directorDetails.title                             = What is the National Insurance number of at least one company director?
+pages.directorDetails.legend                            = What is the National Insurance number of at least one company director?
+pages.directorDetails.heading                           = What is the National Insurance number of at least one company director?
 pages.directorDetails.errors.noneCompleted              = Enter at least one director''s National Insurance number
 pages.directorDetails.information.indent                = You can find a National Insurance number on a National Insurance card, benefit letter, payslip or P60.
-pages.directorDetails.information.dropdown.header       = Have the directors changed?
+pages.directorDetails.information.dropdown.header       = Not the right directors?
 pages.directorDetails.information.dropdown.body         = If the direct names are incorrect, you can change them with
 pages.directorDetails.input.hint-text                   = For example, QQ 12 34 56 C
-pages.directorDetails.hiddenIntro                       = If the director names are incorrect, you can change them with <a href={0}>Companies House</a>.
+pages.directorDetails.hiddenIntro                       = If the director names are wrong, <a href={0}>change them with Companies House</a>. It will take less than 24 hours for Companies House to confirm the changes via email.
+pages.directorDetails.hiddenIntro2                      = After you get the email, <a href={0}>sign back into this service from GOV.UK</a> to continue your application.
 pages.directorDetails.name-suffix                       = {0}''s National Insurance number
 
 

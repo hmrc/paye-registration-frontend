@@ -20,12 +20,10 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import utils.Formatters
 
-case class Name(
-                 forename: Option[String],
-                 otherForenames: Option[String],
-                 surname: String,
-                 title: Option[String]
-                 )
+case class Name(forename: Option[String],
+                otherForenames: Option[String],
+                surname: String,
+                title: Option[String])
 
 object Name {
   implicit val format = (
