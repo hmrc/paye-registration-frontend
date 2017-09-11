@@ -100,10 +100,10 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
         (response: Future[Result]) =>
           status(response) shouldBe Status.OK
           val result = Jsoup.parse(bodyOf(response))
-          result.body().getElementById("pageHeading").text() shouldBe "Will the company trade under another name?"
-          result.body.getElementById("differentName-true").parent.classNames().contains("selected") shouldBe true
-          result.body.getElementById("differentName-false").parent.classNames().contains("selected") shouldBe false
-          result.body().getElementById("tradingName").attr("value") shouldBe validCompanyDetailsViewModel.tradingName.get.tradingName.get
+          result.body.getElementById("pageHeading").text() shouldBe "Will the company trade under another name?"
+          result.body.getElementById("differentName-true").attr("checked") shouldBe "checked"
+          result.body.getElementById("differentName-false").attr("checked") shouldBe ""
+          result.body.getElementById("tradingName").attr("value") shouldBe validCompanyDetailsViewModel.tradingName.get.tradingName.get
       }
     }
 
@@ -123,10 +123,10 @@ class CompanyDetailsControllerSpec extends PAYERegSpec with S4LFixture with PAYE
         (response: Future[Result]) =>
           status(response) shouldBe Status.OK
           val result = Jsoup.parse(bodyOf(response))
-          result.body().getElementById("pageHeading").text() shouldBe "Will the company trade under another name?"
-          result.body.getElementById("differentName-true").parent.classNames().contains("selected") shouldBe false
-          result.body.getElementById("differentName-false").parent.classNames().contains("selected") shouldBe true
-          result.body().getElementById("tradingName").attr("value") shouldBe ""
+          result.body.getElementById("pageHeading").text() shouldBe "Will the company trade under another name?"
+          result.body.getElementById("differentName-true").attr("checked") shouldBe ""
+          result.body.getElementById("differentName-false").attr("checked") shouldBe "checked"
+          result.body.getElementById("tradingName").attr("value") shouldBe ""
       }
     }
 
