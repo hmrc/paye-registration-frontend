@@ -1,20 +1,14 @@
 @(backButtonEnabled: Boolean)(implicit messages: Messages)
 
-@backButton = {
-    @if(backButtonEnabled) {
-        <div style="width:40%; display: inline-block" align="left" class="form-group-compound">
-            <a id="back" class="back-link" href="javascript:history.back()">@Messages("app.common.back")</a>
-        </div>
-    }
-}
-<div class="service-info">
-    <div class="beta-banner">
-        <p>
-            <strong class="phase-tag">BETA</strong>
-            <span>@Messages("app.common.feedbackFirst") <a href="@controllers.feedback.routes.FeedbackController.feedbackShow()">@Messages("app.common.feedbackLinkText")</a>.</span>
-        </p>
-    </div>
+<div id="global-header-bar"></div>
+<div class="phase-banner">
+    <p>
+        <strong class="phase-tag">BETA</strong>
+        <span>@Messages("app.common.feedbackFirst") <a href="@controllers.feedback.routes.FeedbackController.feedbackShow()">@Messages("app.common.feedbackSecond")</a> @Messages("app.common.feedbackThird")</span>
+    </p>
 </div>
 
-@backButton
+@if(backButtonEnabled) {
+    <a id="back" class="link-back" href="javascript:history.back()">@Messages("app.common.back")</a>
+}
 
