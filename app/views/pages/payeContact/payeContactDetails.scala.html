@@ -22,7 +22,7 @@
             contactForm("digitalContact.mobileNumber"),
             '_labelClass -> "form-label cascading",
             '_inputClass -> "form-control-1-2",
-            '_label -> messages("pages.payeContact.mobile")
+            '_label -> messages("pages.payeContact.contact")
             )
         </div>
 
@@ -31,7 +31,7 @@
             contactForm("digitalContact.phoneNumber"),
             '_labelClass -> "form-label cascading",
             '_inputClass -> "form-control-1-2",
-            '_label -> messages("pages.payeContact.phone")
+            '_label -> messages("pages.payeContact.othercontact")
             )
         </div>
     </fieldset>
@@ -44,8 +44,6 @@
     )
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.payeContact.heading")</h1>
-
-    <p id="p1">@messages("pages.payeContact.p1")</p>
 
     @govHelpers.form(action = controllers.userJourney.routes.PAYEContactController.submitPAYEContactDetails()) {
 
@@ -64,10 +62,8 @@
                 </div>
             </fieldset>
 
-            <div class="form-group">
-                <div class="indent">
-                    <p>@messages("pages.payeContactDetails.information.indent")</p>
-                </div>
+            <div class="indent">
+                <p id="helpMessage1">@Messages("pages.payeContactDetails.information.indent")</p>
             </div>
             @oneOfManyErrorWrapper(contactForm, formContent)
         </div>

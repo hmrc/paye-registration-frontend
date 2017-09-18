@@ -22,7 +22,7 @@
             contactForm("mobileNumber"),
             '_labelClass -> "form-label cascading",
             '_inputClass -> "form-control-1-2",
-            '_label -> messages("pages.businessContact.mobile")
+            '_label -> messages("pages.businessContact.contact")
             )
         </div>
 
@@ -31,7 +31,7 @@
             contactForm("phoneNumber"),
             '_labelClass -> "form-label cascading",
             '_inputClass -> "form-control-1-2",
-            '_label -> messages("pages.businessContact.phone")
+            '_label -> messages("pages.businessContact.othercontact")
             )
         </div>
     </fieldset>
@@ -45,14 +45,6 @@
     )
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.businessContact.heading")</h1>
-
-    <p id="p1">@messages("pages.businessContactDetails.p1")</p>
-    <div class="form-group">
-        <div class="indent">
-            <p id="p2">@messages("pages.businessContactDetails.p2.indent")</p>
-        </div>
-    </div>
-
 
     @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.submitBusinessContactDetails()) {
 

@@ -21,12 +21,12 @@ import play.api.data.format.Formatter
 import utils.Validators.isValidPhoneNo
 
 trait PhoneNoForm {
-  implicit def phoneNoFormatter(errMsg: String): Formatter[Option[String]] = new Formatter[Option[String]] {
+  implicit def phoneNoFormatter: Formatter[Option[String]] = new Formatter[Option[String]] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] = {
       val input = data.getOrElse(key, "")
 
       if (input.isEmpty) Right(None) else {
-        isValidPhoneNo(input, errMsg) match {
+        isValidPhoneNo(input) match {
           case Right(phoneNo) => Right(Some(phoneNo))
           case Left(err) => Left(Seq(FormError(key, err)))
         }
@@ -36,5 +36,5 @@ trait PhoneNoForm {
     override def unbind(key: String, value: Option[String]): Map[String, String] = Map(key -> value.getOrElse(""))
   }
 
-  def phoneNoField(errMsg: String): Mapping[Option[String]] = Forms.of[Option[String]](phoneNoFormatter(errMsg))
+  def phoneNoField: Mapping[Option[String]] = Forms.of[Option[String]](phoneNoFormatter)
 }

@@ -30,8 +30,8 @@ object BusinessContactDetailsForm extends OneOfManyForm with PhoneNoForm {
   val form = Form(
     mapping(
       "businessEmail" -> oneOfManyErrorTarget.verifying(optionalValidation(emailValidation)),
-      "mobileNumber" -> phoneNoField("errors.invalid.mobileNumber"),
-      "phoneNumber" -> phoneNoField("errors.invalid.phoneNumber")
+      "mobileNumber" -> phoneNoField,
+      "phoneNumber" -> phoneNoField
     )(DigitalContactDetails.apply)(DigitalContactDetails.unapply).verifying()
   )
 }
