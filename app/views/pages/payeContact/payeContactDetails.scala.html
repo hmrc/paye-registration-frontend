@@ -1,4 +1,4 @@
-@import helpers.templates.{oneOfManyErrorWrapper, payeErrorSummary}
+@import helpers.templates.{oneOfManyErrorWrapper, payeErrorSummary, payInput}
 @import models.view.PAYEContactDetails
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @(contactForm: Form[PAYEContactDetails])(implicit request: Request[_], messages: Messages)
@@ -53,7 +53,7 @@
                     @Html(messages("pages.payeContact.p1"))
                 </legend>
                 <div class="form-group">
-                    @govHelpers.input(
+                    @payInput(
                     contactForm("name"),
                     '_inputClass -> "form-control-1-2",
                     '_labelClass -> "form-label cascading",

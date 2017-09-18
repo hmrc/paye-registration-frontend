@@ -1,11 +1,11 @@
-@import helpers.templates.inlineDateInput
+@import helpers.templates.{inlineDateInput, payeErrorSummary}
 @import models.api.{PAYERegistration => PAYERegistrationAPI}
 @import pages.test.testHelpers.manualPrePopulatedInput
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
 @(payeForm: Form[PAYERegistrationAPI], regID: String, txID: String)(implicit request: Request[_], messages: Messages)
 
-@govHelpers.errorSummary(
+@payeErrorSummary(
     Messages("app.common.errorSummaryLabel"), payeForm
 )
 

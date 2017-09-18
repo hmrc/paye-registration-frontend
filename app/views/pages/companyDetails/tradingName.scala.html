@@ -1,4 +1,4 @@
-@import helpers.templates.{formHiddenYesNoRadio, hiddenDetails}
+@import helpers.templates.{formHiddenYesNoRadio, hiddenDetails, payeErrorSummary}
 @import models.view.TradingName
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
@@ -25,7 +25,7 @@
 
 @main_template(title = Messages("pages.tradingName.title")) {
 
-    @govHelpers.errorSummary(
+    @payeErrorSummary(
         Messages("app.common.errorSummaryLabel"), tradingNameForm
     )
 

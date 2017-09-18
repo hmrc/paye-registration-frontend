@@ -1,3 +1,4 @@
+@import helpers.templates.payeErrorSummary
 @import models.test.CoHoCompanyDetailsFormModel
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
@@ -5,7 +6,7 @@
 
 
 
-@govHelpers.errorSummary(
+@gpayeErrorSummary(
     Messages("app.common.errorSummaryLabel"), cohoForm
 )
 

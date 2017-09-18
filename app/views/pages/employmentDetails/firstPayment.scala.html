@@ -1,4 +1,4 @@
-@import helpers.templates.{hiddenDetails, inlineDateInput}
+@import helpers.templates.{hiddenDetails, inlineDateInput, payeErrorSummary}
 @import models.view.FirstPayment
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
@@ -16,7 +16,7 @@
 }
 
 @main_template(title = Messages("pages.firstPayment.title")) {
-    @govHelpers.errorSummary(
+    @payeErrorSummary(
         Messages("app.common.errorSummaryLabel"),
         firstPaymentForm
     )
