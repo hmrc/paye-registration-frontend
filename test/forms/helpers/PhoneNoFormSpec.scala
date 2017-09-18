@@ -28,66 +28,66 @@ class PhoneNoFormSpec extends UnitSpec {
       val data = Map[String, String](
         "test1" -> ""
       )
-      TestForm.phoneNoFormatter("error").bind("test1", data) shouldBe Right(None)
+      TestForm.phoneNoFormatter.bind("test1", data) shouldBe Right(None)
     }
 
     "bind from a correct input with 10 digits" in {
       val data = Map[String, String](
         "test1" -> "0123456789"
       )
-      TestForm.phoneNoFormatter("error").bind("test1", data) shouldBe Right(Some("0123456789"))
+      TestForm.phoneNoFormatter.bind("test1", data) shouldBe Right(Some("0123456789"))
     }
 
     "bind from a correct input with 20 digits" in {
       val data = Map[String, String](
         "test1" -> "01234567890123456789"
       )
-      TestForm.phoneNoFormatter("error").bind("test1", data) shouldBe Right(Some("01234567890123456789"))
+      TestForm.phoneNoFormatter.bind("test1", data) shouldBe Right(Some("01234567890123456789"))
     }
 
     "bind from a correct input with 15 digits and total less than 20 characters" in {
       val data = Map[String, String](
         "test1" -> "01 23 45 67 890 1234"
       )
-      TestForm.phoneNoFormatter("error").bind("test1", data) shouldBe Right(Some("01 23 45 67 890 1234"))
+      TestForm.phoneNoFormatter.bind("test1", data) shouldBe Right(Some("01 23 45 67 890 1234"))
     }
 
     "bind from a correct input with 15 digits and total more than 20 characters" in {
       val data = Map[String, String](
         "test1" -> "01 23 45 67 890 12 34"
       )
-      TestForm.phoneNoFormatter("error").bind("test1", data) shouldBe Right(Some("012345678901234"))
+      TestForm.phoneNoFormatter.bind("test1", data) shouldBe Right(Some("012345678901234"))
     }
 
     "fail to bind with incorrect input containing non numeric characters" in {
       val data = Map[String, String](
         "test1" -> "a2324sfsf*&$%"
       )
-      TestForm.phoneNoFormatter("error").bind("test1", data) shouldBe Left(Seq(FormError("test1", "error")))
+      TestForm.phoneNoFormatter.bind("test1", data) shouldBe Left(Seq(FormError("test1", "errors.invalid.contactNum")))
     }
 
     "fail to bind with incorrect input, less than 10 digits" in {
       val data = Map[String, String](
         "test1" -> "012345678"
       )
-      TestForm.phoneNoFormatter("error").bind("test1", data) shouldBe Left(Seq(FormError("test1", "error")))
+      TestForm.phoneNoFormatter.bind("test1", data) shouldBe Left(Seq(FormError("test1", "errors.invalid.contactNum.tooShort")))
     }
 
     "fail to bind with incorrect input, more than 20 digits" in {
       val data = Map[String, String](
         "test1" -> "012345678901234567890"
       )
-      TestForm.phoneNoFormatter("error").bind("test1", data) shouldBe Left(Seq(FormError("test1", "error")))
+      TestForm.phoneNoFormatter.bind("test1", data) shouldBe Left(Seq(FormError("test1", "errors.invalid.contactNum.tooLong")))
     }
   }
 
   "Unbinding a form extending PhoneNoForm" should {
     "unbind successfully from Some" in {
-      TestForm.phoneNoFormatter("error").unbind("tst", Some("test value")) shouldBe Map("tst" -> "test value")
+      TestForm.phoneNoFormatter.unbind("tst", Some("test value")) shouldBe Map("tst" -> "test value")
     }
 
     "unbind successfully from None" in {
-      TestForm.phoneNoFormatter("error").unbind("tst", None) shouldBe Map("tst" -> "")
+      TestForm.phoneNoFormatter.unbind("tst", None) shouldBe Map("tst" -> "")
     }
   }
 }

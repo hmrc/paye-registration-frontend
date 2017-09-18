@@ -28,8 +28,9 @@ app.common.companies-houseinfo                          = update it with Compani
 ## User error messages
 errors.invalid.email                                    = The email address you have provided is invalid
 errors.invalid.email.tooLong                            = Enter your email address using 70 characters or less
-errors.invalid.phoneNumber                              = The phone number you have provided is invalid
-errors.invalid.mobileNumber                             = The mobile phone number you have provided is invalid
+errors.invalid.contactNum                               = Enter a contact number using only numbers
+errors.invalid.contactNum.tooShort                      = Enter a contact number using 10 digits or more
+errors.invalid.contactNum.tooLong                       = Enter a contact number using 20 digits or less
 errors.invalid.nino                                     = National Insurance number is in the wrong format
 errors.duplicate.nino                                   = You''ve entered the same National Insurance number more than once
 errors.invalid.sic.noEntry                              = Tell us what the company does
@@ -118,12 +119,12 @@ pages.correspondenceAddress.addressChoice.noEntry       = Tell us the company''s
 
 ## Business Contact Details
 pages.businessContact.title                             = What are the company contact details?
-pages.businessContact.heading                           = What are the company contact details?
+pages.businessContact.heading                           = Provide at least one of the following company contact details
 pages.businessContactDetails.p1                         = Let us know how we can get in touch if we need more information about the company.
 pages.businessContactDetails.p2.indent                  = You need to provide at least one of the following contact details.
 pages.businessContact.email                             = Email address
-pages.businessContact.mobile                            = Mobile number
-pages.businessContact.phone                             = Phone number
+pages.businessContact.contact                           = Contact number
+pages.businessContact.othercontact                      = Other contact number
 pages.businessContact.noFieldsCompleted                 = Enter at least one company contact detail
 
 ## PAYE Contact Details
@@ -132,11 +133,11 @@ pages.payeContact.heading                               = Who should we contact 
 pages.payeContact.p1                                    = Let us know who we can contact if we need more information about the company''s PAYE scheme.
 pages.payeContact.contactName                           = Contact name
 pages.payeContact.email                                 = Email address
-pages.payeContact.mobile                                = Mobile number
-pages.payeContact.phone                                 = Phone number
+pages.payeContact.contact                               = Contact number
+pages.payeContact.othercontact                          = Other contact number
 pages.payeContact.noFieldsCompleted                     = You need to provide at least one contact method so we can get in touch if we need to
 pages.payeContact.nameMandatory                         = Enter a contact name
-pages.payeContactDetails.information.indent             = You need to provide at least one of the following contact details.
+pages.payeContactDetails.information.indent             = Provide at least one of the following contact details.
 
 ## Employing Staff Page
 pages.employingStaff.title                              = Over the next 2 months will you pay any staff, including yourself?
@@ -250,12 +251,12 @@ pages.summary.businessContactDetails.sectionHeading     = Company contact detail
 pages.summary.businessEmail.question                    = What is the company contact''s email address?
 pages.summary.businessEmail.answers.noAnswerGiven       = '
 pages.summary.businessEmail.hiddenChangeText            = the company contact''s email address.
-pages.summary.mobileNumber.question                     = What is the company contact''s mobile number?
+pages.summary.mobileNumber.question                     = What is the company contact''s number?
 pages.summary.mobileNumber.answers.noAnswerGiven        = '
-pages.summary.mobileNumber.hiddenChangeText             = the company contact''s mobile number.
-pages.summary.businessTelephone.question                = What is the company contact''s phone number?
+pages.summary.mobileNumber.hiddenChangeText             = the company contact''s number.
+pages.summary.businessTelephone.question                = What is the company contact''s other number?
 pages.summary.businessTelephone.answers.noAnswerGiven   = '
-pages.summary.businessTelephone.hiddenChangeText        = the company contact''s phone number.
+pages.summary.businessTelephone.hiddenChangeText        = the company contact''s other number.
 
 pages.summary.natureOfBusiness.question                 = What does your company do?
 pages.summary.natureOfBusiness.hiddenChangeText         = what your company does.
@@ -266,14 +267,14 @@ pages.summary.director.question                         = {0}''s National Insura
 pages.summary.payeContactDetails.sectionHeading         = PAYE contact details
 pages.summary.contactName.question                      = What is the name of the company''s PAYE contact?
 pages.summary.emailPAYEContact.question                 = What is the email address of the company''s PAYE contact?
-pages.summary.mobileNumberPAYEContact.question          = What is the mobile number of the company''s PAYE contact?
-pages.summary.phoneNumberPAYEContact.question           = What is the phone number of the company''s PAYE contact?
+pages.summary.mobileNumberPAYEContact.question          = What is the contact number of the company''s PAYE contact?
+pages.summary.phoneNumberPAYEContact.question           = What is the other contact number of the company''s PAYE contact?
 pages.summary.correspondenceAddress.question            = Where should we send PAYE-related post to?
 
 pages.summary.contactName.hiddenChangeText              = the name of the company''s PAYE contact.
 pages.summary.emailPAYEContact.hiddenChangeText         = the email address of the company''s PAYE contact.
-pages.summary.mobileNumberPAYEContact.hiddenChangeText  = the mobile number of the company''s PAYE contact.
-pages.summary.phoneNumberPAYEContact.hiddenChangeText   = the phone number of the company''s PAYE contact.
+pages.summary.mobileNumberPAYEContact.hiddenChangeText  = the contact number of the company''s PAYE contact.
+pages.summary.phoneNumberPAYEContact.hiddenChangeText   = the other contact number of the company''s PAYE contact.
 pages.summary.correspondenceAddress.hiddenChangeText    = where we should send PAYE-related post to.
 
 pages.summary.emailPAYEContact.answers.noAnswerGiven = '
