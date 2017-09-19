@@ -1,5 +1,4 @@
 @import 'global-header.css';
-@import 'components.css';
 
 /* position labels above input fields in cascading forms */
 label.cascading span {
@@ -19,10 +18,6 @@ label.cascading span {
 
 .table--borderless th {
   border: none;
-}
-
-.confirmation-banner {
-    color: #FFFFFF;
 }
 
 .spaced-below {
