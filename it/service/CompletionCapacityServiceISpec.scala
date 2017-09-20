@@ -72,7 +72,7 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
       res shouldBe Some(CompletionCapacity(UserCapacity.director, ""))
     }
 
-    "return a completion capacity from PR if the PR document contains a CC but is not director or agent" in {
+    "return a completion capacity from PR if the PR document contains a CC but is not director, secretary or agent" in {
       stubFor(get(urlMatching(s"/paye-registration/$regID/capacity"))
         .willReturn(
           aResponse().
@@ -119,7 +119,7 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
       res shouldBe Some(CompletionCapacity(UserCapacity.director, ""))
     }
 
-    "return a completion capacity from BR if one is found in BR but NOT in PR and it isn't director or agent" in {
+    "return a completion capacity from BR if one is found in BR but NOT in PR and it isn't director, secretary or agent" in {
       stubFor(get(urlMatching(s"/paye-registration/$regID/capacity"))
         .willReturn(
           aResponse().

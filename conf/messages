@@ -73,6 +73,7 @@ pages.completionCapacity.title                          = What is your relations
 pages.completionCapacity.heading                        = What is your relationship to the company?
 pages.completionCapacity.legend                         = What is your relationship to the company?
 pages.completionCapacity.director                       = Director
+pages.completionCapacity.secretary                      = Secretary
 pages.completionCapacity.agent                          = Agent - for example, an accountant
 pages.completionCapacity.other                          = Other - for example, a friend of the director
 pages.completionCapacity.other.label                    = Enter your relationship to the company
@@ -233,6 +234,7 @@ pages.summary.firstPaymentDate.hiddenChangeText         = your PAYE start date.
 pages.summary.completionCapacity.sectionHeading         = About you
 pages.summary.completionCapacity.question               = What is your relationship to the company?
 pages.summary.completionCapacity.answers.director       = Director
+pages.summary.completionCapacity.answers.secretary      = Secretary
 pages.summary.completionCapacity.answers.agent          = Agent
 pages.summary.completionCapacity.hiddenChangeText       = your relationship to the company.
 
