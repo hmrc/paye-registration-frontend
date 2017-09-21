@@ -2,11 +2,13 @@
 
 @main_template(title = messages("pages.confirmation.title"), backButton = false) {
 
-
     <div class="govuk-box-highlight">
-        <h1 class="transaction-banner__heading confirmation-banner" id="pageHeading">@messages("pages.confirmation.heading")</h1>
-        <p align="center">@messages("pages.confirmation.reference")</p>
-        <p align="center"><strong>@ackRef</strong></p>
+        <h1 class="heading-xlarge" id="pageHeading">@messages("pages.confirmation.heading")</h1>
+        <p class="font-large">
+            @messages("pages.confirmation.reference")
+            <br>
+            <strong>@ackRef</strong>
+        </p>
     </div>
 
     <div class="form-group">
