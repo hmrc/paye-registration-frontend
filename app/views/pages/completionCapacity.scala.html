@@ -26,9 +26,10 @@
         <div class="form-group">
             @inputRadioGroupHidden(
                 completionCapacityForm("completionCapacity"),
-                Seq("director" -> messages("pages.completionCapacity.director"),
-                    "agent"    -> messages("pages.completionCapacity.agent"),
-                    "other"    -> messages("pages.completionCapacity.other")),
+                Seq("director"  -> messages("pages.completionCapacity.director"),
+                    "secretary" -> messages("pages.completionCapacity.secretary"),
+                    "agent"     -> messages("pages.completionCapacity.agent"),
+                    "other"     -> messages("pages.completionCapacity.other")),
                 Seq("other" -> otherHidden),
                 '_idHidden -> "other",
                 '_classHidden -> "panel panel-indent",

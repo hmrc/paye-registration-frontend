@@ -21,13 +21,15 @@ import play.api.libs.json.{Format, Reads, Writes}
 object UserCapacity extends Enumeration {
 
   val director = Value
+  val secretary = Value
   val agent = Value
   val other = Value
 
   def fromString(choice: String): Value = choice.toLowerCase match {
-    case "director" => director
-    case "agent"    => agent
-    case "other"    => other
+    case "director"   => director
+    case "secretary"  => secretary
+    case "agent"      => agent
+    case "other"      => other
   }
 
 

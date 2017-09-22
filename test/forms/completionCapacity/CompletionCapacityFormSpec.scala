@@ -41,6 +41,21 @@ class CompletionCapacityFormSpec extends UnitSpec {
       boundModel shouldBe model
     }
 
+    "Bind successfully when capacity is Secretary" in {
+      val data = Map(
+        "completionCapacity" -> "secretary",
+        "completionCapacityOther" -> "")
+
+      val model = CompletionCapacity(UserCapacity.secretary, "")
+
+      val boundModel = testForm.bind(data).fold(
+        errs => errs,
+        success => success
+      )
+
+      boundModel shouldBe model
+    }
+
     "Bind successfully when capacity is Agent" in {
       val data = Map(
         "completionCapacity" -> "agent",
