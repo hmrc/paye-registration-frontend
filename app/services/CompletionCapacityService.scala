@@ -81,7 +81,7 @@ trait CompletionCapacitySrv {
     completionCapacity.toLowerCase match {
       case "director"   => CompletionCapacity(UserCapacity.director, "")
       case "agent"      => CompletionCapacity(UserCapacity.agent, "")
-      case "secretary"  => CompletionCapacity(UserCapacity.secretary, "")
+      case "company secretary"  => CompletionCapacity(UserCapacity.secretary, "")
       case _            => CompletionCapacity(UserCapacity.other, completionCapacity)
     }
   }

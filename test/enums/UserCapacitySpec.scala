@@ -31,7 +31,7 @@ class UserCapacitySpec extends UnitSpec {
       UserCapacity.fromString("agent") shouldBe UserCapacity.agent
     }
     "work for secretary" in {
-      UserCapacity.fromString("secretary") shouldBe UserCapacity.secretary
+      UserCapacity.fromString("company secretary") shouldBe UserCapacity.secretary
     }
     "work for OTHER" in {
       UserCapacity.fromString("OTHER") shouldBe UserCapacity.other
@@ -46,7 +46,7 @@ class UserCapacitySpec extends UnitSpec {
       UserCapacity.agent.toString shouldBe "agent"
     }
     "work for secretary" in {
-      UserCapacity.secretary.toString shouldBe "secretary"
+      UserCapacity.secretary.toString shouldBe "company secretary"
     }
     "work for other" in {
       UserCapacity.other.toString shouldBe "other"

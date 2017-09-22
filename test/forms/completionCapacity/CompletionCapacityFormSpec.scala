@@ -43,7 +43,7 @@ class CompletionCapacityFormSpec extends UnitSpec {
 
     "Bind successfully when capacity is Secretary" in {
       val data = Map(
-        "completionCapacity" -> "secretary",
+        "completionCapacity" -> "company secretary",
         "completionCapacityOther" -> "")
 
       val model = CompletionCapacity(UserCapacity.secretary, "")

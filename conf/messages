@@ -234,7 +234,7 @@ pages.summary.firstPaymentDate.hiddenChangeText         = your PAYE start date.
 pages.summary.completionCapacity.sectionHeading         = About you
 pages.summary.completionCapacity.question               = What is your relationship to the company?
 pages.summary.completionCapacity.answers.director       = Director
-pages.summary.completionCapacity.answers.secretary      = Secretary
+pages.summary.completionCapacity.answers.companysecretary = Secretary
 pages.summary.completionCapacity.answers.agent          = Agent
 pages.summary.completionCapacity.hiddenChangeText       = your relationship to the company.
 

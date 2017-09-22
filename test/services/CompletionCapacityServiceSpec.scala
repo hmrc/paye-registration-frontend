@@ -62,7 +62,7 @@ class CompletionCapacityServiceSpec extends PAYERegSpec {
       service.viewToAPI(CompletionCapacity(UserCapacity.agent, "")) shouldBe "agent"
     }
     "return the correct string for a secretary" in new Setup {
-      service.viewToAPI(CompletionCapacity(UserCapacity.secretary, "")) shouldBe "secretary"
+      service.viewToAPI(CompletionCapacity(UserCapacity.secretary, "")) shouldBe "company secretary"
     }
     "return the correct string for an other - Priest" in new Setup {
       service.viewToAPI(CompletionCapacity(UserCapacity.other, "Priest")) shouldBe "Priest"
@@ -74,7 +74,7 @@ class CompletionCapacityServiceSpec extends PAYERegSpec {
       service.apiToView("director") shouldBe CompletionCapacity(UserCapacity.director, "")
     }
     "return the correct model for a secretary" in new Setup {
-      service.apiToView("secretary") shouldBe CompletionCapacity(UserCapacity.secretary, "")
+      service.apiToView("company secretary") shouldBe CompletionCapacity(UserCapacity.secretary, "")
     }
     "return the correct model for an agent" in new Setup {
       service.apiToView("agent") shouldBe CompletionCapacity(UserCapacity.agent, "")
