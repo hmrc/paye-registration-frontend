@@ -19,11 +19,12 @@ app.common.feedbackFirst                                = This is a new service 
 app.common.feedbackSecond                               = feedback
 app.common.feedbackLinkText                             = feedback
 app.common.feedbackThird                                = will help us to improve it.
-app.common.bottom.feedback                              = Leave feedback
 app.common.companyRegistrationOverview                  = Your company registration overview
 app.common.businessRegistrationOverview                 = Your business registration overview
 app.common.startNow                                     = Start now
 app.common.companies-houseinfo                          = update it with Companies House.
+app.common.finish                                       = Finish
+app.common.whatDidYouThink                              = What did you think of the service?
 
 ## User error messages
 errors.invalid.email                                    = The email address you have provided is invalid
@@ -296,11 +297,6 @@ pages.confirmation.p1                                   = If your application is
 pages.confirmation.bullet1                              = a letter with your PAYE and Accounts Office reference numbers within 5 working days of the company registering with Companies House
 pages.confirmation.bullet2                              = an activation PIN for PAYE Online within 10 working days of the company registering with Companies House
 pages.confirmation.p2                                   = You''ll need these to send payroll information to HMRC.
-pages.confirmation.heading3                             = What you can do now
-pages.confirmation.p3                                   = Find out: 
-pages.confirmation.bullet3.1                            = about
-pages.confirmation.bullet3.2                            = running payroll
-pages.confirmation.payroll.link                         = https://www.gov.uk/running-payroll
 
 ## Ineligible
 pages.ineligible.title                                  = You can''t register as an employer online
