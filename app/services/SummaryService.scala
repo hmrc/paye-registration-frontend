@@ -68,7 +68,7 @@ trait SummarySrv {
     } match {
       case Success(UserCapacity.director)   => Left("director")
       case Success(UserCapacity.agent)      => Left("agent")
-      case Success(UserCapacity.secretary)  => Left("secretary")
+      case Success(UserCapacity.secretary)  => Left("companysecretary")
       case _ => Right(capacity)
     }
     SummarySection(
