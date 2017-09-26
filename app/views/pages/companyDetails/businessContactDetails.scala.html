@@ -1,4 +1,4 @@
-@import helpers.templates.{oneOfManyErrorWrapper, payeErrorSummary}
+@import helpers.templates.{oneOfManyErrorWrapper, payeErrorSummary, payInput}
 @import models.DigitalContactDetails
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @(contactForm: Form[DigitalContactDetails])(implicit request: Request[_], messages: Messages)
@@ -9,7 +9,7 @@
             @Messages("pages.businessContact.heading")
         </legend>
         <div class="form-group">
-            @govHelpers.input(
+            @payInput(
             contactForm("businessEmail"),
             '_inputClass -> "form-control-1-2",
             '_labelClass -> "form-label cascading",
@@ -18,7 +18,7 @@
         </div>
 
         <div class="form-group">
-            @govHelpers.input(
+            @payInput(
             contactForm("mobileNumber"),
             '_labelClass -> "form-label cascading",
             '_inputClass -> "form-control-1-2",
@@ -27,7 +27,7 @@
         </div>
 
         <div>
-            @govHelpers.input(
+            @payInput(
             contactForm("phoneNumber"),
             '_labelClass -> "form-label cascading",
             '_inputClass -> "form-control-1-2",
