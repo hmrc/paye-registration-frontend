@@ -1,4 +1,4 @@
-@import helpers.templates.{payeErrorSummary, payInput}
+@import helpers.templates.{payeErrorSummary, payeInput}
 @import models.test.CoHoCompanyDetailsFormModel
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
@@ -15,67 +15,67 @@
 @govHelpers.form(action = controllers.test.routes.TestCoHoController.submitCoHoCompanyDetailsSetup) {
 
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
             cohoForm("companyName"),
             '_label -> "Company name"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         cohoForm("sicCodes[0]"),
         '_label -> "SIC code 1"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         cohoForm("descriptions[0]"),
         '_label -> "Description 1"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         cohoForm("sicCodes[1]"),
         '_label -> "SIC code 2"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         cohoForm("descriptions[1]"),
         '_label -> "Description 2"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         cohoForm("sicCodes[2]"),
         '_label -> "SIC code 3"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         cohoForm("descriptions[2]"),
         '_label -> "Description 3"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         cohoForm("sicCodes[3]"),
         '_label -> "SIC code 4"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         cohoForm("descriptions[3]"),
         '_label -> "Description 4"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         cohoForm("sicCodes[4]"),
         '_label -> "SIC code 5"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         cohoForm("descriptions[4]"),
         '_label -> "Description 5"
         )

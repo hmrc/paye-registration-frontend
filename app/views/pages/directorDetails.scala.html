@@ -1,4 +1,4 @@
-@import helpers.templates.{hiddenDetails, oneOfManyErrorWrapper, payeErrorSummary, payInput}
+@import helpers.templates.{hiddenDetails, oneOfManyErrorWrapper, payeErrorSummary, payeInput}
 @import models.view.Ninos
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
@@ -10,7 +10,7 @@
 
         @helper.repeat(ninoForm("nino")) { ninoField =>
             <div class="form-field">
-                @payInput(
+                @payeInput(
                     ninoField,
                     '_inputClass -> "form-control-1-2 form-control--block",
                     '_labelClass -> "form-label",

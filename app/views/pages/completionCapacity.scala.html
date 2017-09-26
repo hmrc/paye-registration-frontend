@@ -1,11 +1,11 @@
 @import models.view.CompletionCapacity
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
-@import views.html.helpers.templates.{inputRadioGroupHidden, payeErrorSummary, payInput}
+@import views.html.helpers.templates.{inputRadioGroupHidden, payeErrorSummary, payeInput}
 
 @(completionCapacityForm: Form[CompletionCapacity])(implicit request: Request[_], messages: Messages)
 
 @otherHidden = {
-    @payInput(
+    @payeInput(
         completionCapacityForm("completionCapacityOther"),
         '_inputClass -> "form-control-1-2",
         '_labelClass -> "form-label cascading",

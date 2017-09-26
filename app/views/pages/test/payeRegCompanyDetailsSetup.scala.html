@@ -1,4 +1,4 @@
-@import helpers.templates.{payeErrorSummary, payInput}
+@import helpers.templates.{payeErrorSummary, payeInput}
 @import models.api.{CompanyDetails => CompanyDetailsAPI}
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
@@ -14,13 +14,13 @@
 @govHelpers.form(action = controllers.test.routes.TestRegSetupController.submitRegSetupCompanyDetails) {
 
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("companyName"),
         '_label -> "Company name"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("tradingName"),
         '_label -> "Trading name (optional)"
         )
@@ -28,43 +28,43 @@
 
     <h2>RO Address</h2>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("roAddress.line1"),
         '_label -> "RO Address Line 1"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("roAddress.line2"),
         '_label -> "RO Address Line 2"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("roAddress.line3"),
         '_label -> "RO Address Line 3 (optional)"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("roAddress.line4"),
         '_label -> "RO Address Line 4 (optional)"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("roAddress.postCode"),
         '_label -> "RO Address Postcode (optional)"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("roAddress.country"),
         '_label -> "RO Address Country (optional)"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("roAddress.auditRef"),
         '_label -> "RO Address Audit Ref (optional)"
         )
@@ -72,62 +72,62 @@
 
     <h2>PPOB Address</h2>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("ppobAddress.line1"),
         '_label -> "PPOB Address Line 1"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("ppobAddress.line2"),
         '_label -> "PPOB Address Line 2"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("ppobAddress.line3"),
         '_label -> "PPOB Address Line 3 (optional)"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("ppobAddress.line4"),
         '_label -> "PPOB Address Line 4 (optional)"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("ppobAddress.postCode"),
         '_label -> "PPOB Address Postcode (optional)"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("ppobAddress.country"),
         '_label -> "PPOB Address Country (optional)"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("ppobAddress.auditRef"),
         '_label -> "PPOB Address Audit Ref (optional)"
         )
     </div>
 
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("businessContactDetails.businessEmail"),
         '_label -> "Business email (optional)"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("businessContactDetails.mobileNumber"),
         '_label -> "Mobile number (optional)"
         )
     </div>
     <div class="inline form-group">
-        @payInput(
+        @payeInput(
         detailsForm("businessContactDetails.phoneNumber"),
         '_label -> "Business telephone (optional)"
         )

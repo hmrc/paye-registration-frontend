@@ -1,4 +1,4 @@
-@import helpers.templates.{payeErrorSummary, payInput, payeTextArea}
+@import helpers.templates.{payeErrorSummary, payeInput, payeTextArea}
 @import models.view.Ticket
 @(deskproForm: Form[Ticket])(implicit request: Request[_], messages: Messages)
 
@@ -25,7 +25,7 @@
     <fieldset class="form-group">
       <legend class="visuallyhidden">@Messages("errorPages.failedSubmission.detail")</legend>
         <div class="form-field">
-          @payInput(
+          @payeInput(
             deskproForm("name"),
             '_inputClass -> "form-control-1-2",
             '_labelClass -> "form-label cascading",
@@ -33,7 +33,7 @@
           )
         </div>
         <div class="form-field">
-          @payInput(
+          @payeInput(
             deskproForm("email"),
             '_inputClass -> "form-control-1-2",
             '_labelClass -> "form-label cascading",
