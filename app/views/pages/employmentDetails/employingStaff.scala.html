@@ -1,11 +1,11 @@
-@import helpers.templates.payeInputRadioGroup
+@import helpers.templates.{payeInputRadioGroup, payeErrorSummary}
 @import models.view.EmployingStaff
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
 @(employingStaffForm: Form[EmployingStaff])(implicit request: Request[_], messages: Messages)
 
 @main_template(title = Messages("pages.employingStaff.title")) {
-    @govHelpers.errorSummary(
+    @payeErrorSummary(
         Messages("app.common.errorSummaryLabel"), employingStaffForm
     )
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.employingStaff.heading")</h1>

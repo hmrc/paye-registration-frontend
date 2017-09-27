@@ -1,4 +1,4 @@
-@import helpers.templates.{hiddenDetails, oneOfManyErrorWrapper, payeErrorSummary}
+@import helpers.templates.{hiddenDetails, oneOfManyErrorWrapper, payeErrorSummary, payeInput}
 @import models.view.Ninos
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
@@ -10,7 +10,7 @@
 
         @helper.repeat(ninoForm("nino")) { ninoField =>
             <div class="form-field">
-                @govHelpers.input(
+                @payeInput(
                     ninoField,
                     '_inputClass -> "form-control-1-2 form-control--block",
                     '_labelClass -> "form-label",
@@ -41,8 +41,9 @@
     </div>
 
     @govHelpers.form(action = controllers.userJourney.routes.DirectorDetailsController.submitDirectorDetails()) {
-
-        @oneOfManyErrorWrapper(ninoForm, formContent)
+        <div class="form-group">
+            @oneOfManyErrorWrapper(ninoForm, formContent)
+        </div>
 
         <div class="form-group">
             <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>

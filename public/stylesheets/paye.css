@@ -1,18 +1,8 @@
 @import 'global-header.css';
+@import 'form-validation.css';
 
 /* position labels above input fields in cascading forms */
 label.cascading span {
-	display: block;
-}
-
-
-/* hide error summary */
-.error-summary {
-	display: none;
-}
-
-/* show error summary when required */
-.error-summary--show  {
 	display: block;
 }
 

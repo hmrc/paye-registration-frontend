@@ -3,7 +3,7 @@
 @import views.html.helper._
 
 @elements = @{new FieldElements(field.id, field, null, args.toMap, messages) }
-@fieldsetClass = {@elements.args.get('_groupClass)@if(elements.hasErrors){ form-field--error}}
+@fieldsetClass = {@elements.args.get('_groupClass)@if(elements.hasErrors){ form-group-error}}
 @labelAfter = @{ elements.args.get('_labelAfter).getOrElse(false).asInstanceOf[Boolean] }
 
 <fieldset class="@fieldsetClass" id="@field.id"
@@ -14,7 +14,7 @@
         </legend>
     }
     @if(elements.args.get('_helpText).isDefined) {
-        <span class="form-hint">
+        <span class="error-message">
             @elements.args.get('_helpText)
         </span>
     }

@@ -1,4 +1,4 @@
-@import helpers.templates.{addressDisplay, payeInputRadioGroup}
+@import helpers.templates.{addressDisplay, payeInputRadioGroup, payeErrorSummary}
 @import models.Address
 @import models.view.{ChosenAddress, PrepopAddress}
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
@@ -6,7 +6,7 @@
 @(chooseAddressForm: Form[ChosenAddress], roAddress: Option[Address], ppobAddress: Option[Address], prepopAddresses: Map[Int, Address])(implicit request: Request[_], messages: Messages)
 
 @main_template(title = messages("pages.ppobAddress.title")) {
-    @govHelpers.errorSummary(
+    @payeErrorSummary(
         messages("app.common.errorSummaryLabel"),
         chooseAddressForm
     )

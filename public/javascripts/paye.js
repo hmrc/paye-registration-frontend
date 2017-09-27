@@ -4,7 +4,7 @@ $(document).ready($(function() {
     function changeHrefForFirefox() {
         var isFirefox = typeof InstallTrigger !== 'undefined';
         if (isFirefox) {
-            $(".js-error-summary-messages a").each(function (index, object) {
+            $(".error-summary-list a").each(function (index, object) {
                 var element = $(object).attr("data-focuses");
 
                 // Matches 1 or more characters at the start of the string followed by [ followed by one or more numbers, followed by ]

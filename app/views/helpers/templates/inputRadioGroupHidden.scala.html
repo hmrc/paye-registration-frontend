@@ -7,7 +7,7 @@
 @import views.html.helper._
 
 @elements = @{new FieldElements(field.id, field, null, args.toMap, lang) }
-@fieldsetClass = {@elements.args.get('_groupClass)@if(elements.hasErrors){ form-field--error}}
+@fieldsetClass = {@elements.args.get('_groupClass)@if(elements.hasErrors){ form-group-error}}
 @labelAfter = @{ elements.args.get('_labelAfter).getOrElse(false).asInstanceOf[Boolean] }
 @idHidden = @{ elements.args.get('_idHidden).getOrElse("")}
 @classHidden = @{ elements.args.get('_classHidden).getOrElse("") }

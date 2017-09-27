@@ -1,11 +1,11 @@
-@import helpers.templates.{formHiddenYesNoRadio, hiddenDetails}
+@import helpers.templates.{formHiddenYesNoRadio, hiddenDetails, payeErrorSummary, payeInput}
 @import models.view.TradingName
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
 @(tradingNameForm: Form[TradingName], companyName: String)(implicit request: Request[_], messages: Messages)
 
 @hiddenYesNoContent = {
-    @govHelpers.input(
+    @payeInput(
         tradingNameForm("tradingName"),
         '_labelClass -> "form-label cascading",
         '_label -> Messages("pages.tradingName.tradingNameLabel")
@@ -25,7 +25,7 @@
 
 @main_template(title = Messages("pages.tradingName.title")) {
 
-    @govHelpers.errorSummary(
+    @payeErrorSummary(
         Messages("app.common.errorSummaryLabel"), tradingNameForm
     )
 
@@ -40,10 +40,10 @@
 
     <div class="inline form-group">
         @formHiddenYesNoRadio(
-        tradingNameForm,
-        "differentName",
-        Messages("pages.tradingName.legend"),
-        hiddenYesNoContent
+            tradingNameForm,
+            "differentName",
+            Messages("pages.tradingName.legend"),
+            hiddenYesNoContent
         )
 
     </div>

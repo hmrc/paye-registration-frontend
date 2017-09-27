@@ -6,7 +6,7 @@
 @import play.api.i18n._
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
-@fieldsetClasses = @{if(formItem.hasErrors && (formItem.errors.find(_.key != "psoAmt").isDefined)) "form-field--error" else "" }
+@fieldsetClasses = @{if(formItem.hasErrors && (formItem.errors.find(_.key != "psoAmt").isDefined)) "form-group-error" else "" }
 
 <fieldset class="form-group form-date @fieldsetClasses" id="@fieldName-fieldset">
 
