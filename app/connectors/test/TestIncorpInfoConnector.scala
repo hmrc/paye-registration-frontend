@@ -58,6 +58,7 @@ trait TestIncorpInfoConnect {
          |    "officers" : [
          |        {
          |            "name_elements" : {
+         |                "title" : "Brigadier Bridge Builder",
          |                "forename" : "Bob",
          |                "other_forenames" : "Bimbly Bobblous",
          |                "surname" : "Bobbings"

@@ -97,6 +97,15 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
           |        "title" : "Mr"
           |      },
           |      "officer_role" : "director"
+          |    }, {
+          |      "name" : "test",
+          |      "name_elements" : {
+          |        "forename" : "test3",
+          |        "other_forenames" : "test33",
+          |        "surname" : "testc",
+          |        "title" : "Test Title That Is More Than Twenty Chars"
+          |      },
+          |      "officer_role" : "director"
           |    }
           |  ]
           |}""".stripMargin
@@ -114,7 +123,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       val document = Jsoup.parse(response.body)
       document.title() shouldBe "What is the National Insurance number of at least one company director?"
-      document.getElementsByClass("form-field").size shouldBe 2
+      document.getElementsByClass("form-field").size shouldBe 3
 
       val list = document.getElementsByClass("form-label")
 
@@ -123,6 +132,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       get(0) shouldBe s"Mr test1 test11 testa's National Insurance number For example, QQ 12 34 56 C"
       get(1) shouldBe s"Mr test2 test22 testb's National Insurance number"
+      get(2) shouldBe s"test3 test33 testc's National Insurance number"
     }
 
     "not show any officers who aren't directors or directors who are retired" in {
@@ -218,6 +228,16 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
           |      "officer_role" : "director"
           |    },
           |    {
+          |      "name" : "test",
+          |      "name_elements" : {
+          |        "forename" : "test2",
+          |        "other_forenames" : "test22",
+          |        "surname" : "testb",
+          |        "title" : "Test Title That Is Over Twenty Chars"
+          |      },
+          |      "officer_role" : "director"
+          |    },
+          |    {
           |      "name" : "abc",
           |      "name_elements" : {
           |        "forename" : "a",
@@ -228,9 +248,9 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
           |    }, {
           |      "name" : "test",
           |      "name_elements" : {
-          |        "forename" : "test2",
-          |        "other_forenames" : "test22",
-          |        "surname" : "testb",
+          |        "forename" : "test3",
+          |        "other_forenames" : "test33",
+          |        "surname" : "testc",
           |        "title" : "Mr"
           |      },
           |      "officer_role" : "corporate-nominee-director"
@@ -248,14 +268,15 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
       response.status shouldBe 200
 
       val document = Jsoup.parse(response.body)
-      document.getElementsByClass("form-field").size shouldBe 2
+      document.getElementsByClass("form-field").size shouldBe 3
 
       val list = document.getElementsByClass("form-label")
 
       def get(n: Int) = list.get(n).text
 
       get(0) shouldBe s"Mr test1 test11 testa's National Insurance number For example, QQ 12 34 56 C"
-      get(1) shouldBe s"a b c's National Insurance number"
+      get(1) shouldBe s"test2 test22 testb's National Insurance number"
+      get(2) shouldBe s"a b c's National Insurance number"
     }
 
     "should throw error when no valid directors are returned" in {

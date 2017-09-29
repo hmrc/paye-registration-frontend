@@ -30,6 +30,14 @@ class DirectorsSpec extends UnitSpec {
          |  "title":"Mr"
          |}""".stripMargin)
 
+    val tstJsonTitle = Json.parse(
+      s"""{
+         |  "forename":"Timothy",
+         |  "other_forenames":"Potterley-Smythe",
+         |  "surname":"Buttersford",
+         |  "title":"Brigadier Bridge Buddies"
+         |}""".stripMargin)
+
     val tstModel = Name(
       forename = Some("Timothy"),
       otherForenames = Some("Potterley-Smythe"),
@@ -37,8 +45,18 @@ class DirectorsSpec extends UnitSpec {
       title = Some("Mr")
     )
 
+    val tstModelTitle = Name(
+      forename = Some("Timothy"),
+      otherForenames = Some("Potterley-Smythe"),
+      surname = "Buttersford",
+      title = None
+    )
+
     "read from json with full data" in {
       Json.fromJson[Name](tstJson) shouldBe JsSuccess(tstModel)
+    }
+    "read from json with a title over 20 characters" in {
+      Json.fromJson[Name](tstJsonTitle)(Name.normalizeNameReads) shouldBe JsSuccess(tstModelTitle)
     }
     "write to json with full data" in {
       Json.toJson[Name](tstModel) shouldBe tstJson
