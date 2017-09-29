@@ -16,7 +16,7 @@
 @main_template(title = messages("pages.completionCapacity.title")) {
 
     @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), completionCapacityForm
+        messages("app.common.errorSummaryLabel"), completionCapacityForm, dataJourney=Some("CompletionCapacity")
     )
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@messages("pages.completionCapacity.heading")</h1>

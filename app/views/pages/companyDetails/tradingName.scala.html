@@ -26,7 +26,7 @@
 @main_template(title = Messages("pages.tradingName.title")) {
 
     @payeErrorSummary(
-        Messages("app.common.errorSummaryLabel"), tradingNameForm
+        Messages("app.common.errorSummaryLabel"), tradingNameForm, dataJourney=Some("TradingName")
     )
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.tradingName.heading")</h1>

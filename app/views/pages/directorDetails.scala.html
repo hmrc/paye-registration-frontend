@@ -31,7 +31,7 @@
 @main_template(title = messages(s"pages.directorDetails.title")) {
 
     @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), ninoForm
+        messages("app.common.errorSummaryLabel"), ninoForm, dataJourney=Some("DirectorNINOs")
     )
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages(s"pages.directorDetails.heading"))</h1>

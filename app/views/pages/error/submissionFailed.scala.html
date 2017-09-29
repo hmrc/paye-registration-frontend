@@ -7,7 +7,7 @@
 @main_template(title = Messages("errorPages.failedSubmission.title")) {
 
   @payeErrorSummary(
-    messages("app.common.errorSummaryLabel"), deskproForm
+    messages("app.common.errorSummaryLabel"), deskproForm, dataJourney=Some("DESDeskPro")
   )
 
   <h1 class="heading-xlarge">@Messages("errorPages.failedSubmission.title")</h1>

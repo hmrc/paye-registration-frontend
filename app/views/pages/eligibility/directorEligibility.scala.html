@@ -6,7 +6,7 @@
 
 @main_template(title = Messages("pages.directorEligibility.title")) {
     @payeErrorSummary(
-        Messages("app.common.errorSummaryLabel"), directorEligibilityForm
+        Messages("app.common.errorSummaryLabel"), directorEligibilityForm, dataJourney=Some("DirectorEligibility")
     )
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.directorEligibility.heading")</h1>
 

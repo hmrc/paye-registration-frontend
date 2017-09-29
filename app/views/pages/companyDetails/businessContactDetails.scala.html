@@ -39,9 +39,8 @@
 
 @main_template(title = messages("pages.businessContact.title")) {
 
-
     @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), contactForm
+        messages("app.common.errorSummaryLabel"), contactForm, dataJourney=Some("DigitalContactDetails")
     )
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.businessContact.heading")</h1>

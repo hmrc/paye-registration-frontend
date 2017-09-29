@@ -7,8 +7,7 @@
 
 @main_template(title = messages("pages.correspondenceAddress.title")) {
     @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"),
-        chooseAddressForm
+        messages("app.common.errorSummaryLabel"), chooseAddressForm, dataJourney=Some("CorrespondenceAddress")
     )
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.correspondenceAddress.title")</h1>
