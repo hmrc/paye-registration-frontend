@@ -40,7 +40,7 @@
 @main_template(title = messages("pages.payeContact.title")) {
 
     @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), contactForm
+        messages("app.common.errorSummaryLabel"), contactForm, dataJourney=Some("PAYEContactDetails")
     )
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.payeContact.heading")</h1>

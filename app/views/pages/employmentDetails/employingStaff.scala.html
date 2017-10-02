@@ -6,7 +6,7 @@
 
 @main_template(title = Messages("pages.employingStaff.title")) {
     @payeErrorSummary(
-        Messages("app.common.errorSummaryLabel"), employingStaffForm
+        Messages("app.common.errorSummaryLabel"), employingStaffForm, dataJourney=Some("EmployingStaff")
     )
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.employingStaff.heading")</h1>
     @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitEmployingStaff) {

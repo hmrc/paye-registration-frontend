@@ -7,7 +7,7 @@
 @main_template(title = messages("pages.natureOfBusiness.title")) {
 
     @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), sicForm
+        messages("app.common.errorSummaryLabel"), sicForm, dataJourney=Some("NatureOfBusiness")
     )
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages("pages.natureOfBusiness.heading"))</h1>
