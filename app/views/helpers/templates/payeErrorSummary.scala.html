@@ -9,7 +9,7 @@
     <ul class="error-summary-list">
         @if(form.hasErrors) {
         @form.errors.distinct.map { error =>
-        <div data-metrics="error:@dataJourney.getOrElse("PageUnknown"):@error.key:@error.message">
+        <div data-metrics="error:@dataJourney.getOrElse("PageUnknown"):@error.message">
         <li role="tooltip">
             <a href='#@{error.key.replace("noFieldsCompleted-","")}'
                id="@{error.key}-error-summary"
