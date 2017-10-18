@@ -1,14 +1,24 @@
-@import helpers.templates.payeInputRadioGroup
+@import helpers.templates.{payeInputRadioGroup, payeErrorSummary}
 @import models.view.DirectorEligibility
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
 @(directorEligibilityForm: Form[DirectorEligibility])(implicit request: Request[_], messages: Messages)
 
 @main_template(title = Messages("pages.directorEligibility.title")) {
-    @govHelpers.errorSummary(
-        Messages("app.common.errorSummaryLabel"), directorEligibilityForm
+    @payeErrorSummary(
+        Messages("app.common.errorSummaryLabel"), directorEligibilityForm, dataJourney=Some("DirectorEligibility")
     )
-    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.directorEligibility.heading")</h1>
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.directorEligibility.heading")</h1>
+
+    <p>@Messages("pages.employingStaff.directorEligibilityRulesIntro1")</p>
+    <p>@Messages("pages.employingStaff.directorEligibilityRulesIntro2")</p>
+    <ul class="list list-bullet">
+    <li>@Messages("pages.employingStaff.directorEligibility1")</li>
+    <li>@Messages("pages.employingStaff.directorEligibility2")</li>
+        <li>@Messages("pages.employingStaff.directorEligibility3")</li>
+        <li>@Messages("pages.employingStaff.directorEligibility4")</li>
+
+    </ul>
 
     @govHelpers.form(action = controllers.userJourney.routes.EligibilityController.submitDirectorEligibility()) {
         <div class="inline form-group">

@@ -20,27 +20,21 @@ import models.api.Director
 import play.api.libs.json.Json
 
 
-case class Directors(
-                    directorMapping: Map[String, Director]
-                      )
+case class Directors(directorMapping: Map[String, Director])
 
 object Directors {
   implicit val directorFormat = Director.format
   implicit val directorMappingFormat = Json.format[Directors]
 }
 
-case class UserEnteredNino (
-                           id: String,
-                           nino: Option[String]
-                             )
+case class UserEnteredNino (id: String,
+                            nino: Option[String])
 
 object UserEnteredNino {
   implicit val format = Json.format[UserEnteredNino]
 }
 
-case class Ninos (
-                 ninoMapping: List[UserEnteredNino]
-                   )
+case class Ninos (ninoMapping: List[UserEnteredNino])
 
 object Ninos {
   implicit val format = Json.format[Ninos]

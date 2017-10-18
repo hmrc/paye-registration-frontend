@@ -15,20 +15,23 @@ app.common.month                                        = Month
 app.common.day                                          = Day
 app.common.date.invalid                                 = You have not entered a valid date
 app.common.companies-house                              = Companies House
-app.common.feedbackFirst                                = This is a new service. Help us improve it - send your
-app.common.feedbackSecond                               = feedback.
+app.common.feedbackFirst                                = This is a new service - your
+app.common.feedbackSecond                               = feedback
 app.common.feedbackLinkText                             = feedback
-app.common.bottom.feedback                              = Leave feedback
+app.common.feedbackThird                                = will help us to improve it.
 app.common.companyRegistrationOverview                  = Your company registration overview
 app.common.businessRegistrationOverview                 = Your business registration overview
 app.common.startNow                                     = Start now
 app.common.companies-houseinfo                          = update it with Companies House.
+app.common.finish                                       = Finish
+app.common.whatDidYouThink                              = What did you think of the service?
 
 ## User error messages
 errors.invalid.email                                    = The email address you have provided is invalid
 errors.invalid.email.tooLong                            = Enter your email address using 70 characters or less
-errors.invalid.phoneNumber                              = The phone number you have provided is invalid
-errors.invalid.mobileNumber                             = The mobile phone number you have provided is invalid
+errors.invalid.contactNum                               = Enter a contact number using only numbers
+errors.invalid.contactNum.tooShort                      = Enter a contact number using 10 digits or more
+errors.invalid.contactNum.tooLong                       = Enter a contact number using 20 digits or less
 errors.invalid.nino                                     = National Insurance number is in the wrong format
 errors.duplicate.nino                                   = You''ve entered the same National Insurance number more than once
 errors.invalid.sic.noEntry                              = Tell us what the company does
@@ -40,7 +43,7 @@ errors.invalid.name.invalidChars                        = Enter a contact name u
 pages.welcome.title                                     = Register as an employer
 pages.welcome.heading                                   = Register as an employer
 pages.welcome.heading.register                          = You must register if you:
-pages.welcome.bullet.pay                                = pay any employees - including company directors - £112 or more a week (this is the same as £486 a month or £5,824 a year)
+pages.welcome.bullet.pay                                = pay any employees - including company directors - £113 or more a week (this is the same as £490 a month or £5,876 a year)
 pages.welcome.bullet.subcontractors                     = use subcontractors for construction work
 pages.welcome.beforeStart                               = Before you start
 pages.welcome.otherWaysToRegister                       = You''ll need to use <a href={0}>another service to register</a> if you:
@@ -56,15 +59,22 @@ pages.companyEligibility.heading                        = Is the company an offs
 pages.companyEligibility.error                          = Tell us if any of the following apply to you
 
 ## Director Eligibility
-pages.directorEligibility.title                         = Does the company provide non-cash awards to employees and pay any tax due in a Taxed Award Scheme?
-pages.directorEligibility.heading                       = Does the company provide non-cash awards to employees and pay any tax due in a Taxed Award Scheme?
-pages.directorEligibility.error                         = Tell us if any of the following apply to you
+pages.directorEligibility.title                         = Does the company pay out any non-cash incentive awards?
+pages.directorEligibility.heading                       = Does the company pay out any non-cash incentive awards?
+pages.employingStaff.directorEligibilityRulesIntro1     = This could be to anyone, not just your own staff.
+pages.employingStaff.directorEligibilityRulesIntro2     = Non-cash incentive awards include:
+pages.employingStaff.directorEligibility1               = vouchers - including ones that can be exchanged for cash
+pages.employingStaff.directorEligibility2               = any goods
+pages.employingStaff.directorEligibility3               = prizes for employer-run competitions
+pages.employingStaff.directorEligibility4               = holidays the company pays for
+pages.directorEligibility.error                         = Tell us if the company pays out non-cash incentive awards
 
 ## Completion Capacity page
 pages.completionCapacity.title                          = What is your relationship to the company?
 pages.completionCapacity.heading                        = What is your relationship to the company?
 pages.completionCapacity.legend                         = What is your relationship to the company?
 pages.completionCapacity.director                       = Director
+pages.completionCapacity.secretary                      = Secretary
 pages.completionCapacity.agent                          = Agent - for example, an accountant
 pages.completionCapacity.other                          = Other - for example, a friend of the director
 pages.completionCapacity.other.label                    = Enter your relationship to the company
@@ -111,12 +121,12 @@ pages.correspondenceAddress.addressChoice.noEntry       = Tell us the company''s
 
 ## Business Contact Details
 pages.businessContact.title                             = What are the company contact details?
-pages.businessContact.heading                           = What are the company contact details?
+pages.businessContact.heading                           = Provide at least one of the following company contact details
 pages.businessContactDetails.p1                         = Let us know how we can get in touch if we need more information about the company.
 pages.businessContactDetails.p2.indent                  = You need to provide at least one of the following contact details.
 pages.businessContact.email                             = Email address
-pages.businessContact.mobile                            = Mobile number
-pages.businessContact.phone                             = Phone number
+pages.businessContact.contact                           = Contact number
+pages.businessContact.othercontact                      = Other contact number
 pages.businessContact.noFieldsCompleted                 = Enter at least one company contact detail
 
 ## PAYE Contact Details
@@ -125,11 +135,11 @@ pages.payeContact.heading                               = Who should we contact 
 pages.payeContact.p1                                    = Let us know who we can contact if we need more information about the company''s PAYE scheme.
 pages.payeContact.contactName                           = Contact name
 pages.payeContact.email                                 = Email address
-pages.payeContact.mobile                                = Mobile number
-pages.payeContact.phone                                 = Phone number
+pages.payeContact.contact                               = Contact number
+pages.payeContact.othercontact                          = Other contact number
 pages.payeContact.noFieldsCompleted                     = You need to provide at least one contact method so we can get in touch if we need to
 pages.payeContact.nameMandatory                         = Enter a contact name
-pages.payeContactDetails.information.indent             = You need to provide at least one of the following contact details.
+pages.payeContactDetails.information.indent             = Provide at least one of the following contact details.
 
 ## Employing Staff Page
 pages.employingStaff.title                              = Over the next 2 months will you pay any staff, including yourself?
@@ -142,12 +152,12 @@ pages.employingStaff.error                              = Tell us if over the ne
 
 
 ## Subcontractors Page
-pages.subcontractors.title                              = Will you employ subcontractors in the construction industry?
-pages.subcontractors.heading                            = Will you employ subcontractors in the construction industry?
-pages.subcontractors.legend                             = Will you employ subcontractors in the construction industry?
+pages.subcontractors.title                              = Will the company use subcontractors in the construction industry?
+pages.subcontractors.heading                            = Will the company use subcontractors in the construction industry?
+pages.subcontractors.legend                             = Will the company use subcontractors in the construction industry?
 pages.subcontractors.nameRulesIntro                     = We''ll register you with the Construction Industry Scheme (CIS) if you pay subcontractors to do construction work.
 pages.subcontractors.findout                            = Find out <a href="{0}">what work is covered by the CIS</a>
-pages.subcontractors.error                              = Tell us if the company will pay subcontractors to do work this year
+pages.subcontractors.error                              = Tell us if the company will use subcontractors in the construction industry
 
 ## Company Pension Page
 pages.companyPension.title                              = Will you make pension payments to a former employee or their dependants in the next 2 months?
@@ -182,17 +192,16 @@ pages.natureOfBusiness.hint                             = For example, cleaning 
 pages.natureOfBusiness.textArea.label                   = Enter a description of what the company does
 
 ## Director Details Page
-pages.directorDetails.title1Director                    = What is the director''s National Insurance number?
-pages.directorDetails.titleMultipleDirectors            = Enter the National Insurance number of at least one company director
-pages.directorDetails.legend                            = Enter the National Insurance number of at least one company director
-pages.directorDetails.heading1Director                  = What is the director''s National Insurance number?
-pages.directorDetails.headingMultipleDirectors          = Enter the National Insurance number of at least one company director
+pages.directorDetails.title                             = What is the National Insurance number of at least one company director?
+pages.directorDetails.legend                            = What is the National Insurance number of at least one company director?
+pages.directorDetails.heading                           = What is the National Insurance number of at least one company director?
 pages.directorDetails.errors.noneCompleted              = Enter at least one director''s National Insurance number
 pages.directorDetails.information.indent                = You can find a National Insurance number on a National Insurance card, benefit letter, payslip or P60.
-pages.directorDetails.information.dropdown.header       = Have the directors changed?
+pages.directorDetails.information.dropdown.header       = Not the right directors?
 pages.directorDetails.information.dropdown.body         = If the direct names are incorrect, you can change them with
 pages.directorDetails.input.hint-text                   = For example, QQ 12 34 56 C
-pages.directorDetails.hiddenIntro                       = If the director names are incorrect, you can change them with <a href={0}>Companies House</a>.
+pages.directorDetails.hiddenIntro                       = If the director names are wrong, <a href={0}>change them with Companies House</a>. It will take less than 24 hours for Companies House to confirm the changes via email.
+pages.directorDetails.hiddenIntro2                      = After you get the email, <a href={0}>sign back into this service from GOV.UK</a> to continue your application.
 pages.directorDetails.name-suffix                       = {0}''s National Insurance number
 
 
@@ -215,7 +224,7 @@ pages.summary.companyPension.answers.true               = Yes
 pages.summary.companyPension.answers.false              = No
 pages.summary.companyPension.hiddenChangeText           = whether you will make pension payments to a former employee or their dependants in the next 2 months.
 
-pages.summary.subcontractors.question                   = Will you employ subcontractors in the construction industry?
+pages.summary.subcontractors.question                   = Will the company use subcontractors in the construction industry?
 pages.summary.subcontractors.answers.true               = Yes
 pages.summary.subcontractors.answers.false              = No
 pages.summary.subcontractors.hiddenChangeText           = whether you will employ subcontractors in the construction industry.
@@ -226,6 +235,7 @@ pages.summary.firstPaymentDate.hiddenChangeText         = your PAYE start date.
 pages.summary.completionCapacity.sectionHeading         = About you
 pages.summary.completionCapacity.question               = What is your relationship to the company?
 pages.summary.completionCapacity.answers.director       = Director
+pages.summary.completionCapacity.answers.companysecretary = Secretary
 pages.summary.completionCapacity.answers.agent          = Agent
 pages.summary.completionCapacity.hiddenChangeText       = your relationship to the company.
 
@@ -244,12 +254,12 @@ pages.summary.businessContactDetails.sectionHeading     = Company contact detail
 pages.summary.businessEmail.question                    = What is the company contact''s email address?
 pages.summary.businessEmail.answers.noAnswerGiven       = '
 pages.summary.businessEmail.hiddenChangeText            = the company contact''s email address.
-pages.summary.mobileNumber.question                     = What is the company contact''s mobile number?
+pages.summary.mobileNumber.question                     = What is the company contact''s number?
 pages.summary.mobileNumber.answers.noAnswerGiven        = '
-pages.summary.mobileNumber.hiddenChangeText             = the company contact''s mobile number.
-pages.summary.businessTelephone.question                = What is the company contact''s phone number?
+pages.summary.mobileNumber.hiddenChangeText             = the company contact''s number.
+pages.summary.businessTelephone.question                = What is the company contact''s other number?
 pages.summary.businessTelephone.answers.noAnswerGiven   = '
-pages.summary.businessTelephone.hiddenChangeText        = the company contact''s phone number.
+pages.summary.businessTelephone.hiddenChangeText        = the company contact''s other number.
 
 pages.summary.natureOfBusiness.question                 = What does your company do?
 pages.summary.natureOfBusiness.hiddenChangeText         = what your company does.
@@ -260,14 +270,14 @@ pages.summary.director.question                         = {0}''s National Insura
 pages.summary.payeContactDetails.sectionHeading         = PAYE contact details
 pages.summary.contactName.question                      = What is the name of the company''s PAYE contact?
 pages.summary.emailPAYEContact.question                 = What is the email address of the company''s PAYE contact?
-pages.summary.mobileNumberPAYEContact.question          = What is the mobile number of the company''s PAYE contact?
-pages.summary.phoneNumberPAYEContact.question           = What is the phone number of the company''s PAYE contact?
+pages.summary.mobileNumberPAYEContact.question          = What is the contact number of the company''s PAYE contact?
+pages.summary.phoneNumberPAYEContact.question           = What is the other contact number of the company''s PAYE contact?
 pages.summary.correspondenceAddress.question            = Where should we send PAYE-related post to?
 
 pages.summary.contactName.hiddenChangeText              = the name of the company''s PAYE contact.
 pages.summary.emailPAYEContact.hiddenChangeText         = the email address of the company''s PAYE contact.
-pages.summary.mobileNumberPAYEContact.hiddenChangeText  = the mobile number of the company''s PAYE contact.
-pages.summary.phoneNumberPAYEContact.hiddenChangeText   = the phone number of the company''s PAYE contact.
+pages.summary.mobileNumberPAYEContact.hiddenChangeText  = the contact number of the company''s PAYE contact.
+pages.summary.phoneNumberPAYEContact.hiddenChangeText   = the other contact number of the company''s PAYE contact.
 pages.summary.correspondenceAddress.hiddenChangeText    = where we should send PAYE-related post to.
 
 pages.summary.emailPAYEContact.answers.noAnswerGiven = '
@@ -287,11 +297,6 @@ pages.confirmation.p1                                   = If your application is
 pages.confirmation.bullet1                              = a letter with your PAYE and Accounts Office reference numbers within 5 working days of the company registering with Companies House
 pages.confirmation.bullet2                              = an activation PIN for PAYE Online within 10 working days of the company registering with Companies House
 pages.confirmation.p2                                   = You''ll need these to send payroll information to HMRC.
-pages.confirmation.heading3                             = What you can do now
-pages.confirmation.p3                                   = Find out: 
-pages.confirmation.bullet3.1                            = about
-pages.confirmation.bullet3.2                            = running payroll
-pages.confirmation.payroll.link                         = https://www.gov.uk/running-payroll
 
 ## Ineligible
 pages.ineligible.title                                  = You can''t register as an employer online

@@ -1,11 +1,11 @@
 @import models.view.CompletionCapacity
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
-@import views.html.helpers.templates.inputRadioGroupHidden
+@import views.html.helpers.templates.{inputRadioGroupHidden, payeErrorSummary, payeInput}
 
 @(completionCapacityForm: Form[CompletionCapacity])(implicit request: Request[_], messages: Messages)
 
 @otherHidden = {
-    @govHelpers.input(
+    @payeInput(
         completionCapacityForm("completionCapacityOther"),
         '_inputClass -> "form-control-1-2",
         '_labelClass -> "form-label cascading",
@@ -15,8 +15,8 @@
 
 @main_template(title = messages("pages.completionCapacity.title")) {
 
-    @govHelpers.errorSummary(
-        messages("app.common.errorSummaryLabel"), completionCapacityForm
+    @payeErrorSummary(
+        messages("app.common.errorSummaryLabel"), completionCapacityForm, dataJourney=Some("CompletionCapacity")
     )
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@messages("pages.completionCapacity.heading")</h1>
@@ -26,9 +26,10 @@
         <div class="form-group">
             @inputRadioGroupHidden(
                 completionCapacityForm("completionCapacity"),
-                Seq("director" -> messages("pages.completionCapacity.director"),
-                    "agent"    -> messages("pages.completionCapacity.agent"),
-                    "other"    -> messages("pages.completionCapacity.other")),
+                Seq("director"  -> messages("pages.completionCapacity.director"),
+                    "company secretary" -> messages("pages.completionCapacity.secretary"),
+                    "agent"     -> messages("pages.completionCapacity.agent"),
+                    "other"     -> messages("pages.completionCapacity.other")),
                 Seq("other" -> otherHidden),
                 '_idHidden -> "other",
                 '_classHidden -> "panel panel-indent",

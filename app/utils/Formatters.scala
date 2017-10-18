@@ -62,7 +62,7 @@ object Formatters {
   def phoneNoReads(errMsg: String) = new Reads[String] {
     override def reads(json: JsValue): JsResult[String] = {
       normalizeTrimmedReads.reads(json) flatMap { input =>
-        Validators.isValidPhoneNo(input, errMsg) match {
+        Validators.isValidPhoneNo(input) match {
           case Right(phone) => JsSuccess(phone)
           case Left(err) => JsError(err)
         }

@@ -3,7 +3,7 @@
 @import views.html.helper._
 
 @elements = @{new FieldElements(field.id, field, null, args.toMap, messages) }
-@fieldsetClass = {@elements.args.get('_groupClass)@if(elements.hasErrors){ form-field--error}}
+@fieldsetClass = {@elements.args.get('_groupClass)@if(elements.hasErrors){ form-group-error}}
 @labelAfter = @{ elements.args.get('_labelAfter).getOrElse(false).asInstanceOf[Boolean] }
 
 <fieldset class="@fieldsetClass" id="@field.id"
@@ -14,7 +14,7 @@
         </legend>
     }
     @if(elements.args.get('_helpText).isDefined) {
-        <span class="form-hint">
+        <span class="error-message">
             @elements.args.get('_helpText)
         </span>
     }
@@ -22,18 +22,7 @@
 
     @radioOptions.map { case (value, label) =>
         @defining(s"${elements.field.name}-${value.toLowerCase.replace(" ","_")}")  { inputId =>
-        <label for="@inputId"
-               @elements.args.get('_labelClass).map{labelClass => class="@labelClass@field.value.filter( _ == value).map{_ => selected}"}>
-            @if(!labelAfter) {
-                @if(elements.args.get('_stackedLabel)) {
-                    @if(label.split(" ").length < 2) {<br>@label
-                } else {
-                    @for( (l, index) <- label.split(" ").zipWithIndex) {
-                        @if(index != 0) {<br>}@l
-                        }
-                    }
-                } else { @label }
-            }
+        <div class="multiple-choice">
             <input
                     type="radio"
                     id="@inputId"
@@ -42,18 +31,32 @@
                     @elements.args.get('_inputClass).map{inputClass => class="@inputClass"}
                     @if(elements.args.contains('_dataAttributes) ){ @elements.args.get('_dataAttributes)}
                     @field.value.filter( _ == value).map{_ => checked="checked"}/>
-                @if(labelAfter) {
+            <label for="@inputId"
+                   @elements.args.get('_labelClass).map{labelClass => class="@labelClass@field.value.filter( _ == value).map{_ => selected}"}>
+                @if(!labelAfter) {
                     @if(elements.args.get('_stackedLabel)) {
-                        @if(label.split(" ").length < 2) {
-                            <br>@Html(label)
-                        } else {
-                            @for( (l, index) <- label.split(" ").zipWithIndex) {
-                                @if(index != 0) {<br>}@Html(l)
+                        @if(label.split(" ").length < 2) {<br>@label
+                    } else {
+                        @for( (l, index) <- label.split(" ").zipWithIndex) {
+                            @if(index != 0) {<br>}@l
                             }
                         }
-                    } else { @Html(label) }
+                    } else { @label }
                 }
-        </label>
+
+                    @if(labelAfter) {
+                        @if(elements.args.get('_stackedLabel)) {
+                            @if(label.split(" ").length < 2) {
+                                <br>@Html(label)
+                            } else {
+                                @for( (l, index) <- label.split(" ").zipWithIndex) {
+                                    @if(index != 0) {<br>}@Html(l)
+                                }
+                            }
+                        } else { @Html(label) }
+                    }
+            </label>
+        </div>
         }
     }
 </fieldset>

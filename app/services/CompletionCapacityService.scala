@@ -70,17 +70,19 @@ trait CompletionCapacitySrv {
 
   private[services] def viewToAPI(completionCapacity: CompletionCapacity): String = {
     completionCapacity.completionCapacity match {
-      case UserCapacity.director => UserCapacity.director.toString
-      case UserCapacity.agent    => UserCapacity.agent.toString
-      case UserCapacity.other    => completionCapacity.completionCapacityOther
+      case UserCapacity.director  => UserCapacity.director.toString
+      case UserCapacity.agent     => UserCapacity.agent.toString
+      case UserCapacity.secretary => UserCapacity.secretary.toString
+      case UserCapacity.other     => completionCapacity.completionCapacityOther
     }
   }
 
   private[services] def apiToView(completionCapacity: String): CompletionCapacity = {
     completionCapacity.toLowerCase match {
-      case "director" => CompletionCapacity(UserCapacity.director, "")
-      case "agent"    => CompletionCapacity(UserCapacity.agent, "")
-      case _          => CompletionCapacity(UserCapacity.other, completionCapacity)
+      case "director"   => CompletionCapacity(UserCapacity.director, "")
+      case "agent"      => CompletionCapacity(UserCapacity.agent, "")
+      case "company secretary"  => CompletionCapacity(UserCapacity.secretary, "")
+      case _            => CompletionCapacity(UserCapacity.other, completionCapacity)
     }
   }
 }

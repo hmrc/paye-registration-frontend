@@ -234,7 +234,7 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
         "digitalContact.phoneNumber" -> ""
       )
       val boundForm = testForm.bind(data)
-      val err = FormError("digitalContact.mobileNumber", "errors.invalid.mobileNumber")
+      val err = FormError("digitalContact.mobileNumber", "errors.invalid.contactNum")
 
       boundForm.errors shouldBe Seq(err)
     }
@@ -247,7 +247,7 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
         "digitalContact.phoneNumber" -> "NotAProperNumber!!!!!"
       )
       val boundForm = testForm.bind(data)
-      val err = FormError("digitalContact.phoneNumber", "errors.invalid.phoneNumber")
+      val err = FormError("digitalContact.phoneNumber", "errors.invalid.contactNum")
 
       boundForm.errors shouldBe Seq(err)
     }

@@ -1,13 +1,13 @@
 @import models.view.NatureOfBusiness
-@import helpers.templates.payeTextArea
+@import helpers.templates.{payeTextArea, payeErrorSummary}
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
 @(sicForm: Form[NatureOfBusiness])(implicit request: Request[_], messages: Messages)
 
 @main_template(title = messages("pages.natureOfBusiness.title")) {
 
-    @govHelpers.errorSummary(
-        messages("app.common.errorSummaryLabel"), sicForm
+    @payeErrorSummary(
+        messages("app.common.errorSummaryLabel"), sicForm, dataJourney=Some("NatureOfBusiness")
     )
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages("pages.natureOfBusiness.heading"))</h1>

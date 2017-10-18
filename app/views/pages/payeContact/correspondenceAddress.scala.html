@@ -1,14 +1,13 @@
 @import models.Address
 @import models.view.{ChosenAddress, PrepopAddress}
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
-@import views.html.helpers.templates.{payeInputRadioGroup, addressDisplay}
+@import views.html.helpers.templates.{payeInputRadioGroup, addressDisplay, payeErrorSummary}
 
 @(chooseAddressForm: Form[ChosenAddress], roAddress: Option[Address], ppobAddress: Option[Address], correspondenceAddress: Option[Address], prepopAddresses: Map[Int, Address])(implicit request: Request[_], messages: Messages)
 
 @main_template(title = messages("pages.correspondenceAddress.title")) {
-    @govHelpers.errorSummary(
-        messages("app.common.errorSummaryLabel"),
-        chooseAddressForm
+    @payeErrorSummary(
+        messages("app.common.errorSummaryLabel"), chooseAddressForm, dataJourney=Some("CorrespondenceAddress")
     )
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.correspondenceAddress.title")</h1>

@@ -163,7 +163,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
           "mobileNumber" -> "NotAProperMobNumber!!!!!",
           "phoneNumber" -> ""
         ),
-        List(FormError("mobileNumber",List("errors.invalid.mobileNumber"),List())),
+        List(FormError("mobileNumber",List("errors.invalid.contactNum"),List())),
         None
       )
 
@@ -185,7 +185,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
           "mobileNumber" -> "",
           "phoneNumber" -> "NotAProperNumber!!!!!"
         ),
-        List(FormError("phoneNumber",List("errors.invalid.phoneNumber"),List())),
+        List(FormError("phoneNumber",List("errors.invalid.contactNum"),List())),
         None
       )
 
@@ -229,7 +229,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
           "mobileNumber" -> " ",
           "phoneNumber" -> ""
         ),
-        List(FormError("mobileNumber",List("errors.invalid.mobileNumber"),List())),
+        List(FormError("mobileNumber",List("errors.invalid.contactNum"),List())),
         None
       )
 
@@ -251,7 +251,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
           "mobileNumber" -> "",
           "phoneNumber" -> " "
         ),
-        List(FormError("phoneNumber",List("errors.invalid.phoneNumber"),List())),
+        List(FormError("phoneNumber",List("errors.invalid.contactNum"),List())),
         None
       )
 

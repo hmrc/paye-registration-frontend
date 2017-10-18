@@ -41,13 +41,16 @@ object Validators extends DateUtil {
     case _                                  => Valid
   })
 
-  def isValidPhoneNo(phone: String, msgError: String): Either[String, String] = {
-    def isValidNumberCount(s: String) = s.replaceAll(" ", "").matches("[0-9]{10,20}")
+  def isValidPhoneNo(phone: String): Either[String, String] = {
+    def isValidNumber(s: String) = s.replaceAll(" ", "").matches("[0-9]+")
+    val digitCount = phone.trim.replaceAll(" ", "").length
 
-    (isValidNumberCount(phone), phone.trim.matches(phoneNoTypeRegex.toString)) match {
-      case (true, true)   => Right(phone.trim)
-      case (true, false)  => Right(phone.replaceAll(" ", ""))
-      case (false, _)     => Left(msgError)
+    (isValidNumber(phone), phone.trim.matches(phoneNoTypeRegex.toString())) match {
+      case (true, _) if digitCount > 20      => Left("errors.invalid.contactNum.tooLong")
+      case (true, _) if digitCount < 10      => Left("errors.invalid.contactNum.tooShort")
+      case (true, true)                      => Right(phone.trim)
+      case (true, false)                     => Right(phone.replaceAll(" ", ""))
+      case _                                 => Left("errors.invalid.contactNum")
     }
   }
 

@@ -33,8 +33,8 @@ object PAYEContactDetailsForm extends OneOfManyForm with PhoneNoForm {
     "name" -> text.verifying(nameValidation),
     "digitalContact" -> mapping(
         "contactEmail" -> oneOfManyErrorTarget.verifying(optionalValidation(emailValidation)),
-        "mobileNumber" -> phoneNoField("errors.invalid.mobileNumber"),
-        "phoneNumber" -> phoneNoField("errors.invalid.phoneNumber")
+        "mobileNumber" -> phoneNoField,
+        "phoneNumber" -> phoneNoField
       )(DigitalContactDetails.apply)(DigitalContactDetails.unapply)
     )(PAYEContactDetails.apply)(PAYEContactDetails.unapply).verifying()
   )

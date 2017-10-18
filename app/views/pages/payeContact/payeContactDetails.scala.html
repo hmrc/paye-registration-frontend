@@ -1,4 +1,4 @@
-@import helpers.templates.{oneOfManyErrorWrapper, payeErrorSummary}
+@import helpers.templates.{oneOfManyErrorWrapper, payeErrorSummary, payeInput}
 @import models.view.PAYEContactDetails
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @(contactForm: Form[PAYEContactDetails])(implicit request: Request[_], messages: Messages)
@@ -9,7 +9,7 @@
             @Messages("pages.payeContact.heading")
         </legend>
         <div class="form-group">
-            @govHelpers.input(
+            @payeInput(
             contactForm("digitalContact.contactEmail"),
             '_inputClass -> "form-control-1-2",
             '_labelClass -> "form-label cascading",
@@ -18,20 +18,20 @@
         </div>
 
         <div class="form-group">
-            @govHelpers.input(
+            @payeInput(
             contactForm("digitalContact.mobileNumber"),
             '_labelClass -> "form-label cascading",
             '_inputClass -> "form-control-1-2",
-            '_label -> messages("pages.payeContact.mobile")
+            '_label -> messages("pages.payeContact.contact")
             )
         </div>
 
         <div>
-            @govHelpers.input(
+            @payeInput(
             contactForm("digitalContact.phoneNumber"),
             '_labelClass -> "form-label cascading",
             '_inputClass -> "form-control-1-2",
-            '_label -> messages("pages.payeContact.phone")
+            '_label -> messages("pages.payeContact.othercontact")
             )
         </div>
     </fieldset>
@@ -40,12 +40,10 @@
 @main_template(title = messages("pages.payeContact.title")) {
 
     @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), contactForm
+        messages("app.common.errorSummaryLabel"), contactForm, dataJourney=Some("PAYEContactDetails")
     )
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.payeContact.heading")</h1>
-
-    <p id="p1">@messages("pages.payeContact.p1")</p>
 
     @govHelpers.form(action = controllers.userJourney.routes.PAYEContactController.submitPAYEContactDetails()) {
 
@@ -55,7 +53,7 @@
                     @Html(messages("pages.payeContact.p1"))
                 </legend>
                 <div class="form-group">
-                    @govHelpers.input(
+                    @payeInput(
                     contactForm("name"),
                     '_inputClass -> "form-control-1-2",
                     '_labelClass -> "form-label cascading",
@@ -64,10 +62,8 @@
                 </div>
             </fieldset>
 
-            <div class="form-group">
-                <div class="indent">
-                    <p>@messages("pages.payeContactDetails.information.indent")</p>
-                </div>
+            <div class="indent">
+                <p id="helpMessage1">@Messages("pages.payeContactDetails.information.indent")</p>
             </div>
             @oneOfManyErrorWrapper(contactForm, formContent)
         </div>

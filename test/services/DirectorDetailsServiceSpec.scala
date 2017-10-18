@@ -180,7 +180,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
           nino = Some("ZZ123456A")
         ),
         "1" -> Director(
-          name = Name(Some("Peter"), Some("Pierre"), "Simpson", Some("Sir")),
+          name = Name(Some("Peter"), None, "Simpson", Some("Sir")),
           nino = None
         )
       )
@@ -190,8 +190,8 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
       "correctly produce a map of IDs to names from a completed view model" in new Setup {
 
         val displayMap = Map(
-            "0" -> "Timothy Buttersford",
-            "1" -> "Peter Simpson"
+            "0" -> "Mr Timothy Potterley-Smythe Buttersford",
+            "1" -> "Sir Peter Simpson"
           )
 
         service.createDisplayNamesMap(tstDirectors) shouldBe displayMap
@@ -208,6 +208,128 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
 
 
         service.createDirectorNinos(tstDirectors) shouldBe ninos
+      }
+    }
+  }
+
+  "areDirectorsUnchanged" should {
+    "return true" when {
+      "the II mapping is the same as the backend mapping" in new Setup {
+        val iiDirectors = Directors(
+          Map(
+            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+          )
+        )
+
+        val backendDirectors = Directors(
+          Map(
+            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+          )
+        )
+
+        service.directorsNotChanged(iiDirectors, backendDirectors) shouldBe true
+      }
+      "the II mapping is the same as the backend mapping but the order of directors is different" in new Setup {
+        val iiDirectors = Directors(
+          Map(
+            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+          )
+        )
+
+        val backendDirectors = Directors(
+          Map(
+            "0" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None),
+            "1" -> Director(Name(Some("first"), Some("middle"), "last", Some("title")), None)
+
+          )
+        )
+        service.directorsNotChanged(iiDirectors, backendDirectors) shouldBe true
+      }
+    }
+
+
+
+    "return false" when {
+      "the II mapping is different to the backend mapping" in new Setup {
+        val iiDirectors = Directors(
+          Map(
+            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+          )
+        )
+
+        val backendDirectors = Directors(
+          Map(
+            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("NewTitle")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", Some("NewTitle")), None)
+          )
+        )
+
+        service.directorsNotChanged(iiDirectors, backendDirectors) shouldBe false
+      }
+
+      "the II mapping is different (less elements in backend map" in new Setup {
+        val iiDirectors = Directors(
+          Map(
+            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+          )
+        )
+        val backendDirectors = Directors(
+          Map(
+            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("NewTitle")), None)
+          )
+        )
+
+        service.directorsNotChanged(iiDirectors, backendDirectors) shouldBe false
+      }
+      "the II mapping is different whereby the casing is different for title" in new Setup {
+        val iiDirectors = Directors(
+          Map(
+            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+          )
+        )
+        val backendDirectors = Directors(
+          Map(
+            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("Title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+          )
+        )
+
+        service.directorsNotChanged(iiDirectors, backendDirectors) shouldBe false
+
+      }
+      "the ii mapping is different whereby coho has less elements" in new Setup {
+        val iiDirectors = Directors(
+          Map(
+            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("title")), None)
+          )
+        )
+        val backendDirectors = Directors(
+          Map(
+            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("Title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+          )
+        )
+
+        service.directorsNotChanged(iiDirectors, backendDirectors) shouldBe false
+      }
+      "the ii mapping has no elements" in new Setup {
+        val iiDirectors = Directors(
+          Map()
+        )
+        val backendDirectors = Directors(
+          Map(
+            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("Title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+          )
+        )
+
+        service.directorsNotChanged(iiDirectors, backendDirectors) shouldBe false
       }
     }
   }
@@ -251,10 +373,61 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
         )
       )
 
+      when(mockCoHoService.getDirectorDetails(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(directorDetails))
+
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(Some(directorDetails)))
-
+      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
+        .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
       await(service.getDirectorDetails("12345", "txId")) shouldBe directorDetails
+    }
+
+    "return coho directors when paye reg directors do not match" in new Setup {
+
+      def dir(nino:Option[String],title:Option[String]) = Director(
+        name = Name(Some("test2"), Some("test22"), "testb", title),
+        nino = nino)
+
+      val cohoDirectors = Directors(
+        directorMapping = Map(
+          "0" -> dir(nino = Some("foo"),title = Some("title1"))
+        )
+      )
+      val payeregDirectors = Seq(dir(nino = None, title = Some("Title2"))
+
+      )
+      when(mockCoHoService.getDirectorDetails(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(cohoDirectors))
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
+        .thenReturn(Future.successful(None))
+      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(payeregDirectors))
+      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
+        .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
+      await(service.getDirectorDetails("12345", "txId")) shouldBe cohoDirectors
+
+    }
+
+    "return coho directors when s4l directors do not match" in new Setup {
+      def dir(nino:Option[String],title:Option[String]) = Director(
+        name = Name(Some("test2"), Some("test22"), "testb", title),
+        nino = nino)
+
+      val cohoDirectors = Directors(
+        directorMapping = Map(
+          "0" -> dir(nino = Some("foo"),title = Some("title1"))
+        )
+      )
+      val s4lDirectors = Directors(
+        directorMapping = Map(
+          "0" -> dir(nino = None,title = Some("Title2"))
+        )
+      )
+      when(mockCoHoService.getDirectorDetails(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(cohoDirectors))
+      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
+        .thenReturn(Future.successful(Some(s4lDirectors)))
+      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
+        .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
+      await(service.getDirectorDetails("12345", "txId")) shouldBe cohoDirectors
     }
 
     "return the correct View response when Director Details are returned from the microservice" in new Setup {
@@ -270,6 +443,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
         )
       )
 
+      when(mockCoHoService.getDirectorDetails(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(directorDetails))
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
 

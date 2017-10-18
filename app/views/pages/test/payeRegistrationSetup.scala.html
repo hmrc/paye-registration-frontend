@@ -1,11 +1,11 @@
-@import helpers.templates.inlineDateInput
+@import helpers.templates.{inlineDateInput, payeErrorSummary, payeInput}
 @import models.api.{PAYERegistration => PAYERegistrationAPI}
 @import pages.test.testHelpers.manualPrePopulatedInput
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
 @(payeForm: Form[PAYERegistrationAPI], regID: String, txID: String)(implicit request: Request[_], messages: Messages)
 
-@govHelpers.errorSummary(
+@payeErrorSummary(
     Messages("app.common.errorSummaryLabel"), payeForm
 )
 
@@ -29,34 +29,34 @@
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("formCreationTimestamp"),
         '_label -> "Form Creation Timestamp"
         )
     </div>
 
     <div class="inline form-group">
-    @govHelpers.input(
-        payeForm("status"),
-        '_label -> "Status"
-    )
+        @payeInput(
+            payeForm("status"),
+            '_label -> "Status"
+        )
     </div>
 
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("completionCapacity"),
         '_label -> "Completion capacity"
         )
     </div>
 
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("companyDetails.companyName"),
         '_label -> "Company name"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("companyDetails.tradingName"),
         '_label -> "Trading name (optional)"
         )
@@ -64,43 +64,43 @@
 
     <h2>RO Address</h2>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("companyDetails.roAddress.line1"),
         '_label -> "RO Address Line 1"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("companyDetails.roAddress.line2"),
         '_label -> "RO Address Line 2"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("companyDetails.roAddress.line3"),
         '_label -> "RO Address Line 3 (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("companyDetails.roAddress.line4"),
         '_label -> "RO Address Line 4 (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("companyDetails.roAddress.postCode"),
         '_label -> "RO Address Postcode (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("companyDetails.roAddress.country"),
         '_label -> "RO Address Country (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("companyDetails.roAddress.auditRef"),
         '_label -> "RO Address Audit Ref (optional)"
         )
@@ -108,81 +108,81 @@
 
     <h2>PPOB Address</h2>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("companyDetails.ppobAddress.line1"),
         '_label -> "PPOB Address Line 1"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("companyDetails.ppobAddress.line2"),
         '_label -> "PPOB Address Line 2"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("companyDetails.ppobAddress.line3"),
         '_label -> "PPOB Address Line 3 (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("companyDetails.ppobAddress.line4"),
         '_label -> "PPOB Address Line 4 (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("companyDetails.ppobAddress.postCode"),
         '_label -> "PPOB Address Postcode (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("companyDetails.ppobAddress.country"),
         '_label -> "PPOB Address Country (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("companyDetails.ppobAddress.auditRef"),
         '_label -> "PPOB Address Audit Ref (optional)"
         )
     </div>
 
     <div class="inline form-group">
-    @govHelpers.input(
+    @payeInput(
         payeForm("companyDetails.businessContactDetails.businessEmail"),
         '_label -> "Business email (optional)"
     )
     </div>
     <div class="inline form-group">
-    @govHelpers.input(
+    @payeInput(
         payeForm("companyDetails.businessContactDetails.mobileNumber"),
         '_label -> "Mobile number (optional)"
     )
     </div>
     <div class="inline form-group">
-    @govHelpers.input(
+    @payeInput(
         payeForm("companyDetails.businessContactDetails.phoneNumber"),
         '_label -> "Business telephone (optional)"
     )
     </div>
 
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("employment.employees"),
         '_label -> "Employees"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("employment.companyPension"),
         '_label -> "Company Pension (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("employment.subcontractors"),
         '_label -> "Subcontractors"
         )
@@ -197,7 +197,7 @@
 
     <h2>Nature of Business</h2>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("sicCodes[0].description"),
         '_label -> "SIC Code description (optional)"
         )
@@ -206,93 +206,93 @@
     <h2>Director Details</h2>
     <h3>Director 1</h3>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("directors[0].name.firstName"),
         '_label -> "Firstname (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("directors[0].name.middleName"),
         '_label -> "Middlename (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("directors[0].name.lastName"),
         '_label -> "Lastname (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("directors[0].name.title"),
         '_label -> "Title (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("directors[0].nino"),
         '_label -> "Nino (optional)"
         )
     </div>
     <h3>Director 2</h3>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("directors[1].name.firstName"),
         '_label -> "Firstname (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("directors[1].name.middleName"),
         '_label -> "Middlename (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("directors[1].name.lastName"),
         '_label -> "Lastname (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("directors[1].name.title"),
         '_label -> "Title (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("directors[1].nino"),
         '_label -> "Nino (optional)"
         )
     </div>
     <h3>Director 3</h3>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("directors[2].name.firstName"),
         '_label -> "Firstname (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("directors[2].name.middleName"),
         '_label -> "Middlename (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("directors[2].name.lastName"),
         '_label -> "Lastname (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("directors[2].name.title"),
         '_label -> "Title (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("directors[2].nino"),
         '_label -> "Nino (optional)"
         )
@@ -301,68 +301,68 @@
     <h3>PAYE Contact Details</h3>
     <h4>Name and tel etc.</h4>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
             payeForm("payeContact.payeContactDetails.name"),
             '_label -> "Contact name"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
             payeForm("payeContact.payeContactDetails.digitalContactDetails.email"),
             '_label -> "Email"
         )
     </div>
     <div class="inline form-group">
-    @govHelpers.input(
+    @payeInput(
         payeForm("payeContact.payeContactDetails.digitalContactDetails.mobileNumber"),
         '_label -> "Mobile number"
     )
     </div>
     <div class="inline form-group">
-    @govHelpers.input(
+    @payeInput(
         payeForm("payeContact.payeContactDetails.digitalContactDetails.phoneNumber"),
         '_label -> "Phone number"
     )
     </div>
     <h4>Address</h4>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("payeContact.correspondenceAddress.line1"),
         '_label -> "PAYE Correspondence Address Line 1"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("payeContact.correspondenceAddress.line2"),
         '_label -> "PAYE Correspondence Address Line 2"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("payeContact.correspondenceAddress.line3"),
         '_label -> "PAYE Correspondence Address Line 3 (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("payeContact.correspondenceAddress.line4"),
         '_label -> "PAYE Correspondence Address Line 4 (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("payeContact.correspondenceAddress.postCode"),
         '_label -> "PAYE Correspondence Address Postcode (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("payeContact.correspondenceAddress.country"),
         '_label -> "PAYE Correspondence Address Country (optional)"
         )
     </div>
     <div class="inline form-group">
-        @govHelpers.input(
+        @payeInput(
         payeForm("payeContact.correspondenceAddress.auditRef"),
         '_label -> "Correspondence Address Audit Ref (optional)"
         )

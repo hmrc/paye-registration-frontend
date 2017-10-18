@@ -1,0 +1,32 @@
+/* Global header bar */
+
+/*
+	This I'm guessing will become redundant if HMRC move to creating TaaS (Template as a Service)
+	and include the div#global-header-bar in the template (which they should)
+
+	But currently HMRC AF has this code to style the div
+	https://github.com/hmrc/assets-frontend/blob/master/assets/govuk_elements/govuk/public/stylesheets/govuk-template.css#L480
+	Which refers to this code
+	https://github.com/hmrc/assets-frontend/blob/master/assets/govuk_elements/govuk/views/govuk_template.html#L98
+	and I doubt if I were to create a PR to merge this into HMRC AF it wouldn't get merged for fear of possible consequences
+*/
+
+#global-header-bar {
+  max-width: 1020px;
+  height: 10px;
+  background-color: #005ea5;
+}
+
+
+/*
+	Remove inherited float style form HMRC from .content__body which breaks layout of back button
+	https://github.com/hmrc/assets-frontend/blob/3610585baeb96bb4ad9d73d20cfb73864e095b50/assets/scss/layouts/_page.scss#L59
+
+	There are plans to update and remove .content__body styles, but until then we need this fix in place.
+*/
+
+@media (min-width: 641px) {
+	.content__body {
+	    float: none;
+	}
+}

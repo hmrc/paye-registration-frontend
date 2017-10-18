@@ -20,12 +20,10 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import utils.Formatters
 
-case class Name(
-                 forename: Option[String],
-                 otherForenames: Option[String],
-                 surname: String,
-                 title: Option[String]
-                 )
+case class Name(forename: Option[String],
+                otherForenames: Option[String],
+                surname: String,
+                title: Option[String])
 
 object Name {
   implicit val format = (
@@ -39,7 +37,7 @@ object Name {
     (__ \ "forename").readNullable[String](Formatters.normalizeTrimmedReads) and
       (__ \ "other_forenames").readNullable[String](Formatters.normalizeTrimmedReads) and
       (__ \ "surname").read[String](Formatters.normalizeTrimmedReads) and
-      (__ \ "title").readNullable[String](Formatters.normalizeTrimmedFullStopReads)
+      (__ \ "title").readNullable[String](Formatters.normalizeTrimmedFullStopReads).map(opt => opt.filter(_.length <= 20))
   )(Name.apply _)
 }
 

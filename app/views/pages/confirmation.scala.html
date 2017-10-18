@@ -2,12 +2,16 @@
 
 @main_template(title = messages("pages.confirmation.title"), backButton = false) {
 
-
-    <div class="transaction-banner--complete">
-        <h1 class="transaction-banner__heading confirmation-banner" id="pageHeading">@messages("pages.confirmation.heading")</h1>
-        <p align="center">@messages("pages.confirmation.reference")</p>
-        <p align="center"><strong>@ackRef</strong></p>
+    <div class="govuk-box-highlight">
+        <h1 class="heading-xlarge" id="pageHeading">@messages("pages.confirmation.heading")</h1>
+        <p class="font-large">
+            @messages("pages.confirmation.reference")
+            <br>
+            <strong>@ackRef</strong>
+        </p>
     </div>
+
+    <br />
 
     <div class="form-group">
         <h2>@messages("pages.confirmation.heading2")</h2>
@@ -17,23 +21,19 @@
             <li>@messages("pages.confirmation.bullet1")</li>
             <li>@messages("pages.confirmation.bullet2")</li>
         </ul>
-        <p>@messages("pages.confirmation.p2")</p>
     </div>
 
     <div class="form-group">
-        <h2>@messages("pages.confirmation.heading3")</h2>
-
-        <p>@messages("pages.confirmation.p3")</p>
-        <ul class="bullets">
-            <li>@messages("pages.confirmation.bullet3.1") <a href="@messages("pages.confirmation.payroll.link")">@messages("pages.confirmation.bullet3.2")</a></li>
-        </ul>
+        <p>@messages("pages.confirmation.p2")</p>
     </div>
+
+    <br>
 
     <form action="@controllers.userJourney.routes.DashboardController.dashboard()" method="get">
         <div class="form-group">
-            <button class="button" type="submit" id="continue" >@messages("app.common.companyRegistrationOverview")</button>
+            <button class="button" type="submit" id="continue" >@messages("app.common.finish")</button>
         </div>
     </form>
 
-    <a href="@controllers.userJourney.routes.EligibilityController.questionnaire()">@messages("app.common.bottom.feedback")</a>
+    <a href="@controllers.userJourney.routes.EligibilityController.questionnaire()">@messages("app.common.whatDidYouThink")</a>
 }
