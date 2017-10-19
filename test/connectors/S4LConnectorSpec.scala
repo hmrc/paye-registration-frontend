@@ -27,10 +27,10 @@ import play.api.test.FakeApplication
 import play.api.test.Helpers._
 import services.MetricsSrv
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse, Upstream4xxResponse }
 
 class S4LConnectorSpec extends UnitSpec with MockitoSugar {
 
@@ -53,7 +53,7 @@ class S4LConnectorSpec extends UnitSpec with MockitoSugar {
   "Fetching from save4later" should {
     "return the correct model" in {
 
-      when(mockShortLivedCache.fetchAndGetEntry[TradingNameView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockShortLivedCache.fetchAndGetEntry[TradingNameView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Option(tNameModel)))
 
       val result = S4LConnectorTest.fetchAndGet[TradingNameView]("", "")
@@ -65,7 +65,7 @@ class S4LConnectorSpec extends UnitSpec with MockitoSugar {
     "save the model" in {
       val returnCacheMap = CacheMap("", Map("" -> Json.toJson(tNameModel)))
 
-      when(mockShortLivedCache.cache[TradingNameView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockShortLivedCache.cache[TradingNameView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(returnCacheMap))
 
       val result = S4LConnectorTest.saveForm[TradingNameView]("", "", tNameModel)
@@ -75,7 +75,7 @@ class S4LConnectorSpec extends UnitSpec with MockitoSugar {
 
   "clearing an entry using save4later" should {
     "clear the entry given the user id" in {
-      when(mockShortLivedCache.remove(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockShortLivedCache.remove(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
 
       val result = S4LConnectorTest.clear("test")
@@ -85,14 +85,14 @@ class S4LConnectorSpec extends UnitSpec with MockitoSugar {
 
   "fetchAll" should {
     "fetch all entries in S4L" in {
-      when(mockShortLivedCache.fetch(ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockShortLivedCache.fetch(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(cacheMap)))
 
       val result = S4LConnectorTest.fetchAll("testUserId")
       await(result).get shouldBe cacheMap
     }
     "return an Upstream response when a failure occurs on the fetch (and then returned from metrics)" in {
-      when(mockShortLivedCache.fetch(ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockShortLivedCache.fetch(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(Upstream4xxResponse("400", 400, 400)))
     val result =  intercept[Upstream4xxResponse] {await(S4LConnectorTest.fetchAll("testUserId"))}
      await(result) shouldBe Upstream4xxResponse("400", 400, 400)

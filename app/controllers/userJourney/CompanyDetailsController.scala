@@ -34,9 +34,9 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.{SessionProfile, UpToDateCompanyDetails}
 import views.html.pages.companyDetails.{confirmROAddress, businessContactDetails => BusinessContactDetailsPage, ppobAddress => PPOBAddressPage, tradingName => TradingNamePage}
 import common.exceptions.DownstreamExceptions.S4LFetchException
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class CompanyDetailsController @Inject()(

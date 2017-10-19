@@ -27,9 +27,9 @@ import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException, Upstream4xxResponse}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, NotFoundException, Upstream4xxResponse }
 
 class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
 

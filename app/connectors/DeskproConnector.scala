@@ -21,34 +21,30 @@ import javax.inject.{Inject, Singleton}
 import config.WSHttp
 import models.external.Ticket
 import play.api.Logger
-import services.{MetricsService, MetricsSrv}
-import uk.gov.hmrc.play.http.ws.WSHttp
 import play.api.libs.json._
+import services.{MetricsService, MetricsSrv}
+import uk.gov.hmrc.http.{CorePost, HeaderCarrier}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class DeskproConnector @Inject()(injMetrics : MetricsService) extends DeskproConnect with ServicesConfig {
-  val metricsService: MetricsService = injMetrics
-  override val http = WSHttp
+class DeskproConnector @Inject()(val metricsService : MetricsService) extends DeskproConnect with ServicesConfig {
+  override val http               = WSHttp
   override val deskProUrl: String = baseUrl("hmrc-deskpro")
 }
 
 trait DeskproConnect {
-
-  val http: WSHttp
-  val deskProUrl : String
+  val http: CorePost
+  val deskProUrl: String
   val metricsService: MetricsSrv
 
   def submitTicket(t: Ticket)(implicit hc: HeaderCarrier) : Future[Long] = {
     val deskproTimer = metricsService.deskproResponseTimer.time()
-    http.POST[Ticket, JsObject](s"$deskProUrl/deskpro/ticket", t) map {
-      res =>
-        deskproTimer.stop()
-        (res \ "ticket_id").as[Long]
+    http.POST[Ticket, JsObject](s"$deskProUrl/deskpro/ticket", t) map { res =>
+      deskproTimer.stop()
+      (res \ "ticket_id").as[Long]
     } recover {
       case e =>
         deskproTimer.stop()

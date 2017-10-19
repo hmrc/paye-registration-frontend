@@ -21,7 +21,7 @@ import audit.RegistrationAuditEvent.{AUTH_PROVIDER_ID, EXTERNAL_USER_ID, JOURNEY
 import models.DigitalContactDetails
 import play.api.libs.json.{JsObject, JsValue, Json, Writes, __}
 import play.api.mvc.{AnyContent, Request}
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 case class AmendedBusinessContactDetailsEventDetail(externalUserId: String,
                                                     authProviderId: String,

@@ -33,9 +33,9 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.SessionProfile
 import views.html.pages.payeContact.{correspondenceAddress => PAYECorrespondenceAddressPage, payeContactDetails => PAYEContactDetailsPage}
 import common.exceptions.DownstreamExceptions.{PPOBAddressNotFoundException, S4LFetchException}
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class PAYEContactController @Inject()(injCompanyDetailsService: CompanyDetailsService,

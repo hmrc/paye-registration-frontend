@@ -29,11 +29,11 @@ import services.{SubmissionService, SubmissionSrv, SummaryService, SummarySrv}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.SessionProfile
 import views.html.pages.{summary => SummaryPage}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class SummaryController @Inject()(injSummaryService: SummaryService,

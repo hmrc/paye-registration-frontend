@@ -29,9 +29,9 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK}
 import services.PAYERegistrationSrv
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFixture {
 

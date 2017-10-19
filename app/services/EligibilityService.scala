@@ -22,10 +22,10 @@ import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.{CacheKeys, DownstreamOutcome}
 import models.api.{Eligibility => EligibilityAPI}
 import models.view.{CompanyEligibility, DirectorEligibility, Eligibility => EligibilityView}
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class EligibilityService @Inject()(injPayeRegConnector: PAYERegistrationConnector,

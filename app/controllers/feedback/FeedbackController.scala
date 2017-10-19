@@ -33,22 +33,23 @@ import uk.gov.hmrc.play.partials._
 import views.html.feedback_thankyou
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http._
 
 @Singleton
 class FeedbackController @Inject()(val messagesApi: MessagesApi) extends FrontendController  with I18nSupport {
-  val http: WSHttp = WSHttp
+  val http: CorePost = WSHttp
 
   val applicationConfig = FrontendAppConfig
 
   private val TICKET_ID = "ticketId"
 
   implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = new CachedStaticHtmlPartialRetriever {
-    override val httpGet: HttpGet = WSHttp
+    override val httpGet: CoreGet = WSHttp
   }
 
 
   implicit val formPartialRetriever: FormPartialRetriever = new FormPartialRetriever {
-    override def httpGet: HttpGet = WSHttp
+    override def httpGet: CoreGet = WSHttp
 
     override def crypto: (String) => String = cookie => SessionCookieCryptoFilter.encrypt(cookie)
   }
@@ -81,7 +82,7 @@ class FeedbackController @Inject()(val messagesApi: MessagesApi) extends Fronten
   def submitFeedback: Action[AnyContent] = UnauthorisedAction.async {
     implicit request =>
       request.body.asFormUrlEncoded.map { formData =>
-        http.POSTForm[HttpResponse](feedbackHmrcSubmitPartialUrl, formData)(rds = readPartialsForm, hc = partialsReadyHeaderCarrier).map {
+        http.POSTForm[HttpResponse](feedbackHmrcSubmitPartialUrl, formData)(rds = readPartialsForm, hc = partialsReadyHeaderCarrier, ec = implicitly).map {
           resp =>
             resp.status match {
               case HttpStatus.OK => Redirect(routes.FeedbackController.thankyou()).withSession(request.session + (TICKET_ID -> resp.body))

@@ -19,7 +19,7 @@ package audit
 import audit.RegistrationAuditEvent.{AUTH_PROVIDER_ID, EXTERNAL_USER_ID, JOURNEY_ID}
 import play.api.libs.json.{JsObject, JsValue, Json, Writes}
 import play.api.mvc.{AnyContent, Request}
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 
 case class PPOBAddressAuditEventDetail(externalUserId: String,

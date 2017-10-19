@@ -25,11 +25,11 @@ import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import connectors._
 import models.external.CurrentProfile
-import uk.gov.hmrc.play.http.HeaderCarrier
 import play.api.http.Status._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class PAYERegistrationService @Inject()(injPayeRegistrationConnector: PAYERegistrationConnector,

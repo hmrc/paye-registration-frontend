@@ -18,24 +18,15 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import audit.{CorrespondenceAddressAuditEvent, CorrespondenceAddressAuditEventDetail}
 import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
-import audit.{AmendedPAYEContactDetailsEvent, AmendedPAYEContactDetailsEventDetail, AuditPAYEContactDetails}
-import config.{FrontendAuditConnector, FrontendAuthConnector}
-import enums.CacheKeys
+import enums.{CacheKeys, DownstreamOutcome}
 import models.Address
-import models.view.{PAYEContactDetails, CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
 import models.api.{PAYEContact => PAYEContactAPI}
-import enums.DownstreamOutcome
-import models.external.{UserDetailsModel, UserIds}
+import models.view.{PAYEContactDetails, CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
 import play.api.Logger
-import uk.gov.hmrc.play.audit.model.AuditEvent
-import play.api.libs.json.JsObject
 import play.api.mvc.{AnyContent, Request}
-import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

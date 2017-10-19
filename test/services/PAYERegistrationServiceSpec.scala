@@ -28,6 +28,7 @@ import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse, NotFoundException, Upstream4xxResponse }
 
 class PAYERegistrationServiceSpec extends PAYERegSpec {
 
@@ -78,7 +79,7 @@ class PAYERegistrationServiceSpec extends PAYERegSpec {
             "affinityGroup" -> "Organisation"
           )
 
-        when(mockAuthConnector.getUserDetails[JsObject](ArgumentMatchers.any[AuthContext]())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        when(mockAuthConnector.getUserDetails[JsObject](ArgumentMatchers.any[AuthContext]())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(userDetails))
 
         val result = await(service.getAccountAffinityGroup)
@@ -93,7 +94,7 @@ class PAYERegistrationServiceSpec extends PAYERegSpec {
             "affinityGroup" -> "Individual"
           )
 
-        when(mockAuthConnector.getUserDetails[JsObject](ArgumentMatchers.any[AuthContext]())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        when(mockAuthConnector.getUserDetails[JsObject](ArgumentMatchers.any[AuthContext]())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(userDetails))
 
         val result = await(service.getAccountAffinityGroup)

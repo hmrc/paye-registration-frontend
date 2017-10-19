@@ -26,9 +26,9 @@ import org.mockito.Mockito._
 import play.api.libs.json.Format
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class PrepopulationServiceSpec extends PAYERegSpec {
   implicit val hc = new HeaderCarrier()

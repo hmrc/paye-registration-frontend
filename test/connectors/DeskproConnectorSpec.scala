@@ -22,9 +22,9 @@ import play.api.libs.json.{JsObject, Json}
 import services.MetricsSrv
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ BadRequestException, HeaderCarrier }
 
 class DeskproConnectorSpec extends PAYERegSpec {
 

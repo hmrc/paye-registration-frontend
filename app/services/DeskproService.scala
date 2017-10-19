@@ -23,10 +23,10 @@ import connectors.{DeskproConnect, DeskproConnector}
 import models.external.Ticket
 import models.view.{Ticket => TicketForm}
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class DeskproService @Inject()(injDeskproConnector: DeskproConnector) extends DeskproSrv {

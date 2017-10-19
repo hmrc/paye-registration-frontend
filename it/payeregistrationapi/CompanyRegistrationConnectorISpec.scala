@@ -19,11 +19,11 @@ package payeregistrationapi
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.CompanyRegistrationConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
-import play.api.{Application, Play}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
+import play.api.{Application, Play}
 import services.MetricsService
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.PAYEFeatureSwitch
 
 class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {

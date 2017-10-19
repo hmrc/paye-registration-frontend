@@ -21,23 +21,22 @@ import javax.inject.{Inject, Singleton}
 import config.WSHttp
 import models.external.{BusinessProfile, BusinessRegistrationRequest}
 import play.api.libs.json.{JsValue, Json}
+import uk.gov.hmrc.http.{CorePost, HeaderCarrier}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class TestBusinessRegConnector @Inject()() extends TestBusinessRegConnect with ServicesConfig {
-  val businessRegUrl = baseUrl("business-registration")
-  val http : WSHttp = WSHttp
+  val businessRegUrl  = baseUrl("business-registration")
+  val http : CorePost = WSHttp
 }
 
 trait TestBusinessRegConnect {
 
   val businessRegUrl: String
-  val http: WSHttp
+  val http: CorePost
 
   def createBusinessProfileEntry(implicit hc: HeaderCarrier): Future[BusinessProfile] = {
     val json = Json.toJson[BusinessRegistrationRequest](BusinessRegistrationRequest("ENG"))

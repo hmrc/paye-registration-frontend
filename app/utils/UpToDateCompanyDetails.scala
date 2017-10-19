@@ -20,10 +20,10 @@ import enums.CacheKeys
 import models.view.CompanyDetails
 import play.api.mvc.Result
 import services.{CompanyDetailsSrv, IncorporationInformationSrv, S4LSrv}
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 trait UpToDateCompanyDetails {
   val incorpInfoService: IncorporationInformationSrv

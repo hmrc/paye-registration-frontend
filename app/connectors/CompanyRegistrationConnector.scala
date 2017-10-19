@@ -23,33 +23,29 @@ import models.external.CompanyRegistrationProfile
 import play.api.Logger
 import play.api.libs.json._
 import services.{MetricsService, MetricsSrv}
+import uk.gov.hmrc.http.{BadRequestException, CoreGet, HeaderCarrier}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
 import utils.{PAYEFeatureSwitch, PAYEFeatureSwitches}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class CompanyRegistrationConnector @Inject()(injFeatureSwitch: PAYEFeatureSwitch,
-                                             injMetrics: MetricsService) extends CompanyRegistrationConnect with ServicesConfig {
+class CompanyRegistrationConnector @Inject()(val featureSwitch: PAYEFeatureSwitch,
+                                             val metricsService: MetricsService) extends CompanyRegistrationConnect with ServicesConfig {
   lazy val companyRegistrationUrl: String = baseUrl("company-registration")
   lazy val companyRegistrationUri: String = getConfString("company-registration.uri","")
-  lazy val stubUrl: String = baseUrl("incorporation-frontend-stubs")
-  lazy val stubUri: String = getConfString("incorporation-frontend-stubs.uri","")
-  val http = WSHttp
-  val metricsService = injMetrics
-  val featureSwitch = injFeatureSwitch
+  lazy val stubUrl: String                = baseUrl("incorporation-frontend-stubs")
+  lazy val stubUri: String                = getConfString("incorporation-frontend-stubs.uri","")
+  val http                                = WSHttp
 }
 
 trait CompanyRegistrationConnect {
-
-  val companyRegistrationUrl : String
-  val companyRegistrationUri : String
-  val stubUrl : String
-  val stubUri : String
-  val http : WSHttp
+  val companyRegistrationUrl: String
+  val companyRegistrationUri: String
+  val stubUrl: String
+  val stubUri: String
+  val http: CoreGet
   val metricsService: MetricsSrv
   val featureSwitch: PAYEFeatureSwitches
 
@@ -58,12 +54,11 @@ trait CompanyRegistrationConnect {
 
     val url = if (useCompanyRegistration) s"$companyRegistrationUrl$companyRegistrationUri/corporation-tax-registration" else s"$stubUrl$stubUri"
 
-    http.GET[JsObject](s"$url/$regId/corporation-tax-registration") map {
-      response =>
-        companyRegTimer.stop()
-        val status = (response \ "status").as[String]
-        val txId = (response \ "confirmationReferences" \ "transaction-id").as[String]
-        CompanyRegistrationProfile(status, txId)
+    http.GET[JsObject](s"$url/$regId/corporation-tax-registration") map { response =>
+      companyRegTimer.stop()
+      val status = (response \ "status").as[String]
+      val txId = (response \ "confirmationReferences" \ "transaction-id").as[String]
+      CompanyRegistrationProfile(status, txId)
     } recover {
       case badRequestErr: BadRequestException =>
         companyRegTimer.stop()
@@ -76,8 +71,5 @@ trait CompanyRegistrationConnect {
     }
   }
 
-  private[connectors] def useCompanyRegistration: Boolean = {
-    featureSwitch.companyReg.enabled
-  }
-
+  private[connectors] def useCompanyRegistration: Boolean = featureSwitch.companyReg.enabled
 }

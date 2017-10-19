@@ -24,10 +24,10 @@ import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import play.api.libs.json.{Json, JsObject}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier, NotFoundException}
 import utils.PAYEFeatureSwitch
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ BadRequestException, HeaderCarrier, NotFoundException }
 
 class IncorporationInformationConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
 

@@ -16,13 +16,24 @@
 
 package audit
 
-import play.api.libs.json.{JsObject, Json}
+import org.joda.time.{DateTime, DateTimeZone}
+import play.api.libs.json._
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
-import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.{Authorization, ForwardedFor, RequestId, SessionId}
 import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.logging.{Authorization, ForwardedFor, RequestId, SessionId}
 
 class RegistrationAuditEventSpec extends UnitSpec {
+
+  implicit val dateTimeRead: Reads[DateTime] = (__ \ "$date").read[Long] map { dateTime =>
+    new DateTime(dateTime, DateTimeZone.UTC)
+  }
+
+  implicit val dateTimeWrite: Writes[DateTime] = new Writes[DateTime] {
+    def writes(dateTime: DateTime): JsValue = Json.obj("$date" -> dateTime.getMillis)
+  }
+
+  implicit val format = Json.format[ExtendedDataEvent]
 
   "RegistrationEvent" should {
     val clientIP: String = "1.2.3.4"

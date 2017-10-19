@@ -22,9 +22,9 @@ import models.view.Directors
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ BadRequestException, HeaderCarrier }
 
 class IncorporationInformationServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFixture {
 

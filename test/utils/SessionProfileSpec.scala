@@ -23,10 +23,10 @@ import play.api.mvc.Result
 import play.api.mvc.Results.Ok
 import testHelpers.PAYERegSpec
 import play.api.test.Helpers._
-import uk.gov.hmrc.play.http.HeaderCarrier
 import play.api.test.FakeRequest
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 
 class SessionProfileSpec extends PAYERegSpec {

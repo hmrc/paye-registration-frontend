@@ -22,10 +22,10 @@ import enums.CacheKeys
 import models.external.CurrentProfile
 import play.api.mvc.{Request, Result}
 import play.api.mvc.Results.Redirect
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 trait SessionProfile extends InternalExceptions {
 

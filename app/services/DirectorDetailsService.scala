@@ -22,11 +22,11 @@ import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.{CacheKeys, DownstreamOutcome}
 import models.api.{Director, Name}
 import models.view.{Directors, Ninos, UserEnteredNino}
-import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.RegistrationWhitelist
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class DirectorDetailsService @Inject()(val payeRegConnector: PAYERegistrationConnector,

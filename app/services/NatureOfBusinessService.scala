@@ -22,10 +22,10 @@ import connectors.{KeystoreConnector, PAYERegistrationConnect, PAYERegistrationC
 import enums.DownstreamOutcome
 import models.api.SICCode
 import models.view.NatureOfBusiness
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class NatureOfBusinessService @Inject()(injPayeRegConnector: PAYERegistrationConnector) extends NatureOfBusinessSrv {

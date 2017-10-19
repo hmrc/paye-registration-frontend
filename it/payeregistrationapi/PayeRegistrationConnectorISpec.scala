@@ -20,15 +20,14 @@ import java.time.LocalDate
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.PAYERegistrationConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
-import models.DigitalContactDetails
+import models.{Address, DigitalContactDetails}
 import models.api._
-import models.Address
 import models.view.PAYEContactDetails
-import play.api.{Application, Play}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
+import play.api.{Application, Play}
 import services.MetricsService
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 

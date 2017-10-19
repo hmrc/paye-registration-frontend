@@ -21,8 +21,8 @@ import models.view.PAYEContactDetails
 import play.api.test.FakeRequest
 import testHelpers.{AuthHelpers, PAYERegSpec}
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
-import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.SessionId
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.logging.SessionId
 
 class AuditServiceSpec extends PAYERegSpec with AuthHelpers {
   val mockAuditConnector = mock[AuditConnector]

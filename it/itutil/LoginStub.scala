@@ -23,7 +23,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.libs.Crypto
 import play.api.libs.ws.WSCookie
 import uk.gov.hmrc.crypto.{CompositeSymmetricCrypto, Crypted, PlainText}
-import uk.gov.hmrc.play.http.SessionKeys
+import uk.gov.hmrc.http.SessionKeys
 
 trait LoginStub extends SessionCookieBaker {
 

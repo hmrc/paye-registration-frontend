@@ -29,6 +29,7 @@ import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
 class TestPAYERegConnectorSpec extends PAYERegSpec with PAYERegistrationFixture {
 

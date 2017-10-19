@@ -20,7 +20,7 @@ import audit.RegistrationAuditEvent.buildTags
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 case class TagSet(clientIP: Boolean,
                   clientPort: Boolean,

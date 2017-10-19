@@ -32,9 +32,9 @@ import play.api.test.FakeRequest
 import testHelpers.{AuthHelpers, PAYERegSpec}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse, Upstream4xxResponse }
 
 class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture with AuthHelpers {
   implicit val hc = HeaderCarrier()

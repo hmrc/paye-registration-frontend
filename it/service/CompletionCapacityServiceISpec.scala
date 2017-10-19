@@ -19,15 +19,14 @@ package service
 import java.util.UUID
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, stubFor, urlMatching}
-import connectors.{BusinessRegistrationConnector, KeystoreConnector, PAYERegistrationConnector}
+import connectors.{BusinessRegistrationConnector, PAYERegistrationConnector}
 import enums.UserCapacity
-import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
+import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.view.CompletionCapacity
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Play}
 import services.CompletionCapacityService
-import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.SessionId
+import uk.gov.hmrc.http.HeaderCarrier
 
 class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStub {
   val mockHost = WiremockHelper.wiremockHost

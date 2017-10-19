@@ -26,12 +26,12 @@ import models.api.{CompanyDetails, Director, Employment, PAYEContact, SICCode, P
 import models.view.{Summary, SummaryRow, SummarySection}
 import models.{Address, DigitalContactDetails}
 import play.api.mvc.Call
-import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.Formatters
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Success, Try}
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class SummaryService @Inject()(payeRegistrationConn: PAYERegistrationConnector) extends SummarySrv {

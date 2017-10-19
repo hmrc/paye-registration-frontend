@@ -26,10 +26,10 @@ import play.api.mvc.Call
 import play.api.test.FakeRequest
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.{BooleanFeatureSwitch, PAYEFeatureSwitch}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 
 class AddressLookupServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistrationFixture with ServicesConfig {

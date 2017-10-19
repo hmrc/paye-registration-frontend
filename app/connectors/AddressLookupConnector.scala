@@ -22,23 +22,21 @@ import com.codahale.metrics.{Counter, Timer}
 import config.WSHttp
 import models.Address
 import play.api.Logger
-import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
 import services.{MetricsService, MetricsSrv}
+import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http._
-import uk.gov.hmrc.play.http.ws.WSHttp
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.util.control.NoStackTrace
 
 @Singleton
-class AddressLookupConnector @Inject()(injMetricsService: MetricsService) extends AddressLookupConnect with ServicesConfig {
-  val addressLookupFrontendUrl = baseUrl("address-lookup-frontend")
-  lazy val payeRegistrationUrl = getConfString("paye-registration-frontend.www.url","")
-  val http : WSHttp = WSHttp
-  val metricsService = injMetricsService
+class AddressLookupConnector @Inject()(val metricsService: MetricsService) extends AddressLookupConnect with ServicesConfig {
+  val addressLookupFrontendUrl     = baseUrl("address-lookup-frontend")
+  lazy val payeRegistrationUrl     = getConfString("paye-registration-frontend.www.url","")
+  val http : CoreGet with CorePost = WSHttp
   val successCounter = metricsService.addressLookupSuccessResponseCounter
   val failedCounter  = metricsService.addressLookupFailedResponseCounter
   def timer          = metricsService.addressLookupResponseTimer.time()
@@ -50,7 +48,7 @@ trait AddressLookupConnect {
 
   val addressLookupFrontendUrl: String
   val payeRegistrationUrl: String
-  val http: WSHttp
+  val http: CoreGet with CorePost
   val metricsService: MetricsSrv
 
   val successCounter: Counter

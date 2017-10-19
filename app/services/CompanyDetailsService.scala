@@ -25,11 +25,11 @@ import models.view.{CompanyDetails => CompanyDetailsView, TradingName => Trading
 import models.{Address, DigitalContactDetails}
 import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.RegistrationWhitelist
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class CompanyDetailsService @Inject()(injPAYERegistrationConnector: PAYERegistrationConnector,

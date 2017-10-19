@@ -31,9 +31,9 @@ import play.api.test.FakeRequest
 import services.{CurrentProfileService, IncorporationInformationService, PAYERegistrationService}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier, NotFoundException}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, NotFoundException }
 
 class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture with BeforeAndAfterEach with CoHoAPIFixture {
 

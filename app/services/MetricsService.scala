@@ -20,7 +20,6 @@ import javax.inject.{Inject, Singleton}
 
 import com.codahale.metrics.{Counter, Timer}
 import com.kenshoo.play.metrics.Metrics
-import uk.gov.hmrc.play.http.HttpResponse
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global

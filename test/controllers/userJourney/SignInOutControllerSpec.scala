@@ -27,7 +27,7 @@ import play.api.test.Helpers._
 import services.{IncorporationInformationService, CurrentProfileService, PAYERegistrationService}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 class SignInOutControllerSpec extends PAYERegSpec {
 

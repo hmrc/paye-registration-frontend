@@ -28,10 +28,10 @@ import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class AuditService extends AuditSrv {
@@ -49,7 +49,7 @@ trait AuditSrv {
       ids         <- authConnector.getIds[UserIds](authContext)
       authId      <- authConnector.getUserDetails[UserDetailsModel](authContext)
       eventDetail = AmendedBusinessContactDetailsEventDetail(ids.externalId, authId.authProviderId, regId, previousData, newData)
-      auditResult <- auditConnector.sendEvent(new AmendedBusinessContactDetailsEvent(eventDetail))
+      auditResult <- auditConnector.sendExtendedEvent(new AmendedBusinessContactDetailsEvent(eventDetail))
     } yield auditResult
   }
 
@@ -58,7 +58,7 @@ trait AuditSrv {
       userIds     <- authConnector.getIds[UserIds](user)
       userDetails <- authConnector.getUserDetails[UserDetailsModel](user)
       event       = new PPOBAddressAuditEvent(PPOBAddressAuditEventDetail(userIds.externalId, userDetails.authProviderId, regId))
-      auditResult <- auditConnector.sendEvent(event)
+      auditResult <- auditConnector.sendExtendedEvent(event)
     } yield auditResult
   }
 
@@ -83,7 +83,7 @@ trait AuditSrv {
           previousPAYEContactDetails = convertPAYEContactViewToAudit(previousData.get),
           newPAYEContactDetails = convertPAYEContactViewToAudit(newData)
         )
-        auditResult <- auditConnector.sendEvent(new AmendedPAYEContactDetailsEvent(eventDetail))
+        auditResult <- auditConnector.sendExtendedEvent(new AmendedPAYEContactDetailsEvent(eventDetail))
       } yield auditResult
     } else {
       Future.successful(AuditResult.Disabled)
@@ -95,7 +95,7 @@ trait AuditSrv {
       userIds <- authConnector.getIds[UserIds](user)
       userDetails <- authConnector.getUserDetails[UserDetailsModel](user)
       event = new CorrespondenceAddressAuditEvent(CorrespondenceAddressAuditEventDetail(userIds.externalId, userDetails.authProviderId, regId, addressUsed))
-      auditResult <- auditConnector.sendEvent(event)
+      auditResult <- auditConnector.sendExtendedEvent(event)
     } yield auditResult
   }
 }

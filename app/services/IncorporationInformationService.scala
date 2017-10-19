@@ -23,10 +23,10 @@ import enums.{CacheKeys, DownstreamOutcome}
 import models.api.Director
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import models.view.Directors
-import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ BadRequestException, HeaderCarrier }
 
 @Singleton
 class IncorporationInformationService @Inject()(injkeystoreConnector: KeystoreConnector,

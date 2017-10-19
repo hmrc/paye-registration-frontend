@@ -23,24 +23,22 @@ import config.PAYEShortLivedCache
 import play.api.libs.json.Format
 import services.{MetricsService, MetricsSrv}
 import uk.gov.hmrc.http.cache.client.{CacheMap, ShortLivedCache}
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
 @Singleton
-class S4LConnector @Inject()(payeShortLivedCache: PAYEShortLivedCache, injMetrics: MetricsService) extends S4LConnect {
-  val shortCache : ShortLivedCache = payeShortLivedCache
-  val metricsService = injMetrics
-  val successCounter = metricsService.s4lSuccessResponseCounter
-  val emptyResponseCounter = metricsService.s4lEmptyResponseCounter
-  val failedCounter = metricsService.s4lFailedResponseCounter
-  def timer = metricsService.s4lResponseTimer.time()
+class S4LConnector @Inject()(val shortCache: PAYEShortLivedCache, val metricsService: MetricsService) extends S4LConnect {
+  val successCounter        = metricsService.s4lSuccessResponseCounter
+  val emptyResponseCounter  = metricsService.s4lEmptyResponseCounter
+  val failedCounter         = metricsService.s4lFailedResponseCounter
+  def timer                 = metricsService.s4lResponseTimer.time()
 }
 
 trait S4LConnect {
 
-  val shortCache : ShortLivedCache
+  val shortCache: ShortLivedCache
   val metricsService: MetricsSrv
 
   val successCounter: Counter

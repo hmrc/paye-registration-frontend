@@ -23,10 +23,10 @@ import connectors.{BusinessRegistrationConnect, BusinessRegistrationConnector}
 import enums.CacheKeys
 import models.{Address, DigitalContactDetails}
 import models.view.PAYEContactDetails
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class

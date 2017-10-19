@@ -26,10 +26,10 @@ import play.api.test.Helpers._
 import play.twirl.api.Html
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.play.http.{HttpGet, HttpResponse}
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{CoreGet, CorePost, HttpGet, HttpResponse}
 
 class FeedbackControllerSpec extends PAYERegSpec {
 
@@ -37,10 +37,10 @@ class FeedbackControllerSpec extends PAYERegSpec {
     val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
 
     val controller = new FeedbackController(messagesApi) {
-      override val http: WSHttp = mockWSHttp
+      override val http: CorePost = mockWSHttp
 
       override implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = new CachedStaticHtmlPartialRetriever {
-        override def httpGet: HttpGet = mockWSHttp
+        override def httpGet: CoreGet = mockWSHttp
 
         override def getPartialContent(url: String, templateParameters: Map[String, String], errorMessage: Html)(implicit request: RequestHeader): Html =
           Html("")
@@ -48,7 +48,7 @@ class FeedbackControllerSpec extends PAYERegSpec {
       override implicit val formPartialRetriever: FormPartialRetriever = new FormPartialRetriever {
         override def crypto: (String) => String = ???
 
-        override def httpGet: HttpGet = mockWSHttp
+        override def httpGet: CoreGet = mockWSHttp
 
         override def getPartialContent(url: String,
                                        templateParameters: Map[String, String],
@@ -75,7 +75,7 @@ class FeedbackControllerSpec extends PAYERegSpec {
     val fakeRequest = FakeRequest("GET", "/")
     val fakePostRequest = FakeRequest("POST", "/register-for-paye/feedback").withFormUrlEncodedBody("test" -> "test")
     "return form with thank you for valid selections" in new Setup {
-      when(mockWSHttp.POSTForm[HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
+      when(mockWSHttp.POSTForm[HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
         Future.successful(HttpResponse(Status.OK, responseString = Some("1234"))))
 
       val result = controller.submitFeedback(fakePostRequest)
@@ -83,21 +83,21 @@ class FeedbackControllerSpec extends PAYERegSpec {
     }
 
     "return form with errors for invalid selections" in new Setup {
-      when(mockWSHttp.POSTForm[HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
+      when(mockWSHttp.POSTForm[HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
         Future.successful(HttpResponse(Status.BAD_REQUEST, responseString = Some("<p>:^(</p>"))))
       val result = controller.submitFeedback(fakePostRequest)
       status(result) shouldBe Status.BAD_REQUEST
     }
 
     "return error for other http code back from contact-frontend" in new Setup {
-      when(mockWSHttp.POSTForm[HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
+      when(mockWSHttp.POSTForm[HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
         Future.successful(HttpResponse(418))) // 418 - I'm a teapot
       val result = controller.submitFeedback(fakePostRequest)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
 
     "return internal server error when there is an empty form" in new Setup {
-      when(mockWSHttp.POSTForm[HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
+      when(mockWSHttp.POSTForm[HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
         Future.successful(HttpResponse(Status.OK, responseString = Some("1234"))))
 
       val result = controller.submitFeedback(fakeRequest)

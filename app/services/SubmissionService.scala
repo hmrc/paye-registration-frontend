@@ -21,11 +21,11 @@ import javax.inject.{Inject, Singleton}
 import connectors._
 import enums.CacheKeys
 import models.external.CurrentProfile
-import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.RegistrationWhitelist
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class SubmissionService @Inject()(
