@@ -34,9 +34,8 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 import scala.concurrent.Future
 
 @Singleton
-class SignInOutController @Inject()(injMessagesApi: MessagesApi) extends SignInOutCtrl with ServicesConfig {
-  val authConnector = FrontendAuthConnector
-  val messagesApi = injMessagesApi
+class SignInOutController @Inject()(val messagesApi: MessagesApi) extends SignInOutCtrl with ServicesConfig {
+  val authConnector     = FrontendAuthConnector
   lazy val compRegFEURL = getConfString("company-registration-frontend.www.url", "")
   lazy val compRegFEURI = getConfString("company-registration-frontend.www.uri", "")
 }

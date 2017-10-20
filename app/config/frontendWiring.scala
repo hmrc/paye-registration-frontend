@@ -27,10 +27,10 @@ import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector => Auditing}
 import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.http.ws._
-import uk.gov.hmrc.whitelist.AkamaiWhitelistFilter
 import uk.gov.hmrc.play.frontend.config.LoadAuditingConfig
 import uk.gov.hmrc.play.frontend.filters.MicroserviceFilterSupport
+import uk.gov.hmrc.play.http.ws._
+import uk.gov.hmrc.whitelist.AkamaiWhitelistFilter
 
 object FrontendAuditConnector extends Auditing with AppName {
   override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
@@ -49,7 +49,6 @@ trait WSHttp extends
   HttpDelete with WSDelete with
   Hooks with AppName
 
-
 object WSHttp extends WSHttp { // with AppName with RunMode {
   override val hooks = NoneRequired
 }
@@ -58,7 +57,6 @@ object FrontendAuthConnector extends AuthConnector with ServicesConfig {
   val serviceUrl = baseUrl("auth")
   lazy val http = WSHttp
 }
-
 
 object PAYEShortLivedHttpCaching extends ShortLivedHttpCaching with AppName with ServicesConfig {
   override lazy val http = WSHttp

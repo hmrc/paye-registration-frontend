@@ -20,13 +20,13 @@ import javax.inject.{Inject, Singleton}
 
 import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.{CacheKeys, DownstreamOutcome}
-import models.api.{Director, Name}
+import models.api.Director
 import models.view.{Directors, Ninos, UserEnteredNino}
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.RegistrationWhitelist
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class DirectorDetailsService @Inject()(val payeRegConnector: PAYERegistrationConnector,
@@ -51,7 +51,7 @@ trait DirectorDetailsSrv extends RegistrationWhitelist {
 
   private[services] def viewToAPI(viewData: Directors): Either[Directors, Seq[Director]] = viewData match {
     case Directors(map) if map.nonEmpty => Right(map.values.toList)
-    case _ => Left(viewData)
+    case _                              => Left(viewData)
   }
 
 

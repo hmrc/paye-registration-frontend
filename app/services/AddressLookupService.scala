@@ -20,42 +20,37 @@ import javax.inject.{Inject, Singleton}
 
 import connectors.{AddressLookupConnect, AddressLookupConnector}
 import models.Address
-import play.api.Logger
-import play.api.libs.json.{JsArray, JsObject}
 import play.api.mvc.{Call, Request}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.config.ServicesConfig
 import utils.{PAYEFeatureSwitch, PAYEFeatureSwitches}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
-class AddressLookupService @Inject()(injFeatureSwitch: PAYEFeatureSwitch,
-                                     injAddressConnector: AddressLookupConnector,
+class AddressLookupService @Inject()(val featureSwitch: PAYEFeatureSwitch,
+                                     val addressLookupConnector: AddressLookupConnector,
                                      injMetrics: MetricsService)
   extends AddressLookupSrv with ServicesConfig {
   lazy val payeRegistrationUrl = getConfString("paye-registration-frontend.www.url","")
-  val addressLookupConnector = injAddressConnector
-  val featureSwitch = injFeatureSwitch
   val metricsService: MetricsSrv = injMetrics
 }
 
 trait AddressLookupSrv {
-
   val payeRegistrationUrl : String
   val addressLookupConnector: AddressLookupConnect
   val featureSwitch: PAYEFeatureSwitches
   val metricsService: MetricsSrv
 
   def buildAddressLookupUrl(query: String, call: Call)(implicit hc: HeaderCarrier): Future[String] = {
-    useAddressLookupFrontend match {
-      case true => addressLookupConnector.getOnRampUrl(query, call)
-      case false =>
-        call.url.split('/').last match {
-          case "return-from-address-for-ppob" => Future.successful(controllers.test.routes.TestAddressLookupController.noLookupPPOBAddress().url)
-          case "return-from-address-for-corresp-addr" => Future.successful(controllers.test.routes.TestAddressLookupController.noLookupCorrespondenceAddress().url)
-        }
+    if(useAddressLookupFrontend) {
+      addressLookupConnector.getOnRampUrl(query, call)
+    } else {
+      call.url.split('/').last match {
+        case "return-from-address-for-ppob"         => Future.successful(controllers.test.routes.TestAddressLookupController.noLookupPPOBAddress().url)
+        case "return-from-address-for-corresp-addr" => Future.successful(controllers.test.routes.TestAddressLookupController.noLookupCorrespondenceAddress().url)
+      }
     }
   }
 

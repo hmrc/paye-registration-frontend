@@ -29,12 +29,7 @@ import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
-class
-PrepopulationService @Inject()(injBusinessRegistrationConnector: BusinessRegistrationConnector,
-                               injS4LService: S4LService) extends PrepopulationSrv {
-  override val busRegConnector = injBusinessRegistrationConnector
-  override val s4LService = injS4LService
-}
+class PrepopulationService @Inject()(val busRegConnector: BusinessRegistrationConnector, val s4LService: S4LService) extends PrepopulationSrv
 
 trait PrepopulationSrv {
   val busRegConnector: BusinessRegistrationConnect

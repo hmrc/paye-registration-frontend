@@ -17,8 +17,8 @@
 package forms.test
 
 import models.api.PAYEContact
-import models.{Address, DigitalContactDetails}
 import models.view.PAYEContactDetails
+import models.{Address, DigitalContactDetails}
 import play.api.data.Form
 import play.api.data.Forms._
 
@@ -27,21 +27,21 @@ object TestPAYEContactForm {
   val form = Form(
     mapping(
       "payeContactDetails" -> mapping(
-        "name" -> nonEmptyText,
+        "name"                  -> nonEmptyText,
         "digitalContactDetails" -> mapping(
-          "email" -> optional(text),
-          "mobileNumber" -> optional(text),
-          "phoneNumber" -> optional(text)
+          "email"         -> optional(text),
+          "mobileNumber"  -> optional(text),
+          "phoneNumber"   -> optional(text)
         )(DigitalContactDetails.apply)(DigitalContactDetails.unapply)
       )(PAYEContactDetails.apply)(PAYEContactDetails.unapply),
       "correspondenceAddress" -> mapping(
-        "line1" -> text,
-        "line2" -> text,
-        "line3" -> optional(text),
-        "line4" -> optional(text),
-        "postCode" -> optional(text),
-        "country" -> optional(text),
-        "auditRef" -> optional(text)
+        "line1"     -> text,
+        "line2"     -> text,
+        "line3"     -> optional(text),
+        "line4"     -> optional(text),
+        "postCode"  -> optional(text),
+        "country"   -> optional(text),
+        "auditRef"  -> optional(text)
       )(Address.apply)(Address.unapply)
     )(PAYEContact.apply)(PAYEContact.unapply)
   )

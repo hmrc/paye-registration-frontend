@@ -37,7 +37,7 @@ trait FeatureManager {
 
     value match {
       case Some("true") => BooleanFeatureSwitch(name, enabled = true)
-      case _ => BooleanFeatureSwitch(name, enabled = false)
+      case _            => BooleanFeatureSwitch(name, enabled = false)
     }
   }
 
@@ -46,15 +46,14 @@ trait FeatureManager {
     getProperty(name)
   }
 
-  def enable(fs: FeatureSwitch): FeatureSwitch = setProperty(fs.name, "true")
+  def enable(fs: FeatureSwitch): FeatureSwitch  = setProperty(fs.name, "true")
   def disable(fs: FeatureSwitch): FeatureSwitch = setProperty(fs.name, "false")
 }
 
 @Singleton
-class PAYEFeatureSwitch @Inject()(injManager: FeatureSwitchManager) extends PAYEFeatureSwitches {
-  val addressLookupUrl = "addressService"
+class PAYEFeatureSwitch @Inject()(val manager: FeatureSwitchManager) extends PAYEFeatureSwitches {
+  val addressLookupUrl    = "addressService"
   val companyRegistration = "companyRegistration"
-  val manager = injManager
 }
 
 trait PAYEFeatureSwitches {
@@ -64,11 +63,11 @@ trait PAYEFeatureSwitches {
   val manager: FeatureManager
 
   def addressLookupFrontend = manager.getProperty(addressLookupUrl)
-  def companyReg = manager.getProperty(companyRegistration)
+  def companyReg            = manager.getProperty(companyRegistration)
 
   def apply(name: String): Option[FeatureSwitch] = name match {
-    case "addressService" => Some(addressLookupFrontend)
-    case "companyRegistration" => Some(companyReg)
-    case _ => None
+    case "addressService"       => Some(addressLookupFrontend)
+    case "companyRegistration"  => Some(companyReg)
+    case _                      => None
   }
 }

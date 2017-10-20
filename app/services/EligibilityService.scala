@@ -28,11 +28,7 @@ import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
-class EligibilityService @Inject()(injPayeRegConnector: PAYERegistrationConnector,
-                                   injS4LService: S4LService) extends EligibilitySrv {
-  override val payeRegConnector = injPayeRegConnector
-  override val s4lService = injS4LService
-}
+class EligibilityService @Inject()(val payeRegConnector: PAYERegistrationConnector, val s4lService: S4LService) extends EligibilitySrv
 
 trait EligibilitySrv {
   val payeRegConnector : PAYERegistrationConnect
@@ -44,20 +40,20 @@ trait EligibilitySrv {
 
   private[services] def isCompleteData(data: EligibilityView) : Either[EligibilityView, EligibilityAPI] = data match {
     case EligibilityView(Some(e1), Some(e2)) => Right(EligibilityAPI(e1.ineligible, e2.eligible))
-    case _ => Left(data)
+    case _                                   => Left(data)
   }
 
   private[services] def convertOrCreateEligibilityView(oAPI: Option[EligibilityAPI]): EligibilityView = {
     oAPI match {
       case Some(data) => apiToView(data)
-      case None => EligibilityView(None, None)
+      case None       => EligibilityView(None, None)
     }
   }
 
   def getEligibility(regId: String)(implicit hc: HeaderCarrier) : Future[EligibilityView]= {
     s4lService.fetchAndGet[EligibilityView](CacheKeys.Eligibility.toString, regId) flatMap {
       case Some(e) => Future.successful(e)
-      case None => for {
+      case None    => for {
         oDetails <- payeRegConnector.getEligibility(regId)
       } yield convertOrCreateEligibilityView(oDetails)
     }

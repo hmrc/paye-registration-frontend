@@ -28,9 +28,7 @@ import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
-class NatureOfBusinessService @Inject()(injPayeRegConnector: PAYERegistrationConnector) extends NatureOfBusinessSrv {
-  override val payeRegConnector = injPayeRegConnector
-}
+class NatureOfBusinessService @Inject()(val payeRegConnector: PAYERegistrationConnector) extends NatureOfBusinessSrv
 
 trait NatureOfBusinessSrv {
   val payeRegConnector: PAYERegistrationConnect

@@ -34,12 +34,9 @@ import scala.util.{Success, Try}
 import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
-class SummaryService @Inject()(payeRegistrationConn: PAYERegistrationConnector) extends SummarySrv {
-  override val payeRegistrationConnector = payeRegistrationConn
-}
+class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationConnector) extends SummarySrv
 
 trait SummarySrv {
-
   val payeRegistrationConnector: PAYERegistrationConnect
 
   def getRegistrationSummary(regId: String)(implicit hc: HeaderCarrier): Future[Summary] = {
@@ -49,17 +46,14 @@ trait SummarySrv {
   }
 
   private[services] def registrationToSummary(apiModel: PAYERegistrationAPI): Summary = {
-    Summary(
-      Seq(
-        buildEmploymentSection(apiModel.employment),
-        buildCompletionCapacitySection(apiModel.completionCapacity),
-        buildCompanyDetailsSection(apiModel.companyDetails, apiModel.sicCodes),
-        buildBusinessContactDetailsSection(apiModel.companyDetails.businessContactDetails),
-        buildDirectorsSection(apiModel.directors),
-        buildContactDetails(apiModel.payeContact)
-      )
-
-    )
+    Summary(Seq(
+      buildEmploymentSection(apiModel.employment),
+      buildCompletionCapacitySection(apiModel.completionCapacity),
+      buildCompanyDetailsSection(apiModel.companyDetails, apiModel.sicCodes),
+      buildBusinessContactDetailsSection(apiModel.companyDetails.businessContactDetails),
+      buildDirectorsSection(apiModel.directors),
+      buildContactDetails(apiModel.payeContact)
+    ))
   }
 
   private[services] def buildCompletionCapacitySection(capacity: String): SummarySection = {
@@ -69,7 +63,7 @@ trait SummarySrv {
       case Success(UserCapacity.director)   => Left("director")
       case Success(UserCapacity.agent)      => Left("agent")
       case Success(UserCapacity.secretary)  => Left("companysecretary")
-      case _ => Right(capacity)
+      case _                                => Right(capacity)
     }
     SummarySection(
       id = "completionCapacity",

@@ -27,15 +27,14 @@ import play.twirl.api.Html
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
 import uk.gov.hmrc.play.frontend.bootstrap.DefaultFrontendGlobal
-import uk.gov.hmrc.play.frontend.filters.{ FrontendAuditFilter, FrontendLoggingFilter, MicroserviceFilterSupport }
+import uk.gov.hmrc.play.frontend.filters.{FrontendAuditFilter, FrontendLoggingFilter, MicroserviceFilterSupport}
 
 object FrontendGlobal extends FrontendGlobal
 
-trait FrontendGlobal
-  extends DefaultFrontendGlobal {
+trait FrontendGlobal extends DefaultFrontendGlobal {
 
-  override val auditConnector = FrontendAuditConnector
-  override val loggingFilter = LoggingFilter
+  override val auditConnector      = FrontendAuditConnector
+  override val loggingFilter       = LoggingFilter
   override val frontendAuditFilter = AuditFilter
 
   override def onStart(app: Application) {
@@ -60,7 +59,6 @@ object LoggingFilter extends FrontendLoggingFilter with MicroserviceFilterSuppor
 }
 
 object AuditFilter extends FrontendAuditFilter with RunMode with AppName with MicroserviceFilterSupport {
-
   override lazy val maskedFormFields = Seq("password")
 
   override lazy val applicationPort = None

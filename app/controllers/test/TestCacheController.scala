@@ -20,25 +20,20 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{BusinessRegistrationConnector, BusinessRegistrationConnect, KeystoreConnect, KeystoreConnector}
+import connectors.{BusinessRegistrationConnect, BusinessRegistrationConnector}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{AnyContent, Request}
 import services.{S4LService, S4LSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.SessionProfile
 
 import scala.concurrent.Future
 
 @Singleton
-class TestCacheController @Inject()(injBusinessRegistrationConnector: BusinessRegistrationConnector,
-                                    injS4LService: S4LService,
-                                    injMessagesApi: MessagesApi)
-  extends TestCacheCtrl {
+class TestCacheController @Inject()(val businessRegConnector: BusinessRegistrationConnector,
+                                    val s4LService: S4LService,
+                                    val messagesApi: MessagesApi) extends TestCacheCtrl {
   val authConnector = FrontendAuthConnector
-  val businessRegConnector = injBusinessRegistrationConnector
-  val s4LService = injS4LService
-  val messagesApi = injMessagesApi
 }
 
 trait TestCacheCtrl extends FrontendController with Actions with I18nSupport {
@@ -49,11 +44,10 @@ trait TestCacheCtrl extends FrontendController with Actions with I18nSupport {
   val tearDownS4L = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        businessRegConnector.retrieveCurrentProfile flatMap { profile =>
-          for {
-            res <- doTearDownS4L(profile.registrationID)
-          } yield Ok(res)
-        }
+        for {
+          profile <- businessRegConnector.retrieveCurrentProfile
+          res     <- doTearDownS4L(profile.registrationID)
+        } yield Ok(res)
   }
 
   protected[controllers] def doTearDownS4L(regId: String)(implicit request: Request[AnyContent]): Future[String] = {

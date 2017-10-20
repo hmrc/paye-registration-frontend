@@ -28,11 +28,13 @@ object FirstPaymentForm extends DateForm {
 
   override val prefix = "firstPay"
   override def validation(dt: LocalDate) = {
-    if(!Validators.firstPaymentDateWithinRange(dt))
+    if(!Validators.firstPaymentDateWithinRange(dt)) {
       Left(Seq(FormError("firstPayDay", "pages.firstPayment.date.invalidRange")))
-    else if (Validators.beforeMinDate(dt))
+    } else if (Validators.beforeMinDate(dt)) {
       Left(Seq(FormError("firstPayDay", "pages.firstPayment.date.dateTooEarly")))
-    else Right(dt)
+    } else {
+      Right(dt)
+    }
   }
 
   val form = Form(

@@ -43,13 +43,13 @@ class AddressLookupServiceSpec extends PAYERegSpec with S4LFixture with PAYERegi
 
   class Setup {
     val service = new AddressLookupService(mockFeatureSwitch, mockAddressLookupConnector, mockMetrics) {
-      override val metricsService = metricsMock
+      override val metricsService: MetricsSrv = metricsMock
     }
   }
 
   case class SetupWithProxy(boole: Boolean) {
     val service = new AddressLookupService(mockFeatureSwitch, mockAddressLookupConnector, mockMetrics) {
-      override val metricsService = metricsMock
+      override val metricsService: MetricsSrv = metricsMock
       override def useAddressLookupFrontend = boole
     }
   }

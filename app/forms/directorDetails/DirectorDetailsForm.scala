@@ -17,16 +17,13 @@
 package forms.directorDetails
 
 import models.view.{Ninos, UserEnteredNino}
-import play.api.Logger
 import play.api.data.Forms._
 import play.api.data.format.Formatter
-import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError, Forms, Mapping}
 import utils.Formatters
 import utils.Validators.isValidNino
 
 object DirectorDetailsForm {
-
 
   implicit def userNinoFormatter: Formatter[UserEnteredNino] = new Formatter[UserEnteredNino] {
 

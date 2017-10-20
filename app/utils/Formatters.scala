@@ -64,7 +64,7 @@ object Formatters {
       normalizeTrimmedReads.reads(json) flatMap { input =>
         Validators.isValidPhoneNo(input) match {
           case Right(phone) => JsSuccess(phone)
-          case Left(err) => JsError(err)
+          case Left(err)    => JsError(err)
         }
       }
     }
@@ -73,7 +73,7 @@ object Formatters {
   lazy val emailReads = Reads.StringReads.filter(ValidationError("Invalid email")) {
     email => Validators.emailValidation(normalize(email)) match {
       case e: Invalid => false
-      case _ => true
+      case _          => true
     }
   }
 }

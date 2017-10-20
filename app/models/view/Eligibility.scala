@@ -18,13 +18,11 @@ package models.view
 
 import play.api.libs.json.Json
 
-
 case class CompanyEligibility(ineligible: Boolean)
 
 object CompanyEligibility {
   implicit val format = Json.format[CompanyEligibility]
 }
-
 
 case class DirectorEligibility(eligible: Boolean)
 
@@ -32,11 +30,8 @@ object DirectorEligibility {
   implicit val format = Json.format[DirectorEligibility]
 }
 
-
-case class Eligibility(
-                        companyEligible: Option[CompanyEligibility],
-                        directorEligible: Option[DirectorEligibility]
-                      )
+case class Eligibility(companyEligible: Option[CompanyEligibility],
+                       directorEligible: Option[DirectorEligibility])
 
 object Eligibility {
   implicit val format = Json.format[Eligibility]

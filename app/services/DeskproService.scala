@@ -29,13 +29,11 @@ import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
-class DeskproService @Inject()(injDeskproConnector: DeskproConnector) extends DeskproSrv {
+class DeskproService @Inject()(val deskproConnector: DeskproConnector) extends DeskproSrv {
   override val authConnector = FrontendAuthConnector
-  override val deskproConnector = injDeskproConnector
 }
 
 trait DeskproSrv {
-
   val authConnector : AuthConnector
   val deskproConnector : DeskproConnect
 
@@ -66,5 +64,4 @@ trait DeskproSrv {
       deskproConnector.submitTicket(ticket)
     }
   }
-
 }

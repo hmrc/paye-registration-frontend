@@ -19,16 +19,10 @@ package models.external
 import models.Address
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import utils.Formatters
 
-case class CoHoCompanyDetailsModel(
-                                  companyName: String,
-                                  roAddress: Address
-                                ) {
-}
+case class CoHoCompanyDetailsModel(companyName: String, roAddress: Address)
 
 object CoHoCompanyDetailsModel {
-
   val r =
     (__ \ "company_name").read[String] and
     (__ \ "registered_office_address").read[Address]
@@ -37,12 +31,12 @@ object CoHoCompanyDetailsModel {
     (__ \ "company_name").write[String] and
     (__ \ "registered_office_address").write[Address]
 
-  val apiReads: Reads[CoHoCompanyDetailsModel] = (r)(CoHoCompanyDetailsModel.apply _)
-  val apiWrites: Writes[CoHoCompanyDetailsModel] = (w)(unlift(CoHoCompanyDetailsModel.unapply))
+  val apiReads: Reads[CoHoCompanyDetailsModel]    = r (CoHoCompanyDetailsModel.apply _)
+  val apiWrites: Writes[CoHoCompanyDetailsModel]  = w (unlift(CoHoCompanyDetailsModel.unapply))
   val incorpInfoReads = (
-      (__ \ "company_name").read[String] and
-      (__ \ "registered_office_address").read[Address](Address.incorpInfoReads)
-    )(CoHoCompanyDetailsModel.apply _)
+    (__ \ "company_name").read[String] and
+    (__ \ "registered_office_address").read[Address](Address.incorpInfoReads)
+  )(CoHoCompanyDetailsModel.apply _)
 
   implicit val format = Format(apiReads, apiWrites)
 }

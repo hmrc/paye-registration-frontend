@@ -27,27 +27,21 @@ import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import services._
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.frontend.auth.{Actions, AuthContext}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, NotFoundException }
 
 @Singleton
-class PayeStartController @Inject()(injCurrentProfileService: CurrentProfileService,
-                                    injPayeRegistrationService: PAYERegistrationService,
-                                    injKeystoreConnector: KeystoreConnector,
-                                    injBusinessRegistrationConnector: BusinessRegistrationConnector,
-                                    injCompanyRegistrationConnector: CompanyRegistrationConnector,
-                                    injMessagesApi: MessagesApi) extends PayeStartCtrl with ServicesConfig {
+class PayeStartController @Inject()(val currentProfileService: CurrentProfileService,
+                                    val payeRegistrationService: PAYERegistrationService,
+                                    val keystoreConnector: KeystoreConnector,
+                                    val businessRegistrationConnector: BusinessRegistrationConnector,
+                                    val companyRegistrationConnector: CompanyRegistrationConnector,
+                                    val messagesApi: MessagesApi) extends PayeStartCtrl with ServicesConfig {
   val authConnector = FrontendAuthConnector
-  val messagesApi = injMessagesApi
-  val currentProfileService = injCurrentProfileService
-  val payeRegistrationService = injPayeRegistrationService
-  val keystoreConnector = injKeystoreConnector
-  val businessRegistrationConnector = injBusinessRegistrationConnector
-  val companyRegistrationConnector = injCompanyRegistrationConnector
   lazy val compRegFEURL = getConfString("company-registration-frontend.www.url", "")
   lazy val compRegFEURI = getConfString("company-registration-frontend.www.uri", "")
 }
@@ -67,11 +61,10 @@ trait PayeStartCtrl extends FrontendController with Actions with I18nSupport {
     implicit user =>
       implicit request =>
         hasOrgAffinity {
-          checkAndStoreCurrentProfile {
-            profile =>
-              assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId){
-                Redirect(controllers.userJourney.routes.WelcomeController.show())
-              }
+          checkAndStoreCurrentProfile { profile =>
+            assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId){
+              Redirect(controllers.userJourney.routes.WelcomeController.show())
+            }
           }
         }
   }

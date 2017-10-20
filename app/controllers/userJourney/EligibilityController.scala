@@ -21,7 +21,6 @@ import javax.inject.{Inject, Singleton}
 import auth.PAYERegime
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
-import views.html.pages.eligibility.{companyEligibility => CompanyEligibilityPage, directorEligibility => DirectorEligibilityPage, ineligible => IneligiblePage}
 import forms.eligibility.{CompanyEligibilityForm, DirectorEligibilityForm}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import services.{EligibilityService, EligibilitySrv}
@@ -29,20 +28,16 @@ import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.SessionProfile
+import views.html.pages.eligibility.{companyEligibility => CompanyEligibilityPage, directorEligibility => DirectorEligibilityPage, ineligible => IneligiblePage}
 
 import scala.concurrent.Future
 
 @Singleton
-class EligibilityController @Inject()(injMessagesApi: MessagesApi,
-                                      injKeystoreConnector: KeystoreConnector,
-                                      injEligibilityService: EligibilityService,
-                                      injPayeRegistrationConnector: PAYERegistrationConnector
-                                     ) extends EligibilityCtrl with ServicesConfig {
+class EligibilityController @Inject()(val messagesApi: MessagesApi,
+                                      val keystoreConnector: KeystoreConnector,
+                                      val eligibilityService: EligibilityService,
+                                      val payeRegistrationConnector: PAYERegistrationConnector) extends EligibilityCtrl with ServicesConfig {
   val authConnector = FrontendAuthConnector
-  val messagesApi = injMessagesApi
-  override val eligibilityService = injEligibilityService
-  override val keystoreConnector = injKeystoreConnector
-  val payeRegistrationConnector = injPayeRegistrationConnector
   lazy val compRegFEURL = getConfString("company-registration-frontend.www.url", "")
   lazy val compRegFEURI = getConfString("company-registration-frontend.www.uri", "")
 }
@@ -57,11 +52,11 @@ trait EligibilityCtrl extends FrontendController with Actions with I18nSupport w
   val companyEligibility = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user => implicit request =>
       withCurrentProfile { profile =>
-        for {
-          storedData <- eligibilityService.getEligibility(profile.registrationID)
-        } yield storedData.companyEligible match {
-          case Some(boole) => Ok(CompanyEligibilityPage(CompanyEligibilityForm.form.fill(boole)))
-          case _ => Ok(CompanyEligibilityPage(CompanyEligibilityForm.form))
+        eligibilityService.getEligibility(profile.registrationID) map {
+          _.companyEligible match {
+            case Some(boole) => Ok(CompanyEligibilityPage(CompanyEligibilityForm.form.fill(boole)))
+            case _           => Ok(CompanyEligibilityPage(CompanyEligibilityForm.form))
+          }
         }
       }
   }
@@ -86,11 +81,11 @@ trait EligibilityCtrl extends FrontendController with Actions with I18nSupport w
   val directorEligibility = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user => implicit request =>
       withCurrentProfile { profile =>
-        for {
-          storedData <- eligibilityService.getEligibility(profile.registrationID)
-        } yield storedData.directorEligible match {
-          case Some(boole) => Ok(DirectorEligibilityPage(DirectorEligibilityForm.form.fill(boole)))
-          case _ => Ok(DirectorEligibilityPage(DirectorEligibilityForm.form))
+        eligibilityService.getEligibility(profile.registrationID) map {
+          _.directorEligible match {
+            case Some(boole)  => Ok(DirectorEligibilityPage(DirectorEligibilityForm.form.fill(boole)))
+            case _            => Ok(DirectorEligibilityPage(DirectorEligibilityForm.form))
+          }
         }
       }
   }

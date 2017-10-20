@@ -22,15 +22,15 @@ import play.api.data.validation.{ValidationError, _}
 
 object Validators extends DateUtil {
 
-  private val emailRegex = """^(?!.{71,})([-0-9a-zA-Z.+_]+@[-0-9a-zA-Z.+_]+\.[a-zA-Z]{2,4})$"""
-  private val phoneNoTypeRegex = """^[0-9 ]{1,20}$""".r
-  private val nonEmptyRegex = """^(?=\s*\S).*$""".r
-  private val validNinoFormat = "[[a-zA-Z]&&[^DFIQUVdfiquv]][[a-zA-Z]&&[^DFIQUVOdfiquvo]] ?\\d{2} ?\\d{2} ?\\d{2} ?[a-dA-D]{1}"
-  private val invalidPrefixes = List("BG", "GB", "NK", "KN", "TN", "NT", "ZZ")
+  private val emailRegex            = """^(?!.{71,})([-0-9a-zA-Z.+_]+@[-0-9a-zA-Z.+_]+\.[a-zA-Z]{2,4})$"""
+  private val phoneNoTypeRegex      = """^[0-9 ]{1,20}$""".r
+  private val nonEmptyRegex         = """^(?=\s*\S).*$""".r
+  private val validNinoFormat       = "[[a-zA-Z]&&[^DFIQUVdfiquv]][[a-zA-Z]&&[^DFIQUVOdfiquvo]] ?\\d{2} ?\\d{2} ?\\d{2} ?[a-dA-D]{1}"
+  private val invalidPrefixes       = List("BG", "GB", "NK", "KN", "TN", "NT", "ZZ")
   private val natureOfBusinessRegex = """^(?![\r\n|\r|\n|\t])[A-Za-z 0-9\-,/&']{1,100}$"""
-  val postcodeRegex = """^[A-Z]{1,2}[0-9][0-9A-Z]? [0-9][A-Z]{2}$"""
-  private val nameRegex = """^[A-Za-z 0-9\'-]{1,100}$""".r
-  val minDate = LocalDate.of(1900,1,1)
+  val postcodeRegex                 = """^[A-Z]{1,2}[0-9][0-9A-Z]? [0-9][A-Z]{2}$"""
+  private val nameRegex             = """^[A-Za-z 0-9\'-]{1,100}$""".r
+  val minDate                       = LocalDate.of(1900,1,1)
 
   private def hasValidPrefix(nino: String) = !invalidPrefixes.exists(nino.toUpperCase.startsWith)
 

@@ -47,8 +47,8 @@ object Address {
   def validatePostcode(unvalidatedPostcode: Option[String]): Either[String, String] = {
     unvalidatedPostcode match {
       case Some(pc) if pc.matches(Validators.postcodeRegex) => Right(pc)
-      case Some(_) => Left("Invalid postcode")
-      case _ => Left("No postcode")
+      case Some(_)                                          => Left("Invalid postcode")
+      case _                                                => Left("No postcode")
     }
   }
 
@@ -70,7 +70,7 @@ object Address {
 
       countryName match {
         case Some(country) if !unitedKingdomDomains.contains(country) => JsSuccess(createForeignAddress(unvalidatedPostCode, countryName, addressLines, auditRef))
-        case _ => buildAddress
+        case _                                                        => buildAddress
       }
     }
 

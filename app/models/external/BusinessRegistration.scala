@@ -16,9 +16,8 @@
 
 package models.external
 
-import play.api.libs.json.Json
 import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import play.api.libs.json.{Json, _}
 
 case class BusinessRegistrationRequest(language: String)
 
@@ -49,10 +48,10 @@ object CurrentProfile {
 
   val reads = (
     (__ \ "registrationID").read[String] and
-      (__ \ "companyTaxRegistration").read[CompanyRegistrationProfile] and
-      (__ \ "language").read[String] and
-      ((__ \ "payeRegistrationSubmitted").read[Boolean] or Reads.pure(false))
-    )(CurrentProfile.apply _)
+    (__ \ "companyTaxRegistration").read[CompanyRegistrationProfile] and
+    (__ \ "language").read[String] and
+    ((__ \ "payeRegistrationSubmitted").read[Boolean] or Reads.pure(false))
+  )(CurrentProfile.apply _)
 
   val writes = Json.writes[CurrentProfile]
 

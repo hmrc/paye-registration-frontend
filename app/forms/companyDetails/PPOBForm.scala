@@ -22,7 +22,6 @@ import play.api.data.Form
 import play.api.data.Forms._
 
 object PPOBForm extends ChooseAddressForm {
-
   override val errMessage = "pages.ppobAddress.addressChoice.noEntry"
 
   val form = Form(
@@ -30,5 +29,4 @@ object PPOBForm extends ChooseAddressForm {
       "chosenAddress" -> chosenAddress
     )(ChosenAddress.apply)(ChosenAddress.unapply)
   )
-
 }

@@ -21,20 +21,18 @@ import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-case class Officer(
-                    name: Name,
-                    role: String,
-                    resignedOn: Option[DateTime],
-                    appointmentLink: Option[String] // custom read to pick up (if required - TBC)
-                  )
+case class Officer(name: Name,
+                   role: String,
+                   resignedOn: Option[DateTime],
+                   appointmentLink: Option[String]) // custom read to pick up (if required - TBC)
 
 object Officer {
   implicit val formatModel: Reads[Officer] = (
     (__ \ "name_elements").read[Name](Name.normalizeNameReads) and
-      (__ \ "officer_role").read[String] and
-      (__ \ "resigned_on").readNullable[DateTime] and
-      (__ \ "appointment_link").readNullable[String]
-    )(Officer.apply _)
+    (__ \ "officer_role").read[String] and
+    (__ \ "resigned_on").readNullable[DateTime] and
+    (__ \ "appointment_link").readNullable[String]
+  )(Officer.apply _)
 }
 
 case class OfficerList(items: Seq[Officer])

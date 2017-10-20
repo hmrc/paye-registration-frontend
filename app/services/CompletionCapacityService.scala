@@ -22,26 +22,19 @@ import connectors._
 import enums.{DownstreamOutcome, UserCapacity}
 import models.view.CompletionCapacity
 import play.api.Logger
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
-class CompletionCapacityService @Inject()(
-                                           injPAYERegistrationConnector: PAYERegistrationConnector,
-                                           injBusinessregistrationConnector: BusinessRegistrationConnector
-                                         ) extends CompletionCapacitySrv {
-
-  override val payeRegConnector = injPAYERegistrationConnector
-  override val businessRegistrationConnector = injBusinessregistrationConnector
-}
+class CompletionCapacityService @Inject()(val payeRegConnector: PAYERegistrationConnector,
+                                          val businessRegistrationConnector: BusinessRegistrationConnector) extends CompletionCapacitySrv
 
 trait CompletionCapacitySrv {
 
   val payeRegConnector: PAYERegistrationConnect
   val businessRegistrationConnector: BusinessRegistrationConnect
-
 
   def saveCompletionCapacity(regId: String, completionCapacity: CompletionCapacity)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     payeRegConnector.upsertCompletionCapacity(regId, viewToAPI(completionCapacity)) map {
@@ -57,7 +50,7 @@ trait CompletionCapacitySrv {
           payeRegConnector.upsertCompletionCapacity(regId, brCC) flatMap {
             _ => Future.successful(Some(apiToView(brCC)))
           }
-        case None       =>
+        case None     =>
           Logger.info(s"[CompletionCapacityService] - [getCompletionCapacity] - BR document was found for regId $regId but it contained no completion capacity")
           Future.successful(None)
       } recover {
@@ -79,10 +72,10 @@ trait CompletionCapacitySrv {
 
   private[services] def apiToView(completionCapacity: String): CompletionCapacity = {
     completionCapacity.toLowerCase match {
-      case "director"   => CompletionCapacity(UserCapacity.director, "")
-      case "agent"      => CompletionCapacity(UserCapacity.agent, "")
+      case "director"           => CompletionCapacity(UserCapacity.director, "")
+      case "agent"              => CompletionCapacity(UserCapacity.agent, "")
       case "company secretary"  => CompletionCapacity(UserCapacity.secretary, "")
-      case _            => CompletionCapacity(UserCapacity.other, completionCapacity)
+      case _                    => CompletionCapacity(UserCapacity.other, completionCapacity)
     }
   }
 }

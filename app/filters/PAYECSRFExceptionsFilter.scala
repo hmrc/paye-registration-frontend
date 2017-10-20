@@ -20,9 +20,9 @@ import config.FrontendAppConfig
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.http.HttpVerbs.DELETE
 import play.api.mvc.{RequestHeader, Result}
+import uk.gov.hmrc.play.frontend.filters.CSRFExceptionsFilter
 
 import scala.concurrent.Future
-import uk.gov.hmrc.play.frontend.filters.CSRFExceptionsFilter
 
 class PAYECSRFExceptionsFilter(whitelist: Set[String]) extends CSRFExceptionsFilter(whitelist) {
 

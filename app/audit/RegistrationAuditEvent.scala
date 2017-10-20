@@ -17,10 +17,10 @@
 package audit
 
 import audit.RegistrationAuditEvent.buildTags
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.JsObject
 import play.api.mvc.{AnyContent, Request}
-import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
 case class TagSet(clientIP: Boolean,
                   clientPort: Boolean,
@@ -31,9 +31,9 @@ case class TagSet(clientIP: Boolean,
                   path: Boolean)
 
 object TagSet {
-  val ALL_TAGS = TagSet(true, true, true, true, true, true, true)
-  val NO_TAGS = TagSet(false, false, false, false, false, false, false)
-  val REQUEST_ONLY = TagSet(false, false, true, false, false, false, false)
+  val ALL_TAGS      = TagSet(true, true, true, true, true, true, true)
+  val NO_TAGS       = TagSet(false, false, false, false, false, false, false)
+  val REQUEST_ONLY  = TagSet(false, false, true, false, false, false, false)
 }
 
 import audit.TagSet.ALL_TAGS
@@ -42,17 +42,17 @@ abstract class RegistrationAuditEvent(auditType: String, transactionName : Optio
                                      (implicit hc: HeaderCarrier, optReq: Option[Request[AnyContent]] = None)
   extends ExtendedDataEvent(
     auditSource = "paye-registration-frontend",
-    auditType = auditType,
-    detail = detail,
-    tags = buildTags(transactionName.getOrElse(auditType), tagSet)
+    auditType   = auditType,
+    detail      = detail,
+    tags        = buildTags(transactionName.getOrElse(auditType), tagSet)
   )
 
 object RegistrationAuditEvent {
 
-  val EXTERNAL_USER_ID = "externalUserId"
-  val AUTH_PROVIDER_ID = "authProviderId"
-  val JOURNEY_ID = "journeyId"
-  val PATH = "path"
+  val EXTERNAL_USER_ID  = "externalUserId"
+  val AUTH_PROVIDER_ID  = "authProviderId"
+  val JOURNEY_ID        = "journeyId"
+  val PATH              = "path"
 
 
   def buildTags(transactionName: String, tagSet: TagSet)(implicit hc: HeaderCarrier, optReq: Option[Request[AnyContent]]) = {

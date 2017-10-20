@@ -50,7 +50,7 @@ trait DirectorDetailsCtrl extends FrontendController with Actions with I18nSuppo
             val ninos = directorDetailsService.createDirectorNinos(directors)
             val names = directorDetailsService.createDisplayNamesMap(directors)
             Ok(DirectorDetailsPage(DirectorDetailsForm.form.fill(ninos), names))
-          }recover {
+          } recover {
             case _ => InternalServerError(views.html.pages.error.restart())
           }
         }
@@ -62,10 +62,9 @@ trait DirectorDetailsCtrl extends FrontendController with Actions with I18nSuppo
         withCurrentProfile { profile =>
           DirectorDetailsForm.form.bindFromRequest.fold(
             errors => {
-              directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map {
-                directors =>
-                  val names = directorDetailsService.createDisplayNamesMap(directors)
-                  BadRequest(DirectorDetailsPage(errors, names))
+              directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map { directors =>
+                val names = directorDetailsService.createDisplayNamesMap(directors)
+                BadRequest(DirectorDetailsPage(errors, names))
               }
             },
             success => {

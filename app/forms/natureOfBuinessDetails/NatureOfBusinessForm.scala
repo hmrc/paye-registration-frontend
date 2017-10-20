@@ -17,9 +17,9 @@
 package forms.natureOfBuinessDetails
 
 import models.view.NatureOfBusiness
-import play.api.data.{Form, FormError, Forms, Mapping}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
+import play.api.data.{Form, FormError, Forms, Mapping}
 import utils.Validators.isValidNatureOfBusiness
 
 object NatureOfBusinessForm {
@@ -27,7 +27,7 @@ object NatureOfBusinessForm {
 
   def validate(entry: String): Either[Seq[FormError], String] = {
     removeNewlineAndTrim(entry) match {
-      case t if t.length > 100                 => Left(Seq(FormError("description", "errors.invalid.sic.overCharLimit")))
+      case t if t.length > 100                  => Left(Seq(FormError("description", "errors.invalid.sic.overCharLimit")))
       case ""                                   => Left(Seq(FormError("description", "errors.invalid.sic.noEntry")))
       case nob if isValidNatureOfBusiness(nob)  => Right(nob)
       case _                                    => Left(Seq(FormError("description", "errors.invalid.sic.invalidChars")))

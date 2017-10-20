@@ -32,17 +32,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class PAYEContactService @Inject()(injPAYERegistrationConnector: PAYERegistrationConnector,
-                                   injS4LService: S4LService,
-                                   injCompanyDetailsService: CompanyDetailsService,
-                                   injPrepopulationService: PrepopulationService,
-                                   injAuditService: AuditService) extends PAYEContactSrv {
-  override val payeRegConnector = injPAYERegistrationConnector
-  override val s4LService = injS4LService
-  override val companyDetailsService = injCompanyDetailsService
-  override val prepopService = injPrepopulationService
-  override val auditService = injAuditService
-}
+class PAYEContactService @Inject()(val payeRegConnector: PAYERegistrationConnector,
+                                   val s4LService: S4LService,
+                                   val companyDetailsService: CompanyDetailsService,
+                                   val prepopService: PrepopulationService,
+                                   val auditService: AuditService) extends PAYEContactSrv
 
 trait PAYEContactSrv  {
   val payeRegConnector: PAYERegistrationConnect

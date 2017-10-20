@@ -31,20 +31,16 @@ import views.html.pages.{confirmation => ConfirmationPage}
 import scala.concurrent.Future
 
 @Singleton
-class ConfirmationController @Inject()(injMessagesApi: MessagesApi,
-                                       injKeystore: KeystoreConnector,
-                                       injConfirmationService: ConfirmationService,
-                                       injPayeRegistrationConnector: PAYERegistrationConnector) extends ConfirmationCtrl {
+class ConfirmationController @Inject()(val messagesApi: MessagesApi,
+                                       val keystoreConnector: KeystoreConnector,
+                                       val confirmationService: ConfirmationService,
+                                       val payeRegistrationConnector: PAYERegistrationConnector) extends ConfirmationCtrl {
   val authConnector = FrontendAuthConnector
-  val messagesApi = injMessagesApi
-  val keystoreConnector = injKeystore
-  val confirmationService = injConfirmationService
-  val payeRegistrationConnector = injPayeRegistrationConnector
 }
 
 trait ConfirmationCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
 
-  val keystoreConnector : KeystoreConnect
+  val keystoreConnector: KeystoreConnect
   val confirmationService: ConfirmationSrv
 
   val showConfirmation = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
@@ -52,9 +48,9 @@ trait ConfirmationCtrl extends FrontendController with Actions with I18nSupport 
       implicit request =>
         withCurrentProfile( { profile =>
           confirmationService.getAcknowledgementReference(profile.registrationID) flatMap {
-              case Some(ref) => Future.successful(Ok(ConfirmationPage(ref)))
-              case None => Future.successful(InternalServerError(views.html.pages.error.restart()))
-            }
+            case Some(ref) => Future.successful(Ok(ConfirmationPage(ref)))
+            case None      => Future.successful(InternalServerError(views.html.pages.error.restart()))
+          }
         }, checkSubmissionStatus = false)
   }
 }

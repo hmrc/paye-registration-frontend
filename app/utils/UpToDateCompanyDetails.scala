@@ -20,10 +20,10 @@ import enums.CacheKeys
 import models.view.CompanyDetails
 import play.api.mvc.Result
 import services.{CompanyDetailsSrv, IncorporationInformationSrv, S4LSrv}
-
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.http.HeaderCarrier
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 trait UpToDateCompanyDetails {
   val incorpInfoService: IncorporationInformationSrv
@@ -33,9 +33,9 @@ trait UpToDateCompanyDetails {
   def withLatestCompanyDetails(regId: String, txId: String)(f: CompanyDetails => Result)(implicit hc: HeaderCarrier): Future[Result] = {
     for {
       oCoHoCompanyDetails <- incorpInfoService.getCompanyDetails(regId, txId) map(Some(_)) recover {case _ => None}
-      companyDetails <- companyDetailsService.getCompanyDetails(regId, txId)
-      details = oCoHoCompanyDetails.map(ch => companyDetails.copy(companyName = ch.companyName, roAddress = ch.roAddress)).getOrElse(companyDetails)
-      _ <- s4LService.saveForm[CompanyDetails](CacheKeys.CompanyDetails.toString, details, regId)
+      companyDetails      <- companyDetailsService.getCompanyDetails(regId, txId)
+      details             =  oCoHoCompanyDetails.map(ch => companyDetails.copy(companyName = ch.companyName, roAddress = ch.roAddress)).getOrElse(companyDetails)
+      _                   <- s4LService.saveForm[CompanyDetails](CacheKeys.CompanyDetails.toString, details, regId)
     } yield f(details)
   }
 }

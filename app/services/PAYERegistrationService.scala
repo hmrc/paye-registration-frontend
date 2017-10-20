@@ -32,15 +32,11 @@ import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
-class PAYERegistrationService @Inject()(injPayeRegistrationConnector: PAYERegistrationConnector,
-                                        injKeystoreConnector: KeystoreConnector,
-                                        injCurrentProfileService: CurrentProfileService,
-                                        injS4LService: S4LService) extends PAYERegistrationSrv {
-  override val payeRegistrationConnector = injPayeRegistrationConnector
+class PAYERegistrationService @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,
+                                        val keyStoreConnector: KeystoreConnector,
+                                        val currentProfileService: CurrentProfileService,
+                                        val s4LService: S4LService) extends PAYERegistrationSrv {
   override val authConnector = FrontendAuthConnector
-  override val keyStoreConnector = injKeystoreConnector
-  override val currentProfileService = injCurrentProfileService
-  override val s4LService = injS4LService
 }
 
 trait PAYERegistrationSrv {
@@ -90,7 +86,7 @@ trait PAYERegistrationSrv {
   private def getCurrentProfile(implicit hc: HeaderCarrier): Future[CurrentProfile] = {
     keyStoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString) flatMap {
       case Some(currentProfile) => Future.successful(currentProfile)
-      case None => currentProfileService.fetchAndStoreCurrentProfile
+      case None                 => currentProfileService.fetchAndStoreCurrentProfile
     }
   }
 }

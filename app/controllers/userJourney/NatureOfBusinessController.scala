@@ -25,7 +25,7 @@ import enums.DownstreamOutcome
 import forms.natureOfBuinessDetails.NatureOfBusinessForm
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
-import services.{CompanyDetailsService, CompanyDetailsSrv, NatureOfBusinessService, NatureOfBusinessSrv}
+import services.{NatureOfBusinessService, NatureOfBusinessSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -35,15 +35,11 @@ import views.html.pages.{natureOfBusiness => NatureOfBusinessPage}
 import scala.concurrent.Future
 
 @Singleton
-class NatureOfBusinessController @Inject()(injMessagesApi: MessagesApi,
-                                           injNatureOfBusinessService: NatureOfBusinessService,
-                                           injKeystoreConnector: KeystoreConnector,
-                                           injPayeRegistrationConnector: PAYERegistrationConnector) extends NatureOfBusinessCtrl {
+class NatureOfBusinessController @Inject()(val messagesApi: MessagesApi,
+                                           val natureOfBusinessService: NatureOfBusinessService,
+                                           val keystoreConnector: KeystoreConnector,
+                                           val payeRegistrationConnector: PAYERegistrationConnector) extends NatureOfBusinessCtrl {
   val authConnector = FrontendAuthConnector
-  implicit val messagesApi = injMessagesApi
-  val natureOfBusinessService = injNatureOfBusinessService
-  val keystoreConnector = injKeystoreConnector
-  val payeRegistrationConnector = injPayeRegistrationConnector
 }
 
 trait NatureOfBusinessCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
@@ -59,7 +55,7 @@ trait NatureOfBusinessCtrl extends FrontendController with Actions with I18nSupp
         withCurrentProfile { profile =>
           natureOfBusinessService.getNatureOfBusiness(profile.registrationID) map {
             case Some(model) => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form.fill(model)))
-            case None => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form))
+            case None        => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form))
           }
         }
   }

@@ -19,7 +19,7 @@ package audit
 
 import audit.RegistrationAuditEvent.{AUTH_PROVIDER_ID, EXTERNAL_USER_ID, JOURNEY_ID}
 import models.DigitalContactDetails
-import play.api.libs.json.{JsObject, JsValue, Json, Writes, __}
+import play.api.libs.json.{JsObject, JsValue, Json, Writes}
 import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -30,16 +30,16 @@ case class AmendedBusinessContactDetailsEventDetail(externalUserId: String,
                                                     newContactDetails: DigitalContactDetails)
 
 object AmendedBusinessContactDetailsEventDetail {
-  private val PREVIOUS_CONTACT_DETAILS = "previousContactDetails"
-  private val NEW_CONTACT_DETAILS = "newContactDetails"
+  private val PREVIOUS_CONTACT_DETAILS  = "previousContactDetails"
+  private val NEW_CONTACT_DETAILS       = "newContactDetails"
 
   implicit val writes = new Writes[AmendedBusinessContactDetailsEventDetail] {
     override def writes(detail: AmendedBusinessContactDetailsEventDetail): JsValue = Json.obj(
-      EXTERNAL_USER_ID -> detail.externalUserId,
-      AUTH_PROVIDER_ID -> detail.authProviderId,
-      JOURNEY_ID -> detail.regId,
-      PREVIOUS_CONTACT_DETAILS -> detail.previousContactDetails,
-      NEW_CONTACT_DETAILS -> detail.newContactDetails
+      EXTERNAL_USER_ID          -> detail.externalUserId,
+      AUTH_PROVIDER_ID          -> detail.authProviderId,
+      JOURNEY_ID                -> detail.regId,
+      PREVIOUS_CONTACT_DETAILS  -> detail.previousContactDetails,
+      NEW_CONTACT_DETAILS       -> detail.newContactDetails
     )
   }
 }

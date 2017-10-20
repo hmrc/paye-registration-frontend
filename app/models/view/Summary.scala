@@ -18,19 +18,12 @@ package models.view
 
 import play.api.mvc.Call
 
-case class Summary(
-                  sections: Seq[SummarySection]
-                  )
+case class Summary(sections: Seq[SummarySection])
 
-case class SummarySection(
-                        id: String,
-                        rows: Seq[SummaryRow]
-                        )
+case class SummarySection(id: String, rows: Seq[SummaryRow])
 
-case class SummaryRow(
-                       id: String,
-                       answers: List[Either[String, String]],
-                       changeLink: Option[Call],
-                       questionArgs: Option[Seq[String]] = None,
-                       commonQuestionKey: Option[String] = None
-                      )
+case class SummaryRow(id: String,
+                      answers: List[Either[String, String]],
+                      changeLink: Option[Call],
+                      questionArgs: Option[Seq[String]] = None,
+                      commonQuestionKey: Option[String] = None)

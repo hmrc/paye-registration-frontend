@@ -31,10 +31,10 @@ object CorrespondenceAddressAuditEventDetail {
 
   implicit val writes = new Writes[CorrespondenceAddressAuditEventDetail] {
     override def writes(detail: CorrespondenceAddressAuditEventDetail): JsValue = Json.obj(
-      EXTERNAL_USER_ID -> detail.externalUserId,
-      AUTH_PROVIDER_ID -> detail.authProviderId,
-      JOURNEY_ID   -> detail.regId,
-      ADDRESS_USED -> detail.addressUsed
+      EXTERNAL_USER_ID  -> detail.externalUserId,
+      AUTH_PROVIDER_ID  -> detail.authProviderId,
+      JOURNEY_ID        -> detail.regId,
+      ADDRESS_USED      -> detail.addressUsed
     )
   }
 }

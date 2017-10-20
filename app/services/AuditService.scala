@@ -25,17 +25,17 @@ import models.external.{UserDetailsModel, UserIds}
 import models.view.PAYEContactDetails
 import play.api.libs.json.JsObject
 import play.api.mvc.{AnyContent, Request}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.http.HeaderCarrier
+import scala.concurrent.Future
 
 @Singleton
 class AuditService extends AuditSrv {
-  override val authConnector = FrontendAuthConnector
+  override val authConnector  = FrontendAuthConnector
   override val auditConnector = FrontendAuditConnector
 }
 
@@ -48,7 +48,7 @@ trait AuditSrv {
     for {
       ids         <- authConnector.getIds[UserIds](authContext)
       authId      <- authConnector.getUserDetails[UserDetailsModel](authContext)
-      eventDetail = AmendedBusinessContactDetailsEventDetail(ids.externalId, authId.authProviderId, regId, previousData, newData)
+      eventDetail =  AmendedBusinessContactDetailsEventDetail(ids.externalId, authId.authProviderId, regId, previousData, newData)
       auditResult <- auditConnector.sendExtendedEvent(new AmendedBusinessContactDetailsEvent(eventDetail))
     } yield auditResult
   }
@@ -57,7 +57,7 @@ trait AuditSrv {
     for {
       userIds     <- authConnector.getIds[UserIds](user)
       userDetails <- authConnector.getUserDetails[UserDetailsModel](user)
-      event       = new PPOBAddressAuditEvent(PPOBAddressAuditEventDetail(userIds.externalId, userDetails.authProviderId, regId))
+      event       =  new PPOBAddressAuditEvent(PPOBAddressAuditEventDetail(userIds.externalId, userDetails.authProviderId, regId))
       auditResult <- auditConnector.sendExtendedEvent(event)
     } yield auditResult
   }
@@ -72,16 +72,16 @@ trait AuditSrv {
       phoneNumber   = viewData.digitalContactDetails.phoneNumber
     )
 
-    if( previousData.nonEmpty ) {
+    if(previousData.nonEmpty) {
       for {
-        ids <- authConnector.getIds[UserIds](authContext)
-        authId <- authConnector.getUserDetails[JsObject](authContext)
-        eventDetail = AmendedPAYEContactDetailsEventDetail(
-          externalUserId = ids.externalId,
-          authProviderId = authId.\("authProviderId").as[String],
-          journeyId = regId,
-          previousPAYEContactDetails = convertPAYEContactViewToAudit(previousData.get),
-          newPAYEContactDetails = convertPAYEContactViewToAudit(newData)
+        ids         <- authConnector.getIds[UserIds](authContext)
+        authId      <- authConnector.getUserDetails[JsObject](authContext)
+        eventDetail =  AmendedPAYEContactDetailsEventDetail(
+          externalUserId              = ids.externalId,
+          authProviderId              = authId.\("authProviderId").as[String],
+          journeyId                   = regId,
+          previousPAYEContactDetails  = convertPAYEContactViewToAudit(previousData.get),
+          newPAYEContactDetails       = convertPAYEContactViewToAudit(newData)
         )
         auditResult <- auditConnector.sendExtendedEvent(new AmendedPAYEContactDetailsEvent(eventDetail))
       } yield auditResult
@@ -92,9 +92,9 @@ trait AuditSrv {
 
   def auditCorrespondenceAddress(regId: String, addressUsed: String)(implicit user: AuthContext, hc: HeaderCarrier, req: Request[AnyContent]): Future[AuditResult] = {
     for {
-      userIds <- authConnector.getIds[UserIds](user)
+      userIds     <- authConnector.getIds[UserIds](user)
       userDetails <- authConnector.getUserDetails[UserDetailsModel](user)
-      event = new CorrespondenceAddressAuditEvent(CorrespondenceAddressAuditEventDetail(userIds.externalId, userDetails.authProviderId, regId, addressUsed))
+      event       =  new CorrespondenceAddressAuditEvent(CorrespondenceAddressAuditEventDetail(userIds.externalId, userDetails.authProviderId, regId, addressUsed))
       auditResult <- auditConnector.sendExtendedEvent(event)
     } yield auditResult
   }

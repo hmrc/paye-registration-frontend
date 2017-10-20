@@ -34,20 +34,13 @@ import utils.SessionProfile
 import scala.concurrent.Future
 
 @Singleton
-class TestRegSetupController @Inject()(injPayeRegService:PAYERegistrationService,
-                                       injTestPAYERegConnector: TestPAYERegConnector,
-                                       injKeystoreConnector: KeystoreConnector,
-                                       injPayeRegistrationConnector: PAYERegistrationConnector,
-                                       injBusinessRegistrationConnector: TestBusinessRegConnector,
-                                       injMessagesApi: MessagesApi)
-  extends TestRegSetupCtrl {
+class TestRegSetupController @Inject()(val payeRegService:PAYERegistrationService,
+                                       val testPAYERegConnector: TestPAYERegConnector,
+                                       val keystoreConnector: KeystoreConnector,
+                                       val payeRegistrationConnector: PAYERegistrationConnector,
+                                       val testBusinessRegConnector: TestBusinessRegConnector,
+                                       val messagesApi: MessagesApi) extends TestRegSetupCtrl {
   val authConnector = FrontendAuthConnector
-  val payeRegService = injPayeRegService
-  val testPAYERegConnector = injTestPAYERegConnector
-  val messagesApi = injMessagesApi
-  val keystoreConnector = injKeystoreConnector
-  val payeRegistrationConnector = injPayeRegistrationConnector
-  val testBusinessRegConnector = injBusinessRegistrationConnector
 }
 
 trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
@@ -61,9 +54,7 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
     implicit user =>
       implicit request =>
         withCurrentProfile { profile =>
-          for {
-            res <- testPAYERegConnector.testRegistrationTeardown()
-          } yield res match {
+          testPAYERegConnector.testRegistrationTeardown() map {
             case DownstreamOutcome.Success => Ok("Registration collection successfully cleared")
             case DownstreamOutcome.Failure => InternalServerError("Error clearing registration collection")
           }
@@ -77,10 +68,10 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
   def individualRegTeardown(regId: String) = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-          doIndividualRegTeardown(regId) map {
-            case DownstreamOutcome.Success => Ok(s"Registration successfully cleared for regID $regId")
-            case DownstreamOutcome.Failure => InternalServerError(s"Error clearing registration for regID $regId")
-          }
+        doIndividualRegTeardown(regId) map {
+          case DownstreamOutcome.Success => Ok(s"Registration successfully cleared for regID $regId")
+          case DownstreamOutcome.Failure => InternalServerError(s"Error clearing registration for regID $regId")
+        }
   }
 
   val regSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
@@ -101,7 +92,7 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
             success =>
               for {
                 setupReg <- testPAYERegConnector.addPAYERegistration(success)
-                updateCC <- testBusinessRegConnector.updateCompletionCapacity(profile.registrationID, success.completionCapacity)
+                _        <- testBusinessRegConnector.updateCompletionCapacity(profile.registrationID, success.completionCapacity)
               } yield {
                 setupReg match {
                   case DownstreamOutcome.Success => Ok("PAYE Registration set up successfully")
@@ -123,7 +114,7 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
       implicit request =>
         withCurrentProfile { profile =>
           TestPAYERegCompanyDetailsSetupForm.form.bindFromRequest.fold(
-            errors => Future.successful(BadRequest(views.html.pages.test.payeRegCompanyDetailsSetup(errors))),
+            errors  => Future.successful(BadRequest(views.html.pages.test.payeRegCompanyDetailsSetup(errors))),
             success => testPAYERegConnector.addTestCompanyDetails(success, profile.registrationID) map {
               case DownstreamOutcome.Success => Ok("Company details successfully set up")
               case DownstreamOutcome.Failure => InternalServerError("Error setting up Company Details")
@@ -139,7 +130,7 @@ trait TestRegSetupCtrl extends FrontendController with Actions with I18nSupport 
   val submitRegSetupPAYEContact = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     withCurrentProfile { profile =>
       TestPAYEContactForm.form.bindFromRequest.fold(
-        errors => Future.successful(BadRequest(views.html.pages.test.payeRegPAYEContactSetup(errors))),
+        errors  => Future.successful(BadRequest(views.html.pages.test.payeRegPAYEContactSetup(errors))),
         success => testPAYERegConnector.addTestPAYEContact(success, profile.registrationID) map {
           case DownstreamOutcome.Success => Ok("PAYE Contact details successfully set up")
           case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Contact details")

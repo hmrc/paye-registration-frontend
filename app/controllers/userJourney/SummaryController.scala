@@ -36,22 +36,15 @@ import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
-class SummaryController @Inject()(injSummaryService: SummaryService,
-                                  injSubmissionService: SubmissionService,
-                                  injKeystoreConnector: KeystoreConnector,
-                                  injPayeRegistrationConnector: PAYERegistrationConnector,
-                                  injMessagesApi: MessagesApi)
-  extends SummaryCtrl {
+class SummaryController @Inject()(val summaryService: SummaryService,
+                                  val submissionService: SubmissionService,
+                                  val keystoreConnector: KeystoreConnector,
+                                  val payeRegistrationConnector: PAYERegistrationConnector,
+                                  val messagesApi: MessagesApi) extends SummaryCtrl {
   val authConnector = FrontendAuthConnector
-  val summaryService = injSummaryService
-  val submissionService = injSubmissionService
-  val keystoreConnector = injKeystoreConnector
-  val payeRegistrationConnector = injPayeRegistrationConnector
-  val messagesApi = injMessagesApi
 }
 
 trait SummaryCtrl extends FrontendController with Actions with I18nSupport with SessionProfile with ServicesConfig {
-
   val summaryService: SummarySrv
   val submissionService: SubmissionSrv
   val keystoreConnector: KeystoreConnect
@@ -60,8 +53,8 @@ trait SummaryCtrl extends FrontendController with Actions with I18nSupport with 
   val summary = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
     withCurrentProfile { profile =>
       invalidSubmissionGuard(profile) {
-        summaryService.getRegistrationSummary(profile.registrationID) map {
-          summaryModel => Ok(SummaryPage(summaryModel))
+        summaryService.getRegistrationSummary(profile.registrationID) map { summaryModel =>
+          Ok(SummaryPage(summaryModel))
         } recover {
           case _ => InternalServerError(views.html.pages.error.restart())
         }
@@ -73,10 +66,10 @@ trait SummaryCtrl extends FrontendController with Actions with I18nSupport with 
     withCurrentProfile { profile =>
       invalidSubmissionGuard(profile) {
         submissionService.submitRegistration(profile) map {
-          case Success => Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation())
-          case Cancelled => Redirect(controllers.userJourney.routes.DashboardController.dashboard())
-          case Failed => Redirect(controllers.errors.routes.ErrorController.failedSubmission())
-          case TimedOut => InternalServerError(views.html.pages.error.submissionTimeout())
+          case Success    => Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation())
+          case Cancelled  => Redirect(controllers.userJourney.routes.DashboardController.dashboard())
+          case Failed     => Redirect(controllers.errors.routes.ErrorController.failedSubmission())
+          case TimedOut   => InternalServerError(views.html.pages.error.submissionTimeout())
         }
       }
     }
@@ -85,11 +78,11 @@ trait SummaryCtrl extends FrontendController with Actions with I18nSupport with 
   private[controllers] def invalidSubmissionGuard(profile: CurrentProfile)(f: => Future[Result])(implicit hc: HeaderCarrier) = {
     payeRegistrationConnector.getRegistration(profile.registrationID) flatMap { regDoc =>
       regDoc.status match {
-        case PAYEStatus.draft => f
+        case PAYEStatus.draft                       => f
         case PAYEStatus.held | PAYEStatus.submitted => Future.successful(Redirect(routes.ConfirmationController.showConfirmation()))
-        case PAYEStatus.invalid => Future.successful(Redirect(controllers.errors.routes.ErrorController.ineligible()))
+        case PAYEStatus.invalid                     => Future.successful(Redirect(controllers.errors.routes.ErrorController.ineligible()))
           //TODO: Potentially need a new view to better demonstrate the problem
-        case PAYEStatus.rejected => Future.successful(Redirect(controllers.errors.routes.ErrorController.ineligible()))
+        case PAYEStatus.rejected                    => Future.successful(Redirect(controllers.errors.routes.ErrorController.ineligible()))
       }
     }
   }

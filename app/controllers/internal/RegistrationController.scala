@@ -31,13 +31,10 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 import scala.concurrent.Future
 
 @Singleton
-class RegistrationController @Inject()(injKeystoreConnector: KeystoreConnector,
-                                       injPayeRegistrationConnector: PAYERegistrationConnector,
-                                       injPAYERegistrationService: PAYERegistrationService) extends RegistrationCtrl {
+class RegistrationController @Inject()(val keystoreConnector: KeystoreConnector,
+                                       val payeRegistrationConnector: PAYERegistrationConnector,
+                                       val payeRegistrationService: PAYERegistrationService) extends RegistrationCtrl {
   val authConnector = FrontendAuthConnector
-  val keystoreConnector = injKeystoreConnector
-  val payeRegistrationConnector = injPayeRegistrationConnector
-  val payeRegistrationService = injPAYERegistrationService
 }
 
 trait RegistrationCtrl extends FrontendController with Actions {
@@ -51,9 +48,9 @@ trait RegistrationCtrl extends FrontendController with Actions {
       FrontendAuthConnector.currentAuthority flatMap {
         case Some(_) =>
           payeRegistrationService.deletePayeRegistrationInProgress(regId)(hc) map {
-            case RegistrationDeletion.success => Ok
+            case RegistrationDeletion.success       => Ok
             case RegistrationDeletion.invalidStatus => PreconditionFailed
-            case RegistrationDeletion.forbidden =>
+            case RegistrationDeletion.forbidden     =>
               Logger.warn(s"[RegistrationController] [delete] - Requested document regId $regId to be deleted is not corresponding to the CurrentProfile regId")
               BadRequest
           } recover {

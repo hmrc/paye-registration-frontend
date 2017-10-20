@@ -28,7 +28,7 @@ import scala.concurrent.Future
 
 @Singleton
 class TestIncorpInfoConnector @Inject()() extends TestIncorpInfoConnect with ServicesConfig {
-  val incorpFEStubsUrl = baseUrl("incorporation-frontend-stubs")
+  val incorpFEStubsUrl             = baseUrl("incorporation-frontend-stubs")
   val http : CorePost with CorePut = WSHttp
 }
 

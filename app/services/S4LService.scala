@@ -28,9 +28,7 @@ import scala.concurrent.Future
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
 @Singleton
-class S4LService @Inject()(s4LConn: S4LConnector) extends S4LSrv {
-  override val s4LConnector = s4LConn
-}
+class S4LService @Inject()(val s4LConnector: S4LConnector) extends S4LSrv
 
 trait S4LSrv {
 

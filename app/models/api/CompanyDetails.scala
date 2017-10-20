@@ -19,17 +19,15 @@ package models.api
 import models.{Address, DigitalContactDetails}
 import play.api.libs.json.Json
 
-case class CompanyDetails(
-                           companyName: String,
-                           tradingName: Option[String],
-                           roAddress: Address,
-                           ppobAddress: Address,
-                           businessContactDetails: DigitalContactDetails
-                           )
+case class CompanyDetails(companyName: String,
+                          tradingName: Option[String],
+                          roAddress: Address,
+                          ppobAddress: Address,
+                          businessContactDetails: DigitalContactDetails)
 
 object CompanyDetails {
-  implicit val addressFormat = Address.format
+  implicit val addressFormat                = Address.format
   implicit val businessContactDetailsFormat = DigitalContactDetails.format
-  implicit val format = Json.format[CompanyDetails]
+  implicit val format                       = Json.format[CompanyDetails]
 }
 

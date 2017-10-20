@@ -18,11 +18,9 @@ package models.test
 
 import play.api.libs.json.Json
 
-case class CoHoCompanyDetailsFormModel (
-                                       companyName: String,
-                                       sicCodes: List[String],
-                                       descriptions: List[String]
-                                         )
+case class CoHoCompanyDetailsFormModel (companyName: String,
+                                        sicCodes: List[String],
+                                        descriptions: List[String])
 
 
 object CoHoCompanyDetailsFormModel {

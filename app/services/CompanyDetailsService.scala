@@ -32,20 +32,12 @@ import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
-class CompanyDetailsService @Inject()(injPAYERegistrationConnector: PAYERegistrationConnector,
-                                      injIncorporationInformationService: IncorporationInformationService,
-                                      injS4LService: S4LService,
-                                      injCompRegConnector : CompanyRegistrationConnector,
-                                      injPrepopulationService: PrepopulationService,
-                                      injAuditService: AuditService) extends CompanyDetailsSrv {
-
-  override val payeRegConnector = injPAYERegistrationConnector
-  override val compRegConnector = injCompRegConnector
-  override val incorpInfoService = injIncorporationInformationService
-  override val s4LService = injS4LService
-  override val prepopService = injPrepopulationService
-  override val auditService = injAuditService
-}
+class CompanyDetailsService @Inject()(val payeRegConnector: PAYERegistrationConnector,
+                                      val incorpInfoService: IncorporationInformationService,
+                                      val s4LService: S4LService,
+                                      val compRegConnector : CompanyRegistrationConnector,
+                                      val prepopService: PrepopulationService,
+                                      val auditService: AuditService) extends CompanyDetailsSrv
 
 trait CompanyDetailsSrv extends RegistrationWhitelist {
 
@@ -60,10 +52,10 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
     s4LService.fetchAndGet[CompanyDetailsView](CacheKeys.CompanyDetails.toString, regId) flatMap {
       case Some(companyDetails) => Future.successful(companyDetails)
       case None => for {
-        oDetails <- ifRegIdNotWhitelisted(regId) {
+        oDetails    <- ifRegIdNotWhitelisted(regId) {
           payeRegConnector.getCompanyDetails(regId)
         }
-        details  <- convertOrCreateCompanyDetailsView(regId, txId, oDetails)
+        details     <- convertOrCreateCompanyDetailsView(regId, txId, oDetails)
         viewDetails <- saveToS4L(details, regId)
       } yield viewDetails
     }
@@ -73,8 +65,8 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
     oAPI match {
       case Some(detailsAPI) => Future.successful(apiToView(detailsAPI))
       case None => for {
-        details <- incorpInfoService.getCompanyDetails(regId, txId)
-        oPrepopBCD <- prepopService.getBusinessContactDetails(regId)
+        details     <- incorpInfoService.getCompanyDetails(regId, txId)
+        oPrepopBCD  <- prepopService.getBusinessContactDetails(regId)
       } yield CompanyDetailsView(details.companyName, None, details.roAddress, None, oPrepopBCD)
     }
   }
@@ -105,7 +97,7 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
   def getPPOBPageAddresses(companyDetailsView: CompanyDetailsView): (Map[String, Address]) = {
     companyDetailsView.ppobAddress.map {
       case companyDetailsView.roAddress => Map("ppob" -> companyDetailsView.roAddress)
-      case addr: Address => Map("ro" -> companyDetailsView.roAddress, "ppob" -> addr)
+      case addr: Address                => Map("ro" -> companyDetailsView.roAddress, "ppob" -> addr)
       }.getOrElse(Map("ro" -> companyDetailsView.roAddress))
   }
 
@@ -123,7 +115,8 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
     } yield outcome
   }
 
-  def submitBusinessContact(businessContact: DigitalContactDetails, regId: String, txId: String)(implicit hc: HeaderCarrier, authContext: AuthContext, req:Request[AnyContent]): Future[DownstreamOutcome.Value] = {
+  def submitBusinessContact(businessContact: DigitalContactDetails, regId: String, txId: String)
+                           (implicit hc: HeaderCarrier, authContext: AuthContext, req:Request[AnyContent]): Future[DownstreamOutcome.Value] = {
     for {
       details <- getCompanyDetails(regId, txId) flatMap {
         case currentDetails if dataHasChanged(businessContact, currentDetails.businessContactDetails) =>
@@ -139,9 +132,9 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
   private[services] def dataHasChanged(viewData: DigitalContactDetails, s4lData: Option[DigitalContactDetails]): Boolean = s4lData.exists(flattenData(viewData) != flattenData(_))
 
   private[services] def flattenData(details: DigitalContactDetails): DigitalContactDetails = details.copy(
-    email = details.email map(_.trim.replace(" ", "").toLowerCase),
-    mobileNumber = details.mobileNumber map(_.trim.replace(" ", "").toLowerCase),
-    phoneNumber = details.phoneNumber map(_.trim.replace(" ","").toLowerCase)
+    email         = details.email map(_.trim.replace(" ", "").toLowerCase),
+    mobileNumber  = details.mobileNumber map(_.trim.replace(" ", "").toLowerCase),
+    phoneNumber   = details.phoneNumber map(_.trim.replace(" ","").toLowerCase)
   )
 
   private[services] def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {

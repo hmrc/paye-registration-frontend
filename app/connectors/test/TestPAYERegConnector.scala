@@ -32,10 +32,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class TestPAYERegConnector @Inject()(payeRegistrationConnector: PAYERegistrationConnector) extends TestPAYERegConnect with ServicesConfig {
-  val payeRegUrl = baseUrl("paye-registration")
+class TestPAYERegConnector @Inject()(val payeRegConnector: PAYERegistrationConnector) extends TestPAYERegConnect with ServicesConfig {
+  val payeRegUrl                   = baseUrl("paye-registration")
   val http : CoreGet with CorePost = WSHttp
-  val payeRegConnector: PAYERegistrationConnect = payeRegistrationConnector
 }
 
 trait TestPAYERegConnect {
@@ -45,32 +44,24 @@ trait TestPAYERegConnect {
   val payeRegConnector: PAYERegistrationConnect
 
   def addPAYERegistration(reg: PAYERegistrationAPI)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    for {
-      resp <- http.POST[PAYERegistrationAPI, HttpResponse](s"$payeRegUrl/paye-registration/test-only/update-registration/${reg.registrationID}", reg)
-    } yield resp.status match {
-      case Status.OK => DownstreamOutcome.Success
-      case _  =>        DownstreamOutcome.Failure
+    http.POST[PAYERegistrationAPI, HttpResponse](s"$payeRegUrl/paye-registration/test-only/update-registration/${reg.registrationID}", reg) map {
+      _.status match {
+        case Status.OK => DownstreamOutcome.Success
+        case _         => DownstreamOutcome.Failure
+      }
     }
   }
 
   def addTestCompanyDetails(details: CompanyDetailsAPI, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    val response = for {
-      resp <- payeRegConnector.upsertCompanyDetails(regId,  details)
-    } yield resp
-
-    response map {
-        _ => DownstreamOutcome.Success
+    payeRegConnector.upsertCompanyDetails(regId,  details) map {
+      _ => DownstreamOutcome.Success
     } recover {
       case _ => DownstreamOutcome.Failure
     }
   }
 
   def addTestPAYEContact(details: PAYEContactAPI, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    val response = for {
-      resp <- payeRegConnector.upsertPAYEContact(regId,  details)
-    } yield resp
-
-    response map {
+    payeRegConnector.upsertPAYEContact(regId,  details) map {
       _ => DownstreamOutcome.Success
     } recover {
       case _ => DownstreamOutcome.Failure
