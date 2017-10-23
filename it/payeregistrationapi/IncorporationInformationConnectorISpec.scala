@@ -22,10 +22,10 @@ import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.Address
 import models.api.Name
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
-import play.api.{Application, Play}
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.{Application, Play}
 import services.MetricsService
-import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import utils.PAYEFeatureSwitch
 
 class IncorporationInformationConnectorISpec extends IntegrationSpecBase {

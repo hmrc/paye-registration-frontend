@@ -24,9 +24,9 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, NotFoundException}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ ForbiddenException, HeaderCarrier, NotFoundException }
 
 class CurrentProfileServiceSpec extends PAYERegSpec with BusinessRegistrationFixture {
 

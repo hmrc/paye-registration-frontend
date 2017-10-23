@@ -18,13 +18,13 @@ package enums
 
 object CacheKeys extends Enumeration {
 
-  val CurrentProfile = Value
-  val CoHoCompanyDetails = Value
-  val TradingName = Value
-  val Employment = Value
-  val CompanyDetails = Value
-  val DirectorDetails = Value
-  val PAYEContact = Value
-  val Eligibility = Value
-  val PrePopAddresses = Value
+  val CurrentProfile      = Value
+  val CoHoCompanyDetails  = Value
+  val TradingName         = Value
+  val Employment          = Value
+  val CompanyDetails      = Value
+  val DirectorDetails     = Value
+  val PAYEContact         = Value
+  val Eligibility         = Value
+  val PrePopAddresses     = Value
 }

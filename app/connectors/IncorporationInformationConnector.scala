@@ -25,24 +25,21 @@ import models.external.{CoHoCompanyDetailsModel, OfficerList}
 import play.api.Logger
 import play.api.libs.json._
 import services.{MetricsService, MetricsSrv}
+import uk.gov.hmrc.http.{BadRequestException, CoreGet, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http._
-import uk.gov.hmrc.play.http.ws.WSHttp
 import utils.RegistrationWhitelist
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 
 @Singleton
-class IncorporationInformationConnector @Inject()(injMetrics: MetricsService) extends IncorporationInformationConnect with ServicesConfig {
+class IncorporationInformationConnector @Inject()(val metricsService: MetricsService) extends IncorporationInformationConnect with ServicesConfig {
   lazy val incorpInfoUrl = baseUrl("incorporation-information")
   lazy val incorpInfoUri = getConfString("incorporation-information.uri","")
-  val http : WSHttp = WSHttp
-  val metricsService = injMetrics
-
-  val successCounter = metricsService.companyDetailsSuccessResponseCounter
-  val failedCounter  = metricsService.companyDetailsFailedResponseCounter
-  def timer          = metricsService.incorpInfoResponseTimer.time()
+  val http               = WSHttp
+  val successCounter     = metricsService.companyDetailsSuccessResponseCounter
+  val failedCounter      = metricsService.companyDetailsFailedResponseCounter
+  def timer              = metricsService.incorpInfoResponseTimer.time()
 }
 
 sealed trait IncorpInfoResponse
@@ -51,10 +48,9 @@ case object IncorpInfoBadRequestResponse extends IncorpInfoResponse
 case class IncorpInfoErrorResponse(ex: Exception) extends IncorpInfoResponse
 
 trait IncorporationInformationConnect extends RegistrationWhitelist {
-
   val incorpInfoUrl: String
   val incorpInfoUri: String
-  val http: WSHttp
+  val http: CoreGet
   val metricsService: MetricsSrv
 
   val successCounter: Counter
@@ -70,13 +66,15 @@ trait IncorporationInformationConnect extends RegistrationWhitelist {
         successCounter.inc(1)
         IncorpInfoSuccessResponse(res)
       } recover {
-        case badRequestErr: BadRequestException =>
+        case _: BadRequestException =>
           Logger.error(s"[IncorporationInformationConnector] [getCoHoCompanyDetails] - Received a BadRequest status code when expecting company details for regId: $regId / TX-ID: $transactionId")
           incorpInfoTimer.stop()
           failedCounter.inc(1)
           IncorpInfoBadRequestResponse
         case ex: Exception =>
-          Logger.error(s"[IncorporationInformationConnector] [getCoHoCompanyDetails] - Received an error when expecting company details for regId: $regId / TX-ID: $transactionId - error: ${ex.getMessage}")
+          Logger.error(
+            s"[IncorporationInformationConnector] [getCoHoCompanyDetails] - Received an error when expecting company details for regId: $regId / TX-ID: $transactionId - error: ${ex.getMessage}"
+          )
           incorpInfoTimer.stop()
           failedCounter.inc(1)
           IncorpInfoErrorResponse(ex)
@@ -93,9 +91,11 @@ trait IncorporationInformationConnect extends RegistrationWhitelist {
         Logger.error(s"[IncorporationInformationConnector] [getOfficerList] - Received an empty Officer list for TX-ID $transactionId")
         throw new OfficerListNotFoundException
       }
-      else { list }
+      else {
+        list
+      }
     } recover {
-      case notFoundErr: NotFoundException =>
+      case _: NotFoundException =>
         Logger.error(s"[IncorporationInformationConnector] [getOfficerList] - Received a NotFound status code when expecting an Officer list for TX-ID $transactionId")
         incorpInfoTimer.stop()
         throw new OfficerListNotFoundException

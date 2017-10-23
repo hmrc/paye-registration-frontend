@@ -23,7 +23,7 @@ import play.api.libs.json.Json
 case class Directors(directorMapping: Map[String, Director])
 
 object Directors {
-  implicit val directorFormat = Director.format
+  implicit val directorFormat        = Director.format
   implicit val directorMappingFormat = Json.format[Directors]
 }
 

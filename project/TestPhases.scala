@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-package models.test
+import sbt.Tests.{Group, SubProcess}
+import sbt._
 
-import play.api.libs.json.Json
-
-case class CoHoCompanyDetailsFormModel (companyName: String,
-                                        sicCodes: List[String],
-                                        descriptions: List[String])
-
-
-object CoHoCompanyDetailsFormModel {
-  implicit val formats = Json.format[CoHoCompanyDetailsFormModel]
+object TestPhases {
+  def oneForkedJvmPerTest(tests: Seq[TestDefinition]) = tests map(test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name)))))
 }

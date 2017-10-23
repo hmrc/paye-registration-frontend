@@ -28,9 +28,9 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.CompletionCapacityService
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class CompletionCapacityControllerSpec extends PAYERegSpec {
 

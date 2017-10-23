@@ -31,10 +31,10 @@ import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import services.EmploymentService
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.DateUtil
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
   val mockEmploymentService = mock[EmploymentService]

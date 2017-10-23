@@ -20,8 +20,8 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
 import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector}
+import connectors.{KeystoreConnector, PAYERegistrationConnector}
 import forms.test.TestCCUpdateForm
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
@@ -33,13 +33,11 @@ import views.html.pages.test.updateCCPage
 import scala.concurrent.Future
 
 @Singleton
-class TestCCController @Inject()(injMessagesApi: MessagesApi, injTestBusinessRegConnect: TestBusinessRegConnector,
-                                 injKeystoreConnector: KeystoreConnector, injPayeRegConnector: PAYERegistrationConnector) extends TestCCCtrl{
+class TestCCController @Inject()(val messagesApi: MessagesApi,
+                                 val testBusRegConnector: TestBusinessRegConnector,
+                                 val keystoreConnector: KeystoreConnector,
+                                 val payeRegistrationConnector: PAYERegistrationConnector) extends TestCCCtrl{
   val authConnector = FrontendAuthConnector
-  val messagesApi = injMessagesApi
-  val testBusRegConnector = injTestBusinessRegConnect
-  val keystoreConnector = injKeystoreConnector
-  val payeRegistrationConnector = injPayeRegConnector
 }
 
 trait TestCCCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
@@ -57,8 +55,8 @@ trait TestCCCtrl extends FrontendController with Actions with I18nSupport with S
       implicit request =>
         withCurrentProfile { profile =>
           TestCCUpdateForm.form.bindFromRequest.fold(
-            errors => Future.successful(BadRequest(updateCCPage(errors))),
-            valid => testBusRegConnector.updateCompletionCapacity(profile.registrationID, valid.cc) map(_ => Ok(valid.cc))
+            errors  => Future.successful(BadRequest(updateCCPage(errors))),
+            valid   => testBusRegConnector.updateCompletionCapacity(profile.registrationID, valid.cc) map(_ => Ok(valid.cc))
           )
         }
   }

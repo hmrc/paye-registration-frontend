@@ -26,10 +26,10 @@ import play.api.mvc.Call
 import play.api.test.FakeRequest
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.{BooleanFeatureSwitch, PAYEFeatureSwitch}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 
 class AddressLookupServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistrationFixture with ServicesConfig {
@@ -43,13 +43,13 @@ class AddressLookupServiceSpec extends PAYERegSpec with S4LFixture with PAYERegi
 
   class Setup {
     val service = new AddressLookupService(mockFeatureSwitch, mockAddressLookupConnector, mockMetrics) {
-      override val metricsService = metricsMock
+      override val metricsService: MetricsSrv = metricsMock
     }
   }
 
   case class SetupWithProxy(boole: Boolean) {
     val service = new AddressLookupService(mockFeatureSwitch, mockAddressLookupConnector, mockMetrics) {
-      override val metricsService = metricsMock
+      override val metricsService: MetricsSrv = metricsMock
       override def useAddressLookupFrontend = boole
     }
   }

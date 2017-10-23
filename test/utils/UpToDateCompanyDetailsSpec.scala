@@ -27,9 +27,9 @@ import play.api.test.Helpers._
 import services.{CompanyDetailsService, IncorporationInformationService, S4LService}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class UpToDateCompanyDetailsSpec extends PAYERegSpec with CoHoAPIFixture with S4LFixture {
   val mockIncorpInfoService = mock[IncorporationInformationService]

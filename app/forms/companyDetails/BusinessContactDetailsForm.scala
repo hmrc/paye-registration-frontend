@@ -24,14 +24,14 @@ import utils.Validators._
 
 object BusinessContactDetailsForm extends OneOfManyForm with PhoneNoForm {
 
-  override val optionalFields = Seq("businessEmail", "mobileNumber", "phoneNumber")
+  override val optionalFields           = Seq("businessEmail", "mobileNumber", "phoneNumber")
   override val noFieldsCompletedMessage = "pages.businessContact.noFieldsCompleted"
 
   val form = Form(
     mapping(
       "businessEmail" -> oneOfManyErrorTarget.verifying(optionalValidation(emailValidation)),
-      "mobileNumber" -> phoneNoField,
-      "phoneNumber" -> phoneNoField
+      "mobileNumber"  -> phoneNoField,
+      "phoneNumber"   -> phoneNoField
     )(DigitalContactDetails.apply)(DigitalContactDetails.unapply).verifying()
   )
 }

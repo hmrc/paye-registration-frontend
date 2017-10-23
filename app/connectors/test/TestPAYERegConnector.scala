@@ -21,57 +21,47 @@ import javax.inject.{Inject, Singleton}
 import config.WSHttp
 import connectors._
 import enums.DownstreamOutcome
-import models.api.{CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI, PAYEContact => PAYEContactAPI}
+import models.api.{CompanyDetails => CompanyDetailsAPI, PAYEContact => PAYEContactAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.Logger
 import play.api.http.Status
-import play.api.libs.json.{Json, JsObject}
+import play.api.libs.json.{JsObject, Json}
+import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http._
-import uk.gov.hmrc.play.http.ws.WSHttp
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 
 @Singleton
-class TestPAYERegConnector @Inject()(payeRegistrationConnector: PAYERegistrationConnector) extends TestPAYERegConnect with ServicesConfig {
-  val payeRegUrl = baseUrl("paye-registration")
-  val http : WSHttp = WSHttp
-  val payeRegConnector: PAYERegistrationConnect = payeRegistrationConnector
+class TestPAYERegConnector @Inject()(val payeRegConnector: PAYERegistrationConnector) extends TestPAYERegConnect with ServicesConfig {
+  val payeRegUrl                   = baseUrl("paye-registration")
+  val http : CoreGet with CorePost = WSHttp
 }
 
 trait TestPAYERegConnect {
 
   val payeRegUrl: String
-  val http: WSHttp
+  val http: CoreGet with CorePost
   val payeRegConnector: PAYERegistrationConnect
 
   def addPAYERegistration(reg: PAYERegistrationAPI)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    for {
-      resp <- http.POST[PAYERegistrationAPI, HttpResponse](s"$payeRegUrl/paye-registration/test-only/update-registration/${reg.registrationID}", reg)
-    } yield resp.status match {
-      case Status.OK => DownstreamOutcome.Success
-      case _  =>        DownstreamOutcome.Failure
+    http.POST[PAYERegistrationAPI, HttpResponse](s"$payeRegUrl/paye-registration/test-only/update-registration/${reg.registrationID}", reg) map {
+      _.status match {
+        case Status.OK => DownstreamOutcome.Success
+        case _         => DownstreamOutcome.Failure
+      }
     }
   }
 
   def addTestCompanyDetails(details: CompanyDetailsAPI, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    val response = for {
-      resp <- payeRegConnector.upsertCompanyDetails(regId,  details)
-    } yield resp
-
-    response map {
-        _ => DownstreamOutcome.Success
+    payeRegConnector.upsertCompanyDetails(regId,  details) map {
+      _ => DownstreamOutcome.Success
     } recover {
       case _ => DownstreamOutcome.Failure
     }
   }
 
   def addTestPAYEContact(details: PAYEContactAPI, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    val response = for {
-      resp <- payeRegConnector.upsertPAYEContact(regId,  details)
-    } yield resp
-
-    response map {
+    payeRegConnector.upsertPAYEContact(regId,  details) map {
       _ => DownstreamOutcome.Success
     } recover {
       case _ => DownstreamOutcome.Failure

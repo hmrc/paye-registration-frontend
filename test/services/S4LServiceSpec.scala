@@ -21,7 +21,7 @@ import fixtures.{KeystoreFixture, PAYERegistrationFixture}
 import models.view.{TradingName => TradingNameView}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 class S4LServiceSpec extends PAYERegSpec with KeystoreFixture with PAYERegistrationFixture {
 

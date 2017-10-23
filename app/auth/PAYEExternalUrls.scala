@@ -22,10 +22,9 @@ import uk.gov.hmrc.play.config.{RunMode, ServicesConfig}
 object PAYEExternalUrls extends RunMode with ServicesConfig {
 
   private[PAYEExternalUrls] val companyAuthHost = getConfString("auth.company-auth.url","")
-  private[PAYEExternalUrls] val loginCallback = getConfString("auth.login-callback.url","")
-  private[PAYEExternalUrls] val loginPath = getConfString("auth.login_path","")
+  private[PAYEExternalUrls] val loginCallback   = getConfString("auth.login-callback.url","")
+  private[PAYEExternalUrls] val loginPath       = getConfString("auth.login_path","")
 
-  val loginURL = s"$companyAuthHost$loginPath"
+  val loginURL    = s"$companyAuthHost$loginPath"
   val continueURL = s"$loginCallback${routes.SignInOutController.postSignIn()}"
-
 }

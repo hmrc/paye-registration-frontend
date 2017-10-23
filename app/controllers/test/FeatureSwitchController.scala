@@ -38,16 +38,15 @@ trait FeatureSwitchCtrl extends FrontendController {
 
   def switcher(featureName: String, featureState: String): Action[AnyContent] = Action.async {
     implicit request =>
-
       def feature: FeatureSwitch = featureState match {
-        case "true" => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
-        case "addressLookupFrontend" => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
-        case _ => featureManager.disable(BooleanFeatureSwitch(featureName, enabled = false))
+        case "true"                   => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
+        case "addressLookupFrontend"  => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
+        case _                        => featureManager.disable(BooleanFeatureSwitch(featureName, enabled = false))
       }
 
       PayeFeatureSwitch(featureName) match {
-        case Some(_) => Future.successful(Ok(feature.toString))
-        case None => Future.successful(BadRequest)
+        case Some(_)  => Future.successful(Ok(feature.toString))
+        case None     => Future.successful(BadRequest)
       }
   }
 }

@@ -17,15 +17,15 @@
 package service
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlMatching}
-import connectors.{PAYERegistrationConnector, BusinessRegistrationConnector, CompanyRegistrationConnector, KeystoreConnector}
+import connectors.{BusinessRegistrationConnector, CompanyRegistrationConnector, KeystoreConnector, PAYERegistrationConnector}
 import itutil.{IntegrationSpecBase, WiremockHelper}
-import models.external.{CompanyRegistrationProfile, BusinessProfile, CurrentProfile}
+import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProfile}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.{Application, Play}
 import services.CurrentProfileService
-import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.SessionId
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.logging.SessionId
 
 class CurrentProfileServiceISpec extends IntegrationSpecBase {
   val mockHost = WiremockHelper.wiremockHost

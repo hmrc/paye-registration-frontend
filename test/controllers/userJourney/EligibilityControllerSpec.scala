@@ -28,9 +28,9 @@ import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import services.{EligibilityService, EligibilitySrv}
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class EligibilityControllerSpec extends PAYERegSpec {
   val mockEligibilityService = mock[EligibilityService]

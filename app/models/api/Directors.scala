@@ -28,16 +28,16 @@ case class Name(forename: Option[String],
 object Name {
   implicit val format = (
     (__ \ "forename").formatNullable[String] and
-      (__ \ "other_forenames").formatNullable[String] and
-      (__ \ "surname").format[String] and
-      (__ \ "title").formatNullable[String]
+    (__ \ "other_forenames").formatNullable[String] and
+    (__ \ "surname").format[String] and
+    (__ \ "title").formatNullable[String]
   )(Name.apply, unlift(Name.unapply))
 
   val normalizeNameReads = (
     (__ \ "forename").readNullable[String](Formatters.normalizeTrimmedReads) and
-      (__ \ "other_forenames").readNullable[String](Formatters.normalizeTrimmedReads) and
-      (__ \ "surname").read[String](Formatters.normalizeTrimmedReads) and
-      (__ \ "title").readNullable[String](Formatters.normalizeTrimmedFullStopReads).map(opt => opt.filter(_.length <= 20))
+    (__ \ "other_forenames").readNullable[String](Formatters.normalizeTrimmedReads) and
+    (__ \ "surname").read[String](Formatters.normalizeTrimmedReads) and
+    (__ \ "title").readNullable[String](Formatters.normalizeTrimmedFullStopReads).map(opt => opt.filter(_.length <= 20))
   )(Name.apply _)
 }
 
@@ -46,8 +46,8 @@ case class Director(name: Name, nino: Option[String])
 object Director {
   implicit val format = (
     (__ \ "director").format[Name] and
-      (__ \ "nino").formatNullable[String]
-    )(Director.apply, unlift(Director.unapply))
+    (__ \ "nino").formatNullable[String]
+  )(Director.apply, unlift(Director.unapply))
 
   val seqReads: Reads[Seq[Director]] = new Reads[Seq[Director]] {
     override def reads(json: JsValue): JsResult[Seq[Director]] = Json.fromJson[Seq[Director]](json)

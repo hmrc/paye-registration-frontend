@@ -28,6 +28,7 @@ import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ BadRequestException, HeaderCarrier, HttpResponse, InternalServerException, NotFoundException, Upstream4xxResponse, Upstream5xxResponse }
 
 class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFixture {
 
@@ -524,7 +525,7 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
 
   "deleteCurrentRegistrationDocument" should {
     "return a RegistrationDeletion Success" in new Setup {
-      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
 
       val result = await(connector.deleteCurrentRegistrationDocument("testRegId", "testTxID"))
@@ -532,14 +533,14 @@ class PAYERegistrationConnectorSpec extends PAYERegSpec with PAYERegistrationFix
     }
 
     "return a RegistrationDeletion failure" in new Setup {
-      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(Upstream5xxResponse("msg", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
 
       intercept[Upstream5xxResponse](await(connector.deleteCurrentRegistrationDocument("testRegId", "testTxID")))
     }
 
     "return a RegistrationDeletion invalidStatus" in new Setup {
-      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(Upstream4xxResponse("msg", PRECONDITION_FAILED, PRECONDITION_FAILED)))
 
       val result = await(connector.deleteCurrentRegistrationDocument("testRegId", "testTxID"))

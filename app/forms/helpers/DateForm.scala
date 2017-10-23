@@ -31,32 +31,28 @@ trait DateForm extends DateUtil {
   def validation(dt: LocalDate): Either[Seq[FormError], LocalDate]
 
   implicit val dateFormatter = new Formatter[LocalDate] {
-
-
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
 
       val dte: Option[LocalDate] = Try(
         for {
-          day <- data.get(s"${prefix}Day")
+          day   <- data.get(s"${prefix}Day")
           month <- data.get(s"${prefix}Month")
-          year <- data.get(s"${prefix}Year")
-        }
-          yield toDate(year, month, day)
+          year  <- data.get(s"${prefix}Year")
+        } yield toDate(year, month, day)
       ).getOrElse(None)
 
       dte match {
         case Some(dt) => validation(dt)
-        case None => Left(Seq(FormError(s"${prefix}Day", "app.common.date.invalid")))
+        case None     => Left(Seq(FormError(s"${prefix}Day", "app.common.date.invalid")))
       }
-
     }
 
     override def unbind(key: String, value: LocalDate): Map[String, String] = Map(
       s"${prefix}Day" -> value.getDayOfMonth.toString,
       s"${prefix}Month" -> value.getMonthValue.toString,
-      s"${prefix}Year" -> value.getYear.toString)
+      s"${prefix}Year" -> value.getYear.toString
+    )
   }
 
   val threePartDate: Mapping[LocalDate] = Forms.of[LocalDate](dateFormatter)
-
 }

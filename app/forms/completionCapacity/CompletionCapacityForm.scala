@@ -35,9 +35,7 @@ object CompletionCapacityForm {
   implicit val completionCapacityFormatter = new Formatter[UserCapacity.Value] {
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], UserCapacity.Value] = {
-      Try {
-        UserCapacity.fromString(data.getOrElse(key, ""))
-      } match {
+      Try(UserCapacity.fromString(data.getOrElse(key, ""))) match {
         case Success(capacity) => Right(capacity)
         case _                 => Left(Seq(FormError(key, "pages.completionCapacity.error")))
       }
@@ -51,7 +49,7 @@ object CompletionCapacityForm {
 
   val form = Form(
     mapping(
-      "completionCapacity" -> completionCapacity,
+      "completionCapacity"      -> completionCapacity,
       "completionCapacityOther" -> ifOther(text.verifying("pages.completionCapacity.other.error", _.matches(ccRegex)))
     )(CompletionCapacityView.apply)(CompletionCapacityView.unapply)
   )

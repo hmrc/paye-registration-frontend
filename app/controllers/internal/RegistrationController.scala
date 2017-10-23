@@ -24,21 +24,17 @@ import enums.RegistrationDeletion
 import play.api.Logger
 import play.api.mvc.Action
 import services.{PAYERegistrationService, PAYERegistrationSrv}
+import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import uk.gov.hmrc.play.http.{HeaderCarrier, NotFoundException, Upstream4xxResponse}
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class RegistrationController @Inject()(injKeystoreConnector: KeystoreConnector,
-                                       injPayeRegistrationConnector: PAYERegistrationConnector,
-                                       injPAYERegistrationService: PAYERegistrationService) extends RegistrationCtrl {
+class RegistrationController @Inject()(val keystoreConnector: KeystoreConnector,
+                                       val payeRegistrationConnector: PAYERegistrationConnector,
+                                       val payeRegistrationService: PAYERegistrationService) extends RegistrationCtrl {
   val authConnector = FrontendAuthConnector
-  val keystoreConnector = injKeystoreConnector
-  val payeRegistrationConnector = injPayeRegistrationConnector
-  val payeRegistrationService = injPAYERegistrationService
 }
 
 trait RegistrationCtrl extends FrontendController with Actions {
@@ -48,13 +44,13 @@ trait RegistrationCtrl extends FrontendController with Actions {
 
   def delete(regId: String) = Action.async {
     implicit request => {
-      val hc = HeaderCarrier.fromHeadersAndSession(request.headers)
-      FrontendAuthConnector.currentAuthority(hc) flatMap {
+      implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+      FrontendAuthConnector.currentAuthority flatMap {
         case Some(_) =>
           payeRegistrationService.deletePayeRegistrationInProgress(regId)(hc) map {
-            case RegistrationDeletion.success => Ok
+            case RegistrationDeletion.success       => Ok
             case RegistrationDeletion.invalidStatus => PreconditionFailed
-            case RegistrationDeletion.forbidden =>
+            case RegistrationDeletion.forbidden     =>
               Logger.warn(s"[RegistrationController] [delete] - Requested document regId $regId to be deleted is not corresponding to the CurrentProfile regId")
               BadRequest
           } recover {

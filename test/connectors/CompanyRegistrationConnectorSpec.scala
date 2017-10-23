@@ -20,10 +20,10 @@ import mocks.MockMetrics
 import models.external.CompanyRegistrationProfile
 import play.api.libs.json.{JsObject, Json}
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
 import utils.PAYEFeatureSwitch
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ BadRequestException, HeaderCarrier }
 
 class CompanyRegistrationConnectorSpec extends PAYERegSpec {
 

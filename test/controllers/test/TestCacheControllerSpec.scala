@@ -23,9 +23,9 @@ import org.mockito.Mockito.when
 import play.api.test.Helpers.OK
 import services.S4LSrv
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 class TestCacheControllerSpec extends PAYERegSpec {
 

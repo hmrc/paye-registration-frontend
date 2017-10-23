@@ -19,6 +19,7 @@ package controllers.userJourney
 import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
+import common.exceptions.DownstreamExceptions.S4LFetchException
 import config.FrontendAuthConnector
 import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
 import enums.DownstreamOutcome
@@ -29,37 +30,25 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import services._
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.frontend.auth.{Actions, AuthContext}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.{SessionProfile, UpToDateCompanyDetails}
 import views.html.pages.companyDetails.{confirmROAddress, businessContactDetails => BusinessContactDetailsPage, ppobAddress => PPOBAddressPage, tradingName => TradingNamePage}
-import common.exceptions.DownstreamExceptions.S4LFetchException
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
 @Singleton
-class CompanyDetailsController @Inject()(
-                                          injS4LService: S4LService,
-                                          injKeystoreConnector: KeystoreConnector,
-                                          injCompanyDetailsService: CompanyDetailsService,
-                                          injIncorporationInformationService: IncorporationInformationService,
-                                          injMessagesApi: MessagesApi,
-                                          injPayeRegistrationConnector: PAYERegistrationConnector,
-                                          injAddressLookupService: AddressLookupService,
-                                          injPrepopulationService: PrepopulationService,
-                                          injAuditService: AuditService)
-  extends CompanyDetailsCtrl {
+class CompanyDetailsController @Inject()(val s4LService: S4LService,
+                                         val keystoreConnector: KeystoreConnector,
+                                         val companyDetailsService: CompanyDetailsService,
+                                         val incorpInfoService: IncorporationInformationService,
+                                         val messagesApi: MessagesApi,
+                                         val payeRegistrationConnector: PAYERegistrationConnector,
+                                         val addressLookupService: AddressLookupService,
+                                         val prepopService: PrepopulationService,
+                                         val auditService: AuditService) extends CompanyDetailsCtrl {
   val authConnector = FrontendAuthConnector
-  val s4LService = injS4LService
-  val keystoreConnector = injKeystoreConnector
-  val companyDetailsService = injCompanyDetailsService
-  val incorpInfoService = injIncorporationInformationService
-  val messagesApi = injMessagesApi
-  val addressLookupService = injAddressLookupService
-  val payeRegistrationConnector = injPayeRegistrationConnector
-  val prepopService = injPrepopulationService
-  val auditService = injAuditService
 }
 
 trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSupport with SessionProfile with UpToDateCompanyDetails {
@@ -76,8 +65,8 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
       withCurrentProfile { profile =>
         withLatestCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) { companyDetails =>
           companyDetails.tradingName match {
-            case Some(model) => Ok(TradingNamePage(TradingNameForm.form.fill(model), companyDetails.companyName))
-            case _ => Ok(TradingNamePage(TradingNameForm.form, companyDetails.companyName))
+            case Some(model)  => Ok(TradingNamePage(TradingNameForm.form.fill(model), companyDetails.companyName))
+            case _            => Ok(TradingNamePage(TradingNameForm.form, companyDetails.companyName))
           }
         }
       }
@@ -178,12 +167,12 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
               details <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
               prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, details.roAddress, details.ppobAddress, None)
             } yield {
-                val addressMap = companyDetailsService.getPPOBPageAddresses(details)
-                BadRequest(PPOBAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob"), prepopAddresses))
+              val addressMap = companyDetailsService.getPPOBPageAddresses(details)
+              BadRequest(PPOBAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob"), prepopAddresses))
             },
             success => submitPPOBAddressChoice(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
-              case DownstreamOutcome.Success => Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
-              case DownstreamOutcome.Failure => Future.successful(InternalServerError(views.html.pages.error.restart()))
+              case DownstreamOutcome.Success  => Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
+              case DownstreamOutcome.Failure  => Future.successful(InternalServerError(views.html.pages.error.restart()))
               case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("payereg1", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()) map {
                 redirectUrl => Redirect(redirectUrl)
               }
@@ -199,13 +188,13 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
       case ROAddress =>
         for {
           res <- companyDetailsService.copyROAddrToPPOBAddr(regId, txId)
-          _ <- auditService.auditPPOBAddress(regId)
+          _   <- auditService.auditPPOBAddress(regId)
         } yield res
       case Other =>
         Future.successful(DownstreamOutcome.Redirect)
       case prepop: PrepopAddress => (for {
         prepopAddress <- prepopService.getAddress(regId, prepop.index)
-        res <- companyDetailsService.submitPPOBAddr(prepopAddress, regId, txId)
+        res           <- companyDetailsService.submitPPOBAddr(prepopAddress, regId, txId)
       } yield res) recover {
         case e: S4LFetchException =>
           Logger.warn(s"[CompanyDetailsController] [submitPPOBAddressChoice] - Error while saving PPOB Address with a PrepopAddress: ${e.getMessage}")
@@ -223,8 +212,8 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
         withCurrentProfile { profile =>
           for {
             Some(address) <- addressLookupService.getAddress
-            res <- companyDetailsService.submitPPOBAddr(address, profile.registrationID, profile.companyTaxRegistration.transactionId)
-            _ <- prepopService.saveAddress(profile.registrationID, address)
+            res           <- companyDetailsService.submitPPOBAddr(address, profile.registrationID, profile.companyTaxRegistration.transactionId)
+            _             <- prepopService.saveAddress(profile.registrationID, address)
           } yield res match {
             case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
             case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())

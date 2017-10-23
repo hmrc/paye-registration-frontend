@@ -18,17 +18,17 @@ package service
 
 import java.util.UUID
 
-import connectors.{KeystoreConnector, PAYERegistrationConnector, Success, Failed}
-import enums.{CacheKeys, UserCapacity}
+import com.github.tomakehurst.wiremock.client.WireMock._
+import connectors.{Failed, KeystoreConnector, PAYERegistrationConnector, Success}
+import enums.CacheKeys
 import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.{Application, Play}
-import play.api.inject.guice.GuiceApplicationBuilder
 import services.SubmissionService
-import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.SessionId
-import com.github.tomakehurst.wiremock.client.WireMock._
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.logging.SessionId
 
 class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
   val mockHost = WiremockHelper.wiremockHost

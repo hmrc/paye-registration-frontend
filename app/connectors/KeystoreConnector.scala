@@ -23,15 +23,13 @@ import config.PAYESessionCache
 import play.api.libs.json.Format
 import services.{MetricsService, MetricsSrv}
 import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
 @Singleton
-class KeystoreConnector @Inject()(payeSessionCache: PAYESessionCache, injMetrics: MetricsService) extends KeystoreConnect {
-  val sessionCache : SessionCache = payeSessionCache
-  val metricsService = injMetrics
+class KeystoreConnector @Inject()(val sessionCache: PAYESessionCache, val metricsService: MetricsService) extends KeystoreConnect {
   val successCounter        = metricsService.keystoreSuccessResponseCounter
   val emptyResponseCounter  = metricsService.keystoreEmptyResponseCounter
   val failedCounter         = metricsService.keystoreFailedResponseCounter

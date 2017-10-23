@@ -28,7 +28,7 @@ trait PhoneNoForm {
       if (input.isEmpty) Right(None) else {
         isValidPhoneNo(input) match {
           case Right(phoneNo) => Right(Some(phoneNo))
-          case Left(err) => Left(Seq(FormError(key, err)))
+          case Left(err)      => Left(Seq(FormError(key, err)))
         }
       }
     }

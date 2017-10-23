@@ -29,8 +29,8 @@ case class Employment(employees: Boolean,
 object Employment {
   implicit val formatModel = (
     (__ \ "employees").format[Boolean] and
-      (__ \ "ocpn").formatNullable[Boolean] and
-      (__ \ "cis").format[Boolean] and
-      (__ \ "first-payment-date").format[LocalDate]
-    )(Employment.apply, unlift(Employment.unapply))
+    (__ \ "ocpn").formatNullable[Boolean] and
+    (__ \ "cis").format[Boolean] and
+    (__ \ "first-payment-date").format[LocalDate]
+  )(Employment.apply, unlift(Employment.unapply))
 }

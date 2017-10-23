@@ -37,9 +37,9 @@ import services._
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class PAYEContactControllerSpec extends PAYERegSpec with S4LFixture with PAYERegistrationFixture {
   val mockCompanyDetailsService = mock[CompanyDetailsService]

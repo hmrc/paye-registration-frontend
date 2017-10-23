@@ -19,8 +19,7 @@ package audit
 import audit.RegistrationAuditEvent.{AUTH_PROVIDER_ID, EXTERNAL_USER_ID, JOURNEY_ID}
 import play.api.libs.json.{JsObject, JsValue, Json, Writes}
 import play.api.mvc.{AnyContent, Request}
-import uk.gov.hmrc.play.http.HeaderCarrier
-
+import uk.gov.hmrc.http.HeaderCarrier
 
 case class PPOBAddressAuditEventDetail(externalUserId: String,
                                        authProviderId: String,
@@ -31,9 +30,9 @@ object PPOBAddressAuditEventDetail {
 
   implicit val writes = new Writes[PPOBAddressAuditEventDetail] {
     override def writes(detail: PPOBAddressAuditEventDetail): JsValue = Json.obj(
-      EXTERNAL_USER_ID -> detail.externalUserId,
-      AUTH_PROVIDER_ID -> detail.authProviderId,
-      JOURNEY_ID   -> detail.regId,
+      EXTERNAL_USER_ID          -> detail.externalUserId,
+      AUTH_PROVIDER_ID          -> detail.authProviderId,
+      JOURNEY_ID                -> detail.regId,
       REGISTERED_OFFICE_ADDRESS -> "true"
     )
   }

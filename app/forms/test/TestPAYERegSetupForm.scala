@@ -20,12 +20,12 @@ import java.time.LocalDate
 
 import enums.PAYEStatus
 import forms.helpers.{DateForm, RequiredBooleanForm}
-import models.{Address, DigitalContactDetails}
 import models.api._
 import models.view.PAYEContactDetails
-import play.api.data.{Form, FormError, Forms, Mapping}
+import models.{Address, DigitalContactDetails}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
+import play.api.data.{Form, FormError, Forms, Mapping}
 
 object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
 
@@ -35,13 +35,13 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
   implicit def payeStatusFormatter: Formatter[PAYEStatus.Value] = new Formatter[PAYEStatus.Value] {
     def bind(key: String, data: Map[String, String]) = {
       Right(data.getOrElse(key,"")).right.flatMap {
-        case "draft" => Right(PAYEStatus.draft)
-        case "" => Right(PAYEStatus.draft)
-        case "held" => Right(PAYEStatus.held)
-        case "submitted" => Right(PAYEStatus.submitted)
-        case "invalid" => Right(PAYEStatus.invalid)
-        case "rejected" => Right(PAYEStatus.rejected)
-        case _ => Left(Seq(FormError(key, "error.required", Nil)))
+        case "draft"      => Right(PAYEStatus.draft)
+        case ""           => Right(PAYEStatus.draft)
+        case "held"       => Right(PAYEStatus.held)
+        case "submitted"  => Right(PAYEStatus.submitted)
+        case "invalid"    => Right(PAYEStatus.invalid)
+        case "rejected"   => Right(PAYEStatus.rejected)
+        case _            => Left(Seq(FormError(key, "error.required", Nil)))
       }
     }
     def unbind(key: String, value: PAYEStatus.Value) = Map(key -> value.toString)
@@ -51,46 +51,46 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
 
   val form = Form(
     mapping(
-      "registrationID" -> text,
-      "transactionID" -> text,
+      "registrationID"        -> text,
+      "transactionID"         -> text,
       "formCreationTimestamp" -> text,
-      "status" -> payeStatus,
-      "completionCapacity" -> text,
-      "companyDetails" -> mapping(
+      "status"                -> payeStatus,
+      "completionCapacity"    -> text,
+      "companyDetails"        -> mapping(
         "companyName" -> text,
         "tradingName" -> optional(text),
-        "roAddress" -> mapping(
-          "line1" -> text,
-          "line2" -> text,
-          "line3" -> optional(text),
-          "line4" -> optional(text),
-          "postCode" -> optional(text),
-          "country" -> optional(text),
-          "auditRef" -> optional(text)
+        "roAddress"   -> mapping(
+          "line1"     -> text,
+          "line2"     -> text,
+          "line3"     -> optional(text),
+          "line4"     -> optional(text),
+          "postCode"  -> optional(text),
+          "country"   -> optional(text),
+          "auditRef"  -> optional(text)
         )(Address.apply)(Address.unapply),
         "ppobAddress" -> mapping(
-          "line1" -> text,
-          "line2" -> text,
-          "line3" -> optional(text),
-          "line4" -> optional(text),
-          "postCode" -> optional(text),
-          "country" -> optional(text),
-          "auditRef" -> optional(text)
+          "line1"     -> text,
+          "line2"     -> text,
+          "line3"     -> optional(text),
+          "line4"     -> optional(text),
+          "postCode"  -> optional(text),
+          "country"   -> optional(text),
+          "auditRef"  -> optional(text)
         )(Address.apply)(Address.unapply),
         "businessContactDetails" -> mapping(
           "businessEmail" -> optional(text),
-          "mobileNumber" -> optional(text),
-          "phoneNumber" -> optional(text)
+          "mobileNumber"  -> optional(text),
+          "phoneNumber"   -> optional(text)
         )(DigitalContactDetails.apply)(DigitalContactDetails.unapply)
       )(CompanyDetails.apply)(CompanyDetails.unapply),
       "employment" -> mapping(
-        "employees" -> requiredBoolean,
-        "companyPension" -> optional(requiredBoolean),
-        "subcontractors" -> requiredBoolean,
-        "firstPayDate" -> threePartDate
+        "employees"       -> requiredBoolean,
+        "companyPension"  -> optional(requiredBoolean),
+        "subcontractors"  -> requiredBoolean,
+        "firstPayDate"    -> threePartDate
       )(Employment.apply)(Employment.unapply),
       "sicCodes" -> list(mapping(
-        "code" -> optional(text),
+        "code"        -> optional(text),
         "description" -> optional(text)
       )(SICCode.apply)(SICCode.unapply)),
       "directors" -> list(mapping(

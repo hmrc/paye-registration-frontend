@@ -23,9 +23,9 @@ import play.api.libs.json.Json
 import play.api.test.Helpers._
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
 class KeystoreConnectorSpec extends PAYERegSpec {
 
@@ -51,10 +51,10 @@ class KeystoreConnectorSpec extends PAYERegSpec {
 
       val returnCacheMap = CacheMap("", Map("" -> Json.toJson(testModel)))
 
-      when(mockSessionCache.cache[TestModel](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockSessionCache.cache[TestModel](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(returnCacheMap))
 
-      val result = connector.cache[TestModel](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())
+      val result = connector.cache[TestModel]("testKey", testModel)
       await(result) shouldBe returnCacheMap
     }
   }
@@ -64,10 +64,10 @@ class KeystoreConnectorSpec extends PAYERegSpec {
       val testModel = TestModel("test")
       val list = List(testModel)
 
-      when(mockSessionCache.fetchAndGetEntry[List[TestModel]](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockSessionCache.fetchAndGetEntry[List[TestModel]](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(list)))
 
-      val result = connector.fetchAndGet[List[TestModel]](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())
+      val result = connector.fetchAndGet[List[TestModel]]("testKey")
       await(result) shouldBe Some(list)
     }
   }
@@ -78,20 +78,20 @@ class KeystoreConnectorSpec extends PAYERegSpec {
 
       val returnCacheMap = CacheMap("", Map("" -> Json.toJson(testModel)))
 
-      when(mockSessionCache.fetch()(ArgumentMatchers.any()))
+      when(mockSessionCache.fetch()(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(returnCacheMap)))
 
-      val result = connector.fetch()(ArgumentMatchers.any())
+      val result = connector.fetch()
       await(result) shouldBe Some(returnCacheMap)
     }
   }
 
   "Removing from KeyStore" should {
     "return a HTTP Response" in {
-      when(mockSessionCache.remove()(ArgumentMatchers.any()))
+      when(mockSessionCache.remove()(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
 
-      val result = connector.remove()(ArgumentMatchers.any())
+      val result = connector.remove()
       await(result).status shouldBe HttpResponse(OK).status
     }
   }

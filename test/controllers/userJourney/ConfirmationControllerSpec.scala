@@ -27,9 +27,9 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Request, Result}
 import services.ConfirmationService
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class ConfirmationControllerSpec extends PAYERegSpec {
 

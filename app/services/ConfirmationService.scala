@@ -19,9 +19,9 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class ConfirmationService @Inject()(injPAYERegistrationConnector: PAYERegistrationConnector) extends ConfirmationSrv {

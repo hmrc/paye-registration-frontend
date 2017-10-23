@@ -31,7 +31,7 @@ object AuthBuilder extends AuthBuilder {}
 trait AuthBuilder {
 
   def mockAuthorisedUser(userId: String, mockAuthConnector : AuthConnector, accounts: Accounts = Accounts()) {
-    when(mockAuthConnector.currentAuthority(ArgumentMatchers.any())) thenReturn {
+    when(mockAuthConnector.currentAuthority(ArgumentMatchers.any(), ArgumentMatchers.any())) thenReturn {
       Future.successful(Some(createUserAuthority(userId, accounts)))
     }
   }

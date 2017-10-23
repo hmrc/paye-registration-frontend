@@ -18,40 +18,25 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import audit.{CorrespondenceAddressAuditEvent, CorrespondenceAddressAuditEventDetail}
 import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
-import audit.{AmendedPAYEContactDetailsEvent, AmendedPAYEContactDetailsEventDetail, AuditPAYEContactDetails}
-import config.{FrontendAuditConnector, FrontendAuthConnector}
-import enums.CacheKeys
+import enums.{CacheKeys, DownstreamOutcome}
 import models.Address
-import models.view.{PAYEContactDetails, CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
 import models.api.{PAYEContact => PAYEContactAPI}
-import enums.DownstreamOutcome
-import models.external.{UserDetailsModel, UserIds}
+import models.view.{PAYEContactDetails, CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
 import play.api.Logger
-import uk.gov.hmrc.play.audit.model.AuditEvent
-import play.api.libs.json.JsObject
 import play.api.mvc.{AnyContent, Request}
-import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 
 @Singleton
-class PAYEContactService @Inject()(injPAYERegistrationConnector: PAYERegistrationConnector,
-                                   injS4LService: S4LService,
-                                   injCompanyDetailsService: CompanyDetailsService,
-                                   injPrepopulationService: PrepopulationService,
-                                   injAuditService: AuditService) extends PAYEContactSrv {
-  override val payeRegConnector = injPAYERegistrationConnector
-  override val s4LService = injS4LService
-  override val companyDetailsService = injCompanyDetailsService
-  override val prepopService = injPrepopulationService
-  override val auditService = injAuditService
-}
+class PAYEContactService @Inject()(val payeRegConnector: PAYERegistrationConnector,
+                                   val s4LService: S4LService,
+                                   val companyDetailsService: CompanyDetailsService,
+                                   val prepopService: PrepopulationService,
+                                   val auditService: AuditService) extends PAYEContactSrv
 
 trait PAYEContactSrv  {
   val payeRegConnector: PAYERegistrationConnect

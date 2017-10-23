@@ -23,18 +23,13 @@ import connectors.{BusinessRegistrationConnect, BusinessRegistrationConnector}
 import enums.CacheKeys
 import models.{Address, DigitalContactDetails}
 import models.view.PAYEContactDetails
-import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
-class
-PrepopulationService @Inject()(injBusinessRegistrationConnector: BusinessRegistrationConnector,
-                               injS4LService: S4LService) extends PrepopulationSrv {
-  override val busRegConnector = injBusinessRegistrationConnector
-  override val s4LService = injS4LService
-}
+class PrepopulationService @Inject()(val busRegConnector: BusinessRegistrationConnector, val s4LService: S4LService) extends PrepopulationSrv
 
 trait PrepopulationSrv {
   val busRegConnector: BusinessRegistrationConnect

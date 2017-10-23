@@ -42,10 +42,10 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   override lazy val contactFrontendPartialBaseUrl = baseUrl("contact-frontend")
 
-  override lazy val analyticsToken = loadConfig(s"google-analytics.token")
-  override lazy val analyticsHost = loadConfig(s"google-analytics.host")
-  override lazy val reportAProblemPartialUrl = s"/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
-  override lazy val reportAProblemNonJSUrl = s"/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+  override lazy val analyticsToken            = loadConfig(s"google-analytics.token")
+  override lazy val analyticsHost             = loadConfig(s"google-analytics.host")
+  override lazy val reportAProblemPartialUrl  = s"/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
+  override lazy val reportAProblemNonJSUrl    = s"/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
 
   private def whiteListConfig(key : String) : Seq[String] = {
     Some(new String(Base64.getDecoder
@@ -53,8 +53,8 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
       .map(_.split(",")).getOrElse(Array.empty).toSeq
   }
 
-  lazy val whitelist = whiteListConfig("whitelist")
-  lazy val whitelistExcluded = whiteListConfig("whitelist-excluded")
+  lazy val whitelist          = whiteListConfig("whitelist")
+  lazy val whitelistExcluded  = whiteListConfig("whitelist-excluded")
 
   private def loadStringConfigBase64(key : String) : String = {
     new String(Base64.getDecoder.decode(configuration.getString(key).getOrElse("")), Charset.forName("UTF-8"))
@@ -65,12 +65,12 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
     json.asOpt[T].getOrElse(throw new Exception(s"Incorrect data for the key: $key"))
   }
 
-  lazy val regIdWhitelist = whiteListConfig("regIdWhitelist")
+  lazy val regIdWhitelist     = whiteListConfig("regIdWhitelist")
   lazy val defaultCompanyName = loadStringConfigBase64("defaultCompanyName")
   lazy val defaultCHROAddress = loadJsonConfigBase64[Address]("defaultCHROAddress")
   lazy val defaultSeqDirector = loadJsonConfigBase64[Seq[Director]]("defaultSeqDirector")(Director.seqReads)
-  lazy val defaultCTStatus = loadStringConfigBase64("defaultCTStatus")
+  lazy val defaultCTStatus    = loadStringConfigBase64("defaultCTStatus")
 
-  lazy val uriWhiteList = configuration.getStringSeq("csrfexceptions.whitelist").getOrElse(Seq.empty).toSet
-  lazy val csrfBypassValue = loadStringConfigBase64("Csrf-Bypass-value")
+  lazy val uriWhiteList     = configuration.getStringSeq("csrfexceptions.whitelist").getOrElse(Seq.empty).toSet
+  lazy val csrfBypassValue  = loadStringConfigBase64("Csrf-Bypass-value")
 }

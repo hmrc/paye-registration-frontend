@@ -30,21 +30,18 @@ import utils.SessionProfile
 import scala.concurrent.Future
 
 @Singleton
-class DashboardController @Inject()(injMessagesApi: MessagesApi,
-                                    injKeystoreConnector: KeystoreConnector,
-                                    injPayeRegistrationConnector: PAYERegistrationConnector) extends DashboardCtrl {
+class DashboardController @Inject()(val messagesApi: MessagesApi,
+                                    val keystoreConnector: KeystoreConnector,
+                                    val payeRegistrationConnector: PAYERegistrationConnector) extends DashboardCtrl {
   val authConnector = FrontendAuthConnector
-  val keystoreConnector = injKeystoreConnector
-  val messagesApi = injMessagesApi
-  val payeRegistrationConnector = injPayeRegistrationConnector
   override lazy val companyRegUrl = getConfString("company-registration-frontend.www.url", "Could not find Company Registration Frontend URL")
   override lazy val companyRegUri = getConfString("company-registration-frontend.www.uri", "Could not find Company Registration Frontend URI")
 }
 
 trait DashboardCtrl extends FrontendController with Actions with I18nSupport with SessionProfile with ServicesConfig {
   val keystoreConnector: KeystoreConnect
-  val companyRegUrl : String
-  val companyRegUri : String
+  val companyRegUrl: String
+  val companyRegUri: String
 
   val dashboard = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user =>
     implicit request =>

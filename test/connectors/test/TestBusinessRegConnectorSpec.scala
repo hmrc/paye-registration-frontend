@@ -20,7 +20,7 @@ import fixtures.BusinessRegistrationFixture
 import models.external.BusinessProfile
 import play.api.libs.json.JsValue
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 class TestBusinessRegConnectorSpec extends PAYERegSpec with BusinessRegistrationFixture {
 

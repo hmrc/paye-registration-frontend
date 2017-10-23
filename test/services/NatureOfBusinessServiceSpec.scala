@@ -24,9 +24,9 @@ import models.view.NatureOfBusiness
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse, Upstream4xxResponse }
 
 class NatureOfBusinessServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
   implicit val hc = HeaderCarrier()

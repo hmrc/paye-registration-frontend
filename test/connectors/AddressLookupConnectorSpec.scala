@@ -22,9 +22,9 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.{JsObject, Json}
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.{ForbiddenException, HeaderCarrier, NotFoundException}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ ForbiddenException, HeaderCarrier, NotFoundException }
 
 class AddressLookupConnectorSpec extends PAYERegSpec with BusinessRegistrationFixture {
 
@@ -48,28 +48,28 @@ class AddressLookupConnectorSpec extends PAYERegSpec with BusinessRegistrationFi
 
   "getAddress" should {
     "return an address response" in new Setup {
-      when(mockWSHttp.GET[JsObject](ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockWSHttp.GET[JsObject](ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(testAddress))
 
       await(connector.getAddress("123")) shouldBe testAddress
     }
 
     "return a Not Found response" in new Setup {
-      when(mockWSHttp.GET[JsObject](ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockWSHttp.GET[JsObject](ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new NotFoundException("Bad request")))
 
       intercept[NotFoundException](await(connector.getAddress("123")))
     }
 
     "return a Forbidden response when a CurrentProfile record can not be accessed by the user" in new Setup {
-      when(mockWSHttp.GET[JsObject](ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockWSHttp.GET[JsObject](ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new ForbiddenException("Forbidden")))
 
       intercept[ForbiddenException](await(connector.getAddress("321")))
     }
 
     "return an Exception response when an unspecified error has occurred" in new Setup {
-      when(mockWSHttp.GET[JsObject](ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockWSHttp.GET[JsObject](ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new IndexOutOfBoundsException("other exception")))
 
       intercept[IndexOutOfBoundsException](await(connector.getAddress("321")))

@@ -25,32 +25,28 @@ import models.view.PAYEContactDetails
 import play.api.Logger
 import play.api.libs.json.JsValue
 import services.{MetricsService, MetricsSrv}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http._
-import uk.gov.hmrc.play.http.ws.WSHttp
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 
 @Singleton
-class BusinessRegistrationConnector @Inject()(injMetrics: MetricsService) extends BusinessRegistrationConnect with ServicesConfig {
-  val businessRegUrl = baseUrl("business-registration")
-  val http : WSHttp = WSHttp
-  val metricsService = injMetrics
+class BusinessRegistrationConnector @Inject()(val metricsService: MetricsService) extends BusinessRegistrationConnect with ServicesConfig {
+  val businessRegUrl                = baseUrl("business-registration")
+  val http : CoreGet with CorePost  = WSHttp
 }
 
 trait BusinessRegistrationConnect {
-
   val businessRegUrl: String
-  val http: WSHttp
+  val http: CoreGet with CorePost
   val metricsService: MetricsSrv
 
   def retrieveCurrentProfile(implicit hc: HeaderCarrier, rds: HttpReads[BusinessProfile]): Future[BusinessProfile] = {
     val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
-    http.GET[BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration") map {
-      profile =>
-        businessRegistrationTimer.stop()
-        profile
+    http.GET[BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration") map { profile =>
+      businessRegistrationTimer.stop()
+      profile
     } recover {
       case e =>
         businessRegistrationTimer.stop()
@@ -60,12 +56,11 @@ trait BusinessRegistrationConnect {
 
   def retrieveCompletionCapacity(implicit hc: HeaderCarrier, rds: HttpReads[JsValue]): Future[Option[String]] = {
     val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
-    http.GET[JsValue](s"$businessRegUrl/business-registration/business-tax-registration") map {
-      json =>
-        businessRegistrationTimer.stop()
-        (json \ "completionCapacity").asOpt[String]
+    http.GET[JsValue](s"$businessRegUrl/business-registration/business-tax-registration") map { json =>
+      businessRegistrationTimer.stop()
+      (json \ "completionCapacity").asOpt[String]
     } recover {
-      case notfound: NotFoundException =>
+      case _: NotFoundException =>
         businessRegistrationTimer.stop()
         None
       case e =>
@@ -77,12 +72,11 @@ trait BusinessRegistrationConnect {
   def retrieveContactDetails(regId: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYEContactDetails]): Future[Option[PAYEContactDetails]] = {
     val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
     implicit val rds = PAYEContactDetails.prepopReads
-    http.GET[PAYEContactDetails](s"$businessRegUrl/business-registration/$regId/contact-details") map {
-      details =>
-        businessRegistrationTimer.stop()
-        Some(details)
+    http.GET[PAYEContactDetails](s"$businessRegUrl/business-registration/$regId/contact-details") map { details =>
+      businessRegistrationTimer.stop()
+      Some(details)
     } recover {
-      case notfound: NotFoundException =>
+      case _: NotFoundException =>
         businessRegistrationTimer.stop()
         None
       case e =>
@@ -95,10 +89,9 @@ trait BusinessRegistrationConnect {
   def upsertContactDetails(regId: String, contactDetails: PAYEContactDetails)(implicit hc: HeaderCarrier): Future[PAYEContactDetails] = {
     val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
     implicit val wts = PAYEContactDetails.prepopWrites
-    http.POST[PAYEContactDetails, HttpResponse](s"$businessRegUrl/business-registration/$regId/contact-details", contactDetails) map {
-      _ =>
-        businessRegistrationTimer.stop()
-        contactDetails
+    http.POST[PAYEContactDetails, HttpResponse](s"$businessRegUrl/business-registration/$regId/contact-details", contactDetails) map { _ =>
+      businessRegistrationTimer.stop()
+      contactDetails
     } recover {
       case e: Exception =>
         businessRegistrationTimer.stop()
@@ -109,12 +102,11 @@ trait BusinessRegistrationConnect {
 
   def retrieveAddresses(regId: String)(implicit hc: HeaderCarrier): Future[Seq[Address]] = {
     val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
-    http.GET[JsValue](s"$businessRegUrl/business-registration/$regId/addresses") map {
-      json =>
-        businessRegistrationTimer.stop()
-        json.\("addresses").as[Seq[JsValue]].map(_.as[Address](Address.prePopReads))
+    http.GET[JsValue](s"$businessRegUrl/business-registration/$regId/addresses") map { json =>
+      businessRegistrationTimer.stop()
+      json.\("addresses").as[Seq[JsValue]].map(_.as[Address](Address.prePopReads))
     } recover {
-      case notfound: NotFoundException =>
+      case _: NotFoundException =>
         businessRegistrationTimer.stop()
         Seq.empty
       case ex =>
@@ -127,10 +119,9 @@ trait BusinessRegistrationConnect {
   def upsertAddress(regId: String, address: Address)(implicit hc: HeaderCarrier): Future[Address] = {
     val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
     implicit val wts = Address.prePopWrites
-    http.POST[Address, HttpResponse](s"$businessRegUrl/business-registration/$regId/addresses", address) map {
-      _ =>
-        businessRegistrationTimer.stop()
-        address
+    http.POST[Address, HttpResponse](s"$businessRegUrl/business-registration/$regId/addresses", address) map { _ =>
+      businessRegistrationTimer.stop()
+      address
     } recover {
       case e: Exception =>
         businessRegistrationTimer.stop()
@@ -143,14 +134,14 @@ trait BusinessRegistrationConnect {
     val optRegId = regId.map(r => s" and regId: $regId").getOrElse("")
     def log(s: String) = Logger.error(s"[BusinessRegistrationConnector] [$f] received $s when $m$optRegId")
     e match {
-      case e: NotFoundException => log("NOT FOUND")
+      case e: NotFoundException   => log("NOT FOUND")
       case e: BadRequestException => log("BAD REQUEST")
       case e: Upstream4xxResponse => e.upstreamResponseCode match {
-      case 403 => log("FORBIDDEN")
-      case _ => log(s"Upstream 4xx: ${e.upstreamResponseCode} ${e.message}")
-    }
+        case 403  => log("FORBIDDEN")
+        case _    => log(s"Upstream 4xx: ${e.upstreamResponseCode} ${e.message}")
+      }
       case e: Upstream5xxResponse => log(s"Upstream 5xx: ${e.upstreamResponseCode}")
-      case e: Exception => log(s"ERROR: ${e.getMessage}")
+      case e: Exception           => log(s"ERROR: ${e.getMessage}")
     }
     e
   }

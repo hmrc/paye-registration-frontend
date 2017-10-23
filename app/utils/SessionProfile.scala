@@ -20,12 +20,12 @@ import common.exceptions.InternalExceptions
 import connectors.{KeystoreConnect, PAYERegistrationConnect}
 import enums.CacheKeys
 import models.external.CurrentProfile
-import play.api.mvc.{Request, Result}
 import play.api.mvc.Results.Redirect
-import uk.gov.hmrc.play.http.HeaderCarrier
+import play.api.mvc.{Request, Result}
+import uk.gov.hmrc.http.HeaderCarrier
 
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 
 trait SessionProfile extends InternalExceptions {
 

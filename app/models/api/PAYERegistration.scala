@@ -21,16 +21,16 @@ import models._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{OFormat, __}
 
-case class PAYERegistration (registrationID: String,
-                             transactionID: String,
-                             formCreationTimestamp: String,
-                             status: PAYEStatus.Value,
-                             completionCapacity: String,
-                             companyDetails: CompanyDetails,
-                             employment: Employment,
-                             sicCodes: List[SICCode],
-                             directors: List[Director],
-                             payeContact: PAYEContact)
+case class PAYERegistration(registrationID: String,
+                            transactionID: String,
+                            formCreationTimestamp: String,
+                            status: PAYEStatus.Value,
+                            completionCapacity: String,
+                            companyDetails: CompanyDetails,
+                            employment: Employment,
+                            sicCodes: List[SICCode],
+                            directors: List[Director],
+                            payeContact: PAYEContact)
 
 object PAYERegistration {
   implicit val format: OFormat[PAYERegistration] = (
@@ -44,5 +44,5 @@ object PAYERegistration {
     (__ \ "sicCodes").format[List[SICCode]] and
     (__ \ "directors").format[List[Director]] and
     (__ \ "payeContact").format[PAYEContact]
-    )(PAYERegistration.apply, unlift(PAYERegistration.unapply))
+  )(PAYERegistration.apply, unlift(PAYERegistration.unapply))
 }

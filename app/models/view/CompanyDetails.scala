@@ -19,18 +19,14 @@ package models.view
 import models.{Address, DigitalContactDetails}
 import play.api.libs.json.Json
 
-case class CompanyDetails(
-                           companyName: String,
-                           tradingName: Option[TradingName],
-                           roAddress: Address,
-                           ppobAddress: Option[Address],
-                           businessContactDetails: Option[DigitalContactDetails]
-                           )
+case class CompanyDetails(companyName: String,
+                          tradingName: Option[TradingName],
+                          roAddress: Address,
+                          ppobAddress: Option[Address],
+                          businessContactDetails: Option[DigitalContactDetails])
 
-case class TradingName (
-                         differentName: Boolean,
-                         tradingName:Option[String]
-                         )
+case class TradingName (differentName: Boolean,
+                        tradingName:Option[String])
 
 object TradingName {
   implicit val format = Json.format[TradingName]
@@ -39,5 +35,5 @@ object TradingName {
 
 object CompanyDetails {
   implicit val businessContactFormat = DigitalContactDetails.format
-  implicit val format = Json.format[CompanyDetails]
+  implicit val format                = Json.format[CompanyDetails]
 }

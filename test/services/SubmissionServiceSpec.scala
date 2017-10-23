@@ -25,9 +25,9 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class SubmissionServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFixture with AuthBuilder {
 

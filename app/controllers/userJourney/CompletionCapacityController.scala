@@ -33,15 +33,11 @@ import views.html.pages.{completionCapacity => CompletionCapacityView}
 import scala.concurrent.Future
 
 @Singleton
-class CompletionCapacityController @Inject()(injMessagesApi: MessagesApi,
-                                             injCompletionCapacityService: CompletionCapacityService,
-                                             injKeystoreConnector: KeystoreConnector,
-                                             injPayeRegistrationConnector: PAYERegistrationConnector) extends CompletionCapacityCtrl {
+class CompletionCapacityController @Inject()(val messagesApi: MessagesApi,
+                                             val completionCapacityService: CompletionCapacityService,
+                                             val keystoreConnector: KeystoreConnector,
+                                             val payeRegistrationConnector: PAYERegistrationConnector) extends CompletionCapacityCtrl {
   val authConnector = FrontendAuthConnector
-  val messagesApi = injMessagesApi
-  val completionCapacityService = injCompletionCapacityService
-  val keystoreConnector = injKeystoreConnector
-  val payeRegistrationConnector = injPayeRegistrationConnector
 }
 
 trait CompletionCapacityCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {

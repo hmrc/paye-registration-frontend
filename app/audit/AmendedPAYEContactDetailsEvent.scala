@@ -16,10 +16,10 @@
 
 package audit
 
-import play.api.libs.json.{Format, JsObject, Json, __}
 import play.api.libs.functional.syntax._
+import play.api.libs.json.{Format, JsObject, Json, __}
 import play.api.mvc.{AnyContent, Request}
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 case class AuditPAYEContactDetails(contactName: String,
                                    email: Option[String],

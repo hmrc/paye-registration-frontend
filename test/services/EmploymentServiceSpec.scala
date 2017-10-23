@@ -28,10 +28,10 @@ import org.mockito.Mockito.{times, verify, when}
 import play.api.libs.json.{Format, Json}
 import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import utils.DateUtil
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
 class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistrationFixture {
   val now = LocalDate.now()

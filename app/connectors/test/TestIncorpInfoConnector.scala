@@ -19,24 +19,23 @@ package connectors.test
 import javax.inject.{Inject, Singleton}
 
 import config.WSHttp
-import models.external.CoHoCompanyDetailsModel
 import play.api.libs.json.{JsValue, Json}
+import uk.gov.hmrc.http.{CorePost, CorePut, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
 @Singleton
 class TestIncorpInfoConnector @Inject()() extends TestIncorpInfoConnect with ServicesConfig {
-  val incorpFEStubsUrl = baseUrl("incorporation-frontend-stubs")
-  val http : WSHttp = WSHttp
+  val incorpFEStubsUrl             = baseUrl("incorporation-frontend-stubs")
+  val http : CorePost with CorePut = WSHttp
 }
 
 trait TestIncorpInfoConnect {
 
   val incorpFEStubsUrl: String
-  val http: WSHttp
+  val http: CorePost with CorePut
 
   private def txId(regId: String):String = s"000-434-$regId"
 

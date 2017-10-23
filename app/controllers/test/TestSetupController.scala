@@ -23,36 +23,24 @@ import config.FrontendAuthConnector
 import connectors._
 import connectors.test._
 import enums.DownstreamOutcome
-import models.test.CoHoCompanyDetailsFormModel
 import play.api.Logger
 import play.api.i18n.MessagesApi
 import services._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TestSetupController @Inject()(injKeystoreConnector: KeystoreConnector,
-                                    injBusinessRegConnector: BusinessRegistrationConnector,
-                                    injTestBusinessRegConnector: TestBusinessRegConnector,
-                                    injTestIncorpInfoConnector: TestIncorpInfoConnector,
-                                    injCoHoAPIService: IncorporationInformationService,
-                                    injMessagesApi: MessagesApi,
-                                    injTestPAYERegConnector: TestPAYERegConnector,
-                                    injPayeRegService:PAYERegistrationService,
-                                    injPayeRegistrationConnector: PAYERegistrationConnector,
-                                    injS4LService: S4LService) extends TestSetupCtrl {
+class TestSetupController @Inject()(val keystoreConnector: KeystoreConnector,
+                                    val businessRegConnector: BusinessRegistrationConnector,
+                                    val testBusinessRegConnector: TestBusinessRegConnector,
+                                    val testIncorpInfoConnector: TestIncorpInfoConnector,
+                                    val coHoAPIService: IncorporationInformationService,
+                                    val messagesApi: MessagesApi,
+                                    val testPAYERegConnector: TestPAYERegConnector,
+                                    val payeRegService:PAYERegistrationService,
+                                    val payeRegistrationConnector: PAYERegistrationConnector,
+                                    val s4LService: S4LService) extends TestSetupCtrl {
   val authConnector = FrontendAuthConnector
-  val keystoreConnector = injKeystoreConnector
-  val businessRegConnector = injBusinessRegConnector
-  val testBusinessRegConnector = injTestBusinessRegConnector
-  val testIncorpInfoConnector = injTestIncorpInfoConnector
-  val coHoAPIService = injCoHoAPIService
-  val messagesApi = injMessagesApi
-  val payeRegService = injPayeRegService
-  val testPAYERegConnector = injTestPAYERegConnector
-  val s4LService = injS4LService
-  val payeRegistrationConnector = injPayeRegistrationConnector
 }
 
 trait TestSetupCtrl extends BusinessProfileCtrl with TestCoHoCtrl with TestRegSetupCtrl with TestCacheCtrl {
@@ -65,7 +53,7 @@ trait TestSetupCtrl extends BusinessProfileCtrl with TestCoHoCtrl with TestRegSe
   val testPAYERegConnector: TestPAYERegConnect
   val s4LService: S4LSrv
 
-  private def log[T](f: String, res: Future[T]): Future[T] = {
+  private def log[T](f: String, res: Future[T])(implicit ec: ExecutionContext): Future[T] = {
     res.flatMap (msg => {
       Logger.info(s"[TestSetupController] [$f] - ${msg.toString}")
       res

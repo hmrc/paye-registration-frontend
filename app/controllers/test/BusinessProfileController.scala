@@ -20,24 +20,20 @@ import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector}
 import connectors._
-import play.api.mvc.{AnyContent, Request}
+import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector}
 import models.external.BusinessProfile
+import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
 @Singleton
-class BusinessProfileController @Inject()(injKeystoreConnector: KeystoreConnector,
-                                         injBusinessRegConnector: BusinessRegistrationConnector,
-                                         injTestBusinessRegConnector: TestBusinessRegConnector)
-  extends BusinessProfileCtrl {
+class BusinessProfileController @Inject()(val keystoreConnector: KeystoreConnector,
+                                          val businessRegConnector: BusinessRegistrationConnector,
+                                          val testBusinessRegConnector: TestBusinessRegConnector) extends BusinessProfileCtrl {
   val authConnector = FrontendAuthConnector
-  val keystoreConnector = injKeystoreConnector
-  val businessRegConnector = injBusinessRegConnector
-  val testBusinessRegConnector = injTestBusinessRegConnector
 }
 
 trait BusinessProfileCtrl extends FrontendController with Actions {
@@ -48,9 +44,9 @@ trait BusinessProfileCtrl extends FrontendController with Actions {
   def businessProfileSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
     implicit user =>
       implicit request =>
-        for {
-          res <- doBusinessProfileSetup
-        } yield Ok(res.toString)
+        doBusinessProfileSetup map { res =>
+          Ok(res.toString)
+        }
   }
 
   protected[controllers] def doBusinessProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = {

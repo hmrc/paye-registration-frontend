@@ -21,16 +21,14 @@ import javax.inject.{Inject, Singleton}
 import connectors.{S4LConnect, S4LConnector}
 import play.api.libs.json._
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import utils.Formatters
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
 @Singleton
-class S4LService @Inject()(s4LConn: S4LConnector) extends S4LSrv {
-  override val s4LConnector = s4LConn
-}
+class S4LService @Inject()(val s4LConnector: S4LConnector) extends S4LSrv
 
 trait S4LSrv {
 

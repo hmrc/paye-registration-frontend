@@ -21,23 +21,17 @@ import javax.inject.{Inject, Singleton}
 import connectors._
 import enums.CacheKeys
 import models.external.CurrentProfile
-import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.RegistrationWhitelist
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
-class SubmissionService @Inject()(
-                                   injPayeRegistrationConn: PAYERegistrationConnector,
-                                   injKeystoreConnector: KeystoreConnector
-                                   ) extends SubmissionSrv {
-  override val payeRegistrationConnector = injPayeRegistrationConn
-  override val keystoreConnector = injKeystoreConnector
-}
+class SubmissionService @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,
+                                  val keystoreConnector: KeystoreConnector) extends SubmissionSrv
 
 trait SubmissionSrv extends RegistrationWhitelist {
-
   val payeRegistrationConnector: PAYERegistrationConnect
   val keystoreConnector: KeystoreConnect
 
@@ -46,8 +40,8 @@ trait SubmissionSrv extends RegistrationWhitelist {
       payeRegistrationConnector.submitRegistration(profile.registrationID).flatMap {
         case Success =>
           keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, profile.copy(payeRegistrationSubmitted = true)).map {
-          _ => Success
-        }
+            _ => Success
+          }
         case other => Future.successful(other)
       }
     }

@@ -18,8 +18,6 @@ package enums
 
 import common.exceptions.InternalExceptions
 
-
-
 object YesNo extends Enumeration {
   val Yes = Value
   val No  = Value
@@ -35,5 +33,4 @@ object YesNo extends Enumeration {
   def fromBoolean(bool: Boolean): Value = {
     if(bool) Yes else No
   }
-
 }

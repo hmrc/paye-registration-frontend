@@ -21,8 +21,8 @@ import play.api.libs.json.{JsError, JsObject, JsResult, JsSuccess, JsValue, Json
 import utils.Formatters
 
 case class DigitalContactDetails(email : Option[String],
-                                  mobileNumber : Option[String],
-                                  phoneNumber : Option[String])
+                                 mobileNumber : Option[String],
+                                 phoneNumber : Option[String])
 
 object DigitalContactDetails {
   implicit val format = Json.format[DigitalContactDetails]
@@ -51,8 +51,8 @@ object DigitalContactDetails {
 
   val prepopWrites: Writes[DigitalContactDetails] = new Writes[DigitalContactDetails] {
     def writes(contactDetails: DigitalContactDetails): JsObject = {
-      val jsonEmail = contactDetails.email.fold(Json.obj())(email => Json.obj("email" -> email))
-      val jsonMobileNumber = contactDetails.mobileNumber.fold(Json.obj())(mobile => Json.obj("mobileNumber" -> mobile))
+      val jsonEmail           = contactDetails.email.fold(Json.obj())(email => Json.obj("email" -> email))
+      val jsonMobileNumber    = contactDetails.mobileNumber.fold(Json.obj())(mobile => Json.obj("mobileNumber" -> mobile))
       val jsonTelephoneNumber = contactDetails.phoneNumber.fold(Json.obj())(tel => Json.obj("telephoneNumber" -> tel))
 
       jsonEmail ++ jsonMobileNumber ++ jsonTelephoneNumber

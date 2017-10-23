@@ -24,9 +24,9 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.test.Helpers.OK
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpReads, NotFoundException}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, NotFoundException }
 
 class CurrentProfileControllerSpec extends PAYERegSpec with KeystoreFixture {
 

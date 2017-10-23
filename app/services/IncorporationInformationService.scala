@@ -19,21 +19,17 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import connectors._
-import enums.{CacheKeys, DownstreamOutcome}
 import models.api.Director
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import models.view.Directors
-import uk.gov.hmrc.play.http.{BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 
 @Singleton
-class IncorporationInformationService @Inject()(injkeystoreConnector: KeystoreConnector,
-                                                injIncorpInfoConnector: IncorporationInformationConnector) extends IncorporationInformationSrv {
-  override val keystoreConnector = injkeystoreConnector
-  override val incorpInfoConnector = injIncorpInfoConnector
-}
+class IncorporationInformationService @Inject()(val keystoreConnector: KeystoreConnector,
+                                                val incorpInfoConnector: IncorporationInformationConnector) extends IncorporationInformationSrv
 
 trait IncorporationInformationSrv {
 
@@ -43,14 +39,14 @@ trait IncorporationInformationSrv {
   def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CoHoCompanyDetailsModel] = {
     incorpInfoConnector.getCoHoCompanyDetails(regId, txId) map {
       case IncorpInfoSuccessResponse(companyDetails) => companyDetails
-      case IncorpInfoBadRequestResponse => throw new BadRequestException(s"Received a BadRequest status code when expecting company details for regId: $regId / TX-ID: $txId")
-      case IncorpInfoErrorResponse(ex) => throw ex
+      case IncorpInfoBadRequestResponse              => throw new BadRequestException(s"Received a BadRequest status code when expecting company details for regId: $regId / TX-ID: $txId")
+      case IncorpInfoErrorResponse(ex)               => throw ex
     }
   }
 
   def getDirectorDetails(txId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
     for {
-      officerList <- incorpInfoConnector.getOfficerList(txId)
+      officerList     <- incorpInfoConnector.getOfficerList(txId)
       directorDetails <- convertOfficerList2Directors(officerList)
     } yield directorDetails
   }

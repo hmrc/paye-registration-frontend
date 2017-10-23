@@ -25,16 +25,16 @@ import utils.Validators._
 
 object PAYEContactDetailsForm extends OneOfManyForm with PhoneNoForm {
 
-  override val optionalFields: Seq[String] = Seq("digitalContact.contactEmail", "digitalContact.mobileNumber", "digitalContact.phoneNumber")
+  override val optionalFields: Seq[String]      = Seq("digitalContact.contactEmail", "digitalContact.mobileNumber", "digitalContact.phoneNumber")
   override val noFieldsCompletedMessage: String = "pages.payeContact.noFieldsCompleted"
 
   val form = Form(
     mapping(
-    "name" -> text.verifying(nameValidation),
-    "digitalContact" -> mapping(
+      "name"           -> text.verifying(nameValidation),
+      "digitalContact" -> mapping(
         "contactEmail" -> oneOfManyErrorTarget.verifying(optionalValidation(emailValidation)),
         "mobileNumber" -> phoneNoField,
-        "phoneNumber" -> phoneNoField
+        "phoneNumber"  -> phoneNoField
       )(DigitalContactDetails.apply)(DigitalContactDetails.unapply)
     )(PAYEContactDetails.apply)(PAYEContactDetails.unapply).verifying()
   )

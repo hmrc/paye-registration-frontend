@@ -25,9 +25,9 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{BAD_REQUEST, OK}
 import services.IncorporationInformationSrv
 import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 class TestCoHoControllerSpec extends PAYERegSpec {
 
