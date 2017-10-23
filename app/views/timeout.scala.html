@@ -1,0 +1,14 @@
+@()(implicit request: Request[_], lang: Lang, messages: Messages)
+@main_template(title = Messages("page.timeout.title")){
+
+    <header class="page-header">
+        <h1 class="form-title heading-xlarge" id="main-heading">@Messages("page.timeout.heading")</h1>
+    </header>
+
+    <p>@Messages("page.timeout.p1")</p>
+
+    <div class="form-group">@Messages("page.timeout.p2")
+        <a href="@{controllers.userJourney.routes.SignInOutController.signOut()}">@Messages("page.timeout.url")</a>.</div>
+
+
+}

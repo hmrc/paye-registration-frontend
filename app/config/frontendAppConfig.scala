@@ -32,6 +32,8 @@ trait AppConfig {
   val reportAProblemNonJSUrl: String
 
   val contactFrontendPartialBaseUrl : String
+
+  val timeoutInSeconds: String
 }
 
 object FrontendAppConfig extends AppConfig with ServicesConfig {
@@ -46,6 +48,8 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   override lazy val analyticsHost             = loadConfig(s"google-analytics.host")
   override lazy val reportAProblemPartialUrl  = s"/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   override lazy val reportAProblemNonJSUrl    = s"/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+
+  override val timeoutInSeconds: String = loadConfig("timeoutInSeconds")
 
   private def whiteListConfig(key : String) : Seq[String] = {
     Some(new String(Base64.getDecoder

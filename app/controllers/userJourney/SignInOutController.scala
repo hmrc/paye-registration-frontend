@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import java.io.File
 import javax.inject.{Inject, Singleton}
 
 import auth.PAYERegime
@@ -25,6 +26,8 @@ import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+
+import scala.concurrent.Future
 
 @Singleton
 class SignInOutController @Inject()(val messagesApi: MessagesApi) extends SignInOutCtrl with ServicesConfig {
@@ -50,4 +53,18 @@ trait SignInOutCtrl extends FrontendController with Actions with I18nSupport {
         Redirect(s"$compRegFEURL$compRegFEURI/questionnaire").withNewSession
   }
 
+  def renewSession: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
+    implicit user =>
+      implicit request =>
+        Ok.sendFile(new File(("public/images/renewSession.jpg"))).as("image")
+  }
+
+  def destroySession: Action[AnyContent] = Action {
+    Redirect(routes.SignInOutController.timeoutShow()).withNewSession
+  }
+
+  def timeoutShow = Action.async {
+    implicit request =>
+      Future.successful(Ok(views.html.timeout()))
+  }
 }
