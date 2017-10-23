@@ -27,7 +27,7 @@ import connectors._
 import models.external.CurrentProfile
 import play.api.http.Status._
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 

@@ -21,8 +21,8 @@ import javax.inject.{Inject, Singleton}
 import com.codahale.metrics.{Counter, Timer}
 import com.kenshoo.play.metrics.Metrics
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 @Singleton
 class MetricsService @Inject()(injMetrics: Metrics) extends MetricsSrv {
@@ -75,7 +75,7 @@ trait MetricsSrv {
   val addressLookupFailedResponseCounter: Counter
 
 
-  def processDataResponseWithMetrics[T](success: Counter, failed: Counter, timer: Timer.Context)(f: => Future[T]): Future[T] = {
+  def processDataResponseWithMetrics[T](success: Counter, failed: Counter, timer: Timer.Context)(f: => Future[T])(implicit ec: ExecutionContext): Future[T] = {
     f map { data =>
       timer.stop()
       success.inc(1)
@@ -88,7 +88,7 @@ trait MetricsSrv {
     }
   }
 
-  def processOptionalDataWithMetrics[T](success: Counter, failed: Counter, timer: Timer.Context)(f: => Future[Option[T]]): Future[Option[T]] = {
+  def processOptionalDataWithMetrics[T](success: Counter, failed: Counter, timer: Timer.Context)(f: => Future[Option[T]])(implicit ec: ExecutionContext): Future[Option[T]] = {
     f map { data =>
       timer.stop()
       processOptionalDataResponse[T](data)(success, failed)

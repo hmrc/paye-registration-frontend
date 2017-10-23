@@ -18,20 +18,13 @@ package controllers.userJourney
 
 import javax.inject.{Inject, Singleton}
 
-import enums.AccountTypes
-import models.external.CurrentProfile
-import play.api.Logger
 import auth.PAYERegime
 import config.FrontendAuthConnector
-import enums.DownstreamOutcome
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Request, Result}
-import services._
+import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.frontend.auth.{Actions, AuthContext}
+import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-
-import scala.concurrent.Future
 
 @Singleton
 class SignInOutController @Inject()(val messagesApi: MessagesApi) extends SignInOutCtrl with ServicesConfig {

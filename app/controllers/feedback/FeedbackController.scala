@@ -25,15 +25,13 @@ import play.api.http.{Status => HttpStatus}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, RequestHeader}
 import play.twirl.api.Html
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.frontend.controller.{FrontendController, UnauthorisedAction}
 import uk.gov.hmrc.play.frontend.filters.SessionCookieCryptoFilter
-import uk.gov.hmrc.play.http._
-import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.partials._
 import views.html.feedback_thankyou
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http._
 
 @Singleton
 class FeedbackController @Inject()(val messagesApi: MessagesApi) extends FrontendController  with I18nSupport {

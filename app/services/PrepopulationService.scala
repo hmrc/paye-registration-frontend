@@ -24,7 +24,7 @@ import enums.CacheKeys
 import models.{Address, DigitalContactDetails}
 import models.view.PAYEContactDetails
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 

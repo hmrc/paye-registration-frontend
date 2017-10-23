@@ -23,7 +23,7 @@ import enums.{CacheKeys, DownstreamOutcome}
 import models.api.{Eligibility => EligibilityAPI}
 import models.view.{CompanyEligibility, DirectorEligibility, Eligibility => EligibilityView}
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 

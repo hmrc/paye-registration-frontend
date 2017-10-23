@@ -22,7 +22,7 @@ import play.api.mvc.Result
 import services.{CompanyDetailsSrv, IncorporationInformationSrv, S4LSrv}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 
 trait UpToDateCompanyDetails {

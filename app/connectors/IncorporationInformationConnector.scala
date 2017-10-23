@@ -29,7 +29,7 @@ import uk.gov.hmrc.http.{BadRequestException, CoreGet, HeaderCarrier, NotFoundEx
 import uk.gov.hmrc.play.config.ServicesConfig
 import utils.RegistrationWhitelist
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 
 @Singleton

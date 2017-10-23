@@ -25,7 +25,7 @@ import models.view.{Directors, Ninos, UserEnteredNino}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.RegistrationWhitelist
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 
 @Singleton

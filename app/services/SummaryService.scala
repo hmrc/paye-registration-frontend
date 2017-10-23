@@ -28,7 +28,7 @@ import models.{Address, DigitalContactDetails}
 import play.api.mvc.Call
 import utils.Formatters
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 import scala.util.{Success, Try}
 import uk.gov.hmrc.http.HeaderCarrier

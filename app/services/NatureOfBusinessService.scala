@@ -18,14 +18,14 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import connectors.{KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
+import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.DownstreamOutcome
 import models.api.SICCode
 import models.view.NatureOfBusiness
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import scala.concurrent.Future
 
 @Singleton
 class NatureOfBusinessService @Inject()(val payeRegConnector: PAYERegistrationConnector) extends NatureOfBusinessSrv

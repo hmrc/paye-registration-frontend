@@ -19,14 +19,13 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import connectors._
-import enums.{CacheKeys, DownstreamOutcome}
 import models.api.Director
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import models.view.Directors
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ BadRequestException, HeaderCarrier }
 
 @Singleton
 class IncorporationInformationService @Inject()(val keystoreConnector: KeystoreConnector,

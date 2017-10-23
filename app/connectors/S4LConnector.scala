@@ -25,7 +25,7 @@ import services.{MetricsService, MetricsSrv}
 import uk.gov.hmrc.http.cache.client.{CacheMap, ShortLivedCache}
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
 @Singleton
