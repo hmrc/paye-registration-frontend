@@ -26,6 +26,13 @@ app.common.companies-houseinfo                          = update it with Compani
 app.common.finish                                       = Finish
 app.common.whatDidYouThink                              = What did you think of the service?
 
+#timeout page
+page.timeout.title = Your session has timed out due to inactivity
+page.timeout.heading = Your session has timed out due to inactivity
+page.timeout.p1 = Your answers have been saved.
+page.timeout.p2 = Sign in to
+page.timeout.url = continue registration
+
 ## User error messages
 errors.invalid.email                                    = The email address you have provided is invalid
 errors.invalid.email.tooLong                            = Enter your email address using 70 characters or less

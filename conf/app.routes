@@ -5,6 +5,11 @@ GET         /assets/*file                                     controllers.Assets
 GET         /post-sign-in                                     controllers.userJourney.SignInOutController.postSignIn
 GET         /sign-out                                         controllers.userJourney.SignInOutController.signOut
 
+## TIMEOUT
+GET        /renew-session                                     controllers.userJourney.SignInOutController.renewSession
+GET        /error/destroy-session                             controllers.userJourney.SignInOutController.destroySession
+GET        /error/timeout                                     controllers.userJourney.SignInOutController.timeoutShow
+
 ## PAYE START
 GET         /                                                 controllers.userJourney.PayeStartController.startPaye
 

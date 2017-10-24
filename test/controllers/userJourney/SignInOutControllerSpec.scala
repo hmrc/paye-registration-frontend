@@ -71,4 +71,34 @@ class SignInOutControllerSpec extends PAYERegSpec {
       }
     }
   }
+
+  "renewSession" should {
+    "return 200 when hit with Authorised User" in new Setup {
+      AuthBuilder.showWithAuthorisedUser(controller.renewSession(),mockAuthConnector){a =>
+        status(a) shouldBe 200
+        contentType(a) shouldBe Some("image")
+        await(a.body.dataStream.toString).contains("""public/images/renewSession.jpg""")  shouldBe true
+      }
+    }
+  }
+
+  "destroySession" should {
+    "return redirect to timeout show and get rid of headers" in new Setup {
+
+      val fr = FakeRequest().withHeaders(("playFoo","no more"))
+
+      val res = await(controller.destroySession()(fr))
+      status(res) shouldBe 303
+      headers(res).contains("playFoo") shouldBe false
+
+      redirectLocation(res) shouldBe Some(controllers.userJourney.routes.SignInOutController.timeoutShow().url)
+    }
+  }
+
+  "timeoutShow" should {
+    "return 200" in new Setup {
+      val res = await(controller.timeoutShow()(FakeRequest()))
+      status(res) shouldBe 200
+    }
+  }
 }
