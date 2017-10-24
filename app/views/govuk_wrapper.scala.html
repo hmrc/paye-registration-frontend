@@ -27,7 +27,11 @@
 
 @headerNavLinks = {
   <li>
-      <a id="signOutNavHref" href="@controllers.userJourney.routes.SignInOutController.signOut()" data-journey-click="primary-navigation:Click:SignOut">Sign out</a>
+      @if(request.cookies.get("mdtp").fold(false)(cookie => cookie.value.contains("authToken=Bearer+"))){
+            <a id="signOutNavHref" href="@controllers.userJourney.routes.SignInOutController.signOut()" data-journey-click="primary-navigation:Click:Sign out">Sign out</a>
+      } else {
+            <a id="signInNavHref" href="@controllers.userJourney.routes.SignInOutController.postSignIn()" data-journey-click="primary-navigation:Click:Sign in">Sign in</a>
+      }
   </li>
 }
 
