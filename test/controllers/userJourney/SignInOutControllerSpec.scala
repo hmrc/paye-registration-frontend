@@ -76,7 +76,7 @@ class SignInOutControllerSpec extends PAYERegSpec {
     "return 200 when hit with Authorised User" in new Setup {
       AuthBuilder.showWithAuthorisedUser(controller.renewSession(),mockAuthConnector){a =>
         status(a) shouldBe 200
-        contentType(a) shouldBe Some("image")
+        contentType(a) shouldBe Some("image/jpeg")
         await(a.body.dataStream.toString).contains("""public/images/renewSession.jpg""")  shouldBe true
       }
     }
