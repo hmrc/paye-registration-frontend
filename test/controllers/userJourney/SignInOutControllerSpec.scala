@@ -77,6 +77,7 @@ class SignInOutControllerSpec extends PAYERegSpec {
       AuthBuilder.showWithAuthorisedUser(controller.renewSession(),mockAuthConnector){a =>
         status(a) shouldBe 200
         contentType(a) shouldBe Some("image/jpeg")
+        await(a).body.dataStream.toString.contains("""renewSession.jpg""")  shouldBe true
       }
     }
   }
