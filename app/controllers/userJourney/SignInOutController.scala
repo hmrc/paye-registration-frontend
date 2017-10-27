@@ -56,7 +56,7 @@ trait SignInOutCtrl extends FrontendController with Actions with I18nSupport {
   def renewSession: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
     implicit user =>
       implicit request =>
-        Ok.sendFile(new File(("public/images/renewSession.jpg"))).as("image")
+        Ok.sendFile(new File("conf/renewSession.jpg")).as("image/jpeg")
   }
 
   def destroySession: Action[AnyContent] = Action {
