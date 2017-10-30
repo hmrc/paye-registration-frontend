@@ -36,8 +36,8 @@ class NatureOfBusinessViewSpec extends PAYERegSpec with I18nSupport {
       document.getElementById("pageHeading").text shouldBe messagesApi("pages.natureOfBusiness.heading")
     }
 
-    "have the correct lede paragraph" in {
-      document.getElementById("lede-paragraph").text shouldBe messagesApi("pages.natureOfBusiness.lede")
+    "have the correct label text" in {
+      document.getElementsByClass("form-label").first().text() shouldBe messagesApi("pages.natureOfBusiness.textArea.label")
     }
 
   }

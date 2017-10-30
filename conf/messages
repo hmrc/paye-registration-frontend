@@ -43,7 +43,7 @@ errors.invalid.nino                                     = National Insurance num
 errors.duplicate.nino                                   = You''ve entered the same National Insurance number more than once
 errors.invalid.sic.noEntry                              = Tell us what the company does
 errors.invalid.sic.overCharLimit                        = Enter a business description using 100 characters or less
-errors.invalid.sic.invalidChars                         = Enter a business description using valid characters
+errors.invalid.sic.invalidChars                         = Enter a business description using only letters, numbers and - , / & ''
 errors.invalid.name.invalidChars                        = Enter a contact name using valid characters
 
 ## Welcome page
@@ -194,9 +194,7 @@ pages.firstPayment.indent                               = Your PAYE scheme will 
 ## NATURE OF BUSINESS
 pages.natureOfBusiness.title                            = What does the company do?
 pages.natureOfBusiness.heading                          = What does the company do?
-pages.natureOfBusiness.lede                             = Describe the company''s main business activities including the type of goods or services it sells.
-pages.natureOfBusiness.hint                             = For example, cleaning services
-pages.natureOfBusiness.textArea.label                   = Enter a description of what the company does
+pages.natureOfBusiness.textArea.label                   = Enter a description of the type of goods or services the company sells.
 
 ## Director Details Page
 pages.directorDetails.title                             = What is the National Insurance number of at least one company director?
