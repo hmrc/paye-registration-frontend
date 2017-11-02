@@ -12,25 +12,31 @@
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages("pages.natureOfBusiness.heading"))</h1>
 
-    <div class="form-group">
-        <p id="lede-paragraph">@Messages("pages.natureOfBusiness.lede")</p>
-    </div>
-
     @govHelpers.form(action = controllers.userJourney.routes.NatureOfBusinessController.submitNatureOfBusiness()) {
-
         <div class="form-group">
-            @payeTextArea(
-                sicForm("description"),
-                '_inputClass -> "form-control--block",
-                '_labelClass -> "form-label",
-                '_label -> messages("pages.natureOfBusiness.textArea.label"),
-                '_percentageWidth -> 98,
-                '_rows -> 5
-            )
+            <div class="char-counter" data-char-counter>
+                @payeTextArea(
+                    sicForm("description"),
+                    '_inputClass -> "form-control--block",
+                    '_labelClass -> "form-label",
+                    '_label -> messages("pages.natureOfBusiness.textArea.label"),
+                    '_percentageWidth -> 98,
+                    '_rows -> 5,
+                    '_maxlength -> 100,
+                    '_dataCharField -> "data_char_field"
+                )
+                <p class="char-counter-text flush" id="no-js-counter-text">
+                    Max 100 characters
+                </p>
+            </div>
         </div>
 
         <div class="form-group">
             <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
         </div>
     }
+
+    <script>
+        document.getElementById("no-js-counter-text").style.visibility = "hidden";
+    </script>
 }
