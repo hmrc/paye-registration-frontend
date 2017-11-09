@@ -1,6 +1,7 @@
 @import helpers.templates.{hiddenDetails, oneOfManyErrorWrapper, payeErrorSummary, payeInput}
 @import models.view.Ninos
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import helpers.templates.linkNewWindow
 
 @(ninoForm: Form[Ninos], directorNames: Map[String, String])(implicit request: Request[_], messages: Messages)
 
@@ -23,9 +24,16 @@
 }
 
 @hiddenDetailsContent = {
-    <p>@Html(Messages("pages.directorDetails.hiddenIntro", "https://ewf.companieshouse.gov.uk//seclogin?tc=1"))</p>
-
-    <p>@Html(Messages("pages.directorDetails.hiddenIntro2", "https://www.gov.uk/limited-company-formation/register-your-company"))</p>
+    <p>
+        @Messages("pages.common.companiesHouse.hiddenIntro.1", Messages("pages.directorDetails.hiddenIntro.value"))
+        @linkNewWindow(Messages("pages.common.companiesHouse.hiddenIntro.url"), Messages("pages.directorDetails.hiddenIntro.label"))
+        @Messages("pages.common.companiesHouse.hiddenIntro.2")
+    </p>
+    <p>
+        @Messages("pages.common.companiesHouse.hiddenIntro2.1")
+        @linkNewWindow(Messages("pages.common.companiesHouse.hiddenIntro2.url"), Messages("pages.common.companiesHouse.hiddenIntro2.label"))
+        @Messages("pages.common.companiesHouse.hiddenIntro2.2")
+    </p>
 }
 
 @main_template(title = messages(s"pages.directorDetails.title")) {

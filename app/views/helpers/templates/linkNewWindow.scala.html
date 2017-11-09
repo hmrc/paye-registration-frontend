@@ -1,0 +1,3 @@
+@(href: String, text: String, htmlId: Option[String] = None)(implicit messages: Messages)
+
+<a href="@{href}" @{htmlId.map(id => s"id=$id")} target="_blank">@text<span class="visually-hidden"> @Messages("app.common.linkHiddenHelperText")</span></a>

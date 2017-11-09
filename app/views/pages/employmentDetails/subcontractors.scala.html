@@ -1,6 +1,7 @@
 @import helpers.templates.{payeInputRadioGroup, payeErrorSummary}
 @import models.view.Subcontractors
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import helpers.templates.linkNewWindow
 
 @(subcontractorsForm: Form[Subcontractors])(implicit request: Request[_], messages: Messages)
 
@@ -11,7 +12,10 @@
     <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.subcontractors.heading")</h1>
     @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitSubcontractors) {
         <p>@Messages("pages.subcontractors.nameRulesIntro")</p>
-        <p>@Html(Messages("pages.subcontractors.findout", "https://www.gov.uk/what-is-the-construction-industry-scheme#work-covered-by-cis"))</p>
+        <p>
+            @Messages("pages.subcontractors.findout1")
+            @linkNewWindow("https://www.gov.uk/what-is-the-construction-industry-scheme#work-covered-by-cis", Messages("pages.subcontractors.findout2"))
+        </p>
         <div class="inline form-group">
             @payeInputRadioGroup(
                 subcontractorsForm("hasContractors"),

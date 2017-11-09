@@ -1,6 +1,7 @@
 @()(implicit request: Request[_], messages: Messages)
 
 @import uk.gov.hmrc.play.views.html.helpers.form
+@import helpers.templates.linkNewWindow
 
 @main_template(title = Messages("pages.welcome.title")) {
 
@@ -17,7 +18,11 @@
             </ul>
         </div>
 
-        <p class="spaced-below" id="otherWaysToRegister">@Html(Messages("pages.welcome.otherWaysToRegister", "https://www.gov.uk/register-employer/y/yes/no/limited-company/no/no#other-ways-to-register"))</p>
+        <p class="spaced-below" id="otherWaysToRegister">
+            @Messages("pages.welcome.otherWaysToRegister1")
+            @linkNewWindow("https://www.gov.uk/register-employer/y/yes/no/limited-company/no/no#other-ways-to-register", Messages("pages.welcome.otherWaysToRegister2"))
+            @Messages("pages.welcome.otherWaysToRegister3")
+        </p>
         <ul class="list list-bullet spaced-below">
             <li id="completionTime">@Messages("pages.welcome.bullet.timeToComplete")</li>
             <li id="processingTime">@Messages("pages.welcome.bullet.timeToProcess")</li>
@@ -31,6 +36,6 @@
         }
 
         <h2>@Messages("pages.welcome.beforeStart")</h2>
-        <p id="nino spaced-below">@Messages("pages.welcome.nino")</p>
-        <p id="nino spaced-below">@Messages("pages.welcome.application")</p>
+        <p class="nino spaced-below">@Messages("pages.welcome.nino")</p>
+        <p class="nino spaced-below">@Messages("pages.welcome.application")</p>
 }

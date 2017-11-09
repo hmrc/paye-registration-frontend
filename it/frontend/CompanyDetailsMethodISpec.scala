@@ -954,7 +954,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") shouldBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "What are the company contact details?"
+      document.title() shouldBe "What are the company's contact details?"
       document.getElementById("businessEmail").attr("value") shouldBe "email@email.zzz"
       document.getElementById("mobileNumber").attr("value") shouldBe "1234567890"
       document.getElementById("phoneNumber").attr("value") shouldBe "0987654321"
@@ -989,7 +989,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status shouldBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "What are the company contact details?"
+      document.title() shouldBe "What are the company's contact details?"
       document.getElementById("businessEmail").attr("value") shouldBe "email@email.zzz"
       document.getElementById("mobileNumber").attr("value") shouldBe "1234567890"
       document.getElementById("phoneNumber").attr("value") shouldBe "0987654321"
@@ -1019,7 +1019,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status shouldBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "What are the company contact details?"
+      document.title() shouldBe "What are the company's contact details?"
       document.getElementById("businessEmail").attr("value") shouldBe ""
       document.getElementById("mobileNumber").attr("value") shouldBe ""
       document.getElementById("phoneNumber").attr("value") shouldBe ""
@@ -1049,7 +1049,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status shouldBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "What are the company contact details?"
+      document.title() shouldBe "What are the company's contact details?"
       document.getElementById("businessEmail").attr("value") shouldBe ""
       document.getElementById("mobileNumber").attr("value") shouldBe ""
       document.getElementById("phoneNumber").attr("value") shouldBe ""
@@ -1091,7 +1091,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status shouldBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "What are the company contact details?"
+      document.title() shouldBe "What are the company's contact details?"
       document.getElementById("businessEmail").attr("value") shouldBe ""
       document.getElementById("mobileNumber").attr("value") shouldBe ""
       document.getElementById("phoneNumber").attr("value") shouldBe ""
