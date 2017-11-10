@@ -56,11 +56,13 @@ class ConfirmROAddressViewSpec extends PAYERegSpec with I18nSupport {
     }
 
     "have the correct drop down body text" in {
-      document.getElementById("incorrect-address-Details").text.contains(messagesApi("pages.confirmRO.help.body")) shouldBe true
+      document.getElementById("incorrect-address-Details").text.contains(messagesApi("pages.confirmRO.hiddenIntro.value")) shouldBe true
+      document.getElementById("incorrect-address-Details").text.contains(messagesApi("pages.confirmRO.hiddenIntro.label")) shouldBe true
+      document.getElementById("incorrect-address-Details").text.contains(messagesApi("pages.common.companiesHouse.hiddenIntro.2")) shouldBe true
     }
 
     "have the correct drop down body link text" in {
-      document.getElementById("companies-house-link").text shouldBe messagesApi("app.common.companies-houseinfo")
+      document.getElementById("companies-house-link").text shouldBe s"${messagesApi("pages.confirmRO.hiddenIntro.label")} ${messagesApi("app.common.linkHiddenHelperText")}"
     }
   }
 }

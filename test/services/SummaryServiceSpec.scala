@@ -182,13 +182,13 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
           ),
           SummaryRow(
-            id = "phoneNumberPAYEContact",
-            answers = List(Right("0987654321")),
+            id = "mobileNumberPAYEContact",
+            answers = List(Right("1234567890")),
             changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
           ),
           SummaryRow(
-            id = "mobileNumberPAYEContact",
-            answers = List(Right("1234567890")),
+            id = "phoneNumberPAYEContact",
+            answers = List(Right("0987654321")),
             changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
           ),
           SummaryRow(
@@ -388,13 +388,13 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
                 changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
               ),
               SummaryRow(
-                id = "phoneNumberPAYEContact",
-                answers = List(Right("0987654321")),
+                id = "mobileNumberPAYEContact",
+                answers = List(Right("1234567890")),
                 changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
               ),
               SummaryRow(
-                id = "mobileNumberPAYEContact",
-                answers = List(Right("1234567890")),
+                id = "phoneNumberPAYEContact",
+                answers = List(Right("0987654321")),
                 changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
               ),
               SummaryRow(
@@ -617,13 +617,13 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
-              id = "phoneNumberPAYEContact",
-              answers = List(Right("0987654321")),
+              id = "mobileNumberPAYEContact",
+              answers = List(Right("1234567890")),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
-              id = "mobileNumberPAYEContact",
-              answers = List(Right("1234567890")),
+              id = "phoneNumberPAYEContact",
+              answers = List(Right("0987654321")),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
@@ -666,12 +666,12 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
-              id = "phoneNumberPAYEContact",
+              id = "mobileNumberPAYEContact",
               answers = List(Left("noAnswerGiven")),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),
             SummaryRow(
-              id = "mobileNumberPAYEContact",
+              id = "phoneNumberPAYEContact",
               answers = List(Left("noAnswerGiven")),
               changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
             ),

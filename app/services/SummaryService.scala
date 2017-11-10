@@ -227,17 +227,17 @@ trait SummarySrv {
           changeLink = changeCall
         ),
         SummaryRow(
-          id = "phoneNumberPAYEContact",
-          answers = List(digitalContact.phoneNumber match {
-            case Some(phone) => Right(phone)
+          id = "mobileNumberPAYEContact",
+          answers = List(digitalContact.mobileNumber match {
+            case Some(mobile) => Right(mobile)
             case _ => Left("noAnswerGiven")
           }),
           changeLink = changeCall
         ),
         SummaryRow(
-          id = "mobileNumberPAYEContact",
-          answers = List(digitalContact.mobileNumber match {
-            case Some(mobile) => Right(mobile)
+          id = "phoneNumberPAYEContact",
+          answers = List(digitalContact.phoneNumber match {
+            case Some(phone) => Right(phone)
             case _ => Left("noAnswerGiven")
           }),
           changeLink = changeCall

@@ -419,7 +419,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status shouldBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Where should we send post to?"
+      document.title() shouldBe "Where should we send post about the company's PAYE?"
       document.getElementById("chosenAddress-roaddress").attr("value") shouldBe "roAddress"
       document.getElementById("ro-address-line-1").text shouldBe "1"
       document.getElementById("ro-address-line-2").text shouldBe ", 2"
@@ -511,7 +511,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status shouldBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Where should we send post to?"
+      document.title() shouldBe "Where should we send post about the company's PAYE?"
       document.getElementById("chosenAddress-roaddress").attr("value") shouldBe "roAddress"
       document.getElementById("chosenAddress-roaddress").attr("name") shouldBe "chosenAddress"
       document.getElementById("ro-address-line-1").text shouldBe "1"
