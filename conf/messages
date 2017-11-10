@@ -54,20 +54,22 @@ errors.invalid.sic.invalidChars                         = Enter a business descr
 errors.invalid.name.invalidChars                        = Enter a contact name using valid characters
 
 ## Welcome page
-pages.welcome.title                                     = Register as an employer
-pages.welcome.heading                                   = Register as an employer
-pages.welcome.heading.register                          = You must register if you:
-pages.welcome.bullet.pay                                = pay any employees - including company directors - £113 or more a week (this is the same as £490 a month or £5,876 a year)
-pages.welcome.bullet.subcontractors                     = use subcontractors for construction work
+pages.welcome.title                                     = Register as an employer for PAYE
+pages.welcome.heading                                   = Register as an employer for PAYE
+pages.welcome.heading1.register                         = PAYE is HM Revenue and Customs''(HMRC) system to collect Income Tax and National Insurance from employment. It stands for '' Pay As You Earn''.
+pages.welcome.heading2.register                         = Use this service if any of the following apply:
+pages.welcome.bullet.pay                                = it pays employees - including company directors - £113 or more a week (this is the same as £490 a month or £5,876 a year)
+pages.welcome.bullet.pension                            = it pays any amount to employees - including company directors - who also receive pension payments or income from another job
+pages.welcome.bullet.subcontractors                     = it uses subcontractors for construction work
 pages.welcome.beforeStart                               = Before you start
 pages.welcome.otherWaysToRegister1                      = You''ll need to use
 pages.welcome.otherWaysToRegister2                      = another service to register
 pages.welcome.otherWaysToRegister3                      = if you:
-pages.welcome.bullet.timeToComplete                     = provide employees with expenses or benefits
-pages.welcome.bullet.timeToProcess                      = claim tax back from Construction Industry Scheme (CIS) payments
-pages.welcome.2months                                   = You can''t register as an employer more than 2 months before you start paying people, including company directors.
+pages.welcome.bullet.timeToComplete                     = provides employees with expenses or benefits
+pages.welcome.bullet.timeToProcess                      = claims tax back from Construction Industry Scheme (CIS) payments
+pages.welcome.2months                                   = A company can''t register as an employer more than 2 months before it starts paying people, including company directors.
 pages.welcome.nino                                      = You''ll need the National Insurance number of at least one company director.
-pages.welcome.application                               = Your application shouldn''t take more than 15 minutes to complete. You''ll need to allow 2 weeks for HMRC to process it.
+pages.welcome.application                               = Your application shouldn''t take more than 10 minutes to complete. You''ll need to allow 2 weeks for HMRC to process it.
 
 ## Company Eligibility
 pages.companyEligibility.title                          = Is the company an offshore employer outside the European Economic Area that doesn''t pay UK National Insurance?
