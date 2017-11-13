@@ -56,7 +56,7 @@ errors.invalid.name.invalidChars                        = Enter a contact name u
 ## Welcome page
 pages.welcome.title                                     = Register as an employer for PAYE
 pages.welcome.heading                                   = Register as an employer for PAYE
-pages.welcome.heading1.register                         = PAYE is HM Revenue and Customs''(HMRC) system to collect Income Tax and National Insurance from employment. It stands for '' Pay As You Earn''.
+pages.welcome.heading1.register                         = PAYE is HM Revenue and Customs'' (HMRC) system to collect Income Tax and National Insurance from employment. It stands for '' Pay As You Earn''.
 pages.welcome.heading2.register                         = Use this service if any of the following apply:
 pages.welcome.bullet.pay                                = it pays employees - including company directors - £113 or more a week (this is the same as £490 a month or £5,876 a year)
 pages.welcome.bullet.pension                            = it pays any amount to employees - including company directors - who also receive pension payments or income from another job
