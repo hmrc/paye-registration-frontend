@@ -64,7 +64,7 @@ class DashboardControllerSpec extends PAYERegSpec {
       AuthBuilder.showWithAuthorisedUser(controller.dashboard, mockAuthConnector) {
         (result: Future[Result]) =>
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controller.companyRegUrl}${controller.companyRegUri}/dashboard")
+          redirectLocation(result) shouldBe Some(s"${controller.companyRegUrl}${controller.companyRegUri}/company-registration-overview")
       }
     }
   }
