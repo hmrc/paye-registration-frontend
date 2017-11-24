@@ -45,6 +45,6 @@ trait DashboardCtrl extends FrontendController with Actions with I18nSupport wit
 
   val dashboard = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user =>
     implicit request =>
-      Future.successful(Redirect(s"$companyRegUrl$companyRegUri/dashboard"))
+      Future.successful(Redirect(s"$companyRegUrl$companyRegUri/company-registration-overview"))
   }
 }

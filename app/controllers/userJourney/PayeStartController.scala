@@ -97,10 +97,10 @@ trait PayeStartCtrl extends FrontendController with Actions with I18nSupport {
 
   private def checkAndStoreCurrentProfile(f: => CurrentProfile => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
     currentProfileService.fetchAndStoreCurrentProfile flatMap {
-      case CurrentProfile(_, compRegProfile, _, _) if compRegProfile.status equals "draft" => Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/start"))
+      case CurrentProfile(_, compRegProfile, _, _) if compRegProfile.status equals "draft" => Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/register"))
       case currentProfile => f(currentProfile)
     } recover {
-      case ex: NotFoundException => Redirect(s"$compRegFEURL$compRegFEURI/start")
+      case ex: NotFoundException => Redirect(s"$compRegFEURL$compRegFEURI/register")
       case _ => InternalServerError(views.html.pages.error.restart())
     }
   }
