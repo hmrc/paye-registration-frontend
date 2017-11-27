@@ -48,6 +48,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
     "defaultCTStatus" -> "aGVsZA==",
     "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ==",
     "defaultCHROAddress" -> "eyJsaW5lMSI6IjMwIFRlc3QgUm9hZCIsImxpbmUyIjoiVGVzdGxleSIsImxpbmUzIjoiVGVzdGZvcmQiLCJsaW5lNCI6IlRlc3RzaGlyZSIsInBvc3RDb2RlIjoiVEUxIDNTVCJ9",
+    "defaultOfficerList" -> "ICBbDQogICAgew0KICAgICAgIm5hbWUiIDogInRlc3QiLA0KICAgICAgIm5hbWVfZWxlbWVudHMiIDogew0KICAgICAgICAiZm9yZW5hbWUiIDogInRlc3QxIiwNCiAgICAgICAgIm90aGVyX2ZvcmVuYW1lcyIgOiAidGVzdDExIiwNCiAgICAgICAgInN1cm5hbWUiIDogInRlc3RhIiwNCiAgICAgICAgInRpdGxlIiA6ICJNciINCiAgICAgIH0sDQogICAgICAib2ZmaWNlcl9yb2xlIiA6ICJjaWMtbWFuYWdlciINCiAgICB9LCB7DQogICAgICAibmFtZSIgOiAidGVzdCIsDQogICAgICAibmFtZV9lbGVtZW50cyIgOiB7DQogICAgICAgICJmb3JlbmFtZSIgOiAidGVzdDIiLA0KICAgICAgICAib3RoZXJfZm9yZW5hbWVzIiA6ICJ0ZXN0MjIiLA0KICAgICAgICAic3VybmFtZSIgOiAidGVzdGIiLA0KICAgICAgICAidGl0bGUiIDogIk1yIg0KICAgICAgfSwNCiAgICAgICJvZmZpY2VyX3JvbGUiIDogImNvcnBvcmF0ZS1kaXJlY3RvciINCiAgICB9DQogIF0=",
     "microservice.services.incorporation-information.uri" -> incorpInfoUri
   )
 
@@ -56,6 +57,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
     .build()
 
   val testTransId = "testTransId"
+  val testRegId = "testRegId"
   implicit val hc = HeaderCarrier()
 
   "getCoHoCompanyDetails" should {
@@ -190,9 +192,16 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
 
       val incorpInfoConnector = new IncorporationInformationConnector(metrics)
 
-      def getResponse = incorpInfoConnector.getOfficerList(testTransId)
+      def getResponse = incorpInfoConnector.getOfficerList(testTransId,testRegId)
       setupWiremockResult(200, tstOfficerListJson)
 
+      await(getResponse) shouldBe tstOfficerListModel
+    }
+
+    "get an officer list from config if the regId is whitelisted and every other service returns none" in {
+      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      def getResponse = incorpInfoConnector.getOfficerList(testTransId,"regWhitelist456")
+      setupWiremockResult(404, "")
       await(getResponse) shouldBe tstOfficerListModel
     }
 
@@ -201,7 +210,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
 
       setupWiremockResult(200, """{"officers": []}""")
 
-      intercept[OfficerListNotFoundException](await(incorpInfoConnector.getOfficerList(testTransId)))
+      intercept[OfficerListNotFoundException](await(incorpInfoConnector.getOfficerList(testTransId,testRegId)))
     }
 
     "throw an OfficerListNotFoundException for a 404 response" in {
@@ -209,7 +218,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
 
       setupWiremockResult(404, "")
 
-      intercept[OfficerListNotFoundException](await(incorpInfoConnector.getOfficerList(testTransId)))
+      intercept[OfficerListNotFoundException](await(incorpInfoConnector.getOfficerList(testTransId,testRegId)))
     }
 
     "throw a BadRequestException" in {
@@ -217,7 +226,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
 
       setupWiremockResult(400, "")
 
-      intercept[BadRequestException](await(incorpInfoConnector.getOfficerList(testTransId)))
+      intercept[BadRequestException](await(incorpInfoConnector.getOfficerList(testTransId,testRegId)))
     }
 
     "throw an Exception" in {
@@ -225,13 +234,13 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
 
       setupWiremockResult(500, "")
 
-      intercept[Exception](await(incorpInfoConnector.getOfficerList(testTransId)))
+      intercept[Exception](await(incorpInfoConnector.getOfficerList(testTransId,testRegId)))
     }
 
     "get an officer list from II when stub is in place for other II calls" in {
       val incorpInfoConnector = new IncorporationInformationConnector(metrics)
 
-      def getResponse = incorpInfoConnector.getOfficerList(testTransId)
+      def getResponse = incorpInfoConnector.getOfficerList(testTransId,testRegId)
       setupWiremockResult(200, tstOfficerListJson)
 
       await(getResponse) shouldBe tstOfficerListModel

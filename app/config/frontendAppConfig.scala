@@ -21,8 +21,9 @@ import java.util.Base64
 
 import models.Address
 import models.api.Director
+import models.external.{Officer, OfficerList}
 import play.api.Play.{configuration, current}
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.{JsObject, Json, Reads}
 import uk.gov.hmrc.play.config.ServicesConfig
 
 trait AppConfig {
@@ -66,7 +67,10 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   private def loadJsonConfigBase64[T](key: String)(implicit reads: Reads[T]): T = {
     val json = Json.parse(Base64.getDecoder.decode(configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))))
-    json.asOpt[T].getOrElse(throw new Exception(s"Incorrect data for the key: $key"))
+    json.validate[T].fold(
+      errors => throw new Exception(s"Incorrect data for the key: $key and ##  $errors"),
+      valid  => valid
+    )
   }
 
   lazy val regIdWhitelist     = whiteListConfig("regIdWhitelist")
@@ -74,7 +78,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   lazy val defaultCHROAddress = loadJsonConfigBase64[Address]("defaultCHROAddress")
   lazy val defaultSeqDirector = loadJsonConfigBase64[Seq[Director]]("defaultSeqDirector")(Director.seqReads)
   lazy val defaultCTStatus    = loadStringConfigBase64("defaultCTStatus")
-
+  lazy val defaultOfficerList = loadJsonConfigBase64[OfficerList]("defaultOfficerList")(OfficerList.formatModel)
   lazy val uriWhiteList     = configuration.getStringSeq("csrfexceptions.whitelist").getOrElse(Seq.empty).toSet
   lazy val csrfBypassValue  = loadStringConfigBase64("Csrf-Bypass-value")
 }

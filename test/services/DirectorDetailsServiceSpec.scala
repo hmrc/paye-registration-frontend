@@ -373,7 +373,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
         )
       )
 
-      when(mockCoHoService.getDirectorDetails(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(directorDetails))
+      when(mockCoHoService.getDirectorDetails(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(directorDetails))
 
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(Some(directorDetails)))
@@ -396,7 +396,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
       val payeregDirectors = Seq(dir(nino = None, title = Some("Title2"))
 
       )
-      when(mockCoHoService.getDirectorDetails(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(cohoDirectors))
+      when(mockCoHoService.getDirectorDetails(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(cohoDirectors))
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
       when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
@@ -422,7 +422,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
           "0" -> dir(nino = None,title = Some("Title2"))
         )
       )
-      when(mockCoHoService.getDirectorDetails(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(cohoDirectors))
+      when(mockCoHoService.getDirectorDetails(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(cohoDirectors))
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(Some(s4lDirectors)))
       when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
@@ -443,7 +443,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
         )
       )
 
-      when(mockCoHoService.getDirectorDetails(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(directorDetails))
+      when(mockCoHoService.getDirectorDetails(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(directorDetails))
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
 
@@ -472,7 +472,7 @@ class DirectorDetailsServiceSpec extends PAYERegSpec with S4LFixture with PAYERe
       when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Nil))
 
-      when(mockCoHoService.getDirectorDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCoHoService.getDirectorDetails(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(directorDetails))
 
       when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))

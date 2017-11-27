@@ -20,7 +20,7 @@ import config.FrontendAppConfig
 import connectors.{DESResponse, IncorpInfoResponse, IncorpInfoSuccessResponse}
 import models.DigitalContactDetails
 import models.api.{Director, CompanyDetails => CompanyDetailsAPI}
-import models.external.{CompanyRegistrationProfile, CoHoCompanyDetailsModel}
+import models.external.{CoHoCompanyDetailsModel, CompanyRegistrationProfile, Officer, OfficerList}
 import play.api.Logger
 
 import scala.concurrent.Future
@@ -48,6 +48,8 @@ trait RegistrationWhitelist {
     )
   )
   implicit def cancelSubmission(regId: String): DESResponse = throw new Exception(s"Registration ID $regId is in whitelist, no submission allowed")
+
+  implicit def getDefaultOfficerList(regId:String):OfficerList = applicationConfig.defaultOfficerList
 
   def ifRegIdNotWhitelisted[T](regId: String)(f: => Future[T])(implicit default: String => T): Future[T] = {
     if( applicationConfig.regIdWhitelist.contains(regId) ) {
