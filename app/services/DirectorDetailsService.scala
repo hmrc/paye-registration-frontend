@@ -61,7 +61,7 @@ trait DirectorDetailsSrv extends RegistrationWhitelist {
 
   def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
     for {
-      iiDirectors       <- incorpInfoService.getDirectorDetails(transactionId)
+      iiDirectors       <- incorpInfoService.getDirectorDetails(txId = transactionId,regId)
       backendDirectors  <- s4LService.fetchAndGet(CacheKeys.DirectorDetails.toString, regId) flatMap {
         case Some(dirs) => Future.successful(dirs)
         case None => for {

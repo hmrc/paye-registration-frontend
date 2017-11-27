@@ -44,9 +44,9 @@ trait IncorporationInformationSrv {
     }
   }
 
-  def getDirectorDetails(txId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
+  def getDirectorDetails(txId: String,regId:String)(implicit hc: HeaderCarrier): Future[Directors] = {
     for {
-      officerList     <- incorpInfoConnector.getOfficerList(txId)
+      officerList     <- incorpInfoConnector.getOfficerList(txId,regId)
       directorDetails <- convertOfficerList2Directors(officerList)
     } yield directorDetails
   }

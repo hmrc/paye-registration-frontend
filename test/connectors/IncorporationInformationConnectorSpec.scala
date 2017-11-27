@@ -119,39 +119,41 @@ class IncorporationInformationConnectorSpec extends PAYERegSpec with CoHoAPIFixt
         |  ]
         |}""".stripMargin
 
+
     val tstOfficerListObject = Json.parse(tstOfficerListJson).as[JsObject]
     val testTransId = "testTransId"
+    val testRegId = "regId"
 
     "return a successful CoHo api response object for valid data" in new Setup(true) {
       mockHttpGet[JsObject](connector.incorpInfoUrl, Future.successful(tstOfficerListObject))
 
-      await(connector.getOfficerList(testTransId)) shouldBe tstOfficerList
+      await(connector.getOfficerList(testTransId,testRegId)) shouldBe tstOfficerList
     }
 
     "return an OfficerListNotFound exception when CoHo api response object returns an empty list" in new Setup(true) {
       val emptyOfficersListJson = JsObject(Seq("officers" -> Json.arr()))
       mockHttpGet[JsObject](connector.incorpInfoUrl, Future.successful(emptyOfficersListJson))
 
-      intercept[OfficerListNotFoundException](await(connector.getOfficerList(testTransId)))
+      intercept[OfficerListNotFoundException](await(connector.getOfficerList(testTransId,testRegId)))
     }
 
     "return an OfficerListNotFound exception for a downstream not found error" in new Setup(true) {
       mockHttpGet[JsObject](connector.incorpInfoUrl, Future.failed(new NotFoundException("tstException")))
 
-      intercept[OfficerListNotFoundException](await(connector.getOfficerList(testTransId)))
+      intercept[OfficerListNotFoundException](await(connector.getOfficerList(testTransId,testRegId)))
     }
 
     "return a CoHo Bad Request api response object for a bad request" in new Setup(true) {
       mockHttpGet[JsObject](connector.incorpInfoUrl, Future.failed(new BadRequestException("tstException")))
 
-      intercept[BadRequestException](await(connector.getOfficerList(testTransId)))
+      intercept[BadRequestException](await(connector.getOfficerList(testTransId,testRegId)))
     }
 
     "return a CoHo error api response object for a downstream error" in new Setup(true) {
       val ex = new RuntimeException("tstException")
       mockHttpGet[JsObject](connector.incorpInfoUrl, Future.failed(ex))
 
-      intercept[RuntimeException](await(connector.getOfficerList(testTransId)) )
+      intercept[RuntimeException](await(connector.getOfficerList(testTransId,testRegId)) )
     }
   }
 

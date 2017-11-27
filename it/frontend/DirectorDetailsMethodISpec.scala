@@ -55,7 +55,8 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
     "defaultCTStatus" -> "aGVsZA==",
     "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ==",
     "defaultCHROAddress" -> "eyJwcmVtaXNlcyI6IjE0IiwiYWRkcmVzc19saW5lXzEiOiJUZXN0IERlZmF1bHQgU3RyZWV0IiwiYWRkcmVzc19saW5lXzIiOiJUZXN0bGV5IiwibG9jYWxpdHkiOiJUZXN0Zm9yZCIsImNvdW50cnkiOiJVSyIsInBvc3RhbF9jb2RlIjoiVEUxIDFTVCJ9",
-    "defaultSeqDirector" -> "W3siZGlyZWN0b3IiOnsiZm9yZW5hbWUiOiJmYXVsdHkiLCJzdXJuYW1lIjoiZGVmYXVsdCJ9fSx7ImRpcmVjdG9yIjp7ImZvcmVuYW1lIjoiVGVzdCIsInN1cm5hbWUiOiJSZWdJZFdoaXRlbGlzdCIsInRpdGxlIjoiTXJzIn19XQ=="
+    "defaultSeqDirector" -> "W3siZGlyZWN0b3IiOnsiZm9yZW5hbWUiOiJmYXVsdHkiLCJzdXJuYW1lIjoiZGVmYXVsdCJ9fSx7ImRpcmVjdG9yIjp7ImZvcmVuYW1lIjoiVGVzdCIsInN1cm5hbWUiOiJSZWdJZFdoaXRlbGlzdCIsInRpdGxlIjoiTXJzIn19XQ==",
+    "defaultOfficerList" -> "IFsNCiAgICB7DQogICAgICAibmFtZSIgOiAidGVzdCIsDQogICAgICAibmFtZV9lbGVtZW50cyIgOiB7DQogICAgICAgICJmb3JlbmFtZSIgOiAidGVzdDEiLA0KICAgICAgICAib3RoZXJfZm9yZW5hbWVzIiA6ICJ0ZXN0MTEiLA0KICAgICAgICAic3VybmFtZSIgOiAidGVzdGEiLA0KICAgICAgICAidGl0bGUiIDogIk1yIg0KICAgICAgfSwNCiAgICAgICJvZmZpY2VyX3JvbGUiIDogImRpcmVjdG9yIg0KICAgIH0sIHsNCiAgICAgICJuYW1lIiA6ICJ0ZXN0IiwNCiAgICAgICJuYW1lX2VsZW1lbnRzIiA6IHsNCiAgICAgICAgImZvcmVuYW1lIiA6ICJ0ZXN0MiIsDQogICAgICAgICJvdGhlcl9mb3JlbmFtZXMiIDogInRlc3QyMiIsDQogICAgICAgICJzdXJuYW1lIiA6ICJ0ZXN0YiIsDQogICAgICAgICJ0aXRsZSIgOiAiTXIiDQogICAgICB9LA0KICAgICAgIm9mZmljZXJfcm9sZSIgOiAiZGlyZWN0b3IiDQogICAgfSwgew0KICAgICAgIm5hbWUiIDogInRlc3QiLA0KICAgICAgIm5hbWVfZWxlbWVudHMiIDogew0KICAgICAgICAiZm9yZW5hbWUiIDogInRlc3QzIiwNCiAgICAgICAgIm90aGVyX2ZvcmVuYW1lcyIgOiAidGVzdDMzIiwNCiAgICAgICAgInN1cm5hbWUiIDogInRlc3RjIiwNCiAgICAgICAgInRpdGxlIiA6ICJUZXN0IFRpdGxlIFRoYXQgSXMgTW9yZSBUaGFuIFR3ZW50eSBDaGFycyINCiAgICAgIH0sDQogICAgICAib2ZmaWNlcl9yb2xlIiA6ICJkaXJlY3RvciINCiAgICB9DQogIF0="
   ))
 
   override def beforeEach() {
@@ -75,44 +76,9 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
       stubKeystoreMetadata(SessionId, regIdWhitelisted)
 
       stubGet(s"/save4later/paye-registration-frontend/$regIdWhitelisted", 404, "")
-      val tstOfficerListJson =
-        """
-          |{
-          |  "officers": [
-          |    {
-          |      "name" : "test",
-          |      "name_elements" : {
-          |        "forename" : "test1",
-          |        "other_forenames" : "test11",
-          |        "surname" : "testa",
-          |        "title" : "Mr"
-          |      },
-          |      "officer_role" : "director"
-          |    }, {
-          |      "name" : "test",
-          |      "name_elements" : {
-          |        "forename" : "test2",
-          |        "other_forenames" : "test22",
-          |        "surname" : "testb",
-          |        "title" : "Mr"
-          |      },
-          |      "officer_role" : "director"
-          |    }, {
-          |      "name" : "test",
-          |      "name_elements" : {
-          |        "forename" : "test3",
-          |        "other_forenames" : "test33",
-          |        "surname" : "testc",
-          |        "title" : "Test Title That Is More Than Twenty Chars"
-          |      },
-          |      "officer_role" : "director"
-          |    }
-          |  ]
-          |}""".stripMargin
-      stubGet(s"/incorporation-information/12345/officer-list", 200, tstOfficerListJson)
+
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/save4later/paye-registration-frontend/$regIdWhitelisted/data/DirectorDetails", 200, dummyS4LResponse)
-
       val fResponse = buildClient("/director-national-insurance-number").
         withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()

@@ -33,10 +33,14 @@ object Officer {
     (__ \ "resigned_on").readNullable[DateTime] and
     (__ \ "appointment_link").readNullable[String]
   )(Officer.apply _)
+
+  val seqReads: Reads[Seq[Officer]] = new Reads[Seq[Officer]] {
+    override def reads(json: JsValue): JsResult[Seq[Officer]] = Json.fromJson[Seq[Officer]](json)
+  }
 }
 
 case class OfficerList(items: Seq[Officer])
 
 object OfficerList {
-  implicit val formatModel: Reads[OfficerList] = __.read[Seq[Officer]] map OfficerList.apply
+  implicit val formatModel: Reads[OfficerList] = Officer.seqReads map OfficerList.apply
 }
