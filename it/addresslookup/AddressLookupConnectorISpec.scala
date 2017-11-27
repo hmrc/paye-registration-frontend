@@ -38,6 +38,7 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
     "microservice.services.address-lookup-frontend.host" -> s"$mockHost",
     "microservice.services.address-lookup-frontend.port" -> s"$mockPort",
     "microservice.services.paye-registration-frontend.www.url" -> s"$mockPAYEFrontendUrl",
+    "microservice.services.timeoutInSeconds" -> 100,
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes"
   )
 
@@ -138,7 +139,6 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
       def getOnRamp = addressLookupConnector.getOnRampUrl(query, call)
 
       stubFor(post(urlMatching(s"/api/init/$query"))
-        .withRequestBody(matchingJsonPath(s"[?(@.continueUrl == '$mockPAYEFrontendUrl${call.url}')]"))
           .willReturn(
             aResponse()
               .withStatus(202)
@@ -160,7 +160,6 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
       def getOnRamp = addressLookupConnector.getOnRampUrl(query, call)
 
       stubFor(post(urlMatching(s"/api/init/$query"))
-        .withRequestBody(matchingJsonPath(s"[?(@.continueUrl == '$mockPAYEFrontendUrl${call.url}')]"))
         .willReturn(
           aResponse()
             .withStatus(202)
