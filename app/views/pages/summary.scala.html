@@ -4,25 +4,16 @@
 
 @(summaryModel: Summary)(implicit request: Request[_], messages: Messages)
 
-@main_template(title = Messages("pages.summary.title"), pageCSS = Some(Html(s"""<link rel="stylesheet" href="${routes.Assets.at("stylesheets/summary.css")}">"""))) {
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.summary.heading")</h1>
+@main_template(title = Messages("pages.summary.title")) {
+    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.summary.heading")</h1>
 
     @for(section <- summaryModel.sections) {
-        <table class="check-your-answers multiple-sections" id="@{section.id}Table">
-            <caption class="heading-medium" id="@{section.id}SectionHeading">@Messages(s"pages.summary.${section.id}.sectionHeading")</caption>
-            <thead class="visuallyhidden">
-                <tr>
-                    <th>@Messages("pages.summary.weAsked")</th>
-                    <th>@Messages("pages.summary.youSaid")</th>
-                    <th>@Messages("pages.summary.youCan")</th>
-                </tr>
-            </thead>
-            <tbody>
+        <h2 class="heading-medium" id="@{section.id}SectionHeading">@Messages(s"pages.summary.${section.id}.sectionHeading")</h2>
+        <dl class="govuk-check-your-answers cya-questions-long" id="@{section.id}Table">
             @for(row <- section.rows) {
                 @summaryRow(row)
             }
-            </tbody>
-        </table>
+        </dl>
     }
     <br>
     <div class="form-group">
