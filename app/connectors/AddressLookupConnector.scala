@@ -21,31 +21,31 @@ import javax.inject.{Inject, Singleton}
 import com.codahale.metrics.{Counter, Timer}
 import config.WSHttp
 import models.Address
-import play.api.Logger
-import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.{Configuration, Logger}
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
 import services.{MetricsService, MetricsSrv}
 import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 import scala.util.control.NoStackTrace
 
 @Singleton
-class AddressLookupConnector @Inject()(val metricsService: MetricsService) extends AddressLookupConnect with ServicesConfig {
-  val addressLookupFrontendUrl     = baseUrl("address-lookup-frontend")
-  lazy val payeRegistrationUrl     = getConfString("paye-registration-frontend.www.url","")
+class AddressLookupConnector @Inject()(val metricsService: MetricsService, config: ServicesConfig, playConfig: Configuration) extends AddressLookupConnect {
+  val addressLookupFrontendUrl     = config.baseUrl("address-lookup-frontend")
+  lazy val payeRegistrationUrl     = config.getConfString("paye-registration-frontend.www.url","")
   val http : CoreGet with CorePost = WSHttp
   val successCounter = metricsService.addressLookupSuccessResponseCounter
   val failedCounter  = metricsService.addressLookupFailedResponseCounter
   def timer          = metricsService.addressLookupResponseTimer.time()
-  lazy val timeoutAmount: Int = getConfInt("timeoutInSeconds",throw new Exception)
+  lazy val timeoutAmount: Int = playConfig.underlying.getInt("timeoutInSeconds")
 }
 
 class ALFLocationHeaderNotSetException extends NoStackTrace
 
-trait AddressLookupConnect  {
+trait AddressLookupConnect {
 
   val addressLookupFrontendUrl: String
   val payeRegistrationUrl: String

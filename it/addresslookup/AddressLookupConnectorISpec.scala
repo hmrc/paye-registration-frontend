@@ -38,7 +38,7 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
     "microservice.services.address-lookup-frontend.host" -> s"$mockHost",
     "microservice.services.address-lookup-frontend.port" -> s"$mockPort",
     "microservice.services.paye-registration-frontend.www.url" -> s"$mockPAYEFrontendUrl",
-    "microservice.services.timeoutInSeconds" -> 100,
+    "timeoutInSeconds" -> 100,
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes"
   )
 
@@ -72,8 +72,7 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
     )
 
     "get an address from a 200" in {
-      lazy val metrics = app.injector.instanceOf(classOf[MetricsService])
-      val addressLookupConnector = new AddressLookupConnector(metrics)
+      val addressLookupConnector = app.injector.instanceOf(classOf[AddressLookupConnector])
 
       def getAddress = addressLookupConnector.getAddress(testId)
 
@@ -109,8 +108,7 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
         country = None
       )
 
-      lazy val metrics = app.injector.instanceOf(classOf[MetricsService])
-      val addressLookupConnector = new AddressLookupConnector(metrics)
+      val addressLookupConnector = app.injector.instanceOf(classOf[AddressLookupConnector])
 
       def getAddress = addressLookupConnector.getAddress(testId)
 
@@ -133,8 +131,7 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
       lazy val call: Call = controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()
       val tstALFUrl = """/test-alf/start-url"""
 
-      lazy val metrics = app.injector.instanceOf(classOf[MetricsService])
-      val addressLookupConnector = new AddressLookupConnector(metrics)
+      val addressLookupConnector = app.injector.instanceOf(classOf[AddressLookupConnector])
 
       def getOnRamp = addressLookupConnector.getOnRampUrl(query, call)
 
@@ -154,8 +151,7 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
       lazy val call: Call = controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()
       val tstALFUrl = """/test-alf/start-url"""
 
-      lazy val metrics = app.injector.instanceOf(classOf[MetricsService])
-      val addressLookupConnector = new AddressLookupConnector(metrics)
+      val addressLookupConnector = app.injector.instanceOf(classOf[AddressLookupConnector])
 
       def getOnRamp = addressLookupConnector.getOnRampUrl(query, call)
 
