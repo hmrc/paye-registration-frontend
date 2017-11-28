@@ -22,8 +22,8 @@ import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.Address
 import models.api.Name
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.{Application, Play}
 import services.MetricsService
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import utils.PAYEFeatureSwitch
@@ -34,8 +34,8 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  lazy val metrics = Play.current.injector.instanceOf[MetricsService]
-  lazy val featureSwitch = Play.current.injector.instanceOf[PAYEFeatureSwitch]
+  lazy val metrics       = app.injector.instanceOf[MetricsService]
+  lazy val featureSwitch = app.injector.instanceOf[PAYEFeatureSwitch]
 
   val incorpInfoUri = "/incorpInfoUri"
   val stubbedUri = "/stubbedUri"

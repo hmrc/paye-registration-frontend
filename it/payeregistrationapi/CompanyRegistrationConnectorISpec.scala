@@ -67,8 +67,8 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
     "get a status and a transaction id" when {
 
       "the feature flag points at the stub" in {
-        lazy val metrics = Play.current.injector.instanceOf[MetricsService]
-        lazy val featureSwitch = Play.current.injector.instanceOf[PAYEFeatureSwitch]
+        lazy val metrics = app.injector.instanceOf[MetricsService]
+        lazy val featureSwitch = app.injector.instanceOf[PAYEFeatureSwitch]
         val companyRegistrationConnector = new CompanyRegistrationConnector(featureSwitch, metrics)
 
         def getResponse = companyRegistrationConnector.getCompanyRegistrationDetails(regId)
@@ -95,8 +95,8 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
           )
         )
 
-        lazy val metrics = Play.current.injector.instanceOf[MetricsService]
-        lazy val featureSwitch = Play.current.injector.instanceOf[PAYEFeatureSwitch]
+        lazy val metrics = app.injector.instanceOf[MetricsService]
+        lazy val featureSwitch = app.injector.instanceOf[PAYEFeatureSwitch]
         val companyRegistrationConnector = new CompanyRegistrationConnector(featureSwitch, metrics)
 
         await(buildClient("/test-only/feature-flag/companyRegistration/true").get())

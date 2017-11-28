@@ -20,9 +20,9 @@ import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor
 import connectors.{BusinessRegistrationConnector, CompanyRegistrationConnector, KeystoreConnector, PAYERegistrationConnector}
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProfile}
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.{Application, Play}
 import services.CurrentProfileService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
@@ -32,10 +32,10 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  lazy val businessRegistrationConnector = Play.current.injector.instanceOf[BusinessRegistrationConnector]
-  lazy val keystoreConnector = Play.current.injector.instanceOf[KeystoreConnector]
-  lazy val companyRegistrationConnector = Play.current.injector.instanceOf[CompanyRegistrationConnector]
-  lazy val payeRegistrationConnector = Play.current.injector.instanceOf[PAYERegistrationConnector]
+  lazy val businessRegistrationConnector = app.injector.instanceOf[BusinessRegistrationConnector]
+  lazy val keystoreConnector             = app.injector.instanceOf[KeystoreConnector]
+  lazy val companyRegistrationConnector  = app.injector.instanceOf[CompanyRegistrationConnector]
+  lazy val payeRegistrationConnector     = app.injector.instanceOf[PAYERegistrationConnector]
 
   val additionalConfiguration = Map(
     "auditing.consumer.baseUri.host" -> s"$mockHost",
