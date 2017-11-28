@@ -66,11 +66,12 @@ trait AddressLookupConnect {
   }
 
   private[connectors] def createOnRampJson(call: Call):JsObject = {
-    val continue     =    Json.obj("contineUrl" -> s"$payeRegistrationUrl${call.url}")
-    val timeout      = Json.obj("timeout" ->
-        Json.obj(
-          "timeoutAmount" -> timeoutAmount,
-          "timeoutUrl" ->  s"$payeRegistrationUrl${controllers.userJourney.routes.SignInOutController.destroySession().url}"))
+    val continue     = Json.obj("continueUrl" -> s"$payeRegistrationUrl${call.url}")
+    val timeout      = Json.obj("timeout" -> Json.obj(
+      "timeoutAmount" -> timeoutAmount,
+      "timeoutUrl" ->  s"$payeRegistrationUrl${controllers.userJourney.routes.SignInOutController.destroySession().url}"
+    ))
+
     continue ++ timeout
   }
 

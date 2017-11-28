@@ -86,7 +86,7 @@ class AddressLookupConnectorSpec extends PAYERegSpec with BusinessRegistrationFi
           | "timeoutAmount": ${connector.timeoutAmount},
           | "timeoutUrl": "${connector.payeRegistrationUrl}${controllers.userJourney.routes.SignInOutController.destroySession().url}"
           | },
-          |"contineUrl":"${connector.payeRegistrationUrl}/foobar"
+          |"continueUrl":"${connector.payeRegistrationUrl}/foobar"
           |}
         """.stripMargin
       ).as[JsObject]
