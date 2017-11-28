@@ -18,9 +18,9 @@ package frontend
 import java.util.UUID
 
 import audit.AuditPAYEContactDetails
-import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import enums.CacheKeys
+import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames

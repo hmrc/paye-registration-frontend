@@ -20,12 +20,12 @@ import java.time.LocalDate
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.PAYERegistrationConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
-import models.{Address, DigitalContactDetails}
 import models.api._
 import models.view.PAYEContactDetails
+import models.{Address, DigitalContactDetails}
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.{Application, Play}
 import services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -35,7 +35,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  lazy val metrics = Play.current.injector.instanceOf[MetricsService]
+  lazy val metrics = app.injector.instanceOf[MetricsService]
 
   val additionalConfiguration = Map(
     "microservice.services.paye-registration.host" -> s"$mockHost",

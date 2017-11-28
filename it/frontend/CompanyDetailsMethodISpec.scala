@@ -23,9 +23,9 @@ import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import models.DigitalContactDetails
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
+import play.api.http.HeaderNames
 import play.api.libs.json._
 import play.api.test.FakeApplication
-import play.api.http.HeaderNames
 
 
 class CompanyDetailsMethodISpec extends IntegrationSpecBase

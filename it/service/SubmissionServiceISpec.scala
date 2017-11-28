@@ -23,9 +23,9 @@ import connectors.{Failed, KeystoreConnector, PAYERegistrationConnector, Success
 import enums.CacheKeys
 import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.{Application, Play}
 import services.SubmissionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
@@ -35,8 +35,8 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  lazy val payeRegistrationConnector = Play.current.injector.instanceOf[PAYERegistrationConnector]
-  lazy val keystoreConnector = Play.current.injector.instanceOf[KeystoreConnector]
+  lazy val payeRegistrationConnector = app.injector.instanceOf[PAYERegistrationConnector]
+  lazy val keystoreConnector         = app.injector.instanceOf[KeystoreConnector]
 
   val additionalConfiguration = Map(
     "microservice.services.paye-registration.host" -> s"$mockHost",

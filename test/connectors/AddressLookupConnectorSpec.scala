@@ -21,16 +21,17 @@ import mocks.MockMetrics
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.{JsObject, Json}
+import play.api.mvc.Call
 import testHelpers.PAYERegSpec
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ ForbiddenException, HeaderCarrier, NotFoundException }
+import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, NotFoundException}
 
 class AddressLookupConnectorSpec extends PAYERegSpec with BusinessRegistrationFixture {
 
   val mockMetrics = new MockMetrics
 
-  trait Setup {
+  class Setup {
     val connector = new AddressLookupConnect {
       override val addressLookupFrontendUrl = "testBusinessRegUrl"
       override val payeRegistrationUrl = "testPayeRegistrationUrl"
@@ -39,6 +40,7 @@ class AddressLookupConnectorSpec extends PAYERegSpec with BusinessRegistrationFi
       override val successCounter = metricsService.addressLookupSuccessResponseCounter
       override val failedCounter = metricsService.addressLookupFailedResponseCounter
       override def timer = metricsService.addressLookupResponseTimer.time()
+      override val timeoutAmount = 900
     }
   }
 
@@ -74,5 +76,23 @@ class AddressLookupConnectorSpec extends PAYERegSpec with BusinessRegistrationFi
 
       intercept[IndexOutOfBoundsException](await(connector.getAddress("321")))
     }
+  }
+  "createOnRampJson" should {
+    "return a json with timeout and valid continue url" in new Setup{
+      val continueJson = Json.parse(
+        s"""
+          |{
+          |"timeout":{
+          | "timeoutAmount": ${connector.timeoutAmount},
+          | "timeoutUrl": "${connector.payeRegistrationUrl}${controllers.userJourney.routes.SignInOutController.destroySession().url}"
+          | },
+          |"contineUrl":"${connector.payeRegistrationUrl}/foobar"
+          |}
+        """.stripMargin
+      ).as[JsObject]
+
+      connector.createOnRampJson(Call("GET","/foobar")) shouldBe continueJson
+    }
+
   }
 }

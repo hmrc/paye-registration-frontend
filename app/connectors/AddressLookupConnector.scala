@@ -22,13 +22,13 @@ import com.codahale.metrics.{Counter, Timer}
 import config.WSHttp
 import models.Address
 import play.api.Logger
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsObject, JsString, Json}
 import play.api.mvc.Call
 import services.{MetricsService, MetricsSrv}
 import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.config.ServicesConfig
-
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 import scala.concurrent.Future
 import scala.util.control.NoStackTrace
 
@@ -40,11 +40,12 @@ class AddressLookupConnector @Inject()(val metricsService: MetricsService) exten
   val successCounter = metricsService.addressLookupSuccessResponseCounter
   val failedCounter  = metricsService.addressLookupFailedResponseCounter
   def timer          = metricsService.addressLookupResponseTimer.time()
+  lazy val timeoutAmount: Int = getConfInt("timeoutInSeconds",throw new Exception)
 }
 
 class ALFLocationHeaderNotSetException extends NoStackTrace
 
-trait AddressLookupConnect {
+trait AddressLookupConnect  {
 
   val addressLookupFrontendUrl: String
   val payeRegistrationUrl: String
@@ -55,6 +56,8 @@ trait AddressLookupConnect {
   val failedCounter: Counter
   def timer: Timer.Context
 
+  val timeoutAmount: Int
+
   def getAddress(id: String)(implicit hc: HeaderCarrier) = {
     implicit val reads = Address.adressLookupReads
     metricsService.processDataResponseWithMetrics[Address](successCounter, failedCounter, timer) {
@@ -62,10 +65,18 @@ trait AddressLookupConnect {
     }
   }
 
+  private[connectors] def createOnRampJson(call: Call):JsObject = {
+    val continue     =    Json.obj("contineUrl" -> s"$payeRegistrationUrl${call.url}")
+    val timeout      = Json.obj("timeout" ->
+        Json.obj(
+          "timeoutAmount" -> timeoutAmount,
+          "timeoutUrl" ->  s"$payeRegistrationUrl${controllers.userJourney.routes.SignInOutController.destroySession().url}"))
+    continue ++ timeout
+  }
+
   def getOnRampUrl(query: String, call: Call)(implicit hc: HeaderCarrier): Future[String] = {
     val postUrl      = s"$addressLookupFrontendUrl/api/init/$query"
-    val continue     = s"$payeRegistrationUrl${call.url}"
-    val continueJson = Json.obj("continueUrl" -> s"$continue")
+    val continueJson = createOnRampJson(call)
 
     metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
       http.POST[JsObject, HttpResponse](postUrl, continueJson)

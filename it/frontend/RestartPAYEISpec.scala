@@ -15,8 +15,8 @@
  */
 package frontend
 
-import itutil.{WiremockHelper, CachingStub, LoginStub, IntegrationSpecBase}
 import com.github.tomakehurst.wiremock.client.WireMock._
+import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
 import play.api.test.FakeApplication

@@ -20,10 +20,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import org.scalatestplus.play.OneServerPerSuite
-import play.api.libs.json.{JsString, JsObject, Json}
-import play.api.libs.ws.WS
-import uk.gov.hmrc.crypto.{ApplicationCrypto, Protected}
-import uk.gov.hmrc.crypto.json.JsonEncryptor
+import play.api.libs.ws.WSClient
 
 object WiremockHelper {
   val wiremockPort = 11111
@@ -48,8 +45,10 @@ trait WiremockHelper {
 
   def resetWiremock() = WireMock.reset()
 
-  def buildClient(path: String) = WS.url(s"http://localhost:$port/register-for-paye$path").withFollowRedirects(false)
-  def buildClientInternal(path: String) = WS.url(s"http://localhost:$port/internal$path").withFollowRedirects(false)
+  lazy val ws = app.injector.instanceOf(classOf[WSClient])
+
+  def buildClient(path: String) = ws.url(s"http://localhost:$port/register-for-paye$path").withFollowRedirects(false)
+  def buildClientInternal(path: String) = ws.url(s"http://localhost:$port/internal$path").withFollowRedirects(false)
 
   def stubGet(url: String, status: Integer, body: String) =
     stubFor(get(urlMatching(url))

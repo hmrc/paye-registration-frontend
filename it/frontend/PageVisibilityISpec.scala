@@ -17,7 +17,7 @@
 package frontend
 
 import controllers.userJourney.routes
-import itutil.{WiremockHelper, CachingStub, LoginStub, IntegrationSpecBase}
+import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
 import play.api.libs.json.Json
