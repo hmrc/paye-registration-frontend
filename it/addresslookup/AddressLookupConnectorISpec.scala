@@ -127,15 +127,14 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
   "getOnRampUrl" should {
 
     "get an address lookup start url" in {
-      val query = "tst-query"
       lazy val call: Call = controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()
       val tstALFUrl = """/test-alf/start-url"""
 
       val addressLookupConnector = app.injector.instanceOf(classOf[AddressLookupConnector])
 
-      def getOnRamp = addressLookupConnector.getOnRampUrl(query, call)
+      def getOnRamp = addressLookupConnector.getOnRampUrl("test", call)
 
-      stubFor(post(urlMatching(s"/api/init/$query"))
+      stubFor(post(urlMatching(s"/api/init"))
           .willReturn(
             aResponse()
               .withStatus(202)
@@ -147,15 +146,14 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
     }
 
     "throw the correct exception when no url is returned from ALF" in {
-      val query = "tst-query"
       lazy val call: Call = controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()
       val tstALFUrl = """/test-alf/start-url"""
 
       val addressLookupConnector = app.injector.instanceOf(classOf[AddressLookupConnector])
 
-      def getOnRamp = addressLookupConnector.getOnRampUrl(query, call)
+      def getOnRamp = addressLookupConnector.getOnRampUrl("test", call)
 
-      stubFor(post(urlMatching(s"/api/init/$query"))
+      stubFor(post(urlMatching(s"/api/init"))
         .willReturn(
           aResponse()
             .withStatus(202)

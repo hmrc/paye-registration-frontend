@@ -41,6 +41,7 @@ class AddressLookupConnectorSpec extends PAYERegSpec with BusinessRegistrationFi
       override val failedCounter = metricsService.addressLookupFailedResponseCounter
       override def timer = metricsService.addressLookupResponseTimer.time()
       override val timeoutAmount = 900
+      override val messagesApi = mockMessages
     }
   }
 
@@ -79,19 +80,53 @@ class AddressLookupConnectorSpec extends PAYERegSpec with BusinessRegistrationFi
   }
   "createOnRampJson" should {
     "return a json with timeout and valid continue url" in new Setup{
-      val continueJson = Json.parse(
+      val json = Json.parse(
         s"""
           |{
-          |"timeout":{
-          | "timeoutAmount": ${connector.timeoutAmount},
-          | "timeoutUrl": "${connector.payeRegistrationUrl}${controllers.userJourney.routes.SignInOutController.destroySession().url}"
-          | },
-          |"continueUrl":"${connector.payeRegistrationUrl}/foobar"
+          |  "continueUrl": "${connector.payeRegistrationUrl}/foobar",
+          |  "navTitle": "Register your company",
+          |  "showPhaseBanner": true,
+          |  "phaseBannerHtml": "This is a new service. Help us improve it - send your <a href=\\"https://www.tax.service.gov.uk/register-for-paye/feedback\\">feedback</a>.",
+          |  "showBackButtons": true,
+          |  "includeHMRCBranding": false,
+          |  "deskProServiceName": "SCRS",
+          |  "lookupPage": {
+          |    "title": "Company address",
+          |    "heading": "Search for your address",
+          |    "filterLabel": "House name or number (optional)",
+          |    "submitLabel": "Search address"
+          |  },
+          |  "selectPage": {
+          |    "title": "Choose an address",
+          |    "heading": "Choose an address",
+          |    "proposalListLimit": 20,
+          |    "showSearchAgainLink": true
+          |  },
+          |  "editPage": {
+          |    "title": "Enter address",
+          |    "heading": "Enter address",
+          |    "line1Label": "Address line 1",
+          |    "line2Label": "Address line 2",
+          |    "line3Label": "Address line 3",
+          |    "showSearchAgainLink": true
+          |  },
+          |  "confirmPage": {
+          |    "title": "Confirm address",
+          |    "heading": "Confirm where you'll carry out most of your business activities",
+          |    "showSubHeadingAndInfo": false,
+          |    "submitLabel": "Save and continue",
+          |    "showChangeLink": true,
+          |    "changeLinkText": "Change"
+          |  },
+          |  "timeout": {
+          |    "timeoutAmount": ${connector.timeoutAmount},
+          |    "timeoutUrl": "${connector.payeRegistrationUrl}${controllers.userJourney.routes.SignInOutController.destroySession().url}"
+          |  }
           |}
         """.stripMargin
       ).as[JsObject]
 
-      connector.createOnRampJson(Call("GET","/foobar")) shouldBe continueJson
+      connector.createOnRampJson("ppob", Call("GET","/foobar")) shouldBe json
     }
 
   }

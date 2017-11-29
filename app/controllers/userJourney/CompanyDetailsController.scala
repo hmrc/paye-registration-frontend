@@ -173,7 +173,7 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
             success => submitPPOBAddressChoice(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
               case DownstreamOutcome.Success  => Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
               case DownstreamOutcome.Failure  => Future.successful(InternalServerError(views.html.pages.error.restart()))
-              case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("payereg1", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()) map {
+              case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("ppob", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()) map {
                 redirectUrl => Redirect(redirectUrl)
               }
             }

@@ -367,3 +367,32 @@ errorPages.deskproSubmitted.title                        = Thank you
 errorPages.deskproSubmitted.heading                      = Thank you
 errorPages.deskproSubmitted.p1                           = Your submission has been received.
 errorPages.deskproSubmitted.p2                           = We''ll be in touch as soon as we can to help you complete your application.
+
+## Address Lookup Frontend Configuration
+pages.alf.common.navTitle                                = Register your company
+pages.alf.common.phaseBannerHtml                         = This is a new service. Help us improve it - send your <a href="https://www.tax.service.gov.uk/register-for-paye/feedback">feedback</a>.
+pages.alf.common.deskProServiceName                      = SCRS
+pages.alf.common.lookupPage.title                        = Search for your address
+pages.alf.common.lookupPage.heading                      = Search for your address
+pages.alf.common.lookupPage.filterLabel                  = House name or number (optional)
+pages.alf.common.lookupPage.submitLabel                  = Search address
+
+pages.alf.ppob.lookupPage.title                          = Company address
+pages.alf.correspondence.lookupPage.title                = Search for your address
+
+pages.alf.common.selectPage.title                        = Choose an address
+pages.alf.common.selectPage.heading                      = Choose an address
+
+pages.alf.common.editPage.title                          = Enter address
+pages.alf.common.editPage.heading                        = Enter address
+pages.alf.common.editPage.line1Label                     = Address line 1
+pages.alf.common.editPage.line2Label                     = Address line 2
+pages.alf.common.editPage.line3Label                     = Address line 3
+
+pages.alf.common.confirmPage.title                       = Confirm address
+pages.alf.common.confirmPage.heading                     = Review and confirm your address
+pages.alf.common.confirmPage.submitLabel                 = Save and continue
+pages.alf.common.confirmPage.changeLinkText              = Change
+
+pages.alf.ppob.confirmPage.heading                       = Confirm where you''ll carry out most of your business activities
+pages.alf.correspondence.confirmPage.heading             = Review and confirm your correspondence address
