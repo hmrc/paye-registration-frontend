@@ -20,12 +20,13 @@ import javax.inject.{Inject, Singleton}
 
 import connectors.{AddressLookupConnect, AddressLookupConnector}
 import models.Address
+import play.api.libs.json.JsValue
 import play.api.mvc.{Call, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.config.ServicesConfig
 import utils.{PAYEFeatureSwitch, PAYEFeatureSwitches}
-
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 import scala.concurrent.Future
 
 @Singleton
@@ -43,9 +44,9 @@ trait AddressLookupSrv {
   val featureSwitch: PAYEFeatureSwitches
   val metricsService: MetricsSrv
 
-  def buildAddressLookupUrl(query: String, call: Call)(implicit hc: HeaderCarrier): Future[String] = {
+  def buildAddressLookupUrl(key: String, call: Call)(implicit hc: HeaderCarrier): Future[String] = {
     if(useAddressLookupFrontend) {
-      addressLookupConnector.getOnRampUrl(query, call)
+      addressLookupConnector.getOnRampUrl(key, call)
     } else {
       call.url.split('/').last match {
         case "return-from-address-for-ppob"         => Future.successful(controllers.test.routes.TestAddressLookupController.noLookupPPOBAddress().url)

@@ -21,6 +21,8 @@ import javax.inject.{Inject, Singleton}
 import com.codahale.metrics.{Counter, Timer}
 import config.WSHttp
 import models.Address
+import models.external.{AddressLookupFrontendConf, ConfirmPage, EditPage, LookupPage, SelectPage, Timeout}
+import play.api.i18n.MessagesApi
 import play.api.{Configuration, Logger}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
@@ -33,7 +35,10 @@ import scala.concurrent.Future
 import scala.util.control.NoStackTrace
 
 @Singleton
-class AddressLookupConnector @Inject()(val metricsService: MetricsService, config: ServicesConfig, playConfig: Configuration) extends AddressLookupConnect {
+class AddressLookupConnector @Inject()(val metricsService: MetricsService,
+                                       val messagesApi: MessagesApi,
+                                       config: ServicesConfig,
+                                       playConfig: Configuration) extends AddressLookupConnect {
   val addressLookupFrontendUrl     = config.baseUrl("address-lookup-frontend")
   lazy val payeRegistrationUrl     = config.getConfString("paye-registration-frontend.www.url","")
   val http : CoreGet with CorePost = WSHttp
@@ -51,6 +56,7 @@ trait AddressLookupConnect {
   val payeRegistrationUrl: String
   val http: CoreGet with CorePost
   val metricsService: MetricsSrv
+  val messagesApi: MessagesApi
 
   val successCounter: Counter
   val failedCounter: Counter
@@ -65,19 +71,63 @@ trait AddressLookupConnect {
     }
   }
 
-  private[connectors] def createOnRampJson(call: Call):JsObject = {
-    val continue     = Json.obj("continueUrl" -> s"$payeRegistrationUrl${call.url}")
-    val timeout      = Json.obj("timeout" -> Json.obj(
-      "timeoutAmount" -> timeoutAmount,
-      "timeoutUrl" ->  s"$payeRegistrationUrl${controllers.userJourney.routes.SignInOutController.destroySession().url}"
-    ))
+  private[connectors] def createOnRampJson(key: String, call: Call): JsObject = {
+    val showBackButtons: Boolean = true
+    val showPhaseBanner: Boolean = true
+    val includeHMRCBranding: Boolean = false
+    val proposalListLimit: Int = 20
+    val showSearchAgainLink: Boolean = true
+    val showChangeLink: Boolean = true
+    val showSubHeadingAndInfo: Boolean = false
 
-    continue ++ timeout
+    val conf = AddressLookupFrontendConf(
+      continueUrl = s"$payeRegistrationUrl${call.url}",
+      navTitle = messagesApi("pages.alf.common.navTitle"),
+      showPhaseBanner = showPhaseBanner,
+      phaseBannerHtml = messagesApi("pages.alf.common.phaseBannerHtml"),
+      showBackButtons = showBackButtons,
+      includeHMRCBranding = includeHMRCBranding,
+      deskProServiceName = messagesApi("pages.alf.common.deskProServiceName"),
+      lookupPage = LookupPage(
+        title = messagesApi(s"pages.alf.$key.lookupPage.title"),
+        heading = messagesApi(s"pages.alf.common.lookupPage.heading"),
+        filterLabel = messagesApi(s"pages.alf.common.lookupPage.filterLabel"),
+        submitLabel = messagesApi(s"pages.alf.common.lookupPage.submitLabel")
+      ),
+      selectPage = SelectPage(
+        title = messagesApi(s"pages.alf.common.selectPage.title"),
+        heading = messagesApi(s"pages.alf.common.selectPage.heading"),
+        proposalListLimit = proposalListLimit,
+        showSearchAgainLink = showSearchAgainLink
+      ),
+      editPage = EditPage(
+        title = messagesApi(s"pages.alf.common.editPage.title"),
+        heading = messagesApi(s"pages.alf.common.editPage.heading"),
+        line1Label = messagesApi(s"pages.alf.common.editPage.line1Label"),
+        line2Label = messagesApi(s"pages.alf.common.editPage.line2Label"),
+        line3Label = messagesApi(s"pages.alf.common.editPage.line3Label"),
+        showSearchAgainLink = showSearchAgainLink
+      ),
+      confirmPage = ConfirmPage(
+        title = messagesApi(s"pages.alf.common.confirmPage.title"),
+        heading = messagesApi(s"pages.alf.$key.confirmPage.heading"),
+        showSubHeadingAndInfo = showSubHeadingAndInfo,
+        submitLabel = messagesApi(s"pages.alf.common.confirmPage.submitLabel"),
+        showChangeLink = showChangeLink,
+        changeLinkText = messagesApi(s"pages.alf.common.confirmPage.changeLinkText")
+      ),
+      timeout = Timeout(
+        timeoutAmount = timeoutAmount,
+        timeoutUrl = s"$payeRegistrationUrl${controllers.userJourney.routes.SignInOutController.destroySession().url}"
+      )
+    )
+
+    Json.toJson(conf).as[JsObject]
   }
 
-  def getOnRampUrl(query: String, call: Call)(implicit hc: HeaderCarrier): Future[String] = {
-    val postUrl      = s"$addressLookupFrontendUrl/api/init/$query"
-    val continueJson = createOnRampJson(call)
+  def getOnRampUrl(key: String, call: Call)(implicit hc: HeaderCarrier): Future[String] = {
+    val postUrl      = s"$addressLookupFrontendUrl/api/init"
+    val continueJson = createOnRampJson(key, call)
 
     metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
       http.POST[JsObject, HttpResponse](postUrl, continueJson)

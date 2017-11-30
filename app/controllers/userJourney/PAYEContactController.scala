@@ -124,7 +124,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
             success => submitCorrespondenceAddress(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
               case DownstreamOutcome.Success => Future.successful(Redirect(controllers.userJourney.routes.SummaryController.summary()))
               case DownstreamOutcome.Failure => Future.successful(InternalServerError(views.html.pages.error.restart()))
-              case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("payereg2", controllers.userJourney.routes.PAYEContactController.savePAYECorrespondenceAddress()) map {
+              case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("correspondence", controllers.userJourney.routes.PAYEContactController.savePAYECorrespondenceAddress()) map {
                 redirectUrl => Redirect(redirectUrl)
               }
             }
