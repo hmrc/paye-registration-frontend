@@ -44,7 +44,7 @@ class ConfirmROAddressViewSpec extends PAYERegSpec with I18nSupport {
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct title" in {
-      document.getElementById("pageHeading").text shouldBe messagesApi("pages.confirmRO.title")
+      document.getElementById("pageHeading").text shouldBe messagesApi("pages.confirmRO.description")
     }
 
     "have the correct lede paragraph" in {

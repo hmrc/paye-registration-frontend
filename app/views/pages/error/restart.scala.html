@@ -1,8 +1,8 @@
 @()(implicit request: Request[_], messages: Messages)
 
-@main_template(title = Messages("errorPages.title")) {
+@main_template(title = Messages("errorPages.restart.description")) {
 
-    <h1>@Messages("errorPages.restart.heading")</h1>
+    <h1>@Messages("errorPages.restart.description")</h1>
 
     <p>@Html(Messages("errorPages.restart.p1", controllers.userJourney.routes.WelcomeController.show))</p>
 

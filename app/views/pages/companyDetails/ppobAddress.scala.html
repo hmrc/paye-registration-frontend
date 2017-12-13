@@ -5,12 +5,12 @@
 
 @(chooseAddressForm: Form[ChosenAddress], roAddress: Option[Address], ppobAddress: Option[Address], prepopAddresses: Map[Int, Address])(implicit request: Request[_], messages: Messages)
 
-@main_template(title = messages("pages.ppobAddress.title")) {
+@main_template(title = messages("pages.ppobAddress.description")) {
     @payeErrorSummary(
         messages("app.common.errorSummaryLabel"), chooseAddressForm, dataJourney=Some("PPOBAddress")
     )
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.ppobAddress.heading")</h1>
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.ppobAddress.description")</h1>
        <p>@Messages("pages.ppobAddress.peopleIntro1")</p>
        <p>@Messages("pages.ppobAddress.peopleIntro2")</p>
 
@@ -24,7 +24,7 @@
                 ).flatten.++(
                     prepopAddresses.map {case (k, v) => s"${PrepopAddress.prefix}$k" -> addressDisplay(v, s"${PrepopAddress.prefix.toLowerCase}$k").toString}.toList
                 ).:+("other" -> messages("pages.ppobAddress.other")),
-                '_legend -> messages("pages.ppobAddress.legend"),
+                '_legend -> messages("pages.ppobAddress.description"),
                 '_legendID -> "chosenAddress",
                 '_helpText -> None,
                 '_labelAfter -> true,

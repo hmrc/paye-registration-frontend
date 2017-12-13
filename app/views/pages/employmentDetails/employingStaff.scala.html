@@ -4,11 +4,11 @@
 
 @(employingStaffForm: Form[EmployingStaff])(implicit request: Request[_], messages: Messages)
 
-@main_template(title = Messages("pages.employingStaff.title")) {
+@main_template(title = Messages("pages.employingStaff.description")) {
     @payeErrorSummary(
         Messages("app.common.errorSummaryLabel"), employingStaffForm, dataJourney=Some("EmployingStaff")
     )
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.employingStaff.heading")</h1>
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.employingStaff.description")</h1>
     @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitEmployingStaff) {
         <p>@Messages("pages.employingStaff.employingStaffRulesIntro")</p>
         <ul class="list list-bullet">
@@ -24,7 +24,7 @@
                     "true"->Messages("app.common.yes"),
                     "false"->Messages("app.common.no")
                 ),
-                '_legend -> Messages("pages.employingStaff.legend"),
+                '_legend -> Messages("pages.employingStaff.description"),
                 '_legendID -> "employingStaff",
                 '_helpText -> None,
                 '_labelAfter -> true,

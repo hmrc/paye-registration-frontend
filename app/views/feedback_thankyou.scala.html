@@ -19,7 +19,7 @@
 @(partialUrl: String, redirectUrl: String)(implicit request: Request[_], cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever,
 messages: Messages)
 
-@main_template(Messages("page.feedback.thank-you.title")) {
+@main_template(Messages("page.feedback.thank-you")) {
     @cachedStaticHtmlPartialRetriever.getPartialContent(partialUrl)
     <a id="back" href='@redirectUrl' role="button" tabindex="0" class="button">@Messages("app.common.back")</a>
 }

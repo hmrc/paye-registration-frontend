@@ -4,13 +4,13 @@
 
 @(sicForm: Form[NatureOfBusiness])(implicit request: Request[_], messages: Messages)
 
-@main_template(title = messages("pages.natureOfBusiness.title")) {
+@main_template(title = messages("pages.natureOfBusiness.description")) {
 
     @payeErrorSummary(
         messages("app.common.errorSummaryLabel"), sicForm, dataJourney=Some("NatureOfBusiness")
     )
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages("pages.natureOfBusiness.heading"))</h1>
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages("pages.natureOfBusiness.description"))</h1>
 
     @govHelpers.form(action = controllers.userJourney.routes.NatureOfBusinessController.submitNatureOfBusiness()) {
         <div class="form-group">

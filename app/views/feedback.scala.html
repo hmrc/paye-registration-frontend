@@ -19,6 +19,6 @@
 @(partialUrl : String, formBody : Option[Html])(implicit request : Request[_], formPartialRetriever: FormPartialRetriever,
 partialRetriever: FormPartialRetriever, messages: Messages)
 
-@main_template(title = Messages("page.feedback.title"), bodyClasses = None) {
+@main_template(title = Messages("page.feedback.description"), bodyClasses = None) {
     @formBody.getOrElse(formPartialRetriever.getPartialContent(partialUrl))
 }

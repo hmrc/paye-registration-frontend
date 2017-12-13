@@ -1,9 +1,9 @@
 @(ackRef: String)(implicit request: Request[_], messages: Messages)
 
-@main_template(title = messages("pages.confirmation.title"), backButton = false) {
+@main_template(title = messages("pages.confirmation.description"), backButton = false) {
 
     <div class="govuk-box-highlight">
-        <h1 class="heading-xlarge" id="pageHeading">@messages("pages.confirmation.heading")</h1>
+        <h1 class="heading-xlarge" id="pageHeading">@messages("pages.confirmation.description")</h1>
         <p class="font-large">
             @messages("pages.confirmation.reference")
             <br>
