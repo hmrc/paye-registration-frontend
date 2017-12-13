@@ -95,14 +95,14 @@ trait AddressLookupConnect {
         submitLabel = messagesApi(s"pages.alf.common.lookupPage.submitLabel")
       ),
       selectPage = SelectPage(
-        title = messagesApi(s"pages.alf.common.selectPage.title"),
-        heading = messagesApi(s"pages.alf.common.selectPage.heading"),
+        title = messagesApi(s"pages.alf.common.selectPage.description"),
+        heading = messagesApi(s"pages.alf.common.selectPage.description"),
         proposalListLimit = proposalListLimit,
         showSearchAgainLink = showSearchAgainLink
       ),
       editPage = EditPage(
-        title = messagesApi(s"pages.alf.common.editPage.title"),
-        heading = messagesApi(s"pages.alf.common.editPage.heading"),
+        title = messagesApi(s"pages.alf.common.editPage.description"),
+        heading = messagesApi(s"pages.alf.common.editPage.description"),
         line1Label = messagesApi(s"pages.alf.common.editPage.line1Label"),
         line2Label = messagesApi(s"pages.alf.common.editPage.line2Label"),
         line3Label = messagesApi(s"pages.alf.common.editPage.line3Label"),

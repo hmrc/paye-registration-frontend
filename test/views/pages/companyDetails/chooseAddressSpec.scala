@@ -84,7 +84,7 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct title" in {
-      document.getElementById("pageHeading").text shouldBe messagesApi("pages.ppobAddress.heading")
+      document.getElementById("pageHeading").text shouldBe messagesApi("pages.ppobAddress.description")
     }
 
     "have the correct name for radio button roAddress" in {
@@ -163,7 +163,7 @@ class chooseAddressSpec extends PAYERegSpec with I18nSupport {
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct title" in {
-      document.getElementById("pageHeading").text shouldBe messagesApi("pages.correspondenceAddress.title")
+      document.getElementById("pageHeading").text shouldBe messagesApi("pages.correspondenceAddress.description")
     }
 
     "have the correct name for radio button roAddress" in {

@@ -7,7 +7,7 @@
 
 @formContent = {
     <fieldset>
-        <legend class="visuallyhidden">@messages("pages.directorDetails.legend")</legend>
+        <legend class="visually-hidden">@messages("pages.directorDetails.description")</legend>
 
         @helper.repeat(ninoForm("nino")) { ninoField =>
             <div class="form-field">
@@ -36,13 +36,13 @@
     </p>
 }
 
-@main_template(title = messages(s"pages.directorDetails.title")) {
+@main_template(title = messages(s"pages.directorDetails.description")) {
 
     @payeErrorSummary(
         messages("app.common.errorSummaryLabel"), ninoForm, dataJourney=Some("DirectorNINOs")
     )
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages(s"pages.directorDetails.heading"))</h1>
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages(s"pages.directorDetails.description"))</h1>
 
     <div class="form-group">
         @hiddenDetails("directors", Messages("pages.directorDetails.information.dropdown.header"), hiddenDetailsContent)

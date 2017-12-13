@@ -4,8 +4,8 @@
 
 @(summaryModel: Summary)(implicit request: Request[_], messages: Messages)
 
-@main_template(title = Messages("pages.summary.title")) {
-    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.summary.heading")</h1>
+@main_template(title = Messages("pages.summary.description")) {
+    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.summary.description")</h1>
 
     @for(section <- summaryModel.sections) {
         <h2 class="heading-medium" id="@{section.id}SectionHeading">@Messages(s"pages.summary.${section.id}.sectionHeading")</h2>

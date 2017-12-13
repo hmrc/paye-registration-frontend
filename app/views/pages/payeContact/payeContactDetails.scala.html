@@ -5,8 +5,8 @@
 
 @formContent = {
     <fieldset>
-        <legend class="visuallyhidden">
-            @Messages("pages.payeContact.heading")
+        <legend class="visually-hidden">
+            @Messages("pages.payeContact.description")
         </legend>
         <div class="form-group">
             @payeInput(
@@ -37,19 +37,19 @@
     </fieldset>
 }
 
-@main_template(title = messages("pages.payeContact.title")) {
+@main_template(title = messages("pages.payeContact.description")) {
 
     @payeErrorSummary(
         messages("app.common.errorSummaryLabel"), contactForm, dataJourney=Some("PAYEContactDetails")
     )
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.payeContact.heading")</h1>
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.payeContact.description")</h1>
 
     @govHelpers.form(action = controllers.userJourney.routes.PAYEContactController.submitPAYEContactDetails()) {
 
         <div class="form-group">
             <fieldset>
-                <legend class="visuallyhidden">
+                <legend class="visually-hidden">
                     @Html(messages("pages.payeContact.p1"))
                 </legend>
                 <div class="form-group">

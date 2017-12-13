@@ -13,13 +13,13 @@
     )
 }
 
-@main_template(title = messages("pages.completionCapacity.title")) {
+@main_template(title = messages("pages.completionCapacity.description")) {
 
     @payeErrorSummary(
         messages("app.common.errorSummaryLabel"), completionCapacityForm, dataJourney=Some("CompletionCapacity")
     )
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@messages("pages.completionCapacity.heading")</h1>
+    <h1 class="form-title heading-xlarge" id="pageHeading">@messages("pages.completionCapacity.description")</h1>
 
     @govHelpers.form(action = controllers.userJourney.routes.CompletionCapacityController.submitCompletionCapacity()) {
 
@@ -34,8 +34,8 @@
                 '_idHidden -> "other",
                 '_classHidden -> "panel panel-indent",
                 '_labelClass -> "block-label radio-label",
-                '_legend -> Messages("pages.completionCapacity.legend"),
-                '_legendClass -> "visuallyhidden"
+                '_legend -> Messages("pages.completionCapacity.description"),
+                '_legendClass -> "visually-hidden"
             )
         </div>
 

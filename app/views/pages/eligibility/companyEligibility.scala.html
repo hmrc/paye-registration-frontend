@@ -4,11 +4,11 @@
 
 @(companyEligibilityForm: Form[CompanyEligibility])(implicit request: Request[_], messages: Messages)
 
-@main_template(title = Messages("pages.companyEligibility.title")) {
+@main_template(title = Messages("pages.companyEligibility.description")) {
     @payeErrorSummary(
         Messages("app.common.errorSummaryLabel"), companyEligibilityForm, dataJourney=Some("CompanyEligibility")
     )
-    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.companyEligibility.heading")</h1>
+    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.companyEligibility.description")</h1>
 
      @govHelpers.form(action = controllers.userJourney.routes.EligibilityController.submitCompanyEligibility()) {
         <div class="inline form-group">
@@ -18,7 +18,7 @@
                     "true"->Messages("app.common.yes"),
                     "false"->Messages("app.common.no")
                 ),
-                '_legend -> Messages("pages.companyEligibility.heading"),
+                '_legend -> Messages("pages.companyEligibility.description"),
                 '_legendID -> "companyEligibility",
                 '_helpText -> None,
                 '_labelAfter -> true,

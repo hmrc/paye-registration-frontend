@@ -10,6 +10,10 @@
 
 <fieldset class="form-group form-date @fieldsetClasses" id="@fieldName-fieldset">
 
+    @{args.filter(a => a._1.name == "_legend").map { a =>
+        <legend class="visually-hidden">{a._2.toString}</legend>
+    }}
+
     @if(formItem.hasErrors) {
     @formItem.errors.filter(_.key.contains(fieldName)).map { error => <span class="error-notification" id='@{s"${error.key}-error-message"}'>@Messages(s"${error.message}")</span>}
     }
@@ -20,7 +24,7 @@
     formItem(s"${fieldName}Day"),
     '_label -> Messages("app.common.day"),
     '_labelClass -> "form-group form-group-day",
-    '_type -> "number",
+    '_type -> "tel",
     '_inputClass -> s"input--xxsmall input--no-spinner",
     '_maxlength -> "2"
     )
@@ -29,7 +33,7 @@
     formItem(s"${fieldName}Month"),
     '_label -> Messages("app.common.month"),
     '_labelClass -> "form-group form-group-month",
-    '_type -> "number",
+    '_type -> "tel",
     '_inputClass -> s"input--xxsmall input--no-spinner",
     '_maxlength -> "2"
     )
@@ -38,7 +42,7 @@
     formItem(s"${fieldName}Year"),
     '_label -> Messages("app.common.year"),
     '_labelClass -> "form-group form-group-year",
-    '_type -> "number",
+    '_type -> "tel",
     '_inputClass -> s"input--small input--no-spinner",
     '_maxlength -> "4"
     )

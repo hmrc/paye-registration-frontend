@@ -5,12 +5,12 @@
 
 @(chooseAddressForm: Form[ChosenAddress], roAddress: Option[Address], ppobAddress: Option[Address], correspondenceAddress: Option[Address], prepopAddresses: Map[Int, Address])(implicit request: Request[_], messages: Messages)
 
-@main_template(title = messages("pages.correspondenceAddress.title")) {
+@main_template(title = messages("pages.correspondenceAddress.description")) {
     @payeErrorSummary(
         messages("app.common.errorSummaryLabel"), chooseAddressForm, dataJourney=Some("CorrespondenceAddress")
     )
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.correspondenceAddress.title")</h1>
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.correspondenceAddress.description")</h1>
 
     @govHelpers.form(action = controllers.userJourney.routes.PAYEContactController.submitPAYECorrespondenceAddress) {
         <div class="form-group">
@@ -23,7 +23,7 @@
                 ).flatten.++(
                     prepopAddresses.map {case (k, v) => s"${PrepopAddress.prefix}$k" -> addressDisplay(v, s"${PrepopAddress.prefix.toLowerCase}$k").toString}.toList
                 ).:+("other" -> messages("pages.correspondenceAddress.other")),
-                '_legend -> messages("pages.correspondenceAddress.legend"),
+                '_legend -> messages("pages.correspondenceAddress.description"),
                 '_legendID -> "chosenAddress",
                 '_helpText -> None,
                 '_labelAfter -> true,

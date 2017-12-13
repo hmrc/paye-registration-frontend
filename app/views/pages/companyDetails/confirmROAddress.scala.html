@@ -5,9 +5,9 @@
 
 @(companyName : String, address : Address)(implicit request: Request[_], messages: Messages)
 
-@main_template(title = messages("pages.confirmRO.title")) {
+@main_template(title = messages("pages.confirmRO.description")) {
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages("pages.confirmRO.heading"))</h1>
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages("pages.confirmRO.description"))</h1>
 
     <p id="lead-paragraph">@messages("pages.confirmRO.lede", companyName)</p>
 

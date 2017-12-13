@@ -27,13 +27,13 @@
     </ul>
 }
 
-@main_template(title = Messages("pages.tradingName.title")) {
+@main_template(title = Messages("pages.tradingName.description")) {
 
     @payeErrorSummary(
         Messages("app.common.errorSummaryLabel"), tradingNameForm, dataJourney=Some("TradingName")
     )
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.tradingName.heading")</h1>
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.tradingName.description")</h1>
 
 
      <p id="lead-paragraph">@messages("pages.tradingName.lede", companyName)</p>
@@ -46,7 +46,7 @@
         @formHiddenYesNoRadio(
             tradingNameForm,
             "differentName",
-            Messages("pages.tradingName.legend"),
+            Messages("pages.tradingName.description"),
             hiddenYesNoContent
         )
 

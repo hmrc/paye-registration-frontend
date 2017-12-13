@@ -4,11 +4,11 @@
 
 @(directorEligibilityForm: Form[DirectorEligibility])(implicit request: Request[_], messages: Messages)
 
-@main_template(title = Messages("pages.directorEligibility.title")) {
+@main_template(title = Messages("pages.directorEligibility.description")) {
     @payeErrorSummary(
         Messages("app.common.errorSummaryLabel"), directorEligibilityForm, dataJourney=Some("DirectorEligibility")
     )
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.directorEligibility.heading")</h1>
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.directorEligibility.description")</h1>
 
     <p>@Messages("pages.employingStaff.directorEligibilityRulesIntro1")</p>
     <p>@Messages("pages.employingStaff.directorEligibilityRulesIntro2")</p>
@@ -28,7 +28,7 @@
                 "true"->Messages("app.common.yes"),
                 "false"->Messages("app.common.no")
             ),
-            '_legend -> Messages("pages.directorEligibility.heading"),
+            '_legend -> Messages("pages.directorEligibility.description"),
             '_legendID -> "directorEligibility",
             '_helpText -> None,
             '_labelAfter -> true,
