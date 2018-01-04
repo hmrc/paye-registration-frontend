@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,13 @@ class IncorporationInformationServiceSpec extends PAYERegSpec with KeystoreFixtu
         .thenReturn(Future.successful(IncorpInfoBadRequestResponse))
 
       a[BadRequestException] shouldBe thrownBy(await(service.getCompanyDetails("regId", "txId")))
+    }
+
+    "throw a Exception when IncorpInfoNotFoundResponse is returned from Incorporation Information" in new Setup {
+      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(IncorpInfoNotFoundResponse))
+
+      a[Exception] shouldBe thrownBy(await(service.getCompanyDetails("regId", "txId")))
     }
 
     "throw a Exception when IncorpInfoErrorResponse is returned from Incorporation Information" in new Setup {

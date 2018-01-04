@@ -45,6 +45,7 @@ class IncorporationInformationConnector @Inject()(val metricsService: MetricsSer
 sealed trait IncorpInfoResponse
 case class IncorpInfoSuccessResponse(response: CoHoCompanyDetailsModel) extends IncorpInfoResponse
 case object IncorpInfoBadRequestResponse extends IncorpInfoResponse
+case object IncorpInfoNotFoundResponse extends IncorpInfoResponse
 case class IncorpInfoErrorResponse(ex: Exception) extends IncorpInfoResponse
 
 trait IncorporationInformationConnect extends RegistrationWhitelist {
@@ -71,6 +72,10 @@ trait IncorporationInformationConnect extends RegistrationWhitelist {
           incorpInfoTimer.stop()
           failedCounter.inc(1)
           IncorpInfoBadRequestResponse
+        case _: NotFoundException =>
+          Logger.error(s"[IncorporationInformationConnector] - [getCoHoCompanyDetails] - Received a NotFound status code when expecting company details for regId: $regId / TX-ID: $transactionId")
+          failedCounter.inc(1)
+          IncorpInfoNotFoundResponse
         case ex: Exception =>
           Logger.error(
             s"[IncorporationInformationConnector] [getCoHoCompanyDetails] - Received an error when expecting company details for regId: $regId / TX-ID: $transactionId - error: ${ex.getMessage}"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,12 @@ class IncorporationInformationConnectorSpec extends PAYERegSpec with CoHoAPIFixt
       mockHttpGet[CoHoCompanyDetailsModel](connector.incorpInfoUrl, Future.failed(new BadRequestException("tstException")))
 
       await(connector.getCoHoCompanyDetails("testRegID", "testTxID")) shouldBe IncorpInfoBadRequestResponse
+    }
+
+    "return a CoHo NotFound api response object for a bad request" in new Setup(true) {
+      mockHttpGet[CoHoCompanyDetailsModel](connector.incorpInfoUrl, Future.failed(new NotFoundException("tstException")))
+
+      await(connector.getCoHoCompanyDetails("testRegID", "testTxID")) shouldBe IncorpInfoNotFoundResponse
     }
 
     "return a CoHo error api response object for a downstream error" in new Setup(true) {
