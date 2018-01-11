@@ -20,6 +20,7 @@ import enums.UserCapacity
 import models.view.{CompletionCapacity => CompletionCapacityView}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
+import play.api.data.validation.{Constraint, Invalid, Valid, ValidationError}
 import play.api.data.{Form, FormError, Forms, Mapping}
 import uk.gov.voa.play.form.ConditionalMappings._
 
@@ -46,11 +47,26 @@ object CompletionCapacityForm {
 
   val completionCapacity: Mapping[UserCapacity.Value] = Forms.of[UserCapacity.Value](completionCapacityFormatter)
 
+  val otherValidation: Mapping[String] = {
+    val otherConstraint: Constraint[String] = Constraint("constraint.other")({ other =>
+      val errors = if(other.matches(ccRegex)) {
+        Nil
+      } else {
+        other match {
+          case ""                         => Seq(ValidationError("pages.completionCapacity.other.label"))
+          case long if long.length >= 100 => Seq(ValidationError("pages.completionCapacity.other.error"))
+          case _                          => Seq(ValidationError("pages.completionCapacity.error.invalidChars"))
+        }
+      }
+      if(errors.isEmpty) Valid else Invalid(errors)
+    })
+    text.verifying(otherConstraint)
+  }
 
   val form = Form(
     mapping(
       "completionCapacity"      -> completionCapacity,
-      "completionCapacityOther" -> ifOther(text.verifying("pages.completionCapacity.other.error", _.matches(ccRegex)))
+      "completionCapacityOther" -> ifOther(otherValidation)
     )(CompletionCapacityView.apply)(CompletionCapacityView.unapply)
   )
 }

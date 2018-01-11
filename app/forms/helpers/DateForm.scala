@@ -43,14 +43,14 @@ trait DateForm extends DateUtil {
 
       dte match {
         case Some(dt) => validation(dt)
-        case None     => Left(Seq(FormError(s"${prefix}Day", "app.common.date.invalid")))
+        case None     => Left(Seq(FormError(s"${prefix}Day", "pages.firstPayment.date.invalidRange")))
       }
     }
 
     override def unbind(key: String, value: LocalDate): Map[String, String] = Map(
-      s"${prefix}Day" -> value.getDayOfMonth.toString,
+      s"${prefix}Day"   -> value.getDayOfMonth.toString,
       s"${prefix}Month" -> value.getMonthValue.toString,
-      s"${prefix}Year" -> value.getYear.toString
+      s"${prefix}Year"  -> value.getYear.toString
     )
   }
 

@@ -19,8 +19,10 @@ package forms.companyDetails
 import common.exceptions.InternalExceptions
 import forms.helpers.RequiredBooleanForm
 import models.view.TradingName
-import play.api.data.Form
+import play.api.data.{Form, Mapping}
 import play.api.data.Forms._
+import play.api.data.validation.Constraint
+import uk.gov.voa.play.form.ConditionalMappings.{isEqual, onlyIf}
 
 object TradingNameForm extends RequiredBooleanForm {
 
@@ -34,8 +36,10 @@ object TradingNameForm extends RequiredBooleanForm {
     if(!validationNeeded(vForm)) vForm else {
       if(tradingNameFieldNotCompleted(vForm)) {
         vForm.withError("tradingName", "pages.tradingName.errorQuestion")
+      } else if(tradingNameFieldLess(vForm)) {
+        vForm.withError("tradingName", "pages.tradingName.error.length")
       } else if(!validateTradingName(vForm)){
-        vForm.withError("tradingName", "pages.tradingName.errorQuestion")
+        vForm.withError("tradingName", "pages.tradingName.error.invalidChars")
       } else {
         vForm
       }
@@ -49,6 +53,9 @@ object TradingNameForm extends RequiredBooleanForm {
   }
 
   private def tradingNameFieldNotCompleted(data: Form[TradingName]) = data("tradingName").value.isEmpty
+
+  private def tradingNameFieldLess(vForm: Form[TradingName])= vForm.data("tradingName").length() > 35
+
 
   override val errorMsg = "pages.tradingName.error"
 

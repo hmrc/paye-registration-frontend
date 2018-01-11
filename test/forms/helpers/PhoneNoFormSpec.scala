@@ -49,7 +49,7 @@ class PhoneNoFormSpec extends UnitSpec {
       val data = Map[String, String](
         "test1" -> "01 23 45 67 890 1234"
       )
-      TestForm.phoneNoFormatter.bind("test1", data) shouldBe Right(Some("01 23 45 67 890 1234"))
+      TestForm.phoneNoFormatter.bind("test1", data) shouldBe Right(Some("012345678901234"))
     }
 
     "bind from a correct input with 15 digits and total more than 20 characters" in {

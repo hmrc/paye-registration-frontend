@@ -196,7 +196,7 @@ class DigitalContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
 
       val maxModel = DigitalContactDetails(
         email = Some("test@email.com"),
-        mobileNumber = Some("0794 300 01 11 45 67"),
+        mobileNumber = Some("079430001114567"),
         phoneNumber = Some("016138503209876")
       )
 
