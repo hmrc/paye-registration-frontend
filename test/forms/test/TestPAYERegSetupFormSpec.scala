@@ -792,7 +792,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
         "payeContact.correspondenceAddress.postCode" -> "TE1 1ST"
       )
       val boundForm = testForm.bind(data)
-      val firstPaymentDayError = FormError("employment.firstPayDateDay", "app.common.date.invalid")
+      val firstPaymentDayError = FormError("employment.firstPayDateDay", "pages.firstPayment.date.invalidRange")
 
       boundForm.error("employment.firstPayDateDay") shouldBe Some(firstPaymentDayError)
       boundForm.data shouldBe data
@@ -837,7 +837,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
         "payeContact.correspondenceAddress.postCode" -> "TE1 1ST"
       )
       val boundForm = testForm.bind(data)
-      val firstPaymentDayError = FormError("employment.firstPayDateDay", "app.common.date.invalid")
+      val firstPaymentDayError = FormError("employment.firstPayDateDay", "pages.firstPayment.date.invalidRange")
 
       boundForm.error("employment.firstPayDateDay") shouldBe Some(firstPaymentDayError)
       boundForm.data shouldBe data
@@ -882,7 +882,7 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
         "payeContact.correspondenceAddress.postCode" -> "TE1 1ST"
       )
       val boundForm = testForm.bind(data)
-      val firstPaymentDayError = FormError("employment.firstPayDateDay", "app.common.date.invalid")
+      val firstPaymentDayError = FormError("employment.firstPayDateDay", "pages.firstPayment.date.invalidRange")
 
       boundForm.error("employment.firstPayDateDay") shouldBe Some(firstPaymentDayError)
       boundForm.data shouldBe data

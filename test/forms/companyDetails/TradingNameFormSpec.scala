@@ -67,7 +67,7 @@ class TradingNameFormSpec extends UnitSpec {
     }
 
     "return the form with errors as the trading name is too long" in {
-      TradingNameForm.validateForm(testForm.bind(invalidDataTooLong)) shouldBe testForm.bind(invalidDataTooLong).withError("tradingName", "pages.tradingName.errorQuestion")
+      TradingNameForm.validateForm(testForm.bind(invalidDataTooLong)) shouldBe testForm.bind(invalidDataTooLong).withError("tradingName", "pages.tradingName.error.length")
     }
   }
 }

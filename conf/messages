@@ -40,17 +40,18 @@ page.timeout.p2                                         = Sign in to
 page.timeout.url                                        = continue registration
 
 ## User error messages
-errors.invalid.email                                    = The email address you have provided is invalid
-errors.invalid.email.tooLong                            = Enter your email address using 70 characters or less
-errors.invalid.contactNum                               = Enter a contact number using only numbers
+errors.invalid.email                                    = Enter an email address using only letters, numbers and - . @ _ +
+errors.invalid.email.noEntry                            = Enter an email address
+errors.invalid.email.tooLong                            = Enter an email address using 70 characters or less
+errors.invalid.contactNum                               = Enter a valid contact number using only numbers
 errors.invalid.contactNum.tooShort                      = Enter a contact number using 10 digits or more
 errors.invalid.contactNum.tooLong                       = Enter a contact number using 20 digits or less
-errors.invalid.nino                                     = National Insurance number is in the wrong format
+errors.invalid.nino                                     = Enter a valid National Insurance number
 errors.duplicate.nino                                   = You''ve entered the same National Insurance number more than once
 errors.invalid.sic.noEntry                              = Tell us what the company does
 errors.invalid.sic.overCharLimit                        = Enter a business description using 100 characters or less
 errors.invalid.sic.invalidChars                         = Enter a business description using only letters, numbers and - , / & ''
-errors.invalid.name.invalidChars                        = Enter a contact name using valid characters
+errors.invalid.name.invalidChars                        = Tell us the contact name using only letters (without accents), hyphens and apostrophes
 
 ## Welcome page
 pages.welcome.description                               = Register as an employer for PAYE
@@ -71,7 +72,7 @@ pages.welcome.application                               = Your application shoul
 
 ## Company Eligibility
 pages.companyEligibility.description                    = Is the company an offshore employer outside the European Economic Area that doesn''t pay UK National Insurance?
-pages.companyEligibility.error                          = Tell us if any of the following apply to you
+pages.companyEligibility.error                          = Tell us if the company''s an offshore employer outside the EEA who doesn’'t pay UK National Insurance
 
 ## Director Eligibility
 pages.directorEligibility.description                   = Does the company pay out any non-cash incentive awards?
@@ -81,7 +82,7 @@ pages.employingStaff.directorEligibility1               = vouchers - including o
 pages.employingStaff.directorEligibility2               = any goods
 pages.employingStaff.directorEligibility3               = prizes for employer-run competitions
 pages.employingStaff.directorEligibility4               = holidays the company pays for
-pages.directorEligibility.error                         = Tell us if the company pays out non-cash incentive awards
+pages.directorEligibility.error                         = Tell us if over the next 2 months, the company pay out any non-cash incentive awards
 
 ## Completion Capacity page
 pages.completionCapacity.description                    = What is your relationship to the company?
@@ -91,7 +92,8 @@ pages.completionCapacity.agent                          = Agent - for example, a
 pages.completionCapacity.other                          = Other - for example, a friend of the director
 pages.completionCapacity.other.label                    = Enter your relationship to the company
 pages.completionCapacity.error                          = Tell us your relationship to the business
-pages.completionCapacity.other.error                    = Enter your relationship to the business using 100 characters or less
+pages.completionCapacity.other.error                    = Enter your relationship to the company using 100 characters or less
+pages.completionCapacity.error.invalidChars             = Tell us your relationship to the company using only letters, numbers, hyphens and apostrophes
 
 ## Trading Name Page
 pages.tradingName.description                           = Will the company trade under another name?
@@ -107,8 +109,10 @@ pages.tradingName.nameRules2.1                          = be the same as an
 pages.tradingName.nameRules2.2                          = existing trade mark
 pages.tradingName.nameRules3.1                          = contain a ''sensitive'' word or expression unless you
 pages.tradingName.nameRules3.2                          = get permission
-pages.tradingName.errorQuestion                         = Enter a trading name
-pages.tradingName.error                                 = Tell us if the company trades under any other name
+pages.tradingName.errorQuestion                         = Enter the trading name
+pages.tradingName.error                                 = Tell us if the company will trade under another name
+pages.tradingName.error.length                          = Enter a trading name using 35 characters or less
+pages.tradingName.error.invalidChars                    = Tell us the trading name using only letters, numbers and - , . ( ) / & '' !
 
 
 ## Confirm RO Address
@@ -129,7 +133,7 @@ pages.ppobAddress.peopleIntro2                          = If you work in differe
 pages.correspondenceAddress.description                 = Where should we send post about the company''s PAYE?
 pages.correspondenceAddress.lede                        = We''ll use this address to send post relating to your PAYE scheme.
 pages.correspondenceAddress.other                       = A different address
-pages.correspondenceAddress.addressChoice.noEntry       = Tell us the company''s correspondence address
+pages.correspondenceAddress.addressChoice.noEntry       = Tell us where we should send post about the company''s PAYE
 
 ## Business Contact Details
 pages.businessContact.description                       = What are the company''s contact details?
@@ -138,7 +142,7 @@ pages.businessContactDetails.p2.indent                  = You need to provide at
 pages.businessContact.email                             = Email address
 pages.businessContact.contact                           = Contact number
 pages.businessContact.othercontact                      = Other contact number (optional)
-pages.businessContact.noFieldsCompleted                 = Enter at least one company contact detail
+pages.businessContact.noFieldsCompleted                 = Enter the company''s contact details
 
 ## PAYE Contact Details
 pages.payeContact.description                           = Who should we contact about the company''s PAYE?
@@ -147,7 +151,7 @@ pages.payeContact.contactName                           = Contact name
 pages.payeContact.email                                 = Email address
 pages.payeContact.contact                               = Contact number
 pages.payeContact.othercontact                          = Other contact number (optional)
-pages.payeContact.noFieldsCompleted                     = You need to provide at least one contact method so we can get in touch if we need to
+pages.payeContact.noFieldsCompleted                     = Enter at least one contact detail for the company’'s PAYE
 pages.payeContact.nameMandatory                         = Enter a contact name
 
 ## Employing Staff Page
@@ -171,14 +175,14 @@ pages.companyPension.setUpPensionIntro                  = This includes payments
 pages.companyPension.setUpPension1                      = an employee who has retired
 pages.companyPension.setUpPension2                      = any dependants of an employee who has died
 pages.companyPension.error                              = Tell us if you will make pension payments to a former employee or their dependants in the next 2 months
-
+pages.companyPension.error.invalidDate                  = Enter a date within 2 months
 
 ## First Payment Page
 pages.firstPayment.description                          = Set the company''s PAYE scheme start date
 pages.firstPayment.firstPaymentLabel                    = First Payment
 pages.firstPayment.intro                                = The PAYE scheme will start on the date of the company''s first payment to an employee or subcontractor.
 pages.firstPayment.hint                                 = For example, 12 8 2017
-pages.firstPayment.date.invalidRange                    = Enter a date up to 61 days in the future
+pages.firstPayment.date.invalidRange                    = Enter a date within 2 months
 pages.firstPayment.date.dateTooEarly                    = Enter a date after 1900
 pages.firstPayment.firstPaymentRulesSummary             = What counts as a payment?
 pages.firstPayment.list                                 = This date can be:
@@ -192,7 +196,7 @@ pages.natureOfBusiness.textArea.label                   = Enter a description of
 
 ## Director Details Page
 pages.directorDetails.description                       = What is the National Insurance number of at least one company director?
-pages.directorDetails.errors.noneCompleted              = Enter at least one director''s National Insurance number
+pages.directorDetails.errors.noneCompleted              = Enter a National Insurance number of at least one company director
 pages.directorDetails.information.indent                = You can find a National Insurance number on a National Insurance card, benefit letter, payslip or P60.
 pages.directorDetails.information.dropdown.header       = Not the right directors?
 pages.directorDetails.information.dropdown.body         = If the direct names are incorrect, you can change them with

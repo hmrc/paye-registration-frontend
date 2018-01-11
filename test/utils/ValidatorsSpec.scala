@@ -30,7 +30,7 @@ class ValidatorsSpec extends UnitSpec with DateUtil {
         "firstPayMonth" -> "12",
         "firstPayDay" -> "32")
       val boundForm = FirstPaymentForm.form.bind(data)
-      boundForm.errors.map(_.message) shouldBe List("app.common.date.invalid")
+      boundForm.errors.map(_.message) shouldBe List("pages.firstPayment.date.invalidRange")
     }
 
     "return an error message if the month is not valid" in {
@@ -39,7 +39,7 @@ class ValidatorsSpec extends UnitSpec with DateUtil {
         "firstPayMonth" -> "13",
         "firstPayDay" -> "31")
       val boundForm = FirstPaymentForm.form.bind(data)
-      boundForm.errors.map(_.message) shouldBe List("app.common.date.invalid")
+      boundForm.errors.map(_.message) shouldBe List("pages.firstPayment.date.invalidRange")
     }
 
     "return an error message if the year is not valid" in {
@@ -48,7 +48,7 @@ class ValidatorsSpec extends UnitSpec with DateUtil {
         "firstPayMonth" -> "12",
         "firstPayDay" -> "31")
       val boundForm = FirstPaymentForm.form.bind(data)
-      boundForm.errors.map(_.message) shouldBe List("app.common.date.invalid")
+      boundForm.errors.map(_.message) shouldBe List("pages.firstPayment.date.invalidRange")
     }
   }
 

@@ -48,7 +48,7 @@ class DateFormSpec extends UnitSpec {
         "tstMonth" -> "01",
         "tstYear" -> "2016"
         )
-    TestForm.dateFormatter.bind("tstKey", data) shouldBe Left(Seq(FormError("tstDay", "app.common.date.invalid")))
+    TestForm.dateFormatter.bind("tstKey", data) shouldBe Left(Seq(FormError("tstDay", "pages.firstPayment.date.invalidRange")))
   }
 
   "fail to bind from an invalid date (missing month)" in {
@@ -56,7 +56,7 @@ class DateFormSpec extends UnitSpec {
         "tstDay" -> "28",
         "tstYear" -> "2016"
         )
-    TestForm.dateFormatter.bind("tstKey", data) shouldBe Left(Seq(FormError("tstDay", "app.common.date.invalid")))
+    TestForm.dateFormatter.bind("tstKey", data) shouldBe Left(Seq(FormError("tstDay", "pages.firstPayment.date.invalidRange")))
   }
 
   "fail to bind from an invalid date (missing year)" in {
@@ -64,7 +64,7 @@ class DateFormSpec extends UnitSpec {
         "tstDay" -> "28",
         "tstMonth" -> "01"
         )
-    TestForm.dateFormatter.bind("tstKey", data) shouldBe Left(Seq(FormError("tstDay", "app.common.date.invalid")))
+    TestForm.dateFormatter.bind("tstKey", data) shouldBe Left(Seq(FormError("tstDay", "pages.firstPayment.date.invalidRange")))
   }
 
   "unbind from a LocalDate" in {
