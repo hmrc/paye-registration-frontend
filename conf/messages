@@ -75,13 +75,14 @@ pages.companyEligibility.description                    = Is the company an offs
 pages.companyEligibility.error                          = Tell us if the company''s an offshore employer outside the EEA who doesn’'t pay UK National Insurance
 
 ## Director Eligibility
-pages.directorEligibility.description                   = Does the company pay out any non-cash incentive awards?
+pages.directorEligibility.description                   = Over the next 2 months, will the company pay out any non-cash incentive awards?
 pages.employingStaff.directorEligibilityRulesIntro1     = This could be to anyone, not just your own staff.
 pages.employingStaff.directorEligibilityRulesIntro2     = Non-cash incentive awards include:
+pages.employingStaff.directorEligibility.indent         = If it does, you won’'t be able to use this service to register the company for PAYE. We'’ll give you another way to register.
 pages.employingStaff.directorEligibility1               = vouchers - including ones that can be exchanged for cash
 pages.employingStaff.directorEligibility2               = any goods
 pages.employingStaff.directorEligibility3               = prizes for employer-run competitions
-pages.employingStaff.directorEligibility4               = holidays the company pays for
+pages.employingStaff.directorEligibility4               = holidays that the company’'s paid for (but don’t include statutory holiday pay)
 pages.directorEligibility.error                         = Tell us if over the next 2 months, the company pay out any non-cash incentive awards
 
 ## Completion Capacity page
@@ -163,11 +164,11 @@ pages.employingStaff.error                              = Tell us if over the ne
 
 
 ## Subcontractors Page
-pages.subcontractors.description                        = Will the company use subcontractors in the construction industry?
-pages.subcontractors.nameRulesIntro                     = We''ll register the company with the Construction Industry Scheme (CIS) if the company pays subcontractors to do construction work.
+pages.subcontractors.description                        = Over the next 2 months, will the company use subcontractors in the construction industry?
+pages.subcontractors.nameRulesIntro                     = We''ll register you with the Construction Industry Scheme (CIS) if you pay subcontractors to do construction work.
 pages.subcontractors.findout1                           = Find out
-pages.subcontractors.findout2                           = what work is covered by the CIS
-pages.subcontractors.error                              = Tell us if the company will use subcontractors in the construction industry
+pages.subcontractors.findout2                           = what work is covered by the CIS (opens in a new window)
+pages.subcontractors.error                              = Tell us if over the next 2 months, the company will use subcontractors in the construction industry
 
 ## Company Pension Page
 pages.companyPension.description                        = Will the company make pension payments to a former employee or their dependants in the next 2 months?

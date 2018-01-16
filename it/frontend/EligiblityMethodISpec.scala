@@ -141,7 +141,7 @@ class EligiblityMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") shouldBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Does the company pay out any non-cash incentive awards?"
+      document.title() shouldBe "Over the next 2 months, will the company pay out any non-cash incentive awards?"
       document.getElementById("isEligible-true").attr("checked") shouldBe ""
       document.getElementById("isEligible-false").attr("checked") shouldBe "checked"
     }
