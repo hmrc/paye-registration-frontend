@@ -17,16 +17,31 @@
 package forms.errors
 
 import models.view.Ticket
+import org.apache.commons.validator.routines.EmailValidator
 import play.api.data.Form
 import play.api.data.Forms._
-import utils.Validators.emailValidation
+
+private case class DeskproEmailValidator() {
+  private val validator = EmailValidator.getInstance(false)
+  def validate(email: String): Boolean = validator.isValid(email)
+}
 
 object DeskproForm {
+  private val emailValidator: DeskproEmailValidator = DeskproEmailValidator()
+  private val validateEmail: String => Boolean = emailValidator.validate
+
   val form = Form(
     mapping(
-      "name" -> nonEmptyText,
-      "email" -> text.verifying(emailValidation),
-      "message" -> nonEmptyText
+      "name" -> text
+        .verifying("errorPages.failedSubmission.error.name_required", action => !action.trim.isEmpty)
+        .verifying("errorPages.failedSubmission.error.name_too_long", name => name.size <= 70)
+        .verifying("errorPages.failedSubmission.error.name_invalid_characters", name => name.matches( """^[A-Za-z\-.,()'"\s]+$""")),
+      "email" -> text
+        .verifying("errorPages.failedSubmission.error.email_format", validateEmail)
+        .verifying("errorPages.failedSubmission.error.email_too_long", email => email.size <= 255),
+      "message" -> text
+        .verifying("errorPages.failedSubmission.error.message_required", action => !action.trim.isEmpty)
+        .verifying("errorPages.failedSubmission.error.message_too_long", message => message.size <= 1000)
     )(Ticket.apply)(Ticket.unapply)
   )
 }

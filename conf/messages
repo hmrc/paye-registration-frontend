@@ -363,6 +363,13 @@ errorPages.failedSubmission.q1                                  = Name
 errorPages.failedSubmission.q2                                  = Email
 errorPages.failedSubmission.q3                                  = What were you doing?
 errorPages.failedSubmission.button                              = Send
+errorPages.failedSubmission.error.name_too_long                 = Your name can''t be longer than 70 characters
+errorPages.failedSubmission.error.name_invalid_characters       = Tell us your name using only letters (without accents), hyphens and apostrophes
+errorPages.failedSubmission.error.name_required                 = Please provide your name.
+errorPages.failedSubmission.error.email_too_long                = Your email can''t be longer than 255 characters
+errorPages.failedSubmission.error.email_format                  = Enter an email address using only letters, numbers and - . @ _ +
+errorPages.failedSubmission.error.message_too_long              = Your message can''t be longer than 1000 characters
+errorPages.failedSubmission.error.message_required              = Please enter details of what you were doing.
 
 ## Deskpro Submitedd
 errorPages.deskproSubmitted.description                         = Thank you
