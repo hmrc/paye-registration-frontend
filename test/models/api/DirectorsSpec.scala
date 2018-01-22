@@ -38,6 +38,15 @@ class DirectorsSpec extends UnitSpec {
          |  "title":"Brigadier Bridge Buddies"
          |}""".stripMargin)
 
+
+    val tstJsonWithCommas = Json.parse(
+      s"""{
+         |  "forename":"Timo,,thy",
+         |  "other_forenames":"Potterl,ey-Smythe",
+         |  "surname":"Buttersf,ord",
+         |  "title":"Brigadier Br,idge Budd.ies"
+         |}""".stripMargin)
+
     val tstModel = Name(
       forename = Some("Timothy"),
       otherForenames = Some("Potterley-Smythe"),
@@ -57,6 +66,9 @@ class DirectorsSpec extends UnitSpec {
     }
     "read from json with a title over 20 characters" in {
       Json.fromJson[Name](tstJsonTitle)(Name.normalizeNameReads) shouldBe JsSuccess(tstModelTitle)
+    }
+    "read from json with commas" in {
+      Json.fromJson[Name](tstJsonWithCommas)(Name.normalizeNameReads) shouldBe JsSuccess(tstModelTitle)
     }
     "write to json with full data" in {
       Json.toJson[Name](tstModel) shouldBe tstJson

@@ -56,8 +56,9 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
     "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ==",
     "defaultCHROAddress" -> "eyJwcmVtaXNlcyI6IjE0IiwiYWRkcmVzc19saW5lXzEiOiJUZXN0IERlZmF1bHQgU3RyZWV0IiwiYWRkcmVzc19saW5lXzIiOiJUZXN0bGV5IiwibG9jYWxpdHkiOiJUZXN0Zm9yZCIsImNvdW50cnkiOiJVSyIsInBvc3RhbF9jb2RlIjoiVEUxIDFTVCJ9",
     "defaultSeqDirector" -> "W3siZGlyZWN0b3IiOnsiZm9yZW5hbWUiOiJmYXVsdHkiLCJzdXJuYW1lIjoiZGVmYXVsdCJ9fSx7ImRpcmVjdG9yIjp7ImZvcmVuYW1lIjoiVGVzdCIsInN1cm5hbWUiOiJSZWdJZFdoaXRlbGlzdCIsInRpdGxlIjoiTXJzIn19XQ==",
-    "defaultOfficerList" -> "IFsNCiAgICB7DQogICAgICAibmFtZSIgOiAidGVzdCIsDQogICAgICAibmFtZV9lbGVtZW50cyIgOiB7DQogICAgICAgICJmb3JlbmFtZSIgOiAidGVzdDEiLA0KICAgICAgICAib3RoZXJfZm9yZW5hbWVzIiA6ICJ0ZXN0MTEiLA0KICAgICAgICAic3VybmFtZSIgOiAidGVzdGEiLA0KICAgICAgICAidGl0bGUiIDogIk1yIg0KICAgICAgfSwNCiAgICAgICJvZmZpY2VyX3JvbGUiIDogImRpcmVjdG9yIg0KICAgIH0sIHsNCiAgICAgICJuYW1lIiA6ICJ0ZXN0IiwNCiAgICAgICJuYW1lX2VsZW1lbnRzIiA6IHsNCiAgICAgICAgImZvcmVuYW1lIiA6ICJ0ZXN0MiIsDQogICAgICAgICJvdGhlcl9mb3JlbmFtZXMiIDogInRlc3QyMiIsDQogICAgICAgICJzdXJuYW1lIiA6ICJ0ZXN0YiIsDQogICAgICAgICJ0aXRsZSIgOiAiTXIiDQogICAgICB9LA0KICAgICAgIm9mZmljZXJfcm9sZSIgOiAiZGlyZWN0b3IiDQogICAgfSwgew0KICAgICAgIm5hbWUiIDogInRlc3QiLA0KICAgICAgIm5hbWVfZWxlbWVudHMiIDogew0KICAgICAgICAiZm9yZW5hbWUiIDogInRlc3QzIiwNCiAgICAgICAgIm90aGVyX2ZvcmVuYW1lcyIgOiAidGVzdDMzIiwNCiAgICAgICAgInN1cm5hbWUiIDogInRlc3RjIiwNCiAgICAgICAgInRpdGxlIiA6ICJUZXN0IFRpdGxlIFRoYXQgSXMgTW9yZSBUaGFuIFR3ZW50eSBDaGFycyINCiAgICAgIH0sDQogICAgICAib2ZmaWNlcl9yb2xlIiA6ICJkaXJlY3RvciINCiAgICB9DQogIF0="
-  ))
+    "defaultOfficerList" -> "WwogICAgewogICAgICAibmFtZSIgOiAidGVzdCIsCiAgICAgICJuYW1lX2VsZW1lbnRzIiA6IHsKICAgICAgICAiZm9yZW5hbWUiIDogInRlLHN0MSIsCiAgICAgICAgIm90aGVyX2ZvcmVuYW1lcyIgOiAidGUsc3QxMSIsCiAgICAgICAgInN1cm5hbWUiIDogInRlc3QsYSIsCiAgICAgICAgInRpdGxlIiA6ICJNLC5yIgogICAgICB9LAogICAgICAib2ZmaWNlcl9yb2xlIiA6ICJkaXJlY3RvciIKICAgIH0sIHsKICAgICAgIm5hbWUiIDogInRlc3QiLAogICAgICAibmFtZV9lbGVtZW50cyIgOiB7CiAgICAgICAgImZvcmVuYW1lIiA6ICJ0ZXN0MiIsCiAgICAgICAgIm90aGVyX2ZvcmVuYW1lcyIgOiAidGVzdDIyIiwKICAgICAgICAic3VybmFtZSIgOiAidGVzdGIiLAogICAgICAgICJ0aXRsZSIgOiAiTXIiCiAgICAgIH0sCiAgICAgICJvZmZpY2VyX3JvbGUiIDogImRpcmVjdG9yIgogICAgfSwgewogICAgICAibmFtZSIgOiAidGVzdCIsCiAgICAgICJuYW1lX2VsZW1lbnRzIiA6IHsKICAgICAgICAiZm9yZW5hbWUiIDogInRlc3QzIiwKICAgICAgICAib3RoZXJfZm9yZW5hbWVzIiA6ICJ0ZXN0MzMiLAogICAgICAgICJzdXJuYW1lIiA6ICJ0ZXN0YyIsCiAgICAgICAgInRpdGxlIiA6ICJUZXN0IFRpdGxlIFRoYXQgSXMgTW9yZSBUaGFuIFR3ZW50eSBDaGFycyIKICAgICAgfSwKICAgICAgIm9mZmljZXJfcm9sZSIgOiAiZGlyZWN0b3IiCiAgICB9CiAgXQ=="))
+
+
 
   override def beforeEach() {
     resetWiremock()
@@ -124,10 +125,10 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
           |    {
           |      "name" : "test",
           |      "name_elements" : {
-          |        "forename" : "test1",
-          |        "other_forenames" : "test11",
-          |        "surname" : "testa",
-          |        "title" : "Mr"
+          |        "forename" : "test,1",
+          |        "other_forenames" : ",test11",
+          |        "surname" : "te, sta",
+          |        "title" : "Mr,"
           |      },
           |      "officer_role" : "director",
           |      "resigned_on" : "2017-01-01"

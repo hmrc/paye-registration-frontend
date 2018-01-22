@@ -33,7 +33,13 @@ object Formatters {
 
   lazy val normalizeTrimmedFullStopReads = new Reads[String] {
     override def reads(json: JsValue): JsResult[String] = Json.fromJson[String](json) flatMap {
-      s => JsSuccess(normalize(s).replace(".",""))
+      s => JsSuccess(normalize(s).replace(".","").replace(",",""))
+    }
+  }
+
+  lazy val normalizeTrimmedCommasReads = new Reads[String] {
+    override def reads(json: JsValue): JsResult[String] = Json.fromJson[String](json) flatMap {
+      s => JsSuccess(normalize(s).replace(",",""))
     }
   }
 
