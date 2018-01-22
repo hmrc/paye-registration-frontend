@@ -35,7 +35,7 @@ class FeatureSwitchControllerSpec extends PAYERegSpec {
 
   class Setup {
     val controller = new FeatureSwitchCtrl {
-      override val PayeFeatureSwitch = mockPAYEFeatureSwitch
+      override val payeFeatureSwitch = mockPAYEFeatureSwitch
       override val featureManager = mockFeatureManager
     }
   }

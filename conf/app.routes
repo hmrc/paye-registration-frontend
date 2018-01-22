@@ -65,6 +65,10 @@ POST        /make-pension-payment-next-two-months             controllers.userJo
 GET         /set-paye-scheme-start-date                       controllers.userJourney.EmploymentController.firstPayment
 POST        /set-paye-scheme-start-date                       controllers.userJourney.EmploymentController.submitFirstPayment
 
+## PAYMENT IN NEXT TAX YEAR
+GET         /first-payment-next-tax-year                      controllers.userJourney.EmploymentController.ifFirstPaymentIsInTheNextTaxYear
+POST        /first-payment-next-tax-year                      controllers.userJourney.EmploymentController.redirectBackToStandardFlow
+
 ## NATURE OF BUSINESS
 GET         /what-company-does                                controllers.userJourney.NatureOfBusinessController.natureOfBusiness
 POST        /what-company-does                                controllers.userJourney.NatureOfBusinessController.submitNatureOfBusiness

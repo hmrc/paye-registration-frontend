@@ -20,10 +20,18 @@ import javax.inject.{Inject, Singleton}
 
 sealed trait FeatureSwitch {
   def name: String
+  def value: String
   def enabled: Boolean
 }
 
-case class BooleanFeatureSwitch(name: String, enabled: Boolean) extends FeatureSwitch
+case class BooleanFeatureSwitch(name: String, enabled: Boolean) extends FeatureSwitch {
+  override def value = ""
+}
+
+case class ValueSetFeatureSwitch(name: String, date: Option[String]) extends FeatureSwitch {
+  override def enabled = date.isDefined
+  override def value = date.getOrElse("")
+}
 
 @Singleton
 class FeatureSwitchManager extends FeatureManager
@@ -36,8 +44,10 @@ trait FeatureManager {
     val value = sys.props.get(systemPropertyName(name))
 
     value match {
-      case Some("true") => BooleanFeatureSwitch(name, enabled = true)
-      case _            => BooleanFeatureSwitch(name, enabled = false)
+      case Some("true")                        => BooleanFeatureSwitch(name, enabled = true)
+      case Some("false")                       => BooleanFeatureSwitch(name, enabled = false)
+      case Some(date) if date.contains("time") => ValueSetFeatureSwitch(name, if(date.equals("")) None else Some(date))
+      case _                                   => BooleanFeatureSwitch(name, enabled = false)
     }
   }
 
@@ -48,26 +58,33 @@ trait FeatureManager {
 
   def enable(fs: FeatureSwitch): FeatureSwitch  = setProperty(fs.name, "true")
   def disable(fs: FeatureSwitch): FeatureSwitch = setProperty(fs.name, "false")
+
+  def setSystemDate(fs: FeatureSwitch, date: String): FeatureSwitch = setProperty(fs.name, date)
+  def clearSystemDate(fs: FeatureSwitch): FeatureSwitch             = setProperty(fs.name, "")
 }
 
 @Singleton
 class PAYEFeatureSwitch @Inject()(val manager: FeatureSwitchManager) extends PAYEFeatureSwitches {
   val addressLookupUrl    = "addressService"
   val companyRegistration = "companyRegistration"
+  val setSystemDate       = "system-date"
 }
 
 trait PAYEFeatureSwitches {
 
   val addressLookupUrl: String
   val companyRegistration: String
+  val setSystemDate: String
   val manager: FeatureManager
 
   def addressLookupFrontend = manager.getProperty(addressLookupUrl)
   def companyReg            = manager.getProperty(companyRegistration)
+  def systemDate            = manager.getProperty(setSystemDate)
 
   def apply(name: String): Option[FeatureSwitch] = name match {
     case "addressService"       => Some(addressLookupFrontend)
     case "companyRegistration"  => Some(companyReg)
+    case "system-date"          => Some(systemDate)
     case _                      => None
   }
 }

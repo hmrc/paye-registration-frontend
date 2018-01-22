@@ -24,11 +24,13 @@ import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector
 import forms.employmentDetails._
 import models.view.{EmployingStaff, Subcontractors}
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.mvc.{Action, AnyContent}
 import services.{EmploymentService, EmploymentSrv}
 import uk.gov.hmrc.play.frontend.auth.Actions
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils.SessionProfile
 import views.html.pages.employmentDetails.{companyPension => CompanyPensionPage, employingStaff => EmployingStaffPage, firstPayment => FirstPaymentPage, subcontractors => SubcontractorsPage}
+import views.html.pages.annual.FirstPaymentInNextTaxYear
 
 import scala.concurrent.Future
 
@@ -36,13 +38,14 @@ import scala.concurrent.Future
 class EmploymentController @Inject()(val employmentService: EmploymentService,
                                      val keystoreConnector: KeystoreConnector,
                                      val payeRegistrationConnector: PAYERegistrationConnector,
-                                     val messagesApi: MessagesApi) extends EmploymentCtrl {
+                                     implicit val messagesApi: MessagesApi) extends EmploymentCtrl {
   val authConnector = FrontendAuthConnector
 }
 
 trait EmploymentCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
   val employmentService: EmploymentSrv
   val keystoreConnector: KeystoreConnect
+  implicit val messagesApi: MessagesApi
 
   // SUBCONTRACTORS
   val subcontractors = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
@@ -152,10 +155,31 @@ trait EmploymentCtrl extends FrontendController with Actions with I18nSupport wi
         withCurrentProfile { profile =>
           FirstPaymentForm.form.bindFromRequest.fold(
             errors => Future.successful(BadRequest(FirstPaymentPage(errors))),
-            model => employmentService.saveFirstPayment(model, profile.registrationID) map {
-              _ => Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+            model => for {
+              _                           <- employmentService.saveFirstPayment(model, profile.registrationID)
+              firstPaymentDateInNextYear  =  employmentService.firstPaymentDateInNextYear(model.firstPayDate)
+            } yield if(firstPaymentDateInNextYear) {
+              Redirect(controllers.userJourney.routes.EmploymentController.ifFirstPaymentIsInTheNextTaxYear() )
+            } else {
+              Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
             }
           )
+        }
+  }
+
+  def ifFirstPaymentIsInTheNextTaxYear: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user =>
+      implicit request =>
+        withCurrentProfile { _ =>
+          Future.successful(Ok(FirstPaymentInNextTaxYear()))
+        }
+  }
+
+  def redirectBackToStandardFlow: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
+    implicit user =>
+      implicit request =>
+        withCurrentProfile { _ =>
+          Future.successful(Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity()))
         }
   }
 }

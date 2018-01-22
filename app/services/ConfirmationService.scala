@@ -16,23 +16,33 @@
 
 package services
 
+import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 
 import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
+import uk.gov.hmrc.http.HeaderCarrier
+import utils.SystemDate
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
-class ConfirmationService @Inject()(injPAYERegistrationConnector: PAYERegistrationConnector) extends ConfirmationSrv {
-  override val payeRegistrationConnector = injPAYERegistrationConnector
+class ConfirmationService @Inject()(val payeRegistrationConnector: PAYERegistrationConnector) extends ConfirmationSrv {
+  def now: LocalDate  = SystemDate.getSystemDate
+  val startDate       = LocalDate.of(now.getYear, 2, 6)
+  val endDate         = LocalDate.of(now.getYear, 5, 17)
 }
 
 trait ConfirmationSrv {
+  def now: LocalDate
+
+  val startDate: LocalDate
+  val endDate: LocalDate
 
   val payeRegistrationConnector: PAYERegistrationConnect
 
   def getAcknowledgementReference(regId: String)(implicit hc: HeaderCarrier): Future[Option[String]] = {
     payeRegistrationConnector.getAcknowledgementReference(regId)
   }
+
+  def determineIfInclusiveContentIsShown: Boolean = (now.isAfter(startDate) && now.isBefore(endDate)) | now.isEqual(startDate) | now.isEqual(endDate)
 }

@@ -81,7 +81,7 @@ object Validators extends DateUtil {
   def isValidNatureOfBusiness(natureOfBusiness: String): Boolean = natureOfBusiness.matches(natureOfBusinessRegex)
 
   def firstPaymentDateWithinRange(date: LocalDate): Boolean = {
-    lessOrEqualThanXDaysAfter(LocalDate.now(), date, 61)
+    lessOrEqualThanXDaysAfter(SystemDate.getSystemDate, date, 61)
   }
 
   def beforeMinDate(date: LocalDate): Boolean = {

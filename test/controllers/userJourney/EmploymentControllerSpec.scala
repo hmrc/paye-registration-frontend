@@ -392,4 +392,23 @@ class EmploymentControllerSpec extends PAYERegSpec with DateUtil {
       }
     }
   }
+
+  "ifFirstPaymentIsInTheNextTaxYear" should {
+    "return an Ok" in new Setup {
+      AuthBuilder.showWithAuthorisedUser(controller.ifFirstPaymentIsInTheNextTaxYear, mockAuthConnector) {
+        (response: Future[Result]) =>
+          status(response) shouldBe Status.OK
+      }
+    }
+  }
+
+  "redirectBackToStandardFlow" should {
+    "return an Redirect" in new Setup {
+      AuthBuilder.submitWithAuthorisedUser(controller.redirectBackToStandardFlow(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody()) {
+        result =>
+          status(result) shouldBe Status.SEE_OTHER
+          result.header.headers("Location") shouldBe "/register-for-paye/relationship-to-company"
+      }
+    }
+  }
 }

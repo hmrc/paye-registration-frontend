@@ -16,6 +16,7 @@
 
 package services
 
+import java.time.LocalDate
 import javax.inject.{Inject, Singleton}
 
 import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
@@ -24,9 +25,9 @@ import models.api.{Employment => EmploymentAPI}
 import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment => EmploymentView, FirstPayment => FirstPaymentView}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.DateUtil
-
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import utils.{DateUtil, SystemDate}
+
 import scala.concurrent.Future
 
 sealed trait SavedResponse
@@ -34,11 +35,15 @@ case object S4LSaved extends SavedResponse
 case class MongoSaved(employment: EmploymentView) extends SavedResponse
 
 @Singleton
-class EmploymentService @Inject()(val payeRegConnector: PAYERegistrationConnector, val s4LService: S4LService) extends EmploymentSrv
+class EmploymentService @Inject()(val payeRegConnector: PAYERegistrationConnector,val s4LService: S4LService) extends EmploymentSrv {
+  def now: LocalDate = SystemDate.getSystemDate
+}
 
 trait EmploymentSrv extends DateUtil {
   val payeRegConnector: PAYERegistrationConnect
   val s4LService: S4LSrv
+
+  def now: LocalDate
 
   implicit val formatRecordSet = Json.format[EmploymentView]
 
@@ -102,5 +107,10 @@ trait EmploymentSrv extends DateUtil {
     fetchEmploymentView(regId) flatMap { employment =>
       saveEmployment(EmploymentView(employment.employing, employment.companyPension, employment.subcontractors, Some(viewData)), regId)
     }
+  }
+
+  def firstPaymentDateInNextYear(firstPaymentDate: LocalDate): Boolean = {
+    val taxYearStart = LocalDate.of(now.getYear,4,6)
+    now.isBefore(taxYearStart) && (firstPaymentDate.isEqual(taxYearStart) | firstPaymentDate.isAfter(taxYearStart))
   }
 }
