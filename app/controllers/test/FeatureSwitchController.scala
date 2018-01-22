@@ -25,26 +25,29 @@ import utils._
 import scala.concurrent.Future
 
 @Singleton
-class FeatureSwitchController @Inject()(injFeatureSwitch: FeatureSwitchManager,
-                                        injPayeFeatureSwitch: PAYEFeatureSwitch) extends FeatureSwitchCtrl {
-  val featureManager = injFeatureSwitch
-  val PayeFeatureSwitch = injPayeFeatureSwitch
-}
+class FeatureSwitchController @Inject()(val featureManager: FeatureSwitchManager,
+                                        val payeFeatureSwitch: PAYEFeatureSwitch) extends FeatureSwitchCtrl
 
 trait FeatureSwitchCtrl extends FrontendController {
 
-  val featureManager : FeatureManager
-  val PayeFeatureSwitch : PAYEFeatureSwitches
+  val featureManager: FeatureManager
+  val payeFeatureSwitch: PAYEFeatureSwitches
 
   def switcher(featureName: String, featureState: String): Action[AnyContent] = Action.async {
     implicit request =>
       def feature: FeatureSwitch = featureState match {
         case "true"                   => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
         case "addressLookupFrontend"  => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
+        case x if x.contains("time")  => if(x.replace("time-", "").equals("clear")) {
+          featureManager.clearSystemDate(ValueSetFeatureSwitch("system-date", None))
+        } else {
+          val dateSwitch = ValueSetFeatureSwitch("system-date", Some(x.replace("time-","")))
+          featureManager.setSystemDate(dateSwitch, dateSwitch.date.get.replace("time-", ""))
+        }
         case _                        => featureManager.disable(BooleanFeatureSwitch(featureName, enabled = false))
       }
 
-      PayeFeatureSwitch(featureName) match {
+      payeFeatureSwitch(featureName) match {
         case Some(_)  => Future.successful(Ok(feature.toString))
         case None     => Future.successful(BadRequest)
       }

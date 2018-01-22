@@ -44,10 +44,13 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
   val returnCacheMap = CacheMap("", Map("" -> Json.toJson("")))
   val returnHttpResponse = HttpResponse(200)
 
-  class Setup {
+  trait Setup {
+    def testNow: LocalDate
+
     val service = new EmploymentSrv {
+      override def now              = testNow
       override val payeRegConnector = mockPAYERegConnector
-      override val s4LService = mockS4LService
+      override val s4LService       = mockS4LService
     }
 
     val dateUtil = new DateUtil {}
@@ -55,26 +58,36 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
 
   "calling viewToAPI with EmployingStaff" should {
     "return the corresponding converted Employment API Model with CompanyPension" in new Setup {
+      override def testNow = LocalDate.now
+
       val viewModel = EmploymentView(Some(EmployingStaff(true)), Some(CompanyPension(true)), Some(Subcontractors(true)), Some(FirstPaymentView(LocalDate.now())))
       service.viewToAPI(viewModel) shouldBe Right(EmploymentAPI(true, Some(true), true, now))
     }
 
     "return the corresponding converted Employment API Model without CompanyPension" in new Setup {
+      override def testNow = LocalDate.now
+
       val viewModel = EmploymentView(Some(EmployingStaff(false)), None, Some(Subcontractors(true)), Some(FirstPaymentView(LocalDate.now())))
       service.viewToAPI(viewModel) shouldBe Right(EmploymentAPI(false, None, true, now))
     }
 
     "return the Employment VIEW Model with EmployingStaff set as true and CompanyPension set as None" in new Setup {
+      override def testNow = LocalDate.now
+
       val viewModel = EmploymentView(Some(EmployingStaff(true)), None, Some(Subcontractors(true)), Some(FirstPaymentView(LocalDate.now())))
       service.viewToAPI(viewModel) shouldBe Left(viewModel)
     }
 
     "return the Employment VIEW Model with Subcontractors set as None" in new Setup {
+      override def testNow = LocalDate.now
+
       val viewModel = EmploymentView(Some(EmployingStaff(false)), None, None, Some(FirstPaymentView(LocalDate.now())))
       service.viewToAPI(viewModel) shouldBe Left(viewModel)
     }
 
     "return the Employment VIEW Model with FirstPayment set as None" in new Setup {
+      override def testNow = LocalDate.now
+
       val viewModel = EmploymentView(Some(EmployingStaff(false)), None, None, None)
       service.viewToAPI(viewModel) shouldBe Left(viewModel)
     }
@@ -82,12 +95,16 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
 
   "calling apiToView with EmployingStaff" should {
     "return the corresponding converted Employment View Model with CompanyPension" in new Setup {
+      override def testNow = LocalDate.now
+
       val apiModel = EmploymentAPI(true, Some(true), false, now)
       val expected = EmploymentView(Some(EmployingStaff(true)), Some(CompanyPension(true)), Some(Subcontractors(false)), Some(FirstPaymentView(LocalDate.now())))
       service.apiToView(apiModel) shouldBe expected
     }
 
     "return the corresponding converted Employment View Model without CompanyPension" in new Setup {
+      override def testNow = LocalDate.now
+
       val apiModel = EmploymentAPI(false, None, false, now)
       service.apiToView(apiModel) shouldBe EmploymentView(Some(EmployingStaff(false)), None, Some(Subcontractors(false)), Some(FirstPaymentView(LocalDate.now())))
     }
@@ -95,6 +112,8 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
 
   "calling fetchEmploymentView" should {
     "return the Employment VIEW model if found in S4L" in new Setup {
+      override def testNow = LocalDate.now
+
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(Some(validEmploymentViewModel)))
 
@@ -102,6 +121,8 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
     }
 
     "return the Employment VIEW model from the connector if not found in S4L" in new Setup {
+      override def testNow = LocalDate.now
+
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(None))
 
@@ -112,6 +133,8 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
     }
 
     "return an empty Employment VIEW model if not found in S4L or in connector" in new Setup {
+      override def testNow = LocalDate.now
+
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(None))
 
@@ -124,6 +147,8 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
 
   "calling saveEmploymentView" should {
     "save the Employment VIEW model in S4L if the model is incomplete" in new Setup {
+      override def testNow = LocalDate.now
+
       when(mockS4LService.saveForm[EmploymentView](ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(returnCacheMap))
 
@@ -131,6 +156,8 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
     }
 
     "save the Employment VIEW model in BE if the model is complete" in new Setup {
+      override def testNow = LocalDate.now
+
       when(mockPAYERegConnector.upsertEmployment(ArgumentMatchers.eq("54321"), ArgumentMatchers.eq(validEmploymentAPIModel))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validEmploymentAPIModel))
 
@@ -141,6 +168,8 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
     }
 
     "clear S4L data if the Employment VIEW model is saved in BE" in new Setup {
+      override def testNow = LocalDate.now
+
       when(mockPAYERegConnector.upsertEmployment(ArgumentMatchers.eq("54321"), ArgumentMatchers.eq(validEmploymentAPIModel))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validEmploymentAPIModel))
 
@@ -154,6 +183,8 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
 
   "calling saveEmployingStaff" should {
     "update the Employment VIEW model" in new Setup {
+      override def testNow = LocalDate.now
+
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(Some(incompleteEmploymentViewModel)))
 
@@ -166,6 +197,8 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
 
   "calling saveCompanyPension" should {
     "update the Employment VIEW model" in new Setup {
+      override def testNow = LocalDate.now
+
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(Some(incompleteEmploymentViewModel)))
 
@@ -178,6 +211,8 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
 
   "calling saveSubcontractors" should {
     "update the Employment VIEW model" in new Setup {
+      override def testNow = LocalDate.now
+
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(Some(incompleteEmploymentViewModel)))
 
@@ -190,6 +225,8 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
 
   "calling saveFirstPayment" should {
     "update the Employment VIEW model" in new Setup {
+      override def testNow = LocalDate.now
+
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
         .thenReturn(Future.successful(Some(incompleteEmploymentViewModel)))
 
@@ -199,6 +236,32 @@ class EmploymentServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistr
       val date = LocalDate.of(2016, 12, 1)
 
       await(service.saveFirstPayment(FirstPaymentView(date), "54321")) shouldBe incompleteEmploymentViewModel.copy(firstPayment = Some(FirstPaymentView(date)))
+    }
+  }
+
+  "firstPaymentDateInNextYear" should {
+    "return true" when {
+      "now is before 6 Apr AND entered date is equal to 6 Apr" in new Setup {
+        override def testNow = LocalDate.of(now.getYear,1,1)
+        service.firstPaymentDateInNextYear(LocalDate.of(now.getYear,4,6)) shouldBe true
+      }
+
+      "now is before 6 Apr AND entered date is after 6 Apr" in new Setup {
+        override def testNow = LocalDate.of(now.getYear,1,1)
+        service.firstPaymentDateInNextYear(LocalDate.of(now.getYear,4,7)) shouldBe true
+      }
+    }
+
+    "return false" when {
+      "now is before 6 Apr AND entered date is before 6 Apr" in new Setup {
+        override def testNow = LocalDate.of(now.getYear,1,1)
+        service.firstPaymentDateInNextYear(LocalDate.of(now.getYear,1,1)) shouldBe false
+      }
+
+      "now is after 6 Apr" in new Setup {
+        override def testNow = LocalDate.of(now.getYear,4,10)
+        service.firstPaymentDateInNextYear(LocalDate.of(now.getYear,4,15))
+      }
     }
   }
 }

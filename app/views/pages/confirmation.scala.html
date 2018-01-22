@@ -1,4 +1,6 @@
-@(ackRef: String)(implicit request: Request[_], messages: Messages)
+@import views.html.helpers.templates.hiddenDetails
+
+@(ackRef: String, displayNextTaxYearContent: Boolean)(implicit request: Request[_], messages: Messages)
 
 @main_template(title = messages("pages.confirmation.description"), backButton = false) {
 
@@ -13,19 +15,11 @@
 
     <br />
 
-    <div class="form-group">
-        <h2>@messages("pages.confirmation.heading2")</h2>
-
-        <p>@messages("pages.confirmation.p1")</p>
-        <ul class="bullets">
-            <li>@messages("pages.confirmation.bullet1")</li>
-            <li>@messages("pages.confirmation.bullet2")</li>
-        </ul>
-    </div>
-
-    <div class="form-group">
-        <p>@messages("pages.confirmation.p2")</p>
-    </div>
+    @if(displayNextTaxYearContent) {
+        @inclusiveDateContent
+    } else {
+        @standardContent()
+    }
 
     <br>
 
@@ -36,4 +30,58 @@
     </form>
 
     <a href="@controllers.userJourney.routes.EligibilityController.questionnaire()">@messages("app.common.whatDidYouThink")</a>
+}
+
+@standardContent() = {
+    <div id="standard-content" class="form-group">
+        <h2>@messages("pages.confirmation.standard.heading")</h2>
+
+        <p>@messages("pages.confirmation.standard.section-1")</p>
+        <ul class="bullets">
+            <li>@messages("pages.confirmation.standard.section-1.bullet1")</li>
+            <li>@messages("pages.confirmation.standard.section-1.bullet2")</li>
+        </ul>
+    </div>
+
+    <div class="form-group">
+        <p>@messages("pages.confirmation.standard.section-2")</p>
+        <ul class="bullets">
+            <li>@messages("pages.confirmation.standard.section-2.bullet1")</li>
+            <li>@messages("pages.confirmation.standard.section-2.bullet2")</li>
+        </ul>
+    </div>
+
+    <div class="form-group">
+        <p>@messages("pages.confirmation.standard.last")</p>
+    </div>
+}
+
+@inclusiveDateContent = {
+    <div id="inclusive-content" class="form-group">
+        <h2>@messages("pages.confirmation.inclusive.section-1.heading")</h2>
+
+        <p>@messages("pages.confirmation.inclusive.section-1")</p>
+        <ul class="bullets">
+            <li>@messages("pages.confirmation.inclusive.section-1.bullet1")</li>
+            <li>@messages("pages.confirmation.inclusive.section-1.bullet2")</li>
+        </ul>
+
+        <p>@messages("pages.confirmation.inclusive.section-1.last")</p>
+    </div>
+
+    <div class="form-group">
+        <h2>@messages("pages.confirmation.inclusive.section-2.heading")</h2>
+
+        <p>@messages("pages.confirmation.inclusive.section-2.body")</p>
+        @hiddenDetails("firstPaymentInNextTaxYear", messages("pages.confirmation.inclusive.section-2.disclosure.heading"), inclusiveProgressiveDisclosure)
+    </div>
+}
+
+@inclusiveProgressiveDisclosure = {
+    <p>@messages("pages.confirmation.inclusive.section-2.disclosure.body")</p>
+    <ul class="list list-bullet">
+        <li>@Html(messages("pages.confirmation.inclusive.section-2.disclosure.bullet1", "https://www.gov.uk/running-payroll"))</li>
+        <li>@messages("pages.confirmation.inclusive.section-2.disclosure.bullet2")</li>
+        <li>@messages("pages.confirmation.inclusive.section-2.disclosure.bullet3")</li>
+    </ul>
 }

@@ -25,6 +25,7 @@ class FeatureSwitchSpec extends UnitSpec with BeforeAndAfterEach {
     System.clearProperty("feature.test")
     System.clearProperty("feature.cohoFirstHandOff")
     System.clearProperty("feature.businessActivitiesHandOff")
+    System.clearProperty("feature.system-date")
   }
 
   val featureSwitch = new FeatureSwitchManager
@@ -65,6 +66,10 @@ class FeatureSwitchSpec extends UnitSpec with BeforeAndAfterEach {
 
     "return a feature switch (testKey, true) when supplied with (testKey, true)" in {
       featureSwitch.setProperty("test", "true") shouldBe BooleanFeatureSwitch("test", enabled = true)
+    }
+
+    "return ValueSetFeatureSwitch when supplied system-date and time-15-3" in {
+      featureSwitch.setProperty("system-date", "time-15-3") shouldBe ValueSetFeatureSwitch("system-date",Some("time-15-3"))
     }
   }
 
@@ -122,5 +127,4 @@ class FeatureSwitchSpec extends UnitSpec with BeforeAndAfterEach {
       payeFeatureSwitch("somethingElse") shouldBe None
     }
   }
-
 }

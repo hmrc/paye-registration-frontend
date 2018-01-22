@@ -21,7 +21,7 @@ import connectors.CompanyRegistrationConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
-import play.api.{Application, Play}
+import play.api.{Application, Logger, Play}
 import services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.PAYEFeatureSwitch
@@ -114,22 +114,6 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
         val result = await(getResponse)
         result.status shouldBe "testStatus"
         result.transactionId shouldBe "testTransactionID-001"
-
-        await(buildClient("/test-only/feature-flag/companyRegistration/false").get())
-
-        def getStubResponse = companyRegistrationConnector.getCompanyRegistrationDetails(regId)
-
-        stubFor(get(urlMatching(stubUrl))
-          .willReturn(
-            aResponse()
-              .withStatus(200)
-              .withBody(Json.toJson(responseBody("testTransactionID-002")).toString())
-          )
-        )
-
-        val stubbedResult = await(getResponse)
-        stubbedResult.status shouldBe "testStatus"
-        stubbedResult.transactionId shouldBe "testTransactionID-002"
       }
     }
   }
