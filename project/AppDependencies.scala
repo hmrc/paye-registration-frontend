@@ -27,13 +27,15 @@ object MainDependencies {
   private val httpCachingVersion              = "7.0.0"
   private val playWhitelistVersion            = "2.0.0"
   private val playConditionalMappingVersion   = "0.2.0"
+  private val commonsValidatorVersion         = "1.6"
 
   def apply() = Seq(
-    "uk.gov.hmrc" %% "frontend-bootstrap"             % frontendBootstrapVersion,
-    "uk.gov.hmrc" %% "play-partials"                  % playPartialsVersion,
-    "uk.gov.hmrc" %% "http-caching-client"            % httpCachingVersion,
-    "uk.gov.hmrc" %% "play-whitelist-filter"          % playWhitelistVersion,
-    "uk.gov.hmrc" %% "play-conditional-form-mapping"  % playConditionalMappingVersion
+    "uk.gov.hmrc"         %% "frontend-bootstrap"             % frontendBootstrapVersion,
+    "uk.gov.hmrc"         %% "play-partials"                  % playPartialsVersion,
+    "uk.gov.hmrc"         %% "http-caching-client"            % httpCachingVersion,
+    "uk.gov.hmrc"         %% "play-whitelist-filter"          % playWhitelistVersion,
+    "uk.gov.hmrc"         %% "play-conditional-form-mapping"  % playConditionalMappingVersion,
+    "commons-validator"   %  "commons-validator"              % commonsValidatorVersion
   )
 }
 
