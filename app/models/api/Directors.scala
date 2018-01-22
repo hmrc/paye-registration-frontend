@@ -34,9 +34,9 @@ object Name {
   )(Name.apply, unlift(Name.unapply))
 
   val normalizeNameReads = (
-    (__ \ "forename").readNullable[String](Formatters.normalizeTrimmedReads) and
-    (__ \ "other_forenames").readNullable[String](Formatters.normalizeTrimmedReads) and
-    (__ \ "surname").read[String](Formatters.normalizeTrimmedReads) and
+    (__ \ "forename").readNullable[String](Formatters.normalizeTrimmedCommasReads) and
+    (__ \ "other_forenames").readNullable[String](Formatters.normalizeTrimmedCommasReads) and
+    (__ \ "surname").read[String](Formatters.normalizeTrimmedCommasReads) and
     (__ \ "title").readNullable[String](Formatters.normalizeTrimmedFullStopReads).map(opt => opt.filter(_.length <= 20))
   )(Name.apply _)
 }
