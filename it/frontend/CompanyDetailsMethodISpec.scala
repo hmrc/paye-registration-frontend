@@ -127,12 +127,12 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") shouldBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Will the company trade under another name?"
-      document.getElementById("pageHeading").text shouldBe "Will the company trade under another name?"
+      document.title() shouldBe "Does or will the company trade using a different name?"
+      document.getElementById("pageHeading").text shouldBe "Does or will the company trade using a different name?"
       document.getElementById("differentName-true").attr("checked") shouldBe "checked"
       document.getElementById("differentName-false").attr("checked") shouldBe ""
       document.getElementById("tradingName").`val` shouldBe tradingName
-      document.getElementById("lead-paragraph").text shouldBe "Tell us if you'll trade using a different name to test company."
+      document.getElementById("lead-paragraph").text shouldBe "Tell us if the company will use a trading name that's different from test company."
     }
 
     "Return an unpopulated page if PayeReg returns a NotFound response" in {
@@ -178,8 +178,8 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") shouldBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Will the company trade under another name?"
-      document.getElementById("pageHeading").text shouldBe "Will the company trade under another name?"
+      document.title() shouldBe "Does or will the company trade using a different name?"
+      document.getElementById("pageHeading").text shouldBe "Does or will the company trade using a different name?"
       document.getElementById("differentName-true").attr("checked") shouldBe ""
       document.getElementById("differentName-false").attr("checked") shouldBe ""
       document.getElementById("tradingName").`val` shouldBe ""
@@ -209,8 +209,8 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status shouldBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Will the company trade under another name?"
-      document.getElementById("pageHeading").text shouldBe "Will the company trade under another name?"
+      document.title() shouldBe "Does or will the company trade using a different name?"
+      document.getElementById("pageHeading").text shouldBe "Does or will the company trade using a different name?"
     }
   }
 
