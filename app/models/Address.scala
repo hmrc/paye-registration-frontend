@@ -17,8 +17,8 @@
 package models
 
 import play.api.data.validation.ValidationError
-import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
 import utils.{Formatters, Validators}
 
 case class Address(line1: String,

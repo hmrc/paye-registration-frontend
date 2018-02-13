@@ -16,25 +16,24 @@
 
 package services
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import connectors._
 import enums.{DownstreamOutcome, UserCapacity}
 import models.view.CompletionCapacity
 import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 import scala.concurrent.Future
 
-@Singleton
-class CompletionCapacityService @Inject()(val payeRegConnector: PAYERegistrationConnector,
-                                          val businessRegistrationConnector: BusinessRegistrationConnector) extends CompletionCapacitySrv
+class CompletionCapacityServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
+                                              val businessRegistrationConnector: BusinessRegistrationConnector) extends CompletionCapacityService
 
-trait CompletionCapacitySrv {
+trait CompletionCapacityService {
 
-  val payeRegConnector: PAYERegistrationConnect
-  val businessRegistrationConnector: BusinessRegistrationConnect
+  val payeRegConnector: PAYERegistrationConnector
+  val businessRegistrationConnector: BusinessRegistrationConnector
 
   def saveCompletionCapacity(regId: String, completionCapacity: CompletionCapacity)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     payeRegConnector.upsertCompletionCapacity(regId, viewToAPI(completionCapacity)) map {

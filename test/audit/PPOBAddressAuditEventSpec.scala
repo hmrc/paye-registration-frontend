@@ -16,10 +16,10 @@
 
 package audit
 
+import helpers.PayeComponentSpec
 import play.api.libs.json.Json
-import uk.gov.hmrc.play.test.UnitSpec
 
-class PPOBAddressAuditEventSpec extends UnitSpec {
+class PPOBAddressAuditEventSpec extends PayeComponentSpec {
   val externalUserId = "testExternalUserId"
   val authProviderId = "testAuthProviderId"
 
@@ -39,7 +39,7 @@ class PPOBAddressAuditEventSpec extends UnitSpec {
       )
 
       val result = Json.toJson[PPOBAddressAuditEventDetail](testModel)(PPOBAddressAuditEventDetail.writes)
-      result shouldBe expectedJson
+      result mustBe expectedJson
     }
   }
 }

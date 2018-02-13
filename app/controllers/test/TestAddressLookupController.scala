@@ -16,74 +16,66 @@
 
 package controllers.test
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
-import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
+import connectors.KeystoreConnector
+import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
 import models.Address
+import play.api.Configuration
+import play.api.i18n.MessagesApi
+import play.api.mvc.{Action, AnyContent}
 import services._
-import uk.gov.hmrc.play.frontend.auth.Actions
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.SessionProfile
+import uk.gov.hmrc.auth.core.AuthConnector
 
-@Singleton
-class TestAddressLookupController @Inject()(val companyDetailsService: CompanyDetailsService,
-                                            val keystoreConnector: KeystoreConnector,
-                                            val payeRegistrationConnector: PAYERegistrationConnector,
-                                            val payeContactService: PAYEContactService,
-                                            val prepopService: PrepopulationService) extends TestAddressLookupCtrl {
-  val authConnector = FrontendAuthConnector
-}
+class TestAddressLookupControllerImpl @Inject()(val messagesApi: MessagesApi,
+                                                val config: Configuration,
+                                                val companyDetailsService: CompanyDetailsService,
+                                                val keystoreConnector: KeystoreConnector,
+                                                val payeContactService: PAYEContactService,
+                                                val authConnector: AuthConnector,
+                                                val s4LService: S4LService,
+                                                val incorpInfoService: IncorporationInformationService,
+                                                val prepopService: PrepopulationService) extends TestAddressLookupController with AuthRedirectUrls
 
-trait TestAddressLookupCtrl extends FrontendController with Actions with SessionProfile {
-  val companyDetailsService: CompanyDetailsSrv
-  val payeContactService: PAYEContactSrv
-  val keystoreConnector: KeystoreConnect
-  val prepopService: PrepopulationSrv
+trait TestAddressLookupController extends PayeBaseController {
+  val companyDetailsService: CompanyDetailsService
+  val payeContactService: PAYEContactService
+  val prepopService: PrepopulationService
 
-  val noLookupPPOBAddress = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          val address = Address(
-            line1     = "13 Test Street",
-            line2     = "No Lookup Town",
-            line3     = Some("NoLookupShire"),
-            line4     = None,
-            postCode  = None,
-            country   = Some("UK")
-          )
-          for {
-            res <- companyDetailsService.submitPPOBAddr(address, profile.registrationID, profile.companyTaxRegistration.transactionId)
-            _   <- prepopService.saveAddress(profile.registrationID, address)
-          } yield res match {
-            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
-            case DownstreamOutcome.Failure => InternalServerError("Couldn't save mock PPOB Address")
-          }
-        }
+  def noLookupPPOBAddress: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>profile =>
+    val address = Address(
+      line1     = "13 Test Street",
+      line2     = "No Lookup Town",
+      line3     = Some("NoLookupShire"),
+      line4     = None,
+      postCode  = None,
+      country   = Some("UK")
+    )
+    for {
+      res <- companyDetailsService.submitPPOBAddr(address, profile.registrationID, profile.companyTaxRegistration.transactionId)
+      _   <- prepopService.saveAddress(profile.registrationID, address)
+    } yield res match {
+      case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
+      case DownstreamOutcome.Failure => InternalServerError("Couldn't save mock PPOB Address")
+    }
   }
 
-  val noLookupCorrespondenceAddress = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          val address = Address(
-            line1     = "13 Correspondence Street",
-            line2     = "No Lookup Town",
-            line3     = Some("NoLookupShire"),
-            line4     = None,
-            postCode  = Some("TE3 3NL"),
-            country   = None
-          )
-          for {
-            res <- payeContactService.submitCorrespondence(profile.registrationID, address)
-            _   <- prepopService.saveAddress(profile.registrationID, address)
-          } yield res match {
-            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
-            case DownstreamOutcome.Failure => InternalServerError("Couldn't save mock Correspondence Address")
-          }
-        }
+  def noLookupCorrespondenceAddress: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    val address = Address(
+      line1     = "13 Correspondence Street",
+      line2     = "No Lookup Town",
+      line3     = Some("NoLookupShire"),
+      line4     = None,
+      postCode  = Some("TE3 3NL"),
+      country   = None
+    )
+    for {
+      res <- payeContactService.submitCorrespondence(profile.registrationID, address)
+      _   <- prepopService.saveAddress(profile.registrationID, address)
+    } yield res match {
+      case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
+      case DownstreamOutcome.Failure => InternalServerError("Couldn't save mock Correspondence Address")
+    }
   }
 }

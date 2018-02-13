@@ -16,48 +16,42 @@
 
 package controllers.test
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
-import config.FrontendAuthConnector
-import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector}
+import connectors.test.TestBusinessRegConnector
 import connectors.{KeystoreConnector, PAYERegistrationConnector}
+import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.test.TestCCUpdateForm
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.Configuration
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.hmrc.play.frontend.auth.Actions
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.SessionProfile
+import services.{CompanyDetailsService, IncorporationInformationService, S4LService}
+import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.test.updateCCPage
 
 import scala.concurrent.Future
 
-@Singleton
-class TestCCController @Inject()(val messagesApi: MessagesApi,
-                                 val testBusRegConnector: TestBusinessRegConnector,
-                                 val keystoreConnector: KeystoreConnector,
-                                 val payeRegistrationConnector: PAYERegistrationConnector) extends TestCCCtrl{
-  val authConnector = FrontendAuthConnector
-}
+class TestCCControllerImpl @Inject()(val messagesApi: MessagesApi,
+                                     val testBusRegConnector: TestBusinessRegConnector,
+                                     val keystoreConnector: KeystoreConnector,
+                                     val authConnector: AuthConnector,
+                                     val s4LService: S4LService,
+                                     val config: Configuration,
+                                     val companyDetailsService: CompanyDetailsService,
+                                     val incorpInfoService: IncorporationInformationService,
+                                     val payeRegistrationConnector: PAYERegistrationConnector) extends TestCCController with AuthRedirectUrls
 
-trait TestCCCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
+trait TestCCController extends PayeBaseController {
+  val testBusRegConnector: TestBusinessRegConnector
 
-  val testBusRegConnector: TestBusinessRegConnect
-
-  def showUpdateCC: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        Future.successful(Ok(updateCCPage(TestCCUpdateForm.form)))
+  def showUpdateCC: Action[AnyContent] = isAuthorised { implicit request =>
+    Future.successful(Ok(updateCCPage(TestCCUpdateForm.form)))
   }
 
-  def submitUpdateCC: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          TestCCUpdateForm.form.bindFromRequest.fold(
-            errors  => Future.successful(BadRequest(updateCCPage(errors))),
-            valid   => testBusRegConnector.updateCompletionCapacity(profile.registrationID, valid.cc) map(_ => Ok(valid.cc))
-          )
-        }
+  def submitUpdateCC: Action[AnyContent] = isAuthorisedWithProfile { implicit user => profile =>
+    TestCCUpdateForm.form.bindFromRequest.fold(
+      errors  => Future.successful(BadRequest(updateCCPage(errors))),
+      valid   => testBusRegConnector.updateCompletionCapacity(profile.registrationID, valid.cc) map(_ => Ok(valid.cc))
+    )
   }
 }

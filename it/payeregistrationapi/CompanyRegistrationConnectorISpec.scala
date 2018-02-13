@@ -17,13 +17,15 @@
 package payeregistrationapi
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import connectors.CompanyRegistrationConnector
+import config.WSHttpImpl
+import connectors.CompanyRegistrationConnectorImpl
 import itutil.{IntegrationSpecBase, WiremockHelper}
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
-import play.api.{Application, Logger, Play}
 import services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.config.inject.DefaultServicesConfig
 import utils.PAYEFeatureSwitch
 
 class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
@@ -69,7 +71,15 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
       "the feature flag points at the stub" in {
         lazy val metrics = app.injector.instanceOf[MetricsService]
         lazy val featureSwitch = app.injector.instanceOf[PAYEFeatureSwitch]
-        val companyRegistrationConnector = new CompanyRegistrationConnector(featureSwitch, metrics)
+        lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+        lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+        val companyRegistrationConnector = new CompanyRegistrationConnectorImpl(
+          featureSwitch,
+          http,
+          metrics,
+          servicesConfig
+        )
 
         def getResponse = companyRegistrationConnector.getCompanyRegistrationDetails(regId)
 
@@ -82,8 +92,8 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
         )
 
         val result = await(getResponse)
-        result.status shouldBe "testStatus"
-        result.transactionId shouldBe "testTransactionID-001"
+        result.status mustBe "testStatus"
+        result.transactionId mustBe "testTransactionID-001"
       }
 
       "the feature flag points at the Company Registration" in {
@@ -97,7 +107,15 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
 
         lazy val metrics = app.injector.instanceOf[MetricsService]
         lazy val featureSwitch = app.injector.instanceOf[PAYEFeatureSwitch]
-        val companyRegistrationConnector = new CompanyRegistrationConnector(featureSwitch, metrics)
+        lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+        lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+        val companyRegistrationConnector = new CompanyRegistrationConnectorImpl(
+          featureSwitch,
+          http,
+          metrics,
+          servicesConfig
+        )
 
         await(buildClient("/test-only/feature-flag/companyRegistration/true").get())
 
@@ -112,8 +130,8 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
         )
 
         val result = await(getResponse)
-        result.status shouldBe "testStatus"
-        result.transactionId shouldBe "testTransactionID-001"
+        result.status mustBe "testStatus"
+        result.transactionId mustBe "testTransactionID-001"
       }
     }
   }

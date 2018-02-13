@@ -16,27 +16,21 @@
 
 package services
 
-import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.DownstreamOutcome
-import fixtures.PAYERegistrationFixture
+import helpers.PayeComponentSpec
 import models.api.SICCode
 import models.view.NatureOfBusiness
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import testHelpers.PAYERegSpec
+import uk.gov.hmrc.http.{HttpResponse, Upstream4xxResponse}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse, Upstream4xxResponse }
 
-class NatureOfBusinessServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
-  implicit val hc = HeaderCarrier()
-
-
-  val mockPAYERegConnector = mock[PAYERegistrationConnector]
+class NatureOfBusinessServiceSpec extends PayeComponentSpec {
   val returnHttpResponse = HttpResponse(200)
 
   class Setup {
-    val service = new NatureOfBusinessSrv {
+    val service = new NatureOfBusinessService {
       override val payeRegConnector = mockPAYERegConnector
     }
   }
@@ -56,13 +50,13 @@ class NatureOfBusinessServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
 
       val tstModelView = NatureOfBusiness(natureOfBusiness = "banking")
 
-      service.sicCodes2NatureOfBusiness(tstModelAPI) shouldBe Some(tstModelView)
+      service.sicCodes2NatureOfBusiness(tstModelAPI) mustBe Some(tstModelView)
     }
 
     "produce an empty model from an empty list of SICCode API model" in new Setup {
       val tstModelAPI = Seq.empty
 
-      service.sicCodes2NatureOfBusiness(tstModelAPI) shouldBe None
+      service.sicCodes2NatureOfBusiness(tstModelAPI) mustBe None
     }
   }
 
@@ -77,30 +71,30 @@ class NatureOfBusinessServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
 
       val tstModelView = NatureOfBusiness(natureOfBusiness = "laundring")
 
-      service.natureOfBusiness2SICCodes(tstModelView) shouldBe tstModelAPI
+      service.natureOfBusiness2SICCodes(tstModelView) mustBe tstModelAPI
     }
   }
 
   "Calling getNatureOfBusiness" should {
     "return the correct View response when SIC Codes are returned from the microservice" in new Setup {
       when(mockPAYERegConnector.getSICCodes(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validSICCodesList))
+        .thenReturn(Future.successful(Fixtures.validSICCodesList))
 
-      await(service.getNatureOfBusiness("54321")) shouldBe Some(NatureOfBusiness(natureOfBusiness = "laundring"))
+      await(service.getNatureOfBusiness("54321")) mustBe Some(NatureOfBusiness(natureOfBusiness = "laundring"))
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
       when(mockPAYERegConnector.getSICCodes(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
 
-      an[Upstream4xxResponse] shouldBe thrownBy(await(service.getNatureOfBusiness("54321")))
+      an[Upstream4xxResponse] mustBe thrownBy(await(service.getNatureOfBusiness("54321")))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
       when(mockPAYERegConnector.getSICCodes(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new ArrayIndexOutOfBoundsException))
 
-      an[Exception] shouldBe thrownBy(await(service.getNatureOfBusiness("54321")))
+      an[Exception] mustBe thrownBy(await(service.getNatureOfBusiness("54321")))
     }
   }
 
@@ -109,10 +103,9 @@ class NatureOfBusinessServiceSpec extends PAYERegSpec with PAYERegistrationFixtu
       val validNatureOfBusiness = NatureOfBusiness(natureOfBusiness = "laundring")
 
       when(mockPAYERegConnector.upsertSICCodes(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validSICCodesList))
+        .thenReturn(Future.successful(Fixtures.validSICCodesList))
 
-      await(service.saveNatureOfBusiness(validNatureOfBusiness, "54321")) shouldBe DownstreamOutcome.Success
+      await(service.saveNatureOfBusiness(validNatureOfBusiness, "54321")) mustBe DownstreamOutcome.Success
     }
   }
-
 }

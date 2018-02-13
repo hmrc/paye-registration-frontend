@@ -16,24 +16,24 @@
 
 package services
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import common.exceptions.DownstreamExceptions.S4LFetchException
-import connectors.{BusinessRegistrationConnect, BusinessRegistrationConnector}
+import connectors.BusinessRegistrationConnector
 import enums.CacheKeys
-import models.{Address, DigitalContactDetails}
 import models.view.PAYEContactDetails
-
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import scala.concurrent.Future
+import models.{Address, DigitalContactDetails}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-@Singleton
-class PrepopulationService @Inject()(val busRegConnector: BusinessRegistrationConnector, val s4LService: S4LService) extends PrepopulationSrv
+import scala.concurrent.Future
 
-trait PrepopulationSrv {
-  val busRegConnector: BusinessRegistrationConnect
-  val s4LService: S4LSrv
+class PrepopulationServiceImpl @Inject()(val busRegConnector: BusinessRegistrationConnector,
+                                         val s4LService: S4LService) extends PrepopulationService
+
+trait PrepopulationService {
+  val busRegConnector: BusinessRegistrationConnector
+  val s4LService: S4LService
 
   def getBusinessContactDetails(regId: String)(implicit hc: HeaderCarrier): Future[Option[DigitalContactDetails]] = {
     busRegConnector.retrieveContactDetails(regId) map {

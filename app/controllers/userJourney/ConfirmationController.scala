@@ -16,41 +16,33 @@
 
 package controllers.userJourney
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
-import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
-import play.api.i18n.{I18nSupport, MessagesApi}
-import services.{ConfirmationService, ConfirmationSrv}
-import uk.gov.hmrc.play.frontend.auth.Actions
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.SessionProfile
+import connectors.KeystoreConnector
+import controllers.{AuthRedirectUrls, PayeBaseController}
+import play.api.Configuration
+import play.api.i18n.MessagesApi
+import play.api.mvc.{Action, AnyContent}
+import services.{CompanyDetailsService, ConfirmationService, IncorporationInformationService, S4LService}
+import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{confirmation => ConfirmationPage}
 
-import scala.concurrent.Future
+class ConfirmationControllerImpl @Inject()(val messagesApi: MessagesApi,
+                                           val keystoreConnector: KeystoreConnector,
+                                           val confirmationService: ConfirmationService,
+                                           val config: Configuration,
+                                           val s4LService: S4LService,
+                                           val companyDetailsService: CompanyDetailsService,
+                                           val incorpInfoService: IncorporationInformationService,
+                                           val authConnector: AuthConnector) extends ConfirmationController with AuthRedirectUrls
 
-@Singleton
-class ConfirmationController @Inject()(val messagesApi: MessagesApi,
-                                       val keystoreConnector: KeystoreConnector,
-                                       val confirmationService: ConfirmationService,
-                                       val payeRegistrationConnector: PAYERegistrationConnector) extends ConfirmationCtrl {
-  val authConnector = FrontendAuthConnector
-}
+trait ConfirmationController extends PayeBaseController {
+  val confirmationService: ConfirmationService
 
-trait ConfirmationCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
-
-  val keystoreConnector: KeystoreConnect
-  val confirmationService: ConfirmationSrv
-
-  val showConfirmation = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile( { profile =>
-          confirmationService.getAcknowledgementReference(profile.registrationID) map {
-            case Some(ref) => Ok(ConfirmationPage(ref, confirmationService.determineIfInclusiveContentIsShown))
-            case None      => InternalServerError(views.html.pages.error.restart())
-          }
-        }, checkSubmissionStatus = false)
+  def showConfirmation: Action[AnyContent] = isAuthorisedWithProfileNoSubmissionCheck { implicit request => profile =>
+    confirmationService.getAcknowledgementReference(profile.registrationID) map {
+      case Some(ref) => Ok(ConfirmationPage(ref, confirmationService.determineIfInclusiveContentIsShown))
+      case None      => InternalServerError(views.html.pages.error.restart())
+    }
   }
 }

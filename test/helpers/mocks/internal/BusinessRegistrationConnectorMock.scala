@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package auth
+package helpers.mocks.internal
 
-import controllers.userJourney.routes
-import uk.gov.hmrc.play.config.{RunMode, ServicesConfig}
+import helpers.MockedComponents
+import models.external.BusinessProfile
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito._
 
-object PAYEExternalUrls extends RunMode with ServicesConfig {
+import scala.concurrent.Future
 
-  private[PAYEExternalUrls] val companyAuthHost = getConfString("auth.company-auth.url","")
-  private[PAYEExternalUrls] val loginCallback   = getConfString("auth.login-callback.url","")
-  private[PAYEExternalUrls] val loginPath       = getConfString("auth.login_path","")
+trait BusinessRegistrationConnectorMock {
+  this: MockedComponents =>
 
-  val loginURL    = s"$companyAuthHost$loginPath"
-  val continueURL = s"$loginCallback${routes.SignInOutController.postSignIn()}"
+  def mockBusinessRegFetch(response: Future[BusinessProfile]) = {
+    when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      .thenReturn(response)
+  }
 }

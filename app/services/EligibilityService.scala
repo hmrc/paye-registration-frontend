@@ -16,23 +16,23 @@
 
 package services
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
+import connectors.PAYERegistrationConnector
 import enums.{CacheKeys, DownstreamOutcome}
 import models.api.{Eligibility => EligibilityAPI}
 import models.view.{CompanyEligibility, DirectorEligibility, Eligibility => EligibilityView}
-
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-@Singleton
-class EligibilityService @Inject()(val payeRegConnector: PAYERegistrationConnector, val s4lService: S4LService) extends EligibilitySrv
+import scala.concurrent.Future
 
-trait EligibilitySrv {
-  val payeRegConnector : PAYERegistrationConnect
-  val s4lService : S4LSrv
+class EligibilityServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
+                                       val s4lService: S4LService) extends EligibilityService
+
+trait EligibilityService {
+  val payeRegConnector : PAYERegistrationConnector
+  val s4lService : S4LService
 
   private[services] def apiToView(data: EligibilityAPI) : EligibilityView = {
     EligibilityView(Some(CompanyEligibility(data.companyEligibility)), Some(DirectorEligibility(data.directorEligibility)))

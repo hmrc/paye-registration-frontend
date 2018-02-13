@@ -16,10 +16,10 @@
 
 package models.api
 
+import helpers.PayeComponentSpec
 import play.api.libs.json.Json
-import uk.gov.hmrc.play.test.UnitSpec
 
-class SICCodeSpec extends UnitSpec {
+class SICCodeSpec extends PayeComponentSpec {
 
   val testModel1 = SICCode(Some("12345"), Some("testDesc"))
   val testModel2 = SICCode(Some("23456"), Some("testDesc"))
@@ -37,7 +37,7 @@ class SICCodeSpec extends UnitSpec {
             |   "description":"testDesc"
             |}
           """.stripMargin)
-      result shouldBe expected
+      result mustBe expected
     }
   }
 
@@ -66,7 +66,7 @@ class SICCodeSpec extends UnitSpec {
             |   }
             |]""".stripMargin)
       val result = Json.toJson(sequence)
-      result shouldBe expected
+      result mustBe expected
     }
   }
 }

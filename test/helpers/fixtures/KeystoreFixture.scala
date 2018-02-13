@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fixtures
+package helpers.fixtures
 
 import models.external.BusinessProfile
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -27,7 +27,7 @@ trait KeystoreFixture {
   )
 
   val blankCacheMap = CacheMap(
-    id="tstID",
+    id = "tstID",
     data = Map.empty
   )
 

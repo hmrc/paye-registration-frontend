@@ -63,7 +63,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
   "DELETE registration" should {
     "return 500 when error occured to get Authority for the session" in {
-      stubGet(s"/auth/authority", 404, "")
+      setupUnauthorised()
 
       val fResponse = buildClientInternal(s"/$regId/delete").
         withHeaders("X-Session-ID" -> "1112223355556").
@@ -71,7 +71,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 500
+      response.status mustBe 401
     }
 
     "return 400 if the Registration ID requested for delete is not same as the CurrentProfile from Keystore" in {
@@ -87,7 +87,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 400
+      response.status mustBe 400
     }
 
     "return 400 if the Registration ID requested for delete is not same as the CurrentProfile" in {
@@ -122,7 +122,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 400
+      response.status mustBe 400
     }
 
     "return 412 if the Registration is not in Draft or Rejected status for deletion" in {
@@ -142,7 +142,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 412
+      response.status mustBe 412
     }
 
     "return 500 if the Registration is not found" in {
@@ -162,7 +162,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 500
+      response.status mustBe 500
     }
 
     "return 500 if PAYERegistration microservice returns 403" in {
@@ -182,7 +182,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 500
+      response.status mustBe 500
     }
 
     "return 500 if PAYERegistration microservice fail to delete Registration" in {
@@ -202,7 +202,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 500
+      response.status mustBe 500
     }
 
     "return 500 if S4L fail to clear Registration" in {
@@ -220,7 +220,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 500
+      response.status mustBe 500
     }
 
     "return 200 if PAYERegistration microservice successfully delete Registration" in {
@@ -240,7 +240,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
     }
   }
 }

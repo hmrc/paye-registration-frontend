@@ -16,37 +16,36 @@
 
 package services
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
+import models.external.AuditingInformation
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.{Address, DigitalContactDetails}
 import play.api.mvc.{AnyContent, Request}
-import uk.gov.hmrc.play.frontend.auth.AuthContext
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.RegistrationWhitelist
 
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-@Singleton
-class CompanyDetailsService @Inject()(val payeRegConnector: PAYERegistrationConnector,
-                                      val incorpInfoService: IncorporationInformationService,
-                                      val s4LService: S4LService,
-                                      val compRegConnector : CompanyRegistrationConnector,
-                                      val prepopService: PrepopulationService,
-                                      val auditService: AuditService) extends CompanyDetailsSrv
+class CompanyDetailsServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
+                                          val incorpInfoService: IncorporationInformationService,
+                                          val s4LService: S4LService,
+                                          val compRegConnector : CompanyRegistrationConnector,
+                                          val prepopService: PrepopulationService,
+                                          val auditService: AuditService) extends CompanyDetailsService
 
-trait CompanyDetailsSrv extends RegistrationWhitelist {
+trait CompanyDetailsService extends RegistrationWhitelist {
 
-  val payeRegConnector: PAYERegistrationConnect
-  val compRegConnector: CompanyRegistrationConnect
-  val incorpInfoService: IncorporationInformationSrv
-  val s4LService: S4LSrv
-  val prepopService: PrepopulationSrv
-  val auditService: AuditSrv
+  val payeRegConnector: PAYERegistrationConnector
+  val compRegConnector: CompanyRegistrationConnector
+  val incorpInfoService: IncorporationInformationService
+  val s4LService: S4LService
+  val prepopService: PrepopulationService
+  val auditService: AuditService
 
   def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
     s4LService.fetchAndGet[CompanyDetailsView](CacheKeys.CompanyDetails.toString, regId) flatMap {
@@ -116,7 +115,7 @@ trait CompanyDetailsSrv extends RegistrationWhitelist {
   }
 
   def submitBusinessContact(businessContact: DigitalContactDetails, regId: String, txId: String)
-                           (implicit hc: HeaderCarrier, authContext: AuthContext, req:Request[AnyContent]): Future[DownstreamOutcome.Value] = {
+                           (implicit hc: HeaderCarrier, auditInfo: AuditingInformation, req:Request[AnyContent]): Future[DownstreamOutcome.Value] = {
     for {
       details <- getCompanyDetails(regId, txId) flatMap {
         case currentDetails if dataHasChanged(businessContact, currentDetails.businessContactDetails) =>

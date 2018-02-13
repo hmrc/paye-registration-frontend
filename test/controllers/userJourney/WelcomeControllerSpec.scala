@@ -16,40 +16,45 @@
 
 package controllers.userJourney
 
-import builders.AuthBuilder
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.test.Helpers._
-import testHelpers.PAYERegSpec
+import play.api.test.FakeRequest
 
-class WelcomeControllerSpec extends PAYERegSpec {
+class WelcomeControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup {
-    val controller = new WelcomeCtrl{
-      implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+    val controller = new WelcomeController {
+      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
+
+      override val incorpInfoService = mockIncorpInfoService
+      override val companyDetailsService = mockCompanyDetailsService
+      override val s4LService = mockS4LService
+      override val keystoreConnector = mockKeystoreConnector
+      implicit val messagesApi: MessagesApi = mockMessagesApi
       override val authConnector = mockAuthConnector
     }
   }
 
   "GET /start" should {
     "return 200" in new Setup {
-      AuthBuilder.showWithAuthorisedUser(controller.show, mockAuthConnector) {
+      AuthHelpers.showAuthorised(controller.show, FakeRequest()) {
         result =>
-          status(result) shouldBe Status.OK
-          contentType(result) shouldBe Some("text/html")
-          charset(result) shouldBe Some("utf-8")
+          status(result) mustBe Status.OK
+          contentType(result) mustBe Some("text/html")
+          charset(result) mustBe Some("utf-8")
       }
     }
   }
 
   "POST /start" should {
     "return 303" in new Setup {
-      AuthBuilder.showWithAuthorisedUser(controller.submit, mockAuthConnector) {
+      AuthHelpers.showAuthorised(controller.submit, FakeRequest()) {
         result =>
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.EligibilityController.companyEligibility()}")
+          status(result) mustBe Status.SEE_OTHER
+          redirectLocation(result) mustBe Some(s"${controllers.userJourney.routes.EligibilityController.companyEligibility()}")
       }
     }
   }
-
 }

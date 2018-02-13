@@ -17,9 +17,9 @@
 package services
 
 import java.time.LocalDate
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
+import connectors.PAYERegistrationConnector
 import enums.CacheKeys
 import models.api.{Employment => EmploymentAPI}
 import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment => EmploymentView, FirstPayment => FirstPaymentView}
@@ -34,14 +34,13 @@ sealed trait SavedResponse
 case object S4LSaved extends SavedResponse
 case class MongoSaved(employment: EmploymentView) extends SavedResponse
 
-@Singleton
-class EmploymentService @Inject()(val payeRegConnector: PAYERegistrationConnector,val s4LService: S4LService) extends EmploymentSrv {
+class EmploymentServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,val s4LService: S4LService) extends EmploymentService {
   def now: LocalDate = SystemDate.getSystemDate
 }
 
-trait EmploymentSrv extends DateUtil {
-  val payeRegConnector: PAYERegistrationConnect
-  val s4LService: S4LSrv
+trait EmploymentService extends DateUtil {
+  val payeRegConnector: PAYERegistrationConnector
+  val s4LService: S4LService
 
   def now: LocalDate
 

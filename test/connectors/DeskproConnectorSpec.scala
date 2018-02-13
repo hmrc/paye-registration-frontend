@@ -16,23 +16,21 @@
 
 package connectors
 
-import mocks.MockMetrics
+import config.WSHttp
+import helpers.PayeComponentSpec
+import helpers.mocks.MockMetrics
 import models.external.Ticket
 import play.api.libs.json.{JsObject, Json}
-import services.MetricsSrv
-import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.ws.WSHttp
+import services.MetricsService
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 
-import scala.concurrent.Future
-import uk.gov.hmrc.http.{ BadRequestException, HeaderCarrier }
+class DeskproConnectorSpec extends PayeComponentSpec {
 
-class DeskproConnectorSpec extends PAYERegSpec {
-
-  class Setup {
-    val connector = new DeskproConnect {
-      override val deskProUrl: String = "testUrl"
-      override val http: WSHttp = mockWSHttp
-      override val metricsService: MetricsSrv = new MockMetrics
+  class Setup extends CodeMocks {
+    val testConnector = new DeskproConnector {
+      override val deskProUrl: String             = "testUrl"
+      override val http: WSHttp                   = mockWSHttp
+      override val metricsService: MetricsService = new MockMetrics
     }
 
     implicit val hc = HeaderCarrier()
@@ -57,21 +55,21 @@ class DeskproConnectorSpec extends PAYERegSpec {
 
   "submitTicket" should {
     "return a ticket number" in new Setup {
-      mockHttpPOST[Ticket, JsObject](s"${connector.deskProUrl}/deskpro/ticket", Future.successful(response))
+      mockHttpPOST[Ticket, JsObject](s"${testConnector.deskProUrl}/deskpro/ticket", response)
 
-      await(connector.submitTicket(ticket)) shouldBe ticketNum
+      await(testConnector.submitTicket(ticket)) mustBe ticketNum
     }
 
     "throw a bad request exception" in new Setup {
-      mockHttpFailedPOST[Ticket, JsObject](s"${connector.deskProUrl}/deskpro/ticket", new BadRequestException("404"))
+      mockHttpFailedPOST[Ticket, JsObject](s"${testConnector.deskProUrl}/deskpro/ticket", new BadRequestException("404"))
 
-      intercept[BadRequestException](await(connector.submitTicket(ticket)))
+      intercept[BadRequestException](await(testConnector.submitTicket(ticket)))
     }
 
     "throw any other exception" in new Setup {
-      mockHttpFailedPOST[Ticket, JsObject](s"${connector.deskProUrl}/deskpro/ticket", new RuntimeException)
+      mockHttpFailedPOST[Ticket, JsObject](s"${testConnector.deskProUrl}/deskpro/ticket", new RuntimeException)
 
-      intercept[RuntimeException](await(connector.submitTicket(ticket)))
+      intercept[RuntimeException](await(testConnector.submitTicket(ticket)))
     }
   }
 }

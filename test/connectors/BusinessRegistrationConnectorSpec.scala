@@ -16,103 +16,98 @@
 
 package connectors
 
-import fixtures.BusinessRegistrationFixture
-import mocks.MockMetrics
-import models.{Address, DigitalContactDetails}
+import helpers.PayeComponentSpec
+import helpers.mocks.MockMetrics
 import models.external.BusinessProfile
 import models.view.PAYEContactDetails
+import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.libs.json.{JsString, Writes, JsValue, Json}
-import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http._
+import play.api.libs.json.{JsValue, Json, Writes}
+import uk.gov.hmrc.http._
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ BadRequestException, ForbiddenException, HeaderCarrier, HttpReads, HttpResponse, NotFoundException, Upstream4xxResponse, Upstream5xxResponse }
 
-class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistrationFixture {
+class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
 
-  val mockBusRegConnector = mock[BusinessRegistrationConnector]
-
-  trait Setup {
-    val connector = new BusinessRegistrationConnect {
+  class Setup {
+    val testConnector = new BusinessRegistrationConnector {
       override val businessRegUrl = "testBusinessRegUrl"
-      override val http = mockWSHttp
+      override val http           = mockWSHttp
       override val metricsService = new MockMetrics
     }
   }
 
-  implicit val hc = HeaderCarrier()
-
   "retrieveCurrentProfile" should {
     "return a a CurrentProfile response if one is found in business registration micro-service" in new Setup {
-      mockHttpGet[BusinessProfile]("testUrl", validBusinessRegistrationResponse)
+      when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future(Fixtures.validBusinessRegistrationResponse))
 
-      await(connector.retrieveCurrentProfile) shouldBe validBusinessRegistrationResponse
+      await(testConnector.retrieveCurrentProfile) mustBe Fixtures.validBusinessRegistrationResponse
     }
 
     "return a Not Found response when a CurrentProfile record can not be found" in new Setup {
       when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new NotFoundException("Bad request")))
 
-      intercept[NotFoundException](await(connector.retrieveCurrentProfile))
+      intercept[NotFoundException](await(testConnector.retrieveCurrentProfile))
     }
 
     "return a Forbidden response when a CurrentProfile record can not be accessed by the user" in new Setup {
       when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new ForbiddenException("Forbidden")))
 
-      intercept[ForbiddenException](await(connector.retrieveCurrentProfile))
+      intercept[ForbiddenException](await(testConnector.retrieveCurrentProfile))
     }
 
     "return an Exception response when an unspecified error has occurred" in new Setup {
       when(mockWSHttp.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new RuntimeException("Runtime Exception")))
 
-      intercept[RuntimeException](await(connector.retrieveCurrentProfile))
+      intercept[RuntimeException](await(testConnector.retrieveCurrentProfile))
     }
   }
 
   "retrieveCompletionCapacity" should {
     "return an optional string if CC is found in the BR document" in new Setup {
-      when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains("/business-registration/business-tax-registration"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Json.parse(
+      when(mockWSHttp.GET[JsValue](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future(Json.parse(
           """
             |{
             | "completionCapacity" : "director"
             |}
           """.stripMargin)))
 
-      await(connector.retrieveCompletionCapacity) shouldBe Some("director")
+      await(testConnector.retrieveCompletionCapacity) mustBe Some("director")
     }
 
     "return none if the CC isn't in the BR document" in new Setup {
-      when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains("/business-registration/business-tax-registration"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Json.parse("""{}""")))
+      when(mockWSHttp.GET[JsValue](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future(Json.parse("""{}""")))
 
-      await(connector.retrieveCompletionCapacity) shouldBe None
+      await(testConnector.retrieveCompletionCapacity) mustBe None
     }
 
-    "return no CC if the Buisness Registration returns 404" in new Setup {
+    "return no CC if the Business Registration returns 404" in new Setup {
       when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains("/business-registration/business-tax-registration"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new NotFoundException("Not Found")))
 
-      await(connector.retrieveCompletionCapacity) shouldBe None
+      await(testConnector.retrieveCompletionCapacity) mustBe None
 
     }
 
     "throw a Forbidden exception if the request has been deemed unauthorised" in new Setup {
       when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains("/business-registration/business-tax-registration"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(new Upstream4xxResponse("Forbidden", 403, 403)))
+        .thenReturn(Future.failed(Upstream4xxResponse("Forbidden", 403, 403)))
 
-      intercept[Upstream4xxResponse](await(connector.retrieveCompletionCapacity))
+      intercept[Upstream4xxResponse](await(testConnector.retrieveCompletionCapacity))
     }
 
     "throw a Exception when something unexpected happened" in new Setup {
       when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains("/business-registration/business-tax-registration"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new RuntimeException("Run time exception")))
 
-      intercept[RuntimeException](await(connector.retrieveCompletionCapacity))
+      intercept[RuntimeException](await(testConnector.retrieveCompletionCapacity))
     }
   }
 
@@ -125,35 +120,35 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
       when(mockWSHttp.GET[PAYEContactDetails](ArgumentMatchers.contains(s"/business-registration/$regId/contact-details"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validContactDetails))
 
-      await(connector.retrieveContactDetails(regId)) shouldBe Some(validContactDetails)
+      await(testConnector.retrieveContactDetails(regId)) mustBe Some(validContactDetails)
     }
 
     "return no Contact Details if contact details are not found in Business Registration" in new Setup {
       when(mockWSHttp.GET[PAYEContactDetails](ArgumentMatchers.contains(s"/business-registration/$regId/contact-details"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new NotFoundException("")))
 
-      await(connector.retrieveContactDetails(regId)) shouldBe None
+      await(testConnector.retrieveContactDetails(regId)) mustBe None
     }
 
     "return no Contact Details if bad request was made to Business Registration" in new Setup {
       when(mockWSHttp.GET[PAYEContactDetails](ArgumentMatchers.contains(s"/business-registration/$regId/contact-details"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new BadRequestException("")))
 
-      await(connector.retrieveContactDetails(regId)) shouldBe None
+      await(testConnector.retrieveContactDetails(regId)) mustBe None
     }
 
     "return no Contact Details if Business Registration returns a 4xx" in new Setup {
       when(mockWSHttp.GET[PAYEContactDetails](ArgumentMatchers.contains(s"/business-registration/$regId/contact-details"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new Upstream4xxResponse("412", 412, 412)))
 
-      await(connector.retrieveContactDetails(regId)) shouldBe None
+      await(testConnector.retrieveContactDetails(regId)) mustBe None
     }
 
     "return no Contact Details if Business Registration does not respond" in new Setup {
       when(mockWSHttp.GET[PAYEContactDetails](ArgumentMatchers.contains(s"/business-registration/$regId/contact-details"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new Upstream5xxResponse("Timed out", 502, 502)))
 
-      await(connector.retrieveContactDetails(regId)) shouldBe None
+      await(testConnector.retrieveContactDetails(regId)) mustBe None
     }
   }
 
@@ -163,9 +158,10 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
     val validContactDetails = PAYEContactDetails("Test Name", DigitalContactDetails(Some("email@test.test"), Some("012345"), Some("543210")))
 
     "return PAYE Contact Details if contact details are stored in Business Registration" in new Setup {
-      mockHttpPOST[PAYEContactDetails, JsValue]("testBusinessRegUrl/business-registration/$regId/contact-details", Json.obj())
+      when(mockWSHttp.POST[PAYEContactDetails, JsValue](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future(Json.obj()))
 
-      await(connector.upsertContactDetails(regId, validContactDetails)) shouldBe validContactDetails
+      await(testConnector.upsertContactDetails(regId, validContactDetails)) mustBe validContactDetails
     }
 
     "return Contact Details if contact details are not stored in Business Registration" in new Setup {
@@ -173,7 +169,7 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
         (ArgumentMatchers.any[Writes[PAYEContactDetails]](), ArgumentMatchers.any[HttpReads[JsValue]](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new NotFoundException("")))
 
-      await(connector.upsertContactDetails(regId, validContactDetails)) shouldBe validContactDetails
+      await(testConnector.upsertContactDetails(regId, validContactDetails)) mustBe validContactDetails
     }
   }
 
@@ -226,21 +222,21 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
       when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(addressJson))
 
-      await(connector.retrieveAddresses(regId)) shouldBe addresses
+      await(testConnector.retrieveAddresses(regId)) mustBe addresses
     }
 
     "return an empty list of addresses in the case of an error" in new Setup{
       when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(Upstream4xxResponse("badRequest", 400, 400)))
 
-      await(connector.retrieveAddresses(regId)) shouldBe Seq.empty
+      await(testConnector.retrieveAddresses(regId)) mustBe Seq.empty
     }
 
     "return an empty list of addresses if addresses are not found in BR & response code is 404" in new Setup {
       when(mockWSHttp.GET[PAYEContactDetails](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new NotFoundException("")))
 
-      await(connector.retrieveAddresses(regId)) shouldBe Seq.empty
+      await(testConnector.retrieveAddresses(regId)) mustBe Seq.empty
     }
   }
 
@@ -253,17 +249,19 @@ class BusinessRegistrationConnectorSpec extends PAYERegSpec with BusinessRegistr
       Some("TE1 1ST")
     )
     val regId = "99999"
+
     "successfully upsert an address" in new Setup {
       when(mockWSHttp.POST[Address, HttpResponse](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"), ArgumentMatchers.any[Address](), ArgumentMatchers.any())(ArgumentMatchers.any[Writes[Address]](), ArgumentMatchers.any[HttpReads[HttpResponse]](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(200, None, Map.empty, None)))
 
-      await(connector.upsertAddress(regId, address)) shouldBe address
+      await(testConnector.upsertAddress(regId, address)) mustBe address
     }
+
     "successfully complete in case of BR error response" in new Setup {
       when(mockWSHttp.POST[Address, HttpResponse](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"), ArgumentMatchers.any[Address](), ArgumentMatchers.any())(ArgumentMatchers.any[Writes[Address]](), ArgumentMatchers.any[HttpReads[HttpResponse]](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.failed(Upstream5xxResponse("error", 500, 500)))
 
-      await(connector.upsertAddress(regId, address)) shouldBe address
+      await(testConnector.upsertAddress(regId, address)) mustBe address
     }
   }
 }

@@ -16,63 +16,58 @@
 
 package controllers.userJourney
 
-import builders.AuthBuilder
-import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
-import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.NatureOfBusiness
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Request, Result}
+import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import services.NatureOfBusinessSrv
-import testHelpers.PAYERegSpec
-
-import scala.concurrent.Future
+import services.NatureOfBusinessService
 import uk.gov.hmrc.http.HeaderCarrier
 
-class NatureOfBusinessControllerSpec extends PAYERegSpec {
+import scala.concurrent.Future
 
-  val mockNatureOfBusinessService = mock[NatureOfBusinessSrv]
-  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
+class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp {
+
+  val mockNatureOfBusinessService = mock[NatureOfBusinessService]
 
   class Setup {
-    val testController = new NatureOfBusinessCtrl {
+    val testController = new NatureOfBusinessController {
+      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
+
+      override val incorpInfoService = mockIncorpInfoService
+      override val companyDetailsService = mockCompanyDetailsService
+      override val s4LService = mockS4LService
       override val authConnector = mockAuthConnector
       override val natureOfBusinessService = mockNatureOfBusinessService
       override val keystoreConnector = mockKeystoreConnector
-      implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
-      override val payeRegistrationConnector = mockPayeRegistrationConnector
-
-      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
-        f(CurrentProfile(
-          "12345",
-          CompanyRegistrationProfile("held", "txId"),
-          "ENG",
-          payeRegistrationSubmitted = false
-        ))
-      }
+      implicit val messagesApi: MessagesApi = mockMessagesApi
     }
   }
 
   val testNOB = NatureOfBusiness(natureOfBusiness = "laundring")
 
+  val request = FakeRequest()
+
   "natureOfBusiness" should {
     "return a SEE_OTHER if user is not authorised" in new Setup {
-      val result = testController.natureOfBusiness()(FakeRequest())
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result).getOrElse("NO REDIRECT LOCATION!").contains("/gg/sign-in") shouldBe true
+      AuthHelpers.showUnauthorised(testController.natureOfBusiness, request) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
+      }
     }
 
     "return an OK when there is a nature of business in the microservice" in new Setup {
       when(mockNatureOfBusinessService.getNatureOfBusiness(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Some(testNOB)))
 
-      AuthBuilder.showWithAuthorisedUser(testController.natureOfBusiness, mockAuthConnector) {
+      AuthHelpers.showAuthorisedWithCP(testController.natureOfBusiness, Fixtures.validCurrentProfile, request) {
         (result: Future[Result])  =>
-          status(result) shouldBe OK
+          status(result) mustBe OK
       }
     }
 
@@ -80,18 +75,20 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec {
       when(mockNatureOfBusinessService.getNatureOfBusiness(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(None))
 
-      AuthBuilder.showWithAuthorisedUser(testController.natureOfBusiness, mockAuthConnector) {
+      AuthHelpers.showAuthorisedWithCP(testController.natureOfBusiness, Fixtures.validCurrentProfile, request) {
         (result: Future[Result])  =>
-          status(result) shouldBe OK
+          status(result) mustBe OK
       }
     }
   }
 
   "submitNatureOfBusiness" should {
     "return a SEE_OTHER if the user is not authorised" in new Setup {
-      val result = testController.submitNatureOfBusiness()(FakeRequest())
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result).getOrElse("NO REDIRECT LOCATION!").contains("/gg/sign-in") shouldBe true
+      AuthHelpers.submitUnauthorised(testController.natureOfBusiness, request) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
+      }
     }
 
     "return a BAD_REQUEST if the submitted form is empty" in new Setup {
@@ -99,9 +96,9 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec {
         "description" -> ""
       )
 
-      AuthBuilder.submitWithAuthorisedUser(testController.submitNatureOfBusiness, mockAuthConnector, request) {
+      AuthHelpers.submitAuthorisedWithCP(testController.submitNatureOfBusiness, Fixtures.validCurrentProfile, request) {
         result =>
-          status(result) shouldBe BAD_REQUEST
+          status(result) mustBe BAD_REQUEST
       }
     }
 
@@ -110,19 +107,19 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec {
         "description" -> "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       )
 
-      AuthBuilder.submitWithAuthorisedUser(testController.submitNatureOfBusiness, mockAuthConnector, request) {
+      AuthHelpers.submitAuthorisedWithCP(testController.submitNatureOfBusiness, Fixtures.validCurrentProfile, request) {
         result =>
-          status(result) shouldBe BAD_REQUEST
+          status(result) mustBe BAD_REQUEST
       }
     }
 
     "show an error page when there is an error response from the microservice" in new Setup {
       when(mockNatureOfBusinessService.saveNatureOfBusiness(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
-      AuthBuilder.submitWithAuthorisedUser(testController.submitNatureOfBusiness(), mockAuthConnector, FakeRequest().withFormUrlEncodedBody(
+      AuthHelpers.submitAuthorisedWithCP(testController.submitNatureOfBusiness(), Fixtures.validCurrentProfile, FakeRequest().withFormUrlEncodedBody(
         "description" -> "testing"
       )) {
         result =>
-          status(result) shouldBe INTERNAL_SERVER_ERROR
+          status(result) mustBe INTERNAL_SERVER_ERROR
       }
     }
 
@@ -133,10 +130,10 @@ class NatureOfBusinessControllerSpec extends PAYERegSpec {
       when(mockNatureOfBusinessService.saveNatureOfBusiness(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      AuthBuilder.submitWithAuthorisedUser(testController.submitNatureOfBusiness, mockAuthConnector, request) {
+      AuthHelpers.submitAuthorisedWithCP(testController.submitNatureOfBusiness, Fixtures.validCurrentProfile, request) {
         result =>
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some("/register-for-paye/director-national-insurance-number")
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/register-for-paye/director-national-insurance-number")
       }
     }
   }

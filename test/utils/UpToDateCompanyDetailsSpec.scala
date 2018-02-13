@@ -16,42 +16,33 @@
 
 package utils
 
-import fixtures.{CoHoAPIFixture, S4LFixture}
+import helpers.PayeComponentSpec
 import models.view.{CompanyDetails => CompanyDetailsView}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.Json
-import play.api.mvc.Result
 import play.api.mvc.Results.Ok
-import play.api.test.Helpers._
-import services.{CompanyDetailsService, IncorporationInformationService, S4LService}
-import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-class UpToDateCompanyDetailsSpec extends PAYERegSpec with CoHoAPIFixture with S4LFixture {
-  val mockIncorpInfoService = mock[IncorporationInformationService]
-  val mockCompanyDetailsService = mock[CompanyDetailsService]
-  val mockS4LService = mock[S4LService]
+class UpToDateCompanyDetailsSpec extends PayeComponentSpec {
 
   object TestUpToDateCompanyDetails extends UpToDateCompanyDetails {
-    override val incorpInfoService = mockIncorpInfoService
+    override val incorpInfoService     = mockIncorpInfoService
     override val companyDetailsService = mockCompanyDetailsService
-    override val s4LService = mockS4LService
+    override val s4LService            = mockS4LService
   }
 
-  implicit val hc = HeaderCarrier()
-  def testFunc(details: CompanyDetailsView): Future[Result] = Future.successful(Ok(Json.toJson(details)))
+  def testFunc(details: CompanyDetailsView) = Ok(Json.toJson(details))
 
   "calling withLatestCompanyDetails" should {
     "return an up to date Company Details with Incorporation Information data" in {
-      val defaultCompanyDetails = CompanyDetailsView("test Name", None, validAddress, None, None)
-      val expectedCompanyDetails = CompanyDetailsView(validCoHoCompanyDetailsResponse.companyName, None, validCoHoCompanyDetailsResponse.roAddress, None, None)
+      val defaultCompanyDetails = CompanyDetailsView("test Name", None, Fixtures.validAddress, None, None)
+      val expectedCompanyDetails = CompanyDetailsView(Fixtures.validCoHoCompanyDetailsResponse.companyName, None, Fixtures.validCoHoCompanyDetailsResponse.roAddress, None, None)
 
       when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCoHoCompanyDetailsResponse))
+        .thenReturn(Future.successful(Fixtures.validCoHoCompanyDetailsResponse))
 
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(defaultCompanyDetails))
@@ -59,13 +50,15 @@ class UpToDateCompanyDetailsSpec extends PAYERegSpec with CoHoAPIFixture with S4
       when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
-      val result = await(TestUpToDateCompanyDetails.withLatestCompanyDetails("testRegId", "testTxId"){testFunc})
-      status(result) shouldBe OK
-      jsonBodyOf(result) shouldBe Json.toJson(expectedCompanyDetails)
+      val result = TestUpToDateCompanyDetails.withLatestCompanyDetails("testRegId", "testTxId"){
+        testFunc
+      }
+      status(result) mustBe OK
+      contentAsJson(result) mustBe Json.toJson(expectedCompanyDetails)
     }
 
     "return a default Company Details from Company Details service if Incorporation Information returns an error" in {
-      val defaultCompanyDetails = CompanyDetailsView("test Name", None, validAddress, None, None)
+      val defaultCompanyDetails = CompanyDetailsView("test Name", None, Fixtures.validAddress, None, None)
 
       when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new Exception))
@@ -76,9 +69,11 @@ class UpToDateCompanyDetailsSpec extends PAYERegSpec with CoHoAPIFixture with S4
       when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
-      val result = await(TestUpToDateCompanyDetails.withLatestCompanyDetails("testRegId", "testTxId"){testFunc})
-      status(result) shouldBe OK
-      jsonBodyOf(result) shouldBe Json.toJson(defaultCompanyDetails)
+      val result = TestUpToDateCompanyDetails.withLatestCompanyDetails("testRegId", "testTxId"){
+        testFunc
+      }
+      status(result) mustBe OK
+      contentAsJson(result) mustBe Json.toJson(defaultCompanyDetails)
     }
   }
 }

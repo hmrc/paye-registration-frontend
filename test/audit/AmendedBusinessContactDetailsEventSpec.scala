@@ -16,11 +16,11 @@
 
 package audit
 
+import helpers.PayeComponentSpec
 import models.DigitalContactDetails
 import play.api.libs.json.Json
-import uk.gov.hmrc.play.test.UnitSpec
 
-class AmendedBusinessContactDetailsEventSpec extends UnitSpec {
+class AmendedBusinessContactDetailsEventSpec extends PayeComponentSpec {
   val externalUserId = "testExternalUserId"
   val authProviderId = "testAuthProviderId"
 
@@ -61,10 +61,7 @@ class AmendedBusinessContactDetailsEventSpec extends UnitSpec {
       )
 
       val result = Json.toJson[AmendedBusinessContactDetailsEventDetail](testModel)
-      result shouldBe expectedJson
+      result mustBe expectedJson
     }
-
-}
-
-
+  }
 }

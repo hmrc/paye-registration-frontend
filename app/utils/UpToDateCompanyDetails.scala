@@ -19,16 +19,16 @@ package utils
 import enums.CacheKeys
 import models.view.CompanyDetails
 import play.api.mvc.Result
-import services.{CompanyDetailsSrv, IncorporationInformationSrv, S4LSrv}
+import services._
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 import scala.concurrent.Future
 
 trait UpToDateCompanyDetails {
-  val incorpInfoService: IncorporationInformationSrv
-  val companyDetailsService: CompanyDetailsSrv
-  val s4LService: S4LSrv
+  val incorpInfoService: IncorporationInformationService
+  val companyDetailsService: CompanyDetailsService
+  val s4LService: S4LService
 
   def withLatestCompanyDetails(regId: String, txId: String)(f: CompanyDetails => Result)(implicit hc: HeaderCarrier): Future[Result] = {
     for {

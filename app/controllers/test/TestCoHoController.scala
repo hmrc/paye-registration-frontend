@@ -16,61 +16,56 @@
 
 package controllers.test
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
-import config.FrontendAuthConnector
-import connectors.test.{TestIncorpInfoConnect, TestIncorpInfoConnector}
-import connectors.{BusinessRegistrationConnect, BusinessRegistrationConnector, KeystoreConnect, KeystoreConnector}
+import connectors.test.TestIncorpInfoConnector
+import connectors.{BusinessRegistrationConnector, KeystoreConnector}
+import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.test.TestCoHoCompanyDetailsForm
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{AnyContent, Request}
-import services.{IncorporationInformationService, IncorporationInformationSrv}
-import uk.gov.hmrc.play.frontend.auth.Actions
-import uk.gov.hmrc.play.frontend.controller.FrontendController
+import play.api.Configuration
+import play.api.i18n.MessagesApi
+import play.api.mvc.{Action, AnyContent, Request}
+import services.{CompanyDetailsService, IncorporationInformationService, S4LService}
+import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.Future
 
-@Singleton
-class TestCoHoController @Inject()(val testIncorpInfoConnector: TestIncorpInfoConnector,
-                                   val coHoAPIService: IncorporationInformationService,
-                                   val keystoreConnector: KeystoreConnector,
-                                   val businessRegConnector: BusinessRegistrationConnector,
-                                   val messagesApi: MessagesApi) extends TestCoHoCtrl {
-  val authConnector = FrontendAuthConnector
-}
+class TestCoHoControllerImpl @Inject()(val testIncorpInfoConnector: TestIncorpInfoConnector,
+                                       val coHoAPIService: IncorporationInformationService,
+                                       val keystoreConnector: KeystoreConnector,
+                                       val businessRegConnector: BusinessRegistrationConnector,
+                                       val authConnector: AuthConnector,
+                                       val s4LService: S4LService,
+                                       val config: Configuration,
+                                       val companyDetailsService: CompanyDetailsService,
+                                       val incorpInfoService: IncorporationInformationService,
+                                       val messagesApi: MessagesApi) extends TestCoHoController with AuthRedirectUrls
 
-trait TestCoHoCtrl extends FrontendController with Actions with I18nSupport {
-  val testIncorpInfoConnector: TestIncorpInfoConnect
-  val businessRegConnector: BusinessRegistrationConnect
-  val keystoreConnector: KeystoreConnect
-  val coHoAPIService: IncorporationInformationSrv
+trait TestCoHoController extends PayeBaseController {
+  val testIncorpInfoConnector: TestIncorpInfoConnector
+  val businessRegConnector: BusinessRegistrationConnector
+  val keystoreConnector: KeystoreConnector
+  val coHoAPIService: IncorporationInformationService
 
-  def coHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        Future.successful(Ok(views.html.pages.test.coHoCompanyDetailsSetup(TestCoHoCompanyDetailsForm.form)))
+  def coHoCompanyDetailsSetup = isAuthorised { implicit request =>
+    Future.successful(Ok(views.html.pages.test.coHoCompanyDetailsSetup(TestCoHoCompanyDetailsForm.form)))
   }
 
-  def submitCoHoCompanyDetailsSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        TestCoHoCompanyDetailsForm.form.bindFromRequest.fold(
-          errors  => Future.successful(BadRequest(views.html.pages.test.coHoCompanyDetailsSetup(errors))),
-          success => for {
-            profile <- businessRegConnector.retrieveCurrentProfile
-            res     <- doAddCoHoCompanyDetails(profile.registrationID, success.companyName)
-          } yield Ok(res)
-        )
+  def submitCoHoCompanyDetailsSetup: Action[AnyContent] = isAuthorised { implicit request =>
+    TestCoHoCompanyDetailsForm.form.bindFromRequest.fold(
+      errors  => Future.successful(BadRequest(views.html.pages.test.coHoCompanyDetailsSetup(errors))),
+      success => for {
+        profile <- businessRegConnector.retrieveCurrentProfile
+        res     <- doAddCoHoCompanyDetails(profile.registrationID, success.companyName)
+      } yield Ok(res)
+    )
   }
 
-  def coHoCompanyDetailsTearDown = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        for {
-          profile <- businessRegConnector.retrieveCurrentProfile
-          res     <- doCoHoCompanyDetailsTearDown(profile.registrationID)
-        } yield Ok(res)
+  def coHoCompanyDetailsTearDown: Action[AnyContent] = isAuthorised { implicit request =>
+    for {
+      profile <- businessRegConnector.retrieveCurrentProfile
+      res     <- doCoHoCompanyDetailsTearDown(profile.registrationID)
+    } yield Ok(res)
   }
 
   protected[controllers] def doCoHoCompanyDetailsTearDown(regId: String)(implicit request: Request[AnyContent]): Future[String] = {
@@ -82,6 +77,4 @@ trait TestCoHoCtrl extends FrontendController with Actions with I18nSupport {
       resp <- testIncorpInfoConnector.setupCoHoCompanyDetails(regId, companyName)
     } yield s"Company Name: $companyName, registration ID: $regId. Response status: ${resp.status}"
   }
-
-
 }

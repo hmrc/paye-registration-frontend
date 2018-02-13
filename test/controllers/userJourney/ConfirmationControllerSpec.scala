@@ -16,65 +16,58 @@
 
 package controllers.userJourney
 
-import builders.AuthBuilder
-import connectors.PAYERegistrationConnector
-import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import helpers.auth.AuthHelpers
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.http.Status
-import play.api.http.Status.OK
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Request, Result}
+import play.api.test.FakeRequest
 import services.ConfirmationService
-import testHelpers.PAYERegSpec
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-class ConfirmationControllerSpec extends PAYERegSpec {
+class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val mockConfirmationService = mock[ConfirmationService]
-  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
 
-  class Setup {
-    val controller = new ConfirmationCtrl {
-      override val authConnector = mockAuthConnector
-      override val keystoreConnector = mockKeystoreConnector
-      override val confirmationService = mockConfirmationService
-      implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
-      override val payeRegistrationConnector = mockPayeRegistrationConnector
+  class Setup extends AuthHelpers {
+    override val authConnector = mockAuthConnector
+    override val keystoreConnector = mockKeystoreConnector
 
-      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
-        f(CurrentProfile(
-          "12345",
-          CompanyRegistrationProfile("held", "txId"),
-          "ENG",
-          payeRegistrationSubmitted = false
-        ))
-      }
+    val controller = new ConfirmationController {
+      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
+
+      override val incorpInfoService        = mockIncorpInfoService
+      override val companyDetailsService    = mockCompanyDetailsService
+      override val s4LService               = mockS4LService
+      override val authConnector            = mockAuthConnector
+      override val keystoreConnector        = mockKeystoreConnector
+      override val confirmationService      = mockConfirmationService
+      implicit val messagesApi: MessagesApi = mockMessagesApi
     }
   }
 
   "showConfirmation" should {
     "display the confirmation page with an acknowledgement reference retrieved from backend" in new Setup {
-      when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
+      when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("BRPY00000000001")))
 
-      AuthBuilder.showWithAuthorisedUser(controller.showConfirmation, mockAuthConnector) {
+      showAuthorisedWithCP(controller.showConfirmation, Fixtures.validCurrentProfile, FakeRequest()) {
         result =>
-          status(result) shouldBe OK
+          status(result) mustBe OK
       }
     }
 
     "show an error page when there is no acknowledgement reference returned from the backend" in new Setup {
-      when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
+      when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
-      AuthBuilder.showWithAuthorisedUser(controller.showConfirmation, mockAuthConnector) {
+      showAuthorisedWithCP(controller.showConfirmation, Fixtures.validCurrentProfile, FakeRequest()) {
         result =>
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+          status(result) mustBe Status.INTERNAL_SERVER_ERROR
       }
     }
   }
-
 }

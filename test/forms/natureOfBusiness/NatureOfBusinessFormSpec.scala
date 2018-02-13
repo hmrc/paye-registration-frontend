@@ -17,14 +17,11 @@
 package forms.natureOfBusiness
 
 import forms.natureOfBuinessDetails.NatureOfBusinessForm
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.NatureOfBusiness
 import play.api.data.FormError
-import play.api.i18n.MessagesApi
-import testHelpers.PAYERegSpec
 
-class NatureOfBusinessFormSpec extends PAYERegSpec {
-
-  val messagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+class NatureOfBusinessFormSpec extends PayeComponentSpec with PayeFakedApp {
 
   val oneHundred = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
@@ -60,7 +57,7 @@ class NatureOfBusinessFormSpec extends PAYERegSpec {
         success => success
       )
 
-      result shouldBe NatureOfBusiness("I am a test description")
+      result mustBe NatureOfBusiness("I am a test description")
     }
 
     "the description is equal to 100 chars" in {
@@ -69,7 +66,7 @@ class NatureOfBusinessFormSpec extends PAYERegSpec {
         success => success
       )
 
-      result shouldBe NatureOfBusiness(oneHundred)
+      result mustBe NatureOfBusiness(oneHundred)
     }
 
     "return a trimmed and newline/tab replaced by whitespace if there are no errors" in {
@@ -78,7 +75,7 @@ class NatureOfBusinessFormSpec extends PAYERegSpec {
         success => success
       )
 
-      result shouldBe NatureOfBusiness("I am a test description")
+      result mustBe NatureOfBusiness("I am a test description")
     }
 
     "return a form with errors" when {
@@ -86,21 +83,21 @@ class NatureOfBusinessFormSpec extends PAYERegSpec {
         val boundForm = testForm.bind(invalidDataNoEntry)
         val formError = FormError("description", "errors.invalid.sic.noEntry")
 
-        boundForm.errors shouldBe Seq(formError)
+        boundForm.errors mustBe Seq(formError)
       }
 
       "the description is over 100 chars" in {
         val boundForm = testForm.bind(invalidDataTooLong)
         val formError = FormError("description", "errors.invalid.sic.overCharLimit")
 
-        boundForm.errors shouldBe Seq(formError)
+        boundForm.errors mustBe Seq(formError)
       }
 
       "the description contains invalid chars" in {
         val boundForm = testForm.bind(invalidDataChars)
         val formError = FormError("description", "errors.invalid.sic.invalidChars")
 
-        boundForm.errors shouldBe Seq(formError)
+        boundForm.errors mustBe Seq(formError)
       }
     }
   }

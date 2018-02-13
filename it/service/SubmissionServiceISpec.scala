@@ -26,7 +26,7 @@ import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import services.SubmissionService
+import services.SubmissionServiceImpl
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
 
@@ -68,10 +68,10 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
     "NOT send the submission if the regId is in whitelist" in {
       val regIdWhitelisted = "regWhitelist123"
 
-      val submissionService = new SubmissionService(payeRegistrationConnector, keystoreConnector)
+      val submissionService = new SubmissionServiceImpl(payeRegistrationConnector, keystoreConnector)
       def getResponse = submissionService.submitRegistration(currentProfile(regIdWhitelisted))
 
-      an[Exception] shouldBe thrownBy(await(getResponse))
+      an[Exception] mustBe thrownBy(await(getResponse))
     }
 
     "send the submission and update keystore if the regId is not in whitelist" in {
@@ -80,10 +80,10 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
       stubPut(s"/paye-registration/$regId/submit-registration", 200, "")
       stubKeystoreCache(sId, CacheKeys.CurrentProfile.toString)
 
-      val submissionService = new SubmissionService(payeRegistrationConnector, keystoreConnector)
+      val submissionService = new SubmissionServiceImpl(payeRegistrationConnector, keystoreConnector)
       def getResponse = submissionService.submitRegistration(currentProfile(regId))
 
-      await(getResponse) shouldBe Success
+      await(getResponse) mustBe Success
 
       verify(putRequestedFor(urlEqualTo(s"/keystore/paye-registration-frontend/$sId/data/${CacheKeys.CurrentProfile.toString}"))
         .withRequestBody(
@@ -107,10 +107,10 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
       stubPut(s"/paye-registration/$regId/submit-registration", 400, "")
       stubKeystoreCache(sId, CacheKeys.CurrentProfile.toString)
 
-      val submissionService = new SubmissionService(payeRegistrationConnector, keystoreConnector)
+      val submissionService = new SubmissionServiceImpl(payeRegistrationConnector, keystoreConnector)
       def getResponse = submissionService.submitRegistration(currentProfile(regId))
 
-      await(getResponse) shouldBe Failed
+      await(getResponse) mustBe Failed
 
       verify(0, putRequestedFor(urlEqualTo(s"/keystore/paye-registration-frontend/$sId/data/${CacheKeys.CurrentProfile.toString}")))
     }

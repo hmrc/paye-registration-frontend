@@ -16,10 +16,10 @@
 
 package models.external
 
+import helpers.PayeComponentSpec
 import play.api.libs.json.{JsSuccess, Json}
-import testHelpers.PAYERegSpec
 
-class CurrentProfileSpec extends PAYERegSpec {
+class CurrentProfileSpec extends PayeComponentSpec {
 
   "Reading a CurrentProfile" should {
     "succeed" when {
@@ -46,7 +46,7 @@ class CurrentProfileSpec extends PAYERegSpec {
             |  "payeRegistrationSubmitted": true
             |}""".stripMargin)
 
-        Json.fromJson[CurrentProfile](tstJson) shouldBe JsSuccess(tstCurrentProfile)
+        Json.fromJson[CurrentProfile](tstJson) mustBe JsSuccess(tstCurrentProfile)
       }
     }
 
@@ -72,7 +72,7 @@ class CurrentProfileSpec extends PAYERegSpec {
           |  "language": "ENG"
           |}""".stripMargin)
 
-      Json.fromJson[CurrentProfile](tstJson) shouldBe JsSuccess(tstCurrentProfile)
+      Json.fromJson[CurrentProfile](tstJson) mustBe JsSuccess(tstCurrentProfile)
     }
   }
 

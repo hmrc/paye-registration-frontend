@@ -16,10 +16,11 @@
 
 package models.api
 
+import helpers.PayeComponentSpec
 import play.api.libs.json.{JsSuccess, Json}
-import uk.gov.hmrc.play.test.UnitSpec
 
-class DirectorsSpec extends UnitSpec {
+class DirectorsSpec extends PayeComponentSpec {
+
   "Name" should {
 
     val tstJson = Json.parse(
@@ -62,26 +63,26 @@ class DirectorsSpec extends UnitSpec {
     )
 
     "read from json with full data" in {
-      Json.fromJson[Name](tstJson) shouldBe JsSuccess(tstModel)
+      Json.fromJson[Name](tstJson) mustBe JsSuccess(tstModel)
     }
     "read from json with a title over 20 characters" in {
-      Json.fromJson[Name](tstJsonTitle)(Name.normalizeNameReads) shouldBe JsSuccess(tstModelTitle)
+      Json.fromJson[Name](tstJsonTitle)(Name.normalizeNameReads) mustBe JsSuccess(tstModelTitle)
     }
     "read from json with commas" in {
-      Json.fromJson[Name](tstJsonWithCommas)(Name.normalizeNameReads) shouldBe JsSuccess(tstModelTitle)
+      Json.fromJson[Name](tstJsonWithCommas)(Name.normalizeNameReads) mustBe JsSuccess(tstModelTitle)
     }
     "write to json with full data" in {
-      Json.toJson[Name](tstModel) shouldBe tstJson
+      Json.toJson[Name](tstModel) mustBe tstJson
     }
 
     val tstEmptyJson = Json.parse(s"""{"surname":""}""".stripMargin)
     val tstEmptyModel = Name(None, None, "", None)
 
     "read from json with empty data" in {
-      Json.fromJson[Name](tstEmptyJson) shouldBe JsSuccess(tstEmptyModel)
+      Json.fromJson[Name](tstEmptyJson) mustBe JsSuccess(tstEmptyModel)
     }
     "write to json with empty data" in {
-      Json.toJson[Name](tstEmptyModel) shouldBe tstEmptyJson
+      Json.toJson[Name](tstEmptyModel) mustBe tstEmptyJson
     }
 
   }
@@ -110,10 +111,10 @@ class DirectorsSpec extends UnitSpec {
     )
 
     "read from json with full data" in {
-      Json.fromJson[Director](tstJson) shouldBe JsSuccess(tstModel)
+      Json.fromJson[Director](tstJson) mustBe JsSuccess(tstModel)
     }
     "write to json with full data" in {
-      Json.toJson[Director](tstModel) shouldBe tstJson
+      Json.toJson[Director](tstModel) mustBe tstJson
     }
 
 
@@ -134,10 +135,10 @@ class DirectorsSpec extends UnitSpec {
     )
 
     "read from json with minimal data" in {
-      Json.fromJson[Director](tstEmptyJson) shouldBe JsSuccess(tstEmptyModel)
+      Json.fromJson[Director](tstEmptyJson) mustBe JsSuccess(tstEmptyModel)
     }
     "write to json with minimal data" in {
-      Json.toJson[Director](tstEmptyModel) shouldBe tstEmptyJson
+      Json.toJson[Director](tstEmptyModel) mustBe tstEmptyJson
     }
   }
 }

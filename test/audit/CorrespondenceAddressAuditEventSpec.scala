@@ -16,10 +16,10 @@
 
 package audit
 
+import helpers.PayeComponentSpec
 import play.api.libs.json.Json
-import uk.gov.hmrc.play.test.UnitSpec
 
-class CorrespondenceAddressAuditEventSpec extends UnitSpec {
+class CorrespondenceAddressAuditEventSpec extends PayeComponentSpec {
   val externalUserId = "testExternalUserId"
   val authProviderId = "testAuthProviderId"
 
@@ -39,7 +39,7 @@ class CorrespondenceAddressAuditEventSpec extends UnitSpec {
       )
 
       val result = Json.toJson[CorrespondenceAddressAuditEventDetail](testModel)(CorrespondenceAddressAuditEventDetail.writes)
-      result shouldBe expectedJson
+      result mustBe expectedJson
     }
   }
 }

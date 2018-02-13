@@ -16,140 +16,116 @@
 
 package controllers.errors
 
-import builders.AuthBuilder
-import connectors.PAYERegistrationConnector
-import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import play.api.http.Status
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import services.DeskproService
-import testHelpers.PAYERegSpec
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-class ErrorControllerSpec extends PAYERegSpec {
-
-  val fakeRequest = FakeRequest("GET", "/")
-
-  val mockDeskproService = mock[DeskproService]
-  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
-
-  val regId = "12345"
+class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
+  val regId = Fixtures.validCurrentProfile.get.registrationID
   val ticketId : Long = 123456789
 
   class Setup {
-    val controller = new ErrorCtrl {
-      override val keystoreConnector = mockKeystoreConnector
-      override val payeRegistrationConnector = mockPayeRegistrationConnector
-      override val deskproService = mockDeskproService
-      override val authConnector = mockAuthConnector
-      implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+    val testController = new ErrorController {
+      override val redirectToLogin        = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign     = MockAuthRedirects.redirectToPostSign
 
-      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_],  hc: HeaderCarrier): Future[Result] = {
-        f(CurrentProfile(
-          "12345",
-          CompanyRegistrationProfile("held", "txId"),
-          "ENG",
-          payeRegistrationSubmitted = false
-        ))
-      }
+      override val incorpInfoService      = mockIncorpInfoService
+      override val companyDetailsService  = mockCompanyDetailsService
+      override val s4LService             = mockS4LService
+      override val keystoreConnector      = mockKeystoreConnector
+      override val deskproService         = mockDeskproService
+      override val messagesApi            = mockMessagesApi
+      override val authConnector          = mockAuthConnector
     }
   }
 
   "GET /start" should {
     "return 200" in new Setup {
-      AuthBuilder.showWithAuthorisedUser(controller.ineligible, mockAuthConnector) {
-        (result: Future[Result]) =>
-          status(result) shouldBe Status.OK
-      }
-    }
-    "return HTML" in new Setup {
-      AuthBuilder.showWithAuthorisedUser(controller.ineligible, mockAuthConnector) {
-        (result: Future[Result]) =>
-          contentType(result) shouldBe Some("text/html")
-          charset(result) shouldBe Some("utf-8")
+      val fakeRequest = FakeRequest("GET", "/authenticated/ineligible")
+
+      AuthHelpers.showAuthorisedWithCP(testController.ineligible, Fixtures.validCurrentProfile, fakeRequest) { result =>
+        status(result)      mustBe OK
+        contentType(result) mustBe Some("text/html")
+        charset(result)     mustBe Some("utf-8")
       }
     }
   }
 
   "retrySubmission" should {
     "return 200" in new Setup {
-      AuthBuilder.showWithAuthorisedUser(controller.retrySubmission, mockAuthConnector) {
-        (result: Future[Result]) =>
-          status(result) shouldBe Status.OK
-          contentType(result) shouldBe Some("text/html")
-          charset(result) shouldBe Some("utf-8")
+      implicit val fakeRequest = FakeRequest("GET", "/")
+
+      AuthHelpers.showAuthorisedWithCP(testController.retrySubmission, Fixtures.validCurrentProfile, fakeRequest) { result =>
+        status(result)      mustBe OK
+        contentType(result) mustBe Some("text/html")
+        charset(result)     mustBe Some("utf-8")
       }
     }
   }
 
   "failedSubmission" should {
     "return 200" in new Setup {
-      AuthBuilder.showWithAuthorisedUser(controller.failedSubmission, mockAuthConnector) {
-        (result: Future[Result]) =>
-          status(result) shouldBe Status.OK
-          contentType(result) shouldBe Some("text/html")
-          charset(result) shouldBe Some("utf-8")
+      implicit val fakeRequest = FakeRequest("GET", "/")
+
+      AuthHelpers.showAuthorisedWithCP(testController.failedSubmission, Fixtures.validCurrentProfile, fakeRequest) { result =>
+        status(result)      mustBe OK
+        contentType(result) mustBe Some("text/html")
+        charset(result)     mustBe Some("utf-8")
       }
     }
   }
 
   "submitTicket" should {
     "return 400 when an empty form is submitted" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      implicit val fakeRequest = FakeRequest().withFormUrlEncodedBody(
         "" -> ""
       )
 
-      AuthBuilder.submitWithAuthorisedUser(controller.submitTicket, mockAuthConnector, request) {
-        result =>
-          status(result) shouldBe BAD_REQUEST
+      AuthHelpers.submitAuthorisedWithCP(testController.submitTicket, Fixtures.validCurrentProfile, fakeRequest) { result =>
+        status(result) mustBe BAD_REQUEST
       }
     }
 
     "return 400 when an invalid email is entered" in new Setup {
-
-      val request = FakeRequest().withFormUrlEncodedBody(
-        "name" -> "Michael Mouse",
-        "email" -> "************",
+      val fakeRequest = FakeRequest().withFormUrlEncodedBody(
+        "name"    -> "Michael Mouse",
+        "email"   -> "************",
         "message" -> "I can't provide a good email address"
       )
 
-      AuthBuilder.submitWithAuthorisedUser(controller.submitTicket, mockAuthConnector, request) {
-        result =>
-          status(result) shouldBe BAD_REQUEST
+      AuthHelpers.submitAuthorisedWithCP(testController.submitTicket, Fixtures.validCurrentProfile, fakeRequest) { result =>
+        status(result) mustBe BAD_REQUEST
       }
     }
 
     "return 303" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
-        "name" -> "Michael Mouse",
-        "email" -> "mic@mou.biz",
+      val fakeRequest = FakeRequest().withFormUrlEncodedBody(
+        "name"    -> "Michael Mouse",
+        "email"   -> "mic@mou.biz",
         "message" -> "I can't provide a good email address"
       )
 
-      when(mockDeskproService.submitTicket(ArgumentMatchers.eq(regId), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(testController.deskproService.submitTicket(ArgumentMatchers.eq(regId), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(ticketId))
 
-      AuthBuilder.submitWithAuthorisedUser(controller.submitTicket, mockAuthConnector, request) {
-        result =>
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some("/register-for-paye/ticket-submitted")
+      AuthHelpers.submitAuthorisedWithCP(testController.submitTicket, Fixtures.validCurrentProfile, fakeRequest) { result =>
+        status(result)            mustBe SEE_OTHER
+        redirectLocation(result)  mustBe Some("/register-for-paye/ticket-submitted")
       }
     }
   }
 
   "submittedTicket" should {
     "return 200" in new Setup {
-      AuthBuilder.showWithAuthorisedUser(controller.submittedTicket, mockAuthConnector) {
-        (result: Future[Result]) =>
-          status(result) shouldBe Status.OK
-          contentType(result) shouldBe Some("text/html")
-          charset(result) shouldBe Some("utf-8")
+      val fakeRequest = FakeRequest()
+
+      AuthHelpers.showAuthorisedWithCP(testController.submittedTicket, Fixtures.validCurrentProfile, fakeRequest) { result =>
+        status(result)      mustBe OK
+        contentType(result) mustBe Some("text/html")
+        charset(result)     mustBe Some("utf-8")
       }
     }
   }

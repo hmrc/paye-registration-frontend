@@ -16,10 +16,10 @@
 
 package forms.helpers
 
+import helpers.PayeComponentSpec
 import play.api.data.FormError
-import uk.gov.hmrc.play.test.UnitSpec
 
-class OneOfManyFormSpec extends UnitSpec {
+class OneOfManyFormSpec extends PayeComponentSpec {
 
   object TestForm extends OneOfManyForm {
     override val optionalFields = Seq("test1", "test2", "test3")
@@ -32,24 +32,24 @@ class OneOfManyFormSpec extends UnitSpec {
         "test1" -> "test",
         "test2" -> ""
         )
-      TestForm.multiPartFormatter.bind("test1", data) shouldBe Right(Some("test"))
-      TestForm.multiPartFormatter.bind("test2", data) shouldBe Right(None)
-      TestForm.multiPartFormatter.bind("test3", data) shouldBe Right(None)
+      TestForm.multiPartFormatter.bind("test1", data) mustBe Right(Some("test"))
+      TestForm.multiPartFormatter.bind("test2", data) mustBe Right(None)
+      TestForm.multiPartFormatter.bind("test3", data) mustBe Right(None)
     }
 
     "bind with another field completed" in {
       val data = Map[String, String](
         "test2" -> "test"
         )
-      TestForm.multiPartFormatter.bind("test1", data) shouldBe Right(None)
-      TestForm.multiPartFormatter.bind("test2", data) shouldBe Right(Some("test"))
-      TestForm.multiPartFormatter.bind("test3", data) shouldBe Right(None)
+      TestForm.multiPartFormatter.bind("test1", data) mustBe Right(None)
+      TestForm.multiPartFormatter.bind("test2", data) mustBe Right(Some("test"))
+      TestForm.multiPartFormatter.bind("test3", data) mustBe Right(None)
     }
 
     "fail to bind with no fields completed" in {
       val data = Map[String, String](
         )
-      TestForm.multiPartFormatter.bind("test1", data) shouldBe Left(Seq(FormError("noFieldsCompleted-test1", "noFieldsErrMsg")))
+      TestForm.multiPartFormatter.bind("test1", data) mustBe Left(Seq(FormError("noFieldsCompleted-test1", "noFieldsErrMsg")))
     }
 
     "fail to bind with all fields blank" in {
@@ -58,7 +58,7 @@ class OneOfManyFormSpec extends UnitSpec {
           "test2" -> "",
           "test3" -> ""
         )
-      TestForm.multiPartFormatter.bind("test1", data) shouldBe Left(Seq(FormError("noFieldsCompleted-test1", "noFieldsErrMsg")))
+      TestForm.multiPartFormatter.bind("test1", data) mustBe Left(Seq(FormError("noFieldsCompleted-test1", "noFieldsErrMsg")))
     }
 
     "fail to bind with other, non included fields completed" in {
@@ -66,7 +66,7 @@ class OneOfManyFormSpec extends UnitSpec {
           "unIncludedField" -> "string",
           "nextUnIncludedField" -> "string"
         )
-      TestForm.multiPartFormatter.bind("test1", data) shouldBe Left(Seq(FormError("noFieldsCompleted-test1", "noFieldsErrMsg")))
+      TestForm.multiPartFormatter.bind("test1", data) mustBe Left(Seq(FormError("noFieldsCompleted-test1", "noFieldsErrMsg")))
     }
 
     "bind with multiple fields completed" in {
@@ -74,19 +74,19 @@ class OneOfManyFormSpec extends UnitSpec {
           "test1" -> "string",
           "test2" -> "otherString"
         )
-      TestForm.multiPartFormatter.bind("test1", data) shouldBe Right(Some("string"))
-      TestForm.multiPartFormatter.bind("test2", data) shouldBe Right(Some("otherString"))
-      TestForm.multiPartFormatter.bind("test3", data) shouldBe Right(None)
+      TestForm.multiPartFormatter.bind("test1", data) mustBe Right(Some("string"))
+      TestForm.multiPartFormatter.bind("test2", data) mustBe Right(Some("otherString"))
+      TestForm.multiPartFormatter.bind("test3", data) mustBe Right(None)
     }
   }
 
   "Unbinding a form extending OneOfManyForm" should {
     "Unbind successfully from Some" in {
-      TestForm.multiPartFormatter.unbind("tst", Some("test value")) shouldBe Map("tst" -> "test value")
+      TestForm.multiPartFormatter.unbind("tst", Some("test value")) mustBe Map("tst" -> "test value")
     }
 
     "Unbind successfully from None" in {
-      TestForm.multiPartFormatter.unbind("tst", None) shouldBe Map("tst" -> "")
+      TestForm.multiPartFormatter.unbind("tst", None) mustBe Map("tst" -> "")
     }
   }
 

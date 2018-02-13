@@ -16,31 +16,30 @@
 
 package connectors
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import config.WSHttp
 import models.Address
 import models.external.BusinessProfile
 import models.view.PAYEContactDetails
-import play.api.Logger
 import play.api.libs.json.JsValue
-import services.{MetricsService, MetricsSrv}
+import services.MetricsService
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.config.ServicesConfig
-
+import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 import scala.concurrent.Future
 
-@Singleton
-class BusinessRegistrationConnector @Inject()(val metricsService: MetricsService) extends BusinessRegistrationConnect with ServicesConfig {
-  val businessRegUrl                = baseUrl("business-registration")
-  val http : CoreGet with CorePost  = WSHttp
+class BusinessRegistrationConnectorImpl @Inject()(val metricsService: MetricsService,
+                                                  val http: WSHttp,
+                                                  servicesConfig: ServicesConfig) extends BusinessRegistrationConnector {
+  val businessRegUrl = servicesConfig.baseUrl("business-registration")
 }
 
-trait BusinessRegistrationConnect {
+trait BusinessRegistrationConnector {
   val businessRegUrl: String
   val http: CoreGet with CorePost
-  val metricsService: MetricsSrv
+  val metricsService: MetricsService
 
   def retrieveCurrentProfile(implicit hc: HeaderCarrier, rds: HttpReads[BusinessProfile]): Future[BusinessProfile] = {
     val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
@@ -50,7 +49,7 @@ trait BusinessRegistrationConnect {
     } recover {
       case e =>
         businessRegistrationTimer.stop()
-        throw logResponse(e, "retrieveCompletionCapacity", "retrieving completion capacity")
+        throw logResponse(e, "retrieving completion capacity")
     }
   }
 
@@ -65,7 +64,7 @@ trait BusinessRegistrationConnect {
         None
       case e =>
         businessRegistrationTimer.stop()
-        throw logResponse(e, "retrieveCompletionCapacity", "retrieving completion capacity")
+        throw logResponse(e, "retrieving completion capacity")
     }
   }
 
@@ -81,7 +80,7 @@ trait BusinessRegistrationConnect {
         None
       case e =>
         businessRegistrationTimer.stop()
-        logResponse(e, "retrieveContactDetails", "retrieving contact details")
+        logResponse(e, "retrieving contact details")
         None
     }
   }
@@ -95,7 +94,7 @@ trait BusinessRegistrationConnect {
     } recover {
       case e: Exception =>
         businessRegistrationTimer.stop()
-        logResponse(e, "upsertContactDetails", "upserting contact details")
+        logResponse(e, "upserting contact details")
         contactDetails
     }
   }
@@ -111,7 +110,7 @@ trait BusinessRegistrationConnect {
         Seq.empty
       case ex =>
         businessRegistrationTimer.stop()
-        logResponse(ex, "retrieveAddresses", "fetching addresses from pre-pop", Some(regId))
+        logResponse(ex, "fetching addresses from pre-pop", Some(regId))
         Seq.empty
     }
   }
@@ -125,24 +124,8 @@ trait BusinessRegistrationConnect {
     } recover {
       case e: Exception =>
         businessRegistrationTimer.stop()
-        logResponse(e, "upsertAddress", "upserting address")
+        logResponse(e, "upserting address")
         address
     }
-  }
-
-  private[connectors] def logResponse(e: Throwable, f: String, m: String, regId: Option[String] = None): Throwable = {
-    val optRegId = regId.map(r => s" and regId: $regId").getOrElse("")
-    def log(s: String) = Logger.error(s"[BusinessRegistrationConnector] [$f] received $s when $m$optRegId")
-    e match {
-      case e: NotFoundException   => log("NOT FOUND")
-      case e: BadRequestException => log("BAD REQUEST")
-      case e: Upstream4xxResponse => e.upstreamResponseCode match {
-        case 403  => log("FORBIDDEN")
-        case _    => log(s"Upstream 4xx: ${e.upstreamResponseCode} ${e.message}")
-      }
-      case e: Upstream5xxResponse => log(s"Upstream 5xx: ${e.upstreamResponseCode}")
-      case e: Exception           => log(s"ERROR: ${e.getMessage}")
-    }
-    e
   }
 }

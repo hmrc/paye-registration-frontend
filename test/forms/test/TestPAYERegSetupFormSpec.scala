@@ -19,13 +19,13 @@ package forms.test
 import java.time.LocalDate
 
 import enums.PAYEStatus
-import models.{Address, DigitalContactDetails}
-import models.api.{CompanyDetails, Director, Employment, Name, PAYEContact, PAYERegistration, SICCode}
+import helpers.PayeComponentSpec
+import models.api._
 import models.view.PAYEContactDetails
+import models.{Address, DigitalContactDetails}
 import play.api.data.FormError
-import uk.gov.hmrc.play.test.UnitSpec
 
-class TestPAYERegSetupFormSpec extends UnitSpec {
+class TestPAYERegSetupFormSpec extends PayeComponentSpec {
   val testForm = TestPAYERegSetupForm.form
 
   "Binding TestPAYERegSetupForm to a model" when {
@@ -155,12 +155,12 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
           errors => errors,
           success => success
         )
-        boundModel shouldBe model
+        boundModel mustBe model
       }
 
       "Unbind successfully" in {
         val form = testForm.fill(model)
-        form.data shouldBe Map(
+        form.data mustBe Map(
           "registrationID" -> "54321",
           "transactionID" -> "10-1028374",
           "formCreationTimestamp" -> "01/01/2017",
@@ -343,12 +343,12 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
           errors => errors,
           success => success
         )
-        boundModel shouldBe model
+        boundModel mustBe model
       }
 
       "Unbind successfully" in {
         val form = testForm.fill(model)
-        form.data shouldBe Map(
+        form.data mustBe Map(
           "registrationID" -> "54321",
           "transactionID" -> "10-1028374",
           "formCreationTimestamp" -> "01/01/2017",
@@ -432,8 +432,8 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val boundForm = testForm.bind(data)
       val regIDError = FormError("registrationID", "error.required")
 
-      boundForm.errors shouldBe Seq(regIDError)
-      boundForm.data shouldBe data
+      boundForm.errors mustBe Seq(regIDError)
+      boundForm.data mustBe data
     }
 
     "formCreationTimestamp is not completed" in {
@@ -477,8 +477,8 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val boundForm = testForm.bind(data)
       val formTimestampError = FormError("formCreationTimestamp", "error.required")
 
-      boundForm.errors shouldBe Seq(formTimestampError)
-      boundForm.data shouldBe data
+      boundForm.errors mustBe Seq(formTimestampError)
+      boundForm.data mustBe data
     }
 
     "completionCapacity is not completed" in {
@@ -522,8 +522,8 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val boundForm = testForm.bind(data)
       val completionCapacityError = FormError("completionCapacity", "error.required")
 
-      boundForm.errors shouldBe Seq(completionCapacityError)
-      boundForm.data shouldBe data
+      boundForm.errors mustBe Seq(completionCapacityError)
+      boundForm.data mustBe data
     }
 
     "company name is not completed" in {
@@ -567,8 +567,8 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val boundForm = testForm.bind(data)
       val companyMameError = FormError("companyDetails.companyName", "error.required")
 
-      boundForm.errors shouldBe Seq(companyMameError)
-      boundForm.data shouldBe data
+      boundForm.errors mustBe Seq(companyMameError)
+      boundForm.data mustBe data
     }
 
     "roAddress line1 and line2 are not completed" in {
@@ -612,9 +612,9 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val formErrorRoAddressLine1 = FormError("companyDetails.roAddress.line1", "error.required")
       val formErrorRoAddressLine2 = FormError("companyDetails.roAddress.line2", "error.required")
 
-      boundForm.error("companyDetails.roAddress.line1") shouldBe Some(formErrorRoAddressLine1)
-      boundForm.error("companyDetails.roAddress.line2") shouldBe Some(formErrorRoAddressLine2)
-      boundForm.data shouldBe data
+      boundForm.error("companyDetails.roAddress.line1") mustBe Some(formErrorRoAddressLine1)
+      boundForm.error("companyDetails.roAddress.line2") mustBe Some(formErrorRoAddressLine2)
+      boundForm.data mustBe data
     }
 
     "ppobAddress line1 and line2 are not completed" in {
@@ -658,9 +658,9 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val formErrorPPOBAddressLine1 = FormError("companyDetails.ppobAddress.line1", "error.required")
       val formErrorPPOBAddressLine2 = FormError("companyDetails.ppobAddress.line2", "error.required")
 
-      boundForm.error("companyDetails.ppobAddress.line1") shouldBe Some(formErrorPPOBAddressLine1)
-      boundForm.error("companyDetails.ppobAddress.line2") shouldBe Some(formErrorPPOBAddressLine2)
-      boundForm.data shouldBe data
+      boundForm.error("companyDetails.ppobAddress.line1") mustBe Some(formErrorPPOBAddressLine1)
+      boundForm.error("companyDetails.ppobAddress.line2") mustBe Some(formErrorPPOBAddressLine2)
+      boundForm.data mustBe data
     }
 
     "employees is not completed" in {
@@ -704,8 +704,8 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val boundForm = testForm.bind(data)
       val employeesError = FormError("employment.employees", "error.required")
 
-      boundForm.errors shouldBe Seq(employeesError)
-      boundForm.data shouldBe data
+      boundForm.errors mustBe Seq(employeesError)
+      boundForm.data mustBe data
     }
 
     "subcontractors is not completed" in {
@@ -749,8 +749,8 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val boundForm = testForm.bind(data)
       val subcontractorsError = FormError("employment.subcontractors", "error.required")
 
-      boundForm.errors shouldBe Seq(subcontractorsError)
-      boundForm.data shouldBe data
+      boundForm.errors mustBe Seq(subcontractorsError)
+      boundForm.data mustBe data
     }
 
     "firstPayment Day is not completed" in {
@@ -794,8 +794,8 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val boundForm = testForm.bind(data)
       val firstPaymentDayError = FormError("employment.firstPayDateDay", "pages.firstPayment.date.invalidRange")
 
-      boundForm.error("employment.firstPayDateDay") shouldBe Some(firstPaymentDayError)
-      boundForm.data shouldBe data
+      boundForm.error("employment.firstPayDateDay") mustBe Some(firstPaymentDayError)
+      boundForm.data mustBe data
     }
 
     "firstPayment Month is not completed" in {
@@ -839,8 +839,8 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val boundForm = testForm.bind(data)
       val firstPaymentDayError = FormError("employment.firstPayDateDay", "pages.firstPayment.date.invalidRange")
 
-      boundForm.error("employment.firstPayDateDay") shouldBe Some(firstPaymentDayError)
-      boundForm.data shouldBe data
+      boundForm.error("employment.firstPayDateDay") mustBe Some(firstPaymentDayError)
+      boundForm.data mustBe data
     }
 
     "firstPayment Year is not completed" in {
@@ -884,8 +884,8 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val boundForm = testForm.bind(data)
       val firstPaymentDayError = FormError("employment.firstPayDateDay", "pages.firstPayment.date.invalidRange")
 
-      boundForm.error("employment.firstPayDateDay") shouldBe Some(firstPaymentDayError)
-      boundForm.data shouldBe data
+      boundForm.error("employment.firstPayDateDay") mustBe Some(firstPaymentDayError)
+      boundForm.data mustBe data
     }
 
     "paye contact name is not completed" in {
@@ -929,8 +929,8 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val boundForm = testForm.bind(data)
       val payeContactNameError = FormError("payeContact.payeContactDetails.name", "error.required")
 
-      boundForm.errors shouldBe Seq(payeContactNameError)
-      boundForm.data shouldBe data
+      boundForm.errors mustBe Seq(payeContactNameError)
+      boundForm.data mustBe data
     }
 
     "correspondenceAddress line1 and line2 are not completed" in {
@@ -972,9 +972,9 @@ class TestPAYERegSetupFormSpec extends UnitSpec {
       val formErrorCorrespondenceAddressLine1 = FormError("payeContact.correspondenceAddress.line1", "error.required")
       val formErrorCorrespondenceAddressLine2 = FormError("payeContact.correspondenceAddress.line2", "error.required")
 
-      boundForm.error("payeContact.correspondenceAddress.line1") shouldBe Some(formErrorCorrespondenceAddressLine1)
-      boundForm.error("payeContact.correspondenceAddress.line2") shouldBe Some(formErrorCorrespondenceAddressLine2)
-      boundForm.data shouldBe data
+      boundForm.error("payeContact.correspondenceAddress.line1") mustBe Some(formErrorCorrespondenceAddressLine1)
+      boundForm.error("payeContact.correspondenceAddress.line2") mustBe Some(formErrorCorrespondenceAddressLine2)
+      boundForm.data mustBe data
     }
   }
 }

@@ -16,129 +16,127 @@
 
 package controllers.userJourney
 
-import builders.AuthBuilder
 import connectors._
 import enums.PAYEStatus
-import fixtures.PAYERegistrationFixture
-import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import helpers.auth.AuthHelpers
+import helpers.{PayeComponentSpec, PayeFakedApp}
+import models.external.CurrentProfile
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Request, Result}
-import play.api.test.Helpers._
+import play.api.mvc.Result
+import play.api.test.FakeRequest
 import services.{SubmissionService, SummaryService}
-import testHelpers.PAYERegSpec
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
+class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
-  val mockSummaryService = mock[SummaryService]
-  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
+  val mockSummaryService    = mock[SummaryService]
   val mockSubmissionService = mock[SubmissionService]
 
-  class Setup {
-    val controller = new SummaryCtrl {
-      override val summaryService = mockSummaryService
-      override val authConnector = mockAuthConnector
-      override val keystoreConnector = mockKeystoreConnector
-      override val payeRegistrationConnector = mockPayeRegistrationConnector
-      override val submissionService = mockSubmissionService
-      implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+  class Setup extends AuthHelpers {
+    override val authConnector = mockAuthConnector
+    override val keystoreConnector = mockKeystoreConnector
 
-      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
-        f(CurrentProfile(
-          "12345",
-          CompanyRegistrationProfile("held", "txId"),
-          "ENG",
-          payeRegistrationSubmitted = false
-        ))
-      }
+
+    val controller = new SummaryController {
+      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
+
+      override val incorpInfoService = mockIncorpInfoService
+      override val companyDetailsService = mockCompanyDetailsService
+      override val s4LService = mockS4LService
+      override val summaryService             = mockSummaryService
+      override val authConnector              = mockAuthConnector
+      override val keystoreConnector          = mockKeystoreConnector
+      override val payeRegistrationConnector  = mockPayeRegistrationConnector
+      override val submissionService          = mockSubmissionService
+      implicit val messagesApi: MessagesApi   = mockMessagesApi
     }
   }
 
   "Calling summary to show the summary page" should {
     "show the summary page when a valid model is returned from the microservice and the reg doc status is draft" in new Setup {
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validPAYERegistrationAPI))
+        .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI))
 
       when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validSummaryView))
+        .thenReturn(Future.successful(Fixtures.validSummaryView))
 
-      AuthBuilder.showWithAuthorisedUser(controller.summary, mockAuthConnector) {
+      showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
         (response: Future[Result]) =>
-          status(response) shouldBe Status.OK
-          val result = Jsoup.parse(bodyOf(response))
-          result.body().getElementById("pageHeading").text() shouldBe "Check and confirm your answers"
-          result.body.getElementById("tradingNameAnswer").text() shouldBe "tstTrade"
+          status(response) mustBe Status.OK
+          val result = Jsoup.parse(contentAsString(response))
+          result.body().getElementById("pageHeading").text() mustBe "Check and confirm your answers"
+          result.body.getElementById("tradingNameAnswer").text() mustBe "tstTrade"
       }
     }
 
     "return an Internal Server Error response when no valid model is returned from the microservice" in new Setup {
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validPAYERegistrationAPI))
+        .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI))
 
       when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalError()))
 
-      AuthBuilder.showWithAuthorisedUser(controller.summary, mockAuthConnector) {
+      showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
         (response: Future[Result]) =>
-          status(response) shouldBe Status.INTERNAL_SERVER_ERROR
+          status(response) mustBe Status.INTERNAL_SERVER_ERROR
       }
     }
 
     "return a see other" when {
       "the reg document status is held" in new Setup {
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-          .thenReturn(Future.successful(validPAYERegistrationAPI.copy(status = PAYEStatus.held)))
+          .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.held)))
 
         when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalError()))
 
-        AuthBuilder.showWithAuthorisedUser(controller.summary, mockAuthConnector) {
+        showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
           (response: Future[Result]) =>
-            status(response) shouldBe Status.SEE_OTHER
-            redirectLocation(response) shouldBe Some("/register-for-paye/application-submitted")
+            status(response) mustBe Status.SEE_OTHER
+            redirectLocation(response) mustBe Some("/register-for-paye/application-submitted")
         }
       }
 
       "the reg document status is submitted" in new Setup {
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-          .thenReturn(Future.successful(validPAYERegistrationAPI.copy(status = PAYEStatus.submitted)))
+          .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.submitted)))
 
         when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalError()))
 
-        AuthBuilder.showWithAuthorisedUser(controller.summary, mockAuthConnector) {
+        showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
           (response: Future[Result]) =>
-            status(response) shouldBe Status.SEE_OTHER
-            redirectLocation(response) shouldBe Some("/register-for-paye/application-submitted")
+            status(response) mustBe Status.SEE_OTHER
+            redirectLocation(response) mustBe Some("/register-for-paye/application-submitted")
         }
       }
 
       "the reg document status is invalid" in new Setup {
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-          .thenReturn(Future.successful(validPAYERegistrationAPI.copy(status = PAYEStatus.invalid)))
+          .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.invalid)))
 
         when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalError()))
 
-        AuthBuilder.showWithAuthorisedUser(controller.summary, mockAuthConnector) {
+        showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
           (response: Future[Result]) =>
-            status(response) shouldBe Status.SEE_OTHER
-            redirectLocation(response) shouldBe Some("/register-for-paye/ineligible-for-paye")
+            status(response) mustBe Status.SEE_OTHER
+            redirectLocation(response) mustBe Some("/register-for-paye/ineligible-for-paye")
         }
       }
 
       "the reg document status is rejected" in new Setup {
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-          .thenReturn(Future.successful(validPAYERegistrationAPI.copy(status = PAYEStatus.rejected)))
+          .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.rejected)))
 
         when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalError()))
 
-        AuthBuilder.showWithAuthorisedUser(controller.summary, mockAuthConnector) {
+        showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
           (response: Future[Result]) =>
-            status(response) shouldBe Status.SEE_OTHER
-            redirectLocation(response) shouldBe Some("/register-for-paye/ineligible-for-paye")
+            status(response) mustBe Status.SEE_OTHER
+            redirectLocation(response) mustBe Some("/register-for-paye/ineligible-for-paye")
         }
       }
     }
@@ -147,49 +145,49 @@ class SummaryControllerSpec extends PAYERegSpec with PAYERegistrationFixture {
   "Calling submitRegistration" should {
     "show the confirmation page" in new Setup {
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validPAYERegistrationAPI))
+        .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI))
 
       when(mockSubmissionService.submitRegistration(ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any())).thenReturn(Future.successful(Success))
 
-      AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
-        (result: Future[Result]) =>
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result).get shouldBe "/register-for-paye/application-submitted"
+      showAuthorisedWithCP(controller.submitRegistration, Fixtures.validCurrentProfile, FakeRequest()) {
+        result =>
+          status(result) mustBe Status.SEE_OTHER
+          redirectLocation(result) mustBe Some("/register-for-paye/application-submitted")
       }
     }
     "show the dashboard" in new Setup {
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validPAYERegistrationAPI))
+        .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI))
 
       when(mockSubmissionService.submitRegistration(ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any())).thenReturn(Future.successful(Cancelled))
 
-      AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
-        (result: Future[Result]) =>
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result).get shouldBe "/register-for-paye/business-registration-overview"
+      showAuthorisedWithCP(controller.submitRegistration, Fixtures.validCurrentProfile, FakeRequest()) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/register-for-paye/business-registration-overview")
       }
     }
     "show the retry page" in new Setup {
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validPAYERegistrationAPI))
+        .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI))
 
       when(mockSubmissionService.submitRegistration(ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any())).thenReturn(Future.successful(TimedOut))
 
-      AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
-        (result: Future[Result]) =>
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      showAuthorisedWithCP(controller.submitRegistration, Fixtures.validCurrentProfile, FakeRequest()) {
+        result =>
+          status(result) mustBe INTERNAL_SERVER_ERROR
       }
     }
     "show the deskpro page" in new Setup {
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validPAYERegistrationAPI))
+        .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI))
 
       when(mockSubmissionService.submitRegistration(ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any())).thenReturn(Future.successful(Failed))
 
-      AuthBuilder.showWithAuthorisedUser(controller.submitRegistration, mockAuthConnector) {
+      showAuthorisedWithCP(controller.submitRegistration, Fixtures.validCurrentProfile, FakeRequest()) {
         (result: Future[Result]) =>
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result).get shouldBe "/register-for-paye/something-went-wrong"
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/register-for-paye/something-went-wrong")
       }
     }
   }

@@ -16,23 +16,22 @@
 
 package services
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import connectors.{S4LConnect, S4LConnector}
+import connectors.S4LConnector
 import play.api.libs.json._
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.Formatters
 
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
-@Singleton
-class S4LService @Inject()(val s4LConnector: S4LConnector) extends S4LSrv
+class S4LServiceImpl @Inject()(val s4LConnector: S4LConnector) extends S4LService
 
-trait S4LSrv {
+trait S4LService {
 
-  val s4LConnector: S4LConnect
+  val s4LConnector: S4LConnector
 
   def saveForm[T](formId: String, data: T, regId: String)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {
     for {
@@ -71,5 +70,4 @@ trait S4LSrv {
       cacheMap <- s4LConnector.fetchAll(regId)
     } yield cacheMap
   }
-
 }

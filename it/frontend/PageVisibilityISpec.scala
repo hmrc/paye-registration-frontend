@@ -106,7 +106,7 @@ with WiremockHelper {
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
     }
 
     "Show the page when payeRegistrationSubmitted is not present in Keystore" in {
@@ -131,7 +131,7 @@ with WiremockHelper {
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
     }
 
     "Redirect to the dashboard when paye registration has been submitted" in {
@@ -156,8 +156,8 @@ with WiremockHelper {
 
       val response = await(fResponse)
 
-      response.status shouldBe 303
-      response.header("Location") shouldBe Some(routes.DashboardController.dashboard().url)
+      response.status mustBe 303
+      response.header("Location") mustBe Some(routes.DashboardController.dashboard().url)
     }
   }
 
@@ -180,7 +180,7 @@ with WiremockHelper {
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
     }
   }
 

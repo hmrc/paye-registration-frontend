@@ -16,22 +16,21 @@
 
 package services
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
+import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
 import models.api.SICCode
 import models.view.NatureOfBusiness
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 import scala.concurrent.Future
 
-@Singleton
-class NatureOfBusinessService @Inject()(val payeRegConnector: PAYERegistrationConnector) extends NatureOfBusinessSrv
+class NatureOfBusinessServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector) extends NatureOfBusinessService
 
-trait NatureOfBusinessSrv {
-  val payeRegConnector: PAYERegistrationConnect
+trait NatureOfBusinessService {
+  val payeRegConnector: PAYERegistrationConnector
 
   private[services] def sicCodes2NatureOfBusiness(sicCodes: Seq[SICCode]): Option[NatureOfBusiness] =
     sicCodes.headOption.flatMap(_.description.map(NatureOfBusiness(_)))

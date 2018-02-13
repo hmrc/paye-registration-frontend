@@ -16,56 +16,48 @@
 
 package controllers.internal
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnect, PAYERegistrationConnector}
+import connectors.{KeystoreConnector, PAYERegistrationConnector}
+import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.RegistrationDeletion
-import play.api.Logger
-import play.api.mvc.Action
-import services.{PAYERegistrationService, PAYERegistrationSrv}
-import uk.gov.hmrc.play.HeaderCarrierConverter
-import uk.gov.hmrc.play.frontend.auth.Actions
-import uk.gov.hmrc.play.frontend.controller.FrontendController
+import play.api.Configuration
+import play.api.i18n.MessagesApi
+import play.api.mvc.{Action, AnyContent}
+import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
+import uk.gov.hmrc.auth.core.AuthConnector
 
-import scala.concurrent.Future
+class RegistrationControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
+                                           val payeRegistrationConnector: PAYERegistrationConnector,
+                                           val authConnector: AuthConnector,
+                                           val messagesApi: MessagesApi,
+                                           val companyDetailsService: CompanyDetailsService,
+                                           val s4LService: S4LService,
+                                           val config: Configuration,
+                                           val incorpInfoService: IncorporationInformationService,
+                                           val payeRegistrationService: PAYERegistrationService) extends RegistrationController with AuthRedirectUrls
 
-@Singleton
-class RegistrationController @Inject()(val keystoreConnector: KeystoreConnector,
-                                       val payeRegistrationConnector: PAYERegistrationConnector,
-                                       val payeRegistrationService: PAYERegistrationService) extends RegistrationCtrl {
-  val authConnector = FrontendAuthConnector
-}
+trait RegistrationController extends PayeBaseController {
+  val payeRegistrationConnector: PAYERegistrationConnector
+  val payeRegistrationService: PAYERegistrationService
 
-trait RegistrationCtrl extends FrontendController with Actions {
-  val keystoreConnector: KeystoreConnect
-  val payeRegistrationConnector: PAYERegistrationConnect
-  val payeRegistrationService: PAYERegistrationSrv
-
-  def delete(regId: String) = Action.async {
-    implicit request => {
-      implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
-      FrontendAuthConnector.currentAuthority flatMap {
-        case Some(_) =>
-          payeRegistrationService.deletePayeRegistrationInProgress(regId)(hc) map {
-            case RegistrationDeletion.success       => Ok
-            case RegistrationDeletion.invalidStatus => PreconditionFailed
-            case RegistrationDeletion.forbidden     =>
-              Logger.warn(s"[RegistrationController] [delete] - Requested document regId $regId to be deleted is not corresponding to the CurrentProfile regId")
-              BadRequest
-          } recover {
-            case ex: Exception =>
-              Logger.error(s"[RegistrationController] [delete] - Received an error when deleting Registration regId: $regId - error: ${ex.getMessage}")
-              InternalServerError
-          }
-        case None =>
-          Logger.warn(s"[RegistrationController] [delete] - Can't get the Authority")
-          Future.successful(Unauthorized)
+  def delete(regId: String): Action[AnyContent] = Action.async { implicit request =>
+    authorised() {
+      payeRegistrationService.deletePayeRegistrationInProgress(regId)(hc) map {
+        case RegistrationDeletion.success       => Ok
+        case RegistrationDeletion.invalidStatus => PreconditionFailed
+        case RegistrationDeletion.forbidden     =>
+          logger.warn(s"[RegistrationController] [delete] - Requested document regId $regId to be deleted is not corresponding to the CurrentProfile regId")
+          BadRequest
       } recover {
         case ex: Exception =>
-          Logger.error(s"[RegistrationController] [delete] - Received an error when retrieving Authority - error: ${ex.getMessage}")
+          logger.error(s"[RegistrationController] [delete] - Received an error when deleting Registration regId: $regId - error: ${ex.getMessage}")
           InternalServerError
       }
+    } recover {
+      case _ =>
+        logger.warn(s"[RegistrationController] [delete] - Can't get the Authority")
+        Unauthorized
     }
   }
 }

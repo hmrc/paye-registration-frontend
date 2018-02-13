@@ -16,29 +16,29 @@
 
 package connectors
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import config.WSHttp
 import models.external.Ticket
 import play.api.Logger
 import play.api.libs.json._
-import services.{MetricsService, MetricsSrv}
+import services.MetricsService
 import uk.gov.hmrc.http.{CorePost, HeaderCarrier}
-import uk.gov.hmrc.play.config.ServicesConfig
-
+import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 import scala.concurrent.Future
 
-@Singleton
-class DeskproConnector @Inject()(val metricsService : MetricsService) extends DeskproConnect with ServicesConfig {
-  override val http               = WSHttp
-  override val deskProUrl: String = baseUrl("hmrc-deskpro")
+class DeskproConnectorImpl @Inject()(val metricsService : MetricsService,
+                                     val http: WSHttp,
+                                     servicesConfig: ServicesConfig) extends DeskproConnector {
+  val deskProUrl: String = servicesConfig.baseUrl("hmrc-deskpro")
 }
 
-trait DeskproConnect {
+trait DeskproConnector {
   val http: CorePost
   val deskProUrl: String
-  val metricsService: MetricsSrv
+  val metricsService: MetricsService
 
   def submitTicket(t: Ticket)(implicit hc: HeaderCarrier) : Future[Long] = {
     val deskproTimer = metricsService.deskproResponseTimer.time()
@@ -52,5 +52,4 @@ trait DeskproConnect {
         throw e
     }
   }
-
 }

@@ -38,15 +38,15 @@ lazy val microservice = Project(appName, file("."))
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(
+    scalaVersion                                  :=  "2.11.11",
+    resolvers                                     ++= Seq(Resolver.bintrayRepo("hmrc", "releases"), Resolver.jcenterRepo),
     libraryDependencies                           ++= AppDependencies(),
     retrieveManaged                               :=  true,
-    evictionWarningOptions in update              :=  EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     routesGenerator                               :=  InjectedRoutesGenerator,
-    scalaVersion                                  :=  "2.11.11",
-    Keys.fork in IntegrationTest                  :=  false,
+    evictionWarningOptions     in update          :=  EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
+    Keys.fork                  in IntegrationTest :=  false,
     unmanagedSourceDirectories in IntegrationTest :=  (baseDirectory in IntegrationTest)(base => Seq(base / "it")).value,
-    addTestReportOption(IntegrationTest, "int-test-reports"),
-    testGrouping in IntegrationTest               :=  oneForkedJvmPerTest((definedTests in IntegrationTest).value),
-    parallelExecution in IntegrationTest          :=  false,
-    resolvers                                     ++= Seq(Resolver.bintrayRepo("hmrc", "releases"), Resolver.jcenterRepo)
+    testGrouping               in IntegrationTest :=  oneForkedJvmPerTest((definedTests in IntegrationTest).value),
+    parallelExecution          in IntegrationTest :=  false,
+    addTestReportOption(IntegrationTest, "int-test-reports")
   )

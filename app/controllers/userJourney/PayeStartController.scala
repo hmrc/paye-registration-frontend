@@ -16,71 +16,60 @@
 
 package controllers.userJourney
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
-import config.FrontendAuthConnector
 import connectors._
-import enums.{AccountTypes, CacheKeys, DownstreamOutcome, RegistrationDeletion}
+import controllers.{AuthRedirectUrls, PayeBaseController}
+import enums.{CacheKeys, DownstreamOutcome, RegistrationDeletion}
 import models.external.CurrentProfile
-import play.api.Logger
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.{Configuration, Environment}
 import services._
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
-import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.frontend.auth.{Actions, AuthContext}
-import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
-@Singleton
-class PayeStartController @Inject()(val currentProfileService: CurrentProfileService,
-                                    val payeRegistrationService: PAYERegistrationService,
-                                    val keystoreConnector: KeystoreConnector,
-                                    val businessRegistrationConnector: BusinessRegistrationConnector,
-                                    val companyRegistrationConnector: CompanyRegistrationConnector,
-                                    val messagesApi: MessagesApi) extends PayeStartCtrl with ServicesConfig {
-  val authConnector = FrontendAuthConnector
-  lazy val compRegFEURL = getConfString("company-registration-frontend.www.url", "")
-  lazy val compRegFEURI = getConfString("company-registration-frontend.www.uri", "")
-}
+class PayeStartControllerImpl @Inject()(val currentProfileService: CurrentProfileService,
+                                        val payeRegistrationService: PAYERegistrationService,
+                                        val keystoreConnector: KeystoreConnector,
+                                        val authConnector: AuthConnector,
+                                        val env: Environment,
+                                        val config: Configuration,
+                                        val s4LService: S4LService,
+                                        val companyDetailsService: CompanyDetailsService,
+                                        val incorpInfoService: IncorporationInformationService,
+                                        val businessRegistrationConnector: BusinessRegistrationConnector,
+                                        val companyRegistrationConnector: CompanyRegistrationConnector,
+                                        val messagesApi: MessagesApi) extends PayeStartController with AuthRedirectUrls
 
-trait PayeStartCtrl extends FrontendController with Actions with I18nSupport {
+trait PayeStartController extends PayeBaseController {
+  val currentProfileService: CurrentProfileService
+  val payeRegistrationService: PAYERegistrationService
+  val businessRegistrationConnector: BusinessRegistrationConnector
+  val companyRegistrationConnector: CompanyRegistrationConnector
 
-  val currentProfileService: CurrentProfileSrv
-  val payeRegistrationService: PAYERegistrationSrv
-  val keystoreConnector: KeystoreConnect
-  val businessRegistrationConnector: BusinessRegistrationConnect
-  val companyRegistrationConnector: CompanyRegistrationConnect
   val compRegFEURL: String
   val compRegFEURI: String
 
 
-  val startPaye = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        hasOrgAffinity {
-          checkAndStoreCurrentProfile { profile =>
-            assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId){
-              Redirect(controllers.userJourney.routes.WelcomeController.show())
-            }
-          }
-        }
+  val startPaye = isAuthorisedAndIsOrg { implicit request =>
+    checkAndStoreCurrentProfile { profile =>
+      assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId){
+        Redirect(controllers.userJourney.routes.WelcomeController.show())
+      }
+    }
   }
 
-  def restartPaye: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        for {
-          (regId, txId)   <- getRegIdAndTxId
-          deleted         <- payeRegistrationService.deletePayeRegistrationDocument(regId, txId)
-        } yield {
-          deleted match {
-            case RegistrationDeletion.success => Redirect(routes.PayeStartController.startPaye())
-            case RegistrationDeletion.invalidStatus => Redirect(controllers.userJourney.routes.DashboardController.dashboard())
-          }
-        }
+  def restartPaye: Action[AnyContent] = isAuthorised { implicit request =>
+    for {
+      (regId, txId) <- getRegIdAndTxId
+      deleted       <- payeRegistrationService.deletePayeRegistrationDocument(regId, txId)
+    } yield deleted match {
+      case RegistrationDeletion.success       => Redirect(routes.PayeStartController.startPaye())
+      case RegistrationDeletion.invalidStatus => Redirect(controllers.userJourney.routes.DashboardController.dashboard())
+    }
   }
 
   private def getRegIdAndTxId(implicit hc: HeaderCarrier): Future[(String, String)] = {
@@ -109,15 +98,6 @@ trait PayeStartCtrl extends FrontendController with Actions with I18nSupport {
     payeRegistrationService.assertRegistrationFootprint(regId, txId) map {
       case DownstreamOutcome.Success => f
       case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-    }
-  }
-
-  private def hasOrgAffinity(f: => Future[Result])(implicit hc: HeaderCarrier, authContext: AuthContext): Future[Result] = {
-    payeRegistrationService.getAccountAffinityGroup flatMap {
-      case AccountTypes.Organisation => Logger.info("[PayeStartController] - [hasOrgAffinity] - Authenticated user has ORGANISATION account, proceeding")
-        f
-      case AccountTypes.InvalidAccountType => Logger.info("[PayeStartController] - [hasOrgAffinity] - AUTHENTICATED USER NOT AN ORGANISATION ACCOUNT; redirecting to create new account")
-        Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/post-sign-in"))
     }
   }
 }

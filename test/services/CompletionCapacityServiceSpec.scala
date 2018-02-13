@@ -16,29 +16,21 @@
 
 package services
 
-import connectors._
 import enums.{DownstreamOutcome, UserCapacity}
+import helpers.PayeComponentSpec
 import models.view.CompletionCapacity
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import testHelpers.PAYERegSpec
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
 
-class CompletionCapacityServiceSpec extends PAYERegSpec {
-
-  implicit val hc = HeaderCarrier()
-
-  val mockPAYERegConnector = mock[PAYERegistrationConnector]
-  val mockKSConnector = mock[KeystoreConnector]
-  val mockBusRegConnector = mock[BusinessRegistrationConnector]
+class CompletionCapacityServiceSpec extends PayeComponentSpec {
 
   class Setup {
-    val service = new CompletionCapacitySrv {
-      override val payeRegConnector: PAYERegistrationConnect = mockPAYERegConnector
-      override val businessRegistrationConnector: BusinessRegistrationConnect = mockBusRegConnector
+    val service = new CompletionCapacityService {
+      override val payeRegConnector              = mockPAYERegConnector
+      override val businessRegistrationConnector = mockBusinessRegistrationConnector
     }
   }
 
@@ -50,41 +42,38 @@ class CompletionCapacityServiceSpec extends PAYERegSpec {
       when(mockPAYERegConnector.upsertCompletionCapacity(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(jobTitle))
 
-      await(service.saveCompletionCapacity("12345", tstCapacity)) shouldBe DownstreamOutcome.Success
+      await(service.saveCompletionCapacity("12345", tstCapacity)) mustBe DownstreamOutcome.Success
     }
   }
-
   "Calling viewToAPI" should {
     "return the correct string for a director" in new Setup {
-      service.viewToAPI(CompletionCapacity(UserCapacity.director, "")) shouldBe "director"
+      service.viewToAPI(CompletionCapacity(UserCapacity.director, "")) mustBe "director"
     }
     "return the correct string for an agent" in new Setup {
-      service.viewToAPI(CompletionCapacity(UserCapacity.agent, "")) shouldBe "agent"
+      service.viewToAPI(CompletionCapacity(UserCapacity.agent, "")) mustBe "agent"
     }
     "return the correct string for a secretary" in new Setup {
-      service.viewToAPI(CompletionCapacity(UserCapacity.secretary, "")) shouldBe "company secretary"
+      service.viewToAPI(CompletionCapacity(UserCapacity.secretary, "")) mustBe "company secretary"
     }
     "return the correct string for an other - Priest" in new Setup {
-      service.viewToAPI(CompletionCapacity(UserCapacity.other, "Priest")) shouldBe "Priest"
+      service.viewToAPI(CompletionCapacity(UserCapacity.other, "Priest")) mustBe "Priest"
     }
   }
-
   "Calling apiToView" should {
     "return the correct model for a director" in new Setup {
-      service.apiToView("director") shouldBe CompletionCapacity(UserCapacity.director, "")
+      service.apiToView("director") mustBe CompletionCapacity(UserCapacity.director, "")
     }
     "return the correct model for a secretary" in new Setup {
-      service.apiToView("company secretary") shouldBe CompletionCapacity(UserCapacity.secretary, "")
+      service.apiToView("company secretary") mustBe CompletionCapacity(UserCapacity.secretary, "")
     }
     "return the correct model for an agent" in new Setup {
-      service.apiToView("agent") shouldBe CompletionCapacity(UserCapacity.agent, "")
+      service.apiToView("agent") mustBe CompletionCapacity(UserCapacity.agent, "")
     }
     "return the correct model for an Agent" in new Setup {
-      service.apiToView("Agent") shouldBe CompletionCapacity(UserCapacity.agent, "")
+      service.apiToView("Agent") mustBe CompletionCapacity(UserCapacity.agent, "")
     }
     "return the correct model for an other - Priestess" in new Setup {
-      service.apiToView("Priestess") shouldBe CompletionCapacity(UserCapacity.other, "Priestess")
+      service.apiToView("Priestess") mustBe CompletionCapacity(UserCapacity.other, "Priestess")
     }
   }
-
 }

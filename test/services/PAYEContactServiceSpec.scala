@@ -16,48 +16,32 @@
 
 package services
 
-import audit.{CorrespondenceAddressAuditEvent, CorrespondenceAddressAuditEventDetail}
-import builders.AuthBuilder
-import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
-import fixtures.PAYERegistrationFixture
-import models.{Address, DigitalContactDetails}
-import models.view.{PAYEContactDetails, CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
+import helpers.PayeComponentSpec
 import models.api.{PAYEContact => PAYEContactAPI}
-import models.external.{UserDetailsModel, UserIds}
+import models.view.{PAYEContactDetails, CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
+import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import play.api.libs.json.{Format, JsObject, Json}
+import play.api.libs.json.Format
 import play.api.test.FakeRequest
-import testHelpers.{AuthHelpers, PAYERegSpec}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse, Upstream4xxResponse }
 
-class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture with AuthHelpers {
-  implicit val hc = HeaderCarrier()
-
-  val mockPAYERegConnector = mock[PAYERegistrationConnector]
-  val mockCompRegConnector = mock[CompanyRegistrationConnector]
-  val mockCohoAPIConnector = mock[IncorporationInformationConnector]
-  val mockCoHoService = mock[IncorporationInformationService]
-  val mockS4LService = mock[S4LService]
-  val mockCompanyDetailsService = mock[CompanyDetailsService]
-  val mockPrepopulationService = mock[PrepopulationService]
-  val mockAuditService = mock[AuditService]
-
+class PAYEContactServiceSpec extends PayeComponentSpec {
   val returnHttpResponse = HttpResponse(200)
 
   class Setup {
-    val service = new PAYEContactSrv {
-      val payeRegConnector = mockPAYERegConnector
-      val s4LService = mockS4LService
-      val keystoreConnector = mockKeystoreConnector
+    val service = new PAYEContactService {
+      val payeRegConnector      = mockPAYERegConnector
+      val s4LService            = mockS4LService
+      val keystoreConnector     = mockKeystoreConnector
       val companyDetailsService = mockCompanyDetailsService
-      val prepopService = mockPrepopulationService
-      val auditService = mockAuditService
+      val prepopService         = mockPrepopulationService
+      val auditService          = mockAuditService
     }
   }
 
@@ -91,7 +75,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
         contactDetails = tstContactDetails,
         correspondenceAddress = tstCorrespondenceAddress
       )
-      service.viewToAPI(viewModel) shouldBe Right(apiModel)
+      service.viewToAPI(viewModel) mustBe Right(apiModel)
     }
 
     "return an incomplete view model when there is no correspondence address" in new Setup {
@@ -100,7 +84,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
         contactDetails = Some(tstContactDetails),
         correspondenceAddress = None
       )
-      service.viewToAPI(viewModel) shouldBe Left(viewModel)
+      service.viewToAPI(viewModel) mustBe Left(viewModel)
     }
 
     "return an incomplete view model when there is no contact details" in new Setup {
@@ -109,7 +93,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
         contactDetails = None,
         correspondenceAddress = Some(tstCorrespondenceAddress)
       )
-      service.viewToAPI(viewModel) shouldBe Left(viewModel)
+      service.viewToAPI(viewModel) mustBe Left(viewModel)
     }
   }
 
@@ -139,7 +123,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
         correspondenceAddress = tstCorrespondenceAddress
       )
 
-      service.apiToView(apiModel) shouldBe viewModel
+      service.apiToView(apiModel) mustBe viewModel
     }
   }
 
@@ -192,45 +176,45 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
     )
 
     "return a map with ro address only when there is no correspondence address and ppob is equal to ro address" in new Setup {
-      service.getCorrespondenceAddresses(None, detailsWithROAddressForAll) shouldBe Map("ro" -> roAddress)
+      service.getCorrespondenceAddresses(None, detailsWithROAddressForAll) mustBe Map("ro" -> roAddress)
     }
 
     "return a map with ro address only when there is no correspondence address and ppob is None" in new Setup {
-      service.getCorrespondenceAddresses(None, detailsWithROAddressOnly) shouldBe Map("ro" -> roAddress)
+      service.getCorrespondenceAddresses(None, detailsWithROAddressOnly) mustBe Map("ro" -> roAddress)
     }
 
     "return a map with ro and ppob addresses when there is no correspondence address" in new Setup {
-      service.getCorrespondenceAddresses(None, detailsWithROAndPPOBAddress) shouldBe Map("ro" -> roAddress, "ppob" -> ppobAddress)
+      service.getCorrespondenceAddresses(None, detailsWithROAndPPOBAddress) mustBe Map("ro" -> roAddress, "ppob" -> ppobAddress)
     }
 
     "return a map with ro, ppob and correspondence addresses when all addresses are different" in new Setup {
       service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAndPPOBAddress)
-        .shouldBe(Map("ro" -> roAddress, "correspondence" -> tstCorrespondenceAddress, "ppob" -> ppobAddress))
+        .mustBe(Map("ro" -> roAddress, "correspondence" -> tstCorrespondenceAddress, "ppob" -> ppobAddress))
     }
 
     "return a map with ro and correspondence addresses when all addresses are different and ppob is None" in new Setup {
       service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAddressOnly)
-        .shouldBe(Map("ro" -> roAddress, "correspondence" -> tstCorrespondenceAddress))
+        .mustBe(Map("ro" -> roAddress, "correspondence" -> tstCorrespondenceAddress))
     }
 
     "return a map with correspondence address when all addresses are the same" in new Setup {
       service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAddressForAll.copy(roAddress = tstCorrespondenceAddress, ppobAddress = Some(tstCorrespondenceAddress)))
-        .shouldBe(Map("correspondence" -> tstCorrespondenceAddress))
+        .mustBe(Map("correspondence" -> tstCorrespondenceAddress))
     }
 
     "return a map with ro and correspondence addresses when correspondence and ppob addresses are the same" in new Setup {
       service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAndPPOBAddress.copy(ppobAddress = Some(tstCorrespondenceAddress)))
-        .shouldBe(Map("ro" -> roAddress, "correspondence" -> tstCorrespondenceAddress))
+        .mustBe(Map("ro" -> roAddress, "correspondence" -> tstCorrespondenceAddress))
     }
 
     "return a map with ppob and correspondence addresses when correspondence and ro addresses are the same" in new Setup {
       service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAndPPOBAddress.copy(roAddress = tstCorrespondenceAddress))
-        .shouldBe(Map("correspondence" -> tstCorrespondenceAddress, "ppob" -> ppobAddress))
+        .mustBe(Map("correspondence" -> tstCorrespondenceAddress, "ppob" -> ppobAddress))
     }
 
     "return a map with correspondence address when correspondence and ro addresses are the same and ppob is None" in new Setup {
       service.getCorrespondenceAddresses(Some(tstCorrespondenceAddress), detailsWithROAddressOnly.copy(roAddress = tstCorrespondenceAddress))
-        .shouldBe(Map("correspondence" -> tstCorrespondenceAddress))
+        .mustBe(Map("correspondence" -> tstCorrespondenceAddress))
     }
   }
 
@@ -238,36 +222,40 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
   "Calling getPAYEContact" should {
     "return the correct View response when PAYE Contact are returned from s4l" in new Setup {
       when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-      .thenReturn(Future.successful(Some(validPAYEContactView)))
+      .thenReturn(Future.successful(Some(Fixtures.validPAYEContactView)))
 
-      await(service.getPAYEContact(testRegId)) shouldBe validPAYEContactView
+      await(service.getPAYEContact(testRegId)) mustBe Fixtures.validPAYEContactView
     }
 
     "return the correct View response when PAYE Contact are returned from the connector" in new Setup {
       when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-      .thenReturn(Future.successful(None))
+        .thenReturn(Future.successful(None))
+
       when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-      .thenReturn(Future.successful(Some(validPAYEContactAPI)))
+        .thenReturn(Future.successful(Some(Fixtures.validPAYEContactAPI)))
 
       when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.anyString())
         (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[PAYEContactView]]()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
-      await(service.getPAYEContact(testRegId)) shouldBe validPAYEContactView
+      await(service.getPAYEContact(testRegId)) mustBe Fixtures.validPAYEContactView
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
+      when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(None))
+
       when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
 
-      an[Upstream4xxResponse] shouldBe thrownBy(await(service.getPAYEContact(testRegId)))
+      an[Upstream4xxResponse] mustBe thrownBy(await(service.getPAYEContact(testRegId)))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
       when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.failed(new RuntimeException))
 
-      an[Exception] shouldBe thrownBy(await(service.getPAYEContact(testRegId)))
+      an[Exception] mustBe thrownBy(await(service.getPAYEContact(testRegId)))
     }
 
     "return the correct View response when PAYE Contact are returned from Prepopulation" in new Setup {
@@ -277,13 +265,13 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
         .thenReturn(Future.successful(None))
 
       when(mockPrepopulationService.getPAYEContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future.successful(validPAYEContactView.contactDetails))
+        .thenReturn(Future.successful(Fixtures.validPAYEContactView.contactDetails))
 
       when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.anyString())
         (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[PAYEContactView]]()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
-      await(service.getPAYEContact(testRegId)) shouldBe validPAYEContactView.copy(correspondenceAddress = None)
+      await(service.getPAYEContact(testRegId)) mustBe Fixtures.validPAYEContactView.copy(correspondenceAddress = None)
     }
 
     "return None when no PAYE Contact are returned from the connector and Prepopulation" in new Setup {
@@ -299,7 +287,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
         (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[PAYEContactView]]()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
-      await(service.getPAYEContact(testRegId)) shouldBe emptyPAYEContactView
+      await(service.getPAYEContact(testRegId)) mustBe Fixtures.emptyPAYEContactView
     }
   }
 
@@ -323,12 +311,12 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
 
     "return a success response when the upsert completes successfully" in new Setup {
       when(mockPAYERegConnector.upsertPAYEContact(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validPAYEContactAPI))
+        .thenReturn(Future.successful(Fixtures.validPAYEContactAPI))
       when(mockS4LService.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]))
         .thenReturn(Future.successful(returnHttpResponse))
 
       await(service.submitPAYEContact(PAYEContactView(Some(tstContactDetails), Some(tstCorrespondenceAddress)), "54321")).
-        shouldBe(DownstreamOutcome.Success)
+        mustBe(DownstreamOutcome.Success)
     }
 
     "return a success response when successfully saving to S4L" in new Setup {
@@ -337,7 +325,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
       await(service.submitPAYEContact(PAYEContactView(Some(tstContactDetails), None), "54321")).
-        shouldBe(DownstreamOutcome.Success)
+        mustBe(DownstreamOutcome.Success)
     }
   }
 
@@ -363,31 +351,31 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
     "return true" when {
       "s4lData is not defined" in new Setup {
         val dataChanged = service.dataHasChanged(viewData, None)
-        dataChanged shouldBe true
+        dataChanged mustBe true
       }
 
       "the data sets don't match (name)" in new Setup {
         val changedData = viewData.copy(name = "testName1")
         val dataChanged = service.dataHasChanged(changedData, Some(s4lData))
-        dataChanged shouldBe true
+        dataChanged mustBe true
       }
 
       "the data sets don't match (email)" in new Setup {
         val changedData = viewData.copy(digitalContactDetails = viewData.digitalContactDetails.copy(email = Some("test1@email.com")))
         val dataChanged = service.dataHasChanged(changedData, Some(s4lData))
-        dataChanged shouldBe true
+        dataChanged mustBe true
       }
 
       "the data sets don't match (phone)" in new Setup {
         val changedData = viewData.copy(digitalContactDetails = viewData.digitalContactDetails.copy(phoneNumber = Some("0987766454321")))
         val dataChanged = service.dataHasChanged(changedData, Some(s4lData))
-        dataChanged shouldBe true
+        dataChanged mustBe true
       }
 
       "the data sets don't match (mobile)" in new Setup {
         val changedData = viewData.copy(digitalContactDetails = viewData.digitalContactDetails.copy(mobileNumber = Some("0987766454321")))
         val dataChanged = service.dataHasChanged(changedData, Some(s4lData))
-        dataChanged shouldBe true
+        dataChanged mustBe true
       }
 
       "the data sets don't match" in new Setup {
@@ -400,7 +388,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
           )
         )
         val dataChanged = service.dataHasChanged(changedData, Some(s4lData))
-        dataChanged shouldBe true
+        dataChanged mustBe true
       }
 
       "the data sets don't match (contains Nones)" in new Setup {
@@ -413,14 +401,14 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
           )
         )
         val dataChanged = service.dataHasChanged(changedData, Some(s4lData))
-        dataChanged shouldBe true
+        dataChanged mustBe true
       }
     }
 
     "return false" when {
       "both data sets match" in new Setup {
         val dataChanged = service.dataHasChanged(viewData, Some(s4lData))
-        dataChanged shouldBe false
+        dataChanged mustBe false
       }
 
       "data sets contain spaces but the same data" in new Setup {
@@ -433,7 +421,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
           )
         )
         val dataChanged = service.dataHasChanged(service.flattenData(changedData), Some(s4lData))
-        dataChanged shouldBe false
+        dataChanged mustBe false
       }
     }
   }
@@ -450,29 +438,38 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
     )
 
     "save a copy of paye contact (no audit)" in new Setup {
-      implicit val context = buildAuthContext
+      implicit val context = AuthHelpers.buildAuthContext
       implicit val request = FakeRequest()
 
-      when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[PAYEContactView]]()))
+      when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(PAYEContactView(Some(tstContactDetails), None))))
 
-      await(service.submitPayeContactDetails("12345", tstContactDetails)) shouldBe DownstreamOutcome.Success
+      when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
+
+      when(mockPrepopulationService.saveContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(tstContactDetails))
+
+      await(service.submitPayeContactDetails("12345", tstContactDetails)) mustBe DownstreamOutcome.Success
     }
 
     "save a copy of paye contact" in new Setup {
-      implicit val context = buildAuthContext
+      implicit val context = AuthHelpers.buildAuthContext
       implicit val request = FakeRequest()
 
       when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[PAYEContactView]]()))
         .thenReturn(Future.successful(Some(PAYEContactView(None, None))))
+
       when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
+
       when(mockAuditService.auditPAYEContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(AuditResult.Success))
+
       when(mockPrepopulationService.saveContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(tstContactDetails))
 
-      await(service.submitPayeContactDetails("12345", tstContactDetails)) shouldBe DownstreamOutcome.Success
+      await(service.submitPayeContactDetails("12345", tstContactDetails)) mustBe DownstreamOutcome.Success
     }
   }
 
@@ -492,7 +489,7 @@ class PAYEContactServiceSpec extends PAYERegSpec with PAYERegistrationFixture wi
       when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
-      await(service.submitCorrespondence("54321", tstCorrespondenceAddress)) shouldBe DownstreamOutcome.Success
+      await(service.submitCorrespondence("54321", tstCorrespondenceAddress)) mustBe DownstreamOutcome.Success
     }
   }
 }

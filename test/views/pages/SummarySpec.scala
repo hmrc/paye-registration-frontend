@@ -16,17 +16,17 @@
 
 package views.pages
 
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.{Summary, SummaryRow, SummarySection}
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.test.FakeRequest
-import testHelpers.PAYERegSpec
 import views.html.pages.summary
 
-class SummarySpec extends PAYERegSpec with I18nSupport {
+class SummarySpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
 
   implicit val request = FakeRequest()
-  implicit val messagesApi : MessagesApi = injector.instanceOf[MessagesApi]
+  implicit lazy val messagesApi : MessagesApi = mockMessagesApi
 
   val suffixIdSectionHeading = "SectionHeading"
   val suffixIdQuestion = "Question"
@@ -40,7 +40,7 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct title" in {
-      document.getElementById("pageHeading").text shouldBe messagesApi("pages.summary.heading")
+      document.getElementById("pageHeading").text mustBe messagesApi("pages.summary.heading")
     }
   }
 
@@ -65,19 +65,19 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
     lazy val document = Jsoup.parse(view.body)
 
     "have Applicant in section title" in {
-      document.getElementById(s"completionCapacity$suffixIdSectionHeading").text shouldBe messagesApi("pages.summary.completionCapacity.sectionHeading")
+      document.getElementById(s"completionCapacity$suffixIdSectionHeading").text mustBe messagesApi("pages.summary.completionCapacity.sectionHeading")
     }
 
     "have the correct question text for Completion Capacity" in {
-      document.getElementById(s"completionCapacity$suffixIdQuestion").text shouldBe messagesApi("pages.summary.completionCapacity.question")
+      document.getElementById(s"completionCapacity$suffixIdQuestion").text mustBe messagesApi("pages.summary.completionCapacity.question")
     }
 
     "have the correct answer text when no Completion Capacity" in {
-      document.getElementById(s"completionCapacity$suffixIdAnswer").text shouldBe messagesApi("pages.summary.completionCapacity.answers.director")
+      document.getElementById(s"completionCapacity$suffixIdAnswer").text mustBe messagesApi("pages.summary.completionCapacity.answers.director")
     }
 
     "have the correct change link for Completion Capacity" in {
-      document.getElementById(s"completionCapacity$suffixIdChangeLink").attr("href") shouldBe controllers.userJourney.routes.CompletionCapacityController.completionCapacity().toString
+      document.getElementById(s"completionCapacity$suffixIdChangeLink").attr("href") mustBe controllers.userJourney.routes.CompletionCapacityController.completionCapacity().toString
     }
   }
 
@@ -107,32 +107,32 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
     lazy val document = Jsoup.parse(view.body)
 
     "have Company Information in section title" in {
-      document.getElementById(s"companyDetails$suffixIdSectionHeading").text shouldBe messagesApi("pages.summary.companyDetails.sectionHeading")
+      document.getElementById(s"companyDetails$suffixIdSectionHeading").text mustBe messagesApi("pages.summary.companyDetails.sectionHeading")
     }
 
     "have the correct question text for Other trading name" in {
-      document.getElementById(s"tradingName$suffixIdQuestion").text shouldBe messagesApi("pages.summary.tradingName.question")
+      document.getElementById(s"tradingName$suffixIdQuestion").text mustBe messagesApi("pages.summary.tradingName.question")
     }
 
     "have the correct answer text when no Other trading name" in {
-      document.getElementById(s"tradingName$suffixIdAnswer").text shouldBe messagesApi("pages.summary.tradingName.answers.noAnswerGiven")
+      document.getElementById(s"tradingName$suffixIdAnswer").text mustBe messagesApi("pages.summary.tradingName.answers.noAnswerGiven")
     }
 
     "have the correct change link for Other trading name" in {
-      document.getElementById(s"tradingName$suffixIdChangeLink").attr("href") shouldBe controllers.userJourney.routes.CompanyDetailsController.tradingName().toString
+      document.getElementById(s"tradingName$suffixIdChangeLink").attr("href") mustBe controllers.userJourney.routes.CompanyDetailsController.tradingName().toString
     }
 
     "have the correct question text for Registered office address" in {
-      document.getElementById(s"roAddress$suffixIdQuestion").text shouldBe messagesApi("pages.summary.roAddress.question")
+      document.getElementById(s"roAddress$suffixIdQuestion").text mustBe messagesApi("pages.summary.roAddress.question")
     }
 
     "have the correct answer text for Registered office address" in {
       document.getElementById(s"roAddress$suffixIdAnswer").text.contains("14 St Test Walk") &&
-        document.getElementById(s"roAddress$suffixIdAnswer").text.contains("Testley") shouldBe true
+        document.getElementById(s"roAddress$suffixIdAnswer").text.contains("Testley") mustBe true
     }
 
     "not have a change link for Registered office address" in {
-      an[NullPointerException] shouldBe thrownBy(document.getElementById(s"roAddress$suffixIdChangeLink").text)
+      an[NullPointerException] mustBe thrownBy(document.getElementById(s"roAddress$suffixIdChangeLink").text)
     }
   }
   "The summary page, Employment section" should {
@@ -171,55 +171,55 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
     lazy val document = Jsoup.parse(view.body)
 
     "have Employment information in section title" in {
-      document.getElementById(s"employees$suffixIdSectionHeading").text shouldBe messagesApi("pages.summary.employees.sectionHeading")
+      document.getElementById(s"employees$suffixIdSectionHeading").text mustBe messagesApi("pages.summary.employees.sectionHeading")
     }
 
     "have the correct question text for Employing staff" in {
-      document.getElementById(s"employees$suffixIdQuestion").text shouldBe messagesApi("pages.summary.employees.question")
+      document.getElementById(s"employees$suffixIdQuestion").text mustBe messagesApi("pages.summary.employees.question")
     }
 
     "have the correct answer text for Employing staff" in {
-      document.getElementById(s"employees$suffixIdAnswer").text shouldBe messagesApi("pages.summary.employees.answers.false")
+      document.getElementById(s"employees$suffixIdAnswer").text mustBe messagesApi("pages.summary.employees.answers.false")
     }
 
     "have the correct change link for Employing staff" in {
-      document.getElementById(s"employees$suffixIdChangeLink").attr("href") shouldBe controllers.userJourney.routes.EmploymentController.employingStaff().toString
+      document.getElementById(s"employees$suffixIdChangeLink").attr("href") mustBe controllers.userJourney.routes.EmploymentController.employingStaff().toString
     }
 
     "have the correct question text for Company pension" in {
-      document.getElementById(s"companyPension$suffixIdQuestion").text shouldBe messagesApi("pages.summary.companyPension.question")
+      document.getElementById(s"companyPension$suffixIdQuestion").text mustBe messagesApi("pages.summary.companyPension.question")
     }
 
     "have the correct answer text for Company pension" in {
-      document.getElementById(s"companyPension$suffixIdAnswer").text shouldBe messagesApi("pages.summary.companyPension.answers.false")
+      document.getElementById(s"companyPension$suffixIdAnswer").text mustBe messagesApi("pages.summary.companyPension.answers.false")
     }
 
     "have the correct change link for Company pension" in {
-      document.getElementById(s"companyPension$suffixIdChangeLink").attr("href") shouldBe controllers.userJourney.routes.EmploymentController.companyPension().toString
+      document.getElementById(s"companyPension$suffixIdChangeLink").attr("href") mustBe controllers.userJourney.routes.EmploymentController.companyPension().toString
     }
 
     "have the correct question text for Subcontractors" in {
-      document.getElementById(s"subcontractors$suffixIdQuestion").text shouldBe messagesApi("pages.summary.subcontractors.question")
+      document.getElementById(s"subcontractors$suffixIdQuestion").text mustBe messagesApi("pages.summary.subcontractors.question")
     }
 
     "have the correct answer text for Subcontractors" in {
-      document.getElementById(s"subcontractors$suffixIdAnswer").text shouldBe messagesApi("pages.summary.subcontractors.answers.false")
+      document.getElementById(s"subcontractors$suffixIdAnswer").text mustBe messagesApi("pages.summary.subcontractors.answers.false")
     }
 
     "have the correct change link for Subcontractors" in {
-      document.getElementById(s"subcontractors$suffixIdChangeLink").attr("href") shouldBe controllers.userJourney.routes.EmploymentController.subcontractors().toString
+      document.getElementById(s"subcontractors$suffixIdChangeLink").attr("href") mustBe controllers.userJourney.routes.EmploymentController.subcontractors().toString
     }
 
     "have the correct question text for First payment" in {
-      document.getElementById(s"firstPaymentDate$suffixIdQuestion").text shouldBe messagesApi("pages.summary.firstPaymentDate.question")
+      document.getElementById(s"firstPaymentDate$suffixIdQuestion").text mustBe messagesApi("pages.summary.firstPaymentDate.question")
     }
 
     "have the correct answer text for First payment" in {
-      document.getElementById(s"firstPaymentDate$suffixIdAnswer").text.matches("([0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{4})") shouldBe true
+      document.getElementById(s"firstPaymentDate$suffixIdAnswer").text.matches("([0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{4})") mustBe true
     }
 
     "have the correct change link for First payment" in {
-      document.getElementById(s"firstPaymentDate$suffixIdChangeLink").attr("href") shouldBe controllers.userJourney.routes.EmploymentController.firstPayment().toString
+      document.getElementById(s"firstPaymentDate$suffixIdChangeLink").attr("href") mustBe controllers.userJourney.routes.EmploymentController.firstPayment().toString
     }
   }
 
@@ -253,31 +253,31 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
     lazy val document = Jsoup.parse(view.body)
 
     "have Business contact details as the summary heading" in {
-      document.getElementById(s"businessContactDetails$suffixIdSectionHeading").text shouldBe messagesApi("pages.summary.businessContactDetails.sectionHeading")
+      document.getElementById(s"businessContactDetails$suffixIdSectionHeading").text mustBe messagesApi("pages.summary.businessContactDetails.sectionHeading")
     }
 
     "have the correct question text for business email" in {
-      document.getElementById(s"businessEmail$suffixIdQuestion").text shouldBe messagesApi("pages.summary.businessEmail.question")
+      document.getElementById(s"businessEmail$suffixIdQuestion").text mustBe messagesApi("pages.summary.businessEmail.question")
     }
 
     "have the correct question text for mobile phone" in {
-      document.getElementById(s"mobileNumber$suffixIdQuestion").text shouldBe messagesApi("pages.summary.mobileNumber.question")
+      document.getElementById(s"mobileNumber$suffixIdQuestion").text mustBe messagesApi("pages.summary.mobileNumber.question")
     }
 
     "have the correct question text for business telephone" in {
-      document.getElementById(s"businessTelephone$suffixIdQuestion").text shouldBe messagesApi("pages.summary.businessTelephone.question")
+      document.getElementById(s"businessTelephone$suffixIdQuestion").text mustBe messagesApi("pages.summary.businessTelephone.question")
     }
 
     "have the correct answer text for business email" in {
-      document.getElementById(s"businessEmail$suffixIdAnswer").text shouldBe "test@email.com"
+      document.getElementById(s"businessEmail$suffixIdAnswer").text mustBe "test@email.com"
     }
 
     "have the correct answer text for mobile number" in {
-      document.getElementById(s"mobileNumber$suffixIdAnswer").text shouldBe "1234567890"
+      document.getElementById(s"mobileNumber$suffixIdAnswer").text mustBe "1234567890"
     }
 
     "have the correct answer text for business telephone" in {
-      document.getElementById(s"businessTelephone$suffixIdAnswer").text shouldBe "0987654321"
+      document.getElementById(s"businessTelephone$suffixIdAnswer").text mustBe "0987654321"
     }
   }
 
@@ -303,15 +303,15 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
     lazy val document = Jsoup.parse(view.body)
 
     "have Director details as the summary heading" in {
-      document.getElementById(s"natureOfBusiness$suffixIdSectionHeading").text shouldBe messagesApi("pages.summary.natureOfBusiness.sectionHeading")
+      document.getElementById(s"natureOfBusiness$suffixIdSectionHeading").text mustBe messagesApi("pages.summary.natureOfBusiness.sectionHeading")
     }
 
     "have the correct question text for Nature Of Business" in {
-      document.getElementById(s"natureOfBusiness$suffixIdQuestion").text shouldBe messagesApi("pages.summary.natureOfBusiness.question")
+      document.getElementById(s"natureOfBusiness$suffixIdQuestion").text mustBe messagesApi("pages.summary.natureOfBusiness.question")
     }
 
     "have the correct answer text for Nature Of Business" in {
-      document.getElementById(s"natureOfBusiness$suffixIdAnswer").text shouldBe "<h1>Flower Arranging</h1>"
+      document.getElementById(s"natureOfBusiness$suffixIdAnswer").text mustBe "<h1>Flower Arranging</h1>"
     }
   }
 
@@ -344,31 +344,31 @@ class SummarySpec extends PAYERegSpec with I18nSupport {
     lazy val document = Jsoup.parse(view.body)
 
     "have Director details as the summary heading" in {
-      document.getElementById(s"directorDetails$suffixIdSectionHeading").text shouldBe messagesApi("pages.summary.directorDetails.sectionHeading")
+      document.getElementById(s"directorDetails$suffixIdSectionHeading").text mustBe messagesApi("pages.summary.directorDetails.sectionHeading")
     }
 
     "have the correct question text for director0" in {
-      document.getElementById(s"director0$suffixIdQuestion").text shouldBe messagesApi("pages.summary.director.question", "Timothy Buttersford")
+      document.getElementById(s"director0$suffixIdQuestion").text mustBe messagesApi("pages.summary.director.question", "Timothy Buttersford")
     }
 
     "have the correct question text for director1" in {
-      document.getElementById(s"director1$suffixIdQuestion").text shouldBe messagesApi("pages.summary.director.question", "Pierre Simpson")
+      document.getElementById(s"director1$suffixIdQuestion").text mustBe messagesApi("pages.summary.director.question", "Pierre Simpson")
     }
 
     "have the correct answer text for director0" in {
-      document.getElementById(s"director0$suffixIdAnswer").text shouldBe "ZZ123456A"
+      document.getElementById(s"director0$suffixIdAnswer").text mustBe "ZZ123456A"
     }
 
     "have the correct answer text for director1" in {
-      document.getElementById(s"director1$suffixIdAnswer").text shouldBe ""
+      document.getElementById(s"director1$suffixIdAnswer").text mustBe ""
     }
 
     "have the correct change link for director0" in {
-      document.getElementById(s"director0$suffixIdChangeLink").attr("href") shouldBe controllers.userJourney.routes.DirectorDetailsController.directorDetails().toString
+      document.getElementById(s"director0$suffixIdChangeLink").attr("href") mustBe controllers.userJourney.routes.DirectorDetailsController.directorDetails().toString
     }
 
     "have the correct change link for director1" in {
-      document.getElementById(s"director1$suffixIdChangeLink").attr("href") shouldBe controllers.userJourney.routes.DirectorDetailsController.directorDetails().toString
+      document.getElementById(s"director1$suffixIdChangeLink").attr("href") mustBe controllers.userJourney.routes.DirectorDetailsController.directorDetails().toString
     }
   }
 }

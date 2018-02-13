@@ -16,46 +16,37 @@
 
 package controllers.userJourney
 
-import builders.AuthBuilder
-import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.api.{Director, Name}
-import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import models.view.{Directors, Ninos, UserEnteredNino}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Request, Result}
+import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import services.DirectorDetailsSrv
-import testHelpers.PAYERegSpec
-
-import scala.concurrent.Future
+import services.DirectorDetailsService
 import uk.gov.hmrc.http.HeaderCarrier
 
-class DirectorDetailsControllerSpec extends PAYERegSpec {
+import scala.concurrent.Future
 
-  val mockDirectorDetailService = mock[DirectorDetailsSrv]
-  val mockMessagesApi = mock[MessagesApi]
-  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
+class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
+
+  val mockDirectorDetailService = mock[DirectorDetailsService]
+
+  val fakeRequest = FakeRequest()
 
   class Setup {
-    val testController = new DirectorDetailsCtrl {
+    val testController = new DirectorDetailsController {
+      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
+
+      override val incorpInfoService = mockIncorpInfoService
+      override val companyDetailsService = mockCompanyDetailsService
+      override val s4LService = mockS4LService
       override val directorDetailsService = mockDirectorDetailService
-      override val messagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+      override val messagesApi = mockMessagesApi
       override val authConnector = mockAuthConnector
       override val keystoreConnector = mockKeystoreConnector
-      override val payeRegistrationConnector = mockPayeRegistrationConnector
-
-      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
-        f(CurrentProfile(
-          "12345",
-          CompanyRegistrationProfile("held", "txId"),
-          "ENG",
-          payeRegistrationSubmitted = false
-        ))
-      }
     }
   }
 
@@ -83,9 +74,11 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
 
   "directorDetails" should {
     "return a SEE_OTHER if user is not authorised" in new Setup {
-      val result = testController.directorDetails()(FakeRequest())
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result).getOrElse("NO REDIRECT LOCATION!").contains("/gg/sign-in") shouldBe true
+      AuthHelpers.showUnauthorised(testController.directorDetails, fakeRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
+      }
     }
 
     "return an OK" in new Setup {
@@ -98,18 +91,20 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
       when(mockDirectorDetailService.createDisplayNamesMap(ArgumentMatchers.any()))
         .thenReturn(directorMap)
 
-      AuthBuilder.showWithAuthorisedUser(testController.directorDetails, mockAuthConnector) {
+      AuthHelpers.showAuthorisedWithCP(testController.directorDetails, Fixtures.validCurrentProfile, FakeRequest()) {
         (result: Future[Result])  =>
-          status(result) shouldBe OK
+          status(result) mustBe OK
       }
     }
   }
 
   "submitDirectorDetails" should {
     "return a SEE_OTHER if the user is not authorised" in new Setup {
-      val result = testController.submitDirectorDetails()(FakeRequest())
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result).getOrElse("NO REDIRECT LOCATION!").contains("/gg/sign-in") shouldBe true
+      AuthHelpers.showUnauthorised(testController.submitDirectorDetails, fakeRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
+      }
     }
 
     "return a BAD_REQUEST if there is problem with the submitted form" in new Setup {
@@ -122,9 +117,9 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
       when(mockDirectorDetailService.createDisplayNamesMap(ArgumentMatchers.any()))
         .thenReturn(directorMap)
 
-      AuthBuilder.submitWithAuthorisedUser(testController.submitDirectorDetails, mockAuthConnector, request) {
+      AuthHelpers.submitAuthorisedWithCP(testController.submitDirectorDetails, Fixtures.validCurrentProfile, request) {
         result =>
-          status(result) shouldBe BAD_REQUEST
+          status(result) mustBe BAD_REQUEST
       }
     }
 
@@ -133,10 +128,10 @@ class DirectorDetailsControllerSpec extends PAYERegSpec {
       when(mockDirectorDetailService.submitNinos(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      AuthBuilder.submitWithAuthorisedUser(testController.submitDirectorDetails, mockAuthConnector, request) {
+      AuthHelpers.submitAuthorisedWithCP(testController.submitDirectorDetails, Fixtures.validCurrentProfile, request) {
         result =>
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some("/register-for-paye/who-should-we-contact")
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/register-for-paye/who-should-we-contact")
       }
     }
   }

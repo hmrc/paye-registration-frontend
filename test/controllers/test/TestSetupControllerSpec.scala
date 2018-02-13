@@ -16,42 +16,35 @@
 
 package controllers.test
 
-import builders.AuthBuilder
-import connectors.PAYERegistrationConnector
-import connectors.test.{TestBusinessRegConnect, TestIncorpInfoConnect, TestPAYERegConnect}
 import enums.DownstreamOutcome
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.BusinessProfile
-import play.api.http.Status
-import play.api.mvc.{AnyContent, Request}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import services.{IncorporationInformationSrv, PAYERegistrationSrv, S4LSrv}
-import testHelpers.PAYERegSpec
+import play.api.http.Status
+import play.api.mvc.{AnyContent, Request}
+import play.api.test.FakeRequest
 
 import scala.concurrent.Future
 
-class TestSetupControllerSpec extends PAYERegSpec {
-  val mockTestBusRegConnector = mock[TestBusinessRegConnect]
-  val mockCoHoAPIService = mock[IncorporationInformationSrv]
-  val mockTestAPIConnector = mock[TestIncorpInfoConnect]
-  val mockPayeRegConnector = mock[TestPAYERegConnect]
-  val mockPayeRegService = mock[PAYERegistrationSrv]
-  val mockS4LService = mock[S4LSrv]
-  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
+class TestSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
+  class Setup extends CodeMocks {
+    val controller = new TestSetupController {
+      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
 
-  class Setup {
-    val controller = new TestSetupCtrl {
-      override val businessRegConnector = mockBusinessRegistrationConnector
-      override val keystoreConnector = mockKeystoreConnector
-      override val payeRegistrationConnector = mockPayeRegistrationConnector
+      override val incorpInfoService        = mockIncorpInfoService
+      override val companyDetailsService    = mockCompanyDetailsService
+      override val businessRegConnector     = mockBusinessRegistrationConnector
+      override val keystoreConnector        = mockKeystoreConnector
       override val testBusinessRegConnector = mockTestBusRegConnector
-      override val authConnector = mockAuthConnector
-      override val testIncorpInfoConnector = mockTestAPIConnector
-      override val coHoAPIService = mockCoHoAPIService
-      override val messagesApi = mockMessages
-      override val payeRegService = mockPayeRegService
-      override val testPAYERegConnector = mockPayeRegConnector
-      override val s4LService = mockS4LService
+      override val authConnector            = mockAuthConnector
+      override val testIncorpInfoConnector  = mockTestIncorpInfoConnector
+      override val coHoAPIService           = mockIncorpInfoService
+      override val messagesApi              = mockMessagesApi
+      override val payeRegService           = mockPayeRegService
+      override val testPAYERegConnector     = mockTestPayeRegConnector
+      override val s4LService               = mockS4LService
 
       override def doBusinessProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = Future.successful(BusinessProfile("regId", "en"))
       override def doCoHoCompanyDetailsTearDown(regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
@@ -65,38 +58,43 @@ class TestSetupControllerSpec extends PAYERegSpec {
     "redirect to post sign in" in new Setup {
       mockFetchCurrentProfile()
 
+      when(mockAuthConnector.authorise[Unit](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(()))
+
       when(mockTestBusRegConnector.updateCompletionCapacity(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful("director"))
 
-      AuthBuilder.showWithAuthorisedUser(controller.testSetup("TESTLTD"), mockAuthConnector) {
-        result =>
-          status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye"
-      }
+      val result = controller.testSetup("TESTLTD")(FakeRequest())
+      status(result) mustBe Status.SEE_OTHER
+      redirectLocation(result) mustBe Some("/register-for-paye")
     }
   }
 
   "update-status" should {
     "return 200 for success" in new Setup {
+      when(mockAuthConnector.authorise[Unit](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(()))
+
       mockBusinessRegFetch(Future.successful(BusinessProfile("regID", "EN")))
-      when(mockPayeRegConnector.updateStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+
+      when(mockTestPayeRegConnector.updateStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      AuthBuilder.showWithAuthorisedUser(controller.updateStatus("draft"), mockAuthConnector) {
-        result =>
-          status(result) shouldBe Status.OK
-      }
+      val result = controller.updateStatus("draft")(FakeRequest())
+      status(result) mustBe OK
     }
 
     "return 500 for failure" in new Setup {
+      when(mockAuthConnector.authorise[Unit](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(()))
+
       mockBusinessRegFetch(Future.successful(BusinessProfile("regID", "EN")))
-      when(mockPayeRegConnector.updateStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+
+      when(mockTestPayeRegConnector.updateStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-      AuthBuilder.showWithAuthorisedUser(controller.updateStatus("draft"), mockAuthConnector) {
-        result =>
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-      }
+      val result = controller.updateStatus("draft")(FakeRequest())
+      status(result) mustBe INTERNAL_SERVER_ERROR
     }
   }
 }

@@ -2,23 +2,23 @@
 
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
-@main_template(title = Messages("errorPages.ineligible.description")) {
+@main_template(title = messages("errorPages.ineligible.description")) {
 
-  <h1 class="heading-xlarge">@Messages("errorPages.ineligible.description")</h1>
+  <h1 class="heading-xlarge">@messages("errorPages.ineligible.description")</h1>
 
-  <p>@Messages("errorPages.ineligible.p1")</p>
+  <p>@messages("errorPages.ineligible.p1")</p>
 
-  <p>@Messages("errorPages.ineligible.p2")</p>
+  <p>@messages("errorPages.ineligible.p2")</p>
 
   <ul class="list-bullet">
-    <li>@Messages("errorPages.ineligible.l1")</li>
-    <li>@Messages("errorPages.ineligible.l2")</li>
-    <li>@Messages("errorPages.ineligible.l3")</li>
+    <li>@messages("errorPages.ineligible.l1")</li>
+    <li>@messages("errorPages.ineligible.l2")</li>
+    <li>@messages("errorPages.ineligible.l3")</li>
   </ul>
 
   <form action="@controllers.userJourney.routes.DashboardController.dashboard()" method="get">
     <div class="form-group">
-      <button class="button" type="submit" id="continue" >@Messages("app.common.companyRegistrationOverview")</button>
+      <button class="button" type="submit" id="continue" >@messages("app.common.companyRegistrationOverview")</button>
     </div>
   </form>
 }

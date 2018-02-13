@@ -16,23 +16,22 @@
 
 package connectors.test
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import config.WSHttp
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.{CorePost, CorePut, HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
-@Singleton
-class TestIncorpInfoConnector @Inject()() extends TestIncorpInfoConnect with ServicesConfig {
-  val incorpFEStubsUrl             = baseUrl("incorporation-frontend-stubs")
-  val http : CorePost with CorePut = WSHttp
+class TestIncorpInfoConnectorImpl @Inject()(val http: WSHttp,
+                                            servicesConfig: ServicesConfig) extends TestIncorpInfoConnector {
+  val incorpFEStubsUrl  = servicesConfig.baseUrl("incorporation-frontend-stubs")
 }
 
-trait TestIncorpInfoConnect {
+trait TestIncorpInfoConnector {
 
   val incorpFEStubsUrl: String
   val http: CorePost with CorePut

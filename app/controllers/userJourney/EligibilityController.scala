@@ -16,107 +16,87 @@
 
 package controllers.userJourney
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
-import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
+import connectors.KeystoreConnector
+import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.eligibility.{CompanyEligibilityForm, DirectorEligibilityForm}
-import play.api.i18n.{I18nSupport, MessagesApi}
-import services.{EligibilityService, EligibilitySrv}
-import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.frontend.auth.Actions
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.SessionProfile
+import play.api.i18n.MessagesApi
+import play.api.mvc.{Action, AnyContent}
+import play.api.{Configuration, Environment}
+import services.{CompanyDetailsService, EligibilityService, IncorporationInformationService, S4LService}
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.play.config.inject.ServicesConfig
 import views.html.pages.eligibility.{companyEligibility => CompanyEligibilityPage, directorEligibility => DirectorEligibilityPage, ineligible => IneligiblePage}
 
 import scala.concurrent.Future
 
-@Singleton
-class EligibilityController @Inject()(val messagesApi: MessagesApi,
-                                      val keystoreConnector: KeystoreConnector,
-                                      val eligibilityService: EligibilityService,
-                                      val payeRegistrationConnector: PAYERegistrationConnector) extends EligibilityCtrl with ServicesConfig {
-  val authConnector = FrontendAuthConnector
-  lazy val compRegFEURL = getConfString("company-registration-frontend.www.url", "")
-  lazy val compRegFEURI = getConfString("company-registration-frontend.www.uri", "")
-}
+class EligibilityControllerImpl @Inject()(val messagesApi: MessagesApi,
+                                          val keystoreConnector: KeystoreConnector,
+                                          val eligibilityService: EligibilityService,
+                                          val authConnector: AuthConnector,
+                                          val env: Environment,
+                                          val config: Configuration,
+                                          val s4LService: S4LService,
+                                          val companyDetailsService: CompanyDetailsService,
+                                          val incorpInfoService: IncorporationInformationService,
+                                          servicesConfig: ServicesConfig) extends EligibilityController with AuthRedirectUrls
 
-trait EligibilityCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
+trait EligibilityController extends PayeBaseController {
+  val eligibilityService: EligibilityService
 
-  val keystoreConnector: KeystoreConnect
-  val eligibilityService: EligibilitySrv
   val compRegFEURL: String
   val compRegFEURI: String
 
-  val companyEligibility = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user => implicit request =>
-      withCurrentProfile { profile =>
-        eligibilityService.getEligibility(profile.registrationID) map {
-          _.companyEligible match {
-            case Some(boole) => Ok(CompanyEligibilityPage(CompanyEligibilityForm.form.fill(boole)))
-            case _           => Ok(CompanyEligibilityPage(CompanyEligibilityForm.form))
-          }
+  def companyEligibility: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>profile =>
+    eligibilityService.getEligibility(profile.registrationID) map {
+      _.companyEligible match {
+        case Some(boole) => Ok(CompanyEligibilityPage(CompanyEligibilityForm.form.fill(boole)))
+        case _           => Ok(CompanyEligibilityPage(CompanyEligibilityForm.form))
+      }
+    }
+  }
+
+  def submitCompanyEligibility = isAuthorisedWithProfile { implicit request => profile =>
+    CompanyEligibilityForm.form.bindFromRequest.fold(
+      errors  => Future.successful(BadRequest(CompanyEligibilityPage(errors))),
+      success => eligibilityService.saveCompanyEligibility(profile.registrationID, success) map {
+        _ => if(success.ineligible){
+          Redirect(controllers.userJourney.routes.EligibilityController.ineligible())
+        } else {
+          Redirect(controllers.userJourney.routes.EligibilityController.directorEligibility())
         }
       }
+    )
   }
 
-  val submitCompanyEligibility = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user => implicit request =>
-      withCurrentProfile { profile =>
-        CompanyEligibilityForm.form.bindFromRequest.fold(
-          errors => Future.successful(BadRequest(CompanyEligibilityPage(errors))),
-          success =>
-            eligibilityService.saveCompanyEligibility(profile.registrationID, success) map {
-              _ => if(success.ineligible){
-                Redirect(controllers.userJourney.routes.EligibilityController.ineligible())
-              } else {
-                Redirect(controllers.userJourney.routes.EligibilityController.directorEligibility())
-              }
-            }
-        )
+  def directorEligibility: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    eligibilityService.getEligibility(profile.registrationID) map {
+      _.directorEligible match {
+        case Some(boole)  => Ok(DirectorEligibilityPage(DirectorEligibilityForm.form.fill(boole)))
+        case _            => Ok(DirectorEligibilityPage(DirectorEligibilityForm.form))
       }
+    }
   }
 
-  val directorEligibility = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user => implicit request =>
-      withCurrentProfile { profile =>
-        eligibilityService.getEligibility(profile.registrationID) map {
-          _.directorEligible match {
-            case Some(boole)  => Ok(DirectorEligibilityPage(DirectorEligibilityForm.form.fill(boole)))
-            case _            => Ok(DirectorEligibilityPage(DirectorEligibilityForm.form))
-          }
+  def submitDirectorEligibility: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    DirectorEligibilityForm.form.bindFromRequest.fold(
+      errors  => Future.successful(BadRequest(DirectorEligibilityPage(errors))),
+      success => eligibilityService.saveDirectorEligibility(profile.registrationID, success) map {
+        _ => if(success.eligible){
+          Redirect(controllers.userJourney.routes.EligibilityController.ineligible())
+        } else {
+          Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
         }
       }
+    )
   }
 
-  val submitDirectorEligibility = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user => implicit request =>
-      withCurrentProfile { profile =>
-        DirectorEligibilityForm.form.bindFromRequest.fold(
-          errors => Future.successful(BadRequest(DirectorEligibilityPage(errors))),
-          success =>
-            eligibilityService.saveDirectorEligibility(profile.registrationID, success) map {
-              _ => if(success.eligible){
-                Redirect(controllers.userJourney.routes.EligibilityController.ineligible())
-              } else {
-                Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
-              }
-            }
-        )
-      }
+  def ineligible: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
+    Future.successful(Ok(IneligiblePage()))
   }
 
-  val ineligible = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user => implicit request =>
-      withCurrentProfile { _ =>
-        Future.successful(Ok(IneligiblePage()))
-      }
-  }
-
-  val questionnaire = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
-    implicit user =>
-      implicit request =>
-        Redirect(s"$compRegFEURL$compRegFEURI/questionnaire")
+  def questionnaire: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
+    Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/questionnaire"))
   }
 }

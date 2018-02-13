@@ -16,13 +16,13 @@
 
 package forms.test
 
+import helpers.PayeComponentSpec
 import models.api.PAYEContact
 import models.view.PAYEContactDetails
 import models.{Address, DigitalContactDetails}
 import play.api.data.FormError
-import uk.gov.hmrc.play.test.UnitSpec
 
-class TestPAYEContactFormSpec extends UnitSpec {
+class TestPAYEContactFormSpec extends PayeComponentSpec {
   val testForm = TestPAYEContactForm.form
 
   "Binding TestPAYEContactForm to a model" when {
@@ -64,12 +64,12 @@ class TestPAYEContactFormSpec extends UnitSpec {
           errors => errors,
           success => success
         )
-        boundModel shouldBe model
+        boundModel mustBe model
       }
 
       "Unbind successfully" in {
         val form = testForm.fill(model)
-        form.data shouldBe Map(
+        form.data mustBe Map(
           "payeContactDetails.name" -> "tata",
           "payeContactDetails.digitalContactDetails.email" -> "tata@test.com",
           "payeContactDetails.digitalContactDetails.mobileNumber" -> "123456",
@@ -122,12 +122,12 @@ class TestPAYEContactFormSpec extends UnitSpec {
           errors => errors,
           success => success
         )
-        boundModel shouldBe model
+        boundModel mustBe model
       }
 
       "Unbind successfully" in {
         val form = testForm.fill(model)
-        form.data shouldBe Map(
+        form.data mustBe Map(
           "payeContactDetails.name" -> "tata",
           "payeContactDetails.digitalContactDetails.email" -> "tata@test.com",
           "payeContactDetails.digitalContactDetails.mobileNumber" -> "123456",
@@ -151,8 +151,8 @@ class TestPAYEContactFormSpec extends UnitSpec {
       val boundForm = testForm.bind(data)
       val payeContactNameError = FormError("payeContactDetails.name", "error.required")
 
-      boundForm.errors shouldBe Seq(payeContactNameError)
-      boundForm.data shouldBe data
+      boundForm.errors mustBe Seq(payeContactNameError)
+      boundForm.data mustBe data
     }
 
     "correspondenceAddress line1 and line2 are not completed" in {
@@ -166,9 +166,9 @@ class TestPAYEContactFormSpec extends UnitSpec {
       val formErrorCorrespondenceAddressLine1 = FormError("correspondenceAddress.line1", "error.required")
       val formErrorCorrespondenceAddressLine2 = FormError("correspondenceAddress.line2", "error.required")
 
-      boundForm.error("correspondenceAddress.line1") shouldBe Some(formErrorCorrespondenceAddressLine1)
-      boundForm.error("correspondenceAddress.line2") shouldBe Some(formErrorCorrespondenceAddressLine2)
-      boundForm.data shouldBe data
+      boundForm.error("correspondenceAddress.line1") mustBe Some(formErrorCorrespondenceAddressLine1)
+      boundForm.error("correspondenceAddress.line2") mustBe Some(formErrorCorrespondenceAddressLine2)
+      boundForm.data mustBe data
     }
   }
 }

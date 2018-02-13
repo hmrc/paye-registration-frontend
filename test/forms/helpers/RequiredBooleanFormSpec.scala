@@ -16,31 +16,32 @@
 
 package forms.helpers
 
+import helpers.PayeComponentSpec
 import play.api.data.FormError
-import uk.gov.hmrc.play.test.UnitSpec
 
-class RequiredBooleanFormSpec extends UnitSpec {
+class RequiredBooleanFormSpec extends PayeComponentSpec {
 
-  object TestForm extends RequiredBooleanForm {
-
-  }
+  object TestForm extends RequiredBooleanForm
 
   "A YesNoForm" should {
     "bind from true" in {
-      TestForm.requiredBooleanFormatter.bind("tstKey", Map[String, String]("tstKey" -> "true")) shouldBe Right(true)
+      TestForm.requiredBooleanFormatter.bind("tstKey", Map[String, String]("tstKey" -> "true")) mustBe Right(true)
     }
+
     "bind from false" in {
-      TestForm.requiredBooleanFormatter.bind("tstKey", Map[String, String]("tstKey" -> "false")) shouldBe Right(false)
+      TestForm.requiredBooleanFormatter.bind("tstKey", Map[String, String]("tstKey" -> "false")) mustBe Right(false)
     }
+
     "fail to bind from \"\"" in {
-      TestForm.requiredBooleanFormatter.bind("tstKey", Map[String, String]("tstKey" -> "")) shouldBe Left(Seq(FormError("tstKey", "error.required", Nil)))
+      TestForm.requiredBooleanFormatter.bind("tstKey", Map[String, String]("tstKey" -> "")) mustBe Left(Seq(FormError("tstKey", "error.required", Nil)))
     }
+
     "unbind from true" in {
-      TestForm.requiredBooleanFormatter.unbind("tstKey", true) shouldBe Map("tstKey" -> "true")
+      TestForm.requiredBooleanFormatter.unbind("tstKey", true) mustBe Map("tstKey" -> "true")
     }
+
     "unbind from false" in {
-      TestForm.requiredBooleanFormatter.unbind("tstKey", false) shouldBe Map("tstKey" -> "false")
+      TestForm.requiredBooleanFormatter.unbind("tstKey", false) mustBe Map("tstKey" -> "false")
     }
   }
-
 }

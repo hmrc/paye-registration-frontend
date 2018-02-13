@@ -16,39 +16,35 @@
 
 package controllers.test
 
-import builders.AuthBuilder
-import connectors.PAYERegistrationConnector
-import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector, TestPAYERegConnect}
 import enums.DownstreamOutcome
-import fixtures.BusinessRegistrationFixture
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK}
-import services.PAYERegistrationSrv
-import testHelpers.PAYERegSpec
-
-import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
-class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFixture {
+import scala.concurrent.Future
 
-  val mockPayeRegConnector = mock[TestPAYERegConnect]
-  val mockPayeRegService = mock[PAYERegistrationSrv]
-  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
-  val mockTestBusRegConnector = mock[TestBusinessRegConnector]
+class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
+
+  val request = FakeRequest()
 
   class Setup {
-    val controller = new TestRegSetupCtrl {
-      override val testPAYERegConnector = mockPayeRegConnector
-      override val payeRegService = mockPayeRegService
-      override val payeRegistrationConnector = mockPayeRegistrationConnector
-      override val messagesApi = mockMessages
-      override val authConnector = mockAuthConnector
-      override val keystoreConnector = mockKeystoreConnector
-      override val testBusinessRegConnector = mockTestBusRegConnector
+    val controller = new TestRegSetupController {
+      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
+
+      override val incorpInfoService          = mockIncorpInfoService
+      override val companyDetailsService      = mockCompanyDetailsService
+      override val s4LService                 = mockS4LService
+      override val testPAYERegConnector       = mockTestPayeRegConnector
+      override val payeRegService             = mockPayeRegService
+      override val messagesApi                = mockMessagesApi
+      override val authConnector              = mockAuthConnector
+      override val keystoreConnector          = mockKeystoreConnector
+      override val testBusinessRegConnector   = mockTestBusRegConnector
 
       override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(CurrentProfile(
@@ -64,22 +60,22 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
   "regTeardown" should {
     "return an OK" when {
       "the registration collection has been successfully torn down" in new Setup {
-        when(mockPayeRegConnector.testRegistrationTeardown()(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestPayeRegConnector.testRegistrationTeardown()(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-        AuthBuilder.showWithAuthorisedUser(controller.regTeardown, mockAuthConnector) { result =>
-          status(result) shouldBe OK
+        AuthHelpers.showAuthorisedWithCP(controller.regTeardown, Fixtures.validCurrentProfile, request) { result =>
+          status(result) mustBe OK
         }
       }
     }
 
     "return an INTERNAL_SERVER_ERROR" when {
       "there was a problem tearing down the registration collection" in new Setup {
-        when(mockPayeRegConnector.testRegistrationTeardown()(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestPayeRegConnector.testRegistrationTeardown()(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-        AuthBuilder.showWithAuthorisedUser(controller.regTeardown, mockAuthConnector) { result =>
-          status(result) shouldBe INTERNAL_SERVER_ERROR
+        AuthHelpers.showAuthorisedWithCP(controller.regTeardown, Fixtures.validCurrentProfile, request) { result =>
+          status(result) mustBe INTERNAL_SERVER_ERROR
         }
       }
     }
@@ -88,22 +84,22 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
   "individualRegTeardown" should {
     "return an OK" when {
       "An existing registration is successfully deleted" in new Setup {
-        when(mockPayeRegConnector.tearDownIndividualRegistration(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestPayeRegConnector.tearDownIndividualRegistration(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-        AuthBuilder.showWithAuthorisedUser(controller.individualRegTeardown("regID"), mockAuthConnector) { result =>
-          status(result) shouldBe OK
+        AuthHelpers.showAuthorised(controller.individualRegTeardown("regID"), request) { result =>
+          status(result) mustBe OK
         }
       }
     }
 
     "return an INTERNAL_SERVER_ERROR" when {
       "there was a problem deleting the registration document" in new Setup {
-        when(mockPayeRegConnector.tearDownIndividualRegistration(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestPayeRegConnector.tearDownIndividualRegistration(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-        AuthBuilder.showWithAuthorisedUser(controller.individualRegTeardown("regID"), mockAuthConnector) { result =>
-          status(result) shouldBe INTERNAL_SERVER_ERROR
+        AuthHelpers.showAuthorised(controller.individualRegTeardown("regID"), request) { result =>
+          status(result) mustBe INTERNAL_SERVER_ERROR
         }
       }
     }
@@ -112,8 +108,8 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
   "regSetup" should {
     "return an OK" when {
       "the reg setup has been rendered with the form and the regId fetched" in new Setup {
-        AuthBuilder.showWithAuthorisedUser(controller.regSetup, mockAuthConnector) { result =>
-          status(result) shouldBe OK
+        AuthHelpers.showAuthorisedWithCP(controller.regSetup, Fixtures.validCurrentProfile, request) { result =>
+          status(result) mustBe OK
         }
       }
     }
@@ -124,8 +120,8 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
       "there was a problem validating the form values" in new Setup {
         val request = FakeRequest().withFormUrlEncodedBody()
 
-        AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetup, mockAuthConnector, request) { result =>
-          status(result) shouldBe BAD_REQUEST
+        AuthHelpers.submitAuthorisedWithCP(controller.submitRegSetup, Fixtures.validCurrentProfile, request) { result =>
+          status(result) mustBe BAD_REQUEST
         }
       }
     }
@@ -190,14 +186,14 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
           "payeContact.correspondenceAddress.country" -> "testCountry"
         )
 
-        when(mockPayeRegConnector.addPAYERegistration(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestPayeRegConnector.addPAYERegistration(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
         when(mockTestBusRegConnector.updateCompletionCapacity(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful("director"))
 
-        AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetup, mockAuthConnector, request) { result =>
-          status(result) shouldBe OK
+        AuthHelpers.submitAuthorisedWithCP(controller.submitRegSetup, Fixtures.validCurrentProfile, request) { result =>
+          status(result) mustBe OK
         }
       }
     }
@@ -261,14 +257,14 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
           "payeContact.correspondenceAddress.postCode" -> "testPostCode",
           "payeContact.correspondenceAddress.country" -> "testCountry"
         )
-        when(mockPayeRegConnector.addPAYERegistration(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestPayeRegConnector.addPAYERegistration(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
         when(mockTestBusRegConnector.updateCompletionCapacity(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful("director"))
 
-        AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetup, mockAuthConnector, request) { result =>
-          status(result) shouldBe INTERNAL_SERVER_ERROR
+        AuthHelpers.submitAuthorisedWithCP(controller.submitRegSetup, Fixtures.validCurrentProfile, request) { result =>
+          status(result) mustBe INTERNAL_SERVER_ERROR
         }
       }
     }
@@ -277,8 +273,8 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
   "regSetupCompanyDetails" should {
     "return an OK" when {
       "the payeRegCompanyDetailsSetup page has been rendered" in new Setup {
-        AuthBuilder.showWithAuthorisedUser(controller.regSetupCompanyDetails, mockAuthConnector) { result =>
-          status(result) shouldBe OK
+        AuthHelpers.showAuthorised(controller.regSetupCompanyDetails, request) { result =>
+          status(result) mustBe OK
         }
       }
     }
@@ -288,8 +284,8 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
     "return a BAD_REQUEST" when {
       "the form values cannot be validated" in new Setup {
         val request = FakeRequest().withFormUrlEncodedBody()
-        AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupCompanyDetails, mockAuthConnector, request) { result =>
-          status(result) shouldBe BAD_REQUEST
+        AuthHelpers.submitAuthorisedWithCP(controller.submitRegSetupCompanyDetails, Fixtures.validCurrentProfile, request) { result =>
+          status(result) mustBe BAD_REQUEST
         }
       }
     }
@@ -316,11 +312,11 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
           "businessContactDetails.mobileNumber" -> "testNumber",
           "businessContactDetails.phoneNumber" -> "testNumber"
         )
-        when(mockPayeRegConnector.addTestCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestPayeRegConnector.addTestCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-        AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupCompanyDetails, mockAuthConnector, request) { result =>
-          status(result) shouldBe OK
+        AuthHelpers.submitAuthorisedWithCP(controller.submitRegSetupCompanyDetails, Fixtures.validCurrentProfile, request) { result =>
+          status(result) mustBe OK
         }
       }
     }
@@ -347,11 +343,11 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
           "businessContactDetails.mobileNumber" -> "testNumber",
           "businessContactDetails.phoneNumber" -> "testNumber"
         )
-        when(mockPayeRegConnector.addTestCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestPayeRegConnector.addTestCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-        AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupCompanyDetails, mockAuthConnector, request) { result =>
-          status(result) shouldBe INTERNAL_SERVER_ERROR
+        AuthHelpers.submitAuthorisedWithCP(controller.submitRegSetupCompanyDetails, Fixtures.validCurrentProfile, request) { result =>
+          status(result) mustBe INTERNAL_SERVER_ERROR
         }
       }
     }
@@ -360,8 +356,8 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
   "regSetupPAYEContact" should {
     "return an OK" when {
       "the payeRegPAYEContactSetup page has been rendered" in new Setup {
-        AuthBuilder.showWithAuthorisedUser(controller.regSetupPAYEContact, mockAuthConnector) { result =>
-          status(result) shouldBe OK
+        AuthHelpers.showAuthorised(controller.regSetupPAYEContact, request) { result =>
+          status(result) mustBe OK
         }
       }
     }
@@ -371,8 +367,8 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
     "return a BAD_REQUEST" when {
       "the form data cant be validated" in new Setup {
         val request = FakeRequest().withFormUrlEncodedBody()
-        AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupPAYEContact, mockAuthConnector, request) { result =>
-          status(result) shouldBe BAD_REQUEST
+        AuthHelpers.submitAuthorisedWithCP(controller.submitRegSetupPAYEContact, Fixtures.validCurrentProfile, request) { result =>
+          status(result) mustBe BAD_REQUEST
         }
       }
     }
@@ -391,11 +387,11 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
           "correspondenceAddress.postCode" -> "testPostCode",
           "correspondenceAddress.country" -> "testCountry"
         )
-        when(mockPayeRegConnector.addTestPAYEContact(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestPayeRegConnector.addTestPAYEContact(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-        AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupPAYEContact, mockAuthConnector, request) { result =>
-          status(result) shouldBe OK
+        AuthHelpers.submitAuthorisedWithCP(controller.submitRegSetupPAYEContact, Fixtures.validCurrentProfile, request) { result =>
+          status(result) mustBe OK
         }
       }
     }
@@ -414,11 +410,11 @@ class TestRegSetupControllerSpec extends PAYERegSpec with BusinessRegistrationFi
           "correspondenceAddress.postCode" -> "testPostCode",
           "correspondenceAddress.country" -> "testCountry"
         )
-        when(mockPayeRegConnector.addTestPAYEContact(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestPayeRegConnector.addTestPAYEContact(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-        AuthBuilder.submitWithAuthorisedUser(controller.submitRegSetupPAYEContact, mockAuthConnector, request) { result =>
-          status(result) shouldBe INTERNAL_SERVER_ERROR
+        AuthHelpers.submitAuthorisedWithCP(controller.submitRegSetupPAYEContact, Fixtures.validCurrentProfile, request) { result =>
+          status(result) mustBe INTERNAL_SERVER_ERROR
         }
       }
     }

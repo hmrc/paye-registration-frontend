@@ -16,48 +16,31 @@
 
 package services
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import config.FrontendAuthConnector
-import enums.{AccountTypes, CacheKeys, DownstreamOutcome, RegistrationDeletion}
-import play.api.libs.json.JsObject
-import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import connectors._
+import enums.{CacheKeys, DownstreamOutcome, RegistrationDeletion}
 import models.external.CurrentProfile
 import play.api.http.Status._
-
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-@Singleton
-class PAYERegistrationService @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,
-                                        val keyStoreConnector: KeystoreConnector,
-                                        val currentProfileService: CurrentProfileService,
-                                        val s4LService: S4LService) extends PAYERegistrationSrv {
-  override val authConnector = FrontendAuthConnector
-}
+import scala.concurrent.Future
 
-trait PAYERegistrationSrv {
+class PAYERegistrationServiceImpl @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,
+                                            val keyStoreConnector: KeystoreConnector,
+                                            val currentProfileService: CurrentProfileService,
+                                            val s4LService: S4LService) extends PAYERegistrationService
 
-  val payeRegistrationConnector: PAYERegistrationConnect
-  val authConnector: AuthConnector
-  val keyStoreConnector: KeystoreConnect
-  val currentProfileService: CurrentProfileSrv
-  val s4LService: S4LSrv
+trait PAYERegistrationService {
+
+  val payeRegistrationConnector: PAYERegistrationConnector
+  val keyStoreConnector: KeystoreConnector
+  val currentProfileService: CurrentProfileService
+  val s4LService: S4LService
 
   def assertRegistrationFootprint(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     payeRegistrationConnector.createNewRegistration(regId, txId)
-  }
-
-  def getAccountAffinityGroup(implicit hc: HeaderCarrier, authContext: AuthContext): Future[AccountTypes.Value] = {
-    authConnector.getUserDetails[JsObject](authContext) flatMap { userDetails =>
-      (userDetails \ "affinityGroup").as[String].toLowerCase match {
-        case "organisation" => Future.successful(AccountTypes.Organisation)
-        case _              => Future.successful(AccountTypes.InvalidAccountType)
-      }
-    }
   }
 
   def deletePayeRegistrationDocument(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {

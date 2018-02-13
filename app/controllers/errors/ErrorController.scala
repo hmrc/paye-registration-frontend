@@ -16,75 +16,54 @@
 
 package controllers.errors
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
-import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
+import connectors.KeystoreConnector
+import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.errors.DeskproForm
-import play.api.i18n.{I18nSupport, MessagesApi}
-import services.{DeskproService, DeskproSrv}
-import uk.gov.hmrc.play.frontend.auth.Actions
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.SessionProfile
+import play.api.Configuration
+import play.api.i18n.MessagesApi
+import play.api.mvc.{Action, AnyContent}
+import services.{CompanyDetailsService, DeskproService, IncorporationInformationService, S4LService}
+import uk.gov.hmrc.auth.core.AuthConnector
+import views.html.pages.error.{ineligible => Ineligible, _}
 
 import scala.concurrent.Future
 
-@Singleton
-class ErrorController @Inject()(val messagesApi: MessagesApi,
-                                val keystoreConnector: KeystoreConnector,
-                                val payeRegistrationConnector: PAYERegistrationConnector,
-                                val deskproService: DeskproService) extends ErrorCtrl{
-  val authConnector = FrontendAuthConnector
-}
+class ErrorControllerImpl @Inject()(val messagesApi: MessagesApi,
+                                    val config: Configuration,
+                                    val keystoreConnector: KeystoreConnector,
+                                    val deskproService: DeskproService,
+                                    val companyDetailsService: CompanyDetailsService,
+                                    val s4LService: S4LService,
+                                    val incorpInfoService: IncorporationInformationService,
+                                    val authConnector: AuthConnector) extends ErrorController with AuthRedirectUrls
 
-trait ErrorCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
+trait ErrorController extends PayeBaseController {
+  val deskproService: DeskproService
 
-  val keystoreConnector: KeystoreConnect
-  val deskproService: DeskproSrv
-
-  val ineligible = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { _ =>
-          Future.successful(Ok(views.html.pages.error.ineligible()))
-        }
+  def ineligible: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
+    Future.successful(Ok(Ineligible()))
   }
 
-  val retrySubmission = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { _ =>
-          Future.successful(Ok(views.html.pages.error.submissionTimeout()))
-        }
+  def retrySubmission: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
+    Future.successful(Ok(submissionTimeout()))
   }
 
-  val failedSubmission = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { _ =>
-          Future.successful(Ok(views.html.pages.error.submissionFailed(DeskproForm.form)))
-        }
+  def failedSubmission: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
+    Future.successful(Ok(submissionFailed(DeskproForm.form)))
   }
 
-  val submitTicket = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          DeskproForm.form.bindFromRequest.fold(
-            errors  => Future.successful(BadRequest(views.html.pages.error.submissionFailed(errors))),
-            success =>  deskproService.submitTicket(profile.registrationID, success) map {
-              ticket => Redirect(controllers.errors.routes.ErrorController.submittedTicket)
-            }
-          )
-        }
+  def submitTicket: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    DeskproForm.form.bindFromRequest.fold(
+      errors  => Future.successful(BadRequest(submissionFailed(errors))),
+      success => deskproService.submitTicket(profile.registrationID, success) map {
+        _ => Redirect(controllers.errors.routes.ErrorController.submittedTicket())
+      }
+    )
   }
 
-  val submittedTicket = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { _ =>
-          Future.successful(Ok(views.html.pages.error.deskproSubmitted()))
-        }
+  def submittedTicket: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
+    Future.successful(Ok(deskproSubmitted()))
   }
 }

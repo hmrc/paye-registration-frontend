@@ -16,46 +16,40 @@
 
 package controllers.userJourney
 
-import builders.AuthBuilder
-import connectors.{KeystoreConnect, PAYERegistrationConnector}
 import enums.DownstreamOutcome
-import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.{CompanyEligibility, DirectorEligibility, Eligibility}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.http.Status
-import play.api.mvc.{Request, Result}
+import play.api.mvc.Result
 import play.api.test.FakeRequest
-import services.{EligibilityService, EligibilitySrv}
-import testHelpers.PAYERegSpec
-
-import scala.concurrent.Future
+import services.EligibilityService
 import uk.gov.hmrc.http.HeaderCarrier
 
-class EligibilityControllerSpec extends PAYERegSpec {
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+class EligibilityControllerSpec extends PayeComponentSpec with PayeFakedApp {
   val mockEligibilityService = mock[EligibilityService]
-  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
 
   class Setup {
-    val controller = new EligibilityCtrl {
-      override val eligibilityService: EligibilitySrv = mockEligibilityService
+    val controller = new EligibilityController {
+      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
+
+
+      override val incorpInfoService = mockIncorpInfoService
+      override val companyDetailsService = mockCompanyDetailsService
+      override val s4LService = mockS4LService
+      override val eligibilityService = mockEligibilityService
       override val compRegFEURL: String = "testUrl"
       override val compRegFEURI: String = "/testUri"
-      override val keystoreConnector: KeystoreConnect = mockKeystoreConnector
-      override val payeRegistrationConnector = mockPayeRegistrationConnector
+      override val keystoreConnector = mockKeystoreConnector
 
-      override protected def authConnector = mockAuthConnector
+      override val authConnector = mockAuthConnector
 
-      override def messagesApi = mockMessages
-
-      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
-        f(CurrentProfile(
-          "12345",
-          CompanyRegistrationProfile("held", "txId"),
-          "ENG",
-          payeRegistrationSubmitted = false
-        ))
-      }
+      override def messagesApi = mockMessagesApi
     }
   }
 
@@ -68,17 +62,19 @@ class EligibilityControllerSpec extends PAYERegSpec {
 
   "calling the companyEligibility action" should {
     "return 303 for an unauthorised user" in new Setup {
-      val result = controller.companyEligibility()(FakeRequest())
-      status(result) shouldBe Status.SEE_OTHER
+      AuthHelpers.showUnauthorised(controller.companyEligibility, fakeRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+      }
     }
 
     "return 200 for an authorised user with data already saved" in new Setup {
       when(mockEligibilityService.getEligibility(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validEligibilityModel))
 
-      AuthBuilder.showWithAuthorisedUser(controller.companyEligibility, mockAuthConnector) {
+      AuthHelpers.showAuthorisedWithCP(controller.companyEligibility, Fixtures.validCurrentProfile, fakeRequest) {
         (response: Future[Result]) =>
-          status(response) shouldBe Status.OK
+          status(response) mustBe Status.OK
       }
     }
 
@@ -86,64 +82,70 @@ class EligibilityControllerSpec extends PAYERegSpec {
       when(mockEligibilityService.getEligibility(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validEmptyModel))
 
-      AuthBuilder.showWithAuthorisedUser(controller.companyEligibility, mockAuthConnector) {
+      AuthHelpers.showAuthorisedWithCP(controller.companyEligibility, Fixtures.validCurrentProfile, fakeRequest) {
         (response: Future[Result]) =>
-          status(response) shouldBe Status.OK
+          status(response) mustBe Status.OK
       }
     }
   }
 
   "calling the submitCompanyEligibility action" should {
     "return 303 for an unauthorised user" in new Setup {
-      val result = controller.submitCompanyEligibility()(FakeRequest())
-      status(result) shouldBe Status.SEE_OTHER
+      AuthHelpers.showUnauthorised(controller.submitCompanyEligibility, fakeRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+      }
     }
 
     "return 400 for an invalid answer" in new Setup {
-      AuthBuilder.submitWithAuthorisedUser(controller.submitCompanyEligibility(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody()) {
+      AuthHelpers.submitAuthorisedWithCP(controller.submitCompanyEligibility(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody()) {
         result =>
-          status(result) shouldBe Status.BAD_REQUEST
+          status(result) mustBe Status.BAD_REQUEST
       }
     }
 
     "redirect to the Ineligibility page when a user enters YES answer" in new Setup {
-      when(mockEligibilityService.saveCompanyEligibility(ArgumentMatchers.eq(regId), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(DownstreamOutcome.Success)
-      AuthBuilder.submitWithAuthorisedUser(controller.submitCompanyEligibility(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+      when(mockEligibilityService.saveCompanyEligibility(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future(DownstreamOutcome.Success))
+
+      AuthHelpers.submitAuthorisedWithCP(controller.submitCompanyEligibility(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
         "isEligible" -> "true"
       )) {
         result =>
-          status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/you-cant-register-online"
+          status(result) mustBe Status.SEE_OTHER
+          redirectLocation(result) mustBe Some("/register-for-paye/you-cant-register-online")
       }
     }
 
     "redirect to the Director Eligibility page when a user enters NO answer" in new Setup {
-      when(mockEligibilityService.saveCompanyEligibility(ArgumentMatchers.eq(regId), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(DownstreamOutcome.Success)
-      AuthBuilder.submitWithAuthorisedUser(controller.submitCompanyEligibility(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+      when(mockEligibilityService.saveCompanyEligibility(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future(DownstreamOutcome.Success))
+
+      AuthHelpers.submitAuthorisedWithCP(controller.submitCompanyEligibility(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
         "isEligible" -> "false"
       )) {
         result =>
-          status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/pay-non-cash-incentive-awards"
+          status(result) mustBe Status.SEE_OTHER
+          redirectLocation(result) mustBe Some("/register-for-paye/pay-non-cash-incentive-awards")
       }
     }
   }
 
   "calling the directorEligibility action" should {
     "return 303 for an unauthorised user" in new Setup {
-      val result = controller.directorEligibility()(FakeRequest())
-      status(result) shouldBe Status.SEE_OTHER
+      AuthHelpers.showUnauthorised(controller.directorEligibility, fakeRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+      }
     }
 
     "return 200 for an authorised user with data already saved" in new Setup {
       when(mockEligibilityService.getEligibility(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validEligibilityModel))
 
-      AuthBuilder.showWithAuthorisedUser(controller.directorEligibility, mockAuthConnector) {
+      AuthHelpers.showAuthorisedWithCP(controller.directorEligibility, Fixtures.validCurrentProfile, fakeRequest) {
         (response: Future[Result]) =>
-          status(response) shouldBe Status.OK
+          status(response) mustBe Status.OK
       }
     }
 
@@ -151,78 +153,86 @@ class EligibilityControllerSpec extends PAYERegSpec {
       when(mockEligibilityService.getEligibility(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validEmptyModel))
 
-      AuthBuilder.showWithAuthorisedUser(controller.directorEligibility, mockAuthConnector) {
+      AuthHelpers.showAuthorisedWithCP(controller.directorEligibility, Fixtures.validCurrentProfile, fakeRequest) {
         (response: Future[Result]) =>
-          status(response) shouldBe Status.OK
+          status(response) mustBe Status.OK
       }
     }
   }
 
   "calling the submitDirectorEligibility action" should {
     "return 303 for an unauthorised user" in new Setup {
-      val result = controller.submitDirectorEligibility()(FakeRequest())
-      status(result) shouldBe Status.SEE_OTHER
+      AuthHelpers.showUnauthorised(controller.submitDirectorEligibility, fakeRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+      }
     }
 
     "return 400 for an invalid answer" in new Setup {
-      AuthBuilder.submitWithAuthorisedUser(controller.submitDirectorEligibility(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody()) {
+      AuthHelpers.submitAuthorisedWithCP(controller.submitDirectorEligibility, Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody()) {
         result =>
-          status(result) shouldBe Status.BAD_REQUEST
+          status(result) mustBe Status.BAD_REQUEST
       }
     }
 
     "redirect to the Ineligibility page when a user enters YES answer" in new Setup {
-      when(mockEligibilityService.saveDirectorEligibility(ArgumentMatchers.eq(regId), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(DownstreamOutcome.Success)
-      AuthBuilder.submitWithAuthorisedUser(controller.submitDirectorEligibility(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+      when(mockEligibilityService.saveDirectorEligibility(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future(DownstreamOutcome.Success))
+
+      AuthHelpers.submitAuthorisedWithCP(controller.submitDirectorEligibility, Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
         "isEligible" -> "true"
       )) {
         result =>
-          status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/you-cant-register-online"
+          status(result) mustBe Status.SEE_OTHER
+          redirectLocation(result) mustBe Some("/register-for-paye/you-cant-register-online")
       }
     }
 
     "redirect to the Director Eligibility page when a user enters NO answer" in new Setup {
-      when(mockEligibilityService.saveDirectorEligibility(ArgumentMatchers.eq(regId), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(DownstreamOutcome.Success)
-      AuthBuilder.submitWithAuthorisedUser(controller.submitDirectorEligibility(), mockAuthConnector, fakeRequest.withFormUrlEncodedBody(
+      when(mockEligibilityService.saveDirectorEligibility(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future(DownstreamOutcome.Success))
+
+      AuthHelpers.submitAuthorisedWithCP(controller.submitDirectorEligibility, Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
         "isEligible" -> "false"
       )) {
         result =>
-          status(result) shouldBe Status.SEE_OTHER
-          result.header.headers("Location") shouldBe "/register-for-paye/use-subcontractors-construction-industry"
+          status(result) mustBe Status.SEE_OTHER
+          redirectLocation(result) mustBe Some("/register-for-paye/use-subcontractors-construction-industry")
       }
     }
   }
 
   "calling the ineligible action" should {
     "return 303 for an unauthorised user" in new Setup {
-      val result = controller.ineligible()(FakeRequest())
-      status(result) shouldBe Status.SEE_OTHER
+      AuthHelpers.showUnauthorised(controller.ineligible, fakeRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+      }
     }
 
     "return 200 for an authorised user" in new Setup {
 
-      AuthBuilder.showWithAuthorisedUser(controller.ineligible, mockAuthConnector) {
-        (response: Future[Result]) =>
-          status(response) shouldBe Status.OK
+      AuthHelpers.showAuthorisedWithCP(controller.ineligible, Fixtures.validCurrentProfile, fakeRequest) {
+        response =>
+          status(response) mustBe Status.OK
       }
     }
   }
 
   "calling the feedback action" should {
     "return 303 for an unauthorised user" in new Setup {
-      val result = controller.questionnaire()(FakeRequest())
-      status(result) shouldBe Status.SEE_OTHER
+      AuthHelpers.showUnauthorised(controller.questionnaire, fakeRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+      }
     }
 
     "return 303 and redirect to Company Registration for an authorised user" in new Setup {
 
-      AuthBuilder.showWithAuthorisedUser(controller.questionnaire, mockAuthConnector) {
-        (response: Future[Result]) =>
-          status(response) shouldBe Status.SEE_OTHER
-          response.header.headers("Location") shouldBe "testUrl/testUri/questionnaire"
+      AuthHelpers.showAuthorisedWithCP(controller.questionnaire, Fixtures.validCurrentProfile, fakeRequest) {
+        response =>
+          status(response) mustBe Status.SEE_OTHER
+          redirectLocation(response) mustBe Some("testUrl/testUri/questionnaire")
       }
     }
   }

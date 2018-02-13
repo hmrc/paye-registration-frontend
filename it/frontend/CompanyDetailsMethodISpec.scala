@@ -120,19 +120,20 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
-      mdtpCookieData("csrfToken") shouldNot be("")
-      mdtpCookieData("sessionId") shouldBe SessionId
-      mdtpCookieData("userId") shouldBe userId
+      mdtpCookieData("csrfToken") mustNot be("")
+      mdtpCookieData("sessionId") mustBe SessionId
+      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Does or will the company trade using a different name?"
-      document.getElementById("pageHeading").text shouldBe "Does or will the company trade using a different name?"
-      document.getElementById("differentName-true").attr("checked") shouldBe "checked"
-      document.getElementById("differentName-false").attr("checked") shouldBe ""
-      document.getElementById("tradingName").`val` shouldBe tradingName
-      document.getElementById("lead-paragraph").text shouldBe "Tell us if the company will use a trading name that's different from test company."
+
+      document.title() mustBe "Does or will the company trade using a different name?"
+      document.getElementById("pageHeading").text mustBe "Does or will the company trade using a different name?"
+      document.getElementById("differentName-true").attr("checked") mustBe "checked"
+      document.getElementById("differentName-false").attr("checked") mustBe ""
+      document.getElementById("tradingName").`val` mustBe tradingName
+      document.getElementById("lead-paragraph").text mustBe "Tell us if the company will use a trading name that's different from test company."
     }
 
     "Return an unpopulated page if PayeReg returns a NotFound response" in {
@@ -171,18 +172,18 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
-      mdtpCookieData("csrfToken") shouldNot be("")
-      mdtpCookieData("sessionId") shouldBe SessionId
-      mdtpCookieData("userId") shouldBe userId
+      mdtpCookieData("csrfToken") mustNot be("")
+      mdtpCookieData("sessionId") mustBe SessionId
+      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Does or will the company trade using a different name?"
-      document.getElementById("pageHeading").text shouldBe "Does or will the company trade using a different name?"
-      document.getElementById("differentName-true").attr("checked") shouldBe ""
-      document.getElementById("differentName-false").attr("checked") shouldBe ""
-      document.getElementById("tradingName").`val` shouldBe ""
+      document.title() mustBe "Does or will the company trade using a different name?"
+      document.getElementById("pageHeading").text mustBe "Does or will the company trade using a different name?"
+      document.getElementById("differentName-true").attr("checked") mustBe ""
+      document.getElementById("differentName-false").attr("checked") mustBe ""
+      document.getElementById("tradingName").`val` mustBe ""
 
       // TODO verify S4L put
     }
@@ -206,11 +207,11 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Does or will the company trade using a different name?"
-      document.getElementById("pageHeading").text shouldBe "Does or will the company trade using a different name?"
+      document.title() mustBe "Does or will the company trade using a different name?"
+      document.getElementById("pageHeading").text mustBe "Does or will the company trade using a different name?"
     }
   }
 
@@ -276,13 +277,13 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 303
-      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/confirm-registered-office-address")
+      response.status mustBe 303
+      response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/confirm-registered-office-address")
 
       val crPuts = findAll(patchRequestedFor(urlMatching(s"/paye-registration/$regId/company-details")))
       val captor = crPuts.get(0)
       val json = Json.parse(captor.getBodyAsString)
-      (json \ "tradingName").as[String] shouldBe tradingName
+      (json \ "tradingName").as[String] mustBe tradingName
     }
   }
 
@@ -310,12 +311,12 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Confirm the company's registered office address"
-      document.getElementById("lead-paragraph").text.contains(defaultCompanyName) shouldBe true
-      document.getElementById("ro-address-address-line-1").text shouldBe "14 Test Default Street"
+      document.title() mustBe "Confirm the company's registered office address"
+      document.getElementById("lead-paragraph").text.contains(defaultCompanyName) mustBe true
+      document.getElementById("ro-address-address-line-1").text mustBe "14 Test Default Street"
     }
   }
 
@@ -344,16 +345,16 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
-      mdtpCookieData("csrfToken") shouldNot be("")
-      mdtpCookieData("sessionId") shouldBe SessionId
-      mdtpCookieData("userId") shouldBe userId
+      mdtpCookieData("csrfToken") mustNot be("")
+      mdtpCookieData("sessionId") mustBe SessionId
+      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Where will the company carry out most of its business activities?"
-      document.getElementById("ro-address-line-1").text shouldBe "11"
-      document.getElementsByAttributeValue("id", "ppob-address-line-1").size() shouldBe 0
+      document.title() mustBe "Where will the company carry out most of its business activities?"
+      document.getElementById("ro-address-line-1").text mustBe "11"
+      document.getElementsByAttributeValue("id", "ppob-address-line-1").size() mustBe 0
     }
 
     "show the page with the PPOB Address when PPOB Address is the same as RO Address" in {
@@ -382,16 +383,16 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
-      mdtpCookieData("csrfToken") shouldNot be("")
-      mdtpCookieData("sessionId") shouldBe SessionId
-      mdtpCookieData("userId") shouldBe userId
+      mdtpCookieData("csrfToken") mustNot be("")
+      mdtpCookieData("sessionId") mustBe SessionId
+      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Where will the company carry out most of its business activities?"
-      document.getElementById("ppob-address-line-1").text shouldBe "11"
-      document.getElementsByAttributeValue("id", "ro-address-line-1").size() shouldBe 0
+      document.title() mustBe "Where will the company carry out most of its business activities?"
+      document.getElementById("ppob-address-line-1").text mustBe "11"
+      document.getElementsByAttributeValue("id", "ro-address-line-1").size() mustBe 0
 
     }
 
@@ -421,16 +422,16 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
-      mdtpCookieData("csrfToken") shouldNot be("")
-      mdtpCookieData("sessionId") shouldBe SessionId
-      mdtpCookieData("userId") shouldBe userId
+      mdtpCookieData("csrfToken") mustNot be("")
+      mdtpCookieData("sessionId") mustBe SessionId
+      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Where will the company carry out most of its business activities?"
-      document.getElementById("ro-address-line-1").text shouldBe "11"
-      document.getElementById("ppob-address-line-1").text shouldBe "22"
+      document.title() mustBe "Where will the company carry out most of its business activities?"
+      document.getElementById("ro-address-line-1").text mustBe "11"
+      document.getElementById("ppob-address-line-1").text mustBe "22"
 
     }
 
@@ -458,17 +459,17 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
-      mdtpCookieData("csrfToken") shouldNot be("")
-      mdtpCookieData("sessionId") shouldBe SessionId
-      mdtpCookieData("userId") shouldBe userId
+      mdtpCookieData("csrfToken") mustNot be("")
+      mdtpCookieData("sessionId") mustBe SessionId
+      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Where will the company carry out most of its business activities?"
-      document.getElementById("ro-address-line-1").text shouldBe "11"
-      document.getElementsByAttributeValue("id", "ppob-address-line-1").size() shouldBe 0
-      an[Exception] shouldBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
+      document.title() mustBe "Where will the company carry out most of its business activities?"
+      document.getElementById("ro-address-line-1").text mustBe "11"
+      document.getElementsByAttributeValue("id", "ppob-address-line-1").size() mustBe 0
+      an[Exception] mustBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
     }
 
     "show the page without prepop addresses if a wrong address is returned from Business Registration" in {
@@ -512,17 +513,17 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
-      mdtpCookieData("csrfToken") shouldNot be("")
-      mdtpCookieData("sessionId") shouldBe SessionId
-      mdtpCookieData("userId") shouldBe userId
+      mdtpCookieData("csrfToken") mustNot be("")
+      mdtpCookieData("sessionId") mustBe SessionId
+      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Where will the company carry out most of its business activities?"
-      document.getElementById("ro-address-line-1").text shouldBe "11"
-      document.getElementsByAttributeValue("id", "ppob-address-line-1").size() shouldBe 0
-      an[Exception] shouldBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
+      document.title() mustBe "Where will the company carry out most of its business activities?"
+      document.getElementById("ro-address-line-1").text mustBe "11"
+      document.getElementsByAttributeValue("id", "ppob-address-line-1").size() mustBe 0
+      an[Exception] mustBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
     }
 
     "show the page with prepop addresses if data is returned from Business Registration" in {
@@ -568,35 +569,35 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
-      mdtpCookieData("csrfToken") shouldNot be("")
-      mdtpCookieData("sessionId") shouldBe SessionId
-      mdtpCookieData("userId") shouldBe userId
+      mdtpCookieData("csrfToken") mustNot be("")
+      mdtpCookieData("sessionId") mustBe SessionId
+      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Where will the company carry out most of its business activities?"
-      document.getElementById("ro-address-line-1").text shouldBe "11"
-      document.getElementById("ppob-address-line-1").text shouldBe "22"
+      document.title() mustBe "Where will the company carry out most of its business activities?"
+      document.getElementById("ro-address-line-1").text mustBe "11"
+      document.getElementById("ppob-address-line-1").text mustBe "22"
 
-      document.getElementById("chosenAddress-prepopaddress0").attr("value") shouldBe "prepopAddress0"
-      document.getElementById("chosenAddress-prepopaddress0").attr("name") shouldBe "chosenAddress"
-      document.getElementById("prepopaddress0-address-line-1").text shouldBe "prepopLine1"
-      document.getElementById("prepopaddress0-address-line-2").text shouldBe ", prepopLine2"
-      document.getElementById("prepopaddress0-post-code").text shouldBe ", AB9 8ZZ"
+      document.getElementById("chosenAddress-prepopaddress0").attr("value") mustBe "prepopAddress0"
+      document.getElementById("chosenAddress-prepopaddress0").attr("name") mustBe "chosenAddress"
+      document.getElementById("prepopaddress0-address-line-1").text mustBe "prepopLine1"
+      document.getElementById("prepopaddress0-address-line-2").text mustBe ", prepopLine2"
+      document.getElementById("prepopaddress0-post-code").text mustBe ", AB9 8ZZ"
 
-      document.getElementById("chosenAddress-prepopaddress1").attr("value") shouldBe "prepopAddress1"
-      document.getElementById("chosenAddress-prepopaddress1").attr("name") shouldBe "chosenAddress"
-      document.getElementById("prepopaddress1-address-line-1").text shouldBe "prepopLine11"
-      document.getElementById("prepopaddress1-address-line-2").text shouldBe ", prepopLine22"
-      document.getElementById("prepopaddress1-address-line-3").text shouldBe ", prepopLine33"
-      document.getElementById("prepopaddress1-country").text shouldBe ", prepopCountry"
+      document.getElementById("chosenAddress-prepopaddress1").attr("value") mustBe "prepopAddress1"
+      document.getElementById("chosenAddress-prepopaddress1").attr("name") mustBe "chosenAddress"
+      document.getElementById("prepopaddress1-address-line-1").text mustBe "prepopLine11"
+      document.getElementById("prepopaddress1-address-line-2").text mustBe ", prepopLine22"
+      document.getElementById("prepopaddress1-address-line-3").text mustBe ", prepopLine33"
+      document.getElementById("prepopaddress1-country").text mustBe ", prepopCountry"
     }
   }
 
   "POST PPOB Address" should {
     "save to microservice with full company details data and send Audit Event" in {
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
 
       stubPayeRegDocumentStatus(regId)
@@ -638,39 +639,39 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 303
-      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/business-contact-details")
+      response.status mustBe 303
+      response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/business-contact-details")
 
       val crPuts = findAll(patchRequestedFor(urlMatching(s"/paye-registration/$regId/company-details")))
       val captor = crPuts.get(0)
       val json = Json.parse(captor.getBodyAsString)
-      (json \ "ppobAddress").as[JsObject].toString() shouldBe roDoc
+      (json \ "ppobAddress").as[JsObject].toString() mustBe roDoc
 
       val reqPosts = findAll(postRequestedFor(urlMatching(s"/write/audit")))
       val captorPost = reqPosts.get(0)
       val jsonAudit = Json.parse(captorPost.getBodyAsString)
 
-      (jsonAudit \ "auditSource").as[JsString].value shouldBe "paye-registration-frontend"
-      (jsonAudit \ "auditType").as[JsString].value shouldBe "registeredOfficeUsedAsPrincipalPlaceOfBusiness"
-      (jsonAudit \ "detail" \ "externalUserId").as[JsString].value shouldBe "Ext-xxx"
-      (jsonAudit \ "detail" \ "authProviderId").as[JsString].value shouldBe "testAuthProviderId"
-      (jsonAudit \ "detail" \ "journeyId").as[JsString].value shouldBe regId
-      (jsonAudit \ "detail" \ "registeredOfficeAddress").as[JsString].value shouldBe "true"
+      (jsonAudit \ "auditSource").as[JsString].value mustBe "paye-registration-frontend"
+      (jsonAudit \ "auditType").as[JsString].value mustBe "registeredOfficeUsedAsPrincipalPlaceOfBusiness"
+      (jsonAudit \ "detail" \ "externalUserId").as[JsString].value mustBe "Ext-xxx"
+      (jsonAudit \ "detail" \ "authProviderId").as[JsString].value mustBe "testAuthProviderId"
+      (jsonAudit \ "detail" \ "journeyId").as[JsString].value mustBe regId
+      (jsonAudit \ "detail" \ "registeredOfficeAddress").as[JsString].value mustBe "true"
 
       val tags = (jsonAudit \ "tags").as[JsObject].value
-      tags("clientIP") shouldBe Json.toJson("-")
-      tags("path") shouldBe Json.toJson("/register-for-paye/where-company-carries-out-business-activities")
-      tags("clientPort") shouldBe Json.toJson("-")
-      tags.contains("X-Session-ID") shouldBe true
-      tags.contains("X-Request-ID") shouldBe true
-      tags.contains("deviceID") shouldBe true
-      tags("Authorization") shouldBe Json.toJson("-")
-      tags("transactionName") shouldBe Json.toJson("registeredOfficeUsedAsPrincipalPlaceOfBusiness")
+      tags("clientIP") mustBe Json.toJson("-")
+      tags("path") mustBe Json.toJson("/register-for-paye/where-company-carries-out-business-activities")
+      tags("clientPort") mustBe Json.toJson("-")
+      tags.contains("X-Session-ID") mustBe true
+      tags.contains("X-Request-ID") mustBe true
+      tags.contains("deviceID") mustBe true
+      tags("Authorization") mustBe Json.toJson("-")
+      tags("transactionName") mustBe Json.toJson("registeredOfficeUsedAsPrincipalPlaceOfBusiness")
     }
 
 
     "save to save for later with incomplete company details data and send Audit Event" in {
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
 
       stubPayeRegDocumentStatus(regId)
@@ -708,15 +709,15 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 303
-      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/business-contact-details")
+      response.status mustBe 303
+      response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/business-contact-details")
 
       val reqPosts = findAll(postRequestedFor(urlMatching(s"/write/audit")))
       val captorPost = reqPosts.get(0)
       val jsonAudit = Json.parse(captorPost.getBodyAsString)
 
-      (jsonAudit \ "auditSource").as[JsString].value shouldBe "paye-registration-frontend"
-      (jsonAudit \ "auditType").as[JsString].value shouldBe "registeredOfficeUsedAsPrincipalPlaceOfBusiness"
+      (jsonAudit \ "auditSource").as[JsString].value mustBe "paye-registration-frontend"
+      (jsonAudit \ "auditType").as[JsString].value mustBe "registeredOfficeUsedAsPrincipalPlaceOfBusiness"
     }
 
     "save to microservice with full company details data and prepop address and no Audit Event sent" in {
@@ -762,7 +763,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
            |  }
            |}""".stripMargin
 
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId)
 
@@ -783,17 +784,17 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
         ))
 
       val response = await(fResponse)
-      response.status shouldBe 303
-      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/business-contact-details")
+      response.status mustBe 303
+      response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/business-contact-details")
 
       val reqPosts = findAll(patchRequestedFor(urlMatching(s"/paye-registration/$regId/company-details")))
       val captor = reqPosts.get(0)
       val json = Json.parse(captor.getBodyAsString)
 
-      json shouldBe Json.parse(updatedPayeDoc)
+      json mustBe Json.parse(updatedPayeDoc)
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      reqPostsAudit.size shouldBe 0
+      reqPostsAudit.size mustBe 0
     }
 
     "return an error page when fail saving to microservice with full company details data and prepop address" in {
@@ -808,7 +809,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
            |  }
            |}""".stripMargin
 
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId)
       stubGet(s"/save4later/paye-registration-frontend/$regId", 200, "")
@@ -823,7 +824,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
         ))
 
       val response = await(fResponse)
-      response.status shouldBe 500
+      response.status mustBe 500
     }
   }
 
@@ -878,7 +879,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
            |}
        """.stripMargin
 
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId)
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
@@ -893,14 +894,14 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
-      response.status shouldBe 303
-      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/business-contact-details")
+      response.status mustBe 303
+      response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/business-contact-details")
 
       val reqPosts = findAll(postRequestedFor(urlMatching(s"/business-registration/$regId/addresses")))
       val captor = reqPosts.get(0)
       val json = Json.parse(captor.getBodyAsString)
 
-      json shouldBe Json.parse(newAddress2BusReg)
+      json mustBe Json.parse(newAddress2BusReg)
     }
   }
 
@@ -919,7 +920,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
     }
 
     "get prepopulated from Business Registration" in {
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId)
 
@@ -947,21 +948,21 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
-      response.status shouldBe 200
+      response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
-      mdtpCookieData("csrfToken") shouldNot be("")
-      mdtpCookieData("sessionId") shouldBe SessionId
-      mdtpCookieData("userId") shouldBe userId
+      mdtpCookieData("csrfToken") mustNot be("")
+      mdtpCookieData("sessionId") mustBe SessionId
+      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "What are the company's contact details?"
-      document.getElementById("businessEmail").attr("value") shouldBe "email@email.zzz"
-      document.getElementById("mobileNumber").attr("value") shouldBe "1234567890"
-      document.getElementById("phoneNumber").attr("value") shouldBe "0987654321"
+      document.title() mustBe "What are the company's contact details?"
+      document.getElementById("businessEmail").attr("value") mustBe "email@email.zzz"
+      document.getElementById("mobileNumber").attr("value") mustBe "1234567890"
+      document.getElementById("phoneNumber").attr("value") mustBe "0987654321"
     }
 
     "get prepopulated from Paye Registration" in {
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId)
 
@@ -986,17 +987,17 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
-      response.status shouldBe 200
+      response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "What are the company's contact details?"
-      document.getElementById("businessEmail").attr("value") shouldBe "email@email.zzz"
-      document.getElementById("mobileNumber").attr("value") shouldBe "1234567890"
-      document.getElementById("phoneNumber").attr("value") shouldBe "0987654321"
+      document.title() mustBe "What are the company's contact details?"
+      document.getElementById("businessEmail").attr("value") mustBe "email@email.zzz"
+      document.getElementById("mobileNumber").attr("value") mustBe "1234567890"
+      document.getElementById("phoneNumber").attr("value") mustBe "0987654321"
     }
 
     "not be prepopulated if no data is found in Business Registration or Paye Registration" in {
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId)
 
@@ -1016,17 +1017,17 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
-      response.status shouldBe 200
+      response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "What are the company's contact details?"
-      document.getElementById("businessEmail").attr("value") shouldBe ""
-      document.getElementById("mobileNumber").attr("value") shouldBe ""
-      document.getElementById("phoneNumber").attr("value") shouldBe ""
+      document.title() mustBe "What are the company's contact details?"
+      document.getElementById("businessEmail").attr("value") mustBe ""
+      document.getElementById("mobileNumber").attr("value") mustBe ""
+      document.getElementById("phoneNumber").attr("value") mustBe ""
     }
 
     "not be prepopulated if no data is found in Paye Registration and error is returned from Business Registration" in {
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId)
 
@@ -1046,13 +1047,13 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
-      response.status shouldBe 200
+      response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "What are the company's contact details?"
-      document.getElementById("businessEmail").attr("value") shouldBe ""
-      document.getElementById("mobileNumber").attr("value") shouldBe ""
-      document.getElementById("phoneNumber").attr("value") shouldBe ""
+      document.title() mustBe "What are the company's contact details?"
+      document.getElementById("businessEmail").attr("value") mustBe ""
+      document.getElementById("mobileNumber").attr("value") mustBe ""
+      document.getElementById("phoneNumber").attr("value") mustBe ""
     }
 
     "not be prepopulated if no data is found in Paye Registration and corrupted data is returned from Business Registration" in {
@@ -1068,7 +1069,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
            |}""".stripMargin
       }
 
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId)
 
@@ -1088,13 +1089,13 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
-      response.status shouldBe 200
+      response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "What are the company's contact details?"
-      document.getElementById("businessEmail").attr("value") shouldBe ""
-      document.getElementById("mobileNumber").attr("value") shouldBe ""
-      document.getElementById("phoneNumber").attr("value") shouldBe ""
+      document.title() mustBe "What are the company's contact details?"
+      document.getElementById("businessEmail").attr("value") mustBe ""
+      document.getElementById("mobileNumber").attr("value") mustBe ""
+      document.getElementById("phoneNumber").attr("value") mustBe ""
     }
   }
 
@@ -1134,7 +1135,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
          """.stripMargin
 
     "upsert the business contact details in PAYE Registration and send Audit Event if different from Prepopulation" in {
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId)
 
@@ -1153,11 +1154,11 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
         ))
 
       val response = await(fResponse)
-      response.status shouldBe 303
-      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/what-company-does")
+      response.status mustBe 303
+      response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/what-company-does")
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      reqPostsAudit.size shouldBe 1
+      reqPostsAudit.size mustBe 1
       val captorPost = reqPostsAudit.get(0)
       val jsonAudit = Json.parse(captorPost.getBodyAsString)
 
@@ -1173,23 +1174,23 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
         Some(newTelephoneNumber)
       )
 
-      (jsonAudit \ "auditSource").as[JsString].value shouldBe "paye-registration-frontend"
-      (jsonAudit \ "auditType").as[JsString].value shouldBe "businessContactAmendment"
-      (jsonAudit \ "detail" \ "externalUserId").as[JsString].value shouldBe "Ext-xxx"
-      (jsonAudit \ "detail" \ "authProviderId").as[JsString].value shouldBe "testAuthProviderId"
-      (jsonAudit \ "detail" \ "journeyId").as[JsString].value shouldBe regId
-      (jsonAudit \ "detail" \ "previousContactDetails").as[DigitalContactDetails] shouldBe previousContactDetails
-      (jsonAudit \ "detail" \ "newContactDetails").as[DigitalContactDetails] shouldBe newContactDetails
+      (jsonAudit \ "auditSource").as[JsString].value mustBe "paye-registration-frontend"
+      (jsonAudit \ "auditType").as[JsString].value mustBe "businessContactAmendment"
+      (jsonAudit \ "detail" \ "externalUserId").as[JsString].value mustBe "Ext-xxx"
+      (jsonAudit \ "detail" \ "authProviderId").as[JsString].value mustBe "testAuthProviderId"
+      (jsonAudit \ "detail" \ "journeyId").as[JsString].value mustBe regId
+      (jsonAudit \ "detail" \ "previousContactDetails").as[DigitalContactDetails] mustBe previousContactDetails
+      (jsonAudit \ "detail" \ "newContactDetails").as[DigitalContactDetails] mustBe newContactDetails
 
       val tags = (jsonAudit \ "tags").as[JsObject].value
-      tags("clientIP") shouldBe Json.toJson("-")
-      tags("path") shouldBe Json.toJson("/register-for-paye/business-contact-details")
-      tags("clientPort") shouldBe Json.toJson("-")
-      tags.contains("X-Session-ID") shouldBe true
-      tags.contains("X-Request-ID") shouldBe true
-      tags.contains("deviceID") shouldBe true
-      tags("Authorization") shouldBe Json.toJson("-")
-      tags("transactionName") shouldBe Json.toJson("businessContactAmendment")
+      tags("clientIP") mustBe Json.toJson("-")
+      tags("path") mustBe Json.toJson("/register-for-paye/business-contact-details")
+      tags("clientPort") mustBe Json.toJson("-")
+      tags.contains("X-Session-ID") mustBe true
+      tags.contains("X-Request-ID") mustBe true
+      tags.contains("deviceID") mustBe true
+      tags("Authorization") mustBe Json.toJson("-")
+      tags("transactionName") mustBe Json.toJson("businessContactAmendment")
     }
 
     "upsert the business contact details in PAYE Registration with Prepopulation data and don't send Audit Event" in {
@@ -1205,7 +1206,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
            |}""".stripMargin
       }
 
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId)
 
@@ -1243,11 +1244,11 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
         ))
 
       val response = await(fResponse)
-      response.status shouldBe 303
-      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/what-company-does")
+      response.status mustBe 303
+      response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/what-company-does")
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      reqPostsAudit.size shouldBe 0
+      reqPostsAudit.size mustBe 0
     }
   }
 }

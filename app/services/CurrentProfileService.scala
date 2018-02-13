@@ -16,29 +16,28 @@
 
 package services
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import connectors._
 import enums.{CacheKeys, PAYEStatus}
 import models.external.CurrentProfile
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.RegistrationWhitelist
 
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 
-@Singleton
-class CurrentProfileService @Inject()(val businessRegistrationConnector: BusinessRegistrationConnector,
-                                      val payeRegistrationConnector: PAYERegistrationConnector,
-                                      val keystoreConnector: KeystoreConnector,
-                                      val companyRegistrationConnector: CompanyRegistrationConnector) extends CurrentProfileSrv
+class CurrentProfileServiceImpl @Inject()(val businessRegistrationConnector: BusinessRegistrationConnector,
+                                          val payeRegistrationConnector: PAYERegistrationConnector,
+                                          val keystoreConnector: KeystoreConnector,
+                                          val companyRegistrationConnector: CompanyRegistrationConnector) extends CurrentProfileService
 
-trait CurrentProfileSrv extends RegistrationWhitelist {
+trait CurrentProfileService extends RegistrationWhitelist {
 
-  val businessRegistrationConnector: BusinessRegistrationConnect
-  val payeRegistrationConnector: PAYERegistrationConnect
-  val companyRegistrationConnector: CompanyRegistrationConnect
-  val keystoreConnector: KeystoreConnect
+  val businessRegistrationConnector: BusinessRegistrationConnector
+  val payeRegistrationConnector: PAYERegistrationConnector
+  val companyRegistrationConnector: CompanyRegistrationConnector
+  val keystoreConnector: KeystoreConnector
 
   def fetchAndStoreCurrentProfile(implicit hc: HeaderCarrier) : Future[CurrentProfile] = {
     for {

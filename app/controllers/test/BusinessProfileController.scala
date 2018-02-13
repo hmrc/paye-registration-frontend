@@ -16,37 +16,38 @@
 
 package controllers.test
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
-import config.FrontendAuthConnector
 import connectors._
-import connectors.test.{TestBusinessRegConnect, TestBusinessRegConnector}
+import connectors.test.TestBusinessRegConnector
+import controllers.{AuthRedirectUrls, PayeBaseController}
 import models.external.BusinessProfile
+import play.api.Configuration
+import play.api.i18n.MessagesApi
 import play.api.mvc.{AnyContent, Request}
-import uk.gov.hmrc.play.frontend.auth.Actions
-import uk.gov.hmrc.play.frontend.controller.FrontendController
+import services.{CompanyDetailsService, IncorporationInformationService, S4LService}
+import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.Future
 
-@Singleton
-class BusinessProfileController @Inject()(val keystoreConnector: KeystoreConnector,
-                                          val businessRegConnector: BusinessRegistrationConnector,
-                                          val testBusinessRegConnector: TestBusinessRegConnector) extends BusinessProfileCtrl {
-  val authConnector = FrontendAuthConnector
-}
+class BusinessProfileControllerImpl @Inject()(val messagesApi: MessagesApi,
+                                              val config: Configuration,
+                                              val keystoreConnector: KeystoreConnector,
+                                              val businessRegConnector: BusinessRegistrationConnector,
+                                              val authConnector: AuthConnector,
+                                              val s4LService: S4LService,
+                                              val companyDetailsService: CompanyDetailsService,
+                                              val incorpInfoService: IncorporationInformationService,
+                                              val testBusinessRegConnector: TestBusinessRegConnector) extends BusinessProfileController with AuthRedirectUrls
 
-trait BusinessProfileCtrl extends FrontendController with Actions {
-  val keystoreConnector: KeystoreConnect
-  val businessRegConnector: BusinessRegistrationConnect
-  val testBusinessRegConnector: TestBusinessRegConnect
+trait BusinessProfileController extends PayeBaseController {
+  val businessRegConnector: BusinessRegistrationConnector
+  val testBusinessRegConnector: TestBusinessRegConnector
 
-  def businessProfileSetup = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        doBusinessProfileSetup map { res =>
-          Ok(res.toString)
-        }
+  def businessProfileSetup = isAuthorised { implicit request =>
+    doBusinessProfileSetup map { res =>
+      Ok(res.toString)
+    }
   }
 
   protected[controllers] def doBusinessProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = {

@@ -16,33 +16,30 @@
 
 package services
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import connectors.{AddressLookupConnect, AddressLookupConnector}
+import connectors.AddressLookupConnector
 import models.Address
-import play.api.libs.json.JsValue
 import play.api.mvc.{Call, Request}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.config.ServicesConfig
-import utils.{PAYEFeatureSwitch, PAYEFeatureSwitches}
+import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import utils.{PAYEFeatureSwitch, PAYEFeatureSwitches}
 
 import scala.concurrent.Future
 
-@Singleton
-class AddressLookupService @Inject()(val featureSwitch: PAYEFeatureSwitch,
-                                     val addressLookupConnector: AddressLookupConnector,
-                                     injMetrics: MetricsService)
-  extends AddressLookupSrv with ServicesConfig {
-  lazy val payeRegistrationUrl = getConfString("paye-registration-frontend.www.url","")
-  val metricsService: MetricsSrv = injMetrics
+class AddressLookupServiceImpl @Inject()(val featureSwitch: PAYEFeatureSwitch,
+                                         val addressLookupConnector: AddressLookupConnector,
+                                         servicesConfig: ServicesConfig,
+                                         val metricsService: MetricsService) extends AddressLookupService {
+  lazy val payeRegistrationUrl = servicesConfig.getConfString("paye-registration-frontend.www.url","")
 }
 
-trait AddressLookupSrv {
+trait AddressLookupService {
   val payeRegistrationUrl : String
-  val addressLookupConnector: AddressLookupConnect
+  val addressLookupConnector: AddressLookupConnector
   val featureSwitch: PAYEFeatureSwitches
-  val metricsService: MetricsSrv
+  val metricsService: MetricsService
 
   def buildAddressLookupUrl(key: String, call: Call)(implicit hc: HeaderCarrier): Future[String] = {
     if(useAddressLookupFrontend) {

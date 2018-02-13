@@ -16,55 +16,35 @@
 
 package controllers.userJourney
 
-import builders.AuthBuilder
-import connectors.PAYERegistrationConnector
-import models.external.{CompanyRegistrationProfile, CurrentProfile}
-import play.api.http.Status
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import testHelpers.PAYERegSpec
 
-import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
-
-class DashboardControllerSpec extends PAYERegSpec {
+class DashboardControllerSpec extends PayeComponentSpec with PayeFakedApp {
   val fakeRequest = FakeRequest("GET", "/")
-  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
 
   class Setup {
-    val controller = new DashboardCtrl {
-      override val authConnector = mockAuthConnector
-      override val keystoreConnector = mockKeystoreConnector
-      implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
-      override val companyRegUrl = "testUrl"
-      override val companyRegUri = "/testUri"
-      override val payeRegistrationConnector = mockPayeRegistrationConnector
+    val controller = new DashboardController {
+      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
 
-      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
-        f(CurrentProfile(
-          "12345",
-          CompanyRegistrationProfile("held", "txId"),
-          "ENG",
-          payeRegistrationSubmitted = false
-        ))
-      }
+      override val incorpInfoService        = mockIncorpInfoService
+      override val companyDetailsService    = mockCompanyDetailsService
+      override val s4LService               = mockS4LService
+      override val authConnector            = mockAuthConnector
+      override val keystoreConnector        = mockKeystoreConnector
+      implicit val messagesApi: MessagesApi = mockMessagesApi
+      override val companyRegUrl            = "testUrl"
+      override val companyRegUri            = "/testUri"
     }
   }
 
   "POST /dashboard" should {
     "return 303" in new Setup {
-      val result = controller.dashboard(fakeRequest)
-      status(result) shouldBe Status.SEE_OTHER
-    }
-
-    "redirect to dashboard page" in new Setup {
-
-      AuthBuilder.showWithAuthorisedUser(controller.dashboard, mockAuthConnector) {
-        (result: Future[Result]) =>
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controller.companyRegUrl}${controller.companyRegUri}/company-registration-overview")
+      AuthHelpers.showAuthorised(controller.dashboard, fakeRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(s"${controller.companyRegUrl}${controller.companyRegUri}/company-registration-overview")
       }
     }
   }

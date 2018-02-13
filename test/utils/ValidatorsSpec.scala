@@ -20,9 +20,9 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 import forms.employmentDetails.FirstPaymentForm
-import uk.gov.hmrc.play.test.UnitSpec
+import helpers.PayeComponentSpec
 
-class ValidatorsSpec extends UnitSpec with DateUtil {
+class ValidatorsSpec extends PayeComponentSpec with DateUtil {
   "calling isInvalidDate" should {
     "return an error message if the day is not valid" in {
       val data : Map[String, String] = Map(
@@ -30,7 +30,7 @@ class ValidatorsSpec extends UnitSpec with DateUtil {
         "firstPayMonth" -> "12",
         "firstPayDay" -> "32")
       val boundForm = FirstPaymentForm.form.bind(data)
-      boundForm.errors.map(_.message) shouldBe List("pages.firstPayment.date.invalidRange")
+      boundForm.errors.map(_.message) mustBe List("pages.firstPayment.date.invalidRange")
     }
 
     "return an error message if the month is not valid" in {
@@ -39,7 +39,7 @@ class ValidatorsSpec extends UnitSpec with DateUtil {
         "firstPayMonth" -> "13",
         "firstPayDay" -> "31")
       val boundForm = FirstPaymentForm.form.bind(data)
-      boundForm.errors.map(_.message) shouldBe List("pages.firstPayment.date.invalidRange")
+      boundForm.errors.map(_.message) mustBe List("pages.firstPayment.date.invalidRange")
     }
 
     "return an error message if the year is not valid" in {
@@ -48,7 +48,7 @@ class ValidatorsSpec extends UnitSpec with DateUtil {
         "firstPayMonth" -> "12",
         "firstPayDay" -> "31")
       val boundForm = FirstPaymentForm.form.bind(data)
-      boundForm.errors.map(_.message) shouldBe List("pages.firstPayment.date.invalidRange")
+      boundForm.errors.map(_.message) mustBe List("pages.firstPayment.date.invalidRange")
     }
   }
 
@@ -61,7 +61,7 @@ class ValidatorsSpec extends UnitSpec with DateUtil {
         "firstPayMonth" -> futureDate._2,
         "firstPayDay" -> futureDate._3)
       val boundForm = FirstPaymentForm.form.bind(data)
-      boundForm.errors.map(_.message) shouldBe List("pages.firstPayment.date.invalidRange")
+      boundForm.errors.map(_.message) mustBe List("pages.firstPayment.date.invalidRange")
     }
   }
 }

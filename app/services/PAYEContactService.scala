@@ -16,34 +16,33 @@
 
 package services
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
+import connectors.PAYERegistrationConnector
 import enums.{CacheKeys, DownstreamOutcome}
 import models.Address
 import models.api.{PAYEContact => PAYEContactAPI}
+import models.external.AuditingInformation
 import models.view.{PAYEContactDetails, CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
 import play.api.Logger
 import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.frontend.auth.AuthContext
-
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 import scala.concurrent.Future
 
-@Singleton
-class PAYEContactService @Inject()(val payeRegConnector: PAYERegistrationConnector,
-                                   val s4LService: S4LService,
-                                   val companyDetailsService: CompanyDetailsService,
-                                   val prepopService: PrepopulationService,
-                                   val auditService: AuditService) extends PAYEContactSrv
+class PAYEContactServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
+                                       val s4LService: S4LService,
+                                       val companyDetailsService: CompanyDetailsService,
+                                       val prepopService: PrepopulationService,
+                                       val auditService: AuditService) extends PAYEContactService
 
-trait PAYEContactSrv  {
-  val payeRegConnector: PAYERegistrationConnect
-  val s4LService: S4LSrv
-  val companyDetailsService: CompanyDetailsSrv
-  val prepopService: PrepopulationSrv
-  val auditService: AuditSrv
+trait PAYEContactService  {
+  val payeRegConnector: PAYERegistrationConnector
+  val s4LService: S4LService
+  val companyDetailsService: CompanyDetailsService
+  val prepopService: PrepopulationService
+  val auditService: AuditService
 
   private[services] def viewToAPI(viewData: PAYEContactView): Either[PAYEContactView, PAYEContactAPI] = viewData match {
     case PAYEContactView(Some(contactDetails), Some(correspondenceAddress)) =>
@@ -107,7 +106,7 @@ trait PAYEContactSrv  {
   }
 
   def submitPayeContactDetails(regId: String, newViewData: PAYEContactDetails)
-                              (implicit hc: HeaderCarrier, authContext: AuthContext, req: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
+                              (implicit hc: HeaderCarrier, auditInfo: AuditingInformation, req: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
     for {
       cachedContactData <- getPAYEContact(regId) flatMap {
         case currentView if dataHasChanged(newViewData, currentView.contactDetails) =>

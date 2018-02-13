@@ -16,10 +16,10 @@
 
 package models.test
 
+import helpers.PayeComponentSpec
 import play.api.libs.json.{JsSuccess, Json}
-import uk.gov.hmrc.play.test.UnitSpec
 
-class CoHoCompanyDetailsFormModelSpec extends UnitSpec {
+class CoHoCompanyDetailsFormModelSpec extends PayeComponentSpec {
   "CoHoCompanyDetailsFormModel" should {
 
     val tstJson = Json.parse(
@@ -44,10 +44,11 @@ class CoHoCompanyDetailsFormModelSpec extends UnitSpec {
     )
 
     "read from json with full data" in {
-      Json.fromJson[CoHoCompanyDetailsFormModel](tstJson) shouldBe JsSuccess(tstModel)
+      Json.fromJson[CoHoCompanyDetailsFormModel](tstJson) mustBe JsSuccess(tstModel)
     }
+
     "write to json with full data" in {
-      Json.toJson[CoHoCompanyDetailsFormModel](tstModel) shouldBe tstJson
+      Json.toJson[CoHoCompanyDetailsFormModel](tstModel) mustBe tstJson
     }
   }
 }

@@ -14,23 +14,10 @@
  * limitations under the License.
  */
 
-package mocks.internal
+package helpers.fixtures
 
-import connectors.BusinessRegistrationConnector
 import models.external.BusinessProfile
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
 
-import scala.concurrent.Future
-
-trait BusinessRegistrationConnectorMock {
-  this: MockitoSugar =>
-
-    lazy val mockBusinessRegistrationConnector = mock[BusinessRegistrationConnector]
-
-    def mockBusinessRegFetch(response: Future[BusinessProfile]) = {
-        when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
-          .thenReturn(response)
-    }
+trait BusinessRegistrationFixture {
+  val validBusinessRegistrationResponse = BusinessProfile("12345", "ENG")
 }

@@ -16,47 +16,48 @@
 
 package controllers.test
 
-import builders.AuthBuilder
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.BusinessProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import play.api.test.Helpers.OK
-import services.S4LSrv
-import testHelpers.PAYERegSpec
-
-import scala.concurrent.Future
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-class TestCacheControllerSpec extends PAYERegSpec {
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-  val mockS4LService = mock[S4LSrv]
-
+class TestCacheControllerSpec extends PayeComponentSpec with PayeFakedApp {
   val testHttpResponse = new HttpResponse {}
 
-  class Setup {
-    val controller = new TestCacheCtrl {
-      override val s4LService = mockS4LService
-      override val businessRegConnector = mockBusinessRegistrationConnector
-      override val messagesApi = mockMessages
-      override val authConnector = mockAuthConnector
+  class Setup extends CodeMocks {
+    val controller = new TestCacheController {
+      override val redirectToLogin        = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign     = MockAuthRedirects.redirectToPostSign
+
+      override val incorpInfoService      = mockIncorpInfoService
+      override val companyDetailsService  = mockCompanyDetailsService
+      override val keystoreConnector      = mockKeystoreConnector
+      override val s4LService             = mockS4LService
+      override val businessRegConnector   = mockBusinessRegistrationConnector
+      override val messagesApi            = mockMessagesApi
+      override val authConnector          = mockAuthConnector
     }
   }
 
   "tearDownS4L" should {
     "return an OK" when {
       "Save4Later has been cleared" in new Setup {
-        mockFetchCurrentProfile()
-        mockBusinessRegFetch(
-          BusinessProfile(registrationID = "1",
-                          language = "EN")
-        )
 
-        when(mockS4LService.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockAuthConnector.authorise[Unit](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+          .thenReturn(Future.successful(()))
+
+        mockBusinessRegFetch(Future(BusinessProfile(registrationID = "1", language = "EN")))
+
+        when(mockS4LService.clear(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testHttpResponse))
 
-        AuthBuilder.showWithAuthorisedUser(controller.tearDownS4L, mockAuthConnector) { result =>
-          status(result) shouldBe OK
-        }
+        val result = controller.tearDownS4L()(FakeRequest())
+        status(result) mustBe OK
       }
     }
   }

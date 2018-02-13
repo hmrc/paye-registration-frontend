@@ -16,29 +16,28 @@
 
 package connectors
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import com.codahale.metrics.{Counter, Timer}
-import config.PAYESessionCache
 import play.api.libs.json.Format
-import services.{MetricsService, MetricsSrv}
+import services.MetricsService
 import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
-@Singleton
-class KeystoreConnector @Inject()(val sessionCache: PAYESessionCache, val metricsService: MetricsService) extends KeystoreConnect {
+class KeystoreConnectorImpl @Inject()(val sessionCache: SessionCache,
+                                      val metricsService: MetricsService) extends KeystoreConnector {
   val successCounter        = metricsService.keystoreSuccessResponseCounter
   val emptyResponseCounter  = metricsService.keystoreEmptyResponseCounter
   val failedCounter         = metricsService.keystoreFailedResponseCounter
   def timer                 = metricsService.keystoreResponseTimer.time()
 }
 
-trait KeystoreConnect {
+trait KeystoreConnector {
   val sessionCache: SessionCache
-  val metricsService: MetricsSrv
+  val metricsService: MetricsService
 
   val successCounter: Counter
   val emptyResponseCounter: Counter

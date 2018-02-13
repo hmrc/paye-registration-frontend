@@ -16,121 +16,128 @@
 
 package connectors.test
 
-import connectors.PAYERegistrationConnector
+import config.WSHttp
 import enums.DownstreamOutcome
-import fixtures.PAYERegistrationFixture
+import helpers.PayeComponentSpec
 import models.api.PAYERegistration
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.JsObject
-import play.mvc.Http.Status
-import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http._
-import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
-class TestPAYERegConnectorSpec extends PAYERegSpec with PAYERegistrationFixture {
+class TestPAYERegConnectorSpec extends PayeComponentSpec {
 
-  val mockPAYERegConnector = mock[PAYERegistrationConnector]
-
-  class Setup {
-    val connector = new TestPAYERegConnect {
-      override val payeRegConnector = mockPAYERegConnector
-      override val http: WSHttp = mockWSHttp
+  class Setup extends CodeMocks {
+    val connector = new TestPAYERegConnector {
+      override val payeRegConnector   = mockPAYERegConnector
+      override val http: WSHttp       = mockWSHttp
       override val payeRegUrl: String = "tst-url"
     }
   }
 
-  implicit val hc = HeaderCarrier()
-
   "Calling addPAYERegistration" should {
     "return a successful outcome for a successful add of PAYE Registration" in new Setup {
-      mockHttpPOST[PAYERegistration, HttpResponse]("tst-url", HttpResponse(Status.OK))
+      when(mockWSHttp.POST[PAYERegistration, HttpResponse](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(HttpResponse(OK)))
 
-      await(connector.addPAYERegistration(validPAYERegistrationAPI)) shouldBe DownstreamOutcome.Success
+      await(connector.addPAYERegistration(Fixtures.validPAYERegistrationAPI)) mustBe DownstreamOutcome.Success
     }
-    "return a failed outcome for an unsuccessful add of PAYE Registration" in new Setup {
-      mockHttpPOST[PAYERegistration, HttpResponse]("tst-url", HttpResponse(Status.BAD_REQUEST))
 
-      await(connector.addPAYERegistration(validPAYERegistrationAPI)) shouldBe DownstreamOutcome.Failure
+    "return a failed outcome for an unsuccessful add of PAYE Registration" in new Setup {
+      when(mockWSHttp.POST[PAYERegistration, HttpResponse](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(HttpResponse(BAD_REQUEST)))
+
+      await(connector.addPAYERegistration(Fixtures.validPAYERegistrationAPI)) mustBe DownstreamOutcome.Failure
     }
   }
 
   "Calling addTestCompanyDetails" should {
     "return a successful outcome for a successful add of Company Details" in new Setup {
       mockFetchCurrentProfile("54321")
-      when(mockPAYERegConnector.upsertCompanyDetails(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCompanyDetailsAPI))
 
-      await(connector.addTestCompanyDetails(validCompanyDetailsAPI, "54321")) shouldBe DownstreamOutcome.Success
+      when(mockPAYERegConnector.upsertCompanyDetails(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Fixtures.validCompanyDetailsAPI))
+
+      await(connector.addTestCompanyDetails(Fixtures.validCompanyDetailsAPI, "54321")) mustBe DownstreamOutcome.Success
     }
+
     "return a failed outcome for an unsuccessful add of Company Details" in new Setup {
       mockFetchCurrentProfile("54321")
+
       when(mockPAYERegConnector.upsertCompanyDetails(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new RuntimeException("tst")))
 
-      await(connector.addTestCompanyDetails(validCompanyDetailsAPI, "54321")) shouldBe DownstreamOutcome.Failure
+      await(connector.addTestCompanyDetails(Fixtures.validCompanyDetailsAPI, "54321")) mustBe DownstreamOutcome.Failure
     }
   }
 
   "Calling addTestPAYEContact" should {
     "return a successful outcome for a successful add of PAYE Contact" in new Setup {
       mockFetchCurrentProfile("54321")
-      when(mockPAYERegConnector.upsertPAYEContact(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validPAYEContactAPI))
 
-      await(connector.addTestPAYEContact(validPAYEContactAPI, "54321")) shouldBe DownstreamOutcome.Success
+      when(mockPAYERegConnector.upsertPAYEContact(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Fixtures.validPAYEContactAPI))
+
+      await(connector.addTestPAYEContact(Fixtures.validPAYEContactAPI, "54321")) mustBe DownstreamOutcome.Success
     }
+
     "return a failed outcome for an unsuccessful add of PAYE Contact" in new Setup {
       mockFetchCurrentProfile("54321")
+
       when(mockPAYERegConnector.upsertPAYEContact(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new RuntimeException("tst")))
 
-      await(connector.addTestPAYEContact(validPAYEContactAPI, "54321")) shouldBe DownstreamOutcome.Failure
+      await(connector.addTestPAYEContact(Fixtures.validPAYEContactAPI, "54321")) mustBe DownstreamOutcome.Failure
     }
   }
 
   "Calling testRegistrationTeardown" should {
     "return a successful outcome for a successful teardown" in new Setup {
-      mockHttpGet[HttpResponse]("tst-url", HttpResponse(Status.OK))
+      when(mockWSHttp.GET[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(HttpResponse(OK)))
 
-      await(connector.testRegistrationTeardown()) shouldBe DownstreamOutcome.Success
+      await(connector.testRegistrationTeardown()) mustBe DownstreamOutcome.Success
     }
-    "return a failed outcome for an unsuccessful teardown" in new Setup {
-      val e = new RuntimeException("tst")
-      mockHttpFailedGET[HttpResponse]("tst-url", e)
 
-      await(connector.testRegistrationTeardown()) shouldBe DownstreamOutcome.Failure
+    "return a failed outcome for an unsuccessful teardown" in new Setup {
+      when(mockWSHttp.GET[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new RuntimeException))
+
+      await(connector.testRegistrationTeardown()) mustBe DownstreamOutcome.Failure
     }
   }
 
   "Calling tearDownIndividualRegistration" should {
     "return a successful outcome for a successful teardown" in new Setup {
-      mockHttpGet[HttpResponse]("tst-url", HttpResponse(Status.OK))
+      when(mockWSHttp.GET[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(HttpResponse(OK)))
 
-      await(connector.tearDownIndividualRegistration("regId")) shouldBe DownstreamOutcome.Success
+      await(connector.tearDownIndividualRegistration("regId")) mustBe DownstreamOutcome.Success
     }
-    "return a failed outcome for an unsuccessful teardown" in new Setup {
-      val e = new RuntimeException("tst")
-      mockHttpFailedGET[HttpResponse]("tst-url", e)
 
-      await(connector.tearDownIndividualRegistration("regId")) shouldBe DownstreamOutcome.Failure
+    "return a failed outcome for an unsuccessful teardown" in new Setup {
+      when(mockWSHttp.GET[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new RuntimeException))
+
+      await(connector.tearDownIndividualRegistration("regId")) mustBe DownstreamOutcome.Failure
     }
   }
 
   "Calling update-status" should {
     "return a successful outcome for a successful update" in new Setup {
-      mockHttpPOST[JsObject, HttpResponse]("tst-url", HttpResponse(Status.OK))
+      when(mockWSHttp.POST[JsObject, HttpResponse](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(HttpResponse(OK)))
 
-      await(connector.updateStatus("regId", "rejected")) shouldBe DownstreamOutcome.Success
+      await(connector.updateStatus("regId", "rejected")) mustBe DownstreamOutcome.Success
     }
-    "return a failed outcome for an unsuccessful teardown" in new Setup {
-      val e = new RuntimeException("tst")
-      mockHttpFailedPOST[JsObject, HttpResponse]("tst-url", e)
 
-      await(connector.updateStatus("regId", "submitted")) shouldBe DownstreamOutcome.Failure
+    "return a failed outcome for an unsuccessful teardown" in new Setup {
+      when(mockWSHttp.POST[JsObject, HttpResponse](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new RuntimeException))
+
+      await(connector.updateStatus("regId", "submitted")) mustBe DownstreamOutcome.Failure
     }
   }
 }

@@ -16,11 +16,11 @@
 
 package utils
 
+import helpers.PayeComponentSpec
 import models.Address
-import play.api.libs.json.{JsSuccess, JsValue, Format, Json}
-import uk.gov.hmrc.play.test.UnitSpec
+import play.api.libs.json.{Format, JsValue, Json}
 
-class FormattersSpec extends UnitSpec {
+class FormattersSpec extends PayeComponentSpec {
 
   val addr1 = Address(
     line1 = "line 1",
@@ -59,7 +59,7 @@ class FormattersSpec extends UnitSpec {
          """.stripMargin
       )
 
-      testJsonWrite[String](map) shouldBe json
+      testJsonWrite[String](map) mustBe json
     }
 
     "write a Map[Int, Address]" in {
@@ -84,7 +84,7 @@ class FormattersSpec extends UnitSpec {
          """.stripMargin
       )
 
-      testJsonWrite[Address](map) shouldBe json
+      testJsonWrite[Address](map) mustBe json
     }
   }
 
@@ -99,7 +99,7 @@ class FormattersSpec extends UnitSpec {
          """.stripMargin
       )
 
-      testJsonRead[String](json).get shouldBe map
+      testJsonRead[String](json).get mustBe map
     }
 
     "read a Map[Int, Address]" in {
@@ -124,7 +124,7 @@ class FormattersSpec extends UnitSpec {
          """.stripMargin
       )
 
-      testJsonRead[Address](json).get shouldBe map
+      testJsonRead[Address](json).get mustBe map
     }
   }
 

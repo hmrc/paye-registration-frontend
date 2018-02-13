@@ -16,41 +16,38 @@
 
 package connectors.test
 
-import fixtures.CoHoAPIFixture
+import helpers.PayeComponentSpec
 import play.api.libs.json.JsValue
-import testHelpers.PAYERegSpec
+import uk.gov.hmrc.http.HttpResponse
 
-import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
-
-class TestCoHoAPIConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
+class TestCoHoAPIConnectorSpec extends PayeComponentSpec {
 
   val testUrl = "testIncorpInfoUrl"
-  implicit val hc = HeaderCarrier()
 
-  class Setup {
-    val connector = new TestIncorpInfoConnector {
+  class Setup extends CodeMocks {
+    val testConnector = new TestIncorpInfoConnector {
       override val incorpFEStubsUrl = testUrl
-      override val http = mockWSHttp
+      override val http             = mockWSHttp
     }
   }
 
   "setupCoHoCompanyDetails" should {
     "return a valid response when successfully set up" in new Setup {
       val resp = HttpResponse(responseStatus = 200)
-      mockHttpPOST[JsValue, HttpResponse](connector.incorpFEStubsUrl, Future.successful(resp))
 
-      await(connector.setupCoHoCompanyDetails("123", "company name")) shouldBe resp
+      mockHttpPOST[JsValue, HttpResponse](testConnector.incorpFEStubsUrl, resp)
+
+      await(testConnector.setupCoHoCompanyDetails("123", "company name")) mustBe resp
     }
   }
 
   "teardownCoHoCompanyDetails" should {
     "return a valid response when successfully set up" in new Setup {
       val resp = HttpResponse(responseStatus = 200)
-      mockHttpPUT[String, HttpResponse](connector.incorpFEStubsUrl, Future.successful(resp))
 
-      await(connector.teardownCoHoCompanyDetails()) shouldBe resp
+      mockHttpPUT[String, HttpResponse](testConnector.incorpFEStubsUrl, resp)
+
+      await(testConnector.teardownCoHoCompanyDetails()) mustBe resp
     }
   }
-
 }

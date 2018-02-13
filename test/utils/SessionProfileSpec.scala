@@ -16,29 +16,24 @@
 
 package utils
 
-import connectors.{KeystoreConnect, PAYERegistrationConnector}
 import enums.CacheKeys
+import helpers.PayeComponentSpec
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import play.api.mvc.Result
 import play.api.mvc.Results.Ok
-import testHelpers.PAYERegSpec
-import play.api.test.Helpers._
 import play.api.test.FakeRequest
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
 
-class SessionProfileSpec extends PAYERegSpec {
+class SessionProfileSpec extends PayeComponentSpec {
 
-  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
-
-  object TestSession extends SessionProfile {
-    override val keystoreConnector: KeystoreConnect = mockKeystoreConnector
-    override val payeRegistrationConnector = mockPayeRegistrationConnector
+  class Setup extends CodeMocks {
+    val testSession = new SessionProfile {
+      override val keystoreConnector = mockKeystoreConnector
+    }
   }
 
-  implicit val hc = HeaderCarrier()
   def testFunc : Future[Result] = Future.successful(Ok)
   implicit val request = FakeRequest()
 
@@ -46,42 +41,42 @@ class SessionProfileSpec extends PAYERegSpec {
 
   "calling withCurrentProfile" should {
     "carry out the passed function" when {
-      "payeRegistrationSubmitted is 'false'" in {
+      "payeRegistrationSubmitted is 'false'" in new Setup {
 
         mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile(false)))
 
-        val result = await(TestSession.withCurrentProfile { _ => testFunc })
-        status(result) shouldBe OK
+        val result = testSession.withCurrentProfile { _ => testFunc }
+        status(result) mustBe OK
       }
 
-      "payeRegistrationSubmitted is 'true' and withCurrentProfile is called specifying no check of submission status" in {
+      "payeRegistrationSubmitted is 'true' and withCurrentProfile is called specifying no check of submission status" in new Setup {
 
         mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile(true)))
 
-        val result = await(TestSession.withCurrentProfile ({ _ => testFunc }, checkSubmissionStatus = false))
-        status(result) shouldBe OK
+        val result = testSession.withCurrentProfile ({ _ => testFunc }, checkSubmissionStatus = false)
+        status(result) mustBe OK
       }
     }
 
     "redirect to dashboard" when {
-      "payeRegistrationSubmitted is 'true'" in {
+      "payeRegistrationSubmitted is 'true'" in new Setup {
 
         mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile(true)))
 
-        val result = await(TestSession.withCurrentProfile { _ => testFunc })
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.DashboardController.dashboard()}")
+        val result = testSession.withCurrentProfile { _ => testFunc }
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(s"${controllers.userJourney.routes.DashboardController.dashboard()}")
       }
     }
 
     "redirect to start of journey" when {
-      "currentProfile is not in Keystore" in {
+      "currentProfile is not in Keystore" in new Setup {
 
         mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, None)
 
-        val result = await(TestSession.withCurrentProfile { _ => testFunc })
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(s"${controllers.userJourney.routes.PayeStartController.startPaye()}")
+        val result = testSession.withCurrentProfile { _ => testFunc }
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(s"${controllers.userJourney.routes.PayeStartController.startPaye()}")
       }
     }
   }

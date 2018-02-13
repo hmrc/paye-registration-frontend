@@ -16,17 +16,18 @@
 
 package connectors
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import com.codahale.metrics.{Counter, Timer}
+import common.Logging
 import config.WSHttp
 import models.Address
-import models.external.{AddressLookupFrontendConf, ConfirmPage, EditPage, LookupPage, SelectPage, Timeout}
+import models.external._
+import play.api.Configuration
 import play.api.i18n.MessagesApi
-import play.api.{Configuration, Logger}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
-import services.{MetricsService, MetricsSrv}
+import services.MetricsService
 import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -34,28 +35,27 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 import scala.util.control.NoStackTrace
 
-@Singleton
-class AddressLookupConnector @Inject()(val metricsService: MetricsService,
-                                       val messagesApi: MessagesApi,
-                                       config: ServicesConfig,
-                                       playConfig: Configuration) extends AddressLookupConnect {
+class AddressLookupConnectorImpl @Inject()(val metricsService: MetricsService,
+                                           val messagesApi: MessagesApi,
+                                           val http: WSHttp,
+                                           config: ServicesConfig,
+                                           playConfig: Configuration) extends AddressLookupConnector {
   val addressLookupFrontendUrl     = config.baseUrl("address-lookup-frontend")
   lazy val payeRegistrationUrl     = config.getConfString("paye-registration-frontend.www.url","")
-  val http : CoreGet with CorePost = WSHttp
-  val successCounter = metricsService.addressLookupSuccessResponseCounter
-  val failedCounter  = metricsService.addressLookupFailedResponseCounter
-  def timer          = metricsService.addressLookupResponseTimer.time()
-  lazy val timeoutAmount: Int = playConfig.underlying.getInt("timeoutInSeconds")
+  val successCounter               = metricsService.addressLookupSuccessResponseCounter
+  val failedCounter                = metricsService.addressLookupFailedResponseCounter
+  def timer                        = metricsService.addressLookupResponseTimer.time()
+  lazy val timeoutAmount: Int      = playConfig.underlying.getInt("timeoutInSeconds")
 }
 
 class ALFLocationHeaderNotSetException extends NoStackTrace
 
-trait AddressLookupConnect {
+trait AddressLookupConnector extends Logging {
 
   val addressLookupFrontendUrl: String
   val payeRegistrationUrl: String
   val http: CoreGet with CorePost
-  val metricsService: MetricsSrv
+  val metricsService: MetricsService
   val messagesApi: MessagesApi
 
   val successCounter: Counter
@@ -72,12 +72,12 @@ trait AddressLookupConnect {
   }
 
   private[connectors] def createOnRampJson(key: String, call: Call): JsObject = {
-    val showBackButtons: Boolean = true
-    val showPhaseBanner: Boolean = true
-    val includeHMRCBranding: Boolean = false
-    val proposalListLimit: Int = 20
-    val showSearchAgainLink: Boolean = true
-    val showChangeLink: Boolean = true
+    val showBackButtons: Boolean       = true
+    val showPhaseBanner: Boolean       = true
+    val includeHMRCBranding: Boolean   = false
+    val proposalListLimit: Int         = 20
+    val showSearchAgainLink: Boolean   = true
+    val showChangeLink: Boolean        = true
     val showSubHeadingAndInfo: Boolean = false
 
     val conf = AddressLookupFrontendConf(
@@ -133,7 +133,7 @@ trait AddressLookupConnect {
       http.POST[JsObject, HttpResponse](postUrl, continueJson)
     } map {
       _.header("Location").getOrElse {
-        Logger.warn("[AddressLookupConnector] [getOnRampUrl] - ERROR: Location header not set in ALF response")
+        logger.warn("[AddressLookupConnector] [getOnRampUrl] - ERROR: Location header not set in ALF response")
         throw new ALFLocationHeaderNotSetException
       }
     }

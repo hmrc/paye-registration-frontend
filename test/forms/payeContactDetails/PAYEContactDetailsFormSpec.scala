@@ -16,12 +16,12 @@
 
 package forms.payeContactDetails
 
+import helpers.PayeComponentSpec
 import models.DigitalContactDetails
 import models.view.PAYEContactDetails
 import play.api.data.FormError
-import uk.gov.hmrc.play.test.UnitSpec
 
-class PAYEContactDetailsFormSpec extends UnitSpec {
+class PAYEContactDetailsFormSpec extends PayeComponentSpec {
 
   val testForm = PAYEContactDetailsForm.form
 
@@ -46,7 +46,7 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
         errors => errors,
         success => success
       )
-      boundModel shouldBe model
+      boundModel mustBe model
     }
 
     "Bind successfully with full data with email at full length" in {
@@ -69,7 +69,7 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
         errors => errors,
         success => success
       )
-      boundModel shouldBe model
+      boundModel mustBe model
     }
 
     "Bind successfully with minimal data (email)" in {
@@ -92,7 +92,7 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
         errors => errors,
         success => success
       )
-      boundModel shouldBe model
+      boundModel mustBe model
     }
 
     "Bind successfully with minimal data (mobile)" in {
@@ -115,7 +115,7 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
         errors => errors,
         success => success
       )
-      boundModel shouldBe model
+      boundModel mustBe model
     }
 
     "Bind successfully with minimal data (phone)" in {
@@ -138,7 +138,7 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
         errors => errors,
         success => success
       )
-      boundModel shouldBe model
+      boundModel mustBe model
     }
 
     "Have the correct error if no fields are completed" in {
@@ -152,8 +152,8 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
       val formError = FormError("noFieldsCompleted-digitalContact.contactEmail", PAYEContactDetailsForm.noFieldsCompletedMessage)
       val nameError = FormError("name", "pages.payeContact.nameMandatory")
 
-      boundForm.error("name") shouldBe Some(nameError)
-      boundForm.error("noFieldsCompleted-digitalContact.contactEmail") shouldBe Some(formError)
+      boundForm.error("name") mustBe Some(nameError)
+      boundForm.error("noFieldsCompleted-digitalContact.contactEmail") mustBe Some(formError)
     }
 
     "Have the correct error if name is not completed" in {
@@ -167,7 +167,7 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
       val nameError = FormError("name", "pages.payeContact.nameMandatory")
 
 
-      boundForm.errors shouldBe Seq(nameError)
+      boundForm.errors mustBe Seq(nameError)
     }
 
     "Have the correct error if name is invalid" in {
@@ -181,7 +181,7 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
       val nameError = FormError("name", "errors.invalid.name.invalidChars")
 
 
-      boundForm.errors shouldBe Seq(nameError)
+      boundForm.errors mustBe Seq(nameError)
     }
 
     "Have the correct error if name is more than 100 characters" in {
@@ -195,7 +195,7 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
       val nameError = FormError("name", "errors.invalid.name.invalidChars")
 
 
-      boundForm.errors shouldBe Seq(nameError)
+      boundForm.errors mustBe Seq(nameError)
     }
 
     "Have the correct error if email is invalid" in {
@@ -209,7 +209,7 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
       val err = FormError("digitalContact.contactEmail", "errors.invalid.email")
 
 
-      boundForm.errors shouldBe Seq(err)
+      boundForm.errors mustBe Seq(err)
     }
 
     "Have the correct error if email is longer than 70 characters" in {
@@ -223,7 +223,7 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
       val err = FormError("digitalContact.contactEmail", "errors.invalid.email.tooLong")
 
 
-      boundForm.errors shouldBe Seq(err)
+      boundForm.errors mustBe Seq(err)
     }
 
     "Have the correct error if mobile number is invalid" in {
@@ -236,7 +236,7 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
       val boundForm = testForm.bind(data)
       val err = FormError("digitalContact.mobileNumber", "errors.invalid.contactNum")
 
-      boundForm.errors shouldBe Seq(err)
+      boundForm.errors mustBe Seq(err)
     }
 
     "Have the correct error if phone number is invalid" in {
@@ -249,8 +249,7 @@ class PAYEContactDetailsFormSpec extends UnitSpec {
       val boundForm = testForm.bind(data)
       val err = FormError("digitalContact.phoneNumber", "errors.invalid.contactNum")
 
-      boundForm.errors shouldBe Seq(err)
+      boundForm.errors mustBe Seq(err)
     }
   }
-
 }

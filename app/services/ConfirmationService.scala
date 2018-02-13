@@ -17,28 +17,27 @@
 package services
 
 import java.time.LocalDate
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
+import connectors.PAYERegistrationConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.SystemDate
 
 import scala.concurrent.Future
 
-@Singleton
-class ConfirmationService @Inject()(val payeRegistrationConnector: PAYERegistrationConnector) extends ConfirmationSrv {
+class ConfirmationServiceImpl @Inject()(val payeRegistrationConnector: PAYERegistrationConnector) extends ConfirmationService {
   def now: LocalDate  = SystemDate.getSystemDate
   val startDate       = LocalDate.of(now.getYear, 2, 6)
   val endDate         = LocalDate.of(now.getYear, 5, 17)
 }
 
-trait ConfirmationSrv {
+trait ConfirmationService {
   def now: LocalDate
 
   val startDate: LocalDate
   val endDate: LocalDate
 
-  val payeRegistrationConnector: PAYERegistrationConnect
+  val payeRegistrationConnector: PAYERegistrationConnector
 
   def getAcknowledgementReference(regId: String)(implicit hc: HeaderCarrier): Future[Option[String]] = {
     payeRegistrationConnector.getAcknowledgementReference(regId)

@@ -18,10 +18,9 @@ package utils
 
 import java.time.LocalDate
 
-import org.scalatest.BeforeAndAfterEach
-import uk.gov.hmrc.play.test.UnitSpec
+import helpers.PayeComponentSpec
 
-class SystemDateSpec extends UnitSpec with BeforeAndAfterEach {
+class SystemDateSpec extends PayeComponentSpec {
 
   override protected def beforeEach(): Unit = {
     System.clearProperty("feature.system-date")
@@ -37,14 +36,14 @@ class SystemDateSpec extends UnitSpec with BeforeAndAfterEach {
     "return a LocalDate of today" when {
       "the feature is null" in {
         val result = SystemDate.getSystemDate
-        result shouldBe LocalDate.now
+        result mustBe LocalDate.now
       }
 
       "the feature is ''" in {
         System.setProperty("feature.system-date", "")
 
         val result = SystemDate.getSystemDate
-        result shouldBe LocalDate.now
+        result mustBe LocalDate.now
       }
     }
 
@@ -52,7 +51,7 @@ class SystemDateSpec extends UnitSpec with BeforeAndAfterEach {
       System.setProperty("feature.system-date", "15-3")
 
       val result = SystemDate.getSystemDate
-      result shouldBe LocalDate.of(LocalDate.now.getYear,3,15)
+      result mustBe LocalDate.of(LocalDate.now.getYear,3,15)
     }
   }
 }

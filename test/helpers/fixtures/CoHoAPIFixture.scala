@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fixtures
+package helpers.fixtures
 
 import models.Address
 import models.api.{Director, Name}
@@ -76,5 +76,4 @@ trait CoHoAPIFixture {
       )
     )
   )
-
 }

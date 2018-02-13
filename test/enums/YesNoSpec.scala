@@ -17,31 +17,31 @@
 package enums
 
 import common.exceptions.InternalExceptions._
-import uk.gov.hmrc.play.test.UnitSpec
+import helpers.PayeComponentSpec
 
-class YesNoSpec extends UnitSpec {
+class YesNoSpec extends PayeComponentSpec {
 
   "YesNo enum" should {
     "correctly handle 'yes'" in {
-      YesNo.fromString("yes") shouldBe YesNo.Yes
+      YesNo.fromString("yes") mustBe YesNo.Yes
     }
     "correctly handle 'YeS" in {
-      YesNo.fromString("YeS") shouldBe YesNo.Yes
+      YesNo.fromString("YeS") mustBe YesNo.Yes
     }
     "correctly handle 'no'" in {
-      YesNo.fromString("no") shouldBe YesNo.No
+      YesNo.fromString("no") mustBe YesNo.No
     }
     "correctly handle 'nO'" in {
-      YesNo.fromString("nO") shouldBe YesNo.No
+      YesNo.fromString("nO") mustBe YesNo.No
     }
     "throw the correct exception" in {
       a[UnableToCreateEnumException] should be thrownBy YesNo.fromString("wrongInput")
     }
     "correctly handle true" in {
-      YesNo.fromBoolean(true) shouldBe YesNo.Yes
+      YesNo.fromBoolean(true) mustBe YesNo.Yes
     }
     "correctly handle false" in {
-      YesNo.fromBoolean(false) shouldBe YesNo.No
+      YesNo.fromBoolean(false) mustBe YesNo.No
     }
   }
 

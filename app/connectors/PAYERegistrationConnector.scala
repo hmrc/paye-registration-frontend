@@ -16,19 +16,18 @@
 
 package connectors
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import config.WSHttp
 import enums.{DownstreamOutcome, PAYEStatus, RegistrationDeletion}
 import models.api.{Director, Eligibility, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
-import play.api.Logger
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, Reads}
-import services.{MetricsService, MetricsSrv}
+import services.MetricsService
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.config.ServicesConfig
-
+import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 import scala.concurrent.Future
 
 sealed trait DESResponse
@@ -37,16 +36,16 @@ object Cancelled extends DESResponse
 object Failed extends DESResponse
 object TimedOut extends DESResponse
 
-@Singleton
-class PAYERegistrationConnector @Inject()(val metricsService: MetricsService) extends PAYERegistrationConnect with ServicesConfig {
-  val payeRegUrl                                                 = baseUrl("paye-registration")
-  val http: CorePatch with CoreGet with CorePut with CoreDelete  = WSHttp
+class PAYERegistrationConnectorImpl @Inject()(val metricsService: MetricsService,
+                                              val http: WSHttp,
+                                              servicesConfig: ServicesConfig) extends PAYERegistrationConnector {
+  val payeRegUrl = servicesConfig.baseUrl("paye-registration")
 }
 
-trait PAYERegistrationConnect {
+trait PAYERegistrationConnector {
   val payeRegUrl: String
   val http: CorePatch with CoreGet with CorePut with CoreDelete
-  val metricsService: MetricsSrv
+  val metricsService: MetricsService
 
   def createNewRegistration(regID: String, txID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[DownstreamOutcome.Value] = {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
@@ -57,7 +56,8 @@ trait PAYERegistrationConnect {
           DownstreamOutcome.Success
       }
     } recover {
-      case e: Exception => logResponse(e, "createNewRegistration", "creating new registration", regID, Some(txID))
+      case e: Exception =>
+        logResponse(e, "createNewRegistration", "creating new registration", regID, Some(txID))
         payeRegTimer.stop()
         DownstreamOutcome.Failure
     }
@@ -88,8 +88,7 @@ trait PAYERegistrationConnect {
       }
     } recover {
       case e: Exception =>
-        logResponse(e, "submitRegistration", "submitting PAYE Registration to DES", regId)
-        e match {
+        logResponse(e, "submitRegistration", "submitting PAYE Registration to DES", regId) match {
           case _ : Upstream5xxResponse  => TimedOut
           case _                        => Failed
         }
@@ -309,7 +308,7 @@ trait PAYERegistrationConnect {
     } recover {
       case _: NotFoundException =>
         payeRegTimer.stop()
-        Logger.info(s"[PAYERegistrationConnector] [getStatus] received NotFound when checking status for regId $regId")
+        logger.info(s"[PAYERegistrationConnector] [getStatus] received NotFound when checking status for regId $regId")
         None
       case e : Throwable =>
         payeRegTimer.stop()
@@ -325,7 +324,7 @@ trait PAYERegistrationConnect {
       }
     } recover {
       case fourXX: Upstream4xxResponse if fourXX.upstreamResponseCode == PRECONDITION_FAILED =>
-        Logger.warn(s"[PAYERegistrationConnector] - [deleteCurrentRegistrationDocument] Deleting document for regId $regId and txId $txId failed as document was not rejected")
+        logger.warn(s"[PAYERegistrationConnector] - [deleteCurrentRegistrationDocument] Deleting document for regId $regId and txId $txId failed as document was not rejected")
         RegistrationDeletion.invalidStatus
       case fiveXX: Upstream5xxResponse =>
         throw logResponse(fiveXX, "deleteCurrentRegistrationDocument", s"deleting document, error message: ${fiveXX.message}", regId, Some(txId))
@@ -339,7 +338,7 @@ trait PAYERegistrationConnect {
       }
     } recover {
       case fourXX: Upstream4xxResponse if fourXX.upstreamResponseCode == PRECONDITION_FAILED =>
-        Logger.warn(s"[PAYERegistrationConnector] - [deleteCurrentRegistrationInProgress] Deleting document for regId $regId and txId $txId failed as document was not draft or invalid")
+        logger.warn(s"[PAYERegistrationConnector] - [deleteCurrentRegistrationInProgress] Deleting document for regId $regId and txId $txId failed as document was not draft or invalid")
         RegistrationDeletion.invalidStatus
       case fiveXX: Upstream5xxResponse =>
         throw logResponse(fiveXX, "deleteCurrentRegistrationInProgress", s"deleting document, error message: ${fiveXX.message}", regId, Some(txId))
@@ -348,7 +347,7 @@ trait PAYERegistrationConnect {
 
   private[connectors] def logResponse(e: Throwable, f: String, m: String, regId: String, txId: Option[String] = None): Throwable = {
     val optTxId = txId.map(t => s" and txId: $t").getOrElse("")
-    def log(s: String) = Logger.warn(s"[PAYERegistrationConnector] [$f] received $s when $m for regId: $regId$optTxId")
+    def log(s: String) = logger.warn(s"[PAYERegistrationConnector] [$f] received $s when $m for regId: $regId$optTxId")
     e match {
       case e: NotFoundException   => log("NOT FOUND")
       case e: BadRequestException => log("BAD REQUEST")

@@ -14,30 +14,28 @@
  * limitations under the License.
  */
 
-package mocks
+package helpers.mocks
 
+import config.WSHttp
+import helpers.MockedComponents
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
-import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Writes
-import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads }
 
 trait WSHTTPMock {
-  this: MockitoSugar =>
-
-  lazy val mockWSHttp = mock[WSHttp]
+  this: MockedComponents =>
 
   def mockHttpGet[T](url: String, thenReturn: T): OngoingStubbing[Future[T]] = {
-    when(mockWSHttp.GET[T](ArgumentMatchers.anyString())(ArgumentMatchers.any[HttpReads[T]](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+    when(mockWSHttp.GET[T](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
       .thenReturn(Future.successful(thenReturn))
   }
 
   def mockHttpGet[T](url: String, thenReturn: Future[T]): OngoingStubbing[Future[T]] = {
-    when(mockWSHttp.GET[T](ArgumentMatchers.anyString())(ArgumentMatchers.any[HttpReads[T]](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+    when(mockWSHttp.GET[T](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
       .thenReturn(thenReturn)
   }
 

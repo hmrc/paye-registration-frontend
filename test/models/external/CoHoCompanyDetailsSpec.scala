@@ -16,11 +16,11 @@
 
 package models.external
 
+import helpers.PayeComponentSpec
 import models.Address
 import play.api.libs.json.{JsSuccess, Json}
-import testHelpers.PAYERegSpec
 
-class CoHoCompanyDetailsSpec extends PAYERegSpec {
+class CoHoCompanyDetailsSpec extends PayeComponentSpec {
 
   val tstModel = CoHoCompanyDetailsModel(
     companyName = "Test Company",
@@ -45,7 +45,7 @@ class CoHoCompanyDetailsSpec extends PAYERegSpec {
 
   "CoHoCompanyDetailsModel" should {
     "read from Json" in {
-      Json.fromJson[CoHoCompanyDetailsModel](tstJson) shouldBe JsSuccess(tstModel)
+      Json.fromJson[CoHoCompanyDetailsModel](tstJson) mustBe JsSuccess(tstModel)
     }
     "read and normalize from Json" in {
       val tstJson2 = Json.parse(
@@ -72,10 +72,10 @@ class CoHoCompanyDetailsSpec extends PAYERegSpec {
       )
 
       implicit val rds = CoHoCompanyDetailsModel.incorpInfoReads
-      Json.fromJson[CoHoCompanyDetailsModel](tstJson2) shouldBe JsSuccess(tstModel2)
+      Json.fromJson[CoHoCompanyDetailsModel](tstJson2) mustBe JsSuccess(tstModel2)
     }
     "write to Json" in {
-      Json.toJson[CoHoCompanyDetailsModel](tstModel) shouldBe tstJson
+      Json.toJson[CoHoCompanyDetailsModel](tstModel) mustBe tstJson
     }
   }
 

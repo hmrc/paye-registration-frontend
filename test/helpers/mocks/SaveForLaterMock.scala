@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-package mocks
+package helpers.mocks
 
 import connectors._
+import helpers.MockedComponents
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
-import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Format
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
 trait SaveForLaterMock {
-  this: MockitoSugar =>
-
-  lazy val mockS4LConnector = mock[S4LConnector]
+  this: MockedComponents =>
 
   def mockS4LFetchAndGet[T](formId: String, model: Option[T], mockS4LConnector: S4LConnector = mockS4LConnector): OngoingStubbing[Future[Option[T]]] = {
     when(mockS4LConnector.fetchAndGet[T](ArgumentMatchers.anyString(), ArgumentMatchers.contains(formId))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[T]]()))

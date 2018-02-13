@@ -17,7 +17,7 @@
 package controllers.feedback
 
 import java.net.URLEncoder
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import config.{FrontendAppConfig, WSHttp}
 import play.api.Logger
@@ -33,21 +33,22 @@ import views.html.feedback_thankyou
 
 import scala.concurrent.Future
 
-@Singleton
-class FeedbackController @Inject()(val messagesApi: MessagesApi) extends FrontendController  with I18nSupport {
-  val http: CorePost = WSHttp
+class FeedbackControllerImpl @Inject()(val messagesApi: MessagesApi,
+                                       val http: WSHttp) extends FeedbackController
+
+trait FeedbackController extends FrontendController with I18nSupport {
+  val http: WSHttp
 
   val applicationConfig = FrontendAppConfig
 
   private val TICKET_ID = "ticketId"
 
   implicit val cachedStaticHtmlPartialRetriever: CachedStaticHtmlPartialRetriever = new CachedStaticHtmlPartialRetriever {
-    override val httpGet: CoreGet = WSHttp
+    override val httpGet: CoreGet = http
   }
 
-
   implicit val formPartialRetriever: FormPartialRetriever = new FormPartialRetriever {
-    override def httpGet: CoreGet = WSHttp
+    override def httpGet: CoreGet = http
 
     override def crypto: (String) => String = cookie => SessionCookieCryptoFilter.encrypt(cookie)
   }
@@ -57,7 +58,6 @@ class FeedbackController @Inject()(val messagesApi: MessagesApi) extends Fronten
   def localSubmitUrl(implicit request: Request[AnyContent]): String = routes.FeedbackController.submitFeedback().url
 
   protected def loadPartial(url: String)(implicit request: RequestHeader): HtmlPartial = ???
-
 
   private def feedbackFormPartialUrl(implicit request: Request[AnyContent]) =
     s"${applicationConfig.contactFrontendPartialBaseUrl}/contact/beta-feedback/form/?submitUrl=${urlEncode(localSubmitUrl)}" +

@@ -16,28 +16,24 @@
 
 package services
 
-import connectors.BusinessRegistrationConnect
-import models.DigitalContactDetails
-import models.view.PAYEContactDetails
 import common.exceptions.DownstreamExceptions.S4LFetchException
-import models.Address
+import helpers.PayeComponentSpec
+import models.view.PAYEContactDetails
+import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.Format
-import testHelpers.PAYERegSpec
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-class PrepopulationServiceSpec extends PAYERegSpec {
-  implicit val hc = new HeaderCarrier()
-  val mockS4LService = mock[S4LService]
+class PrepopulationServiceSpec extends PayeComponentSpec {
 
-  trait Setup {
-    val service = new PrepopulationSrv {
-      override val busRegConnector: BusinessRegistrationConnect = mockBusinessRegistrationConnector
-      override val s4LService = mockS4LService
+  class Setup {
+    val service = new PrepopulationService {
+      override val busRegConnector = mockBusinessRegistrationConnector
+      override val s4LService      = mockS4LService
     }
   }
 
@@ -80,13 +76,13 @@ class PrepopulationServiceSpec extends PAYERegSpec {
       when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(validContactDetails)))
 
-      await(service.getBusinessContactDetails(regId)) shouldBe Some(validDigitalContact)
+      await(service.getBusinessContactDetails(regId)) mustBe Some(validDigitalContact)
     }
     "return no digital contact details" in new Setup {
       when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
-      await(service.getBusinessContactDetails(regId)) shouldBe None
+      await(service.getBusinessContactDetails(regId)) mustBe None
     }
   }
 
@@ -95,13 +91,13 @@ class PrepopulationServiceSpec extends PAYERegSpec {
       when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(validContactDetails)))
 
-      await(service.getPAYEContactDetails(regId)) shouldBe Some(validContactDetails)
+      await(service.getPAYEContactDetails(regId)) mustBe Some(validContactDetails)
     }
     "return no contact details" in new Setup {
       when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
-      await(service.getPAYEContactDetails(regId)) shouldBe None
+      await(service.getPAYEContactDetails(regId)) mustBe None
     }
   }
 
@@ -110,7 +106,7 @@ class PrepopulationServiceSpec extends PAYERegSpec {
       when(mockBusinessRegistrationConnector.upsertContactDetails(ArgumentMatchers.eq(regId), ArgumentMatchers.any[PAYEContactDetails])(ArgumentMatchers.eq(hc)))
         .thenReturn(Future.successful(validContactDetails))
 
-      await(service.saveContactDetails(regId, validContactDetails)) shouldBe validContactDetails
+      await(service.saveContactDetails(regId, validContactDetails)) mustBe validContactDetails
     }
   }
 
@@ -118,31 +114,31 @@ class PrepopulationServiceSpec extends PAYERegSpec {
     "return an address map when no duplicates and no address is different" in new Setup {
       val addresses = Seq(addr1, addr2)
       val resMap = Map(0 -> addr1, 1 -> addr2)
-      service.filterAddresses(addresses, Seq(addr3)) shouldBe resMap
+      service.filterAddresses(addresses, Seq(addr3)) mustBe resMap
     }
 
     "filter out duplicates" in new Setup {
       val addresses = Seq(addr1, addr2, addr1)
       val resMap = Map(0 -> addr1, 1 -> addr2)
-      service.filterAddresses(addresses, Seq(addr3)) shouldBe resMap
+      service.filterAddresses(addresses, Seq(addr3)) mustBe resMap
     }
 
     "filter out address when it is the same as one of the passed addresses" in new Setup {
       val addresses = Seq(addr1, addr2, addr3)
       val resMap = Map(0 -> addr2, 1 -> addr3)
-      service.filterAddresses(addresses, Seq(addr1)) shouldBe resMap
+      service.filterAddresses(addresses, Seq(addr1)) mustBe resMap
     }
 
     "filter out multiple addresses when it is the same as one of the passed addresses" in new Setup {
       val addresses = Seq(addr1, addr2, addr3)
       val resMap = Map(0 -> addr2)
-      service.filterAddresses(addresses, Seq(addr1, addr3)) shouldBe resMap
+      service.filterAddresses(addresses, Seq(addr1, addr3)) mustBe resMap
     }
 
     "handle an empty list" in new Setup {
       val addresses = Seq.empty
       val resMap = Map.empty
-      service.filterAddresses(addresses, Seq(addr3, addr2)) shouldBe resMap
+      service.filterAddresses(addresses, Seq(addr3, addr2)) mustBe resMap
     }
   }
 
@@ -155,7 +151,7 @@ class PrepopulationServiceSpec extends PAYERegSpec {
           (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Address]]()))
         .thenReturn(Future.successful(CacheMap("PrePopAddresses", Map.empty)))
 
-      await(service.getPrePopAddresses(regId, addr3, None, None)) shouldBe Map(0 -> addr1, 1 -> addr2)
+      await(service.getPrePopAddresses(regId, addr3, None, None)) mustBe Map(0 -> addr1, 1 -> addr2)
     }
   }
 
@@ -165,7 +161,7 @@ class PrepopulationServiceSpec extends PAYERegSpec {
       when(mockBusinessRegistrationConnector.upsertAddress(ArgumentMatchers.contains(regId), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(addr1))
 
-      await(service.saveAddress(regId, addr1)) shouldBe addr1
+      await(service.saveAddress(regId, addr1)) mustBe addr1
     }
   }
 
@@ -176,7 +172,7 @@ class PrepopulationServiceSpec extends PAYERegSpec {
           (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Address]]()))
         .thenReturn(Future.successful(Some(Map(0 -> addr1, 1 -> addr2, 2 -> addr3))))
 
-      await(service.getAddress(regId, 1)) shouldBe addr2
+      await(service.getAddress(regId, 1)) mustBe addr2
     }
     "throw an exception when no addresses are returned from S4L" in new Setup {
       val regId = "9999"

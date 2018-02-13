@@ -16,28 +16,23 @@
 
 package services
 
-import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
 import enums.DownstreamOutcome
+import helpers.PayeComponentSpec
 import models.api.{Eligibility => EligibilityAPI}
 import models.view.{CompanyEligibility, DirectorEligibility, Eligibility => EligibilityView}
-import testHelpers.PAYERegSpec
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.JsString
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
-class EligibilityServiceSpec extends PAYERegSpec {
-
-  private val mockPayeRegConnector = mock[PAYERegistrationConnector]
-  private val mockS4LService = mock[S4LService]
-
+class EligibilityServiceSpec extends PayeComponentSpec {
   class Setup {
-    val service = new EligibilitySrv {
-      override val s4lService: S4LSrv = mockS4LService
-      override val payeRegConnector: PAYERegistrationConnect = mockPayeRegConnector
+    val service = new EligibilityService {
+      override val s4lService       = mockS4LService
+      override val payeRegConnector = mockPAYERegConnector
     }
   }
 
@@ -50,23 +45,23 @@ class EligibilityServiceSpec extends PAYERegSpec {
 
   "calling apiToView" should {
     "return the corresponding converted Employment API Model for every variation of view" in new Setup {
-      service.apiToView(apiModel(true, true)) shouldBe EligibilityView(Some(cE(true)), Some(dE(true)))
-      service.apiToView(apiModel(true, false)) shouldBe EligibilityView(Some(cE(true)), Some(dE(false)))
-      service.apiToView(apiModel(false, true)) shouldBe EligibilityView(Some(cE(false)), Some(dE(true)))
-      service.apiToView(apiModel(false, false)) shouldBe EligibilityView(Some(cE(false)), Some(dE(false)))
+      service.apiToView(apiModel(true, true)) mustBe EligibilityView(Some(cE(true)), Some(dE(true)))
+      service.apiToView(apiModel(true, false)) mustBe EligibilityView(Some(cE(true)), Some(dE(false)))
+      service.apiToView(apiModel(false, true)) mustBe EligibilityView(Some(cE(false)), Some(dE(true)))
+      service.apiToView(apiModel(false, false)) mustBe EligibilityView(Some(cE(false)), Some(dE(false)))
     }
   }
 
   "isCompleteData" should {
     "return the corresponding converted Employment View Model for every variation of stored data" in new Setup {
-      service.isCompleteData(viewModel(Some(cE(false)), Some(dE(false)))) shouldBe Right(EligibilityAPI(false, false))
-      service.isCompleteData(viewModel(Some(cE(false)), Some(dE(true)))) shouldBe Right(EligibilityAPI(false, true))
-      service.isCompleteData(viewModel(Some(cE(true)), Some(dE(false)))) shouldBe Right(EligibilityAPI(true, false))
-      service.isCompleteData(viewModel(Some(cE(true)), Some(dE(true)))) shouldBe Right(EligibilityAPI(true, true))
+      service.isCompleteData(viewModel(Some(cE(false)), Some(dE(false)))) mustBe Right(EligibilityAPI(false, false))
+      service.isCompleteData(viewModel(Some(cE(false)), Some(dE(true)))) mustBe Right(EligibilityAPI(false, true))
+      service.isCompleteData(viewModel(Some(cE(true)), Some(dE(false)))) mustBe Right(EligibilityAPI(true, false))
+      service.isCompleteData(viewModel(Some(cE(true)), Some(dE(true)))) mustBe Right(EligibilityAPI(true, true))
 
-      service.isCompleteData(viewModel(Some(cE(true)), None)) shouldBe Left(viewModel(Some(cE(true)), None))
-      service.isCompleteData(viewModel(None, Some(dE(true)))) shouldBe Left(viewModel(None, Some(dE(true))))
-      service.isCompleteData(viewModel(None, None)) shouldBe Left(viewModel(None, None))
+      service.isCompleteData(viewModel(Some(cE(true)), None)) mustBe Left(viewModel(Some(cE(true)), None))
+      service.isCompleteData(viewModel(None, Some(dE(true)))) mustBe Left(viewModel(None, Some(dE(true))))
+      service.isCompleteData(viewModel(None, None)) mustBe Left(viewModel(None, None))
     }
   }
 
@@ -74,14 +69,13 @@ class EligibilityServiceSpec extends PAYERegSpec {
     "convert to view" in new Setup {
       val apiModel = Some(EligibilityAPI(true, true))
 
-      service.convertOrCreateEligibilityView(apiModel) shouldBe EligibilityView(Some(cE(true)), Some(dE(true)))
+      service.convertOrCreateEligibilityView(apiModel) mustBe EligibilityView(Some(cE(true)), Some(dE(true)))
     }
     "create a new view" in new Setup {
-      service.convertOrCreateEligibilityView(None) shouldBe EligibilityView(None, None)
+      service.convertOrCreateEligibilityView(None) mustBe EligibilityView(None, None)
     }
   }
 
-  implicit val hc = new HeaderCarrier()
   val regId = "12345"
 
   "getEligibility" should {
@@ -91,7 +85,7 @@ class EligibilityServiceSpec extends PAYERegSpec {
       when(mockS4LService.fetchAndGet[EligibilityView](ArgumentMatchers.anyString(), ArgumentMatchers.eq(regId))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(validViewModel)))
 
-      await(service.getEligibility(regId)) shouldBe validViewModel
+      await(service.getEligibility(regId)) mustBe validViewModel
     }
     "should fetch from paye registration" in new Setup {
       val validModel = apiModel(true, true)
@@ -99,11 +93,11 @@ class EligibilityServiceSpec extends PAYERegSpec {
       when(mockS4LService.fetchAndGet[EligibilityView](ArgumentMatchers.anyString(), ArgumentMatchers.eq(regId))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
-      when(mockPayeRegConnector.getEligibility(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getEligibility(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(validModel)), Future.successful(None))
 
-      await(service.getEligibility(regId)) shouldBe validViewModel
-      await(service.getEligibility(regId)) shouldBe EligibilityView(None, None)
+      await(service.getEligibility(regId)) mustBe validViewModel
+      await(service.getEligibility(regId)) mustBe EligibilityView(None, None)
     }
   }
 
@@ -112,20 +106,20 @@ class EligibilityServiceSpec extends PAYERegSpec {
       val data = viewModel(Some(cE(true)), None)
 
       when(mockS4LService.saveForm[EligibilityView](ArgumentMatchers.anyString(), ArgumentMatchers.any[EligibilityView], ArgumentMatchers.eq(regId))(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(CacheMap("", Map("" -> JsString(""))))
+        .thenReturn(Future.successful(CacheMap("", Map("" -> JsString("")))))
 
-      await(service.submitEligibility(regId, data)) shouldBe DownstreamOutcome.Success
+      await(service.submitEligibility(regId, data)) mustBe DownstreamOutcome.Success
     }
     "save to paye registration" in new Setup {
       val data = viewModel(Some(cE(true)), Some(dE(true)))
 
-      when(mockPayeRegConnector.upsertEligibility(ArgumentMatchers.eq(regId), ArgumentMatchers.any[EligibilityAPI])(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.upsertEligibility(ArgumentMatchers.eq(regId), ArgumentMatchers.any[EligibilityAPI])(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(apiModel(true, true)))
 
       when(mockS4LService.clear(ArgumentMatchers.eq(regId))(ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(200)))
 
-      await(service.submitEligibility(regId, data)) shouldBe DownstreamOutcome.Success
+      await(service.submitEligibility(regId, data)) mustBe DownstreamOutcome.Success
     }
   }
 
@@ -133,10 +127,11 @@ class EligibilityServiceSpec extends PAYERegSpec {
     "be able to save both a complete model or an incomplete model" in new Setup {
       when(mockS4LService.fetchAndGet[EligibilityView](ArgumentMatchers.anyString(), ArgumentMatchers.eq(regId))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(viewModel(None, None))))
-      when(mockS4LService.saveForm[EligibilityView](ArgumentMatchers.anyString(), ArgumentMatchers.any[EligibilityView], ArgumentMatchers.eq(regId))(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(CacheMap("", Map("" -> JsString(""))))
 
-      await(service.saveCompanyEligibility(regId, CompanyEligibility(true))) shouldBe DownstreamOutcome.Success
+      when(mockS4LService.saveForm[EligibilityView](ArgumentMatchers.anyString(), ArgumentMatchers.any[EligibilityView], ArgumentMatchers.eq(regId))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(CacheMap("", Map("" -> JsString("")))))
+
+      await(service.saveCompanyEligibility(regId, CompanyEligibility(true))) mustBe DownstreamOutcome.Success
     }
   }
 
@@ -144,10 +139,11 @@ class EligibilityServiceSpec extends PAYERegSpec {
     "be able to save both a complete model or an incomplete model" in new Setup {
       when(mockS4LService.fetchAndGet[EligibilityView](ArgumentMatchers.anyString(), ArgumentMatchers.eq(regId))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(viewModel(None, None))))
-      when(mockS4LService.saveForm[EligibilityView](ArgumentMatchers.anyString(), ArgumentMatchers.any[EligibilityView], ArgumentMatchers.eq(regId))(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(CacheMap("", Map("" -> JsString(""))))
 
-      await(service.saveDirectorEligibility(regId, DirectorEligibility(true))) shouldBe DownstreamOutcome.Success
+      when(mockS4LService.saveForm[EligibilityView](ArgumentMatchers.anyString(), ArgumentMatchers.any[EligibilityView], ArgumentMatchers.eq(regId))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(CacheMap("", Map("" -> JsString("")))))
+
+      await(service.saveDirectorEligibility(regId, DirectorEligibility(true))) mustBe DownstreamOutcome.Success
     }
   }
 
