@@ -17,9 +17,9 @@
 package forms.companyDetails
 
 import common.exceptions.InternalExceptions._
-import uk.gov.hmrc.play.test.UnitSpec
+import helpers.PayeComponentSpec
 
-class TradingNameFormSpec extends UnitSpec {
+class TradingNameFormSpec extends PayeComponentSpec {
 
   val testForm = TradingNameForm.form
   val validData = Map(
@@ -51,23 +51,23 @@ class TradingNameFormSpec extends UnitSpec {
     }
 
     "return the original form if no validation is needed" in {
-      TradingNameForm.validateForm(testForm.bind(noValidationNeedData)) shouldBe testForm.bind(noValidationNeedData)
+      TradingNameForm.validateForm(testForm.bind(noValidationNeedData)) mustBe testForm.bind(noValidationNeedData)
     }
 
     "return the original form if data is correct" in {
-      TradingNameForm.validateForm(testForm.bind(validData)) shouldBe testForm.bind(validData)
+      TradingNameForm.validateForm(testForm.bind(validData)) mustBe testForm.bind(validData)
     }
 
     "return the original form if the data is correct even if it contains punctuation" in {
-      TradingNameForm.validateForm(testForm.bind(validDataWithPunct)) shouldBe testForm.bind(validDataWithPunct)
+      TradingNameForm.validateForm(testForm.bind(validDataWithPunct)) mustBe testForm.bind(validDataWithPunct)
     }
 
     "return the form with error for incomplete data" in {
-      TradingNameForm.validateForm(testForm.bind(invalidData)) shouldBe testForm.bind(invalidData).withError("tradingName", "pages.tradingName.errorQuestion")
+      TradingNameForm.validateForm(testForm.bind(invalidData)) mustBe testForm.bind(invalidData).withError("tradingName", "pages.tradingName.errorQuestion")
     }
 
     "return the form with errors as the trading name is too long" in {
-      TradingNameForm.validateForm(testForm.bind(invalidDataTooLong)) shouldBe testForm.bind(invalidDataTooLong).withError("tradingName", "pages.tradingName.error.length")
+      TradingNameForm.validateForm(testForm.bind(invalidDataTooLong)) mustBe testForm.bind(invalidDataTooLong).withError("tradingName", "pages.tradingName.error.length")
     }
   }
 }

@@ -23,7 +23,7 @@ import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProf
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import services.CurrentProfileService
+import services.CurrentProfileServiceImpl
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
 
@@ -93,10 +93,10 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
       stubPut(s"/keystore/paye-registration-frontend/${sessionId}/data/CurrentProfile", 200, dummyS4LResponse)
       stubGet(s"/paye-registration/$regIdWhitelisted/status", 200, backendStatus("draft"))
 
-      val currentProfileService = new CurrentProfileService(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector)
+      val currentProfileService = new CurrentProfileServiceImpl(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector)
       def getResponse = currentProfileService.fetchAndStoreCurrentProfile
 
-      await(getResponse) shouldBe expectedCurrentProfile
+      await(getResponse) mustBe expectedCurrentProfile
     }
 
     "get a Current Profile while stubbed" in {
@@ -126,10 +126,10 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
       stubPut(s"/keystore/paye-registration-frontend/${sessionId}/data/CurrentProfile", 200, dummyS4LResponse)
       stubGet(s"/paye-registration/$regId/status", 404, "")
 
-      val currentProfileService = new CurrentProfileService(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector)
+      val currentProfileService = new CurrentProfileServiceImpl(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector)
       def getResponse = currentProfileService.fetchAndStoreCurrentProfile
 
-      await(getResponse) shouldBe expectedCurrentProfile
+      await(getResponse) mustBe expectedCurrentProfile
     }
 
     "get a Current Profile" in {
@@ -168,10 +168,10 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
       stubPut(s"/keystore/paye-registration-frontend/${sessionId}/data/CurrentProfile", 200, dummyS4LResponse)
       stubGet(s"/paye-registration/$regId/status",200,backendStatus("submitted"))
 
-      val currentProfileService = new CurrentProfileService(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector)
+      val currentProfileService = new CurrentProfileServiceImpl(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector)
       def getResponse = currentProfileService.fetchAndStoreCurrentProfile
 
-      await(getResponse) shouldBe expectedCurrentProfile
+      await(getResponse) mustBe expectedCurrentProfile
     }
   }
 }

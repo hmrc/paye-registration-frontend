@@ -16,24 +16,23 @@
 
 package services
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import connectors._
 import enums.CacheKeys
 import models.external.CurrentProfile
-import utils.RegistrationWhitelist
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import utils.RegistrationWhitelist
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-@Singleton
-class SubmissionService @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,
-                                  val keystoreConnector: KeystoreConnector) extends SubmissionSrv
+class SubmissionServiceImpl @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,
+                                      val keystoreConnector: KeystoreConnector) extends SubmissionService
 
-trait SubmissionSrv extends RegistrationWhitelist {
-  val payeRegistrationConnector: PAYERegistrationConnect
-  val keystoreConnector: KeystoreConnect
+trait SubmissionService extends RegistrationWhitelist {
+  val payeRegistrationConnector: PAYERegistrationConnector
+  val keystoreConnector: KeystoreConnector
 
   def submitRegistration(profile: CurrentProfile)(implicit hc: HeaderCarrier): Future[DESResponse] = {
     ifRegIdNotWhitelisted(profile.registrationID) {

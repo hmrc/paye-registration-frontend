@@ -17,21 +17,18 @@
 package utils
 
 import common.exceptions.InternalExceptions
-import connectors.{KeystoreConnect, PAYERegistrationConnect}
+import connectors.KeystoreConnector
 import enums.CacheKeys
 import models.external.CurrentProfile
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 import scala.concurrent.Future
 
 trait SessionProfile extends InternalExceptions {
-
-  val keystoreConnector: KeystoreConnect
-  val payeRegistrationConnector: PAYERegistrationConnect
-
+  val keystoreConnector: KeystoreConnector
 
   def withCurrentProfile(f: => CurrentProfile => Future[Result], checkSubmissionStatus: Boolean = true)(implicit request: Request[_],  hc: HeaderCarrier): Future[Result] = {
     keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString) flatMap {

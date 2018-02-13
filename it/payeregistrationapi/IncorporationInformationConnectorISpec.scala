@@ -17,7 +17,8 @@ package payeregistrationapi
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import common.exceptions.DownstreamExceptions.OfficerListNotFoundException
-import connectors.{IncorpInfoSuccessResponse, IncorporationInformationConnector}
+import config.WSHttpImpl
+import connectors.{IncorpInfoSuccessResponse, IncorporationInformationConnectorImpl}
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.Address
 import models.api.Name
@@ -26,6 +27,7 @@ import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import services.MetricsService
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.play.config.inject.DefaultServicesConfig
 import utils.PAYEFeatureSwitch
 
 class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
@@ -101,12 +103,20 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
 
     "fetch and convert company details" in {
 
-      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val incorpInfoConnector = new IncorporationInformationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
+
       def getResponse = incorpInfoConnector.getCoHoCompanyDetails("regID", testTransId)
 
       setupWiremockResult(200, testCompanyDetailsJson)
 
-      await(getResponse) shouldBe IncorpInfoSuccessResponse(deetsModel)
+      await(getResponse) mustBe IncorpInfoSuccessResponse(deetsModel)
     }
 
     "get a default CoHo Company Details when the regId is part of the whitelist" in {
@@ -126,10 +136,18 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
           defaultROAddress)
       )
 
-      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val incorpInfoConnector = new IncorporationInformationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
+
       def getResponse = incorpInfoConnector.getCoHoCompanyDetails(regIdWhitelisted, "txID")
 
-      await(getResponse) shouldBe incorpInfoSuccessCoHoCompanyDetails
+      await(getResponse) mustBe incorpInfoSuccessCoHoCompanyDetails
     }
   }
 
@@ -190,23 +208,45 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
 
     "get an officer list" in {
 
-      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val incorpInfoConnector = new IncorporationInformationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def getResponse = incorpInfoConnector.getOfficerList(testTransId,testRegId)
       setupWiremockResult(200, tstOfficerListJson)
 
-      await(getResponse) shouldBe tstOfficerListModel
+      await(getResponse) mustBe tstOfficerListModel
     }
 
     "get an officer list from config if the regId is whitelisted and every other service returns none" in {
-      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val incorpInfoConnector = new IncorporationInformationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
+
       def getResponse = incorpInfoConnector.getOfficerList(testTransId,"regWhitelist456")
       setupWiremockResult(404, "")
-      await(getResponse) shouldBe tstOfficerListModel
+      await(getResponse) mustBe tstOfficerListModel
     }
 
     "throw an OfficerListNotFoundException when CoHo API returns an empty list" in {
-      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val incorpInfoConnector = new IncorporationInformationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       setupWiremockResult(200, """{"officers": []}""")
 
@@ -214,7 +254,14 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
     }
 
     "throw an OfficerListNotFoundException for a 404 response" in {
-      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val incorpInfoConnector = new IncorporationInformationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       setupWiremockResult(404, "")
 
@@ -222,7 +269,14 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
     }
 
     "throw a BadRequestException" in {
-      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val incorpInfoConnector = new IncorporationInformationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       setupWiremockResult(400, "")
 
@@ -230,7 +284,14 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
     }
 
     "throw an Exception" in {
-      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val incorpInfoConnector = new IncorporationInformationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       setupWiremockResult(500, "")
 
@@ -238,12 +299,19 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
     }
 
     "get an officer list from II when stub is in place for other II calls" in {
-      val incorpInfoConnector = new IncorporationInformationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val incorpInfoConnector = new IncorporationInformationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def getResponse = incorpInfoConnector.getOfficerList(testTransId,testRegId)
       setupWiremockResult(200, tstOfficerListJson)
 
-      await(getResponse) shouldBe tstOfficerListModel
+      await(getResponse) mustBe tstOfficerListModel
     }
   }
 }

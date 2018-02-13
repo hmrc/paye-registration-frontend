@@ -16,11 +16,11 @@
 
 package models
 
+import helpers.PayeComponentSpec
 import play.api.data.validation.ValidationError
 import play.api.libs.json._
-import uk.gov.hmrc.play.test.UnitSpec
 
-class AddressSpec extends UnitSpec with JsonFormValidation {
+class AddressSpec extends PayeComponentSpec {
   val tstFullAddress = Address(
     line1 = "14 St Test Walker",
     line2 = "Testford",
@@ -42,7 +42,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
 
   "Address" should {
     "read from Json" in {
-      Json.fromJson[Address](tstFullAddressJson) shouldBe JsSuccess(tstFullAddress)
+      Json.fromJson[Address](tstFullAddressJson) mustBe JsSuccess(tstFullAddress)
     }
   }
 
@@ -84,7 +84,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
 
         val res = outcomeAddress(line3 = Some("Testley"), line4 = Some("Testshire"), postcode = Some("TE1 1ST"), auditRef = Some("tstAuditRef"))
 
-        Json.fromJson[Address](tstJson)(Address.adressLookupReads) shouldBe JsSuccess(res)
+        Json.fromJson[Address](tstJson)(Address.adressLookupReads) mustBe JsSuccess(res)
       }
       "three lines are defined" in {
         val tstJson = Json.parse(
@@ -105,7 +105,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
 
         val res = outcomeAddress(line3 = Some("Testley"), postcode = Some("TE1 1ST"))
 
-        Json.fromJson[Address](tstJson)(Address.adressLookupReads) shouldBe JsSuccess(res)
+        Json.fromJson[Address](tstJson)(Address.adressLookupReads) mustBe JsSuccess(res)
       }
       "two lines are defined" in {
         val tstJson = Json.parse(
@@ -125,7 +125,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
 
         val res = outcomeAddress(postcode = Some("TE1 1ST"))
 
-        Json.fromJson[Address](tstJson)(Address.adressLookupReads) shouldBe JsSuccess(res)
+        Json.fromJson[Address](tstJson)(Address.adressLookupReads) mustBe JsSuccess(res)
       }
       "postcode is not completed" in {
         val tstJson = Json.parse(
@@ -144,7 +144,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
 
         val res = outcomeAddress(country = Some("United Kingdom"))
 
-        Json.fromJson[Address](tstJson)(Address.adressLookupReads) shouldBe JsSuccess(res)
+        Json.fromJson[Address](tstJson)(Address.adressLookupReads) mustBe JsSuccess(res)
       }
       "country is not completed" in {
         val tstJson = Json.parse(
@@ -160,7 +160,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
 
         val res = outcomeAddress(postcode = Some("TE1 1ST"))
 
-        Json.fromJson[Address](tstJson)(Address.adressLookupReads) shouldBe JsSuccess(res)
+        Json.fromJson[Address](tstJson)(Address.adressLookupReads) mustBe JsSuccess(res)
       }
       "postcode is invalid but country is completed" in {
         val tstJson = Json.parse(
@@ -180,7 +180,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
 
         val res = outcomeAddress(country = Some("United Kingdom"))
 
-        Json.fromJson[Address](tstJson)(Address.adressLookupReads) shouldBe JsSuccess(res)
+        Json.fromJson[Address](tstJson)(Address.adressLookupReads) mustBe JsSuccess(res)
       }
 
       "lines 1-4 are too long and are there trimmed" in {
@@ -212,7 +212,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
           country = None
         )
 
-        Json.fromJson[Address](inputJson)(Address.adressLookupReads) shouldBe JsSuccess(expected)
+        Json.fromJson[Address](inputJson)(Address.adressLookupReads) mustBe JsSuccess(expected)
       }
 
       "there are trailing spaces in UK address" in {
@@ -242,7 +242,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
           country = None
         )
 
-        Json.fromJson[Address](inputJson)(Address.adressLookupReads) shouldBe JsSuccess(expected)
+        Json.fromJson[Address](inputJson)(Address.adressLookupReads) mustBe JsSuccess(expected)
       }
 
       "construct a foreign address with the postcode in address line 3" in {
@@ -272,7 +272,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
           country = Some("United States of America")
         )
 
-        Json.fromJson[Address](inputJson)(Address.adressLookupReads) shouldBe JsSuccess(expected)
+        Json.fromJson[Address](inputJson)(Address.adressLookupReads) mustBe JsSuccess(expected)
       }
 
       "construct a foreign address with the postcode in address line 4" in {
@@ -303,7 +303,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
           country = Some("United States of America")
         )
 
-        Json.fromJson[Address](inputJson)(Address.adressLookupReads) shouldBe JsSuccess(expected)
+        Json.fromJson[Address](inputJson)(Address.adressLookupReads) mustBe JsSuccess(expected)
       }
 
       "construct a foreign address and remove trailing spaces" in {
@@ -333,7 +333,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
           country = Some("United States of America")
         )
 
-        Json.fromJson[Address](inputJson)(Address.adressLookupReads) shouldBe JsSuccess(expected)
+        Json.fromJson[Address](inputJson)(Address.adressLookupReads) mustBe JsSuccess(expected)
       }
     }
 
@@ -408,7 +408,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
           postCode = Some("TE1 1ST")
         )
 
-        readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
+        readCoHoAddress(tstCHROAddressJson) mustBe JsSuccess(testAddress)
       }
 
       "converting CHROAddress without a premises" in {
@@ -429,7 +429,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
           postCode = Some("TE1 1ST")
         )
 
-        readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
+        readCoHoAddress(tstCHROAddressJson) mustBe JsSuccess(testAddress)
       }
 
       "converting CHROAddress with a short address line 1" in {
@@ -450,7 +450,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
           postCode = None
         )
 
-        readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
+        readCoHoAddress(tstCHROAddressJson) mustBe JsSuccess(testAddress)
       }
 
       "converting CHROAddress with a line 2 and short address line 1" in {
@@ -473,7 +473,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
           postCode = Some("TE1 1ST")
         )
 
-        readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
+        readCoHoAddress(tstCHROAddressJson) mustBe JsSuccess(testAddress)
       }
 
       "converting CHROAddress with a line 2 and long address line 1" in {
@@ -496,7 +496,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
           postCode = Some("TE1 1ST")
         )
 
-        readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
+        readCoHoAddress(tstCHROAddressJson) mustBe JsSuccess(testAddress)
       }
 
       "converting CHROAddress with a line 2 and long address line 1 with trailing spaces" in {
@@ -519,7 +519,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
           postCode = Some("TE1 1ST")
         )
 
-        readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
+        readCoHoAddress(tstCHROAddressJson) mustBe JsSuccess(testAddress)
       }
 
       "converting CHROAddress with minimal data and premises" in {
@@ -541,7 +541,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
           postCode = Some("TE1 1ST")
         )
 
-        readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
+        readCoHoAddress(tstCHROAddressJson) mustBe JsSuccess(testAddress)
       }
 
       "converting and normalize CHROAddress with minimal data and premises" in {
@@ -563,7 +563,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
           postCode = Some("TE1 1ST")
         )
 
-        readCoHoAddress(tstCHROAddressJson) shouldBe JsSuccess(testAddress)
+        readCoHoAddress(tstCHROAddressJson) mustBe JsSuccess(testAddress)
       }
     }
 
@@ -709,7 +709,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
             postCode = Some("TE1 1ST"),
             auditRef = Some("tstAuditRef")
           )
-          readPrePopAddress(json) shouldBe JsSuccess(addr)
+          readPrePopAddress(json) mustBe JsSuccess(addr)
         }
         "First two lines and country are defined" in {
           val json = Json.parse(
@@ -728,7 +728,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
             country = Some("UK"),
             postCode = None
           )
-          readPrePopAddress(json) shouldBe JsSuccess(addr)
+          readPrePopAddress(json) mustBe JsSuccess(addr)
         }
         "Postcode is invalid but country is defined" in {
           val json = Json.parse(
@@ -748,7 +748,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
             country = Some("UK"),
             postCode = None
           )
-          readPrePopAddress(json) shouldBe JsSuccess(addr)
+          readPrePopAddress(json) mustBe JsSuccess(addr)
         }
       }
       "fail" when {
@@ -813,7 +813,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
             postCode = Some("TE1 1ST"),
             auditRef = Some("tstAuditRef")
           )
-          writePrePopAddress(addr) shouldBe json
+          writePrePopAddress(addr) mustBe json
         }
         "First two lines and country are defined" in {
           val json = Json.parse(
@@ -832,7 +832,7 @@ class AddressSpec extends UnitSpec with JsonFormValidation {
             country = Some("UK"),
             postCode = None
           )
-          writePrePopAddress(addr) shouldBe json
+          writePrePopAddress(addr) mustBe json
         }
       }
     }

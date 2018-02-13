@@ -16,35 +16,36 @@
 
 package controllers.userJourney
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
-import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
-import play.api.i18n.{I18nSupport, MessagesApi}
-import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.frontend.auth.Actions
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.SessionProfile
+import connectors.KeystoreConnector
+import controllers.{AuthRedirectUrls, PayeBaseController}
+import play.api.Configuration
+import play.api.i18n.MessagesApi
+import services.{CompanyDetailsService, IncorporationInformationService, S4LService}
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.play.config.inject.ServicesConfig
 
 import scala.concurrent.Future
 
-@Singleton
-class DashboardController @Inject()(val messagesApi: MessagesApi,
-                                    val keystoreConnector: KeystoreConnector,
-                                    val payeRegistrationConnector: PAYERegistrationConnector) extends DashboardCtrl {
-  val authConnector = FrontendAuthConnector
-  override lazy val companyRegUrl = getConfString("company-registration-frontend.www.url", "Could not find Company Registration Frontend URL")
-  override lazy val companyRegUri = getConfString("company-registration-frontend.www.uri", "Could not find Company Registration Frontend URI")
+class DashboardControllerImpl @Inject()(val messagesApi: MessagesApi,
+                                        val keystoreConnector: KeystoreConnector,
+                                        val authConnector: AuthConnector,
+                                        val config: Configuration,
+                                        val s4LService: S4LService,
+                                        val companyDetailsService: CompanyDetailsService,
+                                        val incorpInfoService: IncorporationInformationService,
+                                        servicesConfig: ServicesConfig) extends DashboardController with AuthRedirectUrls {
+
+  override lazy val companyRegUrl = servicesConfig.getConfString("company-registration-frontend.www.url", "Could not find Company Registration Frontend URL")
+  override lazy val companyRegUri = servicesConfig.getConfString("company-registration-frontend.www.uri", "Could not find Company Registration Frontend URI")
 }
 
-trait DashboardCtrl extends FrontendController with Actions with I18nSupport with SessionProfile with ServicesConfig {
-  val keystoreConnector: KeystoreConnect
+trait DashboardController extends PayeBaseController {
   val companyRegUrl: String
   val companyRegUri: String
 
-  val dashboard = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user =>
-    implicit request =>
-      Future.successful(Redirect(s"$companyRegUrl$companyRegUri/company-registration-overview"))
+  def dashboard = isAuthorised { implicit request =>
+    Future.successful(Redirect(s"$companyRegUrl$companyRegUri/company-registration-overview"))
   }
 }

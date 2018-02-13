@@ -16,64 +16,69 @@
 
 package services
 
-import connectors.S4LConnect
-import fixtures.{KeystoreFixture, PAYERegistrationFixture}
+import helpers.PayeComponentSpec
 import models.view.{TradingName => TradingNameView}
-import testHelpers.PAYERegSpec
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito.when
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-class S4LServiceSpec extends PAYERegSpec with KeystoreFixture with PAYERegistrationFixture {
+import scala.concurrent.Future
+
+class S4LServiceSpec extends PayeComponentSpec {
 
   trait Setup {
-    val service = new S4LSrv {
-      override val s4LConnector: S4LConnect = mockS4LConnector
+    val service = new S4LService {
+      override val s4LConnector = mockS4LConnector
     }
   }
-
-  implicit val hc = new HeaderCarrier()
 
   val tstTradingNameModel = TradingNameView(differentName = false, tradingName = None)
 
   "S4L Service" should {
 
     "save a form with the correct key" in new Setup {
-      mockS4LSaveForm[TradingNameView]("tradingName", CacheMap("t-name", Map.empty))
+      when(mockS4LConnector.saveForm[TradingNameView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(CacheMap("t-name", Map.empty)))
 
-      await(service.saveForm[TradingNameView]("tradingName", tstTradingNameModel, "regId")).id shouldBe "t-name"
+      await(service.saveForm[TradingNameView]("tradingName", tstTradingNameModel, "regId")).id mustBe "t-name"
     }
 
     "fetch a form with the correct key" in new Setup {
-      mockS4LFetchAndGet[TradingNameView]("tradingName2", Some(tstTradingNameModel))
+      when(mockS4LConnector.fetchAndGet[TradingNameView](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(tstTradingNameModel)))
 
-      await(service.fetchAndGet[TradingNameView]("tradingName2", "regId")) shouldBe Some(tstTradingNameModel)
+      await(service.fetchAndGet[TradingNameView]("tradingName2", "regId")) mustBe Some(tstTradingNameModel)
     }
 
     "save a Map with the correct key" in new Setup {
-      mockS4LSaveForm[Map[Int, String]]("intMap", CacheMap("int-map", Map.empty))
+      when(mockS4LConnector.saveForm[Map[Int, String]](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(CacheMap("int-map", Map.empty)))
 
-      await(service.saveIntMap[String]("intMap", Map(1 -> "string", 2 -> "otherString"), "regId")).id shouldBe "int-map"
+      await(service.saveIntMap[String]("intMap", Map(1 -> "string", 2 -> "otherString"), "regId")).id mustBe "int-map"
     }
 
     "fetch a Map with the correct key" in new Setup {
       val map = Map("one" -> 1, "two" -> 2)
-      mockS4LFetchAndGet[Map[String, Int]]("stringMap", Some(map))
 
-      await(service.fetchAndGetIntMap[Int]("stringMap", "regId")) shouldBe Some(map)
+      when(mockS4LConnector.fetchAndGet[Map[String, Int]](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(map)))
+
+      await(service.fetchAndGetIntMap[Int]("stringMap", "regId")) mustBe Some(map)
     }
 
     "clear down S4L data" in new Setup {
-      mockS4LClear()
+      when(mockS4LConnector.clear(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(HttpResponse(200)))
 
-      await(service.clear("regId")).status shouldBe 200
+      await(service.clear("regId")).status mustBe 200
     }
 
     "fetch all data" in new Setup {
-      mockS4LFetchAll(Some(CacheMap("allData", Map.empty)))
+      when(mockS4LConnector.fetchAll(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(Some(CacheMap("allData", Map.empty))))
 
-      await(service.fetchAll("regId")) shouldBe Some(CacheMap("allData", Map.empty))
+      await(service.fetchAll("regId")) mustBe Some(CacheMap("allData", Map.empty))
     }
-
   }
-
 }

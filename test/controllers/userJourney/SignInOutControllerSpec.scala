@@ -16,29 +16,25 @@
 
 package controllers.userJourney
 
-import builders.AuthBuilder
-import enums.AccountTypes
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito._
-import play.api.http.Status.SEE_OTHER
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import services.{IncorporationInformationService, CurrentProfileService, PAYERegistrationService}
-import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.http.HeaderCarrier
 
-class SignInOutControllerSpec extends PAYERegSpec {
+class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
-  val mockCurrentProfileService = mock[CurrentProfileService]
-  val mockCoHoAPIService = mock[IncorporationInformationService]
-  val mockPAYERegService = mock[PAYERegistrationService]
+  val fakeRequest = FakeRequest()
 
   class Setup {
-    val controller = new SignInOutCtrl {
+    val controller = new SignInOutController {
+      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
+
+      override val incorpInfoService = mockIncorpInfoService
+      override val companyDetailsService = mockCompanyDetailsService
+      override val s4LService = mockS4LService
+      override val keystoreConnector = mockKeystoreConnector
       override val authConnector = mockAuthConnector
-      implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+      implicit val messagesApi: MessagesApi = mockMessagesApi
       override val compRegFEURL: String = "testUrl"
       override val compRegFEURI: String = "/testUri"
     }
@@ -46,38 +42,38 @@ class SignInOutControllerSpec extends PAYERegSpec {
 
   "Calling the postSignIn action" should {
     "return 303 for an unauthorised user" in new Setup {
-      val result = controller.postSignIn()(FakeRequest())
-      status(result) shouldBe SEE_OTHER
+      AuthHelpers.showUnauthorised(controller.postSignIn, fakeRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
+      }
     }
 
     "redirect the user to the Company Registration post-sign-in action" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]()))
-        .thenReturn(AccountTypes.InvalidAccountType)
-
-      AuthBuilder.showWithAuthorisedUser(controller.postSignIn, mockAuthConnector) {
+      AuthHelpers.showAuthorised(controller.postSignIn, FakeRequest()) {
         result =>
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/post-sign-in")
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/post-sign-in")
       }
     }
   }
 
   "signOut" should {
     "redirect to the exit questionnaire and clear the session" in new Setup {
-      AuthBuilder.showWithAuthorisedUser(controller.signOut, mockAuthConnector) {
+      AuthHelpers.showAuthorised(controller.signOut, FakeRequest()) {
         result =>
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/questionnaire")
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/questionnaire")
       }
     }
   }
 
   "renewSession" should {
     "return 200 when hit with Authorised User" in new Setup {
-      AuthBuilder.showWithAuthorisedUser(controller.renewSession(),mockAuthConnector){a =>
-        status(a) shouldBe 200
-        contentType(a) shouldBe Some("image/jpeg")
-        await(a).body.dataStream.toString.contains("""renewSession.jpg""")  shouldBe true
+      AuthHelpers.showAuthorised(controller.renewSession(),FakeRequest()){a =>
+        status(a) mustBe 200
+        contentType(a) mustBe Some("image/jpeg")
+        await(a).body.dataStream.toString.contains("""renewSession.jpg""")  mustBe true
       }
     }
   }
@@ -87,18 +83,18 @@ class SignInOutControllerSpec extends PAYERegSpec {
 
       val fr = FakeRequest().withHeaders(("playFoo","no more"))
 
-      val res = await(controller.destroySession()(fr))
-      status(res) shouldBe 303
-      headers(res).contains("playFoo") shouldBe false
+      val res = controller.destroySession()(fr)
+      status(res) mustBe 303
+      headers(res).contains("playFoo") mustBe false
 
-      redirectLocation(res) shouldBe Some(controllers.userJourney.routes.SignInOutController.timeoutShow().url)
+      redirectLocation(res) mustBe Some(controllers.userJourney.routes.SignInOutController.timeoutShow().url)
     }
   }
 
   "timeoutShow" should {
     "return 200" in new Setup {
-      val res = await(controller.timeoutShow()(FakeRequest()))
-      status(res) shouldBe 200
+      val res = controller.timeoutShow()(FakeRequest())
+      status(res) mustBe 200
     }
   }
 }

@@ -17,7 +17,6 @@
 package models.api
 
 import enums.PAYEStatus
-import models._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{OFormat, __}
 

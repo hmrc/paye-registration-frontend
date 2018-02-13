@@ -15,15 +15,26 @@
  */
 package itutil
 
+import akka.util.Timeout
 import org.scalatest._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatestplus.play.OneServerPerSuite
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
-trait IntegrationSpecBase extends UnitSpec
-  with GivenWhenThen
-  with OneServerPerSuite with ScalaFutures with IntegrationPatience with Matchers
-  with WiremockHelper with BeforeAndAfterEach with BeforeAndAfterAll {
+import scala.concurrent.duration._
+
+trait IntegrationSpecBase
+  extends PlaySpec
+    with OneServerPerSuite
+    with ScalaFutures
+    with IntegrationPatience
+    with WiremockHelper
+    with BeforeAndAfterEach
+    with BeforeAndAfterAll
+    with FutureAwaits
+    with DefaultAwaitTimeout {
+
+  override implicit def defaultAwaitTimeout: Timeout = 5.seconds
 
   override def beforeEach() = {
     resetWiremock()

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package fixtures
+package helpers.fixtures
 
 import java.time.LocalDate
 

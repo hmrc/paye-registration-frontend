@@ -16,61 +16,56 @@
 
 package controllers.userJourney
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
-import config.FrontendAuthConnector
 import connectors._
+import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.PAYEStatus
 import models.external.CurrentProfile
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Result
-import services.{SubmissionService, SubmissionSrv, SummaryService, SummarySrv}
-import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.frontend.auth.Actions
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.SessionProfile
+import play.api.Configuration
+import play.api.i18n.MessagesApi
+import play.api.mvc.{Action, AnyContent, Result}
+import services._
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.http.HeaderCarrier
+import views.html.pages.error.restart
 import views.html.pages.{summary => SummaryPage}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-@Singleton
-class SummaryController @Inject()(val summaryService: SummaryService,
-                                  val submissionService: SubmissionService,
-                                  val keystoreConnector: KeystoreConnector,
-                                  val payeRegistrationConnector: PAYERegistrationConnector,
-                                  val messagesApi: MessagesApi) extends SummaryCtrl {
-  val authConnector = FrontendAuthConnector
-}
+class SummaryControllerImpl @Inject()(val summaryService: SummaryService,
+                                      val submissionService: SubmissionService,
+                                      val keystoreConnector: KeystoreConnector,
+                                      val authConnector: AuthConnector,
+                                      val config: Configuration,
+                                      val s4LService: S4LService,
+                                      val companyDetailsService: CompanyDetailsService,
+                                      val incorpInfoService: IncorporationInformationService,
+                                      val payeRegistrationConnector: PAYERegistrationConnector,
+                                      val messagesApi: MessagesApi) extends SummaryController with AuthRedirectUrls
 
-trait SummaryCtrl extends FrontendController with Actions with I18nSupport with SessionProfile with ServicesConfig {
-  val summaryService: SummarySrv
-  val submissionService: SubmissionSrv
-  val keystoreConnector: KeystoreConnect
-  val payeRegistrationConnector: PAYERegistrationConnect
+trait SummaryController extends PayeBaseController {
+  val summaryService: SummaryService
+  val submissionService: SubmissionService
+  val payeRegistrationConnector: PAYERegistrationConnector
 
-  val summary = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    withCurrentProfile { profile =>
-      invalidSubmissionGuard(profile) {
-        summaryService.getRegistrationSummary(profile.registrationID) map { summaryModel =>
-          Ok(SummaryPage(summaryModel))
-        } recover {
-          case _ => InternalServerError(views.html.pages.error.restart())
-        }
+  def summary: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    invalidSubmissionGuard(profile) {
+      summaryService.getRegistrationSummary(profile.registrationID) map { summaryModel =>
+        Ok(SummaryPage(summaryModel))
+      } recover {
+        case _ => InternalServerError(restart())
       }
     }
   }
 
-  val submitRegistration = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    withCurrentProfile { profile =>
-      invalidSubmissionGuard(profile) {
-        submissionService.submitRegistration(profile) map {
-          case Success    => Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation())
-          case Cancelled  => Redirect(controllers.userJourney.routes.DashboardController.dashboard())
-          case Failed     => Redirect(controllers.errors.routes.ErrorController.failedSubmission())
-          case TimedOut   => InternalServerError(views.html.pages.error.submissionTimeout())
-        }
+  def submitRegistration: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    invalidSubmissionGuard(profile) {
+      submissionService.submitRegistration(profile) map {
+        case Success    => Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation())
+        case Cancelled  => Redirect(controllers.userJourney.routes.DashboardController.dashboard())
+        case Failed     => Redirect(controllers.errors.routes.ErrorController.failedSubmission())
+        case TimedOut   => InternalServerError(views.html.pages.error.submissionTimeout())
       }
     }
   }

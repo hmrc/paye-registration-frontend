@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package fixtures
+package helpers.fixtures
 
 import java.time.LocalDate
 
 import enums.PAYEStatus
-import models.api.{PAYEContact => PAYEContactAPI}
-import models.view.{PAYEContact => PAYEContactView}
-import models.api._
-import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection}
+import models.api.{PAYEContact => PAYEContactAPI, _}
+import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection, PAYEContact => PAYEContactView}
 import models.{Address, DigitalContactDetails}
 
 trait PAYERegistrationFixture {

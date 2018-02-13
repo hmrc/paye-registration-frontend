@@ -16,12 +16,12 @@
 
 package forms.test
 
-import models.{Address, DigitalContactDetails}
+import helpers.PayeComponentSpec
 import models.api.CompanyDetails
+import models.{Address, DigitalContactDetails}
 import play.api.data.FormError
-import uk.gov.hmrc.play.test.UnitSpec
 
-class TestPAYERegCompanyDetailsSetupFormSpec extends UnitSpec {
+class TestPAYERegCompanyDetailsSetupFormSpec extends PayeComponentSpec {
   val testForm = TestPAYERegCompanyDetailsSetupForm.form
 
   "Binding TestPAYERegCompanyDetailsSetupForm to a model" when {
@@ -77,12 +77,12 @@ class TestPAYERegCompanyDetailsSetupFormSpec extends UnitSpec {
           errors => errors,
           success => success
         )
-        boundModel shouldBe model
+        boundModel mustBe model
       }
 
       "Unbind successfully" in {
         val form = testForm.fill(model)
-        form.data shouldBe Map(
+        form.data mustBe Map(
           "companyName" -> "TEST LTD",
           "tradingName" -> "NEWTEST LTD",
           "roAddress.line1" -> "Testing Bld",
@@ -156,12 +156,12 @@ class TestPAYERegCompanyDetailsSetupFormSpec extends UnitSpec {
           errors => errors,
           success => success
         )
-        boundModel shouldBe model
+        boundModel mustBe model
       }
 
       "Unbind successfully" in {
         val form = testForm.fill(model)
-        form.data shouldBe Map(
+        form.data mustBe Map(
           "companyName" -> "TEST LTD",
           "roAddress.line1" -> "Testing Bld",
           "roAddress.line2" -> "1 Test Street",
@@ -197,8 +197,8 @@ class TestPAYERegCompanyDetailsSetupFormSpec extends UnitSpec {
       val boundForm = testForm.bind(data)
       val nameError = FormError("companyName", "error.required")
 
-      boundForm.errors shouldBe Seq(nameError)
-      boundForm.data shouldBe data
+      boundForm.errors mustBe Seq(nameError)
+      boundForm.data mustBe data
     }
 
     "roAddress line1 and line2 are not completed" in {
@@ -218,9 +218,9 @@ class TestPAYERegCompanyDetailsSetupFormSpec extends UnitSpec {
       val formErrorRoAddressLine1 = FormError("roAddress.line1", "error.required")
       val formErrorRoAddressLine2 = FormError("roAddress.line2", "error.required")
 
-      boundForm.error("roAddress.line1") shouldBe Some(formErrorRoAddressLine1)
-      boundForm.error("roAddress.line2") shouldBe Some(formErrorRoAddressLine2)
-      boundForm.data shouldBe data
+      boundForm.error("roAddress.line1") mustBe Some(formErrorRoAddressLine1)
+      boundForm.error("roAddress.line2") mustBe Some(formErrorRoAddressLine2)
+      boundForm.data mustBe data
     }
 
     "ppobAddress line1 and line2 are not completed" in {
@@ -240,9 +240,9 @@ class TestPAYERegCompanyDetailsSetupFormSpec extends UnitSpec {
       val formErrorPPOBAddressLine1 = FormError("ppobAddress.line1", "error.required")
       val formErrorPPOBAddressLine2 = FormError("ppobAddress.line2", "error.required")
 
-      boundForm.error("ppobAddress.line1") shouldBe Some(formErrorPPOBAddressLine1)
-      boundForm.error("ppobAddress.line2") shouldBe Some(formErrorPPOBAddressLine2)
-      boundForm.data shouldBe data
+      boundForm.error("ppobAddress.line1") mustBe Some(formErrorPPOBAddressLine1)
+      boundForm.error("ppobAddress.line2") mustBe Some(formErrorPPOBAddressLine2)
+      boundForm.data mustBe data
     }
   }
 }

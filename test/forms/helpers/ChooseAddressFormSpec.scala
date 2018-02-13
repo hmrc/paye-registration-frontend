@@ -16,11 +16,11 @@
 
 package forms.helpers
 
-import models.view.{ConvertToPrepopAddressException, CorrespondenceAddress, Other, PPOBAddress, PrepopAddress, ROAddress}
+import helpers.PayeComponentSpec
+import models.view._
 import play.api.data.FormError
-import uk.gov.hmrc.play.test.UnitSpec
 
-class ChooseAddressFormSpec extends UnitSpec {
+class ChooseAddressFormSpec extends PayeComponentSpec {
   object testForm extends ChooseAddressForm {
     override val errMessage = "tstErrorMessage"
   }
@@ -32,11 +32,11 @@ class ChooseAddressFormSpec extends UnitSpec {
       )
 
       "Bind successfully" in {
-        testForm.addressChoiceFormatter.bind("chosenAddress", data) shouldBe Right(Other)
+        testForm.addressChoiceFormatter.bind("chosenAddress", data) mustBe Right(Other)
       }
 
       "Unbind successfully" in {
-        testForm.addressChoiceFormatter.unbind("tstKey", Other) shouldBe Map("tstKey" -> "other")
+        testForm.addressChoiceFormatter.unbind("tstKey", Other) mustBe Map("tstKey" -> "other")
       }
     }
 
@@ -46,11 +46,11 @@ class ChooseAddressFormSpec extends UnitSpec {
       )
 
       "Bind successfully" in {
-        testForm.addressChoiceFormatter.bind("chosenAddress", data) shouldBe Right(ROAddress)
+        testForm.addressChoiceFormatter.bind("chosenAddress", data) mustBe Right(ROAddress)
       }
 
       "Unbind successfully" in {
-        testForm.addressChoiceFormatter.unbind("tstKey", ROAddress) shouldBe Map("tstKey" -> "roAddress")
+        testForm.addressChoiceFormatter.unbind("tstKey", ROAddress) mustBe Map("tstKey" -> "roAddress")
       }
     }
 
@@ -60,11 +60,11 @@ class ChooseAddressFormSpec extends UnitSpec {
       )
 
       "Bind successfully" in {
-        testForm.addressChoiceFormatter.bind("chosenAddress", data) shouldBe Right(PPOBAddress)
+        testForm.addressChoiceFormatter.bind("chosenAddress", data) mustBe Right(PPOBAddress)
       }
 
       "Unbind successfully" in {
-        testForm.addressChoiceFormatter.unbind("tstKey", PPOBAddress) shouldBe Map("tstKey" -> "ppobAddress")
+        testForm.addressChoiceFormatter.unbind("tstKey", PPOBAddress) mustBe Map("tstKey" -> "ppobAddress")
       }
     }
 
@@ -74,11 +74,11 @@ class ChooseAddressFormSpec extends UnitSpec {
       )
 
       "Bind successfully" in {
-        testForm.addressChoiceFormatter.bind("chosenAddress", data) shouldBe Right(CorrespondenceAddress)
+        testForm.addressChoiceFormatter.bind("chosenAddress", data) mustBe Right(CorrespondenceAddress)
       }
 
       "Unbind successfully" in {
-        testForm.addressChoiceFormatter.unbind("tstKey", CorrespondenceAddress) shouldBe Map("tstKey" -> "correspondenceAddress")
+        testForm.addressChoiceFormatter.unbind("tstKey", CorrespondenceAddress) mustBe Map("tstKey" -> "correspondenceAddress")
       }
     }
 
@@ -88,11 +88,11 @@ class ChooseAddressFormSpec extends UnitSpec {
       )
 
       "Bind successfully" in {
-        testForm.addressChoiceFormatter.bind("chosenAddress", data) shouldBe Right(PrepopAddress(10))
+        testForm.addressChoiceFormatter.bind("chosenAddress", data) mustBe Right(PrepopAddress(10))
       }
 
       "Unbind successfully" in {
-        testForm.addressChoiceFormatter.unbind("tstKey", PrepopAddress(10)) shouldBe Map("tstKey" -> "prepopAddress10")
+        testForm.addressChoiceFormatter.unbind("tstKey", PrepopAddress(10)) mustBe Map("tstKey" -> "prepopAddress10")
       }
     }
 
@@ -102,7 +102,7 @@ class ChooseAddressFormSpec extends UnitSpec {
       )
 
       "Fail to bind with the correct errors" in {
-        a[ConvertToPrepopAddressException] shouldBe thrownBy(testForm.addressChoiceFormatter.bind("chosenAddress", data))
+        a[ConvertToPrepopAddressException] mustBe thrownBy(testForm.addressChoiceFormatter.bind("chosenAddress", data))
       }
     }
 
@@ -112,7 +112,7 @@ class ChooseAddressFormSpec extends UnitSpec {
       )
 
       "Fail to bind with the correct errors" in {
-        testForm.addressChoiceFormatter.bind("chosenAddress", data) shouldBe Left(List(FormError("chosenAddress",List("tstErrorMessage"),Nil)))
+        testForm.addressChoiceFormatter.bind("chosenAddress", data) mustBe Left(List(FormError("chosenAddress",List("tstErrorMessage"),Nil)))
       }
     }
 
@@ -123,7 +123,7 @@ class ChooseAddressFormSpec extends UnitSpec {
       )
 
       "Fail to bind with the correct errors" in {
-        testForm.addressChoiceFormatter.bind("chosenAddress", data) shouldBe Left(List(FormError("chosenAddress",List("tstErrorMessage"),Nil)))
+        testForm.addressChoiceFormatter.bind("chosenAddress", data) mustBe Left(List(FormError("chosenAddress",List("tstErrorMessage"),Nil)))
       }
     }
 
@@ -133,7 +133,7 @@ class ChooseAddressFormSpec extends UnitSpec {
       )
 
       "Fail to bind with the correct errors" in {
-        testForm.addressChoiceFormatter.bind("chosenAddress", data) shouldBe Left(List(FormError("chosenAddress",List("tstErrorMessage"),Nil)))
+        testForm.addressChoiceFormatter.bind("chosenAddress", data) mustBe Left(List(FormError("chosenAddress",List("tstErrorMessage"),Nil)))
       }
     }
   }

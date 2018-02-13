@@ -16,38 +16,27 @@
 
 package services
 
-import builders.AuthBuilder
-import connectors._
-import enums.{AccountTypes, DownstreamOutcome, RegistrationDeletion}
+import enums.{DownstreamOutcome, RegistrationDeletion}
+import helpers.PayeComponentSpec
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.libs.json.{JsObject, Json}
-import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.http._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException, Upstream4xxResponse}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse, NotFoundException, Upstream4xxResponse }
 
-class PAYERegistrationServiceSpec extends PAYERegSpec {
-
-  val mockRegConnector = mock[PAYERegistrationConnector]
-  val mockS4LService = mock[S4LService]
-  val mockCurrentProfileService = mock[CurrentProfileService]
+class PAYERegistrationServiceSpec extends PayeComponentSpec {
 
   class Setup {
-    val service = new PAYERegistrationSrv {
-      override val authConnector = mockAuthConnector
-      override val payeRegistrationConnector = mockRegConnector
-      override val keyStoreConnector = mockKeystoreConnector
-      override val currentProfileService = mockCurrentProfileService
-      override val s4LService = mockS4LService
+    val service = new PAYERegistrationService {
+      override val payeRegistrationConnector  = mockPAYERegConnector
+      override val keyStoreConnector          = mockKeystoreConnector
+      override val currentProfileService      = mockCurrentProfileService
+      override val s4LService                 = mockS4LService
     }
   }
 
-  implicit val hc = HeaderCarrier()
-  implicit val context = AuthBuilder.createTestUser
+  implicit val context = AuthHelpers.buildAuthContext
 
   val validCurrentProfile = CurrentProfile("testRegId", CompanyRegistrationProfile("rejected", "txId"), "en", false)
 
@@ -57,73 +46,41 @@ class PAYERegistrationServiceSpec extends PAYERegSpec {
 
   "Calling assertRegistrationFootprint" should {
     "return a success response when the Registration is successfully created" in new Setup {
-      when(mockRegConnector.createNewRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.createNewRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      await(service.assertRegistrationFootprint("123", "txID")) shouldBe DownstreamOutcome.Success
+      await(service.assertRegistrationFootprint("123", "txID")) mustBe DownstreamOutcome.Success
     }
 
     "return a failure response when the Registration can't be created" in new Setup {
-      when(mockRegConnector.createNewRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.createNewRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-      await(service.assertRegistrationFootprint("123", "txID")) shouldBe DownstreamOutcome.Failure
-    }
-  }
-
-  "Calling getAccountAffinityGroup" should {
-    "return a AccountType.Organisation" when {
-      "the authenticated user has an org account" in new Setup {
-        val userDetails =
-          Json.obj(
-            "affinityGroup" -> "Organisation"
-          )
-
-        when(mockAuthConnector.getUserDetails[JsObject](ArgumentMatchers.any[AuthContext]())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-          .thenReturn(Future.successful(userDetails))
-
-        val result = await(service.getAccountAffinityGroup)
-        result shouldBe AccountTypes.Organisation
-      }
-    }
-
-    "return an AccountType.InvalidAccountType" when {
-      "the authenticated user doesn't have an org account" in new Setup {
-        val userDetails =
-          Json.obj(
-            "affinityGroup" -> "Individual"
-          )
-
-        when(mockAuthConnector.getUserDetails[JsObject](ArgumentMatchers.any[AuthContext]())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-          .thenReturn(Future.successful(userDetails))
-
-        val result = await(service.getAccountAffinityGroup)
-        result shouldBe AccountTypes.InvalidAccountType
-      }
+      await(service.assertRegistrationFootprint("123", "txID")) mustBe DownstreamOutcome.Failure
     }
   }
 
   "deletePayeRegistrationDocument" should {
     "return a RegistrationDeletionSuccess" when {
       "the users paye document was deleted" in new Setup {
-        when(mockRegConnector.deleteCurrentRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPAYERegConnector.deleteCurrentRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(RegistrationDeletion.success))
 
         when(mockKeystoreConnector.remove()(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(HttpResponse(200)))
 
         val result = await(service.deletePayeRegistrationDocument("testRegId", "testTxId"))
-        result shouldBe RegistrationDeletion.success
+        result mustBe RegistrationDeletion.success
       }
     }
 
     "return a RegistrationDeletionInvalidStatus" when {
       "the users paye document was not deleted" in new Setup {
-        when(mockRegConnector.deleteCurrentRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPAYERegConnector.deleteCurrentRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(RegistrationDeletion.invalidStatus))
 
         val result = await(service.deletePayeRegistrationDocument("testRegId", "testTxId"))
-        result shouldBe RegistrationDeletion.invalidStatus
+        result mustBe RegistrationDeletion.invalidStatus
       }
     }
   }

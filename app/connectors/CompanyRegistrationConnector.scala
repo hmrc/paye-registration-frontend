@@ -16,37 +16,36 @@
 
 package connectors
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import config.WSHttp
 import models.external.CompanyRegistrationProfile
-import play.api.Logger
 import play.api.libs.json._
-import services.{MetricsService, MetricsSrv}
+import services.MetricsService
 import uk.gov.hmrc.http.{BadRequestException, CoreGet, HeaderCarrier}
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.{PAYEFeatureSwitch, PAYEFeatureSwitches}
 
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 
-@Singleton
-class CompanyRegistrationConnector @Inject()(val featureSwitch: PAYEFeatureSwitch,
-                                             val metricsService: MetricsService) extends CompanyRegistrationConnect with ServicesConfig {
-  lazy val companyRegistrationUrl: String = baseUrl("company-registration")
-  lazy val companyRegistrationUri: String = getConfString("company-registration.uri","")
-  lazy val stubUrl: String                = baseUrl("incorporation-frontend-stubs")
-  lazy val stubUri: String                = getConfString("incorporation-frontend-stubs.uri","")
-  val http                                = WSHttp
+class CompanyRegistrationConnectorImpl @Inject()(val featureSwitch: PAYEFeatureSwitch,
+                                                 val http: WSHttp,
+                                                 val metricsService: MetricsService,
+                                                 servicesConfig: ServicesConfig) extends CompanyRegistrationConnector {
+  lazy val companyRegistrationUrl: String = servicesConfig.baseUrl("company-registration")
+  lazy val companyRegistrationUri: String = servicesConfig.getConfString("company-registration.uri","")
+  lazy val stubUrl: String                = servicesConfig.baseUrl("incorporation-frontend-stubs")
+  lazy val stubUri: String                = servicesConfig.getConfString("incorporation-frontend-stubs.uri","")
 }
 
-trait CompanyRegistrationConnect {
+trait CompanyRegistrationConnector {
   val companyRegistrationUrl: String
   val companyRegistrationUri: String
   val stubUrl: String
   val stubUri: String
   val http: CoreGet
-  val metricsService: MetricsSrv
+  val metricsService: MetricsService
   val featureSwitch: PAYEFeatureSwitches
 
   def getCompanyRegistrationDetails(regId: String)(implicit hc : HeaderCarrier) : Future[CompanyRegistrationProfile] = {
@@ -57,16 +56,16 @@ trait CompanyRegistrationConnect {
     http.GET[JsObject](s"$url/$regId/corporation-tax-registration") map { response =>
       companyRegTimer.stop()
       val status = (response \ "status").as[String]
-      val txId = (response \ "confirmationReferences" \ "transaction-id").as[String]
+      val txId   = (response \ "confirmationReferences" \ "transaction-id").as[String]
       CompanyRegistrationProfile(status, txId)
     } recover {
       case badRequestErr: BadRequestException =>
         companyRegTimer.stop()
-        Logger.error(s"[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received a BadRequest status code when expecting a Company Registration document for reg id: $regId")
+        logger.error(s"[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received a BadRequest status code when expecting a Company Registration document for reg id: $regId")
         throw badRequestErr
       case ex: Exception =>
         companyRegTimer.stop()
-        Logger.error(s"[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received an error when expecting a Company Registration document for reg id: $regId - error: ${ex.getMessage}")
+        logger.error(s"[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received an error when expecting a Company Registration document for reg id: $regId - error: ${ex.getMessage}")
         throw ex
     }
   }

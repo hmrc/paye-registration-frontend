@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package auth
+package common
 
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
-import uk.gov.hmrc.play.frontend.auth.{AuthenticationProvider, TaxRegime}
+import org.slf4j.{Logger, LoggerFactory}
 
-class PAYERegime extends TaxRegime {
-  override def isAuthorised(accounts: Accounts): Boolean  = true
-  override def authenticationType: AuthenticationProvider = PAYEAuthenticationProvider
+trait Logging {
+  val logger: Logger = LoggerFactory.getLogger(getClass)
 }

@@ -18,38 +18,33 @@ package services
 
 import java.time.LocalDate
 
-import connectors.PAYERegistrationConnector
+import helpers.PayeComponentSpec
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import testHelpers.PAYERegSpec
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-class ConfirmationServiceSpec extends PAYERegSpec {
-  val mockRegConnector = mock[PAYERegistrationConnector]
+class ConfirmationServiceSpec extends PayeComponentSpec {
 
   trait Setup {
     val testNow: LocalDate
 
-    val service = new ConfirmationSrv {
+    val service = new ConfirmationService {
       def now = testNow
       val startDate = LocalDate.of(2018,2,6)
       val endDate   = LocalDate.of(2018,5,17)
-      val payeRegistrationConnector = mockRegConnector
+      val payeRegistrationConnector = mockPAYERegConnector
     }
   }
-
-  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   "Calling getAcknowledgementReference" should {
     "return an acknowledgment reference" in new Setup {
       override val testNow = LocalDate.now
 
-      when(mockRegConnector.getAcknowledgementReference(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getAcknowledgementReference(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("BRPY00000000001")))
 
-      await(service.getAcknowledgementReference("45632")) shouldBe Some("BRPY00000000001")
+      await(service.getAcknowledgementReference("45632")) mustBe Some("BRPY00000000001")
     }
   }
 
@@ -58,19 +53,19 @@ class ConfirmationServiceSpec extends PAYERegSpec {
       "now is equal to the start date" in new Setup {
         override val testNow = LocalDate.of(2018,2,6)
 
-        service.determineIfInclusiveContentIsShown shouldBe true
+        service.determineIfInclusiveContentIsShown mustBe true
       }
 
       "now is equal to the end date" in new Setup {
         override val testNow = LocalDate.of(2018,5,17)
 
-        service.determineIfInclusiveContentIsShown shouldBe true
+        service.determineIfInclusiveContentIsShown mustBe true
       }
 
       "now is after the start date but before the end date" in new Setup {
         override val testNow = LocalDate.of(2018,4,4)
 
-        service.determineIfInclusiveContentIsShown shouldBe true
+        service.determineIfInclusiveContentIsShown mustBe true
       }
     }
 
@@ -78,13 +73,13 @@ class ConfirmationServiceSpec extends PAYERegSpec {
       "now is before the start date" in new Setup {
         override val testNow = LocalDate.of(2018,1,1)
 
-        service.determineIfInclusiveContentIsShown shouldBe false
+        service.determineIfInclusiveContentIsShown mustBe false
       }
 
       "now is after the end date" in new Setup {
         override val testNow = LocalDate.of(2018,10,26)
 
-        service.determineIfInclusiveContentIsShown shouldBe false
+        service.determineIfInclusiveContentIsShown mustBe false
       }
     }
   }

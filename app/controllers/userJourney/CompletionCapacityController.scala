@@ -16,58 +16,47 @@
 
 package controllers.userJourney
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
-import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
+import connectors.KeystoreConnector
+import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.completionCapacity.CompletionCapacityForm
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.Configuration
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.{CompletionCapacityService, CompletionCapacitySrv}
-import uk.gov.hmrc.play.frontend.auth.Actions
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.SessionProfile
+import services.{CompanyDetailsService, CompletionCapacityService, IncorporationInformationService, S4LService}
+import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{completionCapacity => CompletionCapacityView}
 
 import scala.concurrent.Future
 
-@Singleton
-class CompletionCapacityController @Inject()(val messagesApi: MessagesApi,
-                                             val completionCapacityService: CompletionCapacityService,
-                                             val keystoreConnector: KeystoreConnector,
-                                             val payeRegistrationConnector: PAYERegistrationConnector) extends CompletionCapacityCtrl {
-  val authConnector = FrontendAuthConnector
-}
+class CompletionCapacityControllerImpl @Inject()(val messagesApi: MessagesApi,
+                                                 val completionCapacityService: CompletionCapacityService,
+                                                 val keystoreConnector: KeystoreConnector,
+                                                 val config: Configuration,
+                                                 val s4LService: S4LService,
+                                                 val companyDetailsService: CompanyDetailsService,
+                                                 val incorpInfoService: IncorporationInformationService,
+                                                 val authConnector: AuthConnector) extends CompletionCapacityController with AuthRedirectUrls
 
-trait CompletionCapacityCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
+trait CompletionCapacityController extends PayeBaseController {
+  val completionCapacityService: CompletionCapacityService
 
-  val completionCapacityService: CompletionCapacitySrv
-  val keystoreConnector: KeystoreConnect
-
-  val completionCapacity : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          completionCapacityService.getCompletionCapacity(profile.registrationID) map {
-            case Some(capacity) => Ok(CompletionCapacityView(CompletionCapacityForm.form.fill(capacity)))
-            case None           => Ok(CompletionCapacityView(CompletionCapacityForm.form))
-          }
-        }
+  def completionCapacity: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    completionCapacityService.getCompletionCapacity(profile.registrationID) map {
+      case Some(capacity) => Ok(CompletionCapacityView(CompletionCapacityForm.form.fill(capacity)))
+      case None           => Ok(CompletionCapacityView(CompletionCapacityForm.form))
+    }
   }
 
-  val submitCompletionCapacity : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          CompletionCapacityForm.form.bindFromRequest.fold(
-            errors => Future.successful(BadRequest(CompletionCapacityView(errors))),
-            success => {
-              completionCapacityService.saveCompletionCapacity(profile.registrationID, success) map {
-                _ => Redirect(routes.CompanyDetailsController.tradingName())
-              }
-            }
-          )
+  def submitCompletionCapacity: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    CompletionCapacityForm.form.bindFromRequest.fold(
+      errors => Future.successful(BadRequest(CompletionCapacityView(errors))),
+      success => {
+        completionCapacityService.saveCompletionCapacity(profile.registrationID, success) map {
+          _ => Redirect(routes.CompanyDetailsController.tradingName())
         }
+      }
+    )
   }
 }

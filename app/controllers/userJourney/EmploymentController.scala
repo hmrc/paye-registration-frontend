@@ -16,170 +16,127 @@
 
 package controllers.userJourney
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
-import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
+import connectors.KeystoreConnector
+import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.employmentDetails._
 import models.view.{EmployingStaff, Subcontractors}
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.Configuration
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.{EmploymentService, EmploymentSrv}
-import uk.gov.hmrc.play.frontend.auth.Actions
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.SessionProfile
-import views.html.pages.employmentDetails.{companyPension => CompanyPensionPage, employingStaff => EmployingStaffPage, firstPayment => FirstPaymentPage, subcontractors => SubcontractorsPage}
+import services.{CompanyDetailsService, EmploymentService, IncorporationInformationService, S4LService}
+import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.annual.FirstPaymentInNextTaxYear
+import views.html.pages.employmentDetails.{companyPension => CompanyPensionPage, employingStaff => EmployingStaffPage, firstPayment => FirstPaymentPage, subcontractors => SubcontractorsPage}
 
 import scala.concurrent.Future
 
-@Singleton
-class EmploymentController @Inject()(val employmentService: EmploymentService,
-                                     val keystoreConnector: KeystoreConnector,
-                                     val payeRegistrationConnector: PAYERegistrationConnector,
-                                     implicit val messagesApi: MessagesApi) extends EmploymentCtrl {
-  val authConnector = FrontendAuthConnector
-}
+class EmploymentControllerImpl @Inject()(val employmentService: EmploymentService,
+                                         val keystoreConnector: KeystoreConnector,
+                                         val config: Configuration,
+                                         val authConnector: AuthConnector,
+                                         val s4LService: S4LService,
+                                         val companyDetailsService: CompanyDetailsService,
+                                         val incorpInfoService: IncorporationInformationService,
+                                         implicit val messagesApi: MessagesApi) extends EmploymentController with AuthRedirectUrls
 
-trait EmploymentCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
-  val employmentService: EmploymentSrv
-  val keystoreConnector: KeystoreConnect
-  implicit val messagesApi: MessagesApi
+trait EmploymentController extends PayeBaseController {
+  val employmentService: EmploymentService
 
   // SUBCONTRACTORS
-  val subcontractors = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          employmentService.fetchEmploymentView(profile.registrationID) map {
-            _.subcontractors match {
-              case Some(model) => Ok(SubcontractorsPage(SubcontractorsForm.form.fill(model)))
-              case _           => Ok(SubcontractorsPage(SubcontractorsForm.form))
-            }
-          }
-        }
+  def subcontractors: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    employmentService.fetchEmploymentView(profile.registrationID) map {
+      _.subcontractors match {
+        case Some(model) => Ok(SubcontractorsPage(SubcontractorsForm.form.fill(model)))
+        case _           => Ok(SubcontractorsPage(SubcontractorsForm.form))
+      }
+    }
   }
 
-  val submitSubcontractors = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          SubcontractorsForm.form.bindFromRequest.fold(
-            errors => Future.successful(BadRequest(SubcontractorsPage(errors))),
-            model => employmentService.saveSubcontractors(model, profile.registrationID) map { model =>
-              (model.employing, model.subcontractors) match {
-                case (Some(EmployingStaff(false)), Some(Subcontractors(false))) => Redirect(controllers.errors.routes.ErrorController.ineligible())
-                case _ => Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
-              }
-            }
-          )
+  def submitSubcontractors: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    SubcontractorsForm.form.bindFromRequest.fold(
+      errors => Future.successful(BadRequest(SubcontractorsPage(errors))),
+      model => employmentService.saveSubcontractors(model, profile.registrationID) map { model =>
+        (model.employing, model.subcontractors) match {
+          case (Some(EmployingStaff(false)), Some(Subcontractors(false))) => Redirect(controllers.errors.routes.ErrorController.ineligible())
+          case _ => Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
         }
+      }
+    )
   }
 
   // EMPLOYING STAFF
-  val employingStaff = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          employmentService.fetchEmploymentView(profile.registrationID) map {
-            _.employing match {
-              case Some(model)  => Ok(EmployingStaffPage(EmployingStaffForm.form.fill(model)))
-              case _            => Ok(EmployingStaffPage(EmployingStaffForm.form))
-            }
-          }
-        }
+  def employingStaff: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    employmentService.fetchEmploymentView(profile.registrationID) map {
+      _.employing match {
+        case Some(model)  => Ok(EmployingStaffPage(EmployingStaffForm.form.fill(model)))
+        case _            => Ok(EmployingStaffPage(EmployingStaffForm.form))
+      }
+    }
   }
 
-  val submitEmployingStaff = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          EmployingStaffForm.form.bindFromRequest.fold(
-            errors => Future.successful(BadRequest(EmployingStaffPage(errors))),
-            model => employmentService.saveEmployingStaff(model, profile.registrationID) map { model =>
-              (model.employing, model.subcontractors) match {
-                case (Some(EmployingStaff(false)), Some(Subcontractors(false))) => Redirect(controllers.errors.routes.ErrorController.ineligible())
-                case (Some(EmployingStaff(true)), _)                            => Redirect(controllers.userJourney.routes.EmploymentController.companyPension())
-                case _                                                          => Redirect(controllers.userJourney.routes.EmploymentController.firstPayment())
-              }
-            }
-          )
+  def submitEmployingStaff: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    EmployingStaffForm.form.bindFromRequest.fold(
+      errors => Future.successful(BadRequest(EmployingStaffPage(errors))),
+      model => employmentService.saveEmployingStaff(model, profile.registrationID) map { model =>
+        (model.employing, model.subcontractors) match {
+          case (Some(EmployingStaff(false)), Some(Subcontractors(false))) => Redirect(controllers.errors.routes.ErrorController.ineligible())
+          case (Some(EmployingStaff(true)), _)                            => Redirect(controllers.userJourney.routes.EmploymentController.companyPension())
+          case _                                                          => Redirect(controllers.userJourney.routes.EmploymentController.firstPayment())
         }
+      }
+    )
   }
 
   // COMPANY PENSION
-  val companyPension = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          employmentService.fetchEmploymentView(profile.registrationID) map {
-            _.companyPension match {
-              case Some(model)  => Ok(CompanyPensionPage(CompanyPensionForm.form.fill(model)))
-              case _            => Ok(CompanyPensionPage(CompanyPensionForm.form))
-            }
-          }
-        }
+  def companyPension: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    employmentService.fetchEmploymentView(profile.registrationID) map {
+      _.companyPension match {
+        case Some(model)  => Ok(CompanyPensionPage(CompanyPensionForm.form.fill(model)))
+        case _            => Ok(CompanyPensionPage(CompanyPensionForm.form))
+      }
+    }
   }
 
-  val submitCompanyPension = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          CompanyPensionForm.form.bindFromRequest.fold(
-            errors => Future.successful(BadRequest(CompanyPensionPage(errors))),
-            model => employmentService.saveCompanyPension(model, profile.registrationID) map {
-              _ => Redirect(controllers.userJourney.routes.EmploymentController.firstPayment())
-            }
-          )
-        }
+  def submitCompanyPension: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    CompanyPensionForm.form.bindFromRequest.fold(
+      errors => Future.successful(BadRequest(CompanyPensionPage(errors))),
+      model => employmentService.saveCompanyPension(model, profile.registrationID) map {
+        _ => Redirect(controllers.userJourney.routes.EmploymentController.firstPayment())
+      }
+    )
   }
 
   // FIRST PAYMENT
-  val firstPayment = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          employmentService.fetchEmploymentView(profile.registrationID) map {
-            _.firstPayment match {
-              case Some(model) => Ok(FirstPaymentPage(FirstPaymentForm.form.fill(model)))
-              case _           => Ok(FirstPaymentPage(FirstPaymentForm.form))
-            }
-          }
-        }
+  def firstPayment: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    employmentService.fetchEmploymentView(profile.registrationID) map {
+      _.firstPayment match {
+        case Some(model) => Ok(FirstPaymentPage(FirstPaymentForm.form.fill(model)))
+        case _           => Ok(FirstPaymentPage(FirstPaymentForm.form))
+      }
+    }
   }
 
-  val submitFirstPayment = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          FirstPaymentForm.form.bindFromRequest.fold(
-            errors => Future.successful(BadRequest(FirstPaymentPage(errors))),
-            model => for {
-              _                           <- employmentService.saveFirstPayment(model, profile.registrationID)
-              firstPaymentDateInNextYear  =  employmentService.firstPaymentDateInNextYear(model.firstPayDate)
-            } yield if(firstPaymentDateInNextYear) {
-              Redirect(controllers.userJourney.routes.EmploymentController.ifFirstPaymentIsInTheNextTaxYear() )
-            } else {
-              Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
-            }
-          )
-        }
+  def submitFirstPayment = isAuthorisedWithProfile { implicit request => profile =>
+    FirstPaymentForm.form.bindFromRequest.fold(
+      errors => Future.successful(BadRequest(FirstPaymentPage(errors))),
+      model => for {
+        _                           <- employmentService.saveFirstPayment(model, profile.registrationID)
+        firstPaymentDateInNextYear  =  employmentService.firstPaymentDateInNextYear(model.firstPayDate)
+      } yield if(firstPaymentDateInNextYear) {
+        Redirect(controllers.userJourney.routes.EmploymentController.ifFirstPaymentIsInTheNextTaxYear() )
+      } else {
+        Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+      }
+    )
   }
 
-  def ifFirstPaymentIsInTheNextTaxYear: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { _ =>
-          Future.successful(Ok(FirstPaymentInNextTaxYear()))
-        }
+  def ifFirstPaymentIsInTheNextTaxYear: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
+    Future.successful(Ok(FirstPaymentInNextTaxYear()))
   }
 
-  def redirectBackToStandardFlow: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { _ =>
-          Future.successful(Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity()))
-        }
+  def redirectBackToStandardFlow: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
+    Future.successful(Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity()))
   }
 }

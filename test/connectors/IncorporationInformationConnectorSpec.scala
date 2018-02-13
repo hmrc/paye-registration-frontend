@@ -17,66 +17,63 @@
 package connectors
 
 import common.exceptions.DownstreamExceptions.OfficerListNotFoundException
-import fixtures.CoHoAPIFixture
-import mocks.MockMetrics
+import config.WSHttp
+import helpers.PayeComponentSpec
+import helpers.mocks.MockMetrics
 import models.api.Name
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
-import play.api.libs.json.{Json, JsObject}
-import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.http.ws.WSHttp
-import utils.PAYEFeatureSwitch
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.libs.json.{JsObject, Json}
+import uk.gov.hmrc.http.{BadRequestException, NotFoundException}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ BadRequestException, HeaderCarrier, NotFoundException }
 
-class IncorporationInformationConnectorSpec extends PAYERegSpec with CoHoAPIFixture {
+class IncorporationInformationConnectorSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
 
   val testUrl = "testIIUrl"
   val testUri = "testIIUri"
   val testStubUrl = "testIIStubUrl"
   val testStubUri = "testIIStubUri"
-  implicit val hc = HeaderCarrier()
-  val mockFeatureSwitch = mock[PAYEFeatureSwitch]
 
-  class Setup(unStubbed: Boolean) {
-    val connector = new IncorporationInformationConnect {
-      val stubUrl = testStubUrl
-      val stubUri = testStubUri
-      val incorpInfoUrl = testUrl
-      val incorpInfoUri = testUri
-      override val http : WSHttp = mockWSHttp
+  class Setup(unStubbed: Boolean) extends CodeMocks {
+    val connector = new IncorporationInformationConnector {
+      val stubUrl                 = testStubUrl
+      val stubUri                 = testStubUri
+      val incorpInfoUrl           = testUrl
+      val incorpInfoUri           = testUri
+      override val http : WSHttp  = mockWSHttp
       override val metricsService = new MockMetrics
       override val successCounter = metricsService.companyDetailsSuccessResponseCounter
-      override val failedCounter = metricsService.companyDetailsFailedResponseCounter
-      override def timer = metricsService.incorpInfoResponseTimer.time()
+      override val failedCounter  = metricsService.companyDetailsFailedResponseCounter
+      override def timer          = metricsService.incorpInfoResponseTimer.time()
     }
   }
 
 
   "getCoHoCompanyDetails" should {
     "return a successful CoHo api response object for valid data" in new Setup(true) {
-      mockHttpGet[CoHoCompanyDetailsModel](connector.incorpInfoUrl, Future.successful(validCoHoCompanyDetailsResponse))
+      mockHttpGet[CoHoCompanyDetailsModel](connector.incorpInfoUrl, Fixtures.validCoHoCompanyDetailsResponse)
 
-      await(connector.getCoHoCompanyDetails("testRegID", "testTxID")) shouldBe IncorpInfoSuccessResponse(validCoHoCompanyDetailsResponse)
+      await(connector.getCoHoCompanyDetails("testRegID", "testTxID")) mustBe IncorpInfoSuccessResponse(Fixtures.validCoHoCompanyDetailsResponse)
     }
 
     "return a CoHo Bad Request api response object for a bad request" in new Setup(true) {
       mockHttpGet[CoHoCompanyDetailsModel](connector.incorpInfoUrl, Future.failed(new BadRequestException("tstException")))
 
-      await(connector.getCoHoCompanyDetails("testRegID", "testTxID")) shouldBe IncorpInfoBadRequestResponse
+      await(connector.getCoHoCompanyDetails("testRegID", "testTxID")) mustBe IncorpInfoBadRequestResponse
     }
 
     "return a CoHo NotFound api response object for a bad request" in new Setup(true) {
       mockHttpGet[CoHoCompanyDetailsModel](connector.incorpInfoUrl, Future.failed(new NotFoundException("tstException")))
 
-      await(connector.getCoHoCompanyDetails("testRegID", "testTxID")) shouldBe IncorpInfoNotFoundResponse
+      await(connector.getCoHoCompanyDetails("testRegID", "testTxID")) mustBe IncorpInfoNotFoundResponse
     }
 
     "return a CoHo error api response object for a downstream error" in new Setup(true) {
       val ex = new RuntimeException("tstException")
       mockHttpGet[CoHoCompanyDetailsModel](connector.incorpInfoUrl, Future.failed(ex))
 
-      await(connector.getCoHoCompanyDetails("testRegID", "testTxID")) shouldBe IncorpInfoErrorResponse(ex)
+      await(connector.getCoHoCompanyDetails("testRegID", "testTxID")) mustBe IncorpInfoErrorResponse(ex)
     }
   }
 
@@ -133,7 +130,7 @@ class IncorporationInformationConnectorSpec extends PAYERegSpec with CoHoAPIFixt
     "return a successful CoHo api response object for valid data" in new Setup(true) {
       mockHttpGet[JsObject](connector.incorpInfoUrl, Future.successful(tstOfficerListObject))
 
-      await(connector.getOfficerList(testTransId,testRegId)) shouldBe tstOfficerList
+      await(connector.getOfficerList(testTransId,testRegId)) mustBe tstOfficerList
     }
 
     "return an OfficerListNotFound exception when CoHo api response object returns an empty list" in new Setup(true) {
@@ -162,5 +159,4 @@ class IncorporationInformationConnectorSpec extends PAYERegSpec with CoHoAPIFixt
       intercept[RuntimeException](await(connector.getOfficerList(testTransId,testRegId)) )
     }
   }
-
 }

@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package testHelpers
+package helpers.fixtures
 
-import mocks.PAYEMocks
-import org.scalatest.mockito.MockitoSugar
-import play.api.i18n.MessagesApi
-import play.api.inject.Injector
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 
-trait PAYERegSpec extends UnitSpec with WithFakeApplication with MockitoSugar with PAYEMocks {
+trait CurrentProfileFixtures {
+  val validCurrentProfile = Some(CurrentProfile(
+    registrationID = "testRegId",
+    companyTaxRegistration = CompanyRegistrationProfile(
+      status = "testStatus",
+      transactionId = "testTxId"
+    ),
+    language = "EN",
+    payeRegistrationSubmitted = false
+  ))
 
-  val injector : Injector = fakeApplication.injector
-
-  lazy val mockMessages = injector.instanceOf[MessagesApi]
-
-  implicit val materializer = fakeApplication.materializer
+  val invalidCurrentProfile = None
 }

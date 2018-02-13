@@ -16,11 +16,11 @@
 
 package forms.companyDetails
 
+import helpers.PayeComponentSpec
 import models.DigitalContactDetails
 import play.api.data.{Form, FormError}
-import uk.gov.hmrc.play.test.UnitSpec
 
-class BusinessContactDetailsFormSpec extends UnitSpec {
+class BusinessContactDetailsFormSpec extends PayeComponentSpec {
 
   val testForm = BusinessContactDetailsForm.form
 
@@ -41,7 +41,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
         errors => errors,
         success => success
       )
-      boundModel shouldBe model
+      boundModel mustBe model
     }
 
     "Bind successfully with full data with email at full length" in {
@@ -60,7 +60,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
         errors => errors,
         success => success
       )
-      boundModel shouldBe model
+      boundModel mustBe model
     }
 
     "Bind successfully with minimal data (email)" in {
@@ -79,7 +79,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
         errors => errors,
         success => success
       )
-      boundModel shouldBe model
+      boundModel mustBe model
     }
 
     "Bind successfully with minimal data (mobile)" in {
@@ -98,7 +98,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
         errors => errors,
         success => success
       )
-      boundModel shouldBe model
+      boundModel mustBe model
     }
 
     "Bind successfully with minimal data (phone)" in {
@@ -117,7 +117,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
         errors => errors,
         success => success
       )
-      boundModel shouldBe model
+      boundModel mustBe model
     }
 
     "Have the correct error if no fields are completed" in {
@@ -125,7 +125,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
       val boundForm = testForm.bind(data)
       val formError = FormError("noFieldsCompleted-businessEmail", BusinessContactDetailsForm.noFieldsCompletedMessage)
 
-      boundForm shouldBe testForm.withError(formError)
+      boundForm mustBe testForm.withError(formError)
     }
 
     "Have the correct error if email is invalid" in {
@@ -146,7 +146,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
         None
       )
 
-      boundForm shouldBe errForm
+      boundForm mustBe errForm
     }
 
     "Have the correct error if mobile number is invalid" in {
@@ -167,7 +167,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
         None
       )
 
-      boundForm shouldBe errForm
+      boundForm mustBe errForm
     }
 
     "Have the correct error if phone number is invalid" in {
@@ -189,7 +189,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
         None
       )
 
-      boundForm shouldBe errForm
+      boundForm mustBe errForm
     }
 
     "Have the correct error if the email is of a valid structure but too long" in {
@@ -211,7 +211,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
         None
       )
 
-      boundForm shouldBe errForm
+      boundForm mustBe errForm
     }
 
     "Have the correct error if the mobile number is just a space" in {
@@ -233,7 +233,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
         None
       )
 
-      boundForm shouldBe errForm
+      boundForm mustBe errForm
     }
 
     "Have the correct error if the phone number is just a space" in {
@@ -255,7 +255,7 @@ class BusinessContactDetailsFormSpec extends UnitSpec {
         None
       )
 
-      boundForm shouldBe errForm
+      boundForm mustBe errForm
     }
   }
 }

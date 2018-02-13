@@ -16,8 +16,8 @@
 
 package models.api
 
-import models.view.PAYEContactDetails
 import models.Address
+import models.view.PAYEContactDetails
 import play.api.libs.json.Json
 
 

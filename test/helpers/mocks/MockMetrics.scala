@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package mocks
+package helpers.mocks
 
 import com.codahale.metrics.{Counter, Timer}
 import org.scalatest.mockito.MockitoSugar
-import services.MetricsSrv
+import services.MetricsService
 
-class MockMetrics extends MetricsSrv with MockitoSugar {
+class MockMetrics extends MetricsService with MockitoSugar {
   lazy val mockContext = mock[Timer.Context]
+
   val mockTimer = new Timer()
   val mockCounter = mock[Counter]
-
 
   override val payeRegistrationResponseTimer = mockTimer
   override val addressLookupResponseTimer = mockTimer

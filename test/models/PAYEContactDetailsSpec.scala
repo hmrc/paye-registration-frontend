@@ -16,12 +16,12 @@
 
 package models
 
+import helpers.PayeComponentSpec
 import models.view.PAYEContactDetails
 import play.api.data.validation.ValidationError
-import play.api.libs.json.{JsError, JsPath, JsSuccess, Json}
-import testHelpers.PAYERegSpec
+import play.api.libs.json.{JsPath, JsSuccess, Json}
 
-class PAYEContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
+class PAYEContactDetailsSpec extends PayeComponentSpec {
 
   "PAYEContactDetails with full data" should {
     val targetJsonMax = Json.parse(
@@ -44,10 +44,10 @@ class PAYEContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
     )
 
     "read from Json" in {
-      Json.fromJson[PAYEContactDetails](targetJsonMax) shouldBe JsSuccess(maxModel)
+      Json.fromJson[PAYEContactDetails](targetJsonMax) mustBe JsSuccess(maxModel)
     }
     "write to Json" in {
-      Json.toJson[PAYEContactDetails](maxModel) shouldBe targetJsonMax
+      Json.toJson[PAYEContactDetails](maxModel) mustBe targetJsonMax
     }
   }
 
@@ -71,10 +71,10 @@ class PAYEContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
     )
 
     "read from Json" in {
-      Json.fromJson[PAYEContactDetails](tstJson) shouldBe JsSuccess(tstModel)
+      Json.fromJson[PAYEContactDetails](tstJson) mustBe JsSuccess(tstModel)
     }
     "write to Json" in {
-      Json.toJson[PAYEContactDetails](tstModel) shouldBe tstJson
+      Json.toJson[PAYEContactDetails](tstModel) mustBe tstJson
     }
   }
 
@@ -98,10 +98,10 @@ class PAYEContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
     )
 
     "read from Json" in {
-      Json.fromJson[PAYEContactDetails](tstJson) shouldBe JsSuccess(tstModel)
+      Json.fromJson[PAYEContactDetails](tstJson) mustBe JsSuccess(tstModel)
     }
     "write to Json" in {
-      Json.toJson[PAYEContactDetails](tstModel) shouldBe tstJson
+      Json.toJson[PAYEContactDetails](tstModel) mustBe tstJson
     }
   }
 
@@ -125,10 +125,10 @@ class PAYEContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
 
 
     "read from Json" in {
-      Json.fromJson[PAYEContactDetails](tstJson) shouldBe JsSuccess(tstModel)
+      Json.fromJson[PAYEContactDetails](tstJson) mustBe JsSuccess(tstModel)
     }
     "write to Json" in {
-      Json.toJson[PAYEContactDetails](tstModel) shouldBe tstJson
+      Json.toJson[PAYEContactDetails](tstModel) mustBe tstJson
     }
   }
 
@@ -153,10 +153,10 @@ class PAYEContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
     )
 
     "read from Json" in {
-      Json.fromJson[PAYEContactDetails](targetJsonMax)(PAYEContactDetails.prepopReads) shouldBe JsSuccess(maxModel)
+      Json.fromJson[PAYEContactDetails](targetJsonMax)(PAYEContactDetails.prepopReads) mustBe JsSuccess(maxModel)
     }
     "write to Json" in {
-      Json.toJson[PAYEContactDetails](maxModel)(PAYEContactDetails.prepopWrites) shouldBe targetJsonMax
+      Json.toJson[PAYEContactDetails](maxModel)(PAYEContactDetails.prepopWrites) mustBe targetJsonMax
     }
   }
 
@@ -179,10 +179,10 @@ class PAYEContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
     )
 
     "read from Json" in {
-      Json.fromJson[PAYEContactDetails](json)(PAYEContactDetails.prepopReads) shouldBe JsSuccess(model)
+      Json.fromJson[PAYEContactDetails](json)(PAYEContactDetails.prepopReads) mustBe JsSuccess(model)
     }
     "write to Json" in {
-      Json.toJson[PAYEContactDetails](model)(PAYEContactDetails.prepopWrites) shouldBe json
+      Json.toJson[PAYEContactDetails](model)(PAYEContactDetails.prepopWrites) mustBe json
     }
   }
 
@@ -204,10 +204,10 @@ class PAYEContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
     )
 
     "read from Json" in {
-      Json.fromJson[PAYEContactDetails](json)(PAYEContactDetails.prepopReads) shouldBe JsSuccess(model)
+      Json.fromJson[PAYEContactDetails](json)(PAYEContactDetails.prepopReads) mustBe JsSuccess(model)
     }
     "write to Json" in {
-      Json.toJson[PAYEContactDetails](model)(PAYEContactDetails.prepopWrites) shouldBe json
+      Json.toJson[PAYEContactDetails](model)(PAYEContactDetails.prepopWrites) mustBe json
     }
   }
 
@@ -238,7 +238,7 @@ class PAYEContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
       shouldHaveErrors(result, JsPath(), Seq(ValidationError(err)))
     }
     "write to Json without firstName, middleName and surname" in {
-      Json.toJson[PAYEContactDetails](model)(PAYEContactDetails.prepopWrites) shouldBe json
+      Json.toJson[PAYEContactDetails](model)(PAYEContactDetails.prepopWrites) mustBe json
     }
   }
 

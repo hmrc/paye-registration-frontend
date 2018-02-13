@@ -16,12 +16,13 @@
 
 package audit
 
+import helpers.PayeComponentSpec
 import play.api.libs.json.Json
-import uk.gov.hmrc.play.test.UnitSpec
 
-class AmendedPAYEContactDetailsEventSpec extends UnitSpec {
+class AmendedPAYEContactDetailsEventSpec extends PayeComponentSpec {
   "AmendedPAYEContactDetailsEvent" should {
     "construct full Json as per definition" in {
+
       val testAmendedPAYEContactDetailsEvent = AmendedPAYEContactDetailsEventDetail(
         externalUserId = "ext-12354",
         authProviderId = "ap-12345",
@@ -62,7 +63,7 @@ class AmendedPAYEContactDetailsEventSpec extends UnitSpec {
         """.stripMargin
       )
 
-      Json.toJson(testExpectedJson) shouldBe testExpectedJson
+      Json.toJson(testExpectedJson) mustBe testExpectedJson
     }
   }
 }

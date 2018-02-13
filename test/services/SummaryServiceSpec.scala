@@ -17,29 +17,23 @@
 package services
 
 import common.exceptions.InternalExceptions.APIConversionException
-import connectors.PAYERegistrationConnector
 import enums.PAYEStatus
-import fixtures.PAYERegistrationFixture
-import models.api.{PAYEContact => PAYEContactAPI}
-import models.api.{Director, Employment, Name, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
+import helpers.PayeComponentSpec
+import models.api.{Director, Employment, Name, SICCode, CompanyDetails => CompanyDetailsAPI, PAYEContact => PAYEContactAPI, PAYERegistration => PAYERegistrationAPI}
 import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection}
 import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import testHelpers.PAYERegSpec
+import uk.gov.hmrc.http.{NotFoundException, Upstream4xxResponse}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, NotFoundException, Upstream4xxResponse }
 
-class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
-
-  val mockRegConnector = mock[PAYERegistrationConnector]
-  val mockS4LService = mock[S4LService]
+class SummaryServiceSpec extends PayeComponentSpec {
 
   class Setup {
-    val service = new SummarySrv {
-      val keystoreConnector = mockKeystoreConnector
-      val payeRegistrationConnector = mockRegConnector
+    val service = new SummaryService {
+      val keystoreConnector         = mockKeystoreConnector
+      val payeRegistrationConnector = mockPAYERegConnector
     }
   }
 
@@ -56,9 +50,9 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       tradingName = Some("tstTrade"),
       Address("14 St Test Walk", "Testley", None, None, None, None),
       Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK")),
-      businessContactDetails = validBusinessContactDetails
+      businessContactDetails = Fixtures.validBusinessContactDetails
     ),
-    employment = validEmploymentAPI,
+    employment = Fixtures.validEmploymentAPI,
     sicCodes = simpleSICCodes,
     directors = List(
       Director(
@@ -71,7 +65,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         nino = Some("ZZ123456A")
       )
     ),
-    payeContact = validPAYEContactAPI
+    payeContact = Fixtures.validPAYEContactAPI
   )
 
   lazy val summary = Summary(
@@ -201,8 +195,6 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
     )
   )
 
-  implicit val hc = HeaderCarrier()
-
   val forbidden = Upstream4xxResponse("403", 403, 403)
   val notFound = new NotFoundException("404")
   val runTimeException = new RuntimeException("tst")
@@ -210,28 +202,28 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
   "Calling getRegistrationSummary" should {
     "return a defined Summary when the connector returns a valid PAYE Registration response" in new Setup {
 
-      when(mockRegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(apiRegistration))
 
-      await(service.getRegistrationSummary("45632")) shouldBe summary
+      await(service.getRegistrationSummary("45632")) mustBe summary
     }
 
     "return None when the connector returns a Forbidden response" in new Setup {
-      when(mockRegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(forbidden))
 
       intercept[Upstream4xxResponse](await(service.getRegistrationSummary("45632")))
     }
 
     "return None when the connector returns a Not Found response" in new Setup {
-      when(mockRegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(notFound))
 
       intercept[NotFoundException](await(service.getRegistrationSummary("45632")))
     }
 
     "return None when the connector returns an exception response" in new Setup {
-      when(mockRegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(runTimeException))
 
       intercept[RuntimeException](await(service.getRegistrationSummary("45632")))
@@ -241,7 +233,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
   "Calling registrationToSummary" should {
     "convert a PAYE Registration API Model  to a summary model with a trading name" in new Setup {
 
-      service.registrationToSummary(apiRegistration) shouldBe summary
+      service.registrationToSummary(apiRegistration) mustBe summary
     }
 
     "convert a PAYE Registration API Model  to a summary model without a trading name" in new Setup {
@@ -258,9 +250,9 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
           tradingName = None,
           Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
           Address("15 St Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE4 1ST"), Some("UK")),
-          businessContactDetails = validBusinessContactDetails
+          businessContactDetails = Fixtures.validBusinessContactDetails
         ),
-        employment = validEmploymentAPI,
+        employment = Fixtures.validEmploymentAPI,
         sicCodes = simpleSICCodes,
         directors = List(
           Director(
@@ -273,12 +265,12 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
             nino = Some("ZZ123456A")
           )
         ),
-        payeContact = validPAYEContactAPI
+        payeContact = Fixtures.validPAYEContactAPI
       )
 
       val formatHMTLROAddress = service.addressToSummaryRowAnswers(apiRegistrationNoTName.companyDetails.roAddress)
       val formatHMTLPPOBAddress = service.addressToSummaryRowAnswers(apiRegistrationNoTName.companyDetails.ppobAddress)
-      val formatHMTLCorrespondenceAddress = service.addressToSummaryRowAnswers(validPAYEContactAPI.correspondenceAddress)
+      val formatHMTLCorrespondenceAddress = service.addressToSummaryRowAnswers(Fixtures.validPAYEContactAPI.correspondenceAddress)
 
       lazy val summaryNoTName = Summary(
         Seq(
@@ -406,7 +398,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
           )
         )
       )
-      service.registrationToSummary(apiRegistrationNoTName) shouldBe summaryNoTName
+      service.registrationToSummary(apiRegistrationNoTName) mustBe summaryNoTName
     }
   }
 
@@ -457,7 +449,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         )
       )
 
-      service.buildCompanyDetailsSection(validCompanyDetailsAPI, sicCodes) shouldBe companyDetailsSection
+      service.buildCompanyDetailsSection(validCompanyDetailsAPI, sicCodes) mustBe companyDetailsSection
     }
 
     "throw the correct exception when there is no description provided" in new Setup{
@@ -468,13 +460,13 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         )
       )
 
-      an[APIConversionException] shouldBe thrownBy(service.buildCompanyDetailsSection(validCompanyDetailsAPI, sicCodesModel))
+      an[APIConversionException] mustBe thrownBy(service.buildCompanyDetailsSection(Fixtures.validCompanyDetailsAPI, sicCodesModel))
     }
 
     "throw the correct exception when there is no SIC code provided" in new Setup{
       val sicCodesModel = List.empty
 
-      a[NoSuchElementException] shouldBe thrownBy(service.buildCompanyDetailsSection(validCompanyDetailsAPI, sicCodesModel))
+      a[NoSuchElementException] mustBe thrownBy(service.buildCompanyDetailsSection(Fixtures.validCompanyDetailsAPI, sicCodesModel))
     }
   }
 
@@ -484,7 +476,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
       val validEmploymentAPIFalse = Employment(employees = false,
         companyPension = Some(false),
         subcontractors = false,
-        firstPayDate = validDate
+        firstPayDate = Fixtures.validDate
       )
 
       val employmentSection = SummarySection(
@@ -513,7 +505,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         )
       )
 
-      service.buildEmploymentSection(validEmploymentAPIFalse) shouldBe employmentSection
+      service.buildEmploymentSection(validEmploymentAPIFalse) mustBe employmentSection
     }
   }
 
@@ -548,7 +540,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
           ).flatten
         )
 
-      service.buildBusinessContactDetailsSection(businessContactDetailsModel) shouldBe validBCDSection
+      service.buildBusinessContactDetailsSection(businessContactDetailsModel) mustBe validBCDSection
     }
 
     "return a summary section with no provided answers" in new Setup {
@@ -581,7 +573,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
           ).flatten
         )
 
-      service.buildBusinessContactDetailsSection(businessContactDetailsModel) shouldBe validBCDSection
+      service.buildBusinessContactDetailsSection(businessContactDetailsModel) mustBe validBCDSection
     }
   }
 
@@ -634,7 +626,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
           )
         )
 
-      service.buildContactDetails(tstContactSectionAPI) shouldBe validPAYEContactDetailsSection
+      service.buildContactDetails(tstContactSectionAPI) mustBe validPAYEContactDetailsSection
     }
 
     "return a valid PAYE contact details block with empty Digital Contact" in new Setup {
@@ -683,7 +675,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
           )
         )
 
-      service.buildContactDetails(tstContactSectionAPI) shouldBe validPAYEContactDetailsSection
+      service.buildContactDetails(tstContactSectionAPI) mustBe validPAYEContactDetailsSection
     }
   }
 
@@ -701,7 +693,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         )
       )
 
-      service.buildCompletionCapacitySection(capacity) shouldBe section
+      service.buildCompletionCapacitySection(capacity) mustBe section
     }
 
     "return a valid section for agent" in new Setup {
@@ -717,7 +709,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         )
       )
 
-      service.buildCompletionCapacitySection(capacity) shouldBe section
+      service.buildCompletionCapacitySection(capacity) mustBe section
     }
 
     "return a valid section for other - Executive in charge of helicopters" in new Setup {
@@ -733,7 +725,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
         )
       )
 
-      service.buildCompletionCapacitySection(capacity) shouldBe section
+      service.buildCompletionCapacitySection(capacity) mustBe section
     }
   }
 
@@ -782,7 +774,7 @@ class SummaryServiceSpec extends PAYERegSpec with PAYERegistrationFixture {
           ).flatten
         )
 
-      service.buildDirectorsSection(directorDetailsModel) shouldBe validDirectorDetailsSection
+      service.buildDirectorsSection(directorDetailsModel) mustBe validDirectorDetailsSection
     }
   }
 }

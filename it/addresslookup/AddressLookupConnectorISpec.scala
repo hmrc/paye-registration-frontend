@@ -23,7 +23,6 @@ import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.mvc.Call
-import services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
 
 class AddressLookupConnectorISpec extends IntegrationSpecBase {
@@ -84,7 +83,7 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getAddress) shouldBe testAddressModel
+      await(getAddress) mustBe testAddressModel
     }
 
     "get an address from a 200 and trim the lines if they are too long" in {
@@ -120,7 +119,7 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getAddress) shouldBe testAddressModelTrimmed
+      await(getAddress) mustBe testAddressModelTrimmed
     }
   }
 
@@ -142,7 +141,7 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
           )
       )
 
-      await(getOnRamp) shouldBe tstALFUrl
+      await(getOnRamp) mustBe tstALFUrl
     }
 
     "throw the correct exception when no url is returned from ALF" in {

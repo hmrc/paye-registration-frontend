@@ -16,42 +16,47 @@
 
 package controllers.test
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
-import config.FrontendAuthConnector
 import connectors._
 import connectors.test._
+import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
-import play.api.Logger
 import play.api.i18n.MessagesApi
+import play.api.{Configuration, Logger}
 import services._
+import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton
-class TestSetupController @Inject()(val keystoreConnector: KeystoreConnector,
-                                    val businessRegConnector: BusinessRegistrationConnector,
-                                    val testBusinessRegConnector: TestBusinessRegConnector,
-                                    val testIncorpInfoConnector: TestIncorpInfoConnector,
-                                    val coHoAPIService: IncorporationInformationService,
-                                    val messagesApi: MessagesApi,
-                                    val testPAYERegConnector: TestPAYERegConnector,
-                                    val payeRegService:PAYERegistrationService,
-                                    val payeRegistrationConnector: PAYERegistrationConnector,
-                                    val s4LService: S4LService) extends TestSetupCtrl {
-  val authConnector = FrontendAuthConnector
-}
+class TestSetupControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
+                                        val config: Configuration,
+                                        val businessRegConnector: BusinessRegistrationConnector,
+                                        val testBusinessRegConnector: TestBusinessRegConnector,
+                                        val testIncorpInfoConnector: TestIncorpInfoConnector,
+                                        val coHoAPIService: IncorporationInformationService,
+                                        val messagesApi: MessagesApi,
+                                        val companyDetailsService: CompanyDetailsService,
+                                        val incorpInfoService: IncorporationInformationService,
+                                        val testPAYERegConnector: TestPAYERegConnector,
+                                        val payeRegService: PAYERegistrationService,
+                                        val authConnector: AuthConnector,
+                                        val s4LService: S4LService) extends TestSetupController with AuthRedirectUrls
 
-trait TestSetupCtrl extends BusinessProfileCtrl with TestCoHoCtrl with TestRegSetupCtrl with TestCacheCtrl {
-  val keystoreConnector: KeystoreConnect
-  val businessRegConnector: BusinessRegistrationConnect
-  val testBusinessRegConnector: TestBusinessRegConnect
-  val testIncorpInfoConnector: TestIncorpInfoConnect
-  val coHoAPIService: IncorporationInformationSrv
-  val payeRegService: PAYERegistrationSrv
-  val testPAYERegConnector: TestPAYERegConnect
-  val s4LService: S4LSrv
+trait TestSetupController
+  extends BusinessProfileController
+    with TestCoHoController
+    with TestRegSetupController
+    with TestCacheController
+    with PayeBaseController {
+
+  val businessRegConnector: BusinessRegistrationConnector
+  val testBusinessRegConnector: TestBusinessRegConnector
+  val testIncorpInfoConnector: TestIncorpInfoConnector
+  val coHoAPIService: IncorporationInformationService
+  val payeRegService: PAYERegistrationService
+  val testPAYERegConnector: TestPAYERegConnector
+  val s4LService: S4LService
 
   private def log[T](f: String, res: Future[T])(implicit ec: ExecutionContext): Future[T] = {
     res.flatMap (msg => {
@@ -60,28 +65,23 @@ trait TestSetupCtrl extends BusinessProfileCtrl with TestCoHoCtrl with TestRegSe
     })
   }
 
-  def testSetup(companyName: String) = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-          for {
-            businessProfile <- log("CurrentProfileSetup", doBusinessProfileSetup)
-            _ <- log("CoHoCompanyDetailsTeardown", doCoHoCompanyDetailsTearDown(businessProfile.registrationID))
-            _ <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(businessProfile.registrationID, companyName))
-            _ <- log("RegTeardown", doIndividualRegTeardown(businessProfile.registrationID))
-            _ <- log("S4LTeardown", doTearDownS4L(businessProfile.registrationID))
-            _ <- log("CCUpdate", testBusinessRegConnector.updateCompletionCapacity(businessProfile.registrationID, "director"))
-          } yield Redirect(controllers.userJourney.routes.PayeStartController.startPaye())
-
+  def testSetup(companyName: String) = isAuthorised { implicit request =>
+    for {
+      bp <- log("CurrentProfileSetup", doBusinessProfileSetup)
+      _  <- log("CoHoCompanyDetailsTeardown", doCoHoCompanyDetailsTearDown(bp.registrationID))
+      _  <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(bp.registrationID, companyName))
+      _  <- log("RegTeardown", doIndividualRegTeardown(bp.registrationID))
+      _  <- log("S4LTeardown", doTearDownS4L(bp.registrationID))
+      _  <- log("CCUpdate", testBusinessRegConnector.updateCompletionCapacity(bp.registrationID, "director"))
+    } yield Redirect(controllers.userJourney.routes.PayeStartController.startPaye())
   }
 
-  def updateStatus(status: String) = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        businessRegConnector.retrieveCurrentProfile.flatMap { profile =>
-          testPAYERegConnector.updateStatus(profile.registrationID, status) map {
-            case DownstreamOutcome.Success => Ok(s"status for regId ${profile.registrationID} updated to '$status'")
-            case DownstreamOutcome.Failure => InternalServerError(s"Unable to update status for regId ${profile.registrationID}")
-          }
-        }
+  def updateStatus(status: String) = isAuthorised { implicit request =>
+    businessRegConnector.retrieveCurrentProfile.flatMap { profile =>
+      testPAYERegConnector.updateStatus(profile.registrationID, status) map {
+        case DownstreamOutcome.Success => Ok(s"status for regId ${profile.registrationID} updated to '$status'")
+        case DownstreamOutcome.Failure => InternalServerError(s"Unable to update status for regId ${profile.registrationID}")
+      }
+    }
   }
 }

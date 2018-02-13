@@ -16,11 +16,11 @@
 
 package models.external
 
+import helpers.PayeComponentSpec
 import models.api.Name
 import play.api.libs.json.Json
-import testHelpers.PAYERegSpec
 
-class OfficerListSpec extends PAYERegSpec {
+class OfficerListSpec extends PayeComponentSpec {
   val tstOfficerList = OfficerList(
     items = Seq(
       Officer(
@@ -112,7 +112,7 @@ class OfficerListSpec extends PAYERegSpec {
 
   "OfficerList" should {
     "read from Json" in {
-      Json.fromJson[OfficerList](tstOfficerListJson).get shouldBe tstOfficerList
+      Json.fromJson[OfficerList](tstOfficerListJson).get mustBe tstOfficerList
     }
 
     "read and normalize from Json" in {
@@ -181,7 +181,7 @@ class OfficerListSpec extends PAYERegSpec {
           |]""".stripMargin
       )
 
-      Json.fromJson[OfficerList](tstOfficerListJson2).get shouldBe tstOfficerList
+      Json.fromJson[OfficerList](tstOfficerListJson2).get mustBe tstOfficerList
     }
   }
 }

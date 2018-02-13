@@ -16,40 +16,40 @@
 
 package enums
 
-import uk.gov.hmrc.play.test.UnitSpec
+import helpers.PayeComponentSpec
 
-class UserCapacitySpec extends UnitSpec {
+class UserCapacitySpec extends PayeComponentSpec {
 
   "Reading UserCapacity from string" should {
     "work for director" in {
-      UserCapacity.fromString("director") shouldBe UserCapacity.director
+      UserCapacity.fromString("director") mustBe UserCapacity.director
     }
     "work for DiReCToR" in {
-      UserCapacity.fromString("DiReCToR") shouldBe UserCapacity.director
+      UserCapacity.fromString("DiReCToR") mustBe UserCapacity.director
     }
     "work for agent" in {
-      UserCapacity.fromString("agent") shouldBe UserCapacity.agent
+      UserCapacity.fromString("agent") mustBe UserCapacity.agent
     }
     "work for secretary" in {
-      UserCapacity.fromString("company secretary") shouldBe UserCapacity.secretary
+      UserCapacity.fromString("company secretary") mustBe UserCapacity.secretary
     }
     "work for OTHER" in {
-      UserCapacity.fromString("OTHER") shouldBe UserCapacity.other
+      UserCapacity.fromString("OTHER") mustBe UserCapacity.other
     }
   }
 
   "Writing UserCapacity to string" should {
     "work for director" in {
-      UserCapacity.director.toString shouldBe "director"
+      UserCapacity.director.toString mustBe "director"
     }
     "work for agent" in {
-      UserCapacity.agent.toString shouldBe "agent"
+      UserCapacity.agent.toString mustBe "agent"
     }
     "work for secretary" in {
-      UserCapacity.secretary.toString shouldBe "company secretary"
+      UserCapacity.secretary.toString mustBe "company secretary"
     }
     "work for other" in {
-      UserCapacity.other.toString shouldBe "other"
+      UserCapacity.other.toString mustBe "other"
     }
   }
 

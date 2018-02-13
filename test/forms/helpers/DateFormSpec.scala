@@ -18,16 +18,14 @@ package forms.helpers
 
 import java.time.LocalDate
 
+import helpers.PayeComponentSpec
 import play.api.data.FormError
-import uk.gov.hmrc.play.test.UnitSpec
 
-class DateFormSpec extends UnitSpec {
+class DateFormSpec extends PayeComponentSpec {
 
   object TestForm extends DateForm {
-
     override val prefix = "tst"
     override def validation(dt: LocalDate) = Right(dt)
-
   }
 
 
@@ -39,7 +37,7 @@ class DateFormSpec extends UnitSpec {
         "tstYear" -> "2016"
         )
       val date = LocalDate.of(2016,1,28)
-      TestForm.dateFormatter.bind("tstKey", data) shouldBe Right(date)
+      TestForm.dateFormatter.bind("tstKey", data) mustBe Right(date)
     }
   }
 
@@ -48,7 +46,7 @@ class DateFormSpec extends UnitSpec {
         "tstMonth" -> "01",
         "tstYear" -> "2016"
         )
-    TestForm.dateFormatter.bind("tstKey", data) shouldBe Left(Seq(FormError("tstDay", "pages.firstPayment.date.invalidRange")))
+    TestForm.dateFormatter.bind("tstKey", data) mustBe Left(Seq(FormError("tstDay", "pages.firstPayment.date.invalidRange")))
   }
 
   "fail to bind from an invalid date (missing month)" in {
@@ -56,7 +54,7 @@ class DateFormSpec extends UnitSpec {
         "tstDay" -> "28",
         "tstYear" -> "2016"
         )
-    TestForm.dateFormatter.bind("tstKey", data) shouldBe Left(Seq(FormError("tstDay", "pages.firstPayment.date.invalidRange")))
+    TestForm.dateFormatter.bind("tstKey", data) mustBe Left(Seq(FormError("tstDay", "pages.firstPayment.date.invalidRange")))
   }
 
   "fail to bind from an invalid date (missing year)" in {
@@ -64,7 +62,7 @@ class DateFormSpec extends UnitSpec {
         "tstDay" -> "28",
         "tstMonth" -> "01"
         )
-    TestForm.dateFormatter.bind("tstKey", data) shouldBe Left(Seq(FormError("tstDay", "pages.firstPayment.date.invalidRange")))
+    TestForm.dateFormatter.bind("tstKey", data) mustBe Left(Seq(FormError("tstDay", "pages.firstPayment.date.invalidRange")))
   }
 
   "unbind from a LocalDate" in {
@@ -74,7 +72,7 @@ class DateFormSpec extends UnitSpec {
         "tstMonth" -> "2",
         "tstYear" -> "2016"
         )
-    TestForm.dateFormatter.unbind("testKey", date) shouldBe data
+    TestForm.dateFormatter.unbind("testKey", date) mustBe data
   }
 
 }

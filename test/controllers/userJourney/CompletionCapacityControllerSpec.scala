@@ -16,44 +16,33 @@
 
 package controllers.userJourney
 
-import builders.AuthBuilder
-import connectors.PAYERegistrationConnector
 import enums.{DownstreamOutcome, UserCapacity}
-import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.CompletionCapacity
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 import services.CompletionCapacityService
-import testHelpers.PAYERegSpec
-
-import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
-class CompletionCapacityControllerSpec extends PAYERegSpec {
+import scala.concurrent.Future
+
+class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val mockCompletionCapacityService = mock[CompletionCapacityService]
-  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
-
 
   class Setup {
-    val testController = new CompletionCapacityCtrl {
-      override val authConnector = mockAuthConnector
-      override val messagesApi = mockMessages
-      override val completionCapacityService = mockCompletionCapacityService
-      override val keystoreConnector = mockKeystoreConnector
-      override val payeRegistrationConnector = mockPayeRegistrationConnector
+    val testController = new CompletionCapacityController {
+      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
 
-      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
-        f(CurrentProfile(
-          "12345",
-          CompanyRegistrationProfile("held", "txId"),
-          "ENG",
-          payeRegistrationSubmitted = false
-        ))
-      }
+      override val incorpInfoService         = mockIncorpInfoService
+      override val companyDetailsService     = mockCompanyDetailsService
+      override val s4LService                = mockS4LService
+      override val authConnector             = mockAuthConnector
+      override val messagesApi               = mockMessagesApi
+      override val completionCapacityService = mockCompletionCapacityService
+      override val keystoreConnector         = mockKeystoreConnector
     }
   }
   "completionCapacity" should {
@@ -63,8 +52,8 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
       when(mockCompletionCapacityService.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Some(capacity)))
 
-      AuthBuilder.showWithAuthorisedUser(testController.completionCapacity, mockAuthConnector) { result =>
-        status(result) shouldBe OK
+      AuthHelpers.showAuthorisedWithCP(testController.completionCapacity, Fixtures.validCurrentProfile, FakeRequest()) { result =>
+        status(result) mustBe OK
       }
     }
 
@@ -74,8 +63,8 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
       when(mockCompletionCapacityService.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(None))
 
-      AuthBuilder.showWithAuthorisedUser(testController.completionCapacity, mockAuthConnector) { result =>
-        status(result) shouldBe OK
+      AuthHelpers.showAuthorisedWithCP(testController.completionCapacity, Fixtures.validCurrentProfile, FakeRequest()) { result =>
+        status(result) mustBe OK
       }
     }
   }
@@ -86,8 +75,8 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
         "" -> ""
       )
 
-      AuthBuilder.submitWithAuthorisedUser(testController.submitCompletionCapacity, mockAuthConnector, request) { result =>
-        status(result) shouldBe BAD_REQUEST
+      AuthHelpers.submitAuthorisedWithCP(testController.submitCompletionCapacity, Fixtures.validCurrentProfile, request) { result =>
+        status(result) mustBe BAD_REQUEST
       }
     }
 
@@ -102,9 +91,9 @@ class CompletionCapacityControllerSpec extends PAYERegSpec {
       when(mockCompletionCapacityService.saveCompletionCapacity(ArgumentMatchers.anyString(), ArgumentMatchers.any[CompletionCapacity]())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      AuthBuilder.submitWithAuthorisedUser(testController.submitCompletionCapacity, mockAuthConnector, request) { result =>
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.CompanyDetailsController.tradingName().url)
+      AuthHelpers.submitAuthorisedWithCP(testController.submitCompletionCapacity, Fixtures.validCurrentProfile, request) { result =>
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(routes.CompanyDetailsController.tradingName().url)
       }
     }
   }

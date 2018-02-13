@@ -17,7 +17,7 @@
 package services
 
 import java.time.format.DateTimeFormatter
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import common.exceptions.InternalExceptions.APIConversionException
 import connectors._
@@ -26,18 +26,17 @@ import models.api.{CompanyDetails, Director, Employment, PAYEContact, SICCode, P
 import models.view.{Summary, SummaryRow, SummarySection}
 import models.{Address, DigitalContactDetails}
 import play.api.mvc.Call
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.Formatters
 
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 import scala.util.{Success, Try}
-import uk.gov.hmrc.http.HeaderCarrier
 
-@Singleton
-class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationConnector) extends SummarySrv
+class SummaryServiceImpl @Inject()(val payeRegistrationConnector: PAYERegistrationConnector) extends SummaryService
 
-trait SummarySrv {
-  val payeRegistrationConnector: PAYERegistrationConnect
+trait SummaryService {
+  val payeRegistrationConnector: PAYERegistrationConnector
 
   def getRegistrationSummary(regId: String)(implicit hc: HeaderCarrier): Future[Summary] = {
     for {

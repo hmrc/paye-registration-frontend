@@ -17,73 +17,67 @@
 package services
 
 import connectors._
-import fixtures.{CoHoAPIFixture, KeystoreFixture}
+import helpers.PayeComponentSpec
 import models.view.Directors
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import testHelpers.PAYERegSpec
+import uk.gov.hmrc.http.BadRequestException
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ BadRequestException, HeaderCarrier }
 
-class IncorporationInformationServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFixture {
-
-  val mockCoHoAPIConnector = mock[IncorporationInformationConnector]
-
-  trait Setup {
-    val service = new IncorporationInformationSrv {
-      override val incorpInfoConnector: IncorporationInformationConnect = mockCoHoAPIConnector
-      override val keystoreConnector: KeystoreConnect = mockKeystoreConnector
+class IncorporationInformationServiceSpec extends PayeComponentSpec {
+  class Setup {
+    val service = new IncorporationInformationService {
+      override val incorpInfoConnector = mockIncorpInfoConnector
+      override val keystoreConnector   = mockKeystoreConnector
     }
   }
 
-  val tstSuccessResult = IncorpInfoSuccessResponse(validCoHoCompanyDetailsResponse)
+  val tstSuccessResult = IncorpInfoSuccessResponse(Fixtures.validCoHoCompanyDetailsResponse)
   val tstBadRequestResult = IncorpInfoBadRequestResponse
   val tstInternalErrorResult = IncorpInfoErrorResponse(new RuntimeException)
 
-  implicit val hc = HeaderCarrier()
 
   "Calling getCompanyDetails" should {
     "return the Company Details from Incorportation Information service" in new Setup {
-      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(IncorpInfoSuccessResponse(validCoHoCompanyDetailsResponse)))
+      when(mockIncorpInfoConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(IncorpInfoSuccessResponse(Fixtures.validCoHoCompanyDetailsResponse)))
 
-      await(service.getCompanyDetails("regId", "txId")) shouldBe validCoHoCompanyDetailsResponse
+      await(service.getCompanyDetails("regId", "txId")) mustBe Fixtures.validCoHoCompanyDetailsResponse
     }
 
     "throw a BadRequestException when Bad Request response is returned from Incorporation Information" in new Setup {
-      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockIncorpInfoConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(IncorpInfoBadRequestResponse))
 
-      a[BadRequestException] shouldBe thrownBy(await(service.getCompanyDetails("regId", "txId")))
+      a[BadRequestException] mustBe thrownBy(await(service.getCompanyDetails("regId", "txId")))
     }
 
     "throw a Exception when IncorpInfoNotFoundResponse is returned from Incorporation Information" in new Setup {
-      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockIncorpInfoConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(IncorpInfoNotFoundResponse))
 
-      a[Exception] shouldBe thrownBy(await(service.getCompanyDetails("regId", "txId")))
+      a[Exception] mustBe thrownBy(await(service.getCompanyDetails("regId", "txId")))
     }
 
     "throw a Exception when IncorpInfoErrorResponse is returned from Incorporation Information" in new Setup {
-      when(mockCoHoAPIConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockIncorpInfoConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(IncorpInfoErrorResponse(new Exception)))
 
-      a[Exception] shouldBe thrownBy(await(service.getCompanyDetails("regId", "txId")))
+      a[Exception] mustBe thrownBy(await(service.getCompanyDetails("regId", "txId")))
     }
   }
 
   "Calling getDirectorDetails" should {
     "return the nothing when there are no directors details in the Officer list in CoHo API" in new Setup {
-      when(mockCoHoAPIConnector.getOfficerList(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(invalidOfficerList))
+      when(mockIncorpInfoConnector.getOfficerList(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(Fixtures.invalidOfficerList))
 
-      await(service.getDirectorDetails("testTransactionId","testRegId")) shouldBe Directors(Map())
+      await(service.getDirectorDetails("testTransactionId","testRegId")) mustBe Directors(Map())
     }
     "return the directors details when there is Officer list in CoHo API" in new Setup {
-      when(mockCoHoAPIConnector.getOfficerList(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(validOfficerList))
+      when(mockIncorpInfoConnector.getOfficerList(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(Fixtures.validOfficerList))
 
-      await(service.getDirectorDetails("testTransactionId","testRegId")) shouldBe validDirectorDetails
+      await(service.getDirectorDetails("testTransactionId","testRegId")) mustBe Fixtures.validDirectorDetails
     }
   }
-
 }

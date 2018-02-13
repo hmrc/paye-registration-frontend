@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package fixtures
+package helpers
 
-import models.external.BusinessProfile
+import org.scalatestplus.play.guice.GuiceOneAppPerTest
+import play.api.i18n.MessagesApi
 
-trait BusinessRegistrationFixture {
+trait PayeFakedApp extends GuiceOneAppPerTest {
+  self: PayeComponentSpec =>
 
-  lazy val validBusinessRegistrationResponse = BusinessProfile(
-    "12345",
-    "ENG"
-  )
+  implicit lazy val mockMessagesApi = app.injector.instanceOf(classOf[MessagesApi])
 }

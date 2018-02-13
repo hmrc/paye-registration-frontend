@@ -66,8 +66,8 @@ class SignOutISpec extends IntegrationSpecBase with LoginStub with CachingStub w
         await(buildClient("/").withHeaders(HeaderNames.COOKIE -> getSessionCookie()).get())
 
         val signOutResponse = await(buildClient("/sign-out").withHeaders(HeaderNames.COOKIE -> getSessionCookie()).get())
-        signOutResponse.header("location") shouldBe Some(s"$mockUrl/register-your-company/questionnaire")
-        getMDTPSessionCookie(signOutResponse) shouldBe None
+        signOutResponse.header("location") mustBe Some(s"$mockUrl/register-your-company/questionnaire")
+        getMDTPSessionCookie(signOutResponse) mustBe None
       }
     }
   }

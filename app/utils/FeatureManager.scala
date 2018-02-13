@@ -16,7 +16,7 @@
 
 package utils
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 sealed trait FeatureSwitch {
   def name: String
@@ -33,8 +33,7 @@ case class ValueSetFeatureSwitch(name: String, date: Option[String]) extends Fea
   override def value = date.getOrElse("")
 }
 
-@Singleton
-class FeatureSwitchManager extends FeatureManager
+class FeatureSwitchManager @Inject extends FeatureManager
 
 trait FeatureManager {
 
@@ -63,8 +62,7 @@ trait FeatureManager {
   def clearSystemDate(fs: FeatureSwitch): FeatureSwitch             = setProperty(fs.name, "")
 }
 
-@Singleton
-class PAYEFeatureSwitch @Inject()(val manager: FeatureSwitchManager) extends PAYEFeatureSwitches {
+class PAYEFeatureSwitch @Inject()(val manager: FeatureManager) extends PAYEFeatureSwitches {
   val addressLookupUrl    = "addressService"
   val companyRegistration = "companyRegistration"
   val setSystemDate       = "system-date"

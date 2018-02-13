@@ -16,38 +16,36 @@
 
 package controllers.test
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
-import config.FrontendAuthConnector
-import connectors.{BusinessRegistrationConnect, BusinessRegistrationConnector}
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{AnyContent, Request}
-import services.{S4LService, S4LSrv}
-import uk.gov.hmrc.play.frontend.auth.Actions
-import uk.gov.hmrc.play.frontend.controller.FrontendController
+import connectors.{BusinessRegistrationConnector, KeystoreConnector}
+import controllers.{AuthRedirectUrls, PayeBaseController}
+import play.api.Configuration
+import play.api.i18n.MessagesApi
+import play.api.mvc.{Action, AnyContent, Request}
+import services.{CompanyDetailsService, IncorporationInformationService, S4LService}
+import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.Future
 
-@Singleton
-class TestCacheController @Inject()(val businessRegConnector: BusinessRegistrationConnector,
-                                    val s4LService: S4LService,
-                                    val messagesApi: MessagesApi) extends TestCacheCtrl {
-  val authConnector = FrontendAuthConnector
-}
+class TestCacheControllerImpl @Inject()(val businessRegConnector: BusinessRegistrationConnector,
+                                        val s4LService: S4LService,
+                                        val authConnector: AuthConnector,
+                                        val config: Configuration,
+                                        val keystoreConnector: KeystoreConnector,
+                                        val companyDetailsService: CompanyDetailsService,
+                                        val incorpInfoService: IncorporationInformationService,
+                                        val messagesApi: MessagesApi) extends TestCacheController with AuthRedirectUrls
 
-trait TestCacheCtrl extends FrontendController with Actions with I18nSupport {
+trait TestCacheController extends PayeBaseController {
+  val businessRegConnector: BusinessRegistrationConnector
+  val s4LService: S4LService
 
-  val businessRegConnector: BusinessRegistrationConnect
-  val s4LService: S4LSrv
-
-  val tearDownS4L = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        for {
-          profile <- businessRegConnector.retrieveCurrentProfile
-          res     <- doTearDownS4L(profile.registrationID)
-        } yield Ok(res)
+  def tearDownS4L: Action[AnyContent] = isAuthorised { implicit request =>
+    for {
+      profile <- businessRegConnector.retrieveCurrentProfile
+      res     <- doTearDownS4L(profile.registrationID)
+    } yield Ok(res)
   }
 
   protected[controllers] def doTearDownS4L(regId: String)(implicit request: Request[AnyContent]): Future[String] = {

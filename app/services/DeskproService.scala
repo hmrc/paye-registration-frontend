@@ -16,26 +16,23 @@
 
 package services
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import config.FrontendAuthConnector
-import connectors.{DeskproConnect, DeskproConnector}
+import connectors.DeskproConnector
 import models.external.Ticket
 import models.view.{Ticket => TicketForm}
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-@Singleton
-class DeskproService @Inject()(val deskproConnector: DeskproConnector) extends DeskproSrv {
-  override val authConnector = FrontendAuthConnector
-}
+import scala.concurrent.Future
 
-trait DeskproSrv {
+class DeskproServiceImpl @Inject()(val deskproConnector: DeskproConnector,
+                                   val authConnector: AuthConnector) extends DeskproService
+
+trait DeskproService {
   val authConnector : AuthConnector
-  val deskproConnector : DeskproConnect
+  val deskproConnector : DeskproConnector
 
   private[services] def getAuthId(implicit hc: HeaderCarrier) : Future[String] = authConnector.currentAuthority.map(res => res.get.uri)
 

@@ -16,11 +16,11 @@
 
 package models.view
 
+import helpers.PayeComponentSpec
 import models.api.{Director, Name}
 import play.api.libs.json.Json
-import uk.gov.hmrc.play.test.UnitSpec
 
-class DirectorsSpec extends UnitSpec {
+class DirectorsSpec extends PayeComponentSpec {
 
   "Ninos View Model" should {
 
@@ -39,10 +39,10 @@ class DirectorsSpec extends UnitSpec {
          |}""".stripMargin)
 
     "read from json with full data" in {
-      Json.fromJson[Ninos](tstJson).asOpt shouldBe Some(tstModel)
+      Json.fromJson[Ninos](tstJson).asOpt mustBe Some(tstModel)
     }
     "write to json with full data" in {
-      Json.toJson[Ninos](tstModel) shouldBe tstJson
+      Json.toJson[Ninos](tstModel) mustBe tstJson
     }
 
     val tstPartialModel = Ninos(
@@ -60,10 +60,10 @@ class DirectorsSpec extends UnitSpec {
          |}""".stripMargin)
 
     "read from json with partial data" in {
-      Json.fromJson[Ninos](tstPartialJson).asOpt shouldBe Some(tstPartialModel)
+      Json.fromJson[Ninos](tstPartialJson).asOpt mustBe Some(tstPartialModel)
     }
     "write to json with partial data" in {
-      Json.toJson[Ninos](tstPartialModel) shouldBe tstPartialJson
+      Json.toJson[Ninos](tstPartialModel) mustBe tstPartialJson
     }
 
     val tstEmptyModel = Ninos(
@@ -75,10 +75,10 @@ class DirectorsSpec extends UnitSpec {
          |}""".stripMargin)
 
     "read from json with empty data" in {
-      Json.fromJson[Ninos](tstEmptyJson).asOpt shouldBe Some(tstEmptyModel)
+      Json.fromJson[Ninos](tstEmptyJson).asOpt mustBe Some(tstEmptyModel)
     }
     "write to json with empty data" in {
-      Json.toJson[Ninos](tstEmptyModel) shouldBe tstEmptyJson
+      Json.toJson[Ninos](tstEmptyModel) mustBe tstEmptyJson
     }
   }
 
@@ -98,10 +98,10 @@ class DirectorsSpec extends UnitSpec {
          |}""".stripMargin)
 
     "read from json" in {
-      Json.fromJson[Directors](tstJson).asOpt shouldBe Some(tstModel)
+      Json.fromJson[Directors](tstJson).asOpt mustBe Some(tstModel)
     }
     "write to json" in {
-      Json.toJson[Directors](tstModel) shouldBe tstJson
+      Json.toJson[Directors](tstModel) mustBe tstJson
     }
   }
 

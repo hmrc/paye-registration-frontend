@@ -16,54 +16,42 @@
 
 package services
 
-import javax.inject.Singleton
+import javax.inject.Inject
 
 import audit._
-import config.{FrontendAuditConnector, FrontendAuthConnector}
+import config.FrontendAuditConnector
 import models.DigitalContactDetails
-import models.external.{UserDetailsModel, UserIds}
+import models.external.AuditingInformation
 import models.view.PAYEContactDetails
-import play.api.libs.json.JsObject
 import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
-import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 import scala.concurrent.Future
 
-@Singleton
-class AuditService extends AuditSrv {
-  override val authConnector  = FrontendAuthConnector
+class AuditServiceImpl @Inject()() extends AuditService {
   override val auditConnector = FrontendAuditConnector
 }
 
-trait AuditSrv {
-  val authConnector: AuthConnector
+trait AuditService {
   val auditConnector: AuditConnector
 
   def auditBusinessContactDetails(regId: String, newData: DigitalContactDetails, previousData: DigitalContactDetails)
-                                 (implicit authContext: AuthContext, headerCarrier: HeaderCarrier, req:Request[AnyContent]): Future[AuditResult] = {
-    for {
-      ids         <- authConnector.getIds[UserIds](authContext)
-      authId      <- authConnector.getUserDetails[UserDetailsModel](authContext)
-      eventDetail =  AmendedBusinessContactDetailsEventDetail(ids.externalId, authId.authProviderId, regId, previousData, newData)
-      auditResult <- auditConnector.sendExtendedEvent(new AmendedBusinessContactDetailsEvent(eventDetail))
-    } yield auditResult
+                                 (implicit auditInfo: AuditingInformation, headerCarrier: HeaderCarrier, req: Request[AnyContent]): Future[AuditResult] = {
+    auditConnector.sendExtendedEvent(new AmendedBusinessContactDetailsEvent(
+      AmendedBusinessContactDetailsEventDetail(auditInfo.externalId, auditInfo.providerId, regId, previousData, newData)
+    ))
   }
 
-  def auditPPOBAddress(regId: String)(implicit user: AuthContext, hc: HeaderCarrier, req: Request[AnyContent]): Future[AuditResult] = {
-    for {
-      userIds     <- authConnector.getIds[UserIds](user)
-      userDetails <- authConnector.getUserDetails[UserDetailsModel](user)
-      event       =  new PPOBAddressAuditEvent(PPOBAddressAuditEventDetail(userIds.externalId, userDetails.authProviderId, regId))
-      auditResult <- auditConnector.sendExtendedEvent(event)
-    } yield auditResult
+  def auditPPOBAddress(regId: String)(implicit auditInfo: AuditingInformation, hc: HeaderCarrier, req: Request[AnyContent]): Future[AuditResult] = {
+    auditConnector.sendExtendedEvent(
+      new PPOBAddressAuditEvent(PPOBAddressAuditEventDetail(auditInfo.externalId, auditInfo.providerId, regId))
+    )
   }
 
   def auditPAYEContactDetails(regId: String, newData: PAYEContactDetails, previousData: Option[PAYEContactDetails])
-                             (implicit authContext: AuthContext, headerCarrier: HeaderCarrier, req: Request[AnyContent]): Future[AuditResult] = {
+                             (implicit auditInfo: AuditingInformation, headerCarrier: HeaderCarrier, req: Request[AnyContent]): Future[AuditResult] = {
 
     def convertPAYEContactViewToAudit(viewData: PAYEContactDetails) = AuditPAYEContactDetails(
       contactName   = viewData.name,
@@ -73,29 +61,24 @@ trait AuditSrv {
     )
 
     if(previousData.nonEmpty) {
-      for {
-        ids         <- authConnector.getIds[UserIds](authContext)
-        authId      <- authConnector.getUserDetails[JsObject](authContext)
-        eventDetail =  AmendedPAYEContactDetailsEventDetail(
-          externalUserId              = ids.externalId,
-          authProviderId              = authId.\("authProviderId").as[String],
-          journeyId                   = regId,
-          previousPAYEContactDetails  = convertPAYEContactViewToAudit(previousData.get),
-          newPAYEContactDetails       = convertPAYEContactViewToAudit(newData)
-        )
-        auditResult <- auditConnector.sendExtendedEvent(new AmendedPAYEContactDetailsEvent(eventDetail))
-      } yield auditResult
+      val eventDetail = AmendedPAYEContactDetailsEventDetail(
+        externalUserId              = auditInfo.externalId,
+        authProviderId              = auditInfo.providerId,
+        journeyId                   = regId,
+        previousPAYEContactDetails  = convertPAYEContactViewToAudit(previousData.get),
+        newPAYEContactDetails       = convertPAYEContactViewToAudit(newData)
+      )
+      auditConnector.sendExtendedEvent(new AmendedPAYEContactDetailsEvent(eventDetail))
     } else {
       Future.successful(AuditResult.Disabled)
     }
   }
 
-  def auditCorrespondenceAddress(regId: String, addressUsed: String)(implicit user: AuthContext, hc: HeaderCarrier, req: Request[AnyContent]): Future[AuditResult] = {
-    for {
-      userIds     <- authConnector.getIds[UserIds](user)
-      userDetails <- authConnector.getUserDetails[UserDetailsModel](user)
-      event       =  new CorrespondenceAddressAuditEvent(CorrespondenceAddressAuditEventDetail(userIds.externalId, userDetails.authProviderId, regId, addressUsed))
-      auditResult <- auditConnector.sendExtendedEvent(event)
-    } yield auditResult
+  def auditCorrespondenceAddress(regId: String, addressUsed: String)(implicit auditInfo: AuditingInformation, hc: HeaderCarrier, req: Request[AnyContent]): Future[AuditResult] = {
+    auditConnector.sendExtendedEvent(
+      new CorrespondenceAddressAuditEvent(
+        CorrespondenceAddressAuditEventDetail(auditInfo.externalId, auditInfo.providerId, regId, addressUsed)
+      )
+    )
   }
 }

@@ -16,27 +16,26 @@
 
 package services
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import connectors.{PAYERegistrationConnect, PAYERegistrationConnector}
+import connectors.PAYERegistrationConnector
 import enums.{CacheKeys, DownstreamOutcome}
 import models.api.Director
 import models.view.{Directors, Ninos, UserEnteredNino}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.RegistrationWhitelist
 
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import scala.concurrent.Future
 
-@Singleton
-class DirectorDetailsService @Inject()(val payeRegConnector: PAYERegistrationConnector,
+class DirectorDetailsServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
                                        val incorpInfoService: IncorporationInformationService,
-                                       val s4LService: S4LService) extends DirectorDetailsSrv
+                                       val s4LService: S4LService) extends DirectorDetailsService
 
-trait DirectorDetailsSrv extends RegistrationWhitelist {
-  val payeRegConnector: PAYERegistrationConnect
-  val s4LService: S4LSrv
-  val incorpInfoService: IncorporationInformationSrv
+trait DirectorDetailsService extends RegistrationWhitelist {
+  val payeRegConnector: PAYERegistrationConnector
+  val s4LService: S4LService
+  val incorpInfoService: IncorporationInformationService
 
   implicit val formatRecordSet = Directors.directorMappingFormat
 

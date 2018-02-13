@@ -16,124 +16,106 @@
 
 package controllers.userJourney
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
 import common.exceptions.DownstreamExceptions.{PPOBAddressNotFoundException, S4LFetchException}
-import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
+import connectors.KeystoreConnector
+import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
 import forms.payeContactDetails.{CorrespondenceAddressForm, PAYEContactDetailsForm}
+import models.external.AuditingInformation
 import models.view._
-import play.api.Logger
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request}
+import play.api.{Configuration, Logger}
 import services._
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.frontend.auth.{Actions, AuthContext}
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.SessionProfile
 import views.html.pages.payeContact.{correspondenceAddress => PAYECorrespondenceAddressPage, payeContactDetails => PAYEContactDetailsPage}
 
 import scala.concurrent.Future
 
-@Singleton
-class PAYEContactController @Inject()(val companyDetailsService: CompanyDetailsService,
-                                      val payeContactService: PAYEContactService,
-                                      val addressLookupService: AddressLookupService,
-                                      val keystoreConnector: KeystoreConnector,
-                                      val payeRegistrationConnector: PAYERegistrationConnector,
-                                      val messagesApi: MessagesApi,
-                                      val prepopService: PrepopulationService,
-                                      val auditService: AuditService) extends PAYEContactCtrl {
-  val authConnector = FrontendAuthConnector
-}
+class PAYEContactControllerImpl @Inject()(val companyDetailsService: CompanyDetailsService,
+                                          val payeContactService: PAYEContactService,
+                                          val addressLookupService: AddressLookupService,
+                                          val keystoreConnector: KeystoreConnector,
+                                          val messagesApi: MessagesApi,
+                                          val authConnector: AuthConnector,
+                                          val config: Configuration,
+                                          val prepopService: PrepopulationService,
+                                          val s4LService: S4LService,
+                                          val incorpInfoService: IncorporationInformationService,
+                                          val auditService: AuditService) extends PAYEContactController with AuthRedirectUrls
 
-trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
+trait PAYEContactController extends PayeBaseController {
 
-  val companyDetailsService: CompanyDetailsSrv
-  val payeContactService: PAYEContactSrv
-  val addressLookupService: AddressLookupSrv
-  val keystoreConnector: KeystoreConnect
-  val prepopService: PrepopulationSrv
-  val auditService: AuditSrv
+  val companyDetailsService: CompanyDetailsService
+  val payeContactService: PAYEContactService
+  val addressLookupService: AddressLookupService
+  val keystoreConnector: KeystoreConnector
+  val prepopService: PrepopulationService
+  val auditService: AuditService
 
-  val payeContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          payeContactService.getPAYEContact(profile.registrationID) map {
-            case PAYEContact(Some(contactDetails), _) => Ok(PAYEContactDetailsPage(PAYEContactDetailsForm.form.fill(contactDetails)))
-            case _                                    => Ok(PAYEContactDetailsPage(PAYEContactDetailsForm.form))
-          }
-        }
+  def payeContactDetails: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    payeContactService.getPAYEContact(profile.registrationID) map {
+      case PAYEContact(Some(contactDetails), _) => Ok(PAYEContactDetailsPage(PAYEContactDetailsForm.form.fill(contactDetails)))
+      case _                                    => Ok(PAYEContactDetailsPage(PAYEContactDetailsForm.form))
+    }
   }
 
-  val submitPAYEContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          PAYEContactDetailsForm.form.bindFromRequest.fold(
-            errs => Future.successful(BadRequest(PAYEContactDetailsPage(errs))),
-            success => {
-              val trimmed = trimPAYEContactDetails(success)
-              payeContactService.submitPayeContactDetails(profile.registrationID, trimmed) map {
-                case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-                case DownstreamOutcome.Success => Redirect(routes.PAYEContactController.payeCorrespondenceAddress())
-              }
-            }
-          )
+  def submitPAYEContactDetails: Action[AnyContent] = isAuthorisedWithProfileAndAuditing { implicit request => profile => implicit audit =>
+    PAYEContactDetailsForm.form.bindFromRequest.fold(
+      errs    => Future.successful(BadRequest(PAYEContactDetailsPage(errs))),
+      success => {
+        val trimmed = trimPAYEContactDetails(success)
+        payeContactService.submitPayeContactDetails(profile.registrationID, trimmed) map {
+          case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+          case DownstreamOutcome.Success => Redirect(routes.PAYEContactController.payeCorrespondenceAddress())
         }
+      }
+    )
   }
 
-  val payeCorrespondenceAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          for {
-            payeContact     <- payeContactService.getPAYEContact(profile.registrationID)
-            companyDetails  <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-            prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress, payeContact.correspondenceAddress)
-            addressMap      = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
-          } yield {
-            Ok(PAYECorrespondenceAddressPage(
-              CorrespondenceAddressForm.form.fill(
-                ChosenAddress(CorrespondenceAddress)),
-                addressMap.get("ro"),
-                addressMap.get("ppob"),
-                addressMap.get("correspondence"),
-                prepopAddresses
-            ))
-          }
-        }
+  def payeCorrespondenceAddress: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    for {
+      payeContact     <- payeContactService.getPAYEContact(profile.registrationID)
+      companyDetails  <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+      prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress, payeContact.correspondenceAddress)
+      addressMap      = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
+    } yield {
+      Ok(PAYECorrespondenceAddressPage(
+        CorrespondenceAddressForm.form.fill(
+          ChosenAddress(CorrespondenceAddress)),
+        addressMap.get("ro"),
+        addressMap.get("ppob"),
+        addressMap.get("correspondence"),
+        prepopAddresses
+      ))
+    }
   }
 
-  val submitPAYECorrespondenceAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          CorrespondenceAddressForm.form.bindFromRequest.fold(
-            errs => for {
-              payeContact     <- payeContactService.getPAYEContact(profile.registrationID)
-              companyDetails  <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-              prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress, payeContact.correspondenceAddress)
-              addressMap      = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
-            } yield {
-              BadRequest(PAYECorrespondenceAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob"), addressMap.get("correspondence"), prepopAddresses))
-            },
-            success => submitCorrespondenceAddress(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
-              case DownstreamOutcome.Success => Future.successful(Redirect(controllers.userJourney.routes.SummaryController.summary()))
-              case DownstreamOutcome.Failure => Future.successful(InternalServerError(views.html.pages.error.restart()))
-              case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("correspondence", controllers.userJourney.routes.PAYEContactController.savePAYECorrespondenceAddress()) map {
-                redirectUrl => Redirect(redirectUrl)
-              }
-            }
-          )
+  def submitPAYECorrespondenceAddress: Action[AnyContent] = isAuthorisedWithProfileAndAuditing { implicit request => profile => implicit audit =>
+    CorrespondenceAddressForm.form.bindFromRequest.fold(
+      errs => for {
+        payeContact     <- payeContactService.getPAYEContact(profile.registrationID)
+        companyDetails  <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+        prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress, payeContact.correspondenceAddress)
+        addressMap      =  payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
+      } yield {
+        BadRequest(PAYECorrespondenceAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob"), addressMap.get("correspondence"), prepopAddresses))
+      },
+      success => submitCorrespondenceAddress(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
+        case DownstreamOutcome.Success  => Future.successful(Redirect(controllers.userJourney.routes.SummaryController.summary()))
+        case DownstreamOutcome.Failure  => Future.successful(InternalServerError(views.html.pages.error.restart()))
+        case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("correspondence", controllers.userJourney.routes.PAYEContactController.savePAYECorrespondenceAddress()) map {
+          Redirect(_)
         }
+      }
+    )
   }
 
   private def submitCorrespondenceAddress(regId: String, txId: String, choice: AddressChoice)
-                                         (implicit user: AuthContext, hc: HeaderCarrier, req: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
+                                         (implicit auditInfo: AuditingInformation, hc: HeaderCarrier, req: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
     choice match {
       case CorrespondenceAddress  => Future.successful(DownstreamOutcome.Success)
       case ROAddress              => submitCorrespondenceWithROAddress(regId, txId)
@@ -143,7 +125,7 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
     }
   }
 
-  private def submitCorrespondenceWithROAddress(regId: String, txId: String)(implicit user: AuthContext, hc: HeaderCarrier, req: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
+  private def submitCorrespondenceWithROAddress(regId: String, txId: String)(implicit auditInfo: AuditingInformation, hc: HeaderCarrier, req: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
     for {
       companyDetails <- companyDetailsService.getCompanyDetails(regId, txId)
       res            <- payeContactService.submitCorrespondence(regId, companyDetails.roAddress)
@@ -151,7 +133,8 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
     } yield res
   }
 
-  private def submitCorrespondenceWithPPOBAddress(regId: String, txId: String)(implicit user: AuthContext, hc: HeaderCarrier, req: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
+  private def submitCorrespondenceWithPPOBAddress(regId: String, txId: String)
+                                                 (implicit auditInfo: AuditingInformation, hc: HeaderCarrier, req: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
     (for {
       companyDetails <- companyDetailsService.getCompanyDetails(regId, txId)
       res            <- payeContactService.submitCorrespondence(regId, companyDetails.ppobAddress.getOrElse(throw new PPOBAddressNotFoundException))
@@ -174,19 +157,15 @@ trait PAYEContactCtrl extends FrontendController with Actions with I18nSupport w
     }
   }
 
-  val savePAYECorrespondenceAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          for {
-            Some(address) <- addressLookupService.getAddress
-            res           <- payeContactService.submitCorrespondence(profile.registrationID, address )
-            _             <- prepopService.saveAddress(profile.registrationID, address)
-          } yield res match {
-            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
-            case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-          }
-        }
+  def savePAYECorrespondenceAddress: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    for {
+      Some(address) <- addressLookupService.getAddress
+      res           <- payeContactService.submitCorrespondence(profile.registrationID, address )
+      _             <- prepopService.saveAddress(profile.registrationID, address)
+    } yield res match {
+      case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
+      case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+    }
   }
 
   private def trimPAYEContactDetails(details: PAYEContactDetails) = details.copy(

@@ -19,10 +19,8 @@ package forms.companyDetails
 import common.exceptions.InternalExceptions
 import forms.helpers.RequiredBooleanForm
 import models.view.TradingName
-import play.api.data.{Form, Mapping}
+import play.api.data.Form
 import play.api.data.Forms._
-import play.api.data.validation.Constraint
-import uk.gov.voa.play.form.ConditionalMappings.{isEqual, onlyIf}
 
 object TradingNameForm extends RequiredBooleanForm {
 

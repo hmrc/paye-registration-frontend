@@ -16,30 +16,28 @@
 
 package connectors
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import com.codahale.metrics.{Counter, Timer}
-import config.PAYEShortLivedCache
 import play.api.libs.json.Format
-import services.{MetricsService, MetricsSrv}
+import services.MetricsService
 import uk.gov.hmrc.http.cache.client.{CacheMap, ShortLivedCache}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
-@Singleton
-class S4LConnector @Inject()(val shortCache: PAYEShortLivedCache, val metricsService: MetricsService) extends S4LConnect {
+class S4LConnectorImpl @Inject()(val shortCache: ShortLivedCache,
+                                 val metricsService: MetricsService) extends S4LConnector {
   val successCounter        = metricsService.s4lSuccessResponseCounter
   val emptyResponseCounter  = metricsService.s4lEmptyResponseCounter
   val failedCounter         = metricsService.s4lFailedResponseCounter
   def timer                 = metricsService.s4lResponseTimer.time()
 }
 
-trait S4LConnect {
-
+trait S4LConnector {
   val shortCache: ShortLivedCache
-  val metricsService: MetricsSrv
+  val metricsService: MetricsService
 
   val successCounter: Counter
   val emptyResponseCounter: Counter

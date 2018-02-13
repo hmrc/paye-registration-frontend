@@ -38,3 +38,6 @@ case class UserIds(internalId : String,
 object UserIds {
   implicit val format = Json.format[UserIds]
 }
+
+case class AuditingInformation(externalId: String,
+                               providerId: String)

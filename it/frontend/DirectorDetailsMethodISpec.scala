@@ -86,20 +86,20 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "What is the National Insurance number of at least one company director?"
-      document.getElementsByClass("form-field").size shouldBe 3
+      document.title() mustBe "What is the National Insurance number of at least one company director?"
+      document.getElementsByClass("form-field").size mustBe 3
 
       val list = document.getElementsByClass("form-label")
 
       def get(n: Int) = list.get(n).text
 
 
-      get(0) shouldBe s"Mr test1 test11 testa's National Insurance number For example, QQ 12 34 56 C"
-      get(1) shouldBe s"Mr test2 test22 testb's National Insurance number"
-      get(2) shouldBe s"test3 test33 testc's National Insurance number"
+      get(0) mustBe s"Mr test1 test11 testa's National Insurance number For example, QQ 12 34 56 C"
+      get(1) mustBe s"Mr test2 test22 testb's National Insurance number"
+      get(2) mustBe s"test3 test33 testc's National Insurance number"
     }
 
     "not show any officers who aren't directors or directors who are retired" in {
@@ -152,16 +152,16 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.getElementsByClass("form-field").size shouldBe 1
+      document.getElementsByClass("form-field").size mustBe 1
 
       val list = document.getElementsByClass("form-label")
 
       def get(n: Int) = list.get(n).text
 
-      get(0).contains("Error fetching name") shouldBe true
+      get(0).contains("Error fetching name") mustBe true
     }
 
     "should show a list of directors" in {
@@ -232,18 +232,18 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.getElementsByClass("form-field").size shouldBe 3
+      document.getElementsByClass("form-field").size mustBe 3
 
       val list = document.getElementsByClass("form-label")
 
       def get(n: Int) = list.get(n).text
 
-      get(0) shouldBe s"Mr test1 test11 testa's National Insurance number For example, QQ 12 34 56 C"
-      get(1) shouldBe s"test2 test22 testb's National Insurance number"
-      get(2) shouldBe s"a b c's National Insurance number"
+      get(0) mustBe s"Mr test1 test11 testa's National Insurance number For example, QQ 12 34 56 C"
+      get(1) mustBe s"test2 test22 testb's National Insurance number"
+      get(2) mustBe s"a b c's National Insurance number"
     }
 
     "should throw error when no valid directors are returned" in {
@@ -270,7 +270,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 500
+      response.status mustBe 500
     }
   }
 }

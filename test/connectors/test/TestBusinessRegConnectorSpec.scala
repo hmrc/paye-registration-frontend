@@ -16,28 +16,32 @@
 
 package connectors.test
 
-import fixtures.BusinessRegistrationFixture
+import helpers.PayeComponentSpec
 import models.external.BusinessProfile
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito.when
 import play.api.libs.json.JsValue
-import testHelpers.PAYERegSpec
 import uk.gov.hmrc.http.HeaderCarrier
 
-class TestBusinessRegConnectorSpec extends PAYERegSpec with BusinessRegistrationFixture {
+import scala.concurrent.Future
 
-  trait Setup {
-    val connector = new TestBusinessRegConnector {
+class TestBusinessRegConnectorSpec extends PayeComponentSpec {
+
+  class Setup extends CodeMocks {
+    val testConnector = new TestBusinessRegConnector {
       override val businessRegUrl = "testBusinessRegUrl"
-      override val http = mockWSHttp
+      override val http           = mockWSHttp
     }
   }
 
-  implicit val hc = HeaderCarrier()
-
   "createMetadataEntry" should {
     "make a http POST request to business registration micro-service to create a CurrentProfile entry" in new Setup {
-      mockHttpPOST[JsValue, BusinessProfile](connector.businessRegUrl, validBusinessRegistrationResponse)
+      mockHttpPOST[JsValue, BusinessProfile](testConnector.businessRegUrl, Fixtures.validBusinessRegistrationResponse)
 
-      await(connector.createBusinessProfileEntry) shouldBe validBusinessRegistrationResponse
+      when(mockWSHttp.POST[JsValue, BusinessProfile](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Fixtures.validBusinessRegistrationResponse))
+
+      await(testConnector.createBusinessProfileEntry) mustBe Fixtures.validBusinessRegistrationResponse
     }
   }
 }

@@ -20,7 +20,7 @@ import config.FrontendAppConfig
 import connectors.{DESResponse, IncorpInfoResponse, IncorpInfoSuccessResponse}
 import models.DigitalContactDetails
 import models.api.{Director, CompanyDetails => CompanyDetailsAPI}
-import models.external.{CoHoCompanyDetailsModel, CompanyRegistrationProfile, Officer, OfficerList}
+import models.external.{CoHoCompanyDetailsModel, CompanyRegistrationProfile, OfficerList}
 import play.api.Logger
 
 import scala.concurrent.Future

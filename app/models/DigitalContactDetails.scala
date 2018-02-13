@@ -16,8 +16,7 @@
 
 package models
 
-import play.api.Logger
-import play.api.libs.json.{JsError, JsObject, JsResult, JsSuccess, JsValue, Json, Reads, Writes}
+import play.api.libs.json._
 import utils.Formatters
 
 case class DigitalContactDetails(email : Option[String],

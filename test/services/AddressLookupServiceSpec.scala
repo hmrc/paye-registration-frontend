@@ -16,40 +16,38 @@
 
 package services
 
-import connectors._
-import fixtures.{PAYERegistrationFixture, S4LFixture}
-import mocks.MockMetrics
+import helpers.PayeComponentSpec
+import helpers.mocks.MockMetrics
 import models.Address
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.mvc.Call
 import play.api.test.FakeRequest
-import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.config.ServicesConfig
-import utils.{BooleanFeatureSwitch, PAYEFeatureSwitch}
+import uk.gov.hmrc.http.HeaderCarrier
+import utils.BooleanFeatureSwitch
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
 
-class AddressLookupServiceSpec extends PAYERegSpec with S4LFixture with PAYERegistrationFixture with ServicesConfig {
+class AddressLookupServiceSpec extends PayeComponentSpec {
 
-  implicit val hc = HeaderCarrier()
-
-  val mockFeatureSwitch = mock[PAYEFeatureSwitch]
-  val mockAddressLookupConnector = mock[AddressLookupConnector]
-  val mockMetrics = mock[MetricsService]
   val metricsMock = new MockMetrics
 
   class Setup {
-    val service = new AddressLookupService(mockFeatureSwitch, mockAddressLookupConnector, mockMetrics) {
-      override val metricsService: MetricsSrv = metricsMock
+    val service = new AddressLookupService {
+      override val payeRegistrationUrl    = "/test/url"
+      override val addressLookupConnector = mockAddressLookupConnector
+      override val featureSwitch          = mockFeatureSwitch
+      override val metricsService         = metricsMock
     }
   }
 
   case class SetupWithProxy(boole: Boolean) {
-    val service = new AddressLookupService(mockFeatureSwitch, mockAddressLookupConnector, mockMetrics) {
-      override val metricsService: MetricsSrv = metricsMock
+    val service = new AddressLookupService {
+      override val payeRegistrationUrl      = "/test/url"
+      override val addressLookupConnector   = mockAddressLookupConnector
+      override val featureSwitch            = mockFeatureSwitch
+      override val metricsService           = metricsMock
       override def useAddressLookupFrontend = boole
     }
   }
@@ -59,15 +57,15 @@ class AddressLookupServiceSpec extends PAYERegSpec with S4LFixture with PAYERegi
       when(mockAddressLookupConnector.getOnRampUrl(ArgumentMatchers.contains("payereg1"), ArgumentMatchers.any[Call]())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful("test-url"))
 
-      await(service.buildAddressLookupUrl("payereg1", Call("GET", "/register-for-paye/test-url"))) shouldBe "test-url"
+      await(service.buildAddressLookupUrl("payereg1", Call("GET", "/register-for-paye/test-url"))) mustBe "test-url"
     }
 
     "return the Address Lookup stub Url for PPOB" in new SetupWithProxy(false) {
-      await(service.buildAddressLookupUrl("payreg1", Call("GET","/return-from-address-for-ppob"))) shouldBe "/no-lookup-ppob-address"
+      await(service.buildAddressLookupUrl("payreg1", Call("GET","/return-from-address-for-ppob"))) mustBe "/no-lookup-ppob-address"
     }
 
     "return the Address Lookup stub Url for PAYE Contact" in new SetupWithProxy(false) {
-      await(service.buildAddressLookupUrl("payreg1", Call("GET","/return-from-address-for-corresp-addr"))) shouldBe "/no-lookup-correspondence-address"
+      await(service.buildAddressLookupUrl("payreg1", Call("GET","/return-from-address-for-corresp-addr"))) mustBe "/no-lookup-correspondence-address"
     }
   }
 
@@ -89,13 +87,13 @@ class AddressLookupServiceSpec extends PAYERegSpec with S4LFixture with PAYERegi
 
       implicit val request = FakeRequest("GET", "/test-uri?id=1234567890")
 
-      await(service.getAddress) shouldBe Some(expected)
+      await(service.getAddress) mustBe Some(expected)
     }
 
     "return none" in new Setup {
       implicit val request = FakeRequest("GET", "/test-uri")
 
-      await(service.getAddress) shouldBe None
+      await(service.getAddress) mustBe None
     }
   }
 
@@ -104,12 +102,11 @@ class AddressLookupServiceSpec extends PAYERegSpec with S4LFixture with PAYERegi
   "Calling useAddressLookupFrontend" should {
     "return true" in new Setup {
       when(mockFeatureSwitch.addressLookupFrontend).thenReturn(feature(true))
-      service.useAddressLookupFrontend shouldBe true
+      service.useAddressLookupFrontend mustBe true
     }
     "return false" in new Setup {
       when(mockFeatureSwitch.addressLookupFrontend).thenReturn(feature(false))
-      service.useAddressLookupFrontend shouldBe false
+      service.useAddressLookupFrontend mustBe false
     }
   }
-
 }

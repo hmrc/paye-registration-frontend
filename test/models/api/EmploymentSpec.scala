@@ -18,41 +18,40 @@ package models.api
 
 import java.time.LocalDate
 
-import fixtures.PAYERegistrationFixture
+import helpers.PayeComponentSpec
 import play.api.libs.json.{JsSuccess, Json}
-import testHelpers.PAYERegSpec
 
-class EmploymentSpec extends PAYERegSpec with PAYERegistrationFixture {
+class EmploymentSpec extends PayeComponentSpec {
 
 
   "Employment" should {
 
-    val testEmploymentMax = validEmploymentAPI
+    val testEmploymentMax = Fixtures.validEmploymentAPI
 
     val targetJsonMax = Json.parse(
       s"""{
           |  "employees":true,
           |  "ocpn":true,
           |  "cis":true,
-          |  "first-payment-date":"$validDate"
+          |  "first-payment-date":"${Fixtures.validDate}"
           |}""".stripMargin)
 
     "read from maximum Json" in {
-      Json.fromJson[Employment](targetJsonMax) shouldBe JsSuccess(testEmploymentMax)
+      Json.fromJson[Employment](targetJsonMax) mustBe JsSuccess(testEmploymentMax)
     }
 
     "write to maximum Json" in {
-      Json.toJson[Employment](testEmploymentMax) shouldBe targetJsonMax
+      Json.toJson[Employment](testEmploymentMax) mustBe targetJsonMax
     }
 
     val testFutureDate = LocalDate.of(2016,12,20)
     val testFuturePayment = testFutureDate
 
-    val testEmploymentMin = validEmploymentAPI.copy(
-        employees = false,
-        companyPension = None,
-        subcontractors = false,
-        firstPayDate = testFuturePayment
+    val testEmploymentMin = Fixtures.validEmploymentAPI.copy(
+      employees = false,
+      companyPension = None,
+      subcontractors = false,
+      firstPayDate = testFuturePayment
     )
 
     val targetJsonMin = Json.parse(
@@ -63,12 +62,11 @@ class EmploymentSpec extends PAYERegSpec with PAYERegistrationFixture {
           |}""".stripMargin)
 
     "read from minimum Json" in {
-      Json.fromJson[Employment](targetJsonMin) shouldBe JsSuccess(testEmploymentMin)
+      Json.fromJson[Employment](targetJsonMin) mustBe JsSuccess(testEmploymentMin)
     }
 
     "write to minimum Json" in {
-      Json.toJson[Employment](testEmploymentMin) shouldBe targetJsonMin
+      Json.toJson[Employment](testEmploymentMin) mustBe targetJsonMin
     }
   }
-
 }

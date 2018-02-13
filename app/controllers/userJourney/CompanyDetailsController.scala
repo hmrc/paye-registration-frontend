@@ -16,96 +16,80 @@
 
 package controllers.userJourney
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
 import common.exceptions.DownstreamExceptions.S4LFetchException
-import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
+import connectors.KeystoreConnector
+import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
 import forms.companyDetails.{BusinessContactDetailsForm, PPOBForm, TradingNameForm}
+import models.external.AuditingInformation
 import models.view._
-import play.api.Logger
 import play.api.data.Form
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.{Configuration, Logger}
 import services._
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.frontend.auth.{Actions, AuthContext}
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.{SessionProfile, UpToDateCompanyDetails}
 import views.html.pages.companyDetails.{confirmROAddress, businessContactDetails => BusinessContactDetailsPage, ppobAddress => PPOBAddressPage, tradingName => TradingNamePage}
 
 import scala.concurrent.Future
 
-@Singleton
-class CompanyDetailsController @Inject()(val s4LService: S4LService,
-                                         val keystoreConnector: KeystoreConnector,
-                                         val companyDetailsService: CompanyDetailsService,
-                                         val incorpInfoService: IncorporationInformationService,
-                                         val messagesApi: MessagesApi,
-                                         val payeRegistrationConnector: PAYERegistrationConnector,
-                                         val addressLookupService: AddressLookupService,
-                                         val prepopService: PrepopulationService,
-                                         val auditService: AuditService) extends CompanyDetailsCtrl {
-  val authConnector = FrontendAuthConnector
-}
+class CompanyDetailsControllerImpl @Inject()(val s4LService: S4LService,
+                                             val keystoreConnector: KeystoreConnector,
+                                             val companyDetailsService: CompanyDetailsService,
+                                             val incorpInfoService: IncorporationInformationService,
+                                             val messagesApi: MessagesApi,
+                                             val authConnector: AuthConnector,
+                                             val addressLookupService: AddressLookupService,
+                                             val prepopService: PrepopulationService,
+                                             val config: Configuration,
+                                             val auditService: AuditService) extends CompanyDetailsController with AuthRedirectUrls
 
-trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSupport with SessionProfile with UpToDateCompanyDetails {
-  val s4LService: S4LSrv
-  val keystoreConnector: KeystoreConnect
-  val companyDetailsService: CompanyDetailsSrv
-  val incorpInfoService: IncorporationInformationSrv
-  val addressLookupService: AddressLookupSrv
-  val prepopService: PrepopulationSrv
-  val auditService: AuditSrv
+trait CompanyDetailsController extends PayeBaseController {
+  val s4LService: S4LService
+  val companyDetailsService: CompanyDetailsService
+  val incorpInfoService: IncorporationInformationService
+  val addressLookupService: AddressLookupService
+  val prepopService: PrepopulationService
+  val auditService: AuditService
 
-  val tradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user => implicit request =>
-      withCurrentProfile { profile =>
-        withLatestCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) { companyDetails =>
-          companyDetails.tradingName match {
-            case Some(model)  => Ok(TradingNamePage(TradingNameForm.form.fill(model), companyDetails.companyName))
-            case _            => Ok(TradingNamePage(TradingNameForm.form, companyDetails.companyName))
-          }
-        }
+  def tradingName: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    withLatestCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) { companyDetails =>
+      companyDetails.tradingName match {
+        case Some(model)  => Ok(TradingNamePage(TradingNameForm.form.fill(model), companyDetails.companyName))
+        case _            => Ok(TradingNamePage(TradingNameForm.form, companyDetails.companyName))
       }
-  }
-
-  val submitTradingName = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async { implicit user => implicit request =>
-    withCurrentProfile { profile =>
-      TradingNameForm.form.bindFromRequest.fold(
-        errors => badRequestResponse(profile.registrationID, profile.companyTaxRegistration.transactionId, errors),
-        success => {
-          val validatedForm = TradingNameForm.validateForm(TradingNameForm.form.fill(success))
-          if (validatedForm.hasErrors) {
-            badRequestResponse(profile.registrationID, profile.companyTaxRegistration.transactionId, validatedForm)
-          } else {
-            val trimmedTradingName = success.copy(tradingName = success.tradingName.map(_.trim))
-            companyDetailsService.submitTradingName(trimmedTradingName, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
-              case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.roAddress())
-              case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-            }
-          }
-        }
-      )
     }
   }
 
-  val roAddress : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          withLatestCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) { companyDetails =>
-            Ok(confirmROAddress(companyDetails.companyName, companyDetails.roAddress))
+  def submitTradingName: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    TradingNameForm.form.bindFromRequest.fold(
+      errors => badRequestResponse(profile.registrationID, profile.companyTaxRegistration.transactionId, errors),
+      success => {
+        val validatedForm = TradingNameForm.validateForm(TradingNameForm.form.fill(success))
+        if (validatedForm.hasErrors) {
+          badRequestResponse(profile.registrationID, profile.companyTaxRegistration.transactionId, validatedForm)
+        } else {
+          val trimmedTradingName = success.copy(tradingName = success.tradingName.map(_.trim))
+          companyDetailsService.submitTradingName(trimmedTradingName, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.roAddress())
+            case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
           }
         }
+      }
+    )
   }
 
-  val confirmRO : Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.ppobAddress()))
+  def roAddress: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    withLatestCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) { companyDetails =>
+      Ok(confirmROAddress(companyDetails.companyName, companyDetails.roAddress))
+    }
+  }
+
+  def confirmRO: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
+    Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.ppobAddress()))
   }
 
   private def badRequestResponse(regId: String, txID: String, form: Form[TradingName])(implicit request: Request[AnyContent]): Future[Result] = {
@@ -114,74 +98,62 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
     }
   }
 
-  val businessContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) flatMap {
-            details => details.businessContactDetails match {
-              case Some(bcd) => Future.successful(Ok(BusinessContactDetailsPage(BusinessContactDetailsForm.form.fill(bcd))))
-              case None      => Future.successful(Ok(BusinessContactDetailsPage(BusinessContactDetailsForm.form)))
-            }
-          }
-        }
+  def businessContactDetails: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) flatMap {
+      _.businessContactDetails match {
+        case Some(bcd) => Future.successful(Ok(BusinessContactDetailsPage(BusinessContactDetailsForm.form.fill(bcd))))
+        case None      => Future.successful(Ok(BusinessContactDetailsPage(BusinessContactDetailsForm.form)))
+      }
+    }
   }
 
-  val submitBusinessContactDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          BusinessContactDetailsForm.form.bindFromRequest.fold(
-            errs => Future.successful(BadRequest(BusinessContactDetailsPage(errs))),
-            success => {
-              val trimmed = success.copy(email = success.email map(_.trim), phoneNumber = success.phoneNumber map(_.trim), mobileNumber = success.mobileNumber map(_.trim))
-              companyDetailsService.submitBusinessContact(trimmed, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
-                case DownstreamOutcome.Success => Redirect(routes.NatureOfBusinessController.natureOfBusiness())
-                case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-              }
-            }
-          )
+  def submitBusinessContactDetails: Action[AnyContent] = isAuthorisedWithProfileAndAuditing { implicit request => profile => implicit audit =>
+    BusinessContactDetailsForm.form.bindFromRequest.fold(
+      errs    => Future.successful(BadRequest(BusinessContactDetailsPage(errs))),
+      success => {
+        val trimmed = success.copy(email = success.email map(_.trim), phoneNumber = success.phoneNumber map(_.trim), mobileNumber = success.mobileNumber map(_.trim))
+        companyDetailsService.submitBusinessContact(trimmed, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+          case DownstreamOutcome.Success => Redirect(routes.NatureOfBusinessController.natureOfBusiness())
+          case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
         }
+      }
+    )
   }
 
-  val ppobAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          for {
-            companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-            prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress, None)
-          } yield {
-            val addressMap = companyDetailsService.getPPOBPageAddresses(companyDetails)
-            Ok(PPOBAddressPage(PPOBForm.form.fill(ChosenAddress(PPOBAddress)), addressMap.get("ro"), addressMap.get("ppob"), prepopAddresses))
-          }
-        }
+  def ppobAddress: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    for {
+      companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+      prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress, None)
+    } yield {
+      val addressMap = companyDetailsService.getPPOBPageAddresses(companyDetails)
+      Ok(PPOBAddressPage(PPOBForm.form.fill(ChosenAddress(PPOBAddress)), addressMap.get("ro"), addressMap.get("ppob"), prepopAddresses))
+    }
   }
 
-  val submitPPOBAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          PPOBForm.form.bindFromRequest.fold(
-            errs => for {
-              details <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-              prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, details.roAddress, details.ppobAddress, None)
-            } yield {
-              val addressMap = companyDetailsService.getPPOBPageAddresses(details)
-              BadRequest(PPOBAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob"), prepopAddresses))
-            },
-            success => submitPPOBAddressChoice(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
-              case DownstreamOutcome.Success  => Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
-              case DownstreamOutcome.Failure  => Future.successful(InternalServerError(views.html.pages.error.restart()))
-              case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("ppob", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()) map {
-                redirectUrl => Redirect(redirectUrl)
-              }
-            }
-          )
+  def submitPPOBAddress: Action[AnyContent] = isAuthorisedWithProfileAndAuditing { implicit request => profile => implicit audit =>
+    PPOBForm.form.bindFromRequest.fold(
+      errs => for {
+        details <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+        prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, details.roAddress, details.ppobAddress, None)
+      } yield {
+        val addressMap = companyDetailsService.getPPOBPageAddresses(details)
+        BadRequest(PPOBAddressPage(errs,
+          addressMap.get("ro"),
+          addressMap.get("ppob"),
+          prepopAddresses))
+      },
+      success => submitPPOBAddressChoice(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
+        case DownstreamOutcome.Success  => Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
+        case DownstreamOutcome.Failure  => Future.successful(InternalServerError(views.html.pages.error.restart()))
+        case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("ppob", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()) map {
+          redirectUrl => Redirect(redirectUrl)
         }
+      }
+    )
   }
 
-  private def submitPPOBAddressChoice(regId: String, txId: String, choice: AddressChoice)(implicit user: AuthContext, hc: HeaderCarrier, req: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
+  private def submitPPOBAddressChoice(regId: String, txId: String, choice: AddressChoice)
+                                     (implicit auditInfo: AuditingInformation, hc: HeaderCarrier, req: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
     choice match {
       case PPOBAddress =>
         Future.successful(DownstreamOutcome.Success)
@@ -206,18 +178,14 @@ trait CompanyDetailsCtrl extends FrontendController with Actions with I18nSuppor
     }
   }
 
-  val savePPOBAddress: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          for {
-            Some(address) <- addressLookupService.getAddress
-            res           <- companyDetailsService.submitPPOBAddr(address, profile.registrationID, profile.companyTaxRegistration.transactionId)
-            _             <- prepopService.saveAddress(profile.registrationID, address)
-          } yield res match {
-            case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
-            case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-          }
-        }
+  def savePPOBAddress: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    for {
+      Some(address) <- addressLookupService.getAddress
+      res           <- companyDetailsService.submitPPOBAddr(address, profile.registrationID, profile.companyTaxRegistration.transactionId)
+      _             <- prepopService.saveAddress(profile.registrationID, address)
+    } yield res match {
+      case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
+      case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+    }
   }
 }

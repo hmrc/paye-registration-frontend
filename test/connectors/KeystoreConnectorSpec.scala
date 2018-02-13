@@ -16,20 +16,19 @@
 
 package connectors
 
-import mocks.MockMetrics
+import helpers.PayeComponentSpec
+import helpers.mocks.MockMetrics
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.Json
-import play.api.test.Helpers._
-import testHelpers.PAYERegSpec
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 
-class KeystoreConnectorSpec extends PAYERegSpec {
+class KeystoreConnectorSpec extends PayeComponentSpec {
 
-  val connector = new KeystoreConnect {
+  val connector = new KeystoreConnector {
     override val metricsService = new MockMetrics
     override val sessionCache = mockSessionCache
     override val successCounter = metricsService.keystoreSuccessResponseCounter
@@ -37,8 +36,6 @@ class KeystoreConnectorSpec extends PAYERegSpec {
     override val emptyResponseCounter = metricsService.keystoreFailedResponseCounter
     override def timer = metricsService.keystoreResponseTimer.time()
   }
-
-  implicit val hc : HeaderCarrier = HeaderCarrier()
 
   case class TestModel(test: String)
   object TestModel {
@@ -54,8 +51,8 @@ class KeystoreConnectorSpec extends PAYERegSpec {
       when(mockSessionCache.cache[TestModel](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(returnCacheMap))
 
-      val result = connector.cache[TestModel]("testKey", testModel)
-      await(result) shouldBe returnCacheMap
+      val result = await(connector.cache[TestModel]("testKey", testModel))
+      result mustBe returnCacheMap
     }
   }
 
@@ -67,8 +64,8 @@ class KeystoreConnectorSpec extends PAYERegSpec {
       when(mockSessionCache.fetchAndGetEntry[List[TestModel]](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(list)))
 
-      val result = connector.fetchAndGet[List[TestModel]]("testKey")
-      await(result) shouldBe Some(list)
+      val result = await(connector.fetchAndGet[List[TestModel]]("testKey"))
+      result mustBe Some(list)
     }
   }
 
@@ -81,8 +78,8 @@ class KeystoreConnectorSpec extends PAYERegSpec {
       when(mockSessionCache.fetch()(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(returnCacheMap)))
 
-      val result = connector.fetch()
-      await(result) shouldBe Some(returnCacheMap)
+      val result = await(connector.fetch())
+      result mustBe Some(returnCacheMap)
     }
   }
 
@@ -91,8 +88,8 @@ class KeystoreConnectorSpec extends PAYERegSpec {
       when(mockSessionCache.remove()(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
 
-      val result = connector.remove()
-      await(result).status shouldBe HttpResponse(OK).status
+      val result = await(connector.remove())
+      result.status mustBe HttpResponse(OK).status
     }
   }
 }

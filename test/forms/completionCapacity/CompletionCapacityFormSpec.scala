@@ -17,11 +17,11 @@
 package forms.completionCapacity
 
 import enums.UserCapacity
+import helpers.PayeComponentSpec
 import models.view.CompletionCapacity
 import play.api.data.FormError
-import uk.gov.hmrc.play.test.UnitSpec
 
-class CompletionCapacityFormSpec extends UnitSpec {
+class CompletionCapacityFormSpec extends PayeComponentSpec {
 
   val testForm = CompletionCapacityForm.form
 
@@ -38,7 +38,7 @@ class CompletionCapacityFormSpec extends UnitSpec {
         success => success
       )
 
-      boundModel shouldBe model
+      boundModel mustBe model
     }
 
     "Bind successfully when capacity is Secretary" in {
@@ -53,7 +53,7 @@ class CompletionCapacityFormSpec extends UnitSpec {
         success => success
       )
 
-      boundModel shouldBe model
+      boundModel mustBe model
     }
 
     "Bind successfully when capacity is Agent" in {
@@ -68,7 +68,7 @@ class CompletionCapacityFormSpec extends UnitSpec {
         success => success
       )
 
-      boundModel shouldBe model
+      boundModel mustBe model
     }
 
     "Bind successfully when capacity is Other" in {
@@ -83,7 +83,7 @@ class CompletionCapacityFormSpec extends UnitSpec {
         success => success
       )
 
-      boundModel shouldBe model
+      boundModel mustBe model
     }
 
     "Fail to bind when capacity is incomplete" in {
@@ -93,7 +93,7 @@ class CompletionCapacityFormSpec extends UnitSpec {
 
       val boundForm = testForm.bind(data)
 
-      boundForm.errors shouldBe Seq(FormError("completionCapacity", "pages.completionCapacity.error"))
+      boundForm.errors mustBe Seq(FormError("completionCapacity", "pages.completionCapacity.error"))
     }
 
     "Fail to bind when other capacity is incomplete" in {
@@ -103,7 +103,7 @@ class CompletionCapacityFormSpec extends UnitSpec {
 
       val boundForm = testForm.bind(data)
 
-      boundForm.errors shouldBe Seq(FormError("completionCapacityOther", "pages.completionCapacity.other.label"))
+      boundForm.errors mustBe Seq(FormError("completionCapacityOther", "pages.completionCapacity.other.label"))
     }
   }
 
@@ -117,7 +117,7 @@ class CompletionCapacityFormSpec extends UnitSpec {
 
       val filledForm = testForm.fill(model)
 
-      filledForm.data shouldBe data
+      filledForm.data mustBe data
     }
   }
 }

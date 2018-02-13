@@ -22,15 +22,17 @@ object AppDependencies {
 }
 
 object MainDependencies {
-  private val frontendBootstrapVersion        = "8.8.0"
+  private val frontendBootstrapVersion        = "8.17.0"
+  private val authClientVersion               = "2.5.0"
   private val playPartialsVersion             = "6.1.0"
-  private val httpCachingVersion              = "7.0.0"
+  private val httpCachingVersion              = "7.1.0"
   private val playWhitelistVersion            = "2.0.0"
   private val playConditionalMappingVersion   = "0.2.0"
   private val commonsValidatorVersion         = "1.6"
 
   def apply() = Seq(
     "uk.gov.hmrc"         %% "frontend-bootstrap"             % frontendBootstrapVersion,
+    "uk.gov.hmrc"         %% "auth-client"                    % authClientVersion,
     "uk.gov.hmrc"         %% "play-partials"                  % playPartialsVersion,
     "uk.gov.hmrc"         %% "http-caching-client"            % httpCachingVersion,
     "uk.gov.hmrc"         %% "play-whitelist-filter"          % playWhitelistVersion,
@@ -44,7 +46,7 @@ trait TestDependencies {
   val hmrcTestVersion          = "2.4.0"
   val scalaTestVersion         = "3.0.4"
   val pegdownVersion           = "1.6.0"
-  val mockitoCoreVersion       = "2.11.0"
+  val mockitoCoreVersion       = "2.13.0"
   val jsoupVersion             = "1.10.3"
   val wireMockVersion          = "2.9.0"
 
@@ -55,12 +57,9 @@ trait TestDependencies {
 object UnitTestDependencies extends TestDependencies {
   override val scope = Test
   override val test = Seq(
-    "uk.gov.hmrc"             %% "hmrctest"           % hmrcTestVersion           % scope,
-    "org.scalatest"           %% "scalatest"          % scalaTestVersion          % scope,
     "org.scalatestplus.play"  %% "scalatestplus-play" % scalaTestPlusVersion      % scope,
     "org.pegdown"             %  "pegdown"            % pegdownVersion            % scope,
     "org.jsoup"               %  "jsoup"              % jsoupVersion              % scope,
-    "com.typesafe.play"       %% "play-test"          % PlayVersion.current       % scope,
     "org.mockito"             %  "mockito-core"       % mockitoCoreVersion        % scope
   )
 
@@ -70,12 +69,9 @@ object UnitTestDependencies extends TestDependencies {
 object IntegrationTestDependencies extends TestDependencies {
   override val scope = IntegrationTest
   override val test = Seq(
-    "uk.gov.hmrc"             %% "hmrctest"           % hmrcTestVersion           % scope,
-    "org.scalatest"           %% "scalatest"          % scalaTestVersion          % scope,
     "org.scalatestplus.play"  %% "scalatestplus-play" % scalaTestPlusVersion      % scope,
     "org.pegdown"             %  "pegdown"            % pegdownVersion            % scope,
     "org.jsoup"               %  "jsoup"              % jsoupVersion              % scope,
-    "com.typesafe.play"       %% "play-test"          % PlayVersion.current       % scope,
     "com.github.tomakehurst"  %  "wiremock"           % wireMockVersion           % scope
   )
 

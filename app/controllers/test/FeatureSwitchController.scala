@@ -16,7 +16,7 @@
 
 package controllers.test
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -24,11 +24,10 @@ import utils._
 
 import scala.concurrent.Future
 
-@Singleton
-class FeatureSwitchController @Inject()(val featureManager: FeatureSwitchManager,
-                                        val payeFeatureSwitch: PAYEFeatureSwitch) extends FeatureSwitchCtrl
+class FeatureSwitchControllerImpl @Inject()(val featureManager: FeatureManager,
+                                            val payeFeatureSwitch: PAYEFeatureSwitches) extends FeatureSwitchController
 
-trait FeatureSwitchCtrl extends FrontendController {
+trait FeatureSwitchController extends FrontendController {
 
   val featureManager: FeatureManager
   val payeFeatureSwitch: PAYEFeatureSwitches

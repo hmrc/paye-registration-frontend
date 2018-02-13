@@ -17,17 +17,17 @@
 package views.pages
 
 import forms.directorDetails.DirectorDetailsForm
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.{Ninos, UserEnteredNino}
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.test.FakeRequest
-import testHelpers.PAYERegSpec
 import views.html.pages.directorDetails
 
-class DirectorDetailsViewSpec extends PAYERegSpec with I18nSupport {
+class DirectorDetailsViewSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
 
   implicit val request = FakeRequest()
-  implicit val messagesApi : MessagesApi = injector.instanceOf[MessagesApi]
+  implicit lazy val messagesApi : MessagesApi = mockMessagesApi
 
   val d1 = "Henri Lay (id 0)"
   val d2 = "Chris Walker (id 1)"
@@ -62,16 +62,16 @@ class DirectorDetailsViewSpec extends PAYERegSpec with I18nSupport {
     lazy val document = Jsoup.parse(view.body)
 
     "have the title for a single director" in {
-      document.getElementById("pageHeading").text shouldBe messagesApi("pages.directorDetails.description")
+      document.getElementById("pageHeading").text mustBe messagesApi("pages.directorDetails.description")
     }
 
     "display the directors name and prepopped Nino" in {
-      document.getElementsByClass("form-field").get(0).text shouldBe "Henri Lay (id 0)'s National Insurance number For example, QQ 12 34 56 C"
-      document.getElementsByAttributeValueContaining("value", "ZY 12 34 56 A").size shouldBe 1
+      document.getElementsByClass("form-field").get(0).text mustBe "Henri Lay (id 0)'s National Insurance number For example, QQ 12 34 56 C"
+      document.getElementsByAttributeValueContaining("value", "ZY 12 34 56 A").size mustBe 1
     }
 
     "show no more directors" in {
-      document.getElementsByClass("form-field").size shouldBe 1
+      document.getElementsByClass("form-field").size mustBe 1
     }
   }
 
@@ -80,23 +80,23 @@ class DirectorDetailsViewSpec extends PAYERegSpec with I18nSupport {
     lazy val document = Jsoup.parse(view.body)
 
     "have the title for many directors" in {
-      document.getElementById("pageHeading").text shouldBe messagesApi("pages.directorDetails.description")
+      document.getElementById("pageHeading").text mustBe messagesApi("pages.directorDetails.description")
     }
 
     "have all directors shown" in {
       val list = document.getElementsByClass("form-field")
       def get(n: Int) = list.get(n).text
-      get(0) shouldBe s"$d1's National Insurance number For example, QQ 12 34 56 C"
-      get(1) shouldBe s"$d2's National Insurance number"
-      get(2) shouldBe s"$d3's National Insurance number"
-      get(3) shouldBe s"$d4's National Insurance number"
-      get(4) shouldBe s"$d5's National Insurance number"
-      document.getElementsByClass("form-field").size shouldBe 5
-      document.getElementsByClass("form-field").size shouldBe 5
+      get(0) mustBe s"$d1's National Insurance number For example, QQ 12 34 56 C"
+      get(1) mustBe s"$d2's National Insurance number"
+      get(2) mustBe s"$d3's National Insurance number"
+      get(3) mustBe s"$d4's National Insurance number"
+      get(4) mustBe s"$d5's National Insurance number"
+      document.getElementsByClass("form-field").size mustBe 5
+      document.getElementsByClass("form-field").size mustBe 5
     }
 
     "only prepop the 3 fields that have data" in {
-      document.getElementsByAttributeValueContaining("value", "Ni no").size shouldBe 3
+      document.getElementsByAttributeValueContaining("value", "Ni no").size mustBe 3
     }
   }
 

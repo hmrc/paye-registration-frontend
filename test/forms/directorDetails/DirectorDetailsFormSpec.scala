@@ -16,11 +16,11 @@
 
 package forms.directorDetails
 
+import helpers.PayeComponentSpec
 import models.view.{Ninos, UserEnteredNino}
 import play.api.data.FormError
-import uk.gov.hmrc.play.test.UnitSpec
 
-class DirectorDetailsFormSpec extends UnitSpec {
+class DirectorDetailsFormSpec extends PayeComponentSpec {
 
   val testForm = DirectorDetailsForm.form
 
@@ -44,12 +44,12 @@ class DirectorDetailsFormSpec extends UnitSpec {
           errors => errors,
           success => success
         )
-        boundModel shouldBe orderedModel
+        boundModel mustBe orderedModel
       }
 
       "Unbind successfully" in {
         val form = testForm.fill(model)
-        form.data shouldBe Map(
+        form.data mustBe Map(
           "nino[0]" -> "ZY 12 34 56 A",
           "nino[1]" -> "ZY 22 34 56 A"
         )
@@ -75,12 +75,12 @@ class DirectorDetailsFormSpec extends UnitSpec {
           errors => errors,
           success => success
         )
-        boundModel shouldBe model
+        boundModel mustBe model
       }
 
       "Unbind successfully" in {
         val form = testForm.fill(model)
-        form.data shouldBe Map(
+        form.data mustBe Map(
           "nino[0]" -> "ZY 12 34 56 A",
           "nino[1]" -> "",
           "nino[2]" -> "ZY 32 34 56 A"
@@ -100,8 +100,8 @@ class DirectorDetailsFormSpec extends UnitSpec {
           errors => errors,
           success => testForm.fill(success)
         )
-        boundForm.errors shouldBe Seq(FormError("noFieldsCompleted-nino[0]", "pages.directorDetails.errors.noneCompleted"))
-        boundForm.data shouldBe data
+        boundForm.errors mustBe Seq(FormError("noFieldsCompleted-nino[0]", "pages.directorDetails.errors.noneCompleted"))
+        boundForm.data mustBe data
       }
     }
 
@@ -118,8 +118,8 @@ class DirectorDetailsFormSpec extends UnitSpec {
           errors => errors,
           success => testForm.fill(success)
         )
-        boundForm.errors shouldBe Seq(FormError("noFieldsCompleted-nino[0]", "pages.directorDetails.errors.noneCompleted"))
-        boundForm.data shouldBe data
+        boundForm.errors mustBe Seq(FormError("noFieldsCompleted-nino[0]", "pages.directorDetails.errors.noneCompleted"))
+        boundForm.data mustBe data
       }
     }
 
@@ -165,8 +165,8 @@ class DirectorDetailsFormSpec extends UnitSpec {
           errors => errors,
           success => testForm.fill(success)
         )
-        boundForm.errors shouldBe errs
-        boundForm.data shouldBe data
+        boundForm.errors mustBe errs
+        boundForm.data mustBe data
       }
     }
 
@@ -183,7 +183,7 @@ class DirectorDetailsFormSpec extends UnitSpec {
       )
 
       val boundForm = testForm.bind(data)
-      boundForm.errors shouldBe List(
+      boundForm.errors mustBe List(
         FormError("", List("errors.duplicate.nino"))
       )
     }

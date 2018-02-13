@@ -16,11 +16,11 @@
 
 package models
 
+import helpers.PayeComponentSpec
 import play.api.data.validation.ValidationError
 import play.api.libs.json.{JsPath, JsSuccess, Json}
-import testHelpers.PAYERegSpec
 
-class DigitalContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
+class DigitalContactDetailsSpec extends PayeComponentSpec {
 
   "BusinessContactDetails with full data" should {
     val targetJsonMax = Json.parse(
@@ -36,10 +36,10 @@ class DigitalContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
       phoneNumber = Some("0161385032")
     )
     "read from Json" in {
-      Json.fromJson[DigitalContactDetails](targetJsonMax) shouldBe JsSuccess(maxModel)
+      Json.fromJson[DigitalContactDetails](targetJsonMax) mustBe JsSuccess(maxModel)
     }
     "write to Json" in {
-      Json.toJson[DigitalContactDetails](maxModel) shouldBe targetJsonMax
+      Json.toJson[DigitalContactDetails](maxModel) mustBe targetJsonMax
     }
   }
 
@@ -57,10 +57,10 @@ class DigitalContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
     )
 
     "read from Json" in {
-      Json.fromJson[DigitalContactDetails](tstJson) shouldBe JsSuccess(tstModel)
+      Json.fromJson[DigitalContactDetails](tstJson) mustBe JsSuccess(tstModel)
     }
     "write to Json" in {
-      Json.toJson[DigitalContactDetails](tstModel) shouldBe tstJson
+      Json.toJson[DigitalContactDetails](tstModel) mustBe tstJson
     }
   }
 
@@ -78,10 +78,10 @@ class DigitalContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
     )
 
     "read from Json" in {
-      Json.fromJson[DigitalContactDetails](tstJson) shouldBe JsSuccess(tstModel)
+      Json.fromJson[DigitalContactDetails](tstJson) mustBe JsSuccess(tstModel)
     }
     "write to Json" in {
-      Json.toJson[DigitalContactDetails](tstModel) shouldBe tstJson
+      Json.toJson[DigitalContactDetails](tstModel) mustBe tstJson
     }
   }
 
@@ -99,10 +99,10 @@ class DigitalContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
 
 
     "read from Json" in {
-      Json.fromJson[DigitalContactDetails](tstJson) shouldBe JsSuccess(tstModel)
+      Json.fromJson[DigitalContactDetails](tstJson) mustBe JsSuccess(tstModel)
     }
     "write to Json" in {
-      Json.toJson[DigitalContactDetails](tstModel) shouldBe tstJson
+      Json.toJson[DigitalContactDetails](tstModel) mustBe tstJson
     }
   }
 
@@ -121,7 +121,7 @@ class DigitalContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
     )
 
     "write to Json" in {
-      Json.toJson[DigitalContactDetails](maxModel)(DigitalContactDetails.prepopWrites) shouldBe targetJsonMax
+      Json.toJson[DigitalContactDetails](maxModel)(DigitalContactDetails.prepopWrites) mustBe targetJsonMax
     }
   }
 
@@ -139,7 +139,7 @@ class DigitalContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
     )
 
     "write to Json" in {
-      Json.toJson[DigitalContactDetails](model)(DigitalContactDetails.prepopWrites) shouldBe json
+      Json.toJson[DigitalContactDetails](model)(DigitalContactDetails.prepopWrites) mustBe json
     }
   }
 
@@ -157,7 +157,7 @@ class DigitalContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
     )
 
     "write to Json" in {
-      Json.toJson[DigitalContactDetails](model)(DigitalContactDetails.prepopWrites) shouldBe json
+      Json.toJson[DigitalContactDetails](model)(DigitalContactDetails.prepopWrites) mustBe json
     }
   }
 
@@ -175,7 +175,7 @@ class DigitalContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
     )
 
     "write to Json" in {
-      Json.toJson[DigitalContactDetails](model)(DigitalContactDetails.prepopWrites) shouldBe json
+      Json.toJson[DigitalContactDetails](model)(DigitalContactDetails.prepopWrites) mustBe json
     }
   }
 
@@ -200,7 +200,7 @@ class DigitalContactDetailsSpec extends PAYERegSpec with JsonFormValidation {
         phoneNumber = Some("016138503209876")
       )
 
-      Json.fromJson[DigitalContactDetails](targetJsonMax)(DigitalContactDetails.prepopReads) shouldBe JsSuccess(maxModel)
+      Json.fromJson[DigitalContactDetails](targetJsonMax)(DigitalContactDetails.prepopReads) mustBe JsSuccess(maxModel)
     }
 
     "return an error when read from Json with no contact details" in {

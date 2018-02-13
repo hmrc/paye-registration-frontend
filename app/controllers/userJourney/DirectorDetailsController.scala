@@ -16,63 +16,49 @@
 
 package controllers.userJourney
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
-import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
+import connectors.KeystoreConnector
+import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.directorDetails.DirectorDetailsForm
-import play.api.i18n.{I18nSupport, MessagesApi}
-import services.{DirectorDetailsService, DirectorDetailsSrv}
-import uk.gov.hmrc.play.frontend.auth.Actions
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.SessionProfile
+import play.api.Configuration
+import play.api.i18n.MessagesApi
+import play.api.mvc.{Action, AnyContent}
+import services.{CompanyDetailsService, DirectorDetailsService, IncorporationInformationService, S4LService}
+import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{directorDetails => DirectorDetailsPage}
 
-@Singleton
-class DirectorDetailsController @Inject()(val messagesApi: MessagesApi,
-                                          val directorDetailsService: DirectorDetailsService,
-                                          val keystoreConnector: KeystoreConnector,
-                                          val payeRegistrationConnector: PAYERegistrationConnector) extends DirectorDetailsCtrl {
-  val authConnector = FrontendAuthConnector
-}
+class DirectorDetailsControllerImpl @Inject()(val messagesApi: MessagesApi,
+                                              val directorDetailsService: DirectorDetailsService,
+                                              val keystoreConnector: KeystoreConnector,
+                                              val config: Configuration,
+                                              val s4LService: S4LService,
+                                              val companyDetailsService: CompanyDetailsService,
+                                              val incorpInfoService: IncorporationInformationService,
+                                              val authConnector: AuthConnector) extends DirectorDetailsController with AuthRedirectUrls
 
-trait DirectorDetailsCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
+trait DirectorDetailsController extends PayeBaseController {
+  val directorDetailsService : DirectorDetailsService
 
-  val directorDetailsService : DirectorDetailsSrv
-  val keystoreConnector : KeystoreConnect
-
-  val directorDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map { directors =>
-            val ninos = directorDetailsService.createDirectorNinos(directors)
-            val names = directorDetailsService.createDisplayNamesMap(directors)
-            Ok(DirectorDetailsPage(DirectorDetailsForm.form.fill(ninos), names))
-          } recover {
-            case _ => InternalServerError(views.html.pages.error.restart())
-          }
-        }
+  def directorDetails: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map { directors =>
+      val ninos = directorDetailsService.createDirectorNinos(directors)
+      val names = directorDetailsService.createDisplayNamesMap(directors)
+      Ok(DirectorDetailsPage(DirectorDetailsForm.form.fill(ninos), names))
+    } recover {
+      case _ => InternalServerError(views.html.pages.error.restart())
+    }
   }
 
-  val submitDirectorDetails = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          DirectorDetailsForm.form.bindFromRequest.fold(
-            errors => {
-              directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map { directors =>
-                val names = directorDetailsService.createDisplayNamesMap(directors)
-                BadRequest(DirectorDetailsPage(errors, names))
-              }
-            },
-            success => {
-              directorDetailsService.submitNinos(success, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
-                _ => Redirect(routes.PAYEContactController.payeContactDetails())
-              }
-            }
-          )
-        }
+  def submitDirectorDetails: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    DirectorDetailsForm.form.bindFromRequest.fold(
+      errors => directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map { directors =>
+        val names = directorDetailsService.createDisplayNamesMap(directors)
+        BadRequest(DirectorDetailsPage(errors, names))
+      },
+      success => directorDetailsService.submitNinos(success, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+        _ => Redirect(routes.PAYEContactController.payeContactDetails())
+      }
+    )
   }
 }

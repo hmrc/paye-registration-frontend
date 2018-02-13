@@ -1,6 +1,5 @@
 ## Global                                                       
 app.title                                                       = Register your company
-app.phaseBannerFeedback                                         = This is a new service – your <a href= {0}>feedback</a> will help us to improve it.
 app.common.yes                                                  = Yes
 app.common.no                                                   = No
 app.common.continue                                             = Continue

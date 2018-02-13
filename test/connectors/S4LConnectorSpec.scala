@@ -17,47 +17,40 @@
 package connectors
 
 import config.PAYEShortLivedCache
-import mocks.MockMetrics
+import helpers.PayeComponentSpec
+import helpers.mocks.MockMetrics
 import models.view.{TradingName => TradingNameView}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
-import play.api.test.FakeApplication
-import play.api.test.Helpers._
-import services.MetricsSrv
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.http.{HttpResponse, Upstream4xxResponse}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse, Upstream4xxResponse }
 
-class S4LConnectorSpec extends UnitSpec with MockitoSugar {
+class S4LConnectorSpec extends PayeComponentSpec {
 
   val mockShortLivedCache = mock[PAYEShortLivedCache]
 
-  val S4LConnectorTest = new S4LConnect {
-    override val metricsService = new MockMetrics
-    override val shortCache = mockShortLivedCache
-    override val successCounter = metricsService.s4lSuccessResponseCounter
-    override val failedCounter = metricsService.s4lFailedResponseCounter
+  val S4LConnectorTest = new S4LConnector {
+    override val metricsService       = new MockMetrics
+    override val shortCache           = mockShortLivedCache
+    override val successCounter       = metricsService.s4lSuccessResponseCounter
+    override val failedCounter        = metricsService.s4lFailedResponseCounter
     override val emptyResponseCounter = metricsService.s4lEmptyResponseCounter
-    override def timer = metricsService.s4lResponseTimer.time()
+    override def timer                = metricsService.s4lResponseTimer.time()
   }
-
-  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   val tNameModel = TradingNameView(differentName = true, Some("Tradez R Us"))
   val cacheMap = CacheMap("", Map("" -> Json.toJson(tNameModel)))
 
   "Fetching from save4later" should {
     "return the correct model" in {
-
       when(mockShortLivedCache.fetchAndGetEntry[TradingNameView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Option(tNameModel)))
 
       val result = S4LConnectorTest.fetchAndGet[TradingNameView]("", "")
-      await(result) shouldBe Some(tNameModel)
+      await(result) mustBe Some(tNameModel)
     }
   }
 
@@ -69,7 +62,7 @@ class S4LConnectorSpec extends UnitSpec with MockitoSugar {
         .thenReturn(Future.successful(returnCacheMap))
 
       val result = S4LConnectorTest.saveForm[TradingNameView]("", "", tNameModel)
-      await(result) shouldBe returnCacheMap
+      await(result) mustBe returnCacheMap
     }
   }
 
@@ -79,7 +72,7 @@ class S4LConnectorSpec extends UnitSpec with MockitoSugar {
         .thenReturn(Future.successful(HttpResponse(OK)))
 
       val result = S4LConnectorTest.clear("test")
-      await(result).status shouldBe HttpResponse(OK).status
+      await(result).status mustBe HttpResponse(OK).status
     }
   }
 
@@ -89,14 +82,14 @@ class S4LConnectorSpec extends UnitSpec with MockitoSugar {
         .thenReturn(Future.successful(Some(cacheMap)))
 
       val result = S4LConnectorTest.fetchAll("testUserId")
-      await(result).get shouldBe cacheMap
+      await(result).get mustBe cacheMap
     }
+
     "return an Upstream response when a failure occurs on the fetch (and then returned from metrics)" in {
       when(mockShortLivedCache.fetch(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(Upstream4xxResponse("400", 400, 400)))
-    val result =  intercept[Upstream4xxResponse] {await(S4LConnectorTest.fetchAll("testUserId"))}
-     await(result) shouldBe Upstream4xxResponse("400", 400, 400)
-    }
 
+      intercept[Upstream4xxResponse](await(S4LConnectorTest.fetchAll("testUserId")))
+    }
   }
 }

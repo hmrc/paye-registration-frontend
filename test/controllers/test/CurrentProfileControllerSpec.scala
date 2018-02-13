@@ -16,48 +16,54 @@
 
 package controllers.test
 
-import builders.AuthBuilder
-import connectors.test.TestBusinessRegConnect
-import fixtures.KeystoreFixture
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.{BusinessProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.test.Helpers.OK
-import testHelpers.PAYERegSpec
+import play.api.test.FakeRequest
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, NotFoundException}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, NotFoundException }
 
-class CurrentProfileControllerSpec extends PAYERegSpec with KeystoreFixture {
-
-  val mockTestBusRegConnector = mock[TestBusinessRegConnect]
+class CurrentProfileControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val testProfile = BusinessProfile("testRegId", "testLang")
 
   class Setup {
-    val controller = new BusinessProfileCtrl {
-      override val businessRegConnector = mockBusinessRegistrationConnector
-      override val keystoreConnector = mockKeystoreConnector
+    val controller = new BusinessProfileController {
+      override val redirectToLogin          = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign       = MockAuthRedirects.redirectToPostSign
+
+      override val incorpInfoService        = mockIncorpInfoService
+      override val companyDetailsService    = mockCompanyDetailsService
+      override val s4LService               = mockS4LService
+      override val messagesApi              = mockMessagesApi
+      override val businessRegConnector     = mockBusinessRegistrationConnector
+      override val keystoreConnector        = mockKeystoreConnector
       override val testBusinessRegConnector = mockTestBusRegConnector
-      override val authConnector = mockAuthConnector
+      override val authConnector            = mockAuthConnector
     }
   }
 
   "currentProfileSetup" should {
     "return an OK" when {
       "the current profile has been returned and has been cached in keystore" in new Setup {
+        val request = FakeRequest()
+
         when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[HttpReads[BusinessProfile]]()))
           .thenReturn(Future.successful(testProfile))
 
         when(mockKeystoreConnector.cache[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
-          .thenReturn(Future.successful(blankCacheMap))
+          .thenReturn(Future.successful(Fixtures.blankCacheMap))
 
-        AuthBuilder.showWithAuthorisedUser(controller.businessProfileSetup, mockAuthConnector) { result =>
-          status(result) shouldBe OK
+        AuthHelpers.showAuthorised(controller.businessProfileSetup, request) { result =>
+          status(result) mustBe OK
         }
       }
 
       "the current profile hasn't been found, but has then proceeded to create one and cache it in keystore" in new Setup {
+        val request = FakeRequest()
+
         when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[HttpReads[BusinessProfile]]()))
           .thenReturn(Future.failed(new NotFoundException("")))
 
@@ -65,10 +71,10 @@ class CurrentProfileControllerSpec extends PAYERegSpec with KeystoreFixture {
           .thenReturn(Future.successful(testProfile))
 
         when(mockKeystoreConnector.cache[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
-          .thenReturn(Future.successful(blankCacheMap))
+          .thenReturn(Future.successful(Fixtures.blankCacheMap))
 
-        AuthBuilder.showWithAuthorisedUser(controller.businessProfileSetup, mockAuthConnector) { result =>
-          status(result) shouldBe OK
+        AuthHelpers.showAuthorised(controller.businessProfileSetup, request) { result =>
+          status(result) mustBe OK
         }
       }
     }

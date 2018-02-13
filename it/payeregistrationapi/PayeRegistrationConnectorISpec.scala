@@ -18,7 +18,8 @@ package payeregistrationapi
 import java.time.LocalDate
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import connectors.PAYERegistrationConnector
+import config.WSHttpImpl
+import connectors.PAYERegistrationConnectorImpl
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.api._
 import models.view.PAYEContactDetails
@@ -28,6 +29,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.config.inject.DefaultServicesConfig
 
 class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
@@ -80,8 +82,14 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
     )
 
     "get a model" in {
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def getResponse = payeRegistrationConnector.getCompanyDetails(regId)
 
@@ -93,12 +101,19 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getResponse) shouldBe Some(validCompanyDetails)
+      await(getResponse) mustBe Some(validCompanyDetails)
     }
 
     "get a None" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def getResponse = payeRegistrationConnector.getCompanyDetails(regId)
 
@@ -109,12 +124,19 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getResponse) shouldBe None
+      await(getResponse) mustBe None
     }
 
     "upsert a model" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def patchResponse = payeRegistrationConnector.upsertCompanyDetails(regId, validCompanyDetails)
 
@@ -126,7 +148,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(patchResponse) shouldBe validCompanyDetails
+      await(patchResponse) mustBe validCompanyDetails
     }
   }
 
@@ -139,7 +161,14 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get a model" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def getResponse = payeRegistrationConnector.getEmployment(regId)
 
@@ -151,12 +180,19 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getResponse) shouldBe Some(validEmployment)
+      await(getResponse) mustBe Some(validEmployment)
     }
 
     "get a None" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def getResponse = payeRegistrationConnector.getEmployment(regId)
 
@@ -167,12 +203,19 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getResponse) shouldBe None
+      await(getResponse) mustBe None
     }
 
     "upsert a model" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def patchResponse = payeRegistrationConnector.upsertEmployment(regId, validEmployment)
 
@@ -184,7 +227,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(patchResponse) shouldBe validEmployment
+      await(patchResponse) mustBe validEmployment
     }
 
   }
@@ -213,7 +256,14 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get a list of Director models" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def getResponse = payeRegistrationConnector.getDirectors(regId)
 
@@ -225,12 +275,19 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getResponse) shouldBe dirList
+      await(getResponse) mustBe dirList
     }
 
     "get an empty list if no directors" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def getResponse = payeRegistrationConnector.getDirectors(regId)
 
@@ -241,12 +298,19 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getResponse) shouldBe List.empty
+      await(getResponse) mustBe List.empty
     }
 
     "upsert a model" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def patchResponse = payeRegistrationConnector.upsertDirectors(regId, dirList)
 
@@ -258,7 +322,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(patchResponse) shouldBe dirList
+      await(patchResponse) mustBe dirList
     }
 
   }
@@ -277,7 +341,14 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get a list of SICCode models" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def getResponse = payeRegistrationConnector.getSICCodes(regId)
 
@@ -289,12 +360,19 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getResponse) shouldBe sicCodes
+      await(getResponse) mustBe sicCodes
     }
 
     "get an empty list if no sic codes" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def getResponse = payeRegistrationConnector.getSICCodes(regId)
 
@@ -305,12 +383,19 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getResponse) shouldBe List.empty
+      await(getResponse) mustBe List.empty
     }
 
     "upsert a model" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def patchResponse = payeRegistrationConnector.upsertSICCodes(regId, sicCodes)
 
@@ -322,7 +407,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(patchResponse) shouldBe sicCodes
+      await(patchResponse) mustBe sicCodes
     }
 
   }
@@ -348,7 +433,14 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get a model" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def getResponse = payeRegistrationConnector.getPAYEContact(regId)
 
@@ -360,12 +452,19 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getResponse) shouldBe Some(validPAYEContact)
+      await(getResponse) mustBe Some(validPAYEContact)
     }
 
     "get a None" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def getResponse = payeRegistrationConnector.getPAYEContact(regId)
 
@@ -376,12 +475,19 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getResponse) shouldBe None
+      await(getResponse) mustBe None
     }
 
     "upsert a model" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def patchResponse = payeRegistrationConnector.upsertPAYEContact(regId, validPAYEContact)
 
@@ -393,7 +499,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(patchResponse) shouldBe validPAYEContact
+      await(patchResponse) mustBe validPAYEContact
     }
   }
 
@@ -401,7 +507,15 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get a string" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
+
       val jobTitle = "High Priestess"
 
       def getResponse = payeRegistrationConnector.getCompletionCapacity(regId)
@@ -414,12 +528,19 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getResponse) shouldBe Some(jobTitle)
+      await(getResponse) mustBe Some(jobTitle)
     }
 
     "get a None" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def getResponse = payeRegistrationConnector.getCompletionCapacity(regId)
 
@@ -430,12 +551,19 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getResponse) shouldBe None
+      await(getResponse) mustBe None
     }
 
     "upsert a model" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       val jobTitle = "High Priestess"
       def patchResponse = payeRegistrationConnector.upsertCompletionCapacity(regId, jobTitle)
@@ -448,7 +576,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(patchResponse) shouldBe jobTitle
+      await(patchResponse) mustBe jobTitle
     }
   }
 
@@ -456,7 +584,15 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
     "get a string" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
+
       val jobTitle = "High Priestess"
 
       def getResponse = payeRegistrationConnector.getAcknowledgementReference(regId)
@@ -469,12 +605,19 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getResponse) shouldBe Some(jobTitle)
+      await(getResponse) mustBe Some(jobTitle)
     }
 
     "get a None" in {
 
-      val payeRegistrationConnector = new PAYERegistrationConnector(metrics)
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
+        metrics,
+        http,
+        servicesConfig
+      )
 
       def getResponse = payeRegistrationConnector.getAcknowledgementReference(regId)
 
@@ -485,7 +628,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-      await(getResponse) shouldBe None
+      await(getResponse) mustBe None
     }
   }
 }

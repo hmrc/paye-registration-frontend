@@ -16,138 +16,117 @@
 
 package controllers.userJourney
 
-import builders.AuthBuilder
-import connectors.CompanyRegistrationConnector
-import enums.{AccountTypes, DownstreamOutcome, RegistrationDeletion}
-import fixtures.{CoHoAPIFixture, PAYERegistrationFixture}
+import enums.{DownstreamOutcome, RegistrationDeletion}
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatest.BeforeAndAfterEach
-import play.api.test.Helpers._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
-import services.{CurrentProfileService, IncorporationInformationService, PAYERegistrationService}
-import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.frontend.auth.AuthContext
+import uk.gov.hmrc.http.NotFoundException
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, NotFoundException }
 
-class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture with BeforeAndAfterEach with CoHoAPIFixture {
-
-  val mockCurrentProfileService = mock[CurrentProfileService]
-  val mockPAYERegService = mock[PAYERegistrationService]
-  val mockCompanyRegistrationConnector = mock[CompanyRegistrationConnector]
+class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup {
-    val controller = new PayeStartCtrl{
-      override val authConnector = mockAuthConnector
-      override val currentProfileService = mockCurrentProfileService
-      override val payeRegistrationService = mockPAYERegService
-      implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
-      override val compRegFEURL: String = "testUrl"
-      override val compRegFEURI: String = "/testUri"
-      override val keystoreConnector = mockKeystoreConnector
-      override val businessRegistrationConnector = mockBusinessRegistrationConnector
-      override val companyRegistrationConnector = mockCompanyRegistrationConnector
+    val controller = new PayeStartController {
+      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
+
+      override val incorpInfoService              = mockIncorpInfoService
+      override val companyDetailsService          = mockCompanyDetailsService
+      override val s4LService                     = mockS4LService
+      override val authConnector                  = mockAuthConnector
+      override val currentProfileService          = mockCurrentProfileService
+      override val payeRegistrationService        = mockPayeRegService
+      implicit val messagesApi: MessagesApi       = mockMessagesApi
+      override val compRegFEURL: String           = "testUrl"
+      override val compRegFEURI: String           = "/testUri"
+      override val keystoreConnector              = mockKeystoreConnector
+      override val businessRegistrationConnector  = mockBusinessRegistrationConnector
+      override val companyRegistrationConnector   = mockCompRegConnector
     }
   }
 
-  val fakeRequest = FakeRequest("GET", "/")
+  val fakeRequest = FakeRequest()
 
   def validCurrentProfile(status: String) = CurrentProfile("testRegId", CompanyRegistrationProfile(status, "txId"), "en", false)
-
-  override def beforeEach() {
-    reset(mockPAYERegService)
-  }
 
   "Calling the startPaye action" should {
 
     "return 303 for an unauthorised user" in new Setup {
-      val result = controller.startPaye()(FakeRequest())
-      status(result) shouldBe Status.SEE_OTHER
+      AuthHelpers.showUnauthorised(controller.startPaye, fakeRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+      }
     }
 
     "force the user to create a new account" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]()))
-        .thenReturn(AccountTypes.InvalidAccountType)
-
-      AuthBuilder.showWithAuthorisedUser(controller.startPaye, mockAuthConnector) {
+      AuthHelpers.showAuthorisedNotOrg(controller.startPaye, fakeRequest) {
         result =>
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/post-sign-in")
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/post-sign-in")
       }
     }
 
     "show an Error page for an authorised user without a registration ID" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]()))
-        .thenReturn(AccountTypes.Organisation)
-
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCurrentProfile("held")))
+        .thenReturn(Future.failed(new Exception))
 
-      AuthBuilder.showWithAuthorisedUser(controller.startPaye, mockAuthConnector) {
+      AuthHelpers.showAuthorisedOrg(controller.startPaye, fakeRequest) {
         result =>
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+          status(result) mustBe INTERNAL_SERVER_ERROR
       }
     }
 
     "show an Error page for an authorised user with a registration ID and CoHo Company Details, with an error response from the microservice" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]()))
-        .thenReturn(AccountTypes.Organisation)
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+        .thenReturn(Future(Fixtures.validCurrentProfile.get))
 
-      mockFetchCurrentProfile()
+      when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future(DownstreamOutcome.Failure))
 
-      when(mockPAYERegService.assertRegistrationFootprint(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(DownstreamOutcome.Failure)
-
-      AuthBuilder.showWithAuthorisedUser(controller.startPaye, mockAuthConnector) {
+      AuthHelpers.showAuthorisedOrg(controller.startPaye, FakeRequest()) {
         result =>
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+          status(result) mustBe INTERNAL_SERVER_ERROR
       }
     }
 
     "redirect to the start page for an authorised user with a registration ID and CoHo Company Details, with PAYE Footprint correctly asserted" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]())).thenReturn(AccountTypes.Organisation)
-
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("held")))
 
-      when(mockPAYERegService.assertRegistrationFootprint(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(DownstreamOutcome.Success)
+      when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future(DownstreamOutcome.Success))
 
-      AuthBuilder.showWithAuthorisedUser(controller.startPaye, mockAuthConnector) {
+      AuthHelpers.showAuthorisedOrg(controller.startPaye, fakeRequest) {
         result =>
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some("/register-for-paye/register-as-employer")
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/register-for-paye/register-as-employer")
       }
     }
 
     "redirect to the CT start page for a user with no CT Footprint found" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]())).thenReturn(AccountTypes.Organisation)
-
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new NotFoundException("404")))
 
-      AuthBuilder.showWithAuthorisedUser(controller.startPaye, mockAuthConnector) {
+      AuthHelpers.showAuthorisedOrg(controller.startPaye, fakeRequest) {
         result =>
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some("testUrl/testUri/register")
+          status(result) mustBe Status.SEE_OTHER
+          redirectLocation(result) mustBe Some("testUrl/testUri/register")
       }
     }
 
     "redirect the user to the start of Incorporation and Corporation Tax if their Company Registration document has a status of 'draft'" in new Setup {
-      when(mockPAYERegService.getAccountAffinityGroup(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[AuthContext]())).thenReturn(AccountTypes.Organisation)
-
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("draft")))
 
-      AuthBuilder.showWithAuthorisedUser(controller.startPaye, mockAuthConnector) {
+      AuthHelpers.showAuthorisedOrg(controller.startPaye, fakeRequest) {
         result =>
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/register")
+          status(result) mustBe Status.SEE_OTHER
+          redirectLocation(result) mustBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/register")
       }
     }
   }
@@ -158,13 +137,13 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
         when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(validCurrentProfile("rejected"))))
 
-        when(mockPAYERegService.deletePayeRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-          .thenReturn(Future.successful(RegistrationDeletion.success))
+        when(mockPayeRegService.deletePayeRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future(RegistrationDeletion.success))
 
-        AuthBuilder.showWithAuthorisedUser(controller.restartPaye, mockAuthConnector) {
+        AuthHelpers.showAuthorised(controller.restartPaye, fakeRequest) {
           result =>
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(s"/register-for-paye")
+            status(result)           mustBe SEE_OTHER
+            redirectLocation(result) mustBe Some(s"/register-for-paye")
         }
       }
 
@@ -185,16 +164,16 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
         when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(testBusinessProfile))
 
-        when(mockCompanyRegistrationConnector.getCompanyRegistrationDetails(ArgumentMatchers.any())(ArgumentMatchers.any()))
-          .thenReturn(Future.successful(testCompanyProfile))
+        when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future(testCompanyProfile))
 
-        when(mockPAYERegService.deletePayeRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-          .thenReturn(Future.successful(RegistrationDeletion.success))
+        when(mockPayeRegService.deletePayeRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future(RegistrationDeletion.success))
 
-        AuthBuilder.showWithAuthorisedUser(controller.restartPaye, mockAuthConnector) {
+        AuthHelpers.showAuthorised(controller.restartPaye, fakeRequest) {
           result =>
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(s"/register-for-paye")
+            status(result) mustBe Status.SEE_OTHER
+            redirectLocation(result) mustBe Some(s"/register-for-paye")
         }
       }
     }
@@ -204,13 +183,13 @@ class PayeStartControllerSpec extends PAYERegSpec with PAYERegistrationFixture w
         when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(validCurrentProfile("rejected"))))
 
-        when(mockPAYERegService.deletePayeRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-          .thenReturn(Future.successful(RegistrationDeletion.invalidStatus))
+        when(mockPayeRegService.deletePayeRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future(RegistrationDeletion.invalidStatus))
 
-        AuthBuilder.showWithAuthorisedUser(controller.restartPaye, mockAuthConnector) {
+        AuthHelpers.showAuthorised(controller.restartPaye, fakeRequest) {
           result =>
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(controllers.userJourney.routes.DashboardController.dashboard().url)
+            status(result) mustBe Status.SEE_OTHER
+            redirectLocation(result) mustBe Some(controllers.userJourney.routes.DashboardController.dashboard().url)
         }
       }
     }

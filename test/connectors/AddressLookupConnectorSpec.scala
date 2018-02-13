@@ -16,74 +16,71 @@
 
 package connectors
 
-import fixtures.BusinessRegistrationFixture
-import mocks.MockMetrics
+import helpers.mocks.MockMetrics
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
-import testHelpers.PAYERegSpec
+import uk.gov.hmrc.http.{ForbiddenException, NotFoundException}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, NotFoundException}
 
-class AddressLookupConnectorSpec extends PAYERegSpec with BusinessRegistrationFixture {
+class AddressLookupConnectorSpec extends PayeComponentSpec with PayeFakedApp {
 
   val mockMetrics = new MockMetrics
 
-  class Setup {
-    val connector = new AddressLookupConnect {
+  class Setup extends CodeMocks {
+    val testConnector = new AddressLookupConnector {
       override val addressLookupFrontendUrl = "testBusinessRegUrl"
-      override val payeRegistrationUrl = "testPayeRegistrationUrl"
-      override val http = mockWSHttp
-      override val metricsService = mockMetrics
-      override val successCounter = metricsService.addressLookupSuccessResponseCounter
-      override val failedCounter = metricsService.addressLookupFailedResponseCounter
-      override def timer = metricsService.addressLookupResponseTimer.time()
-      override val timeoutAmount = 900
-      override val messagesApi = mockMessages
+      override val payeRegistrationUrl      = "testPayeRegistrationUrl"
+      override val http                     = mockWSHttp
+      override val metricsService           = mockMetrics
+      override val successCounter           = metricsService.addressLookupSuccessResponseCounter
+      override val failedCounter            = metricsService.addressLookupFailedResponseCounter
+      override def timer                    = metricsService.addressLookupResponseTimer.time()
+      override val timeoutAmount            = 900
+      override val messagesApi              = mockMessagesApi
     }
   }
-
-  implicit val hc = HeaderCarrier()
 
   val testAddress = Json.obj("x"->"y")
 
   "getAddress" should {
     "return an address response" in new Setup {
-      when(mockWSHttp.GET[JsObject](ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(testAddress))
+      mockHttpGet[JsObject](testConnector.addressLookupFrontendUrl, testAddress)
 
-      await(connector.getAddress("123")) shouldBe testAddress
+      await(testConnector.getAddress("123")) mustBe testAddress
     }
 
     "return a Not Found response" in new Setup {
       when(mockWSHttp.GET[JsObject](ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new NotFoundException("Bad request")))
 
-      intercept[NotFoundException](await(connector.getAddress("123")))
+      intercept[NotFoundException](await(testConnector.getAddress("123")))
     }
 
     "return a Forbidden response when a CurrentProfile record can not be accessed by the user" in new Setup {
       when(mockWSHttp.GET[JsObject](ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new ForbiddenException("Forbidden")))
 
-      intercept[ForbiddenException](await(connector.getAddress("321")))
+      intercept[ForbiddenException](await(testConnector.getAddress("321")))
     }
 
     "return an Exception response when an unspecified error has occurred" in new Setup {
       when(mockWSHttp.GET[JsObject](ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new IndexOutOfBoundsException("other exception")))
 
-      intercept[IndexOutOfBoundsException](await(connector.getAddress("321")))
+      intercept[IndexOutOfBoundsException](await(testConnector.getAddress("321")))
     }
   }
+
   "createOnRampJson" should {
     "return a json with timeout and valid continue url" in new Setup{
       val json = Json.parse(
         s"""
           |{
-          |  "continueUrl": "${connector.payeRegistrationUrl}/foobar",
+          |  "continueUrl": "${testConnector.payeRegistrationUrl}/foobar",
           |  "navTitle": "Register your company",
           |  "showPhaseBanner": true,
           |  "phaseBannerHtml": "This is a new service. Help us improve it - send your <a href=\\"https://www.tax.service.gov.uk/register-for-paye/feedback\\">feedback</a>.",
@@ -119,15 +116,14 @@ class AddressLookupConnectorSpec extends PAYERegSpec with BusinessRegistrationFi
           |    "changeLinkText": "Change"
           |  },
           |  "timeout": {
-          |    "timeoutAmount": ${connector.timeoutAmount},
-          |    "timeoutUrl": "${connector.payeRegistrationUrl}${controllers.userJourney.routes.SignInOutController.destroySession().url}"
+          |    "timeoutAmount": ${testConnector.timeoutAmount},
+          |    "timeoutUrl": "${testConnector.payeRegistrationUrl}${controllers.userJourney.routes.SignInOutController.destroySession().url}"
           |  }
           |}
         """.stripMargin
       ).as[JsObject]
 
-      connector.createOnRampJson("ppob", Call("GET","/foobar")) shouldBe json
+      testConnector.createOnRampJson("ppob", Call("GET","/foobar")) mustBe json
     }
-
   }
 }

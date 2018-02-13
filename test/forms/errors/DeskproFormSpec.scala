@@ -16,9 +16,9 @@
 
 package forms.errors
 
-import uk.gov.hmrc.play.test.UnitSpec
+import helpers.PayeComponentSpec
 
-class DeskproFormSpec extends UnitSpec {
+class DeskproFormSpec extends PayeComponentSpec {
 
   class Setup {
     val REQUIRED = "error.required"
@@ -34,17 +34,17 @@ class DeskproFormSpec extends UnitSpec {
 
   "Creating a form with a valid post" should {
     "have no errors" in new Setup {
-      testForm.bind(simpleData).hasErrors shouldBe false
+      testForm.bind(simpleData).hasErrors mustBe false
     }
   }
 
   "Creating a form with an empty post" should {
     "have mandatory errors for all fields when no submitted data" in new Setup {
       val form = testForm.bind(empty)
-      form.hasErrors shouldBe true
+      form.hasErrors mustBe true
       form.errors map { e =>
         (e.key, e.message)
-      } shouldBe Seq(
+      } mustBe Seq(
         ("name", REQUIRED),
         ("email", REQUIRED),
         ("message", REQUIRED)
@@ -55,10 +55,10 @@ class DeskproFormSpec extends UnitSpec {
   "Creating a form where name" should {
     "have mandatory errors if missing" in new Setup {
       val form = testForm.bind(simpleData - "name")
-      form.hasErrors shouldBe true
+      form.hasErrors mustBe true
       form.errors map { e =>
         (e.key, e.message)
-      } shouldBe Seq(
+      } mustBe Seq(
         ("name", REQUIRED)
       )
     }
@@ -66,16 +66,16 @@ class DeskproFormSpec extends UnitSpec {
     "be ok when at the length limit" in new Setup {
       val data = simpleData ++ Map("name" -> "x"*70)
       val form = testForm.bind(data)
-      form.hasErrors shouldBe false
+      form.hasErrors mustBe false
     }
 
     "have a size error when too long" in new Setup {
       val data = simpleData ++ Map("name" -> "x"*71)
       val form = testForm.bind(data)
-      form.hasErrors shouldBe true
+      form.hasErrors mustBe true
       form.errors map { e =>
         (e.key, e.message)
-      } shouldBe Seq(
+      } mustBe Seq(
         ("name", ERR_PREFIX + "name_too_long")
       )
     }
@@ -83,10 +83,10 @@ class DeskproFormSpec extends UnitSpec {
     "have a character error when it has dodgy characters" in new Setup {
       val data = simpleData ++ Map("name" -> "<>%$")
       val form = testForm.bind(data)
-      form.hasErrors shouldBe true
+      form.hasErrors mustBe true
       form.errors map { e =>
         (e.key, e.message)
-      } shouldBe Seq(
+      } mustBe Seq(
         ("name", ERR_PREFIX + "name_invalid_characters")
       )
     }
@@ -95,10 +95,10 @@ class DeskproFormSpec extends UnitSpec {
   "Creating a form where email" should {
     "have mandatory errors if missing" in new Setup {
       val form = testForm.bind(simpleData - "email")
-      form.hasErrors shouldBe true
+      form.hasErrors mustBe true
       form.errors map { e =>
         (e.key, e.message)
-      } shouldBe Seq(
+      } mustBe Seq(
         ("email", REQUIRED)
       )
     }
@@ -106,25 +106,25 @@ class DeskproFormSpec extends UnitSpec {
       val part = "x"*49 + "."
       val email = "x"*51 + "@" + part + part + part + part + "com"
 
-      email.length shouldBe 255
+      email.length mustBe 255
 
       val data = simpleData ++ Map("email" -> email)
       val form = testForm.bind(data)
-      form.hasErrors shouldBe false
+      form.hasErrors mustBe false
     }
 
     "have a size error when too long" in new Setup {
       val part = "x"*49 + "."
       val email = "x"*52 + "@" + part + part + part + part + "com"
 
-      email.length shouldBe 256
+      email.length mustBe 256
 
       val data = simpleData ++ Map("email" -> email)
       val form = testForm.bind(data)
-      form.hasErrors shouldBe true
+      form.hasErrors mustBe true
       form.errors map { e =>
         (e.key, e.message)
-      } shouldBe Seq(
+      } mustBe Seq(
         ("email", ERR_PREFIX + "email_too_long")
       )
     }
@@ -138,10 +138,10 @@ class DeskproFormSpec extends UnitSpec {
         s"have a format error with ${m}" in new Setup {
           val data = simpleData ++ Map("email" -> email)
           val form = testForm.bind(data)
-          form.hasErrors shouldBe true
+          form.hasErrors mustBe true
           form.errors map { e =>
             (e.key, e.message)
-          } shouldBe Seq(
+          } mustBe Seq(
             ("email", ERR_PREFIX + "email_format")
           )
         }
@@ -151,10 +151,10 @@ class DeskproFormSpec extends UnitSpec {
   "Creating a form where messages" should {
     "have mandatory errors if missing" in new Setup {
       val form = testForm.bind(simpleData - "message")
-      form.hasErrors shouldBe true
+      form.hasErrors mustBe true
       form.errors map { e =>
         (e.key, e.message)
-      } shouldBe Seq(
+      } mustBe Seq(
         ("message", REQUIRED)
       )
     }
@@ -162,16 +162,16 @@ class DeskproFormSpec extends UnitSpec {
     "be ok when at the length limit" in new Setup {
       val data = simpleData ++ Map("message" -> "x"*1000)
       val form = testForm.bind(data)
-      form.hasErrors shouldBe false
+      form.hasErrors mustBe false
     }
 
     "have a size error when too long" in new Setup {
       val data = simpleData ++ Map("message" -> "x"*1001)
       val form = testForm.bind(data)
-      form.hasErrors shouldBe true
+      form.hasErrors mustBe true
       form.errors map { e =>
         (e.key, e.message)
-      } shouldBe Seq(
+      } mustBe Seq(
         ("message", ERR_PREFIX + "message_too_long")
       )
     }

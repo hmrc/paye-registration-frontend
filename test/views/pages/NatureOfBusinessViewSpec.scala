@@ -17,28 +17,27 @@
 package views.pages
 
 import forms.natureOfBuinessDetails.NatureOfBusinessForm
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.test.FakeRequest
-import testHelpers.PAYERegSpec
 import views.html.pages.natureOfBusiness
 
-class NatureOfBusinessViewSpec extends PAYERegSpec with I18nSupport {
+class NatureOfBusinessViewSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
 
   implicit val request = FakeRequest()
-  implicit val messagesApi : MessagesApi = injector.instanceOf[MessagesApi]
+  implicit lazy val messagesApi : MessagesApi = mockMessagesApi
 
   "The nature of business screen" should {
     lazy val view = natureOfBusiness(NatureOfBusinessForm.form)
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct title" in {
-      document.getElementById("pageHeading").text shouldBe messagesApi("pages.natureOfBusiness.description")
+      document.getElementById("pageHeading").text mustBe messagesApi("pages.natureOfBusiness.description")
     }
 
     "have the correct label text" in {
-      document.getElementsByClass("form-label").first().text() shouldBe messagesApi("pages.natureOfBusiness.textArea.label")
+      document.getElementsByClass("form-label").first().text() mustBe messagesApi("pages.natureOfBusiness.textArea.label")
     }
-
   }
 }

@@ -16,28 +16,21 @@
 
 package services
 
-import builders.AuthBuilder
-import connectors._
-import fixtures.{CoHoAPIFixture, KeystoreFixture}
+import helpers.PayeComponentSpec
 import models.external.{Ticket => ApiTTicket}
 import models.view.{Ticket => TicketForm}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import testHelpers.PAYERegSpec
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-
-import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
 
-class DeskproServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFixture with AuthBuilder {
+import scala.concurrent.Future
 
-  val mockdeskproConnector = mock[DeskproConnector]
-
+class DeskproServiceSpec extends PayeComponentSpec {
   trait Setup {
-    val service = new DeskproSrv {
-      override val authConnector: AuthConnector = mockAuthConnector
-      override val deskproConnector: DeskproConnect = mockdeskproConnector
+    val service = new DeskproService {
+      override val authConnector    = mockOldAuthConnector
+      override val deskproConnector = mockdeskproConnector
     }
   }
 
@@ -46,19 +39,20 @@ class DeskproServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFi
 
   val sessionId = "session-123456-654321"
   val mockSession = SessionId(sessionId)
-  implicit val hc = HeaderCarrier(sessionId = Some(mockSession))
+  override implicit val hc = HeaderCarrier(sessionId = Some(mockSession))
 
   "getAuthId" should {
     "return a successful AuthId" in new Setup {
-      mockAuthorisedUser(mockAuthId, mockAuthConnector)
+      when(mockOldAuthConnector.currentAuthority(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future(Some(AuthHelpers.createUserAuthority(mockAuthId))))
 
-      await(service.getAuthId) shouldBe mockAuthId
+      await(service.getAuthId) mustBe mockAuthId
     }
   }
 
   "getSessionId" should {
     "return a session Id" in new Setup {
-      service.getSessionId shouldBe sessionId
+      service.getSessionId mustBe sessionId
     }
   }
 
@@ -85,9 +79,10 @@ class DeskproServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFi
 
   "buildTicket" should {
     "return a new ticket" in new Setup {
-      mockAuthorisedUser(mockAuthId, mockAuthConnector)
+      when(mockOldAuthConnector.currentAuthority(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future(Some(AuthHelpers.createUserAuthority(mockAuthId))))
 
-      await(service.buildTicket(regId, providedInfo)) shouldBe ticket
+      await(service.buildTicket(regId, providedInfo)) mustBe ticket
     }
   }
 
@@ -96,13 +91,13 @@ class DeskproServiceSpec extends PAYERegSpec with KeystoreFixture with CoHoAPIFi
     val ticketResponse : Long = 123456789
 
     "return a ticket id fromt DeskPro" in new Setup {
-      mockAuthorisedUser(mockAuthId, mockAuthConnector)
+      when(mockOldAuthConnector.currentAuthority(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future(Some(AuthHelpers.createUserAuthority(mockAuthId))))
 
       when(mockdeskproConnector.submitTicket(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(ticketResponse))
 
-      await(service.submitTicket(regId, providedInfo)) shouldBe ticketResponse
+      await(service.submitTicket(regId, providedInfo)) mustBe ticketResponse
     }
   }
-
 }

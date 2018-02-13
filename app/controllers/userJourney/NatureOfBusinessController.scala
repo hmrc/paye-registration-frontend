@@ -16,63 +16,49 @@
 
 package controllers.userJourney
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
-import config.FrontendAuthConnector
-import connectors.{KeystoreConnect, KeystoreConnector, PAYERegistrationConnector}
+import connectors.KeystoreConnector
+import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
 import forms.natureOfBuinessDetails.NatureOfBusinessForm
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.Configuration
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.{NatureOfBusinessService, NatureOfBusinessSrv}
-import uk.gov.hmrc.play.frontend.auth.Actions
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.SessionProfile
+import services.{CompanyDetailsService, IncorporationInformationService, NatureOfBusinessService, S4LService}
+import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{natureOfBusiness => NatureOfBusinessPage}
 
 import scala.concurrent.Future
 
-@Singleton
-class NatureOfBusinessController @Inject()(val messagesApi: MessagesApi,
-                                           val natureOfBusinessService: NatureOfBusinessService,
-                                           val keystoreConnector: KeystoreConnector,
-                                           val payeRegistrationConnector: PAYERegistrationConnector) extends NatureOfBusinessCtrl {
-  val authConnector = FrontendAuthConnector
-}
+class NatureOfBusinessControllerImpl @Inject()(val messagesApi: MessagesApi,
+                                               val natureOfBusinessService: NatureOfBusinessService,
+                                               val keystoreConnector: KeystoreConnector,
+                                               val config: Configuration,
+                                               val s4LService: S4LService,
+                                               val companyDetailsService: CompanyDetailsService,
+                                               val incorpInfoService: IncorporationInformationService,
+                                               val authConnector: AuthConnector) extends NatureOfBusinessController with AuthRedirectUrls
 
-trait NatureOfBusinessCtrl extends FrontendController with Actions with I18nSupport with SessionProfile {
-
+trait NatureOfBusinessController extends PayeBaseController {
   val authConnector: AuthConnector
-  implicit val messagesApi: MessagesApi
-  val natureOfBusinessService: NatureOfBusinessSrv
-  val keystoreConnector: KeystoreConnect
+  val natureOfBusinessService: NatureOfBusinessService
+  val keystoreConnector: KeystoreConnector
 
-  val natureOfBusiness: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          natureOfBusinessService.getNatureOfBusiness(profile.registrationID) map {
-            case Some(model) => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form.fill(model)))
-            case None        => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form))
-          }
-        }
+  def natureOfBusiness: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    natureOfBusinessService.getNatureOfBusiness(profile.registrationID) map {
+      case Some(model) => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form.fill(model)))
+      case None        => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form))
+    }
   }
 
-  val submitNatureOfBusiness: Action[AnyContent] = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence).async {
-    implicit user =>
-      implicit request =>
-        withCurrentProfile { profile =>
-          NatureOfBusinessForm.form.bindFromRequest.fold(
-            errors => Future.successful(BadRequest(NatureOfBusinessPage(errors))),
-            success => {
-              natureOfBusinessService.saveNatureOfBusiness(success, profile.registrationID) map {
-                case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.DirectorDetailsController.directorDetails())
-                case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-              }
-            }
-          )
-        }
+  def submitNatureOfBusiness: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    NatureOfBusinessForm.form.bindFromRequest.fold(
+      errors  => Future.successful(BadRequest(NatureOfBusinessPage(errors))),
+      success => natureOfBusinessService.saveNatureOfBusiness(success, profile.registrationID) map {
+        case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.DirectorDetailsController.directorDetails())
+        case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+      }
+    )
   }
 }

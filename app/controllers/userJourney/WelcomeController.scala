@@ -16,30 +16,32 @@
 
 package controllers.userJourney
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-import auth.PAYERegime
-import config.FrontendAuthConnector
-import play.api.i18n.{I18nSupport, MessagesApi}
-import uk.gov.hmrc.play.frontend.auth.Actions
-import uk.gov.hmrc.play.frontend.controller.FrontendController
+import connectors.KeystoreConnector
+import controllers.{AuthRedirectUrls, PayeBaseController}
+import play.api.Configuration
+import play.api.i18n.MessagesApi
+import play.api.mvc.{Action, AnyContent}
+import services.{CompanyDetailsService, IncorporationInformationService, S4LService}
+import uk.gov.hmrc.auth.core.AuthConnector
 
-@Singleton
-class WelcomeController @Inject()(val messagesApi: MessagesApi) extends WelcomeCtrl {
-  val authConnector = FrontendAuthConnector
-}
+import scala.concurrent.Future
 
-trait WelcomeCtrl extends FrontendController with I18nSupport with Actions {
-  val show = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
-    implicit user =>
-      implicit request =>
-        Ok(views.html.pages.welcome())
+class WelcomeControllerImpl @Inject()(val messagesApi: MessagesApi,
+                                      val config: Configuration,
+                                      val s4LService: S4LService,
+                                      val companyDetailsService: CompanyDetailsService,
+                                      val incorpInfoService: IncorporationInformationService,
+                                      val keystoreConnector: KeystoreConnector,
+                                      val authConnector: AuthConnector) extends WelcomeController with AuthRedirectUrls
+
+trait WelcomeController extends PayeBaseController {
+  def show: Action[AnyContent] = isAuthorised { implicit request =>
+    Future.successful(Ok(views.html.pages.welcome()))
   }
 
-  val submit = AuthorisedFor(taxRegime = new PAYERegime, pageVisibility = GGConfidence) {
-    implicit user =>
-      implicit request =>
-        Redirect(controllers.userJourney.routes.EligibilityController.companyEligibility())
+  def submit: Action[AnyContent] = isAuthorised { implicit request =>
+    Future.successful(Redirect(controllers.userJourney.routes.EligibilityController.companyEligibility()))
   }
-
 }

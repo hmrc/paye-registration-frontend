@@ -16,48 +16,32 @@
 
 package controllers.test
 
-import builders.AuthBuilder
-import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.Address
-import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.http.Status
-import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import services.{CompanyDetailsService, PAYEContactService, PrepopulationService}
-import testHelpers.PAYERegSpec
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
 
-class TestAddressLookupControllerSpec extends PAYERegSpec {
+class TestAddressLookupControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val fakeRequest = FakeRequest("GET", "/")
-  val mockCompanyDetailsService = mock[CompanyDetailsService]
-  val mockPAYEContactService = mock[PAYEContactService]
-  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
-  val mockPrepopService = mock[PrepopulationService]
 
   class Setup {
-    val controller = new TestAddressLookupCtrl {
-      override val authConnector = mockAuthConnector
-      override val payeRegistrationConnector = mockPayeRegistrationConnector
-      override val companyDetailsService = mockCompanyDetailsService
-      override val payeContactService = mockPAYEContactService
-      override val keystoreConnector = mockKeystoreConnector
-      override val prepopService = mockPrepopService
+    val controller = new TestAddressLookupController{
+      override val redirectToLogin        = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign     = MockAuthRedirects.redirectToPostSign
 
-      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
-        f(CurrentProfile(
-          "12345",
-          CompanyRegistrationProfile("held", "txId"),
-          "ENG",
-          payeRegistrationSubmitted = false
-        ))
-      }
+      override val incorpInfoService      = mockIncorpInfoService
+      override val s4LService             = mockS4LService
+      override val messagesApi            = mockMessagesApi
+      override val authConnector          = mockAuthConnector
+      override val companyDetailsService  = mockCompanyDetailsService
+      override val payeContactService     = mockPAYEContactService
+      override val keystoreConnector      = mockKeystoreConnector
+      override val prepopService          = mockPrepopService
     }
   }
 
@@ -73,9 +57,11 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
   "calling the noLookup action for PPOB Address" should {
 
     "return 303 for an unauthorised user" in new Setup {
-      val result = controller.noLookupPPOBAddress(FakeRequest())
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).getOrElse("NO REDIRECT LOCATION!").contains("/gg/sign-in") shouldBe true
+      AuthHelpers.showUnauthorised(controller.noLookupPPOBAddress, fakeRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
+      }
     }
 
     "return 500 when the mocked address can't be submitted" in new Setup {
@@ -85,9 +71,9 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
       when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(address))
 
-      AuthBuilder.showWithAuthorisedUser(controller.noLookupPPOBAddress, mockAuthConnector) {
-        (response: Future[Result]) =>
-          status(response) shouldBe Status.INTERNAL_SERVER_ERROR
+      AuthHelpers.showAuthorisedWithCP(controller.noLookupPPOBAddress, Fixtures.validCurrentProfile, fakeRequest) {
+        response =>
+          status(response) mustBe INTERNAL_SERVER_ERROR
       }
     }
 
@@ -98,10 +84,10 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
       when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(address))
 
-      AuthBuilder.showWithAuthorisedUser(controller.noLookupPPOBAddress, mockAuthConnector) {
-        (response: Future[Result]) =>
-          status(response) shouldBe Status.SEE_OTHER
-          redirectLocation(response) shouldBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()}")
+      AuthHelpers.showAuthorisedWithCP(controller.noLookupPPOBAddress, Fixtures.validCurrentProfile, fakeRequest) {
+        response =>
+          status(response) mustBe SEE_OTHER
+          redirectLocation(response) mustBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()}")
       }
     }
   }
@@ -109,9 +95,11 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
   "calling the noLookup action for PAYE Correspondence Address" should {
 
     "return 303 for an unauthorised user" in new Setup {
-      val result = controller.noLookupCorrespondenceAddress(FakeRequest())
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).getOrElse("NO REDIRECT LOCATION!").contains("/gg/sign-in") shouldBe true
+      AuthHelpers.showUnauthorised(controller.noLookupCorrespondenceAddress, fakeRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
+      }
     }
 
     "return 500 when the mocked address can't be submitted" in new Setup {
@@ -120,24 +108,24 @@ class TestAddressLookupControllerSpec extends PAYERegSpec {
       when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(address))
 
-      AuthBuilder.showWithAuthorisedUser(controller.noLookupCorrespondenceAddress, mockAuthConnector) {
-        (response: Future[Result]) =>
-          status(response) shouldBe Status.INTERNAL_SERVER_ERROR
+      AuthHelpers.showAuthorisedWithCP(controller.noLookupCorrespondenceAddress, Fixtures.validCurrentProfile, fakeRequest) {
+        response =>
+          status(response) mustBe INTERNAL_SERVER_ERROR
       }
     }
 
     "return 303 when the mocked address is successfully submitted" in new Setup {
-      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Success))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(address))
 
-      AuthBuilder.showWithAuthorisedUser(controller.noLookupCorrespondenceAddress, mockAuthConnector) {
-        (response: Future[Result]) =>
-          status(response) shouldBe Status.SEE_OTHER
-          redirectLocation(response) shouldBe Some(s"${controllers.userJourney.routes.SummaryController.summary()}")
+      AuthHelpers.showAuthorisedWithCP(controller.noLookupCorrespondenceAddress, Fixtures.validCurrentProfile, fakeRequest) {
+        response =>
+          status(response) mustBe SEE_OTHER
+          redirectLocation(response) mustBe Some(s"${controllers.userJourney.routes.SummaryController.summary()}")
       }
     }
   }
-
 }

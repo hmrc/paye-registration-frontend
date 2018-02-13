@@ -16,25 +16,23 @@
 
 package connectors.test
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import config.WSHttp
 import models.external.{BusinessProfile, BusinessRegistrationRequest}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.{CorePost, HeaderCarrier}
-import uk.gov.hmrc.play.config.ServicesConfig
-
+import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 import scala.concurrent.Future
 
-@Singleton
-class TestBusinessRegConnector @Inject()() extends TestBusinessRegConnect with ServicesConfig {
-  val businessRegUrl  = baseUrl("business-registration")
-  val http : CorePost = WSHttp
+class TestBusinessRegConnectorImpl @Inject()(val http: WSHttp,
+                                             servicesConfig: ServicesConfig) extends TestBusinessRegConnector {
+  val businessRegUrl  = servicesConfig.baseUrl("business-registration")
 }
 
-trait TestBusinessRegConnect {
-
+trait TestBusinessRegConnector {
   val businessRegUrl: String
   val http: CorePost
 
@@ -44,11 +42,7 @@ trait TestBusinessRegConnect {
   }
 
   def updateCompletionCapacity(regId: String, completionCapacity: String)(implicit hc: HeaderCarrier): Future[String] = {
-    http.POST[JsValue, JsValue](s"$businessRegUrl/business-registration/test-only/update-cc/$regId", Json.parse(
-      s"""
-        |{
-        | "completionCapacity" : "$completionCapacity"
-        |}
-      """.stripMargin)) map(_.toString)
+    val json = Json.parse(s"""{"completionCapacity" : "$completionCapacity"}""".stripMargin)
+    http.POST[JsValue, JsValue](s"$businessRegUrl/business-registration/test-only/update-cc/$regId", json) map(_.toString)
   }
 }

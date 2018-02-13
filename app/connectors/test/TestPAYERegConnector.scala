@@ -16,32 +16,32 @@
 
 package connectors.test
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
+import common.Logging
 import config.WSHttp
 import connectors._
 import enums.DownstreamOutcome
 import models.api.{CompanyDetails => CompanyDetailsAPI, PAYEContact => PAYEContactAPI, PAYERegistration => PAYERegistrationAPI}
-import play.api.Logger
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.config.ServicesConfig
-
+import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 import scala.concurrent.Future
 
-@Singleton
-class TestPAYERegConnector @Inject()(val payeRegConnector: PAYERegistrationConnector) extends TestPAYERegConnect with ServicesConfig {
-  val payeRegUrl                   = baseUrl("paye-registration")
-  val http : CoreGet with CorePost = WSHttp
+class TestPAYERegConnectorImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
+                                         val http: WSHttp,
+                                         servicesConfig: ServicesConfig) extends TestPAYERegConnector {
+  val payeRegUrl = servicesConfig.baseUrl("paye-registration")
 }
 
-trait TestPAYERegConnect {
+trait TestPAYERegConnector extends Logging {
 
   val payeRegUrl: String
   val http: CoreGet with CorePost
-  val payeRegConnector: PAYERegistrationConnect
+  val payeRegConnector: PAYERegistrationConnector
 
   def addPAYERegistration(reg: PAYERegistrationAPI)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     http.POST[PAYERegistrationAPI, HttpResponse](s"$payeRegUrl/paye-registration/test-only/update-registration/${reg.registrationID}", reg) map {
@@ -73,7 +73,7 @@ trait TestPAYERegConnect {
       resp => DownstreamOutcome.Success
     } recover {
       case e: Exception =>
-        Logger.warn(s"[PAYERegistrationConnector] [testRegistrationTeardown] received error when clearing registration details - Error: ${e.getMessage}")
+        logger.warn(s"[PAYERegistrationConnector] [testRegistrationTeardown] received error when clearing registration details - Error: ${e.getMessage}")
         DownstreamOutcome.Failure
     }
   }
@@ -83,7 +83,7 @@ trait TestPAYERegConnect {
       resp => DownstreamOutcome.Success
     } recover {
       case e: Exception =>
-        Logger.warn(s"[PAYERegistrationConnector] [tearDownIndividualRegistration] received error when clearing registration details - Error: ${e.getMessage}")
+        logger.warn(s"[PAYERegistrationConnector] [tearDownIndividualRegistration] received error when clearing registration details - Error: ${e.getMessage}")
         DownstreamOutcome.Failure
     }
   }
@@ -93,7 +93,7 @@ trait TestPAYERegConnect {
       resp => DownstreamOutcome.Success
     } recover {
       case e: Exception =>
-        Logger.warn(s"[PAYERegistrationConnector] [updateStatus] received error when updating status details - Error: ${e.getMessage}")
+        logger.warn(s"[PAYERegistrationConnector] [updateStatus] received error when updating status details - Error: ${e.getMessage}")
         DownstreamOutcome.Failure
     }
   }

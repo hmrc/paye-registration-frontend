@@ -90,16 +90,16 @@ class EligiblityMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
-      mdtpCookieData("csrfToken") shouldNot be("")
-      mdtpCookieData("sessionId") shouldBe SessionId
-      mdtpCookieData("userId") shouldBe userId
+      mdtpCookieData("csrfToken") mustNot be("")
+      mdtpCookieData("sessionId") mustBe SessionId
+      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Is the company an offshore employer outside the European Economic Area that doesn't pay UK National Insurance?"
-      document.getElementById("isEligible-true").attr("checked") shouldBe ""
-      document.getElementById("isEligible-false").attr("checked") shouldBe "checked"
+      document.title() mustBe "Is the company an offshore employer outside the European Economic Area that doesn't pay UK National Insurance?"
+      document.getElementById("isEligible-true").attr("checked") mustBe ""
+      document.getElementById("isEligible-false").attr("checked") mustBe "checked"
     }
   }
 
@@ -134,16 +134,16 @@ class EligiblityMethodISpec extends IntegrationSpecBase
 
       val response = await(fResponse)
 
-      response.status shouldBe 200
+      response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
-      mdtpCookieData("csrfToken") shouldNot be("")
-      mdtpCookieData("sessionId") shouldBe SessionId
-      mdtpCookieData("userId") shouldBe userId
+      mdtpCookieData("csrfToken") mustNot be("")
+      mdtpCookieData("sessionId") mustBe SessionId
+      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Over the next 2 months, will the company pay out any non-cash incentive awards?"
-      document.getElementById("isEligible-true").attr("checked") shouldBe ""
-      document.getElementById("isEligible-false").attr("checked") shouldBe "checked"
+      document.title() mustBe "Over the next 2 months, will the company pay out any non-cash incentive awards?"
+      document.getElementById("isEligible-true").attr("checked") mustBe ""
+      document.getElementById("isEligible-false").attr("checked") mustBe "checked"
     }
   }
 }

@@ -16,7 +16,7 @@
 
 package services
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import connectors._
 import models.api.Director
@@ -27,14 +27,13 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
-@Singleton
-class IncorporationInformationService @Inject()(val keystoreConnector: KeystoreConnector,
-                                                val incorpInfoConnector: IncorporationInformationConnector) extends IncorporationInformationSrv
+class IncorporationInformationServiceImpl @Inject()(val keystoreConnector: KeystoreConnector,
+                                                    val incorpInfoConnector: IncorporationInformationConnector) extends IncorporationInformationService
 
-trait IncorporationInformationSrv {
+trait IncorporationInformationService {
 
-  val incorpInfoConnector : IncorporationInformationConnect
-  val keystoreConnector : KeystoreConnect
+  val incorpInfoConnector : IncorporationInformationConnector
+  val keystoreConnector : KeystoreConnector
 
   def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CoHoCompanyDetailsModel] = {
     incorpInfoConnector.getCoHoCompanyDetails(regId, txId) map {

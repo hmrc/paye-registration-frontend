@@ -84,14 +84,14 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
-      response.status shouldBe 200
+      response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Who should we contact about the company's PAYE?"
-      document.getElementById("name").data() shouldBe ""
-      document.getElementById("digitalContact.contactEmail").attr("value") shouldBe ""
-      document.getElementById("digitalContact.mobileNumber").attr("value") shouldBe ""
-      document.getElementById("digitalContact.phoneNumber").attr("value") shouldBe ""
+      document.title() mustBe "Who should we contact about the company's PAYE?"
+      document.getElementById("name").data() mustBe ""
+      document.getElementById("digitalContact.contactEmail").attr("value") mustBe ""
+      document.getElementById("digitalContact.mobileNumber").attr("value") mustBe ""
+      document.getElementById("digitalContact.phoneNumber").attr("value") mustBe ""
     }
 
     "Return an unpopulated page if PayeReg returns a NotFound response and corrupted data is returned from Business Registration" in {
@@ -125,14 +125,14 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
-      response.status shouldBe 200
+      response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Who should we contact about the company's PAYE?"
-      document.getElementById("name").attr("value") shouldBe ""
-      document.getElementById("digitalContact.contactEmail").attr("value") shouldBe ""
-      document.getElementById("digitalContact.mobileNumber").attr("value") shouldBe ""
-      document.getElementById("digitalContact.phoneNumber").attr("value") shouldBe ""
+      document.title() mustBe "Who should we contact about the company's PAYE?"
+      document.getElementById("name").attr("value") mustBe ""
+      document.getElementById("digitalContact.contactEmail").attr("value") mustBe ""
+      document.getElementById("digitalContact.mobileNumber").attr("value") mustBe ""
+      document.getElementById("digitalContact.phoneNumber").attr("value") mustBe ""
     }
 
     "Return a prepopulated page if PayeReg returns a NotFound response and data is returned from Business Registration" in {
@@ -166,14 +166,14 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
-      response.status shouldBe 200
+      response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Who should we contact about the company's PAYE?"
-      document.getElementById("name").attr("value") shouldBe "fName mName1 mName2 sName"
-      document.getElementById("digitalContact.contactEmail").attr("value") shouldBe "email1@email.co.uk"
-      document.getElementById("digitalContact.mobileNumber").attr("value") shouldBe "543210543210"
-      document.getElementById("digitalContact.phoneNumber").attr("value") shouldBe "012345012345"
+      document.title() mustBe "Who should we contact about the company's PAYE?"
+      document.getElementById("name").attr("value") mustBe "fName mName1 mName2 sName"
+      document.getElementById("digitalContact.contactEmail").attr("value") mustBe "email1@email.co.uk"
+      document.getElementById("digitalContact.mobileNumber").attr("value") mustBe "543210543210"
+      document.getElementById("digitalContact.phoneNumber").attr("value") mustBe "012345012345"
     }
   }
 
@@ -190,7 +190,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     val newMobileNumber = "07123456789"
 
     "upsert the contact details in Business Registration" in {
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId)
 
@@ -253,8 +253,8 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
         ))
 
       val response = await(fResponse)
-      response.status shouldBe 303
-      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/where-to-send-post")
+      response.status mustBe 303
+      response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/where-to-send-post")
 
       val reqPosts = findAll(postRequestedFor(urlMatching(s"/business-registration/$regId/contact-details")))
       val captor = reqPosts.get(0)
@@ -273,7 +273,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
            |}
        """.stripMargin
 
-      json shouldBe Json.parse(prepopJson)
+      json mustBe Json.parse(prepopJson)
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
       val captorPost = reqPostsAudit.get(0)
@@ -293,23 +293,23 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
         Some(newTelephoneNumber)
       )
 
-      (jsonAudit \ "auditSource").as[JsString].value shouldBe "paye-registration-frontend"
-      (jsonAudit \ "auditType").as[JsString].value shouldBe "payeContactDetailsAmendment"
-      (jsonAudit \ "detail" \ "externalUserId").as[JsString].value shouldBe "Ext-xxx"
-      (jsonAudit \ "detail" \ "authProviderId").as[JsString].value shouldBe "testAuthProviderId"
-      (jsonAudit \ "detail" \ "journeyId").as[JsString].value shouldBe regId
-      (jsonAudit \ "detail" \ "previousPAYEContactDetails").as[AuditPAYEContactDetails] shouldBe previousPAYEContactDetails
-      (jsonAudit \ "detail" \ "newPAYEContactDetails").as[AuditPAYEContactDetails] shouldBe newPAYEContactDetails
+      (jsonAudit \ "auditSource").as[JsString].value mustBe "paye-registration-frontend"
+      (jsonAudit \ "auditType").as[JsString].value mustBe "payeContactDetailsAmendment"
+      (jsonAudit \ "detail" \ "externalUserId").as[JsString].value mustBe "Ext-xxx"
+      (jsonAudit \ "detail" \ "authProviderId").as[JsString].value mustBe "testAuthProviderId"
+      (jsonAudit \ "detail" \ "journeyId").as[JsString].value mustBe regId
+      (jsonAudit \ "detail" \ "previousPAYEContactDetails").as[AuditPAYEContactDetails] mustBe previousPAYEContactDetails
+      (jsonAudit \ "detail" \ "newPAYEContactDetails").as[AuditPAYEContactDetails] mustBe newPAYEContactDetails
 
       val tags = (jsonAudit \ "tags").as[JsObject].value
-      tags("clientIP") shouldBe Json.toJson("-")
-      tags("path") shouldBe Json.toJson("/register-for-paye/who-should-we-contact")
-      tags("clientPort") shouldBe Json.toJson("-")
-      tags.contains("X-Session-ID") shouldBe true
-      tags.contains("X-Request-ID") shouldBe true
-      tags.contains("deviceID") shouldBe true
-      tags("Authorization") shouldBe Json.toJson("-")
-      tags("transactionName") shouldBe Json.toJson("payeContactDetailsAmendment")
+      tags("clientIP") mustBe Json.toJson("-")
+      tags("path") mustBe Json.toJson("/register-for-paye/who-should-we-contact")
+      tags("clientPort") mustBe Json.toJson("-")
+      tags.contains("X-Session-ID") mustBe true
+      tags.contains("X-Request-ID") mustBe true
+      tags.contains("deviceID") mustBe true
+      tags("Authorization") mustBe Json.toJson("-")
+      tags("transactionName") mustBe Json.toJson("payeContactDetailsAmendment")
     }
 
     "not upsert the contact details in Business Registration and not send audit event if nothing has changed" in {
@@ -337,7 +337,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
            |}
        """.stripMargin
 
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId)
 
@@ -362,14 +362,14 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
         ))
 
       val response = await(fResponse)
-      response.status shouldBe 303
-      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/where-to-send-post")
+      response.status mustBe 303
+      response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/where-to-send-post")
 
       val reqPosts = findAll(postRequestedFor(urlMatching(s"/business-registration/$regId/contact-details")))
-      reqPosts.size shouldBe 0
+      reqPosts.size mustBe 0
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      reqPostsAudit.size shouldBe 0
+      reqPostsAudit.size mustBe 0
     }
   }
 
@@ -416,18 +416,18 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
-      response.status shouldBe 200
+      response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Where should we send post about the company's PAYE?"
-      document.getElementById("chosenAddress-roaddress").attr("value") shouldBe "roAddress"
-      document.getElementById("ro-address-line-1").text shouldBe "1"
-      document.getElementById("ro-address-line-2").text shouldBe ", 2"
-      document.getElementById("ro-post-code").text shouldBe ", pc"
+      document.title() mustBe "Where should we send post about the company's PAYE?"
+      document.getElementById("chosenAddress-roaddress").attr("value") mustBe "roAddress"
+      document.getElementById("ro-address-line-1").text mustBe "1"
+      document.getElementById("ro-address-line-2").text mustBe ", 2"
+      document.getElementById("ro-post-code").text mustBe ", pc"
 
-      an[Exception] shouldBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
+      an[Exception] mustBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
 
-      document.getElementById("chosenAddress-other").attr("value") shouldBe "other"
+      document.getElementById("chosenAddress-other").attr("value") mustBe "other"
     }
 
     "not be prepopulated if a wrong address is returned from Business Registration" in {
@@ -466,10 +466,10 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
-      response.status shouldBe 200
+      response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      an[Exception] shouldBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
+      an[Exception] mustBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
     }
 
     "be prepopulated if data is returned from Business Registration" in {
@@ -508,31 +508,31 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
-      response.status shouldBe 200
+      response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() shouldBe "Where should we send post about the company's PAYE?"
-      document.getElementById("chosenAddress-roaddress").attr("value") shouldBe "roAddress"
-      document.getElementById("chosenAddress-roaddress").attr("name") shouldBe "chosenAddress"
-      document.getElementById("ro-address-line-1").text shouldBe "1"
-      document.getElementById("ro-address-line-2").text shouldBe ", 2"
-      document.getElementById("ro-post-code").text shouldBe ", pc"
+      document.title() mustBe "Where should we send post about the company's PAYE?"
+      document.getElementById("chosenAddress-roaddress").attr("value") mustBe "roAddress"
+      document.getElementById("chosenAddress-roaddress").attr("name") mustBe "chosenAddress"
+      document.getElementById("ro-address-line-1").text mustBe "1"
+      document.getElementById("ro-address-line-2").text mustBe ", 2"
+      document.getElementById("ro-post-code").text mustBe ", pc"
 
-      document.getElementById("chosenAddress-prepopaddress0").attr("value") shouldBe "prepopAddress0"
-      document.getElementById("chosenAddress-prepopaddress0").attr("name") shouldBe "chosenAddress"
-      document.getElementById("prepopaddress0-address-line-1").text shouldBe "prepopLine1"
-      document.getElementById("prepopaddress0-address-line-2").text shouldBe ", prepopLine2"
-      document.getElementById("prepopaddress0-post-code").text shouldBe ", AB9 8ZZ"
+      document.getElementById("chosenAddress-prepopaddress0").attr("value") mustBe "prepopAddress0"
+      document.getElementById("chosenAddress-prepopaddress0").attr("name") mustBe "chosenAddress"
+      document.getElementById("prepopaddress0-address-line-1").text mustBe "prepopLine1"
+      document.getElementById("prepopaddress0-address-line-2").text mustBe ", prepopLine2"
+      document.getElementById("prepopaddress0-post-code").text mustBe ", AB9 8ZZ"
 
-      document.getElementById("chosenAddress-prepopaddress1").attr("value") shouldBe "prepopAddress1"
-      document.getElementById("chosenAddress-prepopaddress1").attr("name") shouldBe "chosenAddress"
-      document.getElementById("prepopaddress1-address-line-1").text shouldBe "prepopLine11"
-      document.getElementById("prepopaddress1-address-line-2").text shouldBe ", prepopLine22"
-      document.getElementById("prepopaddress1-address-line-3").text shouldBe ", prepopLine33"
-      document.getElementById("prepopaddress1-country").text shouldBe ", prepopCountry"
+      document.getElementById("chosenAddress-prepopaddress1").attr("value") mustBe "prepopAddress1"
+      document.getElementById("chosenAddress-prepopaddress1").attr("name") mustBe "chosenAddress"
+      document.getElementById("prepopaddress1-address-line-1").text mustBe "prepopLine11"
+      document.getElementById("prepopaddress1-address-line-2").text mustBe ", prepopLine22"
+      document.getElementById("prepopaddress1-address-line-3").text mustBe ", prepopLine33"
+      document.getElementById("prepopaddress1-country").text mustBe ", prepopCountry"
 
-      document.getElementById("chosenAddress-other").attr("value") shouldBe "other"
-      document.getElementById("chosenAddress-other").attr("name") shouldBe "chosenAddress"
+      document.getElementById("chosenAddress-other").attr("value") mustBe "other"
+      document.getElementById("chosenAddress-other").attr("name") mustBe "chosenAddress"
     }
   }
 
@@ -566,7 +566,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
          |}""".stripMargin
 
     "upsert PAYE Contact Details in PAYE Registration with a prepop address" in {
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId)
 
@@ -588,14 +588,14 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
         ))
 
       val response = await(fResponse)
-      response.status shouldBe 303
-      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/check-and-confirm-your-answers")
+      response.status mustBe 303
+      response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/check-and-confirm-your-answers")
 
       val reqPosts = findAll(patchRequestedFor(urlMatching(s"/paye-registration/$regId/contact-correspond-paye")))
       val captor = reqPosts.get(0)
       val json = Json.parse(captor.getBodyAsString)
 
-      json shouldBe Json.parse(updatedPayeDoc)
+      json mustBe Json.parse(updatedPayeDoc)
     }
 
     "return an error page when fail saving in PAYE Registration with a prepop address" in {
@@ -625,7 +625,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
         ))
 
       val response = await(fResponse)
-      response.status shouldBe 500
+      response.status mustBe 500
     }
 
     "send a correct Audit Event when roAddress has been chosen" in {
@@ -644,7 +644,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
 
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId)
 
@@ -665,19 +665,19 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
         ))
 
       val response = await(fResponse)
-      response.status shouldBe 303
-      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/check-and-confirm-your-answers")
+      response.status mustBe 303
+      response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/check-and-confirm-your-answers")
 
       val reqPosts = findAll(postRequestedFor(urlMatching(s"/write/audit")))
       val captorPost = reqPosts.get(0)
       val json = Json.parse(captorPost.getBodyAsString)
 
-      (json \ "auditSource").as[JsString].value shouldBe "paye-registration-frontend"
-      (json \ "auditType").as[JsString].value shouldBe "correspondenceAddress"
-      (json \ "detail" \ "externalUserId").as[JsString].value shouldBe "Ext-xxx"
-      (json \ "detail" \ "authProviderId").as[JsString].value shouldBe "testAuthProviderId"
-      (json \ "detail" \ "journeyId").as[JsString].value shouldBe regId
-      (json \ "detail" \ "addressUsed").as[JsString].value shouldBe "RegisteredOffice"
+      (json \ "auditSource").as[JsString].value mustBe "paye-registration-frontend"
+      (json \ "auditType").as[JsString].value mustBe "correspondenceAddress"
+      (json \ "detail" \ "externalUserId").as[JsString].value mustBe "Ext-xxx"
+      (json \ "detail" \ "authProviderId").as[JsString].value mustBe "testAuthProviderId"
+      (json \ "detail" \ "journeyId").as[JsString].value mustBe regId
+      (json \ "detail" \ "addressUsed").as[JsString].value mustBe "RegisteredOffice"
 
 
     }
@@ -698,7 +698,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
 
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
       stubKeystoreMetadata(SessionId, regId)
 
@@ -719,30 +719,30 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
         ))
 
       val response = await(fResponse)
-      response.status shouldBe 303
-      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/check-and-confirm-your-answers")
+      response.status mustBe 303
+      response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/check-and-confirm-your-answers")
 
       val reqPosts = findAll(postRequestedFor(urlMatching(s"/write/audit")))
       val captorPost = reqPosts.get(0)
       val json = Json.parse(captorPost.getBodyAsString)
       println("json")
-      (json \ "auditSource").as[JsString].value shouldBe "paye-registration-frontend"
-      (json \ "auditType").as[JsString].value shouldBe "correspondenceAddress"
-      (json \ "detail" \ "externalUserId").as[JsString].value shouldBe "Ext-xxx"
-      (json \ "detail" \ "authProviderId").as[JsString].value shouldBe "testAuthProviderId"
-      (json \ "detail" \ "journeyId").as[JsString].value shouldBe regId
-      (json \ "detail" \ "addressUsed").as[JsString].value shouldBe "PrincipalPlaceOfBusiness"
+      (json \ "auditSource").as[JsString].value mustBe "paye-registration-frontend"
+      (json \ "auditType").as[JsString].value mustBe "correspondenceAddress"
+      (json \ "detail" \ "externalUserId").as[JsString].value mustBe "Ext-xxx"
+      (json \ "detail" \ "authProviderId").as[JsString].value mustBe "testAuthProviderId"
+      (json \ "detail" \ "journeyId").as[JsString].value mustBe regId
+      (json \ "detail" \ "addressUsed").as[JsString].value mustBe "PrincipalPlaceOfBusiness"
 
       val tags = (json \ "tags").as[JsObject].value
       println(tags)
-      tags("clientIP") shouldBe Json.toJson("-")
-      tags("path") shouldBe Json.toJson("/register-for-paye/where-to-send-post")
-      tags("clientPort") shouldBe Json.toJson("-")
-      tags.contains("X-Session-ID") shouldBe true
-      tags.contains("X-Request-ID") shouldBe true
-      tags.contains("deviceID") shouldBe true
-      tags("Authorization") shouldBe Json.toJson("-")
-      tags("transactionName") shouldBe Json.toJson("correspondenceAddress")
+      tags("clientIP") mustBe Json.toJson("-")
+      tags("path") mustBe Json.toJson("/register-for-paye/where-to-send-post")
+      tags("clientPort") mustBe Json.toJson("-")
+      tags.contains("X-Session-ID") mustBe true
+      tags.contains("X-Request-ID") mustBe true
+      tags.contains("deviceID") mustBe true
+      tags("Authorization") mustBe Json.toJson("-")
+      tags("transactionName") mustBe Json.toJson("correspondenceAddress")
     }
   }
 
@@ -814,14 +814,14 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
         .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
-      response.status shouldBe 303
-      response.header(HeaderNames.LOCATION) shouldBe Some("/register-for-paye/check-and-confirm-your-answers")
+      response.status mustBe 303
+      response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/check-and-confirm-your-answers")
 
       val reqPosts = findAll(postRequestedFor(urlMatching(s"/business-registration/$regId/addresses")))
       val captor = reqPosts.get(0)
       val json = Json.parse(captor.getBodyAsString)
 
-      json shouldBe Json.parse(newAddress2BusReg)
+      json mustBe Json.parse(newAddress2BusReg)
     }
   }
 }

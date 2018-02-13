@@ -25,7 +25,7 @@ import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.view.CompletionCapacity
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import services.CompletionCapacityService
+import services.CompletionCapacityServiceImpl
 import uk.gov.hmrc.http.HeaderCarrier
 
 class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStub {
@@ -65,10 +65,10 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
         )
       )
 
-      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
+      val tstCap = new CompletionCapacityServiceImpl(payeRegistrationConnector, busRegConnector)
       val res = await(tstCap.getCompletionCapacity(regID))
 
-      res shouldBe Some(CompletionCapacity(UserCapacity.director, ""))
+      res mustBe Some(CompletionCapacity(UserCapacity.director, ""))
     }
 
     "return a completion capacity from PR if the PR document contains a CC but is not director, secretary or agent" in {
@@ -80,10 +80,10 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
         )
       )
 
-      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
+      val tstCap = new CompletionCapacityServiceImpl(payeRegistrationConnector, busRegConnector)
       val res = await(tstCap.getCompletionCapacity(regID))
 
-      res shouldBe Some(CompletionCapacity(UserCapacity.other, "friend"))
+      res mustBe Some(CompletionCapacity(UserCapacity.other, "friend"))
     }
 
     "return a completion capacity from BR if one is found in BR but NOT in PR" in {
@@ -112,10 +112,10 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
 
       stubPatch(s"/paye-registration/$regID/capacity", 200, "\"director\"")
 
-      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
+      val tstCap = new CompletionCapacityServiceImpl(payeRegistrationConnector, busRegConnector)
       val res = await(tstCap.getCompletionCapacity(regID))
 
-      res shouldBe Some(CompletionCapacity(UserCapacity.director, ""))
+      res mustBe Some(CompletionCapacity(UserCapacity.director, ""))
     }
 
     "return a completion capacity from BR if one is found in BR but NOT in PR and it isn't director, secretary or agent" in {
@@ -143,10 +143,10 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
 
       stubPatch(s"/paye-registration/$regID/capacity", 200, "\"aunt\"")
 
-      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
+      val tstCap = new CompletionCapacityServiceImpl(payeRegistrationConnector, busRegConnector)
       val res = await(tstCap.getCompletionCapacity(regID))
 
-      res shouldBe Some(CompletionCapacity(UserCapacity.other, "aunt"))
+      res mustBe Some(CompletionCapacity(UserCapacity.other, "aunt"))
     }
 
     "return none if no CC is found in either PR or BR (BR 404)" in {
@@ -164,10 +164,10 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
         )
       )
 
-      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
+      val tstCap = new CompletionCapacityServiceImpl(payeRegistrationConnector, busRegConnector)
       val res = await(tstCap.getCompletionCapacity(regID))
 
-      res shouldBe None
+      res mustBe None
     }
 
     "return none if no CC is found in either PR or BR (BR 200 no CC in document)" in {
@@ -192,10 +192,10 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
         )
       )
 
-      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
+      val tstCap = new CompletionCapacityServiceImpl(payeRegistrationConnector, busRegConnector)
       val res = await(tstCap.getCompletionCapacity(regID))
 
-      res shouldBe None
+      res mustBe None
     }
   }
 }

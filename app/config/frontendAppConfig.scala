@@ -21,9 +21,9 @@ import java.util.Base64
 
 import models.Address
 import models.api.Director
-import models.external.{Officer, OfficerList}
+import models.external.OfficerList
 import play.api.Play.{configuration, current}
-import play.api.libs.json.{JsObject, Json, Reads}
+import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.play.config.ServicesConfig
 
 trait AppConfig {
@@ -38,7 +38,6 @@ trait AppConfig {
 }
 
 object FrontendAppConfig extends AppConfig with ServicesConfig {
-
   private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
   val contactFormServiceIdentifier = "SCRS"
@@ -50,7 +49,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   override lazy val reportAProblemPartialUrl  = s"/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   override lazy val reportAProblemNonJSUrl    = s"/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
 
-  override val timeoutInSeconds: String = loadConfig("timeoutInSeconds")
+  override lazy val timeoutInSeconds: String = loadConfig("timeoutInSeconds")
 
   private def whiteListConfig(key : String) : Seq[String] = {
     Some(new String(Base64.getDecoder
@@ -79,6 +78,6 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   lazy val defaultSeqDirector = loadJsonConfigBase64[Seq[Director]]("defaultSeqDirector")(Director.seqReads)
   lazy val defaultCTStatus    = loadStringConfigBase64("defaultCTStatus")
   lazy val defaultOfficerList = loadJsonConfigBase64[OfficerList]("defaultOfficerList")(OfficerList.formatModel)
-  lazy val uriWhiteList     = configuration.getStringSeq("csrfexceptions.whitelist").getOrElse(Seq.empty).toSet
-  lazy val csrfBypassValue  = loadStringConfigBase64("Csrf-Bypass-value")
+  lazy val uriWhiteList       = configuration.getStringSeq("csrfexceptions.whitelist").getOrElse(Seq.empty).toSet
+  lazy val csrfBypassValue    = loadStringConfigBase64("Csrf-Bypass-value")
 }

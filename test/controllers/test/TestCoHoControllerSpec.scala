@@ -16,44 +16,49 @@
 
 package controllers.test
 
-import builders.AuthBuilder
-import connectors.test.TestIncorpInfoConnect
+import helpers.auth.AuthHelpers
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.BusinessProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{BAD_REQUEST, OK}
-import services.IncorporationInformationSrv
-import testHelpers.PAYERegSpec
-
-import scala.concurrent.Future
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-class TestCoHoControllerSpec extends PAYERegSpec {
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-  val mockCoHoAPIService = mock[IncorporationInformationSrv]
-  val mockTestAPIConnector = mock[TestIncorpInfoConnect]
+class TestCoHoControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val testHttpResponse = new HttpResponse {
     override def status = OK
   }
 
-  class Setup {
-    val controller = new TestCoHoCtrl {
-      override val testIncorpInfoConnector = mockTestAPIConnector
-      override val keystoreConnector = mockKeystoreConnector
-      override val businessRegConnector = mockBusinessRegistrationConnector
-      override val coHoAPIService = mockCoHoAPIService
-      override val messagesApi = mockMessages
-      override val authConnector = mockAuthConnector
+  class Setup extends CodeMocks with AuthHelpers {
+    override val authConnector = mockAuthConnector
+    override val keystoreConnector = mockKeystoreConnector
+
+
+    val controller = new TestCoHoController {
+      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
+
+      override val incorpInfoService       = mockIncorpInfoService
+      override val companyDetailsService   = mockCompanyDetailsService
+      override val s4LService              = mockS4LService
+      override val testIncorpInfoConnector = mockTestIncorpInfoConnector
+      override val keystoreConnector       = mockKeystoreConnector
+      override val businessRegConnector    = mockBusinessRegistrationConnector
+      override val coHoAPIService          = mockIncorpInfoService
+      override val messagesApi             = mockMessagesApi
+      override val authConnector           = mockAuthConnector
     }
   }
 
   "coHoCompanyDetailsSetup" should {
     "return an OK" when {
       "the company details page has been rendered" in new Setup {
-        AuthBuilder.showWithAuthorisedUser(controller.coHoCompanyDetailsSetup, mockAuthConnector) { result =>
-          status(result) shouldBe OK
+        showAuthorised(controller.coHoCompanyDetailsSetup, FakeRequest()) { result =>
+          status(result) mustBe OK
         }
       }
     }
@@ -76,16 +81,15 @@ class TestCoHoControllerSpec extends PAYERegSpec {
           "descriptions[4]" -> ""
         )
         mockFetchCurrentProfile()
-        mockBusinessRegFetch(
-          BusinessProfile(registrationID = "1",
-            language = "EN")
-        )
-        when(mockTestAPIConnector.setupCoHoCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+
+        mockBusinessRegFetch(Future(BusinessProfile(registrationID = "1", language = "EN")))
+
+        when(mockTestIncorpInfoConnector.setupCoHoCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testHttpResponse))
 
-        AuthBuilder.submitWithAuthorisedUser(controller.submitCoHoCompanyDetailsSetup, mockAuthConnector, request) {
+        submitAuthorised(controller.submitCoHoCompanyDetailsSetup, request) {
           result =>
-            status(result) shouldBe OK
+            status(result) mustBe OK
         }
       }
     }
@@ -93,10 +97,12 @@ class TestCoHoControllerSpec extends PAYERegSpec {
     "return a BAD_REQUEST" when {
       "the form values are invalid" in new Setup {
         val request = FakeRequest().withFormUrlEncodedBody("invalidKey" -> "invalidValue")
+
         mockFetchCurrentProfile()
-        AuthBuilder.submitWithAuthorisedUser(controller.submitCoHoCompanyDetailsSetup, mockAuthConnector, request) {
+
+        submitAuthorised(controller.submitCoHoCompanyDetailsSetup, request) {
           result =>
-            status(result) shouldBe BAD_REQUEST
+            status(result) mustBe BAD_REQUEST
         }
       }
     }
@@ -105,11 +111,13 @@ class TestCoHoControllerSpec extends PAYERegSpec {
   "coHoCompanyDetailsTearDown" should {
     "return an OK" when {
       "the company details have been torn down" in new Setup {
-        when(mockTestAPIConnector.teardownIndividualCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        mockBusinessRegFetch(Future(BusinessProfile(registrationID = "1", language = "EN")))
+
+        when(mockTestIncorpInfoConnector.teardownIndividualCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testHttpResponse))
 
-        AuthBuilder.showWithAuthorisedUser(controller.coHoCompanyDetailsTearDown, mockAuthConnector) { result =>
-          status(result) shouldBe OK
+        showAuthorised(controller.coHoCompanyDetailsTearDown, FakeRequest()) { result =>
+          status(result) mustBe OK
         }
       }
     }

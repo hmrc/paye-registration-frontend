@@ -16,11 +16,11 @@
 
 package forms.test
 
+import helpers.PayeComponentSpec
 import models.test.CoHoCompanyDetailsFormModel
 import play.api.data.FormError
-import uk.gov.hmrc.play.test.UnitSpec
 
-class TestCoHoCompanyDetailsFormSpec extends UnitSpec {
+class TestCoHoCompanyDetailsFormSpec extends PayeComponentSpec {
   val testForm = TestCoHoCompanyDetailsForm.form
 
   "Binding TestCoHoCompanyDetailsForm to a model" when {
@@ -45,12 +45,12 @@ class TestCoHoCompanyDetailsFormSpec extends UnitSpec {
           errors => errors,
           success => success
         )
-        boundModel shouldBe model
+        boundModel mustBe model
       }
 
       "Unbind successfully" in {
         val form = testForm.fill(model)
-        form.data shouldBe Map(
+        form.data mustBe Map(
           "companyName" -> "TEST LTD",
           "sicCodes[0]" -> "166",
           "sicCodes[1]" -> "84",
@@ -72,8 +72,8 @@ class TestCoHoCompanyDetailsFormSpec extends UnitSpec {
       val boundForm = testForm.bind(data)
       val nameError = FormError("companyName", "error.required")
 
-      boundForm.errors shouldBe Seq(nameError)
-      boundForm.data shouldBe data
+      boundForm.errors mustBe Seq(nameError)
+      boundForm.data mustBe data
     }
   }
 }
