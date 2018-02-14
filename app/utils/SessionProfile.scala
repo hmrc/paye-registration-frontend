@@ -19,13 +19,14 @@ package utils
 import common.exceptions.InternalExceptions
 import connectors.KeystoreConnector
 import enums.CacheKeys
-import models.external.CurrentProfile
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
+import scala.util.Try
 
 trait SessionProfile extends InternalExceptions {
   val keystoreConnector: KeystoreConnector
@@ -33,10 +34,12 @@ trait SessionProfile extends InternalExceptions {
   def withCurrentProfile(f: => CurrentProfile => Future[Result], checkSubmissionStatus: Boolean = true)(implicit request: Request[_],  hc: HeaderCarrier): Future[Result] = {
     keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString) flatMap {
       case Some(currentProfile) =>
-        if(checkSubmissionStatus && currentProfile.payeRegistrationSubmitted) {
-          Future.successful(Redirect(controllers.userJourney.routes.DashboardController.dashboard()))
-        } else {
-          f(currentProfile)
+        currentProfile match {
+          case CurrentProfile(_, CompanyRegistrationProfile(_, _, Some(a)), _, _) if Try(a.toInt).getOrElse(6) >= 6 =>
+            Future.successful(Redirect(controllers.userJourney.routes.SignInOutController.postSignIn()))
+          case CurrentProfile(_, _, _, true) if checkSubmissionStatus =>
+            Future.successful(Redirect(controllers.userJourney.routes.DashboardController.dashboard()))
+          case _ => f(currentProfile)
         }
       case None => Future.successful(Redirect(controllers.userJourney.routes.PayeStartController.startPaye()))
     }

@@ -52,7 +52,8 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val fakeRequest = FakeRequest()
 
-  def validCurrentProfile(status: String) = CurrentProfile("testRegId", CompanyRegistrationProfile(status, "txId"), "en", false)
+  def validCurrentProfile(status: String, ackRefStatus : Option[String] = None) =
+    CurrentProfile("testRegId", CompanyRegistrationProfile(status, "txId", ackRefStatus), "en", false)
 
   "Calling the startPaye action" should {
 
@@ -108,6 +109,20 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       }
     }
 
+    "redirect to the start page for an authorised user with valid details, with PAYE Footprint correctly asserted, with CT accepted" in new Setup {
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validCurrentProfile("held", Some("04"))))
+
+      when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future(DownstreamOutcome.Success))
+
+      AuthHelpers.showAuthorisedOrg(controller.startPaye, fakeRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/register-for-paye/register-as-employer")
+      }
+    }
+
     "redirect to the CT start page for a user with no CT Footprint found" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new NotFoundException("404")))
@@ -127,6 +142,17 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         result =>
           status(result) mustBe Status.SEE_OTHER
           redirectLocation(result) mustBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/register")
+      }
+    }
+
+    "redirect the user to post sign in if their CT is rejected" in new Setup {
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validCurrentProfile("submitted", Some("06"))))
+
+      AuthHelpers.showAuthorisedOrg(controller.startPaye, fakeRequest) {
+        result =>
+          status(result) mustBe Status.SEE_OTHER
+          redirectLocation(result) mustBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/post-sign-in")
       }
     }
   }

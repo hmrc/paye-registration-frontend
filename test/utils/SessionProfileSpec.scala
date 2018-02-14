@@ -37,7 +37,8 @@ class SessionProfileSpec extends PayeComponentSpec {
   def testFunc : Future[Result] = Future.successful(Ok)
   implicit val request = FakeRequest()
 
-  def validProfile(regSubmitted: Boolean) = CurrentProfile("regId", CompanyRegistrationProfile("held", "txId"), "", regSubmitted)
+  def validProfile(regSubmitted: Boolean, ackRefStatus : Option[String] = None)
+    = CurrentProfile("regId", CompanyRegistrationProfile("held", "txId", ackRefStatus), "", regSubmitted)
 
   "calling withCurrentProfile" should {
     "carry out the passed function" when {
@@ -49,12 +50,31 @@ class SessionProfileSpec extends PayeComponentSpec {
         status(result) mustBe OK
       }
 
+      "payeRegistrationSubmitted is 'false' and ct is accepted" in new Setup {
+
+        mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile(false, Some("04"))))
+
+        val result = testSession.withCurrentProfile { _ => testFunc }
+        status(result) mustBe OK
+      }
+
       "payeRegistrationSubmitted is 'true' and withCurrentProfile is called specifying no check of submission status" in new Setup {
 
         mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile(true)))
 
         val result = testSession.withCurrentProfile ({ _ => testFunc }, checkSubmissionStatus = false)
         status(result) mustBe OK
+      }
+    }
+
+    "redirect to post sign in" when {
+      "ct is rejected in current profile" in new Setup {
+
+        mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile(true, Some("06"))))
+
+        val result = testSession.withCurrentProfile { _ => testFunc }
+        status(result) mustBe SEE_OTHER
+        redirectLocation(result) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
       }
     }
 

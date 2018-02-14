@@ -21,7 +21,7 @@ import javax.inject.Inject
 import connectors._
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.{CacheKeys, DownstreamOutcome, RegistrationDeletion}
-import models.external.CurrentProfile
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import play.api.{Configuration, Environment}
@@ -30,6 +30,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 
 import scala.concurrent.Future
+import scala.util.Try
 
 class PayeStartControllerImpl @Inject()(val currentProfileService: CurrentProfileService,
                                         val payeRegistrationService: PAYERegistrationService,
@@ -86,7 +87,10 @@ trait PayeStartController extends PayeBaseController {
 
   private def checkAndStoreCurrentProfile(f: => CurrentProfile => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
     currentProfileService.fetchAndStoreCurrentProfile flatMap {
-      case CurrentProfile(_, compRegProfile, _, _) if compRegProfile.status equals "draft" => Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/register"))
+      case CurrentProfile(_, CompanyRegistrationProfile(_, _, Some(a)), _, _) if Try(a.toInt).getOrElse(6) >= 6 =>
+        Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/post-sign-in"))
+      case CurrentProfile(_, compRegProfile, _, _) if compRegProfile.status equals "draft" =>
+        Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/register"))
       case currentProfile => f(currentProfile)
     } recover {
       case ex: NotFoundException => Redirect(s"$compRegFEURL$compRegFEURI/register")
