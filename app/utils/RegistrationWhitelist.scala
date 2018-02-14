@@ -40,7 +40,8 @@ trait RegistrationWhitelist {
     )
   ))
   implicit def getDefaultSeqDirector(regId: String): Seq[Director] = applicationConfig.defaultSeqDirector
-  implicit def getDefaultCompanyProfile(regId: String): CompanyRegistrationProfile = CompanyRegistrationProfile(applicationConfig.defaultCTStatus, s"fakeTxId-$regId")
+  implicit def getDefaultCompanyProfile(regId: String): CompanyRegistrationProfile =
+    CompanyRegistrationProfile(applicationConfig.defaultCTStatus, s"fakeTxId-$regId", None)
   implicit def getDefaultCoHoCompanyDetails(regId: String): IncorpInfoResponse = IncorpInfoSuccessResponse(
     CoHoCompanyDetailsModel(
       applicationConfig.defaultCompanyName,

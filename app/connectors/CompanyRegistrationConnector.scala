@@ -55,9 +55,11 @@ trait CompanyRegistrationConnector {
 
     http.GET[JsObject](s"$url/$regId/corporation-tax-registration") map { response =>
       companyRegTimer.stop()
-      val status = (response \ "status").as[String]
-      val txId   = (response \ "confirmationReferences" \ "transaction-id").as[String]
-      CompanyRegistrationProfile(status, txId)
+      val status    = (response \ "status").as[String]
+      val txId      = (response \ "confirmationReferences"    \ "transaction-id").as[String]
+      val ackStatus = (response \ "acknowledgementReferences" \ "status").asOpt[String]
+
+      CompanyRegistrationProfile(status, txId, ackStatus)
     } recover {
       case badRequestErr: BadRequestException =>
         companyRegTimer.stop()

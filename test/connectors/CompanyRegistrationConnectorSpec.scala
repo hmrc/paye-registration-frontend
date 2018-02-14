@@ -46,6 +46,8 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
 
   val status = "submitted"
   val transactionId = "submitted"
+  val ackRefStatus = "04"
+  val ackRefStatusOpt = Some(ackRefStatus)
 
   val profileJson =
     Json.parse(
@@ -56,6 +58,9 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
         |    "confirmationReferences" : {
         |       "acknowledgement-reference" : "BRCT-0123456789",
         |       "transaction-id" : "$transactionId"
+        |    },
+        |    "acknowledgementReferences" : {
+        |       "status" : "$ackRefStatus"
         |    }
         |}
       """.stripMargin).as[JsObject]
@@ -75,7 +80,7 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
         .thenReturn(Future(profileJson))
 
       val result = await(testConnector.getCompanyRegistrationDetails("testRegId"))
-      result mustBe CompanyRegistrationProfile(status, transactionId)
+      result mustBe CompanyRegistrationProfile(status, transactionId, ackRefStatusOpt)
     }
 
     "throw a bad request exception" in new Setup(false) {
@@ -98,7 +103,7 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
           .thenReturn(Future(profileJson))
 
         val result = await(testConnector.getCompanyRegistrationDetails("testRegId"))
-        result mustBe CompanyRegistrationProfile(status, transactionId)
+        result mustBe CompanyRegistrationProfile(status, transactionId, ackRefStatusOpt)
       }
 
       "throwing a bad request exception" in new Setup(false) {
