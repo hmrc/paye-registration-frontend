@@ -44,10 +44,10 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   override lazy val contactFrontendPartialBaseUrl = baseUrl("contact-frontend")
 
-  override lazy val analyticsToken            = loadConfig(s"google-analytics.token")
-  override lazy val analyticsHost             = loadConfig(s"google-analytics.host")
-  override lazy val reportAProblemPartialUrl  = s"/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
-  override lazy val reportAProblemNonJSUrl    = s"/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+  override lazy val analyticsToken            = loadConfig("google-analytics.token")
+  override lazy val analyticsHost             = loadConfig("google-analytics.host")
+  override lazy val reportAProblemPartialUrl  = loadConfig("reportAProblemPartialUrl")
+  override lazy val reportAProblemNonJSUrl    = loadConfig("reportAProblemNonJSUrl")
 
   override lazy val timeoutInSeconds: String = loadConfig("timeoutInSeconds")
 

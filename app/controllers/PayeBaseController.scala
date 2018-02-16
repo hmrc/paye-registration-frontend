@@ -48,7 +48,7 @@ trait PayeBaseController extends FrontendController with AuthorisedFunctions wit
         logger.warn(s"unauthenticated user attempting to access ${request.path} with insufficient confidence level redirecting to login")
         redirectToLogin
       case e: AuthorisationException =>
-        logger.warn(s"unauthenticated user attempting to access ${request.path} redirecting to login", e)
+        logger.info(s"unauthenticated user attempting to access ${request.path} redirecting to login : ${e.getMessage}")
         redirectToLogin
     }
   }
@@ -61,7 +61,7 @@ trait PayeBaseController extends FrontendController with AuthorisedFunctions wit
         logger.warn(s"unauthenticated user attempting to access ${request.path} with insufficient confidence level redirecting to login")
         redirectToLogin
       case e: AuthorisationException =>
-        logger.warn(s"unauthenticated user attempting to access ${request.path} redirecting to login", e)
+        logger.info(s"unauthenticated user attempting to access ${request.path} redirecting to login: ${e.getMessage}")
         redirectToLogin
     }
   }
@@ -77,7 +77,7 @@ trait PayeBaseController extends FrontendController with AuthorisedFunctions wit
         logger.warn(s"unauthenticated user attempting to access ${request.path} with insufficient confidence level redirecting to loginUrl")
         redirectToLogin
       case e: AuthorisationException =>
-        logger.warn(s"unauthenticated user attempting to access ${request.path} redirecting to login", e)
+        logger.info(s"unauthenticated user attempting to access ${request.path} redirecting to login: ${e.getMessage}")
         redirectToLogin
     }
   }
@@ -98,7 +98,7 @@ trait PayeBaseController extends FrontendController with AuthorisedFunctions wit
         logger.warn(s"unauthenticated user attempting to access ${request.path} with incorrect affinity group redirecting to login")
         redirectToLogin
       case e: AuthorisationException =>
-        logger.warn(s"unauthenticated user attempting to access ${request.path} redirecting to login", e)
+        logger.info(s"unauthenticated user attempting to access ${request.path} redirecting to login : ${e.getMessage}")
         redirectToLogin
     }
   }
@@ -116,7 +116,7 @@ trait PayeBaseController extends FrontendController with AuthorisedFunctions wit
         logger.warn(s"unauthenticated user attempting to access ${request.path} with insufficient confidence level redirecting to login")
         redirectToLogin
       case e: AuthorisationException =>
-        logger.warn(s"unauthenticated user attempting to access ${request.path} redirecting to login", e)
+        logger.info(s"unauthenticated user attempting to access ${request.path} redirecting to login: ${e.getMessage}")
         redirectToLogin
     }
   }
