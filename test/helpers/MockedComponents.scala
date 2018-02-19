@@ -47,14 +47,12 @@ trait MockedComponents {
   val mockPAYERegConnector              = mock[PAYERegistrationConnector]
   val mockAddressLookupConnector        = mock[AddressLookupConnector]
   val mockAuditConnector                = mock[AuditConnector]
-  val mockdeskproConnector              = mock[DeskproConnector]
   val mockIncorpInfoConnector           = mock[IncorporationInformationConnector]
   val mockTestBusRegConnector           = mock[TestBusinessRegConnector]
   val mockTestIncorpInfoConnector       = mock[TestIncorpInfoConnector]
   val mockTestPayeRegConnector          = mock[TestPAYERegConnector]
 
   //Service mocks
-  val mockDeskproService        = mock[DeskproService]
   val mockIncorpInfoService     = mock[IncorporationInformationService]
   val mockCompanyDetailsService = mock[CompanyDetailsService]
   val mockS4LService            = mock[S4LService]

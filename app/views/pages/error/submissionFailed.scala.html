@@ -1,53 +1,13 @@
-@import helpers.templates.{payeErrorSummary, payeInput, payeTextArea}
-@import models.view.Ticket
-@(deskproForm: Form[Ticket])(implicit request: Request[_], messages: Messages)
-
-@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@()(implicit request: Request[_], messages: Messages)
 
 @main_template(title = Messages("errorPages.failedSubmission.description")) {
 
-  @payeErrorSummary(
-    messages("app.common.errorSummaryLabel"), deskproForm, dataJourney=Some("DESDeskPro")
-  )
 
-  <h1 class="heading-xlarge">@Messages("errorPages.failedSubmission.description")</h1>
+  <h1 id="submissionFailedReportAProblem" class="heading-xlarge">@Messages("errorPages.failedSubmission.description")</h1>
 
   <div class="spaced-below">
     <p>@Messages("errorPages.failedSubmission.p1")</p>
-
     <p>@Messages("errorPages.failedSubmission.p2")</p>
   </div>
-
-  @govHelpers.form(action = controllers.errors.routes.ErrorController.submitTicket()) {
-
-    <h2 class="section-heading">@Messages("errorPages.failedSubmission.header")</h2>
-    <p class="spaced-below">@Messages("errorPages.failedSubmission.detail")</p>
-    <fieldset class="form-group">
-      <legend class="visually-hidden">@Messages("errorPages.failedSubmission.p1") @Messages("errorPages.failedSubmission.p2")</legend>
-        <div class="form-field">
-          @payeInput(
-            deskproForm("name"),
-            '_inputClass -> "form-control-1-2",
-            '_labelClass -> "form-label cascading",
-            '_label -> messages("errorPages.failedSubmission.q1")
-          )
-        </div>
-        <div class="form-field">
-          @payeInput(
-            deskproForm("email"),
-            '_inputClass -> "form-control-1-2",
-            '_labelClass -> "form-label cascading",
-            '_label -> messages("errorPages.failedSubmission.q2")
-          )
-        </div>
-          @payeTextArea(
-            deskproForm("message"),
-            '_inputClass -> "input--medium input--cleared",
-            '_label -> messages("errorPages.failedSubmission.q3")
-          )
-    </fieldset>
-
-    <button class="button" type="submit" id="continue" >@Messages("errorPages.failedSubmission.button")</button>
-  }
 
 }

@@ -17,11 +17,8 @@
 package controllers.errors
 
 import helpers.{PayeComponentSpec, PayeFakedApp}
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito.when
+import org.jsoup.Jsoup
 import play.api.test.FakeRequest
-
-import scala.concurrent.Future
 
 class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
   val regId = Fixtures.validCurrentProfile.get.registrationID
@@ -36,7 +33,6 @@ class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val companyDetailsService  = mockCompanyDetailsService
       override val s4LService             = mockS4LService
       override val keystoreConnector      = mockKeystoreConnector
-      override val deskproService         = mockDeskproService
       override val messagesApi            = mockMessagesApi
       override val authConnector          = mockAuthConnector
     }
@@ -50,6 +46,7 @@ class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
         status(result)      mustBe OK
         contentType(result) mustBe Some("text/html")
         charset(result)     mustBe Some("utf-8")
+
       }
     }
   }
@@ -74,58 +71,8 @@ class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
         status(result)      mustBe OK
         contentType(result) mustBe Some("text/html")
         charset(result)     mustBe Some("utf-8")
-      }
-    }
-  }
-
-  "submitTicket" should {
-    "return 400 when an empty form is submitted" in new Setup {
-      implicit val fakeRequest = FakeRequest().withFormUrlEncodedBody(
-        "" -> ""
-      )
-
-      AuthHelpers.submitAuthorisedWithCP(testController.submitTicket, Fixtures.validCurrentProfile, fakeRequest) { result =>
-        status(result) mustBe BAD_REQUEST
-      }
-    }
-
-    "return 400 when an invalid email is entered" in new Setup {
-      val fakeRequest = FakeRequest().withFormUrlEncodedBody(
-        "name"    -> "Michael Mouse",
-        "email"   -> "************",
-        "message" -> "I can't provide a good email address"
-      )
-
-      AuthHelpers.submitAuthorisedWithCP(testController.submitTicket, Fixtures.validCurrentProfile, fakeRequest) { result =>
-        status(result) mustBe BAD_REQUEST
-      }
-    }
-
-    "return 303" in new Setup {
-      val fakeRequest = FakeRequest().withFormUrlEncodedBody(
-        "name"    -> "Michael Mouse",
-        "email"   -> "mic@mou.biz",
-        "message" -> "I can't provide a good email address"
-      )
-
-      when(testController.deskproService.submitTicket(ArgumentMatchers.eq(regId), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(ticketId))
-
-      AuthHelpers.submitAuthorisedWithCP(testController.submitTicket, Fixtures.validCurrentProfile, fakeRequest) { result =>
-        status(result)            mustBe SEE_OTHER
-        redirectLocation(result)  mustBe Some("/register-for-paye/ticket-submitted")
-      }
-    }
-  }
-
-  "submittedTicket" should {
-    "return 200" in new Setup {
-      val fakeRequest = FakeRequest()
-
-      AuthHelpers.showAuthorisedWithCP(testController.submittedTicket, Fixtures.validCurrentProfile, fakeRequest) { result =>
-        status(result)      mustBe OK
-        contentType(result) mustBe Some("text/html")
-        charset(result)     mustBe Some("utf-8")
+        val document =  Jsoup.parse(contentAsString(result))
+        document.getElementById("submissionFailedReportAProblem").attr("id") mustBe "submissionFailedReportAProblem"
       }
     }
   }

@@ -103,9 +103,6 @@ GET        /ineligible-for-paye                               controllers.errors
 GET        /you-cant-register-online                          controllers.userJourney.EligibilityController.ineligible
 
 GET        /something-went-wrong                              controllers.errors.ErrorController.failedSubmission
-POST       /something-went-wrong                              controllers.errors.ErrorController.submitTicket
-GET        /ticket-submitted                                  controllers.errors.ErrorController.submittedTicket
-
 GET        /submission-failure                                controllers.errors.ErrorController.retrySubmission
 
 ## DASHBOARD

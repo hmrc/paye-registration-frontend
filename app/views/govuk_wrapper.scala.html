@@ -45,8 +45,6 @@
 
 @afterHeader = {}
 
-
-
 @scriptElement = {
     <script type="text/javascript" src='@routes.Assets.at("javascripts/paye.js")'></script>
     <script type="text/javascript">
@@ -64,7 +62,6 @@
     @pageScripts
 }
 
-
 @bodyEnd = {
     @uiLayouts.footer(
       analyticsToken = Some(appConfig.analyticsToken),
@@ -80,7 +77,9 @@
 @serviceInfo = {
 }
 
-@getHelpForm = @{uiHelpers.reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}
+@getHelpForm = @{
+        uiHelpers.reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)
+}
 
 @content = {
     @uiLayouts.main_content(

@@ -350,24 +350,6 @@ errorPages.retrySubmission.button                               = Resend
 errorPages.failedSubmission.description                         = We couldn''t process your application
 errorPages.failedSubmission.p1                                  = Sorry, there is a technical problem and we couldn''t process your application. Any details you entered have been saved.
 errorPages.failedSubmission.p2                                  = Fill out the form below so we can help you complete your application.
-errorPages.failedSubmission.header                              = Your details
-errorPages.failedSubmission.detail                              = Don''t include any personal or financial information. For example, your National Insurance or credit card numbers.
-errorPages.failedSubmission.q1                                  = Name
-errorPages.failedSubmission.q2                                  = Email
-errorPages.failedSubmission.q3                                  = What were you doing?
-errorPages.failedSubmission.button                              = Send
-errorPages.failedSubmission.error.name_too_long                 = Your name can''t be longer than 70 characters
-errorPages.failedSubmission.error.name_invalid_characters       = Tell us your name using only letters (without accents), hyphens and apostrophes
-errorPages.failedSubmission.error.name_required                 = Please provide your name.
-errorPages.failedSubmission.error.email_too_long                = Your email can''t be longer than 255 characters
-errorPages.failedSubmission.error.email_format                  = Enter an email address using only letters, numbers and - . @ _ +
-errorPages.failedSubmission.error.message_too_long              = Your message can''t be longer than 1000 characters
-errorPages.failedSubmission.error.message_required              = Please enter details of what you were doing.
-
-## Deskpro Submitedd
-errorPages.deskproSubmitted.description                         = Thank you
-errorPages.deskproSubmitted.p1                                  = Your submission has been received.
-errorPages.deskproSubmitted.p2                                  = We''ll be in touch as soon as we can to help you complete your application.
 
 ## Address Lookup Frontend Configuration
 pages.alf.common.lookupPage.title                               = Search for your address
