@@ -23,7 +23,7 @@ app.common.businessRegistrationOverview                         = Your business 
 app.common.startNow                                             = Start now
 app.common.finish                                               = Finish
 app.common.whatDidYouThink                                      = What do you think of the service? (usually takes one minute to complete)
-app.common.linkHiddenHelperText                                 = (link opens in a new tab)
+app.common.linkHelperText                                       = (opens in a new window)
 pages.common.companiesHouse.hiddenIntro.1                       = If the {0} wrong,
 pages.common.companiesHouse.hiddenIntro.url                     = https://ewf.companieshouse.gov.uk//seclogin?tc=1
 pages.common.companiesHouse.hiddenIntro.2                       = It will take less than 24 hours for Companies House to confirm the changes via email.
@@ -39,9 +39,9 @@ page.timeout.p2                                                 = Sign in to
 page.timeout.url                                                = continue registration
                                                                 
 ## First payment in the next tax year                           
-pages.nextTaxYear.title                                         = Set your PAYE scheme start date
-pages.nextTaxYear.heading                                       = The company''s first payment to an employee or subcontractor is in the next tax year
-pages.nextTaxYear.body                                          = You can continue with your application but we won''t process it until after 6 April {0}
+pages.nextTaxYear.title                                         = The date of the company''s first payment is in the next tax year
+pages.nextTaxYear.heading                                       = The date of the company''s first payment is in the next tax year
+pages.nextTaxYear.body                                          = You can continue with your application but we won''t process it until after 6 April {0}.
 
 ## User error messages
 errors.invalid.email                                            = Enter an email address using only letters, numbers and - . @ _ +
@@ -165,7 +165,7 @@ pages.employingStaff.error                                      = Tell us if ove
 pages.subcontractors.description                                = Over the next 2 months, will the company use subcontractors in the construction industry?
 pages.subcontractors.nameRulesIntro                             = We''ll register you with the Construction Industry Scheme (CIS) if you pay subcontractors to do construction work.
 pages.subcontractors.findout1                                   = Find out
-pages.subcontractors.findout2                                   = what work is covered by the CIS (opens in a new window)
+pages.subcontractors.findout2                                   = what work is covered by the CIS
 pages.subcontractors.error                                      = Tell us if over the next 2 months, the company will use subcontractors in the construction industry
 
 ## Company Pension Page
@@ -306,10 +306,11 @@ pages.confirmation.inclusive.section-1.bullet2                  = an activation 
 pages.confirmation.inclusive.section-1.last                     = You''ll need these to send payroll information to HMRC.
 
 pages.confirmation.inclusive.section-2.heading                  = If the company''s first payment to someone is in the next tax year
-pages.confirmation.inclusive.section-2.body                     = We won''t process your application until after the next tax year begins (6 April). Please don''t contact us about the application until after 17 May.
+pages.confirmation.inclusive.section-2.body                     = We won''t start processing your application until after the next tax year begins (6 April). Please don''t contact us about the application until after 17 May.
 pages.confirmation.inclusive.section-2.disclosure.heading       = Paying someone before we''ve processed the application?
 pages.confirmation.inclusive.section-2.disclosure.body          = You''l need to:
-pages.confirmation.inclusive.section-2.disclosure.bullet1       = follow these instructions on <a href={0}>running payroll (opens in a new window)</a>
+pages.confirmation.inclusive.section-2.disclosure.bullet1       = follow these instructions on
+pages.confirmation.inclusive.section-2.disclosure.bullet1.1     = running payroll
 pages.confirmation.inclusive.section-2.disclosure.bullet2       = hold off on sending a Full Payment Submission until you have the company''s PAYE registration details
 pages.confirmation.inclusive.section-2.disclosure.bullet3       = enter HMRC code G in the ''late reporting reason'' box
 
