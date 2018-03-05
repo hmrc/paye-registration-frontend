@@ -1,4 +1,5 @@
 @import views.html.helpers.templates.hiddenDetails
+@import helpers.templates.linkNewWindow
 
 @(ackRef: String, displayNextTaxYearContent: Boolean)(implicit request: Request[_], messages: Messages)
 
@@ -80,7 +81,8 @@
 @inclusiveProgressiveDisclosure = {
     <p>@messages("pages.confirmation.inclusive.section-2.disclosure.body")</p>
     <ul class="list list-bullet">
-        <li>@Html(messages("pages.confirmation.inclusive.section-2.disclosure.bullet1", "https://www.gov.uk/running-payroll"))</li>
+        <li>@Messages("pages.confirmation.inclusive.section-2.disclosure.bullet1")
+            @linkNewWindow("https://www.gov.uk/running-payroll", Messages("pages.confirmation.inclusive.section-2.disclosure.bullet1.1"), "firstPaymentInNextTaxYear")</li>
         <li>@messages("pages.confirmation.inclusive.section-2.disclosure.bullet2")</li>
         <li>@messages("pages.confirmation.inclusive.section-2.disclosure.bullet3")</li>
     </ul>

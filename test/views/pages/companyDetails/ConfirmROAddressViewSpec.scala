@@ -62,7 +62,7 @@ class ConfirmROAddressViewSpec extends PayeComponentSpec with PayeFakedApp with 
     }
 
     "have the correct drop down body link text" in {
-      document.getElementById("companies-house-link").text mustBe s"${messagesApi("pages.confirmRO.hiddenIntro.label")} ${messagesApi("app.common.linkHiddenHelperText")}"
+      document.getElementById("companies-house-link").text mustBe s"${messagesApi("pages.confirmRO.hiddenIntro.label")} ${messagesApi("app.common.linkHelperText")}"
     }
   }
 }
