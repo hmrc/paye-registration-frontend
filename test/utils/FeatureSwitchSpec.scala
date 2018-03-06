@@ -28,12 +28,11 @@ class FeatureSwitchSpec extends PayeComponentSpec {
     super.beforeEach()
   }
 
-  val featureSwitch = new FeatureSwitchManager
-  val payeFeatureSwitch = new PAYEFeatureSwitch(featureSwitch)
+  val featureSwitch        = new FeatureSwitchManager
+  val payeFeatureSwitch    = new PAYEFeatureSwitch(featureSwitch)
   val booleanFeatureSwitch = BooleanFeatureSwitch("test", false)
 
   "getProperty" should {
-
     "return a disabled feature switch if the system property is undefined" in {
       featureSwitch.getProperty("test") mustBe BooleanFeatureSwitch("test", enabled = false)
     }
@@ -52,7 +51,6 @@ class FeatureSwitchSpec extends PayeComponentSpec {
   }
 
   "systemPropertyName" should {
-
     "append feature. to the supplied string'" in {
       featureSwitch.systemPropertyName("test") mustBe "feature.test"
     }
@@ -68,8 +66,8 @@ class FeatureSwitchSpec extends PayeComponentSpec {
       featureSwitch.setProperty("test", "true") mustBe BooleanFeatureSwitch("test", enabled = true)
     }
 
-    "return ValueSetFeatureSwitch when supplied system-date and time-15-3" in {
-      featureSwitch.setProperty("system-date", "time-15-3") mustBe ValueSetFeatureSwitch("system-date",Some("time-15-3"))
+    "return ValueSetFeatureSwitch when supplied system-date and 2018-01-01" in {
+      featureSwitch.setProperty("system-date", "2018-01-01") mustBe ValueSetFeatureSwitch("system-date", "2018-01-01")
     }
   }
 

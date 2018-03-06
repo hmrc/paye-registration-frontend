@@ -48,10 +48,10 @@ class SystemDateSpec extends PayeComponentSpec {
     }
 
     "return a LocalDate that was previously set" in {
-      System.setProperty("feature.system-date", "15-3")
+      System.setProperty("feature.system-date", "2018-01-01")
 
       val result = SystemDate.getSystemDate
-      result mustBe LocalDate.of(LocalDate.now.getYear,3,15)
+      result mustBe LocalDate.parse("2018-01-01")
     }
   }
 }

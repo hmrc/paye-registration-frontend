@@ -28,9 +28,9 @@ case class BooleanFeatureSwitch(name: String, enabled: Boolean) extends FeatureS
   override def value = ""
 }
 
-case class ValueSetFeatureSwitch(name: String, date: Option[String]) extends FeatureSwitch {
-  override def enabled = date.isDefined
-  override def value = date.getOrElse("")
+case class ValueSetFeatureSwitch(name: String, setValue: String) extends FeatureSwitch {
+  override def enabled = true
+  override def value   = setValue
 }
 
 class FeatureSwitchManager @Inject extends FeatureManager
@@ -43,10 +43,11 @@ trait FeatureManager {
     val value = sys.props.get(systemPropertyName(name))
 
     value match {
-      case Some("true")                        => BooleanFeatureSwitch(name, enabled = true)
-      case Some("false")                       => BooleanFeatureSwitch(name, enabled = false)
-      case Some(date) if date.contains("time") => ValueSetFeatureSwitch(name, if(date.equals("")) None else Some(date))
-      case _                                   => BooleanFeatureSwitch(name, enabled = false)
+      case Some("true")                                            => BooleanFeatureSwitch(name, enabled = true)
+      case Some("false")                                           => BooleanFeatureSwitch(name, enabled = false)
+      case Some("time-clear")                                      => ValueSetFeatureSwitch(name, "time-clear")
+      case Some(date) if date.matches(Validators.datePatternRegex) => ValueSetFeatureSwitch(name, date)
+      case _                                                       => BooleanFeatureSwitch(name, enabled = false)
     }
   }
 
@@ -58,8 +59,8 @@ trait FeatureManager {
   def enable(fs: FeatureSwitch): FeatureSwitch  = setProperty(fs.name, "true")
   def disable(fs: FeatureSwitch): FeatureSwitch = setProperty(fs.name, "false")
 
-  def setSystemDate(fs: FeatureSwitch, date: String): FeatureSwitch = setProperty(fs.name, date)
-  def clearSystemDate(fs: FeatureSwitch): FeatureSwitch             = setProperty(fs.name, "")
+  def setSystemDate(fs: FeatureSwitch): FeatureSwitch   = setProperty(fs.name, fs.value)
+  def clearSystemDate(fs: FeatureSwitch): FeatureSwitch = setProperty(fs.name, "")
 }
 
 class PAYEFeatureSwitch @Inject()(val manager: FeatureManager) extends PAYEFeatureSwitches {

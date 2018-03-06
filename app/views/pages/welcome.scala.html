@@ -1,4 +1,4 @@
-@()(implicit request: Request[_], messages: Messages)
+@(thresholdMap: Map[String, Int])(implicit request: Request[_], messages: Messages)
 
 @import uk.gov.hmrc.play.views.html.helpers.form
 @import helpers.templates.linkNewWindow
@@ -15,7 +15,7 @@
 
         <div class="spaced-below">
             <ul class="list list-bullet">
-                <li id="pay">@Messages("pages.welcome.bullet.pay")</li>
+                <li id="pay">@Messages("pages.welcome.bullet.pay", thresholdMap("weekly"), thresholdMap("monthly"), thresholdMap("annually"))</li>
                 <li id="pension">@Messages("pages.welcome.bullet.pension")</li>
                 <li id="subcontractors">@Messages("pages.welcome.bullet.subcontractors")</li>
             </ul>

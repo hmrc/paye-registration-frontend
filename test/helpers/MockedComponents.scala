@@ -63,4 +63,5 @@ trait MockedComponents {
   val mockAddressLookupService  = mock[AddressLookupService]
   val mockPAYEContactService    = mock[PAYEContactService]
   val mockPrepopService         = mock[PrepopulationService]
+  val mockThresholdService      = mock[ThresholdService]
 }
