@@ -64,4 +64,14 @@ class ValidatorsSpec extends PayeComponentSpec with DateUtil {
       boundForm.errors.map(_.message) mustBe List("pages.firstPayment.date.invalidRange")
     }
   }
+
+  "dateRegex" should {
+    "validate 2018-01-01" in {
+      assert("2018-01-01".matches(Validators.datePatternRegex))
+    }
+
+    "not validate 2018-1-1" in {
+      assert(!"2018-1-1".matches(Validators.datePatternRegex))
+    }
+  }
 }

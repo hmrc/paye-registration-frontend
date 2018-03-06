@@ -18,11 +18,11 @@ package utils
 
 import java.time.LocalDate
 
+import play.api.Logger
+
 object SystemDate {
   def getSystemDate: LocalDate = Option(System.getProperty("feature.system-date")).fold(LocalDate.now()) {
     case ""    => LocalDate.now()
-    case date  =>
-      val splitDate = date.split("-")
-      LocalDate.of(LocalDate.now.getYear, splitDate.last.toInt, splitDate.head.toInt)
+    case date  => LocalDate.parse(date)
   }
 }

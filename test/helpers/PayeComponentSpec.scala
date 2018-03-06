@@ -90,18 +90,19 @@ trait PayeComponentSpec
       mockWSHttp,
       mockIncorpInfoService,
       mockCompanyDetailsService,
-      mockS4LService
+      mockS4LService,
+      mockThresholdService
     )
   }
 
   override protected def beforeEach(): Unit = {
-    resetMocks()
     super.beforeEach()
+    resetMocks()
   }
 
   override protected def afterEach(): Unit = {
-    resetMocks()
     super.afterEach()
+    resetMocks()
   }
 
   object AuthHelpers extends AuthHelpers {

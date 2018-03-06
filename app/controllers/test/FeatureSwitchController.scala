@@ -35,15 +35,11 @@ trait FeatureSwitchController extends FrontendController {
   def switcher(featureName: String, featureState: String): Action[AnyContent] = Action.async {
     implicit request =>
       def feature: FeatureSwitch = featureState match {
-        case "true"                   => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
-        case "addressLookupFrontend"  => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
-        case x if x.contains("time")  => if(x.replace("time-", "").equals("clear")) {
-          featureManager.clearSystemDate(ValueSetFeatureSwitch("system-date", None))
-        } else {
-          val dateSwitch = ValueSetFeatureSwitch("system-date", Some(x.replace("time-","")))
-          featureManager.setSystemDate(dateSwitch, dateSwitch.date.get.replace("time-", ""))
-        }
-        case _                        => featureManager.disable(BooleanFeatureSwitch(featureName, enabled = false))
+        case "true"                                      => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
+        case "addressLookupFrontend"                     => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
+        case x if x.matches(Validators.datePatternRegex) => featureManager.setSystemDate(ValueSetFeatureSwitch(featureName, featureState))
+        case x@"time-clear"                              => featureManager.clearSystemDate(ValueSetFeatureSwitch(featureName, x))
+        case _                                           => featureManager.disable(BooleanFeatureSwitch(featureName, enabled = false))
       }
 
       payeFeatureSwitch(featureName) match {

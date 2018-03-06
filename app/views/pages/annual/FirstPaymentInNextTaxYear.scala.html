@@ -1,13 +1,13 @@
-@import java.time.LocalDate
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
+@import utils.SystemDate
 @()(implicit request: Request[_], messages: Messages)
 
 @main_template(title = messages("pages.nextTaxYear.title")) {
 
     <h1 class="form-title heading-xlarge" id="pageHeading">@messages("pages.nextTaxYear.heading")</h1>
 
-    <p id="bodyText">@messages("pages.nextTaxYear.body", LocalDate.now.getYear.toString.replace(",",""))</p>
+    <p id="bodyText">@messages("pages.nextTaxYear.body", SystemDate.getSystemDate.getYear.toString.replace(",",""))</p>
 
     <div class="form-group">
         <a href="@controllers.userJourney.routes.CompletionCapacityController.completionCapacity()" class="button" id="continue">@messages("app.common.continue")</a>

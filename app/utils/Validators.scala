@@ -32,6 +32,8 @@ object Validators extends DateUtil {
   private val nameRegex             = """^[A-Za-z 0-9\'-]{1,100}$""".r
   val minDate                       = LocalDate.of(1900,1,1)
 
+  val datePatternRegex              = """([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))"""
+
   private def hasValidPrefix(nino: String) = !invalidPrefixes.exists(nino.toUpperCase.startsWith)
 
   def isValidNino(nino: String): Boolean = nino.nonEmpty && hasValidPrefix(nino) && nino.matches(validNinoFormat)

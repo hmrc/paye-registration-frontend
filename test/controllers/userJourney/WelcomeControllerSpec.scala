@@ -20,6 +20,8 @@ import helpers.{PayeComponentSpec, PayeFakedApp}
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
+import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers
 
 class WelcomeControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
@@ -28,22 +30,27 @@ class WelcomeControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val redirectToLogin         = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
 
-      override val incorpInfoService = mockIncorpInfoService
-      override val companyDetailsService = mockCompanyDetailsService
-      override val s4LService = mockS4LService
-      override val keystoreConnector = mockKeystoreConnector
+      override val thresholdService         = mockThresholdService
+      override val incorpInfoService        = mockIncorpInfoService
+      override val companyDetailsService    = mockCompanyDetailsService
+      override val s4LService               = mockS4LService
+      override val keystoreConnector        = mockKeystoreConnector
       implicit val messagesApi: MessagesApi = mockMessagesApi
-      override val authConnector = mockAuthConnector
+      override val authConnector            = mockAuthConnector
     }
   }
 
   "GET /start" should {
     "return 200" in new Setup {
+
+      when(mockThresholdService.getCurrentThresholds)
+        .thenReturn(Map("weekly" -> 1, "monthly" -> 1, "annually" -> 1))
+
       AuthHelpers.showAuthorised(controller.show, FakeRequest()) {
         result =>
-          status(result) mustBe Status.OK
+          status(result)      mustBe Status.OK
           contentType(result) mustBe Some("text/html")
-          charset(result) mustBe Some("utf-8")
+          charset(result)     mustBe Some("utf-8")
       }
     }
   }
@@ -52,7 +59,7 @@ class WelcomeControllerSpec extends PayeComponentSpec with PayeFakedApp {
     "return 303" in new Setup {
       AuthHelpers.showAuthorised(controller.submit, FakeRequest()) {
         result =>
-          status(result) mustBe Status.SEE_OTHER
+          status(result)           mustBe Status.SEE_OTHER
           redirectLocation(result) mustBe Some(s"${controllers.userJourney.routes.EligibilityController.companyEligibility()}")
       }
     }

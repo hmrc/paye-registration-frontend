@@ -23,7 +23,7 @@ import controllers.{AuthRedirectUrls, PayeBaseController}
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.{CompanyDetailsService, IncorporationInformationService, S4LService}
+import services.{CompanyDetailsService, IncorporationInformationService, S4LService, ThresholdService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.Future
@@ -34,11 +34,14 @@ class WelcomeControllerImpl @Inject()(val messagesApi: MessagesApi,
                                       val companyDetailsService: CompanyDetailsService,
                                       val incorpInfoService: IncorporationInformationService,
                                       val keystoreConnector: KeystoreConnector,
+                                      val thresholdService: ThresholdService,
                                       val authConnector: AuthConnector) extends WelcomeController with AuthRedirectUrls
 
 trait WelcomeController extends PayeBaseController {
+  val thresholdService: ThresholdService
+
   def show: Action[AnyContent] = isAuthorised { implicit request =>
-    Future.successful(Ok(views.html.pages.welcome()))
+    Future.successful(Ok(views.html.pages.welcome(thresholdService.getCurrentThresholds)))
   }
 
   def submit: Action[AnyContent] = isAuthorised { implicit request =>
