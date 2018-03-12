@@ -17,11 +17,11 @@
 package config
 
 import com.typesafe.config.Config
-import filters.PAYECSRFExceptionsFilter
+import filters.{PAYECSRFExceptionsFilter, PAYESessionIDFilter}
 import net.ceedubs.ficus.Ficus._
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
-import play.api.mvc.Request
+import play.api.mvc.{EssentialFilter, Request}
 import play.api.{Application, Configuration, Play}
 import play.twirl.api.Html
 import uk.gov.hmrc.crypto.ApplicationCrypto
@@ -48,6 +48,8 @@ trait FrontendGlobal extends DefaultFrontendGlobal {
   override def microserviceMetricsConfig(implicit app: Application): Option[Configuration] = app.configuration.getConfig(s"microservice.metrics")
 
   override def csrfExceptionsFilter = new PAYECSRFExceptionsFilter(FrontendAppConfig.uriWhiteList)
+
+  override def filters: Seq[EssentialFilter] = super.filters :+ PAYESessionIDFilter
 }
 
 object ControllerConfiguration extends ControllerConfig {

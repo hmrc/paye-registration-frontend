@@ -74,4 +74,13 @@ class ValidatorsSpec extends PayeComponentSpec with DateUtil {
       assert(!"2018-1-1".matches(Validators.datePatternRegex))
     }
   }
+
+  "desSchemaRegex" should {
+    "not validate FAKE_SOD::TR9873!^^7FDFNN" in {
+      assert(!"FAKE_SOD::TR9873!^^7FDFNN".matches(Validators.desSessionRegex))
+    }
+    "validate stubbed-1sds-sdijhi-2383-seei" in {
+      assert("stubbed-1sds-sdijhi-2383-seei".matches(Validators.desSessionRegex))
+    }
+  }
 }
