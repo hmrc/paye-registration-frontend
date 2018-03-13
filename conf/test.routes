@@ -31,3 +31,5 @@ GET        /update-status/:status                        controllers.test.TestSe
 
 GET        /update-cc                                    controllers.test.TestCCController.showUpdateCC
 POST       /update-cc                                    controllers.test.TestCCController.submitUpdateCC
+
+GET        /set-session-id/:sessionId                    controllers.test.EditSessionController.setSessionId(sessionId: String)
