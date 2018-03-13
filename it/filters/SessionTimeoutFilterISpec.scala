@@ -113,15 +113,8 @@ class SessionTimeoutFilterISpec extends IntegrationSpecBase
 
         response.status mustBe 200
 
-        println(s"${Console.RED_B}##############################################")
-
         val fResponse2 = buildClient("/relationship-to-company").
           withHeaders(HeaderNames.COOKIE -> getSessionCookie(timeStampRollback = 70000)).get()
-
-        val fResponse22 = buildClient("/relationship-to-company").
-          withHeaders(HeaderNames.COOKIE -> getSessionCookie(timeStampRollback = 70000))
-
-       println(s"=================================================================== ${getSessionCookie(timeStampRollback = 1000000)}")
 
         val responseWithRollback = await(fResponse2)
         responseWithRollback.status mustBe 303

@@ -31,6 +31,7 @@ object Validators extends DateUtil {
   val postcodeRegex                 = """^[A-Z]{1,2}[0-9][0-9A-Z]? [0-9][A-Z]{2}$"""
   private val nameRegex             = """^[A-Za-z 0-9\'-]{1,100}$""".r
   val minDate                       = LocalDate.of(1900,1,1)
+  val desSessionRegex               = "^[A-Za-z0-9-]{0,60}$"
 
   val datePatternRegex              = """([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))"""
 

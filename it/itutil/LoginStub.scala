@@ -27,15 +27,16 @@ import uk.gov.hmrc.http.SessionKeys
 
 trait LoginStub extends SessionCookieBaker {
 
-  val SessionId = s"stubbed-${UUID.randomUUID}"
+  val SessionId         = s"stubbed-${UUID.randomUUID}"
+  val invalidSessionId  = s"FAKE_PRF::NON-COMPSDOJ OMSDDf"
 
-  private def cookieData(additionalData: Map[String, String], timeStampRollback: Long): Map[String, String] = {
+  private def cookieData(additionalData: Map[String, String], timeStampRollback: Long, sessionID: String): Map[String, String] = {
 
     val timeStamp = new java.util.Date().getTime
     val rollbackTimestamp = (timeStamp - timeStampRollback).toString
 
     Map(
-      SessionKeys.sessionId -> SessionId,
+      SessionKeys.sessionId -> sessionID,
       SessionKeys.userId -> "/auth/oid/1234567890",
       SessionKeys.token -> "token",
       SessionKeys.authProvider -> "GGW",
@@ -43,8 +44,8 @@ trait LoginStub extends SessionCookieBaker {
     ) ++ additionalData
   }
 
-  def getSessionCookie(additionalData: Map[String, String] = Map(), timeStampRollback: Long = 0) = {
-    cookieValue(cookieData(additionalData, timeStampRollback))
+  def getSessionCookie(additionalData: Map[String, String] = Map(), timeStampRollback: Long = 0, sessionID: String = SessionId) = {
+    cookieValue(cookieData(additionalData, timeStampRollback, sessionID))
   }
 
   def stubSuccessfulLogin(withSignIn: Boolean = false) = {

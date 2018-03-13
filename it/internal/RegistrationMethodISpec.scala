@@ -62,7 +62,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
   val companyName = "Foo Ltd"
 
   "DELETE registration" should {
-    "return 500 when error occured to get Authority for the session" in {
+    "return 401 if user is not authorised for the session" in {
       setupUnauthorised()
 
       val fResponse = buildClientInternal(s"/$regId/delete").
