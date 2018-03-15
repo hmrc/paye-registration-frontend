@@ -105,6 +105,7 @@ class Module extends AbstractModule {
     bind(classOf[TestCoHoController]).to(classOf[TestCoHoControllerImpl]).asEagerSingleton()
     bind(classOf[TestRegSetupController]).to(classOf[TestRegSetupControllerImpl]).asEagerSingleton()
     bind(classOf[TestSetupController]).to(classOf[TestSetupControllerImpl]).asEagerSingleton()
+    bind(classOf[EditSessionController]).to(classOf[EditSessionControllerImpl]).asEagerSingleton()
   }
 
   private def bindUserJourneyControllers(): Unit = {
