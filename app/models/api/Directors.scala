@@ -34,10 +34,10 @@ object Name {
   )(Name.apply, unlift(Name.unapply))
 
   val normalizeNameReads = (
-    (__ \ "forename").readNullable[String](Formatters.normalizeTrimmedCommasReads) and
-    (__ \ "other_forenames").readNullable[String](Formatters.normalizeTrimmedCommasReads) and
-    (__ \ "surname").read[String](Formatters.normalizeTrimmedCommasReads) and
-    (__ \ "title").readNullable[String](Formatters.normalizeTrimmedFullStopReads).map(opt => opt.filter(_.length <= 20))
+    (__ \ "forename").readNullable[String](Formatters.normalizeTrimmedHMRCReads) and
+    (__ \ "other_forenames").readNullable[String](Formatters.normalizeTrimmedHMRCReads) and
+    (__ \ "surname").read[String](Formatters.normalizeTrimmedHMRCReads) and
+    (__ \ "title").readNullable[String](Formatters.normalizeTrimmedHMRCReads).map(opt => opt.filter(_.length <= 20))
   )(Name.apply _)
 }
 

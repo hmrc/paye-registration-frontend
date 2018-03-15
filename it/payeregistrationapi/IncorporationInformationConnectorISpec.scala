@@ -70,7 +70,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
       CoHoCompanyDetailsModel(
         "test company",
         Address(
-          "1 test street",
+          "1 test street, (P-O I&O)",
           "Testford",
           None,
           None,
@@ -93,7 +93,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
           |  "company_name":"test company",
           |  "registered_office_address":{
           |    "premises":"1",
-          |    "address_line_1":"test street",
+          |    "address_line_1":"test street, (P-O: I&O)",
           |    "locality":"Testford",
           |    "country":"UK",
           |    "postal_code":"TE2 2ST"
@@ -216,6 +216,61 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
         http,
         servicesConfig
       )
+
+      def getResponse = incorpInfoConnector.getOfficerList(testTransId,testRegId)
+      setupWiremockResult(200, tstOfficerListJson)
+
+      await(getResponse) mustBe tstOfficerListModel
+    }
+
+    "get an officer list and normalise the first, middle, last names and title of the directors" in {
+
+      val tstOfficerListJson =
+        """
+          |{
+          |  "officers": [
+          |    {
+          |      "name" : "test",
+          |      "name_elements" : {
+          |        "forename" : "tęšt1",
+          |        "other_forenames" : "tèēśt11",
+          |        "surname" : "tæßt.",
+          |        "title" : "Mr,"
+          |      },
+          |      "officer_role" : "cic-manager"
+          |    }, {
+          |      "name" : "test",
+          |      "name_elements" : {
+          |        "forename" : "žñœü",
+          |        "other_forenames" : "ÿürgëñ",
+          |        "surname" : "alfîë",
+          |        "title" : "Mr"
+          |      },
+          |      "officer_role" : "corporate-director"
+          |    }
+          |  ]
+          |}""".stripMargin
+
+      val tstOfficerListModel = OfficerList(
+        items = Seq(
+          Officer(
+            name = Name(Some("test1"), Some("teest11"), "tt", Some("Mr")),
+            role = "cic-manager",
+            resignedOn = None,
+            appointmentLink = None
+          ),
+          Officer(
+            name = Name(Some("znu"), Some("yurgen"), "alfie", Some("Mr")),
+            role = "corporate-director",
+            resignedOn = None,
+            appointmentLink = None
+          )
+        )
+      )
+      lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+      lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+
+      val incorpInfoConnector = new IncorporationInformationConnectorImpl(metrics, http, servicesConfig)
 
       def getResponse = incorpInfoConnector.getOfficerList(testTransId,testRegId)
       setupWiremockResult(200, tstOfficerListJson)

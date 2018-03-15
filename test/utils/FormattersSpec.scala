@@ -18,7 +18,7 @@ package utils
 
 import helpers.PayeComponentSpec
 import models.Address
-import play.api.libs.json.{Format, JsValue, Json}
+import play.api.libs.json._
 
 class FormattersSpec extends PayeComponentSpec {
 
@@ -128,4 +128,17 @@ class FormattersSpec extends PayeComponentSpec {
     }
   }
 
+  "Strange strings" should {
+    "be formatted so that the database can accept HMRC title, first, middle & last names" in {
+      val testValue = JsString("""1234567890'af gh jghj g-æœhjg jg &@$£¥€ «»",.:;?!/\()[]{}<>*=#%+ÀÁÂÃÄÅĀĂĄÆǼÇĆĈĊČÞĎÐÈÉÊËĒĔĖĘĚĜĞĠĢĤĦÌÍÎÏĨĪĬĮİĴĶĹĻĽĿŁÑŃŅŇŊÒÓÔÕÖØŌŎŐǾŒŔŖŘŚŜŞŠŢŤŦÙÚÛÜŨŪŬŮŰŲŴẀẂẄỲÝŶŸŹŻŽÀÖØſƒǺǿẀẅỲỳ""")
+
+      Json.fromJson(testValue)(Formatters.normalizeTrimmedHMRCReads) mustBe JsSuccess("1234567890'af gh jghj g-hjg jg  AAAAAAAAACCCCCDEEEEEEEEEGGGGHIIIIIIIIIJKLLLLNNNNOOOOOOOORRRSSSSTTUUUUUUUUUUWWWWYYYYZZZAOsAWwYy")
+    }
+
+    "be formatted so that the database can accept HMRC address lines" in {
+      val testValue = JsString("""1234567890'af gh jghj g-æœhjg jg &@$£¥€ «»",.:;?!/\()[]{}<>*=#%+ÀÁÂÃÄÅĀĂĄÆǼÇĆĈĊČÞĎÐÈÉÊËĒĔĖĘĚĜĞĠĢĤĦÌÍÎÏĨĪĬĮİĴĶĹĻĽĿŁÑŃŅŇŊÒÓÔÕÖØŌŎŐǾŒŔŖŘŚŜŞŠŢŤŦÙÚÛÜŨŪŬŮŰŲŴẀẂẄỲÝŶŸŹŻŽÀÖØſƒǺǿẀẅỲỳ""")
+
+      Json.fromJson(testValue)(Formatters.normalizeTrimmedHMRCAddressReads) mustBe JsSuccess("""1234567890'af gh jghj g-hjg jg & ",./\()AAAAAAAAACCCCCDEEEEEEEEEGGGGHIIIIIIIIIJKLLLLNNNNOOOOOOOORRRSSSSTTUUUUUUUUUUWWWWYYYYZZZAOsAWwYy""")
+    }
+  }
 }

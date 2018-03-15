@@ -84,7 +84,7 @@ class AddressSpec extends PayeComponentSpec {
 
         val res = outcomeAddress(line3 = Some("Testley"), line4 = Some("Testshire"), postcode = Some("TE1 1ST"), auditRef = Some("tstAuditRef"))
 
-        Json.fromJson[Address](tstJson)(Address.adressLookupReads) mustBe JsSuccess(res)
+        Json.fromJson[Address](tstJson)(Address.addressLookupReads) mustBe JsSuccess(res)
       }
       "three lines are defined" in {
         val tstJson = Json.parse(
@@ -105,7 +105,7 @@ class AddressSpec extends PayeComponentSpec {
 
         val res = outcomeAddress(line3 = Some("Testley"), postcode = Some("TE1 1ST"))
 
-        Json.fromJson[Address](tstJson)(Address.adressLookupReads) mustBe JsSuccess(res)
+        Json.fromJson[Address](tstJson)(Address.addressLookupReads) mustBe JsSuccess(res)
       }
       "two lines are defined" in {
         val tstJson = Json.parse(
@@ -125,7 +125,7 @@ class AddressSpec extends PayeComponentSpec {
 
         val res = outcomeAddress(postcode = Some("TE1 1ST"))
 
-        Json.fromJson[Address](tstJson)(Address.adressLookupReads) mustBe JsSuccess(res)
+        Json.fromJson[Address](tstJson)(Address.addressLookupReads) mustBe JsSuccess(res)
       }
       "postcode is not completed" in {
         val tstJson = Json.parse(
@@ -144,7 +144,7 @@ class AddressSpec extends PayeComponentSpec {
 
         val res = outcomeAddress(country = Some("United Kingdom"))
 
-        Json.fromJson[Address](tstJson)(Address.adressLookupReads) mustBe JsSuccess(res)
+        Json.fromJson[Address](tstJson)(Address.addressLookupReads) mustBe JsSuccess(res)
       }
       "country is not completed" in {
         val tstJson = Json.parse(
@@ -160,7 +160,7 @@ class AddressSpec extends PayeComponentSpec {
 
         val res = outcomeAddress(postcode = Some("TE1 1ST"))
 
-        Json.fromJson[Address](tstJson)(Address.adressLookupReads) mustBe JsSuccess(res)
+        Json.fromJson[Address](tstJson)(Address.addressLookupReads) mustBe JsSuccess(res)
       }
       "postcode is invalid but country is completed" in {
         val tstJson = Json.parse(
@@ -180,7 +180,7 @@ class AddressSpec extends PayeComponentSpec {
 
         val res = outcomeAddress(country = Some("United Kingdom"))
 
-        Json.fromJson[Address](tstJson)(Address.adressLookupReads) mustBe JsSuccess(res)
+        Json.fromJson[Address](tstJson)(Address.addressLookupReads) mustBe JsSuccess(res)
       }
 
       "lines 1-4 are too long and are there trimmed" in {
@@ -212,7 +212,7 @@ class AddressSpec extends PayeComponentSpec {
           country = None
         )
 
-        Json.fromJson[Address](inputJson)(Address.adressLookupReads) mustBe JsSuccess(expected)
+        Json.fromJson[Address](inputJson)(Address.addressLookupReads) mustBe JsSuccess(expected)
       }
 
       "there are trailing spaces in UK address" in {
@@ -242,7 +242,7 @@ class AddressSpec extends PayeComponentSpec {
           country = None
         )
 
-        Json.fromJson[Address](inputJson)(Address.adressLookupReads) mustBe JsSuccess(expected)
+        Json.fromJson[Address](inputJson)(Address.addressLookupReads) mustBe JsSuccess(expected)
       }
 
       "construct a foreign address with the postcode in address line 3" in {
@@ -272,7 +272,7 @@ class AddressSpec extends PayeComponentSpec {
           country = Some("United States of America")
         )
 
-        Json.fromJson[Address](inputJson)(Address.adressLookupReads) mustBe JsSuccess(expected)
+        Json.fromJson[Address](inputJson)(Address.addressLookupReads) mustBe JsSuccess(expected)
       }
 
       "construct a foreign address with the postcode in address line 4" in {
@@ -303,7 +303,7 @@ class AddressSpec extends PayeComponentSpec {
           country = Some("United States of America")
         )
 
-        Json.fromJson[Address](inputJson)(Address.adressLookupReads) mustBe JsSuccess(expected)
+        Json.fromJson[Address](inputJson)(Address.addressLookupReads) mustBe JsSuccess(expected)
       }
 
       "construct a foreign address and remove trailing spaces" in {
@@ -333,7 +333,7 @@ class AddressSpec extends PayeComponentSpec {
           country = Some("United States of America")
         )
 
-        Json.fromJson[Address](inputJson)(Address.adressLookupReads) mustBe JsSuccess(expected)
+        Json.fromJson[Address](inputJson)(Address.addressLookupReads) mustBe JsSuccess(expected)
       }
     }
 
@@ -349,7 +349,7 @@ class AddressSpec extends PayeComponentSpec {
             |  }
             |}""".stripMargin)
 
-        val result = Json.fromJson[Address](tstJson)(Address.adressLookupReads)
+        val result = Json.fromJson[Address](tstJson)(Address.addressLookupReads)
         shouldHaveErrors(result, JsPath(), Seq(ValidationError("No postcode and no country to default to")))
       }
       "only one address line is completed" in {
@@ -363,7 +363,7 @@ class AddressSpec extends PayeComponentSpec {
             |  }
             |}""".stripMargin)
 
-        val result = Json.fromJson[Address](tstJson)(Address.adressLookupReads)
+        val result = Json.fromJson[Address](tstJson)(Address.addressLookupReads)
         shouldHaveErrors(result, JsPath(), Seq(ValidationError("only 1 lines provided from address-lookup-frontend")))
       }
       "postcode is invalid and country is not completed" in {
@@ -378,7 +378,7 @@ class AddressSpec extends PayeComponentSpec {
             |  }
             |}""".stripMargin)
 
-        val result = Json.fromJson[Address](tstJson)(Address.adressLookupReads)
+        val result = Json.fromJson[Address](tstJson)(Address.addressLookupReads)
         shouldHaveErrors(result, JsPath(), Seq(ValidationError("Invalid postcode and no country to default to")))
       }
     }

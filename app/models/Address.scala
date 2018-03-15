@@ -52,7 +52,7 @@ object Address {
     }
   }
 
-  val adressLookupReads: Reads[Address] = new Reads[Address] {
+  val addressLookupReads: Reads[Address] = new Reads[Address] {
     def reads(json: JsValue): JsResult[Address] = {
       val unvalidatedPostCode = json.\("address").\("postcode").asOpt[String](Formatters.normalizeTrimmedReads)
       val validatedPostcode   = validatePostcode(unvalidatedPostCode)
@@ -103,12 +103,12 @@ object Address {
   val incorpInfoReads: Reads[Address] = new Reads[Address] {
     def reads(json: JsValue): JsResult[Address] = {
 
-      val oPremises      = json.\("premises").asOpt[String](Formatters.normalizeTrimmedReads)
-      val oAddressLine1  = json.\("address_line_1").asOpt[String](Formatters.normalizeTrimmedReads)
-      val oAddressLine2  = json.\("address_line_2").asOpt[String](Formatters.normalizeTrimmedReads)
-      val oLocality      = json.\("locality").asOpt[String](Formatters.normalizeTrimmedReads)
-      val oPostalCode    = json.\("postal_code").asOpt[String](Formatters.normalizeTrimmedReads)
-      val oCountry       = json.\("country").asOpt[String](Formatters.normalizeTrimmedReads)
+      val oPremises      = json.\("premises").asOpt[String](Formatters.normalizeTrimmedHMRCAddressReads)
+      val oAddressLine1  = json.\("address_line_1").asOpt[String](Formatters.normalizeTrimmedHMRCAddressReads)
+      val oAddressLine2  = json.\("address_line_2").asOpt[String](Formatters.normalizeTrimmedHMRCAddressReads)
+      val oLocality      = json.\("locality").asOpt[String](Formatters.normalizeTrimmedHMRCAddressReads)
+      val oPostalCode    = json.\("postal_code").asOpt[String](Formatters.normalizeTrimmedHMRCAddressReads)
+      val oCountry       = json.\("country").asOpt[String](Formatters.normalizeTrimmedHMRCAddressReads)
 
 
       val (oLine1, oLine2) = oPremises match {
