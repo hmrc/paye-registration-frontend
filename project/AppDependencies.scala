@@ -22,8 +22,8 @@ object AppDependencies {
 }
 
 object MainDependencies {
-  private val frontendBootstrapVersion        = "8.17.0"
-  private val authClientVersion               = "2.5.0"
+  private val frontendBootstrapVersion        = "8.19.0"
+  private val authClientVersion               = "2.6.0"
   private val playPartialsVersion             = "6.1.0"
   private val httpCachingVersion              = "7.1.0"
   private val playWhitelistVersion            = "2.0.0"
