@@ -65,7 +65,7 @@ trait AddressLookupConnector extends Logging {
   val timeoutAmount: Int
 
   def getAddress(id: String)(implicit hc: HeaderCarrier) = {
-    implicit val reads = Address.adressLookupReads
+    implicit val reads = Address.addressLookupReads
     metricsService.processDataResponseWithMetrics[Address](successCounter, failedCounter, timer) {
       http.GET[Address](s"$addressLookupFrontendUrl/api/confirmed?id=$id")
     }

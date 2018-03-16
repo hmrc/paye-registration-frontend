@@ -74,6 +74,36 @@ class CoHoCompanyDetailsSpec extends PayeComponentSpec {
       implicit val rds = CoHoCompanyDetailsModel.incorpInfoReads
       Json.fromJson[CoHoCompanyDetailsModel](tstJson2) mustBe JsSuccess(tstModel2)
     }
+
+    "read and normalize from Json with address line 2" in {
+      val tstJson2 = Json.parse(
+        """{
+          |  "company_name":"Tést Compàny",
+          |  "registered_office_address":{
+          |    "premises":"1",
+          |    "address_line_1":"test stréèt. zone ÆĨ & O\\E",
+          |    "address_line_2":"1/2 lane, (PO-BOX:; \"5')",
+          |    "locality":"Têstfôrd",
+          |    "country":"ÜK",
+          |    "postal_code":"TË2 2ST"
+          |  }
+          |}""".stripMargin)
+
+      val tstModel2 = CoHoCompanyDetailsModel(
+        companyName = "Tést Compàny",
+        roAddress = Address(
+          "1",
+          "test street. zone I & O\\E",
+          Some("1/2 lane, (PO-BOX \"5')"),
+          Some("Testford"),
+          Some("TE2 2ST")
+        )
+      )
+
+      implicit val rds = CoHoCompanyDetailsModel.incorpInfoReads
+      Json.fromJson[CoHoCompanyDetailsModel](tstJson2) mustBe JsSuccess(tstModel2)
+    }
+
     "write to Json" in {
       Json.toJson[CoHoCompanyDetailsModel](tstModel) mustBe tstJson
     }

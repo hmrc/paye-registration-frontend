@@ -25,21 +25,23 @@ import play.api.libs.json._
 object Formatters {
   def ninoFormatter(nino: String): String = nino.grouped(2).mkString(" ")
 
-  private def normalize(s: String): String = Normalizer.normalize(s, Normalizer.Form.NFKD).replaceAll("\\p{M}", "").trim
+  private def normalize(str: String): String = Normalizer.normalize(str, Normalizer.Form.NFKD)
+    .replaceAll("\\p{M}", "")
+    .trim
 
   lazy val normalizeTrimmedReads = new Reads[String] {
     override def reads(json: JsValue): JsResult[String] = Json.fromJson[String](json) flatMap (s => JsSuccess(normalize(s)))
   }
 
-  lazy val normalizeTrimmedFullStopReads = new Reads[String] {
+  lazy val normalizeTrimmedHMRCReads = new Reads[String] {
     override def reads(json: JsValue): JsResult[String] = Json.fromJson[String](json) flatMap {
-      s => JsSuccess(normalize(s).replace(".","").replace(",",""))
+      str => JsSuccess(normalize(str).replaceAll("[^A-Za-z 0-9\\-']", ""))
     }
   }
 
-  lazy val normalizeTrimmedCommasReads = new Reads[String] {
+  lazy val normalizeTrimmedHMRCAddressReads = new Reads[String] {
     override def reads(json: JsValue): JsResult[String] = Json.fromJson[String](json) flatMap {
-      s => JsSuccess(normalize(s).replace(",",""))
+      str => JsSuccess(normalize(str).replaceAll("""[^a-zA-Z0-9, .\(\)/&'\"\-\\]""", ""))
     }
   }
 
