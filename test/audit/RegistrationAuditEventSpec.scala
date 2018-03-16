@@ -36,7 +36,7 @@ class RegistrationAuditEventSpec extends PayeComponentSpec {
   implicit val format = Json.format[ExtendedDataEvent]
 
   "RegistrationEvent" should {
-    val clientIP: String = "1.2.3.4"
+    val clientIP: String = "whiteListIP"
     val clientPort: String = "1234"
     val auditType = "testType"
     val bearer = "Bearer 12345"
@@ -47,7 +47,7 @@ class RegistrationAuditEventSpec extends PayeComponentSpec {
     val completeCarrier = HeaderCarrier(
       trueClientIp = Some(clientIP),
       trueClientPort = Some(clientPort),
-      forwarded = Some(ForwardedFor("2.3.4.5")),
+      forwarded = Some(ForwardedFor("whiteListIP")),
       sessionId = Some(SessionId(session)),
       requestId = Some(RequestId(request)),
       authorization = Some(Authorization(bearer)),
