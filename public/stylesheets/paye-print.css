@@ -1,0 +1,55 @@
+/* Print styles to improve Summary / Check your answers pages */
+
+/* removes padding so the content aligns with the header in print */
+article h1+h2 {
+	margin-bottom: 30px;
+}
+
+.heading-medium {
+	margin: 10px 0 10px;
+}
+
+
+/* Styles for layout using dl */
+
+.govuk-check-your-answers {
+	margin: 0 0 40px; 
+}
+
+.cya-question,
+.cya-answer {
+	display: inline-block;
+	width: 50%;
+	vertical-align: top !important;
+}
+
+.cya-answer {
+	width: 33.33%;
+	padding: 10px 0;
+	margin-bottom: 0;
+}
+
+
+/* template styles */
+#global-header {
+	margin-bottom: 0;
+}
+
+#content {
+	padding: 0;
+}
+
+.cya-change,
+.report-error,
+.button,
+.link-back,
+.phase-banner,
+.header__menu__proposition-links,
+.menu {
+	display: none;
+}
+
+.header__menu__proposition-name {
+	color: #000;
+	font-size: 27px;
+}
