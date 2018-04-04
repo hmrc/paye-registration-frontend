@@ -81,7 +81,7 @@ class AddressLookupConnectorSpec extends PayeComponentSpec with PayeFakedApp {
         s"""
           |{
           |  "continueUrl": "${testConnector.payeRegistrationUrl}/foobar",
-          |  "navTitle": "Register your company",
+          |  "navTitle": "Register an employer for PAYE",
           |  "showPhaseBanner": true,
           |  "phaseBannerHtml": "This is a new service. Help us improve it - send your <a href=\\"https://www.tax.service.gov.uk/register-for-paye/feedback\\">feedback</a>.",
           |  "showBackButtons": true,

@@ -1,5 +1,5 @@
 ## Global                                                       
-app.title                                                       = Register your company
+app.title                                                       = Register an employer for PAYE
 app.common.yes                                                  = Yes
 app.common.no                                                   = No
 app.common.continue                                             = Continue
@@ -58,7 +58,7 @@ errors.invalid.sic.invalidChars                                 = Enter a busine
 errors.invalid.name.invalidChars                                = Tell us the contact name using only letters (without accents), hyphens and apostrophes
 
 ## Welcome page
-pages.welcome.description                                       = Register as an employer for PAYE
+pages.welcome.description                                       = Register an employer for PAYE
 pages.welcome.heading1.register                                 = PAYE is HM Revenue and Customs'' (HMRC) system to collect Income Tax and National Insurance from employment. It stands for '' Pay As You Earn''.
 pages.welcome.heading2.register                                 = Use this service if any of the following apply:
 pages.welcome.bullet.pay                                        = it pays employees - including company directors - £{0} or more a week (this is the same as £{1} a month or £{2} a year)
@@ -70,7 +70,7 @@ pages.welcome.otherWaysToRegister2                              = another servic
 pages.welcome.otherWaysToRegister3                              = if the company:
 pages.welcome.bullet.timeToComplete                             = provides employees with expenses or benefits
 pages.welcome.bullet.timeToProcess                              = claims tax back from Construction Industry Scheme (CIS) payments
-pages.welcome.2months                                           = A company can''t register as an employer more than 2 months before it starts paying people, including company directors.
+pages.welcome.2months                                           = A company can''t register an employer more than 2 months before it starts paying people, including company directors.
 pages.welcome.nino                                              = You''ll need the National Insurance number of at least one company director.
 pages.welcome.application                                       = Your application shouldn''t take more than 10 minutes to complete. You''ll need to allow 2 weeks for HMRC to process it.
 
@@ -315,7 +315,7 @@ pages.confirmation.inclusive.section-2.disclosure.bullet2       = hold off on se
 pages.confirmation.inclusive.section-2.disclosure.bullet3       = enter HMRC code G in the ''late reporting reason'' box
 
 ## Ineligible
-pages.ineligible.description                                    = The company can''t register as an employer online
+pages.ineligible.description                                    = The company can''t register an employer online
 pages.ineligible.p1                                             = You should register by phone or post.
 pages.ineligible.p2.1                                           = Contact HMRC
 pages.ineligible.p2.2                                           = - they''ll arrange for someone to call you back to help you register.
@@ -330,8 +330,8 @@ pages.ineligible.l6                                             = the names and 
 ## Error Pages
 errorPages.restart.description                                  = Sorry, we''re having technical issues.
 errorPages.restart.p1                                           = You can try again by <a href={0}>restarting</a> your PAYE registration.
-errorPages.ineligible.description                               = You don''t need to register as an employer
-errorPages.ineligible.p1                                        = If you''re not going to employ staff or subcontractors in the next 2 months, you don''t need to register as an employer.
+errorPages.ineligible.description                               = You don''t need to register an employer
+errorPages.ineligible.p1                                        = If you''re not going to employ staff or subcontractors in the next 2 months, you don''t need to register an employer.
 errorPages.ineligible.p2                                        = However, you''ll have to register if your plans change and you start paying:
 errorPages.ineligible.l1                                        = employees
 errorPages.ineligible.l2                                        = subcontractors
@@ -355,7 +355,7 @@ errorPages.failedSubmission.p2                                  = Fill out the f
 ## Address Lookup Frontend Configuration
 pages.alf.common.lookupPage.title                               = Search for your address
 pages.alf.common.lookupPage.heading                             = Search for your address
-pages.alf.common.navTitle                                       = Register your company
+pages.alf.common.navTitle                                                                                                                  = Register an employer for PAYE
 pages.alf.common.phaseBannerHtml                                = This is a new service. Help us improve it - send your <a href="https://www.tax.service.gov.uk/register-for-paye/feedback">feedback</a>.
 pages.alf.common.deskProServiceName                             = SCRS
 pages.alf.common.lookupPage.filterLabel                         = House name or number (optional)
