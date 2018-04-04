@@ -12,7 +12,6 @@ In order to run the microservice, you must have SBT installed. You should then b
 ```sbt "run {PORTNUM}"```
 
 
-
 To run the tests for the application, you can run: ```sbt test it:test``` 
 
 or ```sbt coverage test it:test coverageReport```
