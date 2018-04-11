@@ -174,6 +174,8 @@ with WiremockHelper {
 
       stubGet(s"/paye-registration/$regId/acknowledgement-reference", 200, "\"ackRef\"")
 
+      stubDelete(s"/save4later/paye-registration-frontend/$regId", 200, "")
+
       val fResponse = buildClient("/application-submitted").
         withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
