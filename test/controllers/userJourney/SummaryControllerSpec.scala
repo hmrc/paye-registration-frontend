@@ -41,14 +41,14 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
     override val authConnector = mockAuthConnector
     override val keystoreConnector = mockKeystoreConnector
 
-
     val controller = new SummaryController {
-      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
+      override val redirectToLogin            = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign         = MockAuthRedirects.redirectToPostSign
 
-      override val incorpInfoService = mockIncorpInfoService
-      override val companyDetailsService = mockCompanyDetailsService
-      override val s4LService = mockS4LService
+      override val emailService               = mockEmailService
+      override val incorpInfoService          = mockIncorpInfoService
+      override val companyDetailsService      = mockCompanyDetailsService
+      override val s4LService                 = mockS4LService
       override val summaryService             = mockSummaryService
       override val authConnector              = mockAuthConnector
       override val keystoreConnector          = mockKeystoreConnector
@@ -62,6 +62,9 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
     "show the summary page when a valid model is returned from the microservice and the reg doc status is draft" in new Setup {
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI))
+
+      when(mockEmailService.primeEmailData(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future(Fixtures.blankCacheMap))
 
       when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validSummaryView))
@@ -78,6 +81,9 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
     "return an Internal Server Error response when no valid model is returned from the microservice" in new Setup {
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI))
+
+      when(mockEmailService.primeEmailData(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future(Fixtures.blankCacheMap))
 
       when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalError()))
 

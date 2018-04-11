@@ -314,6 +314,11 @@ pages.confirmation.inclusive.section-2.disclosure.bullet1.1     = running payrol
 pages.confirmation.inclusive.section-2.disclosure.bullet2       = hold off on sending a Full Payment Submission until you have the company''s PAYE registration details
 pages.confirmation.inclusive.section-2.disclosure.bullet3       = enter HMRC code G in the ''late reporting reason'' box
 
+pages.confirmation.email.heading                                = What happens next?
+pages.confirmation.email.body                                   = You''ll receive:
+pages.confirmation.email.bullet-1                               = an email now with your application reference number
+
+
 ## Ineligible
 pages.ineligible.description                                    = The company can''t register an employer online
 pages.ineligible.p1                                             = You should register by phone or post.

@@ -19,8 +19,8 @@ package connectors
 import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics
 import models.external.CompanyRegistrationProfile
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito.when
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{when,times,verify}
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 
@@ -76,7 +76,7 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
 
   "getCompanyRegistrationDetails" should {
     "return a CompanyProfile" in new Setup(false) {
-      when(mockWSHttp.GET[JsObject](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockWSHttp.GET[JsObject](any())(any(), any[HeaderCarrier](), any()))
         .thenReturn(Future(profileJson))
 
       val result = await(testConnector.getCompanyRegistrationDetails("testRegId"))
@@ -84,14 +84,14 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
     }
 
     "throw a bad request exception" in new Setup(false) {
-      when(mockWSHttp.GET[JsObject](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockWSHttp.GET[JsObject](any())(any(), any[HeaderCarrier](), any()))
         .thenReturn(Future.failed(new BadRequestException("tstException")))
 
       intercept[BadRequestException](await(testConnector.getCompanyRegistrationDetails("testRegId")))
     }
 
     "throw any other exception" in new Setup(false) {
-      when(mockWSHttp.GET[JsObject](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockWSHttp.GET[JsObject](any())(any(), any[HeaderCarrier](), any()))
         .thenReturn(Future.failed(new RuntimeException("tstException")))
 
       intercept[RuntimeException](await(testConnector.getCompanyRegistrationDetails("testRegId")))
@@ -99,7 +99,7 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
 
     "be stubbed" when {
       "returning a CompanyProfile" in new Setup(false) {
-        when(mockWSHttp.GET[JsObject](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        when(mockWSHttp.GET[JsObject](any())(any(), any[HeaderCarrier](), any()))
           .thenReturn(Future(profileJson))
 
         val result = await(testConnector.getCompanyRegistrationDetails("testRegId"))
@@ -107,18 +107,44 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
       }
 
       "throwing a bad request exception" in new Setup(false) {
-        when(mockWSHttp.GET[JsObject](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        when(mockWSHttp.GET[JsObject](any())(any(), any[HeaderCarrier](), any()))
           .thenReturn(Future.failed(new BadRequestException("tstException")))
 
         intercept[BadRequestException](await(testConnector.getCompanyRegistrationDetails("testRegId")))
       }
 
       "throwing any other exception" in new Setup(false) {
-        when(mockWSHttp.GET[JsObject](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        when(mockWSHttp.GET[JsObject](any())(any(), any[HeaderCarrier](), any()))
           .thenReturn(Future.failed(new RuntimeException("tstException")))
 
         intercept[RuntimeException](await(testConnector.getCompanyRegistrationDetails("testRegId")))
       }
+    }
+  }
+  "getVerifiedEmail" should {
+    val emailResponse = Json.parse(
+      """{
+        | "address": "foo@foo.com",
+        | "type": "foo",
+        | "link-sent": true,
+        | "verified": true,
+        | "return-link-email-sent": true
+        |}
+      """.stripMargin).as[JsObject]
+    "return future option string" in new Setup(stubbed = false) {
+      when(mockWSHttp.GET[JsObject](any())(any(), any[HeaderCarrier](), any()))
+        .thenReturn(Future.successful(emailResponse))
+
+      val res = await(testConnector.getVerifiedEmail("fooBarAndWizz"))
+      res mustBe Some("foo@foo.com")
+      verify(mockWSHttp,times(1)).GET[JsObject](any())(any(),any(),any())
+    }
+    "return a None when company reg call fails" in new Setup(stubbed = false) {
+      when(mockWSHttp.GET[JsObject](any())(any(), any[HeaderCarrier](), any()))
+        .thenReturn(Future.failed(new BadRequestException("tstException")))
+
+      val res = await(testConnector.getVerifiedEmail("fooBarAndWizz"))
+      res mustBe None
     }
   }
 }

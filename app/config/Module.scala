@@ -70,6 +70,7 @@ class Module extends AbstractModule {
     bind(classOf[KeystoreConnector]).to(classOf[KeystoreConnectorImpl]).asEagerSingleton()
     bind(classOf[PAYERegistrationConnector]).to(classOf[PAYERegistrationConnectorImpl]).asEagerSingleton()
     bind(classOf[S4LConnector]).to(classOf[S4LConnectorImpl]).asEagerSingleton()
+    bind(classOf[EmailConnector]).to(classOf[EmailConnectorImpl]).asEagerSingleton()
   }
 
   private def bindServices(): Unit = {
@@ -91,6 +92,7 @@ class Module extends AbstractModule {
     bind(classOf[SummaryService]).to(classOf[SummaryServiceImpl]).asEagerSingleton()
     bind(classOf[DirectorDetailsService]).to(classOf[DirectorDetailsServiceImpl]).asEagerSingleton()
     bind(classOf[ThresholdService]).to(classOf[ThresholdServiceImpl]).asEagerSingleton()
+    bind(classOf[EmailService]).to(classOf[EmailServiceImpl]).asEagerSingleton()
   }
 
   private def bindOtherControllers(): Unit = {

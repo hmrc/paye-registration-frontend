@@ -42,18 +42,23 @@ class SummaryControllerImpl @Inject()(val summaryService: SummaryService,
                                       val companyDetailsService: CompanyDetailsService,
                                       val incorpInfoService: IncorporationInformationService,
                                       val payeRegistrationConnector: PAYERegistrationConnector,
+                                      val emailService: EmailService,
                                       val messagesApi: MessagesApi) extends SummaryController with AuthRedirectUrls
 
 trait SummaryController extends PayeBaseController {
   val summaryService: SummaryService
   val submissionService: SubmissionService
   val payeRegistrationConnector: PAYERegistrationConnector
+  val emailService: EmailService
 
   def summary: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
     invalidSubmissionGuard(profile) {
-      summaryService.getRegistrationSummary(profile.registrationID) map { summaryModel =>
-        Ok(SummaryPage(summaryModel))
-      } recover {
+      (for {
+        _       <- emailService.primeEmailData(profile.registrationID)
+        summary <- summaryService.getRegistrationSummary(profile.registrationID)
+      } yield {
+        Ok(SummaryPage(summary))
+      }).recover {
         case _ => InternalServerError(restart())
       }
     }

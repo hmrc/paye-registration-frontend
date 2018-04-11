@@ -17,12 +17,12 @@
 package connectors
 
 import javax.inject.Inject
-
 import config.WSHttp
 import models.external.CompanyRegistrationProfile
+import play.api.Logger
 import play.api.libs.json._
 import services.MetricsService
-import uk.gov.hmrc.http.{BadRequestException, CoreGet, HeaderCarrier}
+import uk.gov.hmrc.http.{BadRequestException, CoreGet, HeaderCarrier, HttpException}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.{PAYEFeatureSwitch, PAYEFeatureSwitches}
@@ -70,6 +70,20 @@ trait CompanyRegistrationConnector {
         logger.error(s"[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received an error when expecting a Company Registration document for reg id: $regId - error: ${ex.getMessage}")
         throw ex
     }
+  }
+
+  def getVerifiedEmail(regId: String)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    val emailRetrieveURL = s"$companyRegistrationUrl$companyRegistrationUri/corporation-tax-registration/$regId/retrieve-email"
+
+    http.GET[JsObject](emailRetrieveURL).map(js => Some((js \ "address").as[String]))
+      .recover{
+        case e: HttpException =>
+          logger.warn(s"[getVerifiedEmail] - A call was made to company reg and an unsuccessful response was returned for regId: $regId and message: ${e.getMessage}")
+          None
+        case e: Exception =>
+          logger.error(s"[getVerifiedEmail] - An unexpected exception occurred for regId: $regId and message: ${e.getMessage}")
+          None
+      }
   }
 
   private[connectors] def useCompanyRegistration: Boolean = featureSwitch.companyReg.enabled

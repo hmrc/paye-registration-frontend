@@ -17,13 +17,12 @@
 package controllers.userJourney
 
 import javax.inject.Inject
-
 import connectors.KeystoreConnector
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.{CompanyDetailsService, ConfirmationService, IncorporationInformationService, S4LService}
+import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{confirmation => ConfirmationPage}
 
@@ -34,15 +33,22 @@ class ConfirmationControllerImpl @Inject()(val messagesApi: MessagesApi,
                                            val s4LService: S4LService,
                                            val companyDetailsService: CompanyDetailsService,
                                            val incorpInfoService: IncorporationInformationService,
+                                           val emailService: EmailService,
                                            val authConnector: AuthConnector) extends ConfirmationController with AuthRedirectUrls
 
 trait ConfirmationController extends PayeBaseController {
   val confirmationService: ConfirmationService
+  val emailService: EmailService
 
   def showConfirmation: Action[AnyContent] = isAuthorisedWithProfileNoSubmissionCheck { implicit request => profile =>
-    confirmationService.getAcknowledgementReference(profile.registrationID) map {
-      case Some(ref) => Ok(ConfirmationPage(ref, confirmationService.determineIfInclusiveContentIsShown))
-      case None      => InternalServerError(views.html.pages.error.restart())
+    (for {
+      refs <- confirmationService.getAcknowledgementReference(profile.registrationID)
+      _    <- emailService.sendAcknowledgementEmail(profile, refs.get)
+      _    <- s4LService.clear(profile.registrationID)
+    } yield refs.fold(InternalServerError(views.html.pages.error.restart())) {
+      ref => Ok(ConfirmationPage(ref, confirmationService.determineIfInclusiveContentIsShown))
+    }).recover {
+      case _ => InternalServerError(views.html.pages.error.restart())
     }
   }
 }

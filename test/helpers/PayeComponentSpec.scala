@@ -75,6 +75,8 @@ trait PayeComponentSpec
       mockAuditService,
       mockPrepopulationService,
       mockCompRegConnector,
+      mockEmailConnector,
+      mockEmailService,
       mockAuditConnector,
       mockAddressLookupConnector,
       mockSessionCache,

@@ -33,8 +33,19 @@
     <a href="@controllers.userJourney.routes.EligibilityController.questionnaire()">@messages("app.common.whatDidYouThink")</a>
 }
 
+@emailContent() = {
+    <h2>@messages("pages.confirmation.email.heading")</h2>
+
+    <p>@messages("pages.confirmation.email.body")</p>
+    <ul class="bullets">
+        <li>@messages("pages.confirmation.email.bullet-1")</li>
+    </ul>
+}
+
 @standardContent() = {
     <div id="standard-content" class="form-group">
+        @emailContent()
+
         <h2>@messages("pages.confirmation.standard.heading")</h2>
 
         <p>@messages("pages.confirmation.standard.section-1")</p>
@@ -59,6 +70,8 @@
 
 @inclusiveDateContent = {
     <div id="inclusive-content" class="form-group">
+        @emailContent()
+
         <h2>@messages("pages.confirmation.inclusive.section-1.heading")</h2>
 
         <p>@messages("pages.confirmation.inclusive.section-1")</p>
