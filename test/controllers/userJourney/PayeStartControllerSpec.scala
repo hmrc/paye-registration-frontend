@@ -30,10 +30,19 @@ import scala.concurrent.Future
 
 class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
+  override protected def beforeEach(): Unit = {
+    super.beforeEach()
+    System.clearProperty("feature.publicBeta")
+  }
+
   class Setup {
-    val controller = new PayeStartController {
+    def controller(pbEnabled: Boolean = false) = new PayeStartController {
+      override val publicBetaEnabled       = pbEnabled
       override val redirectToLogin         = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
+
+      override val payeRegElFEURL          = MockAuthRedirects.payeRegElFEUrl
+      override val payeRegElFEURI          = MockAuthRedirects.payeRegElFEUri
 
       override val incorpInfoService              = mockIncorpInfoService
       override val companyDetailsService          = mockCompanyDetailsService
@@ -55,17 +64,49 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
   def validCurrentProfile(status: String, ackRefStatus : Option[String] = None) =
     CurrentProfile("testRegId", CompanyRegistrationProfile(status, "txId", ackRefStatus), "en", false)
 
+  "steppingStone" should {
+    "redirect to PREFE" when {
+      "public beta is enabled" in new Setup {
+        System.setProperty("feature.publicBeta", "true")
+
+        AuthHelpers.showUnauthorised(controller(pbEnabled = true).steppingStone(), fakeRequest) { resp =>
+          status(resp)           mustBe SEE_OTHER
+          redirectLocation(resp) mustBe Some("/prefe/test/")
+        }
+      }
+    }
+
+    "redirect to the startPaye route" when {
+      "public beta is disabled" in new Setup {
+        System.setProperty("feature.publicBeta", "false")
+
+        AuthHelpers.showUnauthorised(controller().steppingStone(), fakeRequest) { resp =>
+          status(resp) mustBe SEE_OTHER
+          redirectLocation(resp) mustBe Some("/register-for-paye/start-pay-as-you-earn")
+        }
+      }
+
+      "public beta is not defined" in new Setup {
+
+        AuthHelpers.showUnauthorised(controller().steppingStone(), fakeRequest) { resp =>
+          status(resp) mustBe SEE_OTHER
+          redirectLocation(resp) mustBe Some("/register-for-paye/start-pay-as-you-earn")
+        }
+      }
+    }
+  }
+
   "Calling the startPaye action" should {
 
     "return 303 for an unauthorised user" in new Setup {
-      AuthHelpers.showUnauthorised(controller.startPaye, fakeRequest) {
+      AuthHelpers.showUnauthorised(controller().startPaye, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
       }
     }
 
     "force the user to create a new account" in new Setup {
-      AuthHelpers.showAuthorisedNotOrg(controller.startPaye, fakeRequest) {
+      AuthHelpers.showAuthorisedNotOrg(controller().startPaye, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("/test/post-sign-in")
@@ -76,7 +117,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new Exception))
 
-      AuthHelpers.showAuthorisedOrg(controller.startPaye, fakeRequest) {
+      AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
           status(result) mustBe INTERNAL_SERVER_ERROR
       }
@@ -89,7 +130,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future(DownstreamOutcome.Failure))
 
-      AuthHelpers.showAuthorisedOrg(controller.startPaye, FakeRequest()) {
+      AuthHelpers.showAuthorisedOrg(controller().startPaye, FakeRequest()) {
         result =>
           status(result) mustBe INTERNAL_SERVER_ERROR
       }
@@ -102,7 +143,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future(DownstreamOutcome.Success))
 
-      AuthHelpers.showAuthorisedOrg(controller.startPaye, fakeRequest) {
+      AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("/register-for-paye/register-as-employer")
@@ -116,7 +157,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future(DownstreamOutcome.Success))
 
-      AuthHelpers.showAuthorisedOrg(controller.startPaye, fakeRequest) {
+      AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("/register-for-paye/register-as-employer")
@@ -127,10 +168,10 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new NotFoundException("404")))
 
-      AuthHelpers.showAuthorisedOrg(controller.startPaye, fakeRequest) {
+      AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
           status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result) mustBe Some("testUrl/testUri/register")
+          redirectLocation(result) mustBe Some("https://www.tax.service.gov.uk/business-registration/introduction")
       }
     }
 
@@ -138,10 +179,10 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("draft")))
 
-      AuthHelpers.showAuthorisedOrg(controller.startPaye, fakeRequest) {
+      AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
           status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result) mustBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/register")
+          redirectLocation(result) mustBe Some(s"${controller().compRegFEURL}${controller().compRegFEURI}/register")
       }
     }
 
@@ -149,10 +190,10 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("submitted", Some("06"))))
 
-      AuthHelpers.showAuthorisedOrg(controller.startPaye, fakeRequest) {
+      AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
           status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result) mustBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/post-sign-in")
+          redirectLocation(result) mustBe Some(s"${controller().compRegFEURL}${controller().compRegFEURI}/post-sign-in")
       }
     }
   }
@@ -166,10 +207,10 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPayeRegService.deletePayeRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future(RegistrationDeletion.success))
 
-        AuthHelpers.showAuthorised(controller.restartPaye, fakeRequest) {
+        AuthHelpers.showAuthorised(controller().restartPaye, fakeRequest) {
           result =>
             status(result)           mustBe SEE_OTHER
-            redirectLocation(result) mustBe Some(s"/register-for-paye")
+            redirectLocation(result) mustBe Some(s"/register-for-paye/start-pay-as-you-earn")
         }
       }
 
@@ -196,10 +237,10 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPayeRegService.deletePayeRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future(RegistrationDeletion.success))
 
-        AuthHelpers.showAuthorised(controller.restartPaye, fakeRequest) {
+        AuthHelpers.showAuthorised(controller().restartPaye, fakeRequest) {
           result =>
             status(result) mustBe Status.SEE_OTHER
-            redirectLocation(result) mustBe Some(s"/register-for-paye")
+            redirectLocation(result) mustBe Some(s"/register-for-paye/start-pay-as-you-earn")
         }
       }
     }
@@ -212,7 +253,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPayeRegService.deletePayeRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future(RegistrationDeletion.invalidStatus))
 
-        AuthHelpers.showAuthorised(controller.restartPaye, fakeRequest) {
+        AuthHelpers.showAuthorised(controller().restartPaye, fakeRequest) {
           result =>
             status(result) mustBe Status.SEE_OTHER
             redirectLocation(result) mustBe Some(controllers.userJourney.routes.DashboardController.dashboard().url)

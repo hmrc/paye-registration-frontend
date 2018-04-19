@@ -43,8 +43,8 @@ trait EmailService {
 
   private val FIRST_PAYMENT_DATE = "firstPaymentDate"
 
-  private val startDateBoolean: Boolean = SystemDate.getSystemDate.isEqual(NewTaxYear.startPeriod) | SystemDate.getSystemDate.isAfter(NewTaxYear.startPeriod)
-  private val endDateBoolean: Boolean = SystemDate.getSystemDate.isEqual(NewTaxYear.endPeriod) | SystemDate.getSystemDate.isBefore(NewTaxYear.endPeriod)
+  private val startDateBoolean: Boolean = SystemDate.getSystemDate.toLocalDate.isEqual(NewTaxYear.startPeriod) | SystemDate.getSystemDate.toLocalDate.isAfter(NewTaxYear.startPeriod)
+  private val endDateBoolean: Boolean = SystemDate.getSystemDate.toLocalDate.isEqual(NewTaxYear.endPeriod) | SystemDate.getSystemDate.toLocalDate.isBefore(NewTaxYear.endPeriod)
   private val fpdEqualOrAfterNTY: LocalDate => Boolean = fpd => fpd.isEqual(NewTaxYear.taxYearStart) | fpd.isAfter(NewTaxYear.taxYearStart)
 
   private val templateId: LocalDate => String = fpd => if((startDateBoolean & endDateBoolean) & fpdEqualOrAfterNTY(fpd)) {

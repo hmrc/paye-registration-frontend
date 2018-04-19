@@ -16,7 +16,6 @@
 
 package utils
 
-import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 import forms.employmentDetails.FirstPaymentForm
@@ -54,7 +53,7 @@ class ValidatorsSpec extends PayeComponentSpec with DateUtil {
 
   "calling firstPaymentDateRange" should {
     "return an error message if the date is more than 61 days in the future" in {
-      val today = LocalDate.now()
+      val today = SystemDate.getSystemDate.toLocalDate
       val futureDate = fromDate(today.plus(3, ChronoUnit.MONTHS))
       val data : Map[String, String] = Map(
         "firstPayYear" -> futureDate._1,
@@ -66,8 +65,8 @@ class ValidatorsSpec extends PayeComponentSpec with DateUtil {
   }
 
   "dateRegex" should {
-    "validate 2018-01-01" in {
-      assert("2018-01-01".matches(Validators.datePatternRegex))
+    "validate 2018-01-01T12:00:00" in {
+      assert("2018-01-01T12:00:00".matches(Validators.datePatternRegex))
     }
 
     "not validate 2018-1-1" in {

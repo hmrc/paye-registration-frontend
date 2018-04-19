@@ -36,7 +36,7 @@ class WelcomePageSpec extends PayeComponentSpec with PayeFakedApp with I18nSuppo
   "Welcome" should {
     "display the 2017 PAYE thresholds" when {
       "the system date is before the 6 Apr 2018" in {
-        System.setProperty("feature.system-date", "2018-04-05")
+        System.setProperty("feature.system-date", "2018-04-05T12:00:00")
 
         lazy val welcomeView = Welcome(thresholdService.getCurrentThresholds)
         lazy val document    = Jsoup.parse(welcomeView.body)
@@ -47,7 +47,7 @@ class WelcomePageSpec extends PayeComponentSpec with PayeFakedApp with I18nSuppo
 
     "display the 2018 PAYE thresholds" when {
       "the system date is on the 6 Apr 2018" in {
-        System.setProperty("feature.system-date", "2018-04-06")
+        System.setProperty("feature.system-date", "2018-04-06T12:00:00")
 
         lazy val welcomeView = Welcome(thresholdService.getCurrentThresholds)
         lazy val document    = Jsoup.parse(welcomeView.body)
@@ -56,7 +56,7 @@ class WelcomePageSpec extends PayeComponentSpec with PayeFakedApp with I18nSuppo
       }
 
       "the system date is after the 6 Apr 2018" in {
-        System.setProperty("feature.system-date", "2018-04-10")
+        System.setProperty("feature.system-date", "2018-04-10T12:00:00")
 
         lazy val welcomeView = Welcome(thresholdService.getCurrentThresholds)
         lazy val document    = Jsoup.parse(welcomeView.body)

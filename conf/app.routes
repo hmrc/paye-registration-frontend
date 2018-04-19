@@ -11,7 +11,9 @@ GET        /error/destroy-session                             controllers.userJo
 GET        /error/timeout                                     controllers.userJourney.SignInOutController.timeoutShow
 
 ## PAYE START
-GET         /                                                 controllers.userJourney.PayeStartController.startPaye
+GET         /                                                 controllers.userJourney.PayeStartController.steppingStone()
+
+GET         /start-pay-as-you-earn                            controllers.userJourney.PayeStartController.startPaye
 
 ## PAYE RESTART
 GET         /re-register-as-an-employer                       controllers.userJourney.PayeStartController.restartPaye

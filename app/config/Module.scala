@@ -33,13 +33,18 @@ import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import utils.{FeatureManager, FeatureSwitchManager, PAYEFeatureSwitch, PAYEFeatureSwitches}
 
 class Module extends AbstractModule {
-  override def configure() = {
+  override def configure(): Unit = {
     bindHmrcDependencies()
+    bindStartUpJobs()
     bindUtils()
     bindConnectors()
     bindServices()
     bindOtherControllers()
     bindUserJourneyControllers()
+  }
+
+  private def bindStartUpJobs(): Unit = {
+
   }
 
   private def bindHmrcDependencies(): Unit = {

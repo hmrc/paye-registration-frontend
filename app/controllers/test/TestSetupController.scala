@@ -73,7 +73,7 @@ trait TestSetupController
       _  <- log("RegTeardown", doIndividualRegTeardown(bp.registrationID))
       _  <- log("S4LTeardown", doTearDownS4L(bp.registrationID))
       _  <- log("CCUpdate", testBusinessRegConnector.updateCompletionCapacity(bp.registrationID, "director"))
-    } yield Redirect(controllers.userJourney.routes.PayeStartController.startPaye())
+    } yield Redirect(controllers.userJourney.routes.PayeStartController.steppingStone())
   }
 
   def updateStatus(status: String) = isAuthorised { implicit request =>

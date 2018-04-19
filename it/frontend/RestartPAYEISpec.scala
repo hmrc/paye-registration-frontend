@@ -105,7 +105,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
         val response = await(fResponse)
 
         response.status mustBe 303
-        response.header("Location") mustBe Some("/register-for-paye")
+        response.header("Location") mustBe Some("/register-for-paye/start-pay-as-you-earn")
         verify(deleteRequestedFor(urlEqualTo(s"/keystore/paye-registration-frontend/$SessionId")))
         verify(getRequestedFor(urlEqualTo(s"/business-registration/business-tax-registration")))
         verify(getRequestedFor(urlEqualTo(s"/company-registration/corporation-tax-registration/$regId/corporation-tax-registration")))
@@ -132,7 +132,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
         val response = await(fResponse)
 
         response.status mustBe 303
-        response.header("Location") mustBe Some("/register-for-paye")
+        response.header("Location") mustBe Some("/register-for-paye/start-pay-as-you-earn")
         verify(deleteRequestedFor(urlEqualTo(s"/keystore/paye-registration-frontend/$SessionId")))
       }
     }

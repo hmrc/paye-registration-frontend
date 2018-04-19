@@ -32,6 +32,120 @@ class FeatureSwitchSpec extends PayeComponentSpec {
   val payeFeatureSwitch    = new PAYEFeatureSwitch(featureSwitch)
   val booleanFeatureSwitch = BooleanFeatureSwitch("test", false)
 
+  "apply" should {
+
+    "return a constructed BooleanFeatureSwitch if the set system property is a boolean" in {
+      System.setProperty("feature.test", "true")
+
+      featureSwitch("test") mustBe BooleanFeatureSwitch("test", enabled = true)
+    }
+
+    "create an instance of BooleanFeatureSwitch which inherits FeatureSwitch" in {
+      featureSwitch("test") mustBe a[FeatureSwitch]
+      featureSwitch("test") mustBe a[BooleanFeatureSwitch]
+    }
+
+    "create an instance of EnabledTimedFeatureSwitch which inherits FeatureSwitch" in {
+      System.setProperty("feature.test", "2016-05-05T14:30:00_2016-05-08T14:30:00")
+
+      featureSwitch("test") mustBe a[FeatureSwitch]
+      featureSwitch("test") mustBe a[TimedFeatureSwitch]
+      featureSwitch("test") mustBe a[EnabledTimedFeatureSwitch]
+    }
+
+    "return an enabled EnabledTimedFeatureSwitch when only the end datetime is specified and is in the future" in {
+      System.setProperty("feature.test", "X_9999-05-08T14:30:00")
+
+      featureSwitch("test")         mustBe a[EnabledTimedFeatureSwitch]
+      featureSwitch("test").enabled mustBe true
+    }
+
+    "return a disabled EnabledTimedFeatureSwitch when only the end datetime is specified and is in the past" in {
+      System.setProperty("feature.test", "X_2000-05-08T14:30:00")
+
+      featureSwitch("test")         mustBe a[EnabledTimedFeatureSwitch]
+      featureSwitch("test").enabled mustBe false
+    }
+
+    "return an enabled EnabledTimedFeatureSwitch when only the start datetime is specified and is in the past" in {
+      System.setProperty("feature.test", "2000-05-05T14:30:00_X")
+
+      featureSwitch("test")         mustBe a[EnabledTimedFeatureSwitch]
+      featureSwitch("test").enabled mustBe true
+    }
+
+    "return a disabled TimedFeatureSwitch when neither date is specified" in {
+      System.setProperty("feature.test", "X_X")
+
+      featureSwitch("test").enabled mustBe false
+    }
+
+    "create an instance of DisabledTimedFeatureSwitch which inherits FeatureSwitch" in {
+      System.setProperty("feature.test", "!2016-05-05T14:30:00_2016-05-08T14:30:00")
+
+      featureSwitch("test") mustBe a[FeatureSwitch]
+      featureSwitch("test") mustBe a[TimedFeatureSwitch]
+      featureSwitch("test") mustBe a[DisabledTimedFeatureSwitch]
+    }
+
+    "return an enabled DisabledTimedFeatureSwitch when only the end datetime is specified and is in the future" in {
+      System.setProperty("feature.test", "!X_9999-05-08T14:30:00")
+
+      featureSwitch("test")         mustBe a[DisabledTimedFeatureSwitch]
+      featureSwitch("test").enabled mustBe false
+    }
+
+    "return a disabled DisabledTimedFeatureSwitch when only the end datetime is specified and is in the past" in {
+      System.setProperty("feature.test", "!X_2000-05-08T14:30:00")
+
+      featureSwitch("test")         mustBe a[DisabledTimedFeatureSwitch]
+      featureSwitch("test").enabled mustBe true
+    }
+
+    "return an enabled DisabledTimedFeatureSwitch when only the start datetime is specified and is in the past" in {
+      System.setProperty("feature.test", "!2000-05-05T14:30:00_X")
+
+      featureSwitch("test")         mustBe a[DisabledTimedFeatureSwitch]
+      featureSwitch("test").enabled mustBe false
+    }
+
+    "return an enabled DisabledTimedFeatureSwitch when neither date is specified" in {
+      System.setProperty("feature.test", "!X_X")
+
+      featureSwitch("test").enabled mustBe true
+    }
+  }
+
+  "unapply" should {
+
+    "deconstruct a given FeatureSwitch into it's name and a false enabled value if undefined as a system property" in {
+      val fs = featureSwitch("test")
+
+      featureSwitch.unapply(fs) mustBe Some("test" -> false)
+    }
+
+    "deconstruct a given FeatureSwitch into its name and true if defined as true as a system property" in {
+      System.setProperty("feature.test", "true")
+      val fs = featureSwitch("test")
+
+      featureSwitch.unapply(fs) mustBe Some("test" -> true)
+    }
+
+    "deconstruct a given FeatureSwitch into its name and false if defined as false as a system property" in {
+      System.setProperty("feature.test", "false")
+      val fs = featureSwitch("test")
+
+      featureSwitch.unapply(fs) mustBe Some("test" -> false)
+    }
+
+    "deconstruct a given TimedFeatureSwitch into its name and enabled flag if defined as a system property" in {
+      System.setProperty("feature.test", "2016-05-05T14:30:00_2016-05-08T14:30:00")
+      val fs = featureSwitch("test")
+
+      featureSwitch.unapply(fs) mustBe Some("test" -> false)
+    }
+  }
+
   "getProperty" should {
     "return a disabled feature switch if the system property is undefined" in {
       featureSwitch.getProperty("test") mustBe BooleanFeatureSwitch("test", enabled = false)
@@ -47,6 +161,18 @@ class FeatureSwitchSpec extends PayeComponentSpec {
       System.setProperty("feature.test", "false")
 
       featureSwitch.getProperty("test") mustBe BooleanFeatureSwitch("test", enabled = false)
+    }
+
+    "return a EnabledTimedFeatureSwitch when the set system property is a date" in {
+      System.setProperty("feature.test", "2016-05-05T14:30:00_2016-05-08T14:30:00")
+
+      featureSwitch.getProperty("test") mustBe a[EnabledTimedFeatureSwitch]
+    }
+
+    "return a DisabledTimedFeatureSwitch when the set system property is a date" in {
+      System.setProperty("feature.test", "!2016-05-05T14:30:00_2016-05-08T14:30:00")
+
+      featureSwitch.getProperty("test") mustBe a[DisabledTimedFeatureSwitch]
     }
   }
 
@@ -67,7 +193,7 @@ class FeatureSwitchSpec extends PayeComponentSpec {
     }
 
     "return ValueSetFeatureSwitch when supplied system-date and 2018-01-01" in {
-      featureSwitch.setProperty("system-date", "2018-01-01") mustBe ValueSetFeatureSwitch("system-date", "2018-01-01")
+      featureSwitch.setProperty("system-date", "2018-01-01T12:00:00") mustBe ValueSetFeatureSwitch("system-date", "2018-01-01T12:00:00")
     }
   }
 

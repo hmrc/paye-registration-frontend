@@ -27,7 +27,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatestplus.play.PlaySpec
 import play.api.http.{HeaderNames, HttpProtocol, MimeTypes, Status}
-import play.api.mvc.Call
+import play.api.mvc.{Call, Result}
 import play.api.mvc.Results.Redirect
 import play.api.test._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -129,7 +129,9 @@ trait PayeComponentSpec
       with MockitoSugar
 
   object MockAuthRedirects {
-    def redirectToLogin    = Redirect(Call("GET", "/test/login"))
-    def redirectToPostSign = Redirect(Call("GET", "/test/post-sign-in"))
+    def redirectToLogin: Result    = Redirect(Call("GET", "/test/login"))
+    def redirectToPostSign: Result = Redirect(Call("GET", "/test/post-sign-in"))
+    def payeRegElFEUrl             = "/prefe"
+    def payeRegElFEUri             = "/test/"
   }
 }
