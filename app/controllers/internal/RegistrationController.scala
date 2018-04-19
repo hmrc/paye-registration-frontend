@@ -16,16 +16,19 @@
 
 package controllers.internal
 
-import javax.inject.Inject
-
 import connectors.{KeystoreConnector, PAYERegistrationConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.RegistrationDeletion
+import javax.inject.Inject
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.HeaderCarrierConverter
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class RegistrationControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
                                            val payeRegistrationConnector: PAYERegistrationConnector,
@@ -42,8 +45,9 @@ trait RegistrationController extends PayeBaseController {
   val payeRegistrationService: PAYERegistrationService
 
   def delete(regId: String): Action[AnyContent] = Action.async { implicit request =>
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
     authorised() {
-      payeRegistrationService.deletePayeRegistrationInProgress(regId)(hc) map {
+      payeRegistrationService.deletePayeRegistrationInProgress(regId) map {
         case RegistrationDeletion.success       => Ok
         case RegistrationDeletion.invalidStatus => PreconditionFailed
         case RegistrationDeletion.forbidden     =>

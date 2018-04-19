@@ -60,13 +60,14 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
   val regId = "3"
   val companyName = "Foo Ltd"
+  val authorisationToken = "FooBarWizzAuthToken"
 
   "DELETE registration" should {
     "return 401 if user is not authorised for the session" in {
       setupUnauthorised()
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders("X-Session-ID" -> "1112223355556").
+        withHeaders("X-Session-ID" -> "1112223355556","Authorization" -> authorisationToken).
         delete()
 
       val response = await(fResponse)
@@ -82,7 +83,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubKeystoreMetadata(SessionId, regId)
 
       val fResponse = buildClientInternal(s"/4/delete").
-        withHeaders("X-Session-ID" -> SessionId).
+        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
         delete()
 
       val response = await(fResponse)
@@ -117,7 +118,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubPut(s"/keystore/paye-registration-frontend/$SessionId/data/CurrentProfile", 200, dummyS4LResponse)
 
       val fResponse = buildClientInternal(s"/4/delete").
-        withHeaders("X-Session-ID" -> SessionId).
+        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
         delete()
 
       val response = await(fResponse)
@@ -137,7 +138,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubDelete(s"/paye-registration/$regId/delete-in-progress", 412, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders("X-Session-ID" -> SessionId).
+        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
         delete()
 
       val response = await(fResponse)
@@ -157,7 +158,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubDelete(s"/paye-registration/$regId/delete-in-progress", 404, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders("X-Session-ID" -> SessionId).
+        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
         delete()
 
       val response = await(fResponse)
@@ -177,7 +178,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubDelete(s"/paye-registration/$regId/delete-in-progress", 403, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders("X-Session-ID" -> SessionId).
+        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
         delete()
 
       val response = await(fResponse)
@@ -197,7 +198,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubDelete(s"/paye-registration/$regId/delete-in-progress", 500, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders("X-Session-ID" -> SessionId).
+        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
         delete()
 
       val response = await(fResponse)
@@ -215,7 +216,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubDelete(s"/save4later/paye-registration-frontend/$regId", 500, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders("X-Session-ID" -> SessionId).
+        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
         delete()
 
       val response = await(fResponse)
@@ -235,7 +236,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubDelete(s"/paye-registration/$regId/delete-in-progress", 200, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders("X-Session-ID" -> SessionId).
+        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
         delete()
 
       val response = await(fResponse)

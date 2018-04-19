@@ -38,5 +38,3 @@ class PAYECSRFExceptionsFilter(whitelist: Set[String]) extends CSRFExceptionsFil
     }
   }
 }
-
-object PAYECSRFExceptionsFilter extends PAYECSRFExceptionsFilter(Set.empty)
