@@ -16,13 +16,11 @@
 
 package utils
 
-import java.time.LocalDate
-
-import play.api.Logger
+import java.time.LocalDateTime
 
 object SystemDate {
-  def getSystemDate: LocalDate = Option(System.getProperty("feature.system-date")).fold(LocalDate.now()) {
-    case ""    => LocalDate.now()
-    case date  => LocalDate.parse(date)
+  def getSystemDate: LocalDateTime = Option(System.getProperty("feature.system-date")).fold(LocalDateTime.now()) {
+    case ""    => LocalDateTime.now()
+    case date  => LocalDateTime.parse(date)
   }
 }

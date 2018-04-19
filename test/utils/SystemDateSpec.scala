@@ -16,7 +16,7 @@
 
 package utils
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 
 import helpers.PayeComponentSpec
 
@@ -36,22 +36,22 @@ class SystemDateSpec extends PayeComponentSpec {
     "return a LocalDate of today" when {
       "the feature is null" in {
         val result = SystemDate.getSystemDate
-        result mustBe LocalDate.now
+        result.toLocalDate mustBe LocalDate.now
       }
 
       "the feature is ''" in {
         System.setProperty("feature.system-date", "")
 
         val result = SystemDate.getSystemDate
-        result mustBe LocalDate.now
+        result.toLocalDate mustBe LocalDate.now
       }
     }
 
     "return a LocalDate that was previously set" in {
-      System.setProperty("feature.system-date", "2018-01-01")
+      System.setProperty("feature.system-date", "2018-01-01T12:00:00")
 
       val result = SystemDate.getSystemDate
-      result mustBe LocalDate.parse("2018-01-01")
+      result mustBe LocalDateTime.parse("2018-01-01T12:00:00")
     }
   }
 }

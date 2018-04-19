@@ -17,7 +17,7 @@
 package controllers.test
 
 import javax.inject.Inject
-
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import utils._
@@ -46,5 +46,11 @@ trait FeatureSwitchController extends FrontendController {
         case Some(_)  => Future.successful(Ok(feature.toString))
         case None     => Future.successful(BadRequest)
       }
+  }
+
+  def show: Action[AnyContent] = Action.async {
+    implicit request =>
+      val f = payeFeatureSwitch.all.foldLeft("")((s: String, fs: FeatureSwitch) => s + s"""${fs.name} # ${fs.enabled} # ${fs.value}\n""")
+      Future.successful(Ok(f))
   }
 }

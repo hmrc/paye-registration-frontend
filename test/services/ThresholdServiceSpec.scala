@@ -24,7 +24,7 @@ import utils.SystemDate
 class ThresholdServiceSpec extends PayeComponentSpec {
 
   val testService = new ThresholdService {
-    override def now              = SystemDate.getSystemDate
+    override def now: LocalDate   = SystemDate.getSystemDate.toLocalDate
     override val nextTaxYearStart = LocalDate.of(2018, 4, 6)
   }
 
@@ -36,7 +36,7 @@ class ThresholdServiceSpec extends PayeComponentSpec {
   "getCurrentThresholds" should {
     "return a map of the previous tax years thresholds" when {
       "the system date is before the 6 Apr 2018" in {
-        System.setProperty("feature.system-date", "2018-04-05")
+        System.setProperty("feature.system-date", "2018-04-05T12:00:00")
 
         val result = testService.getCurrentThresholds
         result mustBe Map("weekly" -> 113, "monthly" -> 490, "annually" -> 5876)
@@ -45,14 +45,14 @@ class ThresholdServiceSpec extends PayeComponentSpec {
 
     "return a map of the next tax years thresholds" when {
       "the system date is on the 6 Apr 2018" in {
-        System.setProperty("feature.system-date", "2018-04-06")
+        System.setProperty("feature.system-date", "2018-04-06T12:00:00")
 
         val result = testService.getCurrentThresholds
         result mustBe Map("weekly" -> 116, "monthly" -> 503, "annually" -> 6032)
       }
 
       "the system date is after the 6 Apr 2018" in {
-        System.setProperty("feature.system-date", "2018-04-10")
+        System.setProperty("feature.system-date", "2018-04-10T12:00:00")
 
         val result = testService.getCurrentThresholds
         result mustBe Map("weekly" -> 116, "monthly" -> 503, "annually" -> 6032)

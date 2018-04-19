@@ -36,17 +36,18 @@ trait IntegrationSpecBase
 
   override implicit def defaultAwaitTimeout: Timeout = 5.seconds
 
-  override def beforeEach() = {
+  override def beforeEach(): Unit = {
+    super.beforeEach()
     resetWiremock()
   }
 
-  override def beforeAll() = {
+  override def beforeAll(): Unit = {
     super.beforeAll()
     startWiremock()
   }
 
-  override def afterAll() = {
-    stopWiremock()
+  override def afterAll(): Unit = {
     super.afterAll()
+    stopWiremock()
   }
 }

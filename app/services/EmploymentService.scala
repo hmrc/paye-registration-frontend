@@ -35,7 +35,7 @@ case object S4LSaved extends SavedResponse
 case class MongoSaved(employment: EmploymentView) extends SavedResponse
 
 class EmploymentServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,val s4LService: S4LService) extends EmploymentService {
-  def now: LocalDate = SystemDate.getSystemDate
+  def now: LocalDate = SystemDate.getSystemDate.toLocalDate
 }
 
 trait EmploymentService extends DateUtil {

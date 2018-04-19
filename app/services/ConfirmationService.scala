@@ -26,7 +26,7 @@ import utils.{NewTaxYear, SystemDate}
 import scala.concurrent.Future
 
 class ConfirmationServiceImpl @Inject()(val payeRegistrationConnector: PAYERegistrationConnector) extends ConfirmationService {
-  def now: LocalDate  = SystemDate.getSystemDate
+  def now: LocalDate  = SystemDate.getSystemDate.toLocalDate
   val startDate       = NewTaxYear.startPeriod
   val endDate         = NewTaxYear.endPeriod
 }

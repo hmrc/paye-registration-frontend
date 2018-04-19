@@ -22,7 +22,7 @@ import javax.inject.Inject
 import utils.SystemDate
 
 class ThresholdServiceImpl @Inject()() extends ThresholdService {
-  override def now: LocalDate   = SystemDate.getSystemDate
+  override def now: LocalDate   = SystemDate.getSystemDate.toLocalDate
   override val nextTaxYearStart = LocalDate.of(2018, 4, 6)
 }
 

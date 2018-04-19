@@ -119,7 +119,7 @@ class PayeBaseControllerSpec extends PayeComponentSpec with PayeFakedApp {
         }(request)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some("/register-for-paye")
+        redirectLocation(result) mustBe Some("/register-for-paye/start-pay-as-you-earn")
       }
 
       "the user not authorised (redirect to sign in)" in new Setup {

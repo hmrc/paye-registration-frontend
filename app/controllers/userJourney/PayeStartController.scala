@@ -16,18 +16,18 @@
 
 package controllers.userJourney
 
-import javax.inject.Inject
-
 import connectors._
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.{CacheKeys, DownstreamOutcome, RegistrationDeletion}
+import javax.inject.Inject
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
-import play.api.{Configuration, Environment}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
+import utils.PAYEFeatureSwitches
 
 import scala.concurrent.Future
 import scala.util.Try
@@ -36,14 +36,16 @@ class PayeStartControllerImpl @Inject()(val currentProfileService: CurrentProfil
                                         val payeRegistrationService: PAYERegistrationService,
                                         val keystoreConnector: KeystoreConnector,
                                         val authConnector: AuthConnector,
-                                        val env: Environment,
                                         val config: Configuration,
                                         val s4LService: S4LService,
                                         val companyDetailsService: CompanyDetailsService,
                                         val incorpInfoService: IncorporationInformationService,
                                         val businessRegistrationConnector: BusinessRegistrationConnector,
                                         val companyRegistrationConnector: CompanyRegistrationConnector,
-                                        val messagesApi: MessagesApi) extends PayeStartController with AuthRedirectUrls
+                                        val featureSwitches: PAYEFeatureSwitches,
+                                        val messagesApi: MessagesApi) extends PayeStartController with AuthRedirectUrls {
+  override def publicBetaEnabled: Boolean = featureSwitches.publicBeta.enabled
+}
 
 trait PayeStartController extends PayeBaseController {
   val currentProfileService: CurrentProfileService
@@ -54,11 +56,27 @@ trait PayeStartController extends PayeBaseController {
   val compRegFEURL: String
   val compRegFEURI: String
 
+  val payeRegElFEURL: String
+  val payeRegElFEURI: String
+
+  def publicBetaEnabled: Boolean
+
+  def steppingStone(): Action[AnyContent] = Action { implicit request =>
+    if(publicBetaEnabled) {
+      Redirect(s"$payeRegElFEURL$payeRegElFEURI")
+    } else {
+      Redirect(routes.PayeStartController.startPaye())
+    }
+  }
 
   val startPaye = isAuthorisedAndIsOrg { implicit request =>
     checkAndStoreCurrentProfile { profile =>
-      assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId){
-        Redirect(controllers.userJourney.routes.WelcomeController.show())
+      assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId) {
+        if(publicBetaEnabled) {
+          Redirect(routes.EmploymentController.subcontractors())
+        } else {
+          Redirect(routes.WelcomeController.show())
+        }
       }
     }
   }
@@ -93,8 +111,8 @@ trait PayeStartController extends PayeBaseController {
         Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/register"))
       case currentProfile => f(currentProfile)
     } recover {
-      case ex: NotFoundException => Redirect(s"$compRegFEURL$compRegFEURI/register")
-      case _ => InternalServerError(views.html.pages.error.restart())
+      case _: NotFoundException => Redirect(s"https://www.tax.service.gov.uk/business-registration/introduction")
+      case _                    => InternalServerError(views.html.pages.error.restart())
     }
   }
 

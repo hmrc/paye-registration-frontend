@@ -33,7 +33,7 @@ object Validators extends DateUtil {
   val minDate                       = LocalDate.of(1900,1,1)
   val desSessionRegex               = "^[A-Za-z0-9-]{0,60}$"
 
-  val datePatternRegex              = """([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))"""
+  val datePatternRegex              = """(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})"""
 
   private def hasValidPrefix(nino: String) = !invalidPrefixes.exists(nino.toUpperCase.startsWith)
 
@@ -84,7 +84,7 @@ object Validators extends DateUtil {
   def isValidNatureOfBusiness(natureOfBusiness: String): Boolean = natureOfBusiness.matches(natureOfBusinessRegex)
 
   def firstPaymentDateWithinRange(date: LocalDate): Boolean = {
-    lessOrEqualThanXDaysAfter(SystemDate.getSystemDate, date, 61)
+    lessOrEqualThanXDaysAfter(SystemDate.getSystemDate.toLocalDate, date, 61)
   }
 
   def beforeMinDate(date: LocalDate): Boolean = {
