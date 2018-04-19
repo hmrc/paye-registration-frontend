@@ -162,11 +162,11 @@ pages.employingStaff.error                                      = Tell us if ove
 
 
 ## Subcontractors Page
-pages.subcontractors.description                                = Over the next 2 months, will the company use subcontractors in the construction industry?
+pages.subcontractors.description                                = Over the next 2 months, will the company hire subcontractors in the construction industry?
 pages.subcontractors.nameRulesIntro                             = We''ll register you with the Construction Industry Scheme (CIS) if you pay subcontractors to do construction work.
 pages.subcontractors.findout1                                   = Find out
 pages.subcontractors.findout2                                   = what work is covered by the CIS
-pages.subcontractors.error                                      = Tell us if over the next 2 months, the company will use subcontractors in the construction industry
+pages.subcontractors.error                                      = Tell us if the company will use subcontractors in the construction industry over the next 2 months
 
 ## Company Pension Page
 pages.companyPension.description                                = Will the company make pension payments to a former employee or their dependants in the next 2 months?
@@ -353,9 +353,8 @@ errorPages.retrySubmission.p2                                   = Please resend 
 errorPages.retrySubmission.button                               = Resend
 
 ## Failed Submission
-errorPages.failedSubmission.description                         = We couldn''t process your application
-errorPages.failedSubmission.p1                                  = Sorry, there is a technical problem and we couldn''t process your application. Any details you entered have been saved.
-errorPages.failedSubmission.p2                                  = Fill out the form below so we can help you complete your application.
+errorPages.failedSubmission.description                         = Something went wrong
+errorPages.failedSubmission.p1                                  = So that we can help you, please give us the following information.
 
 ## Address Lookup Frontend Configuration
 pages.alf.common.lookupPage.title                               = Search for your address

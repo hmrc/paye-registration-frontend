@@ -107,5 +107,7 @@ $(document).ready($(function() {
     $("#submissionFailedReportAProblem").each(function(){
         $(".report-error__toggle").click();
         $(".report-error__toggle").hide();
+        $("#report-error-partial-form h2:first").remove();
+        $("#report-error-partial-form p:first").remove();
     });
 }));
