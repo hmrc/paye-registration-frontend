@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import common.exceptions.DownstreamExceptions.ConfirmationRefsNotFoundException
 import connectors._
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.{CacheKeys, DownstreamOutcome, RegistrationDeletion}
@@ -111,8 +112,9 @@ trait PayeStartController extends PayeBaseController {
         Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/register"))
       case currentProfile => f(currentProfile)
     } recover {
-      case _: NotFoundException => Redirect(s"https://www.tax.service.gov.uk/business-registration/introduction")
-      case _                    => InternalServerError(views.html.pages.error.restart())
+      case _: NotFoundException                 => Redirect(s"https://www.tax.service.gov.uk/business-registration/introduction")
+      case _: ConfirmationRefsNotFoundException => Redirect(s"$compRegFEURL$compRegFEURI/post-sign-in")
+      case _                                    => InternalServerError(views.html.pages.error.restart())
     }
   }
 

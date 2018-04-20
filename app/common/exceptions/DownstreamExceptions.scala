@@ -25,4 +25,5 @@ trait DownstreamExceptions {
   class OfficerListNotFoundException extends Exception
   class S4LFetchException(msg: String) extends Exception(msg)
   class PPOBAddressNotFoundException extends Exception
+  class ConfirmationRefsNotFoundException extends Exception
 }

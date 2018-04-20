@@ -16,6 +16,8 @@
 
 package connectors
 
+import common.exceptions
+import common.exceptions.DownstreamExceptions
 import javax.inject.Inject
 import config.WSHttp
 import models.external.CompanyRegistrationProfile
@@ -56,15 +58,21 @@ trait CompanyRegistrationConnector {
     http.GET[JsObject](s"$url/$regId/corporation-tax-registration") map { response =>
       companyRegTimer.stop()
       val status    = (response \ "status").as[String]
-      val txId      = (response \ "confirmationReferences"    \ "transaction-id").as[String]
+      val txId      = (response \ "confirmationReferences"    \ "transaction-id").validate[String].fold(
+        _ => throw new exceptions.DownstreamExceptions.ConfirmationRefsNotFoundException,
+        identity
+      )
       val ackStatus = (response \ "acknowledgementReferences" \ "status").asOpt[String]
-
       CompanyRegistrationProfile(status, txId, ackStatus)
     } recover {
       case badRequestErr: BadRequestException =>
         companyRegTimer.stop()
         logger.error(s"[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received a BadRequest status code when expecting a Company Registration document for reg id: $regId")
         throw badRequestErr
+      case noRefsErr: DownstreamExceptions.ConfirmationRefsNotFoundException =>
+        companyRegTimer.stop()
+        logger.error(s"[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received an error when expecting a Company Registration document for reg id: $regId could not find confirmation references (has user completed Incorp/CT?)")
+        throw noRefsErr
       case ex: Exception =>
         companyRegTimer.stop()
         logger.error(s"[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received an error when expecting a Company Registration document for reg id: $regId - error: ${ex.getMessage}")
