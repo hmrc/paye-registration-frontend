@@ -112,7 +112,7 @@ trait PayeStartController extends PayeBaseController {
         Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/register"))
       case currentProfile => f(currentProfile)
     } recover {
-      case _: NotFoundException                 => Redirect(s"https://www.tax.service.gov.uk/business-registration/introduction")
+      case _: NotFoundException                 => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
       case _: ConfirmationRefsNotFoundException => Redirect(s"$compRegFEURL$compRegFEURI/post-sign-in")
       case _                                    => InternalServerError(views.html.pages.error.restart())
     }
