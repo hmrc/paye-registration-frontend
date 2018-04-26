@@ -109,11 +109,11 @@ trait PayeStartController extends PayeBaseController {
       case CurrentProfile(_, CompanyRegistrationProfile(_, _, Some(a)), _, _) if Try(a.toInt).getOrElse(6) >= 6 =>
         Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/post-sign-in"))
       case CurrentProfile(_, compRegProfile, _, _) if compRegProfile.status equals "draft" =>
-        Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/register"))
+        Future.successful(Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes"))
       case currentProfile => f(currentProfile)
     } recover {
       case _: NotFoundException                 => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
-      case _: ConfirmationRefsNotFoundException => Redirect(s"$compRegFEURL$compRegFEURI/post-sign-in")
+      case _: ConfirmationRefsNotFoundException => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
       case _                                    => InternalServerError(views.html.pages.error.restart())
     }
   }

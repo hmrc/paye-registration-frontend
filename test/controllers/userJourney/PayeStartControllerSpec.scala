@@ -164,7 +164,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       }
     }
 
-    "redirect to the CT start page for a user with no CT Footprint found" in new Setup {
+    "redirect to OTRS for a user with no CT Footprint found" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new NotFoundException("404")))
 
@@ -175,14 +175,27 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       }
     }
 
-    "redirect the user to the start of Incorporation and Corporation Tax if their Company Registration document has a status of 'draft'" in new Setup {
+    "redirect to OTRS for a user with no CT confirmation references" in new Setup {
+      import common.exceptions.DownstreamExceptions.ConfirmationRefsNotFoundException
+
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new ConfirmationRefsNotFoundException))
+
+      AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
+        result =>
+          status(result) mustBe Status.SEE_OTHER
+          redirectLocation(result) mustBe Some("https://www.tax.service.gov.uk/business-registration/select-taxes")
+      }
+    }
+
+    "redirect the user to OTRS if their Company Registration document has a status of 'draft'" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("draft")))
 
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
           status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result) mustBe Some(s"${controller().compRegFEURL}${controller().compRegFEURI}/register")
+          redirectLocation(result) mustBe Some("https://www.tax.service.gov.uk/business-registration/select-taxes")
       }
     }
 
