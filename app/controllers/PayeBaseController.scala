@@ -137,7 +137,7 @@ trait AuthRedirectUrls {
     s"$companyAuthHost$loginPath"
   }
 
-  private lazy val continueUrl = s"$loginCallback${userJourneyRoutes.SignInOutController.postSignIn()}"
+  private lazy val continueUrl = s"$loginCallback${userJourneyRoutes.PayeStartController.startPaye()}"
 
   lazy val redirectToLogin: Result = Redirect(buildCompanyAuthUrl, Map(
     "continue" -> Seq(continueUrl),
