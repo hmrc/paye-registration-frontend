@@ -109,7 +109,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showAuthorisedNotOrg(controller().startPaye, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/post-sign-in")
+          redirectLocation(result) mustBe Some("https://www.tax.service.gov.uk/business-registration/select-taxes")
       }
     }
 

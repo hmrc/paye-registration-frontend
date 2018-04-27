@@ -87,8 +87,8 @@ trait PayeBaseController extends FrontendController with AuthorisedFunctions wit
       if(aG.contains(Organisation)) {
         f(request)
       } else {
-        logger.warn(s"User attempting to access ${request.path} doesn't have org affinity redirecting to $redirectToPostSign")
-        Future.successful(redirectToPostSign)
+        logger.warn(s"User attempting to access ${request.path} doesn't have org affinity redirecting to OTRS")
+        Future(Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes"))
       }
     } recover {
       case _: InsufficientConfidenceLevel =>

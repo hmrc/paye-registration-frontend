@@ -169,7 +169,7 @@ class PayeBaseControllerSpec extends PayeComponentSpec with PayeFakedApp {
         }(request)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some("/test/post-sign-in")
+        redirectLocation(result) mustBe Some("https://www.tax.service.gov.uk/business-registration/select-taxes")
       }
 
       "the user is authorised but has no affinity" in new Setup {
@@ -183,7 +183,7 @@ class PayeBaseControllerSpec extends PayeComponentSpec with PayeFakedApp {
         }(request)
 
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some("/test/post-sign-in")
+        redirectLocation(result) mustBe Some("https://www.tax.service.gov.uk/business-registration/select-taxes")
       }
 
       "the user is not authorised" in new Setup {
