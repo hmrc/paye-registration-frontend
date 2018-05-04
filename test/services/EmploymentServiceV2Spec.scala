@@ -42,8 +42,8 @@ class EmploymentServiceV2Spec extends PayeComponentSpec {
   val notEmployingApiModel        = EmploymentV2(Employing.notEmploying, testService.now, false, false, None)
   val willEmployThisYearViewModel = EmployingStaffV2(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(true))), Some(false), None, None)
   val willEmployThisYearApiModel  = EmploymentV2(Employing.willEmployThisYear, testService.now , false, false, None)
-  val willEmployNextYearViewModel = EmployingStaffV2(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(false))), Some(false), None, None)
-  val willEmployNextYearApiModel  = EmploymentV2(Employing.willEmployNextYear, LocalDate.of(2018, 4, 6), false, false, None)
+  val willEmployNextYearViewModel = EmployingStaffV2(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(false))), Some(true), Some(false), None)
+  val willEmployNextYearApiModel  = EmploymentV2(Employing.willEmployNextYear, LocalDate.of(2018, 4, 6), true, false, None)
 
   "calling viewToAPIV2 with EmployingStaffV2" should {
     "return corresponding converted EmploymentV2 API Model with Employing = alreadyEmploying" in {

@@ -19,7 +19,7 @@ package forms.test
 import java.time.LocalDate
 
 import enums.PAYEStatus
-import forms.helpers.{DateForm, RequiredBooleanForm}
+import forms.helpers.{CustomDateForm, DateForm, RequiredBooleanForm}
 import models.api._
 import models.view.{EmployingAnyone, EmployingStaffV2, PAYEContactDetails, WillBePaying}
 import models.{Address, DigitalContactDetails}
@@ -27,10 +27,13 @@ import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError, Forms, Mapping}
 
-object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
+object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm with CustomDateForm {
 
   override val prefix = "employment.firstPayDate"
+  override val customFormPrefix = "employmentInfo.earliestDate"
+
   override def validation(dt: LocalDate) = Right(dt)
+  override def validation(dt: LocalDate, cdt: LocalDate) = Right(dt)
 
   implicit def payeStatusFormatter: Formatter[PAYEStatus.Value] = new Formatter[PAYEStatus.Value] {
     def bind(key: String, data: Map[String, String]) = {
@@ -67,10 +70,10 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
 
   def employmentInfoMapping: Mapping[EmploymentV2] = mapping(
     "employees" -> employingStatus,
-    "earliestDate" -> threePartDate,
-    "cis" -> boolean,
-    "subcontractors" -> boolean,
-    "pensions" -> optional(boolean)
+    "earliestDate" -> threePartDateWithComparison(LocalDate.now),
+    "cis" -> requiredBoolean,
+    "subcontractors" -> requiredBoolean,
+    "pensions" -> optional(requiredBoolean)
   )(EmploymentV2.apply)(EmploymentV2.unapply)
 
   def employmentMapping: Mapping[Employment] = mapping(

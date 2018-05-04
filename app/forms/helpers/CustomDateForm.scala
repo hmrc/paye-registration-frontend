@@ -25,28 +25,28 @@ import utils.DateUtil
 import scala.util.Try
 
 trait CustomDateForm extends DateUtil {
-  val prefix: String
+  val customFormPrefix: String
 
   def validation(dt: LocalDate, cdt: LocalDate): Either[Seq[FormError], LocalDate]
 
   def dateFormatter(date: LocalDate) = new Formatter[LocalDate] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
-      (data.get(s"${prefix}Day"), data.get(s"${prefix}Month"), data.get(s"${prefix}Year")) match {
-        case (Some(""), _, _) | (_, Some(""), _) | (_, _, Some("")) | (None, None, None) => Left(Seq(FormError(s"${prefix}-fieldset", "pages.paidEmployees.date.empty")))
+      (data.get(s"${customFormPrefix}Day"), data.get(s"${customFormPrefix}Month"), data.get(s"${customFormPrefix}Year")) match {
+        case (Some(""), _, _) | (_, Some(""), _) | (_, _, Some("")) | (None, None, None) => Left(Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.empty")))
         case (Some(day), Some(month), Some(year)) =>
           Try(toDate(year, month, day)).toOption match {
             case Some(dt) => validation(dt, date)
-            case None     => Left(Seq(FormError(s"${prefix}-fieldset", "pages.paidEmployees.date.invalid")))
+            case None     => Left(Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.invalid")))
           }
       }
     }
 
     override def unbind(key: String, value: LocalDate): Map[String, String] = Map(
-      s"${prefix}Day"   -> value.getDayOfMonth.toString,
-      s"${prefix}Month" -> value.getMonthValue.toString,
-      s"${prefix}Year"  -> value.getYear.toString
+      s"${customFormPrefix}Day"   -> value.getDayOfMonth.toString,
+      s"${customFormPrefix}Month" -> value.getMonthValue.toString,
+      s"${customFormPrefix}Year"  -> value.getYear.toString
     )
   }
 
-  def threePartDate(date: LocalDate): Mapping[LocalDate] = Forms.of[LocalDate](dateFormatter(date))
+  def threePartDateWithComparison(date: LocalDate): Mapping[LocalDate] = Forms.of[LocalDate](dateFormatter(date))
 }
