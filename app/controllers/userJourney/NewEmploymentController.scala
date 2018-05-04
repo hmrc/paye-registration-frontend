@@ -52,8 +52,8 @@ trait NewEmploymentController extends PayeBaseController {
 
   private val handleJourneyPostConstruction: EmployingStaffV2 => Result = {
     case EmployingStaffV2(Some(EmployingAnyone(true, _)), _, _, _, None) => Redirect(controllers.userJourney.routes.NewEmploymentController.pensions())
-    case EmployingStaffV2(Some(EmployingAnyone(false, _)), Some(WillBePaying(true, _)), _, _, None) => Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
-    case EmployingStaffV2(Some(EmployingAnyone(false, _)), Some(WillBePaying(false, _)), Some(false), _, None) => Redirect(controllers.errors.routes.ErrorController.newIneligible())
+    case EmployingStaffV2(_, Some(WillBePaying(true, _)), _, _, None) => Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+    case EmployingStaffV2(_, Some(WillBePaying(false, _)), Some(false), _, None) => Redirect(controllers.errors.routes.ErrorController.newIneligible())
     case _ => NotImplemented
   }
 

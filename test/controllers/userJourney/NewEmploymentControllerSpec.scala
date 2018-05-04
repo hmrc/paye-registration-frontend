@@ -63,6 +63,9 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
   def dynamicViewModel(ea: Boolean = false, wbp: Boolean = false, nty: Boolean = false, cis: Boolean = false, subContractor: Boolean = false) =
     EmployingStaffV2(Some(EmployingAnyone(ea, Some(LocalDate.now()))), Some(WillBePaying(wbp, Some(nty))), Some(cis), Some(subContractor), None)
 
+  def dynamicViewModelNoDate(wbp: Boolean = false, nty: Boolean = false, cis: Boolean = false, subContractor: Boolean = false) =
+    EmployingStaffV2(None, Some(WillBePaying(wbp, Some(nty))), Some(cis), Some(subContractor), None)
+
 
   "paidEmployees" should {
     "redirect if the user is not authorised" in {
@@ -406,6 +409,36 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
       when(mockEmploymentServiceV2.saveConstructionIndustry(ArgumentMatchers.any(), ArgumentMatchers.eq(false))(ArgumentMatchers.any()))
         .thenReturn(Future.successful(dynamicViewModel()))
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.errors.routes.ErrorController.newIneligible().url)
+      }
+    }
+
+    "redirect to the completion capacity page if no is selected and the company will pay employees and no incorp date" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "inConstructionIndustry" -> "false"
+      )
+
+      when(mockEmploymentServiceV2.saveConstructionIndustry(ArgumentMatchers.any(), ArgumentMatchers.eq(false))(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(dynamicViewModelNoDate(wbp = true)))
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity().url)
+      }
+    }
+
+    "redirect to the don't register page if no is selected and the company will not and has never paid employees and no incorp date" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "inConstructionIndustry" -> "false"
+      )
+
+      when(mockEmploymentServiceV2.saveConstructionIndustry(ArgumentMatchers.any(), ArgumentMatchers.eq(false))(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(dynamicViewModelNoDate()))
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
         result =>
