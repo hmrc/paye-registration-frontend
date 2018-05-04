@@ -17,10 +17,10 @@
 package services
 
 import java.time.LocalDate
-import javax.inject.Inject
 
 import connectors.PAYERegistrationConnector
 import enums.CacheKeys
+import javax.inject.Inject
 import models.api.{Employment => EmploymentAPI}
 import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment => EmploymentView, FirstPayment => FirstPaymentView}
 import play.api.libs.json.Json
@@ -33,6 +33,7 @@ import scala.concurrent.Future
 sealed trait SavedResponse
 case object S4LSaved extends SavedResponse
 case class MongoSaved(employment: EmploymentView) extends SavedResponse
+
 
 class EmploymentServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,val s4LService: S4LService) extends EmploymentService {
   def now: LocalDate = SystemDate.getSystemDate.toLocalDate

@@ -52,7 +52,8 @@ class SummaryServiceSpec extends PayeComponentSpec {
       Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK")),
       businessContactDetails = Fixtures.validBusinessContactDetails
     ),
-    employment = Fixtures.validEmploymentAPI,
+    employment = Some(Fixtures.validEmploymentAPI),
+    employmentInfo = Some(Fixtures.validEmploymentApiV2),
     sicCodes = simpleSICCodes,
     directors = List(
       Director(
@@ -233,7 +234,7 @@ class SummaryServiceSpec extends PayeComponentSpec {
   "Calling registrationToSummary" should {
     "convert a PAYE Registration API Model  to a summary model with a trading name" in new Setup {
 
-      service.registrationToSummary(apiRegistration) mustBe summary
+      service.registrationToSummary(apiRegistration, "regId") mustBe summary
     }
 
     "convert a PAYE Registration API Model  to a summary model without a trading name" in new Setup {
@@ -252,7 +253,8 @@ class SummaryServiceSpec extends PayeComponentSpec {
           Address("15 St Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE4 1ST"), Some("UK")),
           businessContactDetails = Fixtures.validBusinessContactDetails
         ),
-        employment = Fixtures.validEmploymentAPI,
+        employment = Some(Fixtures.validEmploymentAPI),
+        employmentInfo = Some(Fixtures.validEmploymentApiV2),
         sicCodes = simpleSICCodes,
         directors = List(
           Director(
@@ -398,7 +400,7 @@ class SummaryServiceSpec extends PayeComponentSpec {
           )
         )
       )
-      service.registrationToSummary(apiRegistrationNoTName) mustBe summaryNoTName
+      service.registrationToSummary(apiRegistrationNoTName, "regId") mustBe summaryNoTName
     }
   }
 
@@ -505,7 +507,7 @@ class SummaryServiceSpec extends PayeComponentSpec {
         )
       )
 
-      service.buildEmploymentSection(validEmploymentAPIFalse) mustBe employmentSection
+      service.buildEmploymentSection(Some(validEmploymentAPIFalse), "regId") mustBe employmentSection
     }
   }
 

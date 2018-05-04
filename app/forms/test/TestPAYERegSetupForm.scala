@@ -19,18 +19,21 @@ package forms.test
 import java.time.LocalDate
 
 import enums.PAYEStatus
-import forms.helpers.{DateForm, RequiredBooleanForm}
+import forms.helpers.{CustomDateForm, DateForm, RequiredBooleanForm}
 import models.api._
-import models.view.PAYEContactDetails
+import models.view.{EmployingAnyone, EmployingStaffV2, PAYEContactDetails, WillBePaying}
 import models.{Address, DigitalContactDetails}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError, Forms, Mapping}
 
-object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
+object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm with CustomDateForm {
 
   override val prefix = "employment.firstPayDate"
+  override val customFormPrefix = "employmentInfo.earliestDate"
+
   override def validation(dt: LocalDate) = Right(dt)
+  override def validation(dt: LocalDate, cdt: LocalDate) = Right(dt)
 
   implicit def payeStatusFormatter: Formatter[PAYEStatus.Value] = new Formatter[PAYEStatus.Value] {
     def bind(key: String, data: Map[String, String]) = {
@@ -48,6 +51,37 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
   }
 
   val payeStatus: Mapping[PAYEStatus.Value] = Forms.of[PAYEStatus.Value](payeStatusFormatter)
+
+
+  implicit def employingStatusFormatter: Formatter[Employing.Value] = new Formatter[Employing.Value] {
+    def bind(key: String, data: Map[String, String]) = {
+      Right(data.getOrElse(key,"")).right.flatMap {
+        case "alreadyEmploying"   => Right(Employing.alreadyEmploying)
+        case "willEmployNextYear" => Right(Employing.willEmployNextYear)
+        case "willEmployThisYear" => Right(Employing.willEmployThisYear)
+        case "notEmploying"       => Right(Employing.notEmploying)
+        case _                    => Left(Seq(FormError(key, "error.required", Nil)))
+      }
+    }
+    def unbind(key: String, value: Employing.Value) = Map(key -> value.toString)
+  }
+
+  val employingStatus: Mapping[Employing.Value] = Forms.of[Employing.Value](employingStatusFormatter)
+
+  def employmentInfoMapping: Mapping[EmploymentV2] = mapping(
+    "employees" -> employingStatus,
+    "earliestDate" -> threePartDateWithComparison(LocalDate.now),
+    "cis" -> requiredBoolean,
+    "subcontractors" -> requiredBoolean,
+    "pensions" -> optional(requiredBoolean)
+  )(EmploymentV2.apply)(EmploymentV2.unapply)
+
+  def employmentMapping: Mapping[Employment] = mapping(
+    "employees"       -> requiredBoolean,
+    "companyPension"  -> optional(requiredBoolean),
+    "subcontractors"  -> requiredBoolean,
+    "firstPayDate"    -> threePartDate
+  )(Employment.apply)(Employment.unapply)
 
   val form = Form(
     mapping(
@@ -83,12 +117,8 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm {
           "phoneNumber"   -> optional(text)
         )(DigitalContactDetails.apply)(DigitalContactDetails.unapply)
       )(CompanyDetails.apply)(CompanyDetails.unapply),
-      "employment" -> mapping(
-        "employees"       -> requiredBoolean,
-        "companyPension"  -> optional(requiredBoolean),
-        "subcontractors"  -> requiredBoolean,
-        "firstPayDate"    -> threePartDate
-      )(Employment.apply)(Employment.unapply),
+      "employment" -> optional(employmentMapping),
+      "employmentInfo" -> optional(employmentInfoMapping),
       "sicCodes" -> list(mapping(
         "code"        -> optional(text),
         "description" -> optional(text)

@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 import config.WSHttp
 import enums.{DownstreamOutcome, PAYEStatus, RegistrationDeletion}
-import models.api.{Director, Eligibility, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
+import models.api.{Director, Eligibility, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, EmploymentV2 => EmploymentAPIV2, PAYERegistration => PAYERegistrationAPI}
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, Reads}
 import services.MetricsService
@@ -140,6 +140,35 @@ trait PAYERegistrationConnector {
   def upsertEmployment(regID: String, employment: EmploymentAPI)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPI]): Future[EmploymentAPI] = {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
     http.PATCH[EmploymentAPI, EmploymentAPI](s"$payeRegUrl/paye-registration/$regID/employment", employment) map { resp =>
+      payeRegTimer.stop()
+      resp
+    } recover {
+      case e: Exception =>
+        payeRegTimer.stop()
+        throw logResponse(e, "upsertEmployment", "upserting employment", regID)
+    }
+  }
+
+  //TODO: Update Uri to match new API
+  def getEmploymentV2(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPIV2]): Future[Option[EmploymentAPIV2]] = {
+    val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
+    http.GET[HttpResponse](s"$payeRegUrl/paye-registration/$regID/employment-info") map { employment =>
+      payeRegTimer.stop()
+      if(employment.status == 204) None else employment.json.asOpt[EmploymentAPIV2]
+    } recover {
+      case _: NotFoundException =>
+        payeRegTimer.stop()
+        None
+      case e: Exception =>
+        payeRegTimer.stop()
+        throw logResponse(e, "getEmployment", "getting employment", regID)
+    }
+  }
+
+  //TODO: Update Uri to match new API
+  def upsertEmploymentV2(regID: String, employment: EmploymentAPIV2)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPI]): Future[EmploymentAPIV2] = {
+    val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
+    http.PATCH[EmploymentAPIV2, EmploymentAPIV2](s"$payeRegUrl/paye-registration/$regID/employment-info", employment) map { resp =>
       payeRegTimer.stop()
       resp
     } recover {

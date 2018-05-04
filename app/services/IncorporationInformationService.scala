@@ -16,9 +16,11 @@
 
 package services
 
-import javax.inject.Inject
+import java.time.LocalDate
 
+import javax.inject.Inject
 import connectors._
+import controllers.exceptions.GeneralException
 import models.api.Director
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import models.view.Directors
@@ -42,6 +44,12 @@ trait IncorporationInformationService {
       case IncorpInfoNotFoundResponse                => throw new NotFoundException(s"Received a NotFound status code when expecting company details for regId: $regId / TX-ID: $txId")
       case IncorpInfoErrorResponse(ex)               => throw ex
     }
+  }
+
+  def getIncorporationDate(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[Option[LocalDate]] = incorpInfoConnector.getIncorporationInfo(regId, txId).map (
+    js => (js \ "incorporationDate").asOpt[String].map(LocalDate.parse)
+  ) recover {
+    case e: Exception => throw GeneralException(s"[IncorpInfoService][getIncorpDate] an exception occurred for regId: $regId, txId: $txId error - ${e.getMessage}")
   }
 
   def getDirectorDetails(txId: String,regId:String)(implicit hc: HeaderCarrier): Future[Directors] = {

@@ -93,7 +93,9 @@ trait PayeComponentSpec
       mockIncorpInfoService,
       mockCompanyDetailsService,
       mockS4LService,
-      mockThresholdService
+      mockThresholdService,
+      mockEmploymentService,
+      mockEmploymentServiceV2
     )
   }
 

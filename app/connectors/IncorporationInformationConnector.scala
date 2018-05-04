@@ -17,14 +17,15 @@
 package connectors
 
 import javax.inject.Inject
-
 import com.codahale.metrics.{Counter, Timer}
 import common.exceptions.DownstreamExceptions.OfficerListNotFoundException
 import config.WSHttp
+import controllers.exceptions.GeneralException
 import models.external.{CoHoCompanyDetailsModel, OfficerList}
+import org.apache.http.HttpStatus
 import play.api.libs.json._
 import services.MetricsService
-import uk.gov.hmrc.http.{BadRequestException, CoreGet, HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.RegistrationWhitelist
@@ -85,6 +86,19 @@ trait IncorporationInformationConnector extends RegistrationWhitelist {
           IncorpInfoErrorResponse(ex)
       }
     }
+  }
+
+  def getIncorporationInfo(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[JsValue] = {
+    val incorpInfoTimer = metricsService.incorpInfoResponseTimer.time()
+    http.GET[HttpResponse](s"$incorpInfoUrl$incorpInfoUri/$txId/incorporation-update") map {
+      case value => incorpInfoTimer.stop()
+        if (value.status == 204) Json.obj() else value.json
+    }
+  } recover {
+    case e: Exception =>
+      throw GeneralException (
+        s"[IncorporationInformationConnector][getIncorporationInfo] an error occurred while getting the incorporation info for regId: $regId and txId: $txId - error: ${e.getMessage}"
+      )
   }
 
   def getOfficerList(transactionId: String, regId:String)(implicit hc : HeaderCarrier): Future[OfficerList] = {

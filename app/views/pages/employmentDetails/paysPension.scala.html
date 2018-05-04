@@ -1,0 +1,33 @@
+@import helpers.templates.{payeInputRadioGroup, payeErrorSummary}
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+
+@(pensionsForm: Form[Boolean])(implicit request: Request[_], messages: Messages)
+
+@main_template(title = Messages("pages.paysPension.title")) {
+    @payeErrorSummary(
+        Messages("app.common.errorSummaryLabel"), pensionsForm, dataJourney=Some("CompanyPension")
+    )
+
+    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.paysPension.description")</h1>
+
+    @govHelpers.form(action = controllers.userJourney.routes.NewEmploymentController.submitPensions) {
+
+        <div class="inline form-group">
+            @payeInputRadioGroup(
+                pensionsForm("paysPension"),
+                Seq(
+                    "true"->Messages("app.common.yes"),
+                    "false"->Messages("app.common.no")
+                ),
+                '_legend -> Messages("pages.paysPension.description"),
+                '_legendID -> "paysPension",
+                '_helpText -> None,
+                '_labelAfter -> true,
+                '_labelClass -> "block-label",
+                '_groupClass -> "inline"
+            )
+        </div>
+
+        <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
+    }
+}

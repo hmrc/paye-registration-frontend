@@ -46,6 +46,7 @@ class PayeStartControllerImpl @Inject()(val currentProfileService: CurrentProfil
                                         val featureSwitches: PAYEFeatureSwitches,
                                         val messagesApi: MessagesApi) extends PayeStartController with AuthRedirectUrls {
   override def publicBetaEnabled: Boolean = featureSwitches.publicBeta.enabled
+  override def newApiEnabled: Boolean = featureSwitches.newApiStructure.enabled
 }
 
 trait PayeStartController extends PayeBaseController {
@@ -61,6 +62,7 @@ trait PayeStartController extends PayeBaseController {
   val payeRegElFEURI: String
 
   def publicBetaEnabled: Boolean
+  def newApiEnabled: Boolean
 
   def steppingStone(): Action[AnyContent] = Action { implicit request =>
     if(publicBetaEnabled) {
@@ -74,7 +76,11 @@ trait PayeStartController extends PayeBaseController {
     checkAndStoreCurrentProfile { profile =>
       assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId) {
         if(publicBetaEnabled) {
-          Redirect(routes.EmploymentController.subcontractors())
+          if(newApiEnabled) {
+            Redirect(routes.NewEmploymentController.paidEmployees())
+          } else {
+            Redirect(routes.EmploymentController.subcontractors())
+          }
         } else {
           Redirect(routes.WelcomeController.show())
         }

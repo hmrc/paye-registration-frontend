@@ -34,3 +34,5 @@ GET        /update-cc                                    controllers.test.TestCC
 POST       /update-cc                                    controllers.test.TestCCController.submitUpdateCC
 
 GET        /set-session-id/:sessionId                    controllers.test.EditSessionController.setSessionId(sessionId: String)
+
+GET        /add-incorp-update-to-ii                      controllers.test.TestSetupController.addIncorpUpdate(success: Boolean ?= false, incorpDate: Option[String] ?= None, crn: Option[String] ?= None)
