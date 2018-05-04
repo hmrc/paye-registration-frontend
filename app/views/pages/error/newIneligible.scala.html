@@ -1,0 +1,21 @@
+@(threshold : Int)(implicit request: Request[_], messages: Messages)
+
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+
+@main_template(title = messages("errorPages.newIneligible.title")) {
+
+  <h1 class="heading-xlarge">@messages("errorPages.newIneligible.description")</h1>
+
+  <p>@messages("errorPages.newIneligible.para")</p>
+
+  <ul class="list-bullet">
+    <li>@messages("errorPages.newIneligible.bullet1",threshold)</li>
+    <li>@messages("errorPages.newIneligible.bullet2")</li>
+    <li>@messages("errorPages.newIneligible.bullet3")</li>
+    <li>@messages("errorPages.newIneligible.bullet4")</li>
+  </ul>
+
+    <div class="form-group">
+      <a href="https://www.gov.uk/" >@messages("errorPages.newIneligible.link")</a>
+    </div>
+}

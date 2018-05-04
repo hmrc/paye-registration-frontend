@@ -85,8 +85,8 @@ trait EmailService {
             firstPaymentDate = firstPaymentDate
           ))
         } yield emailResponse).recover {
-          case e =>
-            logger.error(s"[sendAcknowledgementEmail] - There was a problem sending the acknowledgement email for regId ${profile.registrationID} : txId ${profile.companyTaxRegistration.transactionId}", e)
+          case _ =>
+            logger.warn(s"[sendAcknowledgementEmail] - There was a problem sending the acknowledgement email for regId ${profile.registrationID} : txId ${profile.companyTaxRegistration.transactionId}")
             EmailDifficulties
         }
       }

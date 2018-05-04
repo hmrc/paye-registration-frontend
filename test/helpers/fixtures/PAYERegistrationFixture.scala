@@ -46,6 +46,14 @@ trait PAYERegistrationFixture {
                                   subcontractors = true,
                                   firstPayDate = validDate)
 
+  val validEmploymentApiV2 = EmploymentV2(
+    employees = Employing.willEmployNextYear,
+    firstPaymentDate = LocalDate.of(2018, 1, 1),
+    construction = true,
+    subcontractors = true,
+    companyPension = None
+  )
+
 
   val validSICCodes = List(SICCode(None, Some("Accounting")))
 

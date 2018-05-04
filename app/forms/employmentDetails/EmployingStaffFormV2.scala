@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package models.api
+package forms.employmentDetails
 
-import java.time.LocalDate
 
-import play.api.libs.functional.syntax._
-import play.api.libs.json.__
+import forms.helpers.BooleanForm
+import models.view.WillBePaying
+import play.api.data.Form
+import play.api.data.Forms._
+import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
 
-case class Employment(employees: Boolean,
-                      companyPension: Option[Boolean],
-                      subcontractors: Boolean,
-                      firstPayDate: LocalDate)
-
-object Employment {
-  implicit val formatModel = (
-    (__ \ "employees").format[Boolean] and
-    (__ \ "ocpn").formatNullable[Boolean] and
-    (__ \ "cis").format[Boolean] and
-    (__ \ "first-payment-date").format[LocalDate]
-  )(Employment.apply, unlift(Employment.unapply))
+object EmployingStaffFormV2 extends BooleanForm {
+  val form = Form(
+    mapping(
+      "willBePaying" -> requiredBoolean("pages.willBePaying.empty"),
+      "beforeNewTaxYear" -> mandatoryIf(isEqual("willBePaying", "true"), requiredBoolean("pages.willBePaying.beforeNewTaxYear.empty"))
+    )(WillBePaying.apply)(WillBePaying.unapply)
+  )
 }
-

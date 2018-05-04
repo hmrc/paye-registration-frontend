@@ -1,0 +1,42 @@
+@import helpers.templates.{hiddenDetails, inlineDateInput, payeInputRadioGroup, payeErrorSummary, formHiddenYesNoRadio}
+@import models.view.EmployingAnyone
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import helpers.templates.linkNewWindow
+
+@(paidEmployeesForm: Form[EmployingAnyone], weeklyThreshold: Int)(implicit request: Request[_], messages: Messages)
+
+@hiddenYesNoContent = {
+    @inlineDateInput(
+        paidEmployeesForm,
+        "earliestDate",
+        Some(Html(Messages("pages.paidEmployees.input.hint-text"))),
+        '_legend -> messages("pages.paidEmployees.paidEmployeesLabel"),
+        '_title -> messages("pages.paidEmployees.hiddenLabel")
+    )
+}
+
+@main_template(title = Messages("pages.paidEmployees.title")) {
+    @payeErrorSummary(
+        Messages("app.common.errorSummaryLabel"), paidEmployeesForm, dataJourney=Some("PaidEmployees")
+    )
+    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.paidEmployees.description")</h1>
+    @govHelpers.form(action = controllers.userJourney.routes.NewEmploymentController.submitPaidEmployees) {
+        <p>@Messages("pages.paidEmployees.para")</p>
+    <ul class="list list-bullet">
+        <li>@Messages("pages.paidEmployees.bullet1", weeklyThreshold)</li>
+        <li>@Messages("pages.paidEmployees.bullet2")</li>
+        <li>@Messages("pages.paidEmployees.bullet3")</li>
+
+    </ul>
+
+        <div class="inline form-group">
+            @formHiddenYesNoRadio(
+                paidEmployeesForm,
+                "alreadyPaying",
+                Messages("pages.paidEmployees.description"),
+                hiddenYesNoContent
+            )
+        </div>
+        <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
+    }
+}

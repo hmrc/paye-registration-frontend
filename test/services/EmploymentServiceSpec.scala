@@ -20,8 +20,8 @@ import java.time.LocalDate
 
 import enums.CacheKeys
 import helpers.PayeComponentSpec
-import models.api.{Employment => EmploymentAPI}
-import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment => EmploymentView, FirstPayment => FirstPaymentView}
+import models.api.{Employing, EmploymentV2, Employment => EmploymentAPI}
+import models.view.{CompanyPension, EmployingAnyone, EmployingStaff, EmployingStaffV2, Subcontractors, WillBePaying, Employment => EmploymentView, FirstPayment => FirstPaymentView}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.{times, verify, when}
 import play.api.libs.json.{Format, Json}
@@ -49,6 +49,37 @@ class EmploymentServiceSpec extends PayeComponentSpec {
 
     val dateUtil = new DateUtil {}
   }
+
+
+//  "calling viewToAPIV2 with EmployingStaffV2" should {
+//  "return corresponding converted EmploymentV2 API Model with Employing = alreadyEmploying" in new Setup {
+//    override def testNow = LocalDate.now
+//    val anotherDateEntered = LocalDate.of(2016,1,1)
+//    val viewModel = EmployingStaffV2(Some(EmployingAnyone(true,Some(anotherDateEntered))),None,Some(true),Some(true),Some(true))
+//    service.viewToApi(viewModel) mustBe Right(EmploymentV2(Employing.alreadyEmploying,anotherDateEntered,true,true,Some(true)))
+//    }
+//
+//    "return corresponding converted EmploymentV2 API model with Employing = notEmploying and default subcontractors to false" in new Setup {
+//      override def testNow = LocalDate.now
+//      val viewModel = EmployingStaffV2(Some(EmployingAnyone(false,None)),Some(WillBePaying(false,None)),Some(false),None,None)
+//      service.viewToApiV2(viewModel) mustBe Right(EmploymentV2(Employing.notEmploying,testNow,false,false,None))
+//    }
+//    "return corresponding converted EmploymentV2 API model with Employing = willEmployThisYear" in new Setup {
+//      override def testNow = LocalDate.now
+//      val viewModel = EmployingStaffV2(Some(EmployingAnyone(false,None)),Some(WillBePaying(true,Some(true))),Some(false),None,Some(false))
+//      service.viewToApiV2(viewModel) mustBe Right(EmploymentV2(Employing.willEmployThisYear,testNow,false,false,Some(false)))
+//    }
+//    "return corresponding converted EmploymentV2 API model with Employing = willEmployNextYear and set payment date as 6 4 of this year" in new Setup {
+//      override def testNow = LocalDate.now
+//      val viewModel = EmployingStaffV2(Some(EmployingAnyone(false,None)),Some(WillBePaying(true,Some(false))),Some(false),None,Some(true))
+//      service.viewToApiV2(viewModel) mustBe Right(EmploymentV2(Employing.willEmployNextYear,LocalDate.of(testNow.getYear,4,6),false,false,Some(true)))
+//    }
+//    "return viewModel if model is not complete" in new Setup {
+//      override def testNow = LocalDate.now
+//      val viewModel = EmployingStaffV2(Some(EmployingAnyone(false,None)),None,None,None,Some(true))
+//      service.viewToApiV2(viewModel) mustBe Left(viewModel)
+//    }
+//  }
 
   "calling viewToAPI with EmployingStaff" should {
     "return the corresponding converted Employment API Model with CompanyPension" in new Setup {

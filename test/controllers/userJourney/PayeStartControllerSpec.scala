@@ -36,10 +36,11 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
   }
 
   class Setup {
-    def controller(pbEnabled: Boolean = false) = new PayeStartController {
+    def controller(pbEnabled: Boolean = false, naEnabled: Boolean = false) = new PayeStartController {
       override val publicBetaEnabled       = pbEnabled
       override val redirectToLogin         = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
+      override val newApiEnabled           = naEnabled
 
       override val payeRegElFEURL          = MockAuthRedirects.payeRegElFEUrl
       override val payeRegElFEURI          = MockAuthRedirects.payeRegElFEUri

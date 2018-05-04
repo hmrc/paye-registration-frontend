@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package models.api
+package forms.employeeDetails
 
 import java.time.LocalDate
 
-import play.api.libs.functional.syntax._
-import play.api.libs.json.__
+import forms.employmentDetails.PaidEmployeesForm
+import helpers.PayeComponentSpec
+import models.view.EmployingAnyone
 
-case class Employment(employees: Boolean,
-                      companyPension: Option[Boolean],
-                      subcontractors: Boolean,
-                      firstPayDate: LocalDate)
+class EmployeeDetailsFormSpec extends PayeComponentSpec {
 
-object Employment {
-  implicit val formatModel = (
-    (__ \ "employees").format[Boolean] and
-    (__ \ "ocpn").formatNullable[Boolean] and
-    (__ \ "cis").format[Boolean] and
-    (__ \ "first-payment-date").format[LocalDate]
-  )(Employment.apply, unlift(Employment.unapply))
+  "PaidEmployeesForm" should {
+    "return an EmployAnyone(false, None)" in {
+      val value = Map("alreadyPaying" -> "false")
+      PaidEmployeesForm.form(LocalDate.now().minusMonths(2)).bind(value).value.get mustBe EmployingAnyone(false, None)
+    }
+  }
 }
-

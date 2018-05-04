@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package models.api
+package forms.employmentDetails
 
-import java.time.LocalDate
+import forms.helpers.RequiredBooleanForm
+import models.view.EmployingStaff
+import play.api.data.Form
+import play.api.data.Forms.single
 
-import play.api.libs.functional.syntax._
-import play.api.libs.json.__
+object ConstructionIndustryForm extends RequiredBooleanForm {
 
-case class Employment(employees: Boolean,
-                      companyPension: Option[Boolean],
-                      subcontractors: Boolean,
-                      firstPayDate: LocalDate)
+  override val errorMsg = "pages.constructionIndustry.error"
 
-object Employment {
-  implicit val formatModel = (
-    (__ \ "employees").format[Boolean] and
-    (__ \ "ocpn").formatNullable[Boolean] and
-    (__ \ "cis").format[Boolean] and
-    (__ \ "first-payment-date").format[LocalDate]
-  )(Employment.apply, unlift(Employment.unapply))
+  val form = Form(
+    single(
+      "inConstructionIndustry" -> requiredBoolean
+    )
+  )
 }
-

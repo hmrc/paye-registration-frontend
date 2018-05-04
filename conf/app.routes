@@ -30,6 +30,7 @@ POST        /offshore-employer                                controllers.userJo
 GET         /pay-non-cash-incentive-awards                    controllers.userJourney.EligibilityController.directorEligibility
 POST        /pay-non-cash-incentive-awards                    controllers.userJourney.EligibilityController.submitDirectorEligibility
 
+
 ## COMPLETION CAPACITY
 GET         /relationship-to-company                          controllers.userJourney.CompletionCapacityController.completionCapacity
 POST        /relationship-to-company                          controllers.userJourney.CompletionCapacityController.submitCompletionCapacity
@@ -51,6 +52,22 @@ GET         /return-from-address-for-ppob                     controllers.userJo
 GET         /business-contact-details                         controllers.userJourney.CompanyDetailsController.businessContactDetails
 POST        /business-contact-details                         controllers.userJourney.CompanyDetailsController.submitBusinessContactDetails
 
+## PAID EMPLOYEES
+GET         /employ-anyone                                   controllers.userJourney.NewEmploymentController.paidEmployees
+POST        /employ-anyone                                   controllers.userJourney.NewEmploymentController.submitPaidEmployees
+
+## EMPLOYING STAFF
+GET         /will-employ-anyone                              controllers.userJourney.NewEmploymentController.employingStaff
+POST        /will-employ-anyone                              controllers.userJourney.NewEmploymentController.submitEmployingStaff
+
+## CONSTRUCTION INDUSTRY
+GET         /work-construction-industry                      controllers.userJourney.NewEmploymentController.constructionIndustry
+POST        /work-construction-industry                      controllers.userJourney.NewEmploymentController.submitConstructionIndustry
+
+## APPLICATION DELAYED
+GET        /application-delayed                              controllers.userJourney.NewEmploymentController.applicationDelayed
+POST       /application-delayed                              controllers.userJourney.NewEmploymentController.submitApplicationDelayed
+
 ## EMPLOYMENT
 GET         /employ-staff-next-two-months                     controllers.userJourney.EmploymentController.employingStaff
 POST        /employ-staff-next-two-months                     controllers.userJourney.EmploymentController.submitEmployingStaff
@@ -59,9 +76,17 @@ POST        /employ-staff-next-two-months                     controllers.userJo
 GET         /use-subcontractors-construction-industry         controllers.userJourney.EmploymentController.subcontractors
 POST        /use-subcontractors-construction-industry         controllers.userJourney.EmploymentController.submitSubcontractors
 
+## SUBCONTRACTORS V2
+GET         /hire-subcontractors                              controllers.userJourney.NewEmploymentController.subcontractors
+POST        /hire-subcontractors                              controllers.userJourney.NewEmploymentController.submitSubcontractors
+
 ## COMPANY PENSION
 GET         /make-pension-payment-next-two-months             controllers.userJourney.EmploymentController.companyPension
 POST        /make-pension-payment-next-two-months             controllers.userJourney.EmploymentController.submitCompanyPension
+
+## COMPANY PENSION V2
+GET         /pension-payments                                 controllers.userJourney.NewEmploymentController.pensions
+POST        /pension-payments                                 controllers.userJourney.NewEmploymentController.submitPensions
 
 ## FIRST PAYMENT
 GET         /set-paye-scheme-start-date                       controllers.userJourney.EmploymentController.firstPayment
@@ -102,6 +127,7 @@ GET        /thankyou                                          controllers.feedba
 
 ## ERRORS
 GET        /ineligible-for-paye                               controllers.errors.ErrorController.ineligible
+GET        /dont-need-to-register                             controllers.errors.ErrorController.newIneligible
 GET        /you-cant-register-online                          controllers.userJourney.EligibilityController.ineligible
 
 GET        /something-went-wrong                              controllers.errors.ErrorController.failedSubmission
