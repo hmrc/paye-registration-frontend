@@ -16,11 +16,10 @@
 
 package connectors.test
 
-import javax.inject.Inject
-
 import config.WSHttp
+import javax.inject.Inject
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{CorePost, CorePut, HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{CoreGet, CorePost, CorePut, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
@@ -29,12 +28,14 @@ import scala.concurrent.Future
 class TestIncorpInfoConnectorImpl @Inject()(val http: WSHttp,
                                             servicesConfig: ServicesConfig) extends TestIncorpInfoConnector {
   val incorpFEStubsUrl  = servicesConfig.baseUrl("incorporation-frontend-stubs")
+  val incorpInfoUrl = servicesConfig.baseUrl("incorporation-information")
 }
 
 trait TestIncorpInfoConnector {
 
   val incorpFEStubsUrl: String
-  val http: CorePost with CorePut
+  val incorpInfoUrl: String
+  val http: CorePost with CorePut with CoreGet
 
   private def txId(regId: String):String = s"000-434-$regId"
 
@@ -161,5 +162,12 @@ trait TestIncorpInfoConnector {
 
   def teardownIndividualCoHoCompanyDetails(regId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     http.PUT[String, HttpResponse](s"$incorpFEStubsUrl/incorporation-frontend-stubs/wipe-individual-data", txId(regId))
+  }
+
+  def addIncorpUpdate(regId: String, success: Boolean, incorpDate: Option[String], crn: Option[String])(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    val url = s"$incorpInfoUrl/incorporation-information/test-only/add-incorp-update?txId=${txId(regId)}&success=$success" ++
+      incorpDate.fold("")(d => s"&date=$d") ++
+      crn.fold("")(c => s"&crn=$c")
+    http.GET[HttpResponse](url)
   }
 }
