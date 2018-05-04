@@ -17,20 +17,20 @@
 package controllers.errors
 
 import javax.inject.Inject
-
 import connectors.KeystoreConnector
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.{CompanyDetailsService, IncorporationInformationService, S4LService}
+import services.{CompanyDetailsService, IncorporationInformationService, S4LService, ThresholdService}
 import uk.gov.hmrc.auth.core.AuthConnector
-import views.html.pages.error.{ineligible => Ineligible, _}
+import views.html.pages.error.{ineligible => Ineligible, newIneligible => IneligiblePage, _}
 
 import scala.concurrent.Future
 
 class ErrorControllerImpl @Inject()(val messagesApi: MessagesApi,
                                     val config: Configuration,
+                                    val thresholdService: ThresholdService,
                                     val keystoreConnector: KeystoreConnector,
                                     val companyDetailsService: CompanyDetailsService,
                                     val s4LService: S4LService,
@@ -39,8 +39,14 @@ class ErrorControllerImpl @Inject()(val messagesApi: MessagesApi,
 
 trait ErrorController extends PayeBaseController {
 
+  val thresholdService: ThresholdService
+
   def ineligible: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
     Future.successful(Ok(Ineligible()))
+  }
+
+  def newIneligible: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
+    Future.successful(Ok(IneligiblePage(thresholdService.getCurrentThresholds.getOrElse("weekly", 116))))
   }
 
   def retrySubmission: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>

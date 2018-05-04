@@ -168,7 +168,7 @@
         '_label -> "Business telephone (optional)"
     )
     </div>
-
+    <h2>Employee Details</h2>
     <div class="inline form-group">
         @payeInput(
         payeForm("employment.employees"),
@@ -193,7 +193,38 @@
         "employment.firstPayDate",
         Some(Html("First Pay Date")))
     </div>
-
+    <hr />
+    <div class="inline form-group">
+        @payeInput(
+        payeForm("employmentInfo.employees"),
+        '_label -> "hiring Employees Enum"
+        )
+    </div>
+    <div class="inline form-group">
+        @payeInput(
+        payeForm("employmentInfo.cis"),
+        '_label -> "in construction industry (true/false)"
+        )
+    </div>
+    <div class="inline form-group">
+        @payeInput(
+        payeForm("employmentInfo.subcontractors"),
+        '_label -> "Subcontractors (true/false)"
+        )
+    </div>
+    <div class="inline form-group">
+        @payeInput(
+        payeForm("employmentInfo.pensions"),
+        '_label -> "Pensions (optional)(true/false)"
+        )
+    </div>
+    <div class="inline form-group">
+        @inlineDateInput(
+        payeForm,
+        "employmentInfo.earliestDate",
+        Some(Html("First Pay Date")))
+    </div>
+    <hr>
 
     <h2>Nature of Business</h2>
     <div class="inline form-group">

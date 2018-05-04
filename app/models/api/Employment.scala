@@ -34,3 +34,4 @@ object Employment {
     (__ \ "first-payment-date").format[LocalDate]
   )(Employment.apply, unlift(Employment.unapply))
 }
+

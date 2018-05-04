@@ -17,12 +17,11 @@
 package controllers.test
 
 import javax.inject.Inject
-
 import connectors._
 import connectors.test.{TestBusinessRegConnector, TestPAYERegConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
-import forms.test.{TestPAYEContactForm, TestPAYERegCompanyDetailsSetupForm, TestPAYERegSetupForm}
+import forms.test.{TestPAYEContactForm, TestPAYERegCompanyDetailsSetupForm, TestPAYERegEmploymentInfoSetupForm, TestPAYERegSetupForm}
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request}
@@ -110,6 +109,20 @@ trait TestRegSetupController extends PayeBaseController {
       success => testPAYERegConnector.addTestPAYEContact(success, profile.registrationID) map {
         case DownstreamOutcome.Success => Ok("PAYE Contact details successfully set up")
         case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Contact details")
+      }
+    )
+  }
+
+  def regSetupEmploymentInfo: Action[AnyContent] = isAuthorised { implicit request =>
+    Future.successful(Ok(views.html.pages.test.payeRegEmploymentInfoSetup(TestPAYERegEmploymentInfoSetupForm.form)))
+  }
+
+  def submitRegSetupEmploymentInfo: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+    TestPAYERegEmploymentInfoSetupForm.form.bindFromRequest.fold(
+      errors  => Future.successful(BadRequest(views.html.pages.test.payeRegEmploymentInfoSetup(errors))),
+      success => testPAYERegConnector.addTestEmploymentInfo(success, profile.registrationID) map {
+        case DownstreamOutcome.Success => Ok("Employment info successfully set up")
+        case DownstreamOutcome.Failure => InternalServerError("Error setting up Employment info")
       }
     )
   }

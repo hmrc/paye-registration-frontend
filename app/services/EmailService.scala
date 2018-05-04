@@ -24,7 +24,7 @@ import models.external.{CurrentProfile, EmailRequest}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import utils.{NewTaxYear, SystemDate}
+import utils.{NewTaxYear, PAYEFeatureSwitches, SystemDate}
 
 import scala.concurrent.Future
 
@@ -32,7 +32,10 @@ class EmailServiceImpl @Inject()(val companyRegistrationConnector: CompanyRegist
                                  val emailConnector: EmailConnector,
                                  val payeRegistrationConnector: PAYERegistrationConnector,
                                  val incorporationInformationConnector: IncorporationInformationConnector,
-                                 val s4LConnector: S4LConnector) extends EmailService
+                                 val s4LConnector: S4LConnector,
+                                 val pAYEFeatureSwitches: PAYEFeatureSwitches) extends EmailService {
+  val newApiEnabled: Boolean = pAYEFeatureSwitches.newApiStructure.enabled
+}
 
 trait EmailService {
   val companyRegistrationConnector: CompanyRegistrationConnector
@@ -40,6 +43,7 @@ trait EmailService {
   val emailConnector: EmailConnector
   val s4LConnector: S4LConnector
   val incorporationInformationConnector: IncorporationInformationConnector
+  val newApiEnabled: Boolean
 
   private val FIRST_PAYMENT_DATE = "firstPaymentDate"
 
@@ -64,10 +68,17 @@ trait EmailService {
   )
 
   def primeEmailData(regId: String)(implicit hc: HeaderCarrier): Future[CacheMap] = {
-    for {
-      Some(employment) <- payeRegistrationConnector.getEmployment(regId)
-      stashed          <- s4LConnector.saveForm[LocalDate](regId, FIRST_PAYMENT_DATE, employment.firstPayDate)
-    } yield stashed
+    if(newApiEnabled) {
+      for {
+        Some(employment) <- payeRegistrationConnector.getEmploymentV2(regId)
+        stashed          <- s4LConnector.saveForm[LocalDate](regId, FIRST_PAYMENT_DATE, employment.firstPaymentDate)
+      } yield stashed
+    } else {
+      for {
+        Some(employment) <- payeRegistrationConnector.getEmployment(regId)
+        stashed          <- s4LConnector.saveForm[LocalDate](regId, FIRST_PAYMENT_DATE, employment.firstPayDate)
+      } yield stashed
+    }
   }
 
   def sendAcknowledgementEmail(profile: CurrentProfile, ackRef: String)(implicit hc: HeaderCarrier): Future[EmailResponse] = {
@@ -85,8 +96,8 @@ trait EmailService {
             firstPaymentDate = firstPaymentDate
           ))
         } yield emailResponse).recover {
-          case e =>
-            logger.error(s"[sendAcknowledgementEmail] - There was a problem sending the acknowledgement email for regId ${profile.registrationID} : txId ${profile.companyTaxRegistration.transactionId}", e)
+          case _ =>
+            logger.warn(s"[sendAcknowledgementEmail] - There was a problem sending the acknowledgement email for regId ${profile.registrationID} : txId ${profile.companyTaxRegistration.transactionId}")
             EmailDifficulties
         }
       }

@@ -16,11 +16,14 @@
 
 package services
 
+import java.time.LocalDate
+
 import connectors._
 import helpers.PayeComponentSpec
 import models.view.Directors
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.BadRequestException
 
 import scala.concurrent.Future
@@ -65,6 +68,44 @@ class IncorporationInformationServiceSpec extends PayeComponentSpec {
         .thenReturn(Future.successful(IncorpInfoErrorResponse(new Exception)))
 
       a[Exception] mustBe thrownBy(await(service.getCompanyDetails("regId", "txId")))
+    }
+  }
+
+  "Calling getIncorporationDate should" should {
+    val testJsonWithDate = Json.parse(
+      """
+        |{
+        |   "crn" : "some-crn",
+        |   "incorporationDate" : "2018-05-05"
+        |}
+      """.stripMargin)
+
+    val testJsonNoDate = Json.parse(
+      """
+        |{
+        |   "crn" : "some-crn"
+        |}
+      """.stripMargin)
+
+    "get the incorporation date if it is present in the response" in new Setup {
+      when(mockIncorpInfoConnector.getIncorporationInfo(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(testJsonWithDate))
+
+      await(service.getIncorporationDate("regId", "txId")) mustBe Some(LocalDate.of(2018, 5, 5))
+    }
+
+    "return a None if no date is found" in new Setup {
+      when(mockIncorpInfoConnector.getIncorporationInfo(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(testJsonNoDate))
+
+      await(service.getIncorporationDate("regId", "txId")) mustBe None
+    }
+
+    "throw a BadRequestException when Bad Request response is returned from Incorporation Information" in new Setup {
+      when(mockIncorpInfoConnector.getIncorporationInfo(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new Exception))
+
+      a[Exception] mustBe thrownBy(await(service.getIncorporationDate("regId", "txId")))
     }
   }
 

@@ -16,13 +16,15 @@
 
 package controllers.test
 
-import javax.inject.Inject
+import java.time.LocalDate
 
+import javax.inject.Inject
 import connectors._
 import connectors.test._
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
 import play.api.i18n.MessagesApi
+import play.api.mvc.{Action, AnyContent}
 import play.api.{Configuration, Logger}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -81,6 +83,19 @@ trait TestSetupController
       testPAYERegConnector.updateStatus(profile.registrationID, status) map {
         case DownstreamOutcome.Success => Ok(s"status for regId ${profile.registrationID} updated to '$status'")
         case DownstreamOutcome.Failure => InternalServerError(s"Unable to update status for regId ${profile.registrationID}")
+      }
+    }
+  }
+
+  def addIncorpUpdate(success: Boolean, incorpDate: Option[String], crn: Option[String]): Action[AnyContent] = isAuthorised { implicit request =>
+    for {
+      profile <- businessRegConnector.retrieveCurrentProfile
+      resp    <- testIncorpInfoConnector.addIncorpUpdate(profile.registrationID, success, incorpDate, crn)
+    } yield {
+      if (resp.status == OK) {
+        Ok(s"Incorp Update added for regId: ${profile.registrationID} and success: $success")
+      } else {
+        InternalServerError(s"Unable to add Incorp Update for txId: ${profile.registrationID}")
       }
     }
   }

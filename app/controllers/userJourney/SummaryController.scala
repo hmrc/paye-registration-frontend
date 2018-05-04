@@ -17,8 +17,8 @@
 package controllers.userJourney
 
 import javax.inject.Inject
-
 import connectors._
+import controllers.exceptions.{FrontendControllerException, GeneralException}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.PAYEStatus
 import models.external.CurrentProfile
@@ -58,8 +58,9 @@ trait SummaryController extends PayeBaseController {
         summary <- summaryService.getRegistrationSummary(profile.registrationID)
       } yield {
         Ok(SummaryPage(summary))
-      }).recover {
-        case _ => InternalServerError(restart())
+      }).recover{
+        case e: FrontendControllerException => e.recover
+        case e: Exception => GeneralException(s"an error Occured with message ${e.getMessage}").recover
       }
     }
   }

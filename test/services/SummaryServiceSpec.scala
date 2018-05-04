@@ -17,10 +17,11 @@
 package services
 
 import common.exceptions.InternalExceptions.APIConversionException
+import controllers.exceptions.{IncompleteSummaryBlockException, MissingSummaryBlockException}
 import enums.PAYEStatus
 import helpers.PayeComponentSpec
 import models.api.{Director, Employment, Name, SICCode, CompanyDetails => CompanyDetailsAPI, PAYEContact => PAYEContactAPI, PAYERegistration => PAYERegistrationAPI}
-import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection}
+import models.view._
 import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
@@ -30,10 +31,13 @@ import scala.concurrent.Future
 
 class SummaryServiceSpec extends PayeComponentSpec {
 
-  class Setup {
+  class Setup(enabled: Boolean = false) {
     val service = new SummaryService {
       val keystoreConnector         = mockKeystoreConnector
       val payeRegistrationConnector = mockPAYERegConnector
+      val employmentServiceV2       = mockEmploymentServiceV2
+      val s4LService                = mockS4LService
+      val newApiEnabled: Boolean    = enabled
     }
   }
 
@@ -52,7 +56,8 @@ class SummaryServiceSpec extends PayeComponentSpec {
       Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK")),
       businessContactDetails = Fixtures.validBusinessContactDetails
     ),
-    employment = Fixtures.validEmploymentAPI,
+    employment = Some(Fixtures.validEmploymentAPI),
+    employmentInfo = Some(Fixtures.validEmploymentApiV2),
     sicCodes = simpleSICCodes,
     directors = List(
       Director(
@@ -68,7 +73,7 @@ class SummaryServiceSpec extends PayeComponentSpec {
     payeContact = Fixtures.validPAYEContactAPI
   )
 
-  lazy val summary = Summary(
+  lazy val oldApiSummary = Summary(
     Seq(
       SummarySection(
         id = "employees",
@@ -205,7 +210,7 @@ class SummaryServiceSpec extends PayeComponentSpec {
       when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(apiRegistration))
 
-      await(service.getRegistrationSummary("45632")) mustBe summary
+      await(service.getRegistrationSummary("45632")) mustBe oldApiSummary
     }
 
     "return None when the connector returns a Forbidden response" in new Setup {
@@ -232,8 +237,24 @@ class SummaryServiceSpec extends PayeComponentSpec {
 
   "Calling registrationToSummary" should {
     "convert a PAYE Registration API Model  to a summary model with a trading name" in new Setup {
+      await(service.registrationToSummary(apiRegistration, "regId")) mustBe oldApiSummary
+    }
 
-      service.registrationToSummary(apiRegistration) mustBe summary
+    "throw an exception if no employment v2 block is present in the newApi model" in new Setup(true) {
+      val emptyEmploymentView = EmployingStaffV2(None,None,None,None,None)
+
+      when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(apiRegistration))
+
+      when(mockS4LService.fetchAndGet[EmployingStaffV2](ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(emptyEmploymentView)))
+
+      when(mockEmploymentServiceV2.viewToApi(ArgumentMatchers.any()))
+        .thenReturn(Left(emptyEmploymentView))
+
+      when(mockEmploymentServiceV2.apiToView(ArgumentMatchers.any())).thenReturn(emptyEmploymentView)
+
+      intercept[IncompleteSummaryBlockException](await(service.getRegistrationSummary(regId = "45632")))
     }
 
     "convert a PAYE Registration API Model  to a summary model without a trading name" in new Setup {
@@ -252,7 +273,8 @@ class SummaryServiceSpec extends PayeComponentSpec {
           Address("15 St Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE4 1ST"), Some("UK")),
           businessContactDetails = Fixtures.validBusinessContactDetails
         ),
-        employment = Fixtures.validEmploymentAPI,
+        employment = Some(Fixtures.validEmploymentAPI),
+        employmentInfo = Some(Fixtures.validEmploymentApiV2),
         sicCodes = simpleSICCodes,
         directors = List(
           Director(
@@ -398,7 +420,7 @@ class SummaryServiceSpec extends PayeComponentSpec {
           )
         )
       )
-      service.registrationToSummary(apiRegistrationNoTName) mustBe summaryNoTName
+      await(service.registrationToSummary(apiRegistrationNoTName, "regId")) mustBe summaryNoTName
     }
   }
 
@@ -505,7 +527,7 @@ class SummaryServiceSpec extends PayeComponentSpec {
         )
       )
 
-      service.buildEmploymentSection(validEmploymentAPIFalse) mustBe employmentSection
+      service.buildEmploymentSection(Some(validEmploymentAPIFalse), "regId") mustBe employmentSection
     }
   }
 

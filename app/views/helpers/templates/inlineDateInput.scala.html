@@ -15,8 +15,12 @@
     }}
 
     @if(formItem.hasErrors) {
-    @formItem.errors.filter(_.key.contains(fieldName)).map { error => <span class="error-notification" id='@{s"${error.key}-error-message"}'>@Messages(s"${error.message}")</span>}
+    @formItem.errors.filter(_.key.contains(fieldName)).map { error => <span class="error-notification" id='@{s"${error.key}-error-message"}'>@Messages(s"${error.message}", error.args: _*)</span>}
     }
+
+    @{args.filter(a => a._1.name == "_title").map { a =>
+        <strong>{a._2.toString}</strong>
+    }}
 
     @if(hintText.isDefined) {<span class="form-hint">@hintText</span>}
 
