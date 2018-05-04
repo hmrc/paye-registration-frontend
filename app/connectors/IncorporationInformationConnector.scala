@@ -20,7 +20,7 @@ import javax.inject.Inject
 import com.codahale.metrics.{Counter, Timer}
 import common.exceptions.DownstreamExceptions.OfficerListNotFoundException
 import config.WSHttp
-import controllers.exceptions.UnexpectedException
+import controllers.exceptions.GeneralException
 import models.external.{CoHoCompanyDetailsModel, OfficerList}
 import org.apache.http.HttpStatus
 import play.api.libs.json._
@@ -96,7 +96,7 @@ trait IncorporationInformationConnector extends RegistrationWhitelist {
     }
   } recover {
     case e: Exception =>
-      throw UnexpectedException(
+      throw GeneralException (
         s"[IncorporationInformationConnector][getIncorporationInfo] an error occurred while getting the incorporation info for regId: $regId and txId: $txId - error: ${e.getMessage}"
       )
   }

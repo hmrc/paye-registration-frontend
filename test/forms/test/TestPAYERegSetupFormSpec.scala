@@ -31,7 +31,7 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
   "Binding TestPAYERegSetupForm to a model" when {
     "Bind successfully with full data" should {
       val data = Map(
-        "registrationID" -> "54321",
+        s"registrationID" -> "54321",
         "transactionID" -> "10-1028374",
         "formCreationTimestamp" -> "01/01/2017",
         "status" -> "draft",
@@ -59,6 +59,13 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "employment.firstPayDateDay" -> "1",
         "employment.firstPayDateMonth" -> "1",
         "employment.firstPayDateYear" -> "2017",
+        "employmentInfo.alreadyEmploying " -> "true",
+        "employmentInfo.pensions" -> "false",
+        "employmentInfo.cis" -> "true",
+        "employmentInfo.subcontractors" -> "true",
+        "employmentInfo.earliestDateDay" -> "1",
+        "employmentInfo.earliestDateMonth" -> "1",
+        "employmentInfo.earliestDateYear" -> "2017",
         "sicCodes[0].code" -> "84",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
@@ -116,12 +123,19 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
             phoneNumber = Some("099876545")
           )
         ),
-        employment = Employment(
+        employment = Some(Employment(
           employees = true,
           companyPension = Some(false),
           subcontractors = true,
           firstPayDate = LocalDate.of(2017, 1, 1)
-        ),
+        )),
+        employmentInfo = Some(EmploymentV2(
+          employees = Employing.alreadyEmploying,
+          firstPaymentDate = LocalDate.of(2017, 1, 1),
+          construction = true,
+          companyPension = Some(false),
+          subcontractors = true
+        )),
         sicCodes = List(
           SICCode(Some("84"), Some("consulting")),
           SICCode(Some("150"), Some("laundring"))
@@ -189,6 +203,13 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
           "employment.firstPayDateDay" -> "1",
           "employment.firstPayDateMonth" -> "1",
           "employment.firstPayDateYear" -> "2017",
+          "employmentInfo.alreadyEmploying " -> "true",
+          "employmentInfo.pensions" -> "false",
+          "employmentInfo.cis" -> "true",
+          "employmentInfo.subcontractors" -> "true",
+          "employmentInfo.earliestDateDay" -> "1",
+          "employmentInfo.earliestDateMonth" -> "1",
+          "employmentInfo.earliestDateYear" -> "2017",
           "sicCodes[0].code" -> "84",
           "sicCodes[0].description" -> "consulting",
           "sicCodes[1].code" -> "150",
@@ -247,6 +268,13 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "employment.firstPayDateDay" -> "1",
         "employment.firstPayDateMonth" -> "1",
         "employment.firstPayDateYear" -> "2017",
+        "employmentInfo.alreadyEmploying " -> "true",
+        "employmentInfo.pensions" -> "false",
+        "employmentInfo.cis" -> "true",
+        "employmentInfo.subcontractors" -> "true",
+        "employmentInfo.earliestDateDay" -> "1",
+        "employmentInfo.earliestDateMonth" -> "1",
+        "employmentInfo.earliestDateYear" -> "2017",
         "sicCodes[0].code" -> "",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
@@ -304,12 +332,19 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
             phoneNumber = Some("099876545")
           )
         ),
-        employment = Employment(
-          employees = false,
-          companyPension = None,
+        employment = Some(Employment(
+          employees = true,
+          companyPension = Some(false),
           subcontractors = true,
           firstPayDate = LocalDate.of(2017, 1, 1)
-        ),
+        )),
+        employmentInfo = Some(EmploymentV2(
+          employees = Employing.alreadyEmploying,
+          firstPaymentDate = LocalDate.of(2017, 1, 1),
+          construction = true,
+          companyPension = Some(false),
+          subcontractors = true
+        )),
         sicCodes = List(
           SICCode(None, Some("consulting")),
           SICCode(Some("150"), None)
@@ -371,6 +406,13 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
           "employment.firstPayDateDay" -> "1",
           "employment.firstPayDateMonth" -> "1",
           "employment.firstPayDateYear" -> "2017",
+          "employmentInfo.alreadyEmploying " -> "true",
+          "employmentInfo.pensions" -> "false",
+          "employmentInfo.cis" -> "true",
+          "employmentInfo.subcontractors" -> "true",
+          "employmentInfo.earliestDateDay" -> "1",
+          "employmentInfo.earliestDateMonth" -> "1",
+          "employmentInfo.earliestDateYear" -> "2017",
           "sicCodes[0].description" -> "consulting",
           "sicCodes[1].code" -> "150",
           "directors[0].name.firstName" -> "Thierry",

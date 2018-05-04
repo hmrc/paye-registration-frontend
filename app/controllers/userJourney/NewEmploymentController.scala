@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import javax.inject.Inject
 import connectors.KeystoreConnector
-import controllers.exceptions.FrontendException
+import controllers.exceptions.FrontendControllerException
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.employmentDetails._
 import models.view._
@@ -63,7 +63,7 @@ trait NewEmploymentController extends PayeBaseController {
     incorpInfoService.getIncorporationDate(regId, txId) flatMap {
       _.fold(Future.successful(Redirect(controllers.userJourney.routes.NewEmploymentController.employingStaff())))(action)
     } recover {
-      case e: FrontendException => e.action
+      case e: FrontendControllerException => e.action
     }
 
   // PAID EMPLOYEES
@@ -74,7 +74,7 @@ trait NewEmploymentController extends PayeBaseController {
         Ok(PaidEmployeesPage(form, weeklyThreshold))
       }
     } recover {
-      case e : FrontendException => e.action
+      case e : FrontendControllerException => e.action
     }
   }
 

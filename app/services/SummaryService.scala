@@ -17,12 +17,13 @@
 package services
 
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
 
+import javax.inject.Inject
 import common.exceptions.InternalExceptions.APIConversionException
 import connectors._
+import controllers.exceptions.{MissingSummaryBlockException, GeneralException}
 import enums.UserCapacity
-import models.api.{CompanyDetails, Director, Employment, PAYEContact, SICCode, PAYERegistration => PAYERegistrationAPI}
+import models.api.{CompanyDetails, Director, Employment, EmploymentV2, PAYEContact, SICCode, PAYERegistration => PAYERegistrationAPI}
 import models.view.{Summary, SummaryRow, SummarySection}
 import models.{Address, DigitalContactDetails}
 import play.api.mvc.Call
@@ -41,12 +42,12 @@ trait SummaryService {
   def getRegistrationSummary(regId: String)(implicit hc: HeaderCarrier): Future[Summary] = {
     for {
       regResponse <- payeRegistrationConnector.getRegistration(regId)
-    } yield registrationToSummary(regResponse)
+    } yield registrationToSummary(regResponse, regId)
   }
 
-  private[services] def registrationToSummary(apiModel: PAYERegistrationAPI): Summary = {
+  private[services] def registrationToSummary(apiModel: PAYERegistrationAPI, regId: String): Summary = {
     Summary(Seq(
-      buildEmploymentSection(apiModel.employment),
+      buildEmploymentSection(apiModel.employment, regId),
       buildCompletionCapacitySection(apiModel.completionCapacity),
       buildCompanyDetailsSection(apiModel.companyDetails, apiModel.sicCodes),
       buildBusinessContactDetailsSection(apiModel.companyDetails.businessContactDetails),
@@ -146,7 +147,12 @@ trait SummaryService {
                                                               address.country).flatten.map(Right(_))
   }
 
-  private[services] def buildEmploymentSection(employment : Employment) : SummarySection = {
+  //private[Service] def buildEmploymentV2Section(employment: Option[EmploymentV2]): Summary = ???
+
+  private[services] def buildEmploymentSection(oEmployment : Option[Employment], regId: String) : SummarySection = {
+
+    val employment = oEmployment.getOrElse(throw MissingSummaryBlockException(block = "Employment", regId))
+
     SummarySection(
       id = "employees",
       Seq(

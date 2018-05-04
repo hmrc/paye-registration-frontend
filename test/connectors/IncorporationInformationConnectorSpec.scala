@@ -18,7 +18,7 @@ package connectors
 
 import common.exceptions.DownstreamExceptions.OfficerListNotFoundException
 import config.WSHttp
-import controllers.exceptions.UnexpectedException
+import controllers.exceptions.GeneralException
 import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics
 import models.api.Name
@@ -103,7 +103,7 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with Guice
 
     "return a BadRequest for a bad request" in new Setup(true) {
       mockHttpGet[JsValue](connector.incorpInfoUrl, Future.failed(new BadRequestException("tstException")))
-      intercept[UnexpectedException](await(connector.getIncorporationInfo(testRegId, testTransId)))
+      intercept[GeneralException](await(connector.getIncorporationInfo(testRegId, testTransId)))
     }
   }
 

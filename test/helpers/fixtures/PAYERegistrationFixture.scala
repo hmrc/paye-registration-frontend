@@ -90,7 +90,8 @@ trait PAYERegistrationFixture {
     status = PAYEStatus.draft,
     completionCapacity = "High Priest",
     companyDetails = validCompanyDetailsAPI,
-    employment = validEmploymentAPI,
+    employment = Some(validEmploymentAPI),
+    employmentInfo = Some(validEmploymentApiV2),
     sicCodes = validSICCodes,
     directors = Nil,
     payeContact = validPAYEContactAPI

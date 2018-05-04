@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import javax.inject.Inject
 import connectors._
-import controllers.exceptions.UnexpectedException
+import controllers.exceptions.GeneralException
 import models.api.Director
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import models.view.Directors
@@ -49,7 +49,7 @@ trait IncorporationInformationService {
   def getIncorporationDate(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[Option[LocalDate]] = incorpInfoConnector.getIncorporationInfo(regId, txId).map (
     js => (js \ "incorporationDate").asOpt[String].map(LocalDate.parse)
   ) recover {
-    case e: Exception => throw UnexpectedException(s"[IncorpInfoService][getIncorpDate] an exception occurred for regId: $regId, txId: $txId error - ${e.getMessage}")
+    case e: Exception => throw GeneralException(s"[IncorpInfoService][getIncorpDate] an exception occurred for regId: $regId, txId: $txId error - ${e.getMessage}")
   }
 
   def getDirectorDetails(txId: String,regId:String)(implicit hc: HeaderCarrier): Future[Directors] = {

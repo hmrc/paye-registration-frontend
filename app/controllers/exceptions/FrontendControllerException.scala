@@ -22,13 +22,13 @@ import play.api.mvc.{Request, Result}
 import play.api.mvc.Results._
 import views.html.pages.error.restart
 
-sealed trait FrontendException extends Exception {
+sealed trait FrontendControllerException extends Exception {
   def view: Option[_] = None
   def action(implicit request: Request[_], messages: Messages): Result
   def message: String
 }
 
-sealed trait RestartException extends FrontendException {
+sealed trait RestartException extends FrontendControllerException {
   override def view: Option[restart.type] = Some(restart)
   def action(implicit request: Request[_], messages: Messages): Result = {
     Logger.error(message)
@@ -36,5 +36,5 @@ sealed trait RestartException extends FrontendException {
   }
 }
 
-case class UnexpectedException(message: String) extends RestartException
-case class MissingBlockInformationException(message: String) extends RestartException
+case class GeneralException(message: String) extends RestartException
+case class MissingSummaryBlockException(block: String, regId: String) extends RestartException { val message = s"$block block missing while building summary for regId: $regId" }

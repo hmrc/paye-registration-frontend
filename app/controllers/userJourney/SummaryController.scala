@@ -17,8 +17,8 @@
 package controllers.userJourney
 
 import javax.inject.Inject
-
 import connectors._
+import controllers.exceptions.FrontendControllerException
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.PAYEStatus
 import models.external.CurrentProfile
@@ -61,6 +61,8 @@ trait SummaryController extends PayeBaseController {
       }).recover {
         case _ => InternalServerError(restart())
       }
+    } recover{
+      case e: FrontendControllerException => e.action
     }
   }
 
