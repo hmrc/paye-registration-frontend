@@ -54,7 +54,7 @@ trait SummaryController extends PayeBaseController {
   def summary: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
     invalidSubmissionGuard(profile) {
       (for {
-//        _       <- emailService.primeEmailData(profile.registrationID)
+        _       <- emailService.primeEmailData(profile.registrationID)
         summary <- summaryService.getRegistrationSummary(profile.registrationID)
       } yield {
         Ok(SummaryPage(summary))

@@ -46,3 +46,4 @@ case class MissingSummaryBlockException(block: String, regId: String) extends Re
 case class MissingSummaryBlockItemException(block: String, item: String, regId: String) extends RestartException {
   val message = s"element $item was missing from $block while building summary for regId: $regId"
 }
+

@@ -51,10 +51,10 @@ trait NewEmploymentController extends PayeBaseController {
   val incorpInfoService: IncorporationInformationService
 
   private val handleJourneyPostConstruction: EmployingStaffV2 => Result = {
-    case EmployingStaffV2(Some(EmployingAnyone(true, _)), _, _, _, None) => Redirect(controllers.userJourney.routes.NewEmploymentController.pensions())
-    case EmployingStaffV2(_, Some(WillBePaying(true, _)), _, _, None) | EmployingStaffV2(_, Some(WillBePaying(false, _)), Some(true), _, None)  =>
+    case EmployingStaffV2(Some(EmployingAnyone(true, _)), _, _, _, _) => Redirect(controllers.userJourney.routes.NewEmploymentController.pensions())
+    case EmployingStaffV2(_, Some(WillBePaying(true, _)), _, _, _) | EmployingStaffV2(_, Some(WillBePaying(false, _)), Some(true), _, _)  =>
       Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
-    case EmployingStaffV2(_, Some(WillBePaying(false, _)), Some(false), _, None) => Redirect(controllers.errors.routes.ErrorController.newIneligible())
+    case EmployingStaffV2(_, Some(WillBePaying(false, _)), Some(false), _, _) => Redirect(controllers.errors.routes.ErrorController.newIneligible())
     case data => throw GeneralException(s"[NewEmploymentController][handleJourneyPostConstruction] an invalid scenario was met for employment staff v2: $data")
   }
 

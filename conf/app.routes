@@ -66,7 +66,7 @@ POST        /work-construction-industry                      controllers.userJou
 
 ## APPLICATION DELAYED
 GET        /application-delayed                              controllers.userJourney.NewEmploymentController.applicationDelayed
-POST       /application-delayed                              controllers.userJourney.NewEmploymentController.submitApplicationDelayed
+GET        /application-delayed-confirmed                    controllers.userJourney.NewEmploymentController.submitApplicationDelayed
 
 ## EMPLOYMENT
 GET         /employ-staff-next-two-months                     controllers.userJourney.EmploymentController.employingStaff

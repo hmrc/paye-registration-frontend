@@ -17,10 +17,11 @@
 package services
 
 import common.exceptions.InternalExceptions.APIConversionException
+import controllers.exceptions.{IncompleteSummaryBlockException, MissingSummaryBlockException}
 import enums.PAYEStatus
 import helpers.PayeComponentSpec
 import models.api.{Director, Employment, Name, SICCode, CompanyDetails => CompanyDetailsAPI, PAYEContact => PAYEContactAPI, PAYERegistration => PAYERegistrationAPI}
-import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection}
+import models.view._
 import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
@@ -30,10 +31,13 @@ import scala.concurrent.Future
 
 class SummaryServiceSpec extends PayeComponentSpec {
 
-  class Setup {
+  class Setup(enabled: Boolean = false) {
     val service = new SummaryService {
       val keystoreConnector         = mockKeystoreConnector
       val payeRegistrationConnector = mockPAYERegConnector
+      val employmentServiceV2       = mockEmploymentServiceV2
+      val s4LService                = mockS4LService
+      val newApiEnabled: Boolean    = enabled
     }
   }
 
@@ -69,7 +73,7 @@ class SummaryServiceSpec extends PayeComponentSpec {
     payeContact = Fixtures.validPAYEContactAPI
   )
 
-  lazy val summary = Summary(
+  lazy val oldApiSummary = Summary(
     Seq(
       SummarySection(
         id = "employees",
@@ -206,7 +210,7 @@ class SummaryServiceSpec extends PayeComponentSpec {
       when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(apiRegistration))
 
-      await(service.getRegistrationSummary("45632")) mustBe summary
+      await(service.getRegistrationSummary("45632")) mustBe oldApiSummary
     }
 
     "return None when the connector returns a Forbidden response" in new Setup {
@@ -233,9 +237,14 @@ class SummaryServiceSpec extends PayeComponentSpec {
 
   "Calling registrationToSummary" should {
     "convert a PAYE Registration API Model  to a summary model with a trading name" in new Setup {
-
-      service.registrationToSummary(apiRegistration, "regId") mustBe summary
+      await(service.registrationToSummary(apiRegistration, "regId")) mustBe oldApiSummary
     }
+
+//    "throw an exception if no employment v2 block is present in the newApi model" in new Setup(true) {
+//      when(mockS4LService.fetchAndGet[EmployingStaffV2](ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+//        .thenReturn(Future.successful(Some(EmployingStaffV2(None,None,None,None,None))))
+//      intercept[IncompleteSummaryBlockException](await(service.getRegistrationSummary(regId = "45632")))
+//    }
 
     "convert a PAYE Registration API Model  to a summary model without a trading name" in new Setup {
 
@@ -400,7 +409,7 @@ class SummaryServiceSpec extends PayeComponentSpec {
           )
         )
       )
-      service.registrationToSummary(apiRegistrationNoTName, "regId") mustBe summaryNoTName
+      await(service.registrationToSummary(apiRegistrationNoTName, "regId")) mustBe summaryNoTName
     }
   }
 
