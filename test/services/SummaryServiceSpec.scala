@@ -240,11 +240,22 @@ class SummaryServiceSpec extends PayeComponentSpec {
       await(service.registrationToSummary(apiRegistration, "regId")) mustBe oldApiSummary
     }
 
-//    "throw an exception if no employment v2 block is present in the newApi model" in new Setup(true) {
-//      when(mockS4LService.fetchAndGet[EmployingStaffV2](ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-//        .thenReturn(Future.successful(Some(EmployingStaffV2(None,None,None,None,None))))
-//      intercept[IncompleteSummaryBlockException](await(service.getRegistrationSummary(regId = "45632")))
-//    }
+    "throw an exception if no employment v2 block is present in the newApi model" in new Setup(true) {
+      val emptyEmploymentView = EmployingStaffV2(None,None,None,None,None)
+
+      when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(apiRegistration))
+
+      when(mockS4LService.fetchAndGet[EmployingStaffV2](ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(emptyEmploymentView)))
+
+      when(mockEmploymentServiceV2.viewToApi(ArgumentMatchers.any()))
+        .thenReturn(Left(emptyEmploymentView))
+
+      when(mockEmploymentServiceV2.apiToView(ArgumentMatchers.any())).thenReturn(emptyEmploymentView)
+
+      intercept[IncompleteSummaryBlockException](await(service.getRegistrationSummary(regId = "45632")))
+    }
 
     "convert a PAYE Registration API Model  to a summary model without a trading name" in new Setup {
 

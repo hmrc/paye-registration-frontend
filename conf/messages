@@ -227,7 +227,7 @@ pages.companyPension.error                                      = Tell us if you
 ## Pays Pension
 pages.paysPension.title                                         = Does the company make pension payments to a former employee or their dependants?
 pages.paysPension.description                                   = Does the company make pension payments to a former employee or their dependants?
-pages.paysPension.error                                         = Tell us if the company will hire any subcontractors in the construction industry in the current tax year
+pages.paysPension.error                                         = Tell us if the company makes pension payments to a former employee or their dependants
 
 ## First Payment Page
 pages.firstPayment.description                                  = Set the company''s PAYE scheme start date

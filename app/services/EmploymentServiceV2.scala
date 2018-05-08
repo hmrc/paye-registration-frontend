@@ -53,7 +53,7 @@ trait EmploymentServiceV2 {
     case _ => Left(viewData)
   }
 
-  private[services] val apiToView: EmploymentAPI => EmploymentView = {
+  private[services] def apiToView(employmentAPI: EmploymentAPI): EmploymentView = employmentAPI match {
     case EmploymentAPI(enumValue, date, cis, subcontractors, pensions) =>
       val (employingAnyone, willBePaying) = enumToTuple(enumValue, date)
       EmploymentView(employingAnyone, willBePaying, Some(cis), if(cis) Some(subcontractors) else None, employingAnyone.filter(_.employing).flatMap(_ => pensions))
