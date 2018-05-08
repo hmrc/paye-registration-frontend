@@ -8,7 +8,7 @@
     @payeErrorSummary(
         Messages("app.common.errorSummaryLabel"), employingStaffForm, dataJourney=Some("EmployingStaff")
     )
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.employingStaff.description")</h1>
+    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.employingStaff.description")</h1>
     @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitEmployingStaff) {
         <p>@Messages("pages.employingStaff.employingStaffRulesIntro")</p>
         <ul class="list list-bullet">
