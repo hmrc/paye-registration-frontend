@@ -262,6 +262,7 @@ pages.summary.description                                       = Check and conf
 
 pages.summary.employees.sectionHeading                          = Employment information
 pages.summary.employees.question                                = Over the next 2 months will you pay any staff, including yourself?
+pages.summary.employees.date                                    = When did it first start employing someone or providing expenses or benefits to staff?
 pages.summary.employees.answers.true                            = Yes
 pages.summary.employees.answers.false                           = No
 pages.summary.employees.hiddenChangeText                        = whether over the next 2 months you will pay any staff.

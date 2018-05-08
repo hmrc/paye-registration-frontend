@@ -24,6 +24,7 @@ import controllers.exceptions.GeneralException
 import enums.CacheKeys
 import models.view.{EmployingAnyone, WillBePaying, EmployingStaffV2 => EmploymentView}
 import models.api.{Employing, EmploymentV2 => EmploymentAPI}
+import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.SystemDate

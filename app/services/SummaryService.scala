@@ -21,8 +21,8 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import common.exceptions.InternalExceptions.APIConversionException
 import connectors._
-import controllers.exceptions.{GeneralException, MissingSummaryBlockException, MissingSummaryBlockItemException}
-import enums.UserCapacity
+import controllers.exceptions._
+import enums.{CacheKeys, UserCapacity}
 import models.api.{CompanyDetails, Director, Employment, EmploymentV2, PAYEContact, SICCode, PAYERegistration => PAYERegistrationAPI}
 import models.view.{Summary, SummaryRow, SummarySection, EmployingStaffV2 => EmploymentView}
 import models.{Address, DigitalContactDetails}
@@ -37,29 +37,39 @@ import scala.util.{Success, Try}
 class SummaryServiceImpl @Inject()(
                                     val payeRegistrationConnector: PAYERegistrationConnector,
                                     val employmentServiceV2: EmploymentServiceV2,
-                                    val pAYEFeatureSwitches: PAYEFeatureSwitches
-                                  ) extends SummaryService
+                                    val pAYEFeatureSwitches: PAYEFeatureSwitches,
+                                    val s4LService: S4LService
+                                  ) extends SummaryService {
+
+}
 
 trait SummaryService {
   val payeRegistrationConnector: PAYERegistrationConnector
   val employmentServiceV2: EmploymentServiceV2
   val pAYEFeatureSwitches: PAYEFeatureSwitches
+  val s4LService: S4LService
 
   def getRegistrationSummary(regId: String)(implicit hc: HeaderCarrier): Future[Summary] = {
     for {
       regResponse <- payeRegistrationConnector.getRegistration(regId)
-    } yield registrationToSummary(regResponse, regId)
+      summary     <- registrationToSummary(regResponse, regId)
+    } yield summary
   } recover {
+    case e: FrontendControllerException => throw e
     case e: Exception => throw GeneralException(s"[SummaryService][getRegistrationSummary] an error occured for regId $regId with message ${e.getMessage}")
   }
 
-  private[services] def registrationToSummary(apiModel: PAYERegistrationAPI, regId: String): Summary = {
+  private[services] def registrationToSummary(apiModel: PAYERegistrationAPI, regId: String)(implicit hc: HeaderCarrier): Future[Summary] = {
+    if(pAYEFeatureSwitches.newApiStructure.enabled) {
+      buildEmploymentV2View(apiModel.employmentInfo, regId) map ( section => buildSummary(section, apiModel) )
+    }else {
+      buildEmploymentSection(apiModel.employment, regId) map( section => buildSummary(section, apiModel) )
+    }
+  }
+
+  private[services] def buildSummary(employmentSection: SummarySection, apiModel: PAYERegistrationAPI): Summary = {
     Summary(Seq(
-      if(pAYEFeatureSwitches.newApiStructure.enabled) {
-        buildEmploymentV2Section(apiModel.employmentInfo, regId)
-      }else {
-        buildEmploymentSection(apiModel.employment, regId)
-      },
+      employmentSection,
       buildCompletionCapacitySection(apiModel.completionCapacity),
       buildCompanyDetailsSection(apiModel.companyDetails, apiModel.sicCodes),
       buildBusinessContactDetailsSection(apiModel.companyDetails.businessContactDetails),
@@ -159,11 +169,18 @@ trait SummaryService {
                                                               address.country).flatten.map(Right(_))
   }
 
-  private[services] def buildEmploymentV2Section(oEmployment: Option[EmploymentV2], regId: String): SummarySection = {
-    val employment        = oEmployment.getOrElse(throw MissingSummaryBlockException(block = "EmployingStaffV2", regId))
-    val employmentView    = employmentServiceV2.apiToView(employment)
-    val cis               = employmentView.construction.getOrElse(throw MissingSummaryBlockItemException(block = "EmploymentStaffV2", item = "construction", regId))
 
+  //TODO REDO Whole Function
+  private[services] def buildEmploymentV2View(oEmployment: Option[EmploymentV2], regId: String)(implicit hc: HeaderCarrier): Future[SummarySection] = {
+    s4LService.fetchAndGet[EmploymentView](CacheKeys.EmploymentV2.toString, regId).map(
+      _.fold(buildEmploymentV2Section(Some(employmentServiceV2.apiToView(oEmployment.getOrElse(throw MissingSummaryBlockException("EmploymentV2", regId)))), regId))
+      (x => buildEmploymentV2Section(Some(x), regId))
+    )
+  }
+  private[services] def buildEmploymentV2Section(oEmployment: Option[EmploymentView], regId: String): SummarySection = {
+    val employmentView        = oEmployment.getOrElse(throw MissingSummaryBlockException(block = "EmployingStaffV2", regId))
+    employmentServiceV2.viewToApi(employmentView).fold(throw IncompleteSummaryBlockException(block = "EmployingStaffV2", regId), identity)
+    val cis               = employmentView.construction.getOrElse(throw MissingSummaryBlockItemException(block = "EmploymentStaffV2", item = "construction", regId))
     val employingAnyoneSection = employmentView.employingAnyone.map { paidEmployees =>
       Seq(
         Some(SummaryRow(
@@ -230,11 +247,11 @@ trait SummaryService {
     )
   }
 
-  private[services] def buildEmploymentSection(oEmployment : Option[Employment], regId: String) : SummarySection = {
+  private[services] def buildEmploymentSection(oEmployment : Option[Employment], regId: String) : Future[SummarySection] = {
 
     val employment = oEmployment.getOrElse(throw MissingSummaryBlockException(block = "Employment", regId))
 
-    SummarySection(
+    Future.successful(SummarySection(
       id = "employees",
       Seq(
         Some(SummaryRow(
@@ -270,7 +287,7 @@ trait SummaryService {
           changeLink = Some(controllers.userJourney.routes.EmploymentController.firstPayment())
         ))
       ).flatten
-    )
+    ))
   }
 
   private[services] def buildDirectorsSection(directors: Seq[Director]) = {
