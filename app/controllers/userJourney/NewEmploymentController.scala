@@ -52,9 +52,10 @@ trait NewEmploymentController extends PayeBaseController {
 
   private val handleJourneyPostConstruction: EmployingStaffV2 => Result = {
     case EmployingStaffV2(Some(EmployingAnyone(true, _)), _, _, _, None) => Redirect(controllers.userJourney.routes.NewEmploymentController.pensions())
-    case EmployingStaffV2(_, Some(WillBePaying(true, _)), _, _, None) => Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+    case EmployingStaffV2(_, Some(WillBePaying(true, _)), _, _, None) | EmployingStaffV2(_, Some(WillBePaying(false, _)), Some(true), _, None)  =>
+      Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
     case EmployingStaffV2(_, Some(WillBePaying(false, _)), Some(false), _, None) => Redirect(controllers.errors.routes.ErrorController.newIneligible())
-    case _ => NotImplemented
+    case data => throw GeneralException(s"[NewEmploymentController][handleJourneyPostConstruction] an invalid scenario was met for employment staff v2: $data")
   }
 
   def weeklyThreshold: Int = thresholdService.getCurrentThresholds.getOrElse("weekly", 116)

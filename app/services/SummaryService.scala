@@ -179,7 +179,7 @@ trait SummaryService {
   }
   private[services] def buildEmploymentV2Section(oEmployment: Option[EmploymentView], regId: String): SummarySection = {
     val employmentView        = oEmployment.getOrElse(throw MissingSummaryBlockException(block = "EmployingStaffV2", regId))
-    employmentServiceV2.viewToApi(employmentView).fold(throw IncompleteSummaryBlockException(block = "EmployingStaffV2", regId), identity)
+    employmentServiceV2.viewToApi(employmentView).fold(_ => throw IncompleteSummaryBlockException(block = "EmployingStaffV2", regId), identity)
     val cis               = employmentView.construction.getOrElse(throw MissingSummaryBlockItemException(block = "EmploymentStaffV2", item = "construction", regId))
     val employingAnyoneSection = employmentView.employingAnyone.map { paidEmployees =>
       Seq(
