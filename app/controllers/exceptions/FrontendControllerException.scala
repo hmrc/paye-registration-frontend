@@ -37,6 +37,7 @@ sealed trait RestartException extends FrontendControllerException {
 }
 
 case class GeneralException(message: String) extends RestartException
+case class MissingViewElementException(message: String) extends RestartException
 case class IncompleteSummaryBlockException(block: String, regId: String) extends  RestartException {
   val message = s"$block block is incomplete when trying to load the summary page for regId: $regId"
 }

@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import javax.inject.Inject
 import connectors.KeystoreConnector
-import controllers.exceptions.{FrontendControllerException, GeneralException}
+import controllers.exceptions.{FrontendControllerException, GeneralException, MissingViewElementException}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.employmentDetails._
 import models.view._
@@ -114,7 +114,8 @@ trait NewEmploymentController extends PayeBaseController {
       willBePaying => employmentService.saveWillEmployAnyone(profile.registrationID, willBePaying).map {
         _.willBePaying match {
           case Some(WillBePaying(true, Some(false)))  => Redirect(controllers.userJourney.routes.NewEmploymentController.applicationDelayed())
-          case None                                   => NotImplemented //TODO should we error if nothing there
+          case None                                   =>
+            throw MissingViewElementException(s"[NewEmploymentController][SubmitEmployingStaff] no WillBePaying block found on save for regId: ${profile.registrationID}")
           case _                                      => Redirect(controllers.userJourney.routes.NewEmploymentController.constructionIndustry())
         }
       }
@@ -126,7 +127,7 @@ trait NewEmploymentController extends PayeBaseController {
   // CONSTRUCTION INDUSTRY
   def constructionIndustry: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
     employmentService.fetchEmploymentView(profile.registrationID) map {
-      viewModel => val form = viewModel.companyPension.fold(ConstructionIndustryForm.form)(ConstructionIndustryForm.form.fill)
+      viewModel => val form = viewModel.construction.fold(ConstructionIndustryForm.form)(ConstructionIndustryForm.form.fill)
         Ok(ConstructionIndustryPage(form))
     } recover {
       case e : FrontendControllerException => e.recover
