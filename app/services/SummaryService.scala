@@ -187,7 +187,7 @@ trait SummaryService {
     val willBePayingSection = employmentView.willBePaying.map{ wbp =>
       Seq(
         Some(SummaryRow(
-          id = "",
+          id = "willBePaying",
           answers = List(Left(wbp.willPay.toString)),
           changeLink = Some(controllers.userJourney.routes.NewEmploymentController.employingStaff())
         )),

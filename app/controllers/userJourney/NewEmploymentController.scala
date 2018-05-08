@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import javax.inject.Inject
 import connectors.KeystoreConnector
-import controllers.exceptions.FrontendControllerException
+import controllers.exceptions.{FrontendControllerException, GeneralException}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.employmentDetails._
 import models.view._
@@ -97,7 +97,6 @@ trait NewEmploymentController extends PayeBaseController {
       }
     }
 
-  // EMPLOYING STAFF
   def employingStaff: Action[AnyContent] = isAuthorisedWithProfile{ implicit request => profile =>
     employmentService.fetchEmploymentView(profile.registrationID) map { viewModel =>
       val form = viewModel.willBePaying.fold(EmployingStaffFormV2.form)(EmployingStaffFormV2.form.fill)
@@ -173,8 +172,9 @@ trait NewEmploymentController extends PayeBaseController {
       errors => Future.successful(BadRequest(SubcontractorsPage(errors)))
     },{
       employsSubcontractors => employmentService.saveSubcontractors(profile.registrationID, employsSubcontractors).map(handleJourneyPostConstruction)
-    }) recover {
+    }).recover {
       case e : FrontendControllerException => e.recover
+      case e: Exception => GeneralException(s"ouch ${e.getMessage}").recover
     }
   }
 
