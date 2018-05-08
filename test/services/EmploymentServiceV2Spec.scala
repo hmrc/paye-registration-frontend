@@ -21,8 +21,8 @@ import java.time.LocalDate
 import helpers.PayeComponentSpec
 import models.api.{Employing, EmploymentV2}
 import models.view.{EmployingAnyone, EmployingStaffV2, WillBePaying}
-import org.mockito.Mockito.when
 import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
@@ -35,22 +35,32 @@ class EmploymentServiceV2Spec extends PayeComponentSpec {
     override val payeRegConnector = mockPayeRegistrationConnector
   }
 
-  val anotherDateEntered          = LocalDate.of(2016,1,1)
-  val alreadyEmployingViewModel   = EmployingStaffV2(Some(EmployingAnyone(true, Some(anotherDateEntered))), None, Some(true), Some(true), Some(true))
-  val alreadyEmployingApiModel    = EmploymentV2(Employing.alreadyEmploying, anotherDateEntered, true, true, Some(true))
-  val notEmployingViewModel       = EmployingStaffV2(Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)), Some(false), None, None)
-  val notEmployingApiModel        = EmploymentV2(Employing.notEmploying, testService.now, false, false, None)
-  val willEmployThisYearViewModel = EmployingStaffV2(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(true))), Some(false), None, None)
-  val willEmployThisYearApiModel  = EmploymentV2(Employing.willEmployThisYear, testService.now , false, false, None)
-  val willEmployNextYearViewModel = EmployingStaffV2(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(false))), Some(true), Some(false), None)
-  val willEmployNextYearApiModel  = EmploymentV2(Employing.willEmployNextYear, LocalDate.of(2018, 4, 6), true, false, None)
+  val anotherDateEntered                   = LocalDate.of(2016,1,1)
+  val alreadyEmployingViewModel            = EmployingStaffV2(Some(EmployingAnyone(true, Some(anotherDateEntered))), None, Some(true), Some(true), Some(true))
+  val alreadyEmployingApiModel             = EmploymentV2(Employing.alreadyEmploying, anotherDateEntered, true, true, Some(true))
+  val notEmployingViewModel                = EmployingStaffV2(Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)), Some(false), None, None)
+  val notEmployingApiModel                 = EmploymentV2(Employing.notEmploying, testService.now, false, false, None)
+  val notEmployingApiModelPreIncorpSubs    = EmploymentV2(Employing.notEmploying, testService.now, true, true, None)
+  val notEmployingViewModelPreIncorp       = EmployingStaffV2(Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)), Some(false), None, None)
+  val notEmployingViewModelPreIncorpSubs   = EmployingStaffV2(Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)), Some(true), Some(true), None)
+  val willEmployThisYearViewModel          = EmployingStaffV2(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(true))), Some(false), None, None)
+  val willEmployThisYearViewModelPreIncorp = EmployingStaffV2(None, Some(WillBePaying(true, Some(true))), Some(false), None, None)
+  val willEmployThisYearApiModel           = EmploymentV2(Employing.willEmployThisYear, testService.now , false, false, None)
+  val willEmployNextYearViewModel          = EmployingStaffV2(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(false))), Some(true), Some(false), None)
+  val willEmployNextYearViewModelPreIncorp = EmployingStaffV2(None, Some(WillBePaying(true, Some(false))), Some(true), Some(false), None)
+  val willEmployNextYearApiModel           = EmploymentV2(Employing.willEmployNextYear, LocalDate.of(2018, 4, 6), true, false, None)
+  val defaultPensionViewModelPreIncorp     = EmployingStaffV2(None, Some(WillBePaying(true, Some(false))), Some(true), Some(false), Some(true))
+  val defaultPensionApiModelPreIncorp      = EmploymentV2(Employing.willEmployNextYear, LocalDate.of(2018, 4, 6), true, false, None)
+  val defaultPensionViewModel              = EmployingStaffV2(Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)), Some(false), None, Some(true))
+  val defaultPensionApiModel               = EmploymentV2(Employing.notEmploying, testService.now, false, false, None)
+
 
   "calling viewToAPIV2 with EmployingStaffV2" should {
     "return corresponding converted EmploymentV2 API Model with Employing = alreadyEmploying" in {
       testService.viewToApi(alreadyEmployingViewModel) mustBe Right(alreadyEmployingApiModel)
     }
 
-    "return corresponding converted EmploymentV2 API model with Employing = notEmploying and default subcontractors to false" in {
+    "return corresponding converted EmploymentV2 API model with Employing = notEmploying and default subcontractors to false and setting pension to None" in {
       testService.viewToApi(notEmployingViewModel) mustBe Right(notEmployingApiModel)
     }
 
@@ -61,9 +71,35 @@ class EmploymentServiceV2Spec extends PayeComponentSpec {
     "return corresponding converted EmploymentV2 API model with Employing = willEmployNextYear and set payment date as 6 4 of this year" in {
       testService.viewToApi(willEmployNextYearViewModel) mustBe Right(willEmployNextYearApiModel)
     }
+    "return corresponding converted EmploymentV2 API model with employing = notEmploying and default pension to None" in {
+      testService.viewToApi(defaultPensionViewModel) mustBe Right(defaultPensionApiModel)
+    }
+
+    "return corresponding converted EmploymentV2 API model with Employing = notEmploying user is pre incorp and default subcontractors to false" in {
+      testService.viewToApi(notEmployingViewModelPreIncorp) mustBe Right(notEmployingApiModel)
+    }
+
+    "return corresponding converted EmploymentV2 API model with Employing = notEmploying and dont default subcontractors user is pre incorp" in {
+      testService.viewToApi(notEmployingViewModelPreIncorp) mustBe Right(notEmployingApiModel)
+    }
+
+    "return corresponding converted Employment API model with Employing = willEmployThisYear user is pre incorp" in {
+      testService.viewToApi(willEmployThisYearViewModelPreIncorp) mustBe Right(willEmployThisYearApiModel)
+    }
+
+    "return corresponding converted EmploymentV2 API model with Employing = willEmployNextYear and set payment date as 6 4 of this year user is pre incorp" in {
+      testService.viewToApi(willEmployNextYearViewModel) mustBe Right(willEmployNextYearApiModel)
+    }
+    "return corresponding EmploymentV2 API model when pension is provided user is pre incorp so pension is defaulted to None" in {
+      testService.viewToApi(defaultPensionViewModelPreIncorp) mustBe Right(defaultPensionApiModelPreIncorp)
+    }
 
     "return viewModel if model is not complete" in {
       val viewModel = EmployingStaffV2(Some(EmployingAnyone(false, None)), None, None, None, Some(true))
+      testService.viewToApi(viewModel) mustBe Left(viewModel)
+    }
+    "return viewModel if model is not complete pre incorp" in {
+      val viewModel = EmployingStaffV2(None, Some(WillBePaying(true,Some(false))), None, Some(true), None)
       testService.viewToApi(viewModel) mustBe Left(viewModel)
     }
   }

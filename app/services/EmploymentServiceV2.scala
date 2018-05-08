@@ -56,12 +56,12 @@ trait EmploymentServiceV2 {
   private[services] def viewToApi(viewData: EmploymentView): Either[EmploymentView, EmploymentAPI] = viewData match {
     case EmploymentView(Some(EmployingAnyone(true, Some(date))), _, Some(true), Some(subcontractors), Some(pension)) =>
       Right(EmploymentAPI(Employing.alreadyEmploying, date, true, subcontractors, Some(pension)))
-      case EmploymentView(Some(EmployingAnyone(true, Some(date))), _, Some(false),_, Some(pension)) =>
-  Right(EmploymentAPI(Employing.alreadyEmploying, date, false, false, Some(pension)))
-    case EmploymentView(None, Some(willBePaying), Some(true), Some(subcontractors), _) =>
-      Right(EmploymentAPI(returnEmployingEnum(None,Some(willBePaying)), returnEmployingDate(willBePaying), true, subcontractors,None))
-    case EmploymentView(None, Some(willBePaying), Some(false),_, _) =>
-      Right(EmploymentAPI(returnEmployingEnum(None,Some(willBePaying)), returnEmployingDate(willBePaying), false, false, None))
+    case EmploymentView(Some(EmployingAnyone(true, Some(date))), _, Some(false),_, Some(pension)) =>
+      Right(EmploymentAPI(Employing.alreadyEmploying, date, false, false, Some(pension)))
+    case EmploymentView(employingAnyone, Some(willBePaying), Some(true), Some(subcontractors), _) =>
+      Right(EmploymentAPI(returnEmployingEnum(employingAnyone,Some(willBePaying)), returnEmployingDate(willBePaying), true, subcontractors, None))
+    case EmploymentView(employingAnyone, Some(willBePaying), Some(false),_, _) =>
+      Right(EmploymentAPI(returnEmployingEnum(employingAnyone,Some(willBePaying)), returnEmployingDate(willBePaying), false, false, None))
     case _ => Left(viewData)
   }
 
