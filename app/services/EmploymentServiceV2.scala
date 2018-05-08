@@ -43,13 +43,25 @@ trait EmploymentServiceV2 {
   val s4LService: S4LService
   val payeRegConnector: PAYERegistrationConnector
 
+//  private[services] def viewToApi(viewData: EmploymentView): Either[EmploymentView, EmploymentAPI] = viewData match {
+//    case EmploymentView(Some(EmployingAnyone(true, Some(date))), _, Some(cis), Some(subcontractors), Some(pension)) =>
+//      Right(EmploymentAPI(Employing.alreadyEmploying, date, cis, subcontractors, Some(pension)))
+//    case EmploymentView(Some(employingAnyong), Some(willBePaying), Some(true), Some(subcontractors), _) =>
+//      Right(EmploymentAPI(returnEmployingEnum(EmployingAnyone(false, None), willBePaying), returnEmployingDate(willBePaying), true, subcontractors, None))
+//    case EmploymentView(Some(EmployingAnyone(false, None)), Some(willBePaying), Some(false), _, _) =>
+//      Right(EmploymentAPI(returnEmployingEnum(EmployingAnyone(false, None), willBePaying), returnEmployingDate(willBePaying), false, false, None))
+//    case _ => Left(viewData)
+//  }
+
   private[services] def viewToApi(viewData: EmploymentView): Either[EmploymentView, EmploymentAPI] = viewData match {
-    case EmploymentView(Some(EmployingAnyone(false, None)), Some(willBePaying), Some(true), Some(subcontractors), _) =>
-      Right(EmploymentAPI(returnEmployingEnum(EmployingAnyone(false, None), willBePaying), returnEmployingDate(willBePaying), true, subcontractors, None))
     case EmploymentView(Some(EmployingAnyone(true, Some(date))), _, Some(true), Some(subcontractors), Some(pension)) =>
       Right(EmploymentAPI(Employing.alreadyEmploying, date, true, subcontractors, Some(pension)))
-    case EmploymentView(Some(EmployingAnyone(false, None)), Some(willBePaying), Some(false), _, _) =>
-      Right(EmploymentAPI(returnEmployingEnum(EmployingAnyone(false, None), willBePaying), returnEmployingDate(willBePaying), false, false, None))
+      case EmploymentView(Some(EmployingAnyone(true, Some(date))), _, Some(false),_, Some(pension)) =>
+  Right(EmploymentAPI(Employing.alreadyEmploying, date, false, false, Some(pension)))
+    case EmploymentView(None, Some(willBePaying), Some(true), Some(subcontractors), _) =>
+      Right(EmploymentAPI(returnEmployingEnum(None,Some(willBePaying)), returnEmployingDate(willBePaying), true, subcontractors,None))
+    case EmploymentView(None, Some(willBePaying), Some(false),_, _) =>
+      Right(EmploymentAPI(returnEmployingEnum(None,Some(willBePaying)), returnEmployingDate(willBePaying), false, false, None))
     case _ => Left(viewData)
   }
 
@@ -70,11 +82,21 @@ trait EmploymentServiceV2 {
     case Employing.willEmployNextYear => (Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(false))))
   }
 
-  private def returnEmployingEnum(employingAnyone: EmployingAnyone, willBePaying: WillBePaying): Employing.Value = {
+//  private def returnEmployingEnum(employingAnyone: EmployingAnyone, willBePaying: WillBePaying): Employing.Value = {
+//    (employingAnyone, willBePaying) match {
+//      case (EmployingAnyone(false,_), WillBePaying(false,_))          => Employing.notEmploying
+//      case (EmployingAnyone(false,_), WillBePaying(true,Some(false))) => Employing.willEmployNextYear
+//      case (EmployingAnyone(false,_), WillBePaying(true,_))           => Employing.willEmployThisYear
+//    }
+//  }
+
+  private def returnEmployingEnum(employingAnyone: Option[EmployingAnyone], willBePaying: Option[WillBePaying]): Employing.Value = {
     (employingAnyone, willBePaying) match {
-      case (EmployingAnyone(false,_), WillBePaying(false,_))          => Employing.notEmploying
-      case (EmployingAnyone(false,_), WillBePaying(true,Some(false))) => Employing.willEmployNextYear
-      case (EmployingAnyone(false,_), WillBePaying(true,_))           => Employing.willEmployThisYear
+      case (Some(EmployingAnyone(true, _)), _)            => Employing.alreadyEmploying
+      case (_, Some(WillBePaying(false, _)))              => Employing.notEmploying
+      case (_, Some(WillBePaying(true, Some(false))))     => Employing.willEmployNextYear
+      case (_, Some(WillBePaying(true, _)))               => Employing.willEmployThisYear
+
     }
   }
 
