@@ -22,9 +22,8 @@ import com.google.inject.Inject
 import connectors.PAYERegistrationConnector
 import controllers.exceptions.GeneralException
 import enums.CacheKeys
-import models.view.{EmployingAnyone, WillBePaying, EmployingStaffV2 => EmploymentView}
 import models.api.{Employing, EmploymentV2 => EmploymentAPI}
-import play.api.Logger
+import models.view.{EmployingAnyone, WillBePaying, EmployingStaffV2 => EmploymentView}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.SystemDate
@@ -43,24 +42,12 @@ trait EmploymentServiceV2 {
   val s4LService: S4LService
   val payeRegConnector: PAYERegistrationConnector
 
-//  private[services] def viewToApi(viewData: EmploymentView): Either[EmploymentView, EmploymentAPI] = viewData match {
-//    case EmploymentView(Some(EmployingAnyone(true, Some(date))), _, Some(cis), Some(subcontractors), Some(pension)) =>
-//      Right(EmploymentAPI(Employing.alreadyEmploying, date, cis, subcontractors, Some(pension)))
-//    case EmploymentView(Some(employingAnyong), Some(willBePaying), Some(true), Some(subcontractors), _) =>
-//      Right(EmploymentAPI(returnEmployingEnum(EmployingAnyone(false, None), willBePaying), returnEmployingDate(willBePaying), true, subcontractors, None))
-//    case EmploymentView(Some(EmployingAnyone(false, None)), Some(willBePaying), Some(false), _, _) =>
-//      Right(EmploymentAPI(returnEmployingEnum(EmployingAnyone(false, None), willBePaying), returnEmployingDate(willBePaying), false, false, None))
-//    case _ => Left(viewData)
-//  }
-
   private[services] def viewToApi(viewData: EmploymentView): Either[EmploymentView, EmploymentAPI] = viewData match {
-    case EmploymentView(Some(EmployingAnyone(true, Some(date))), _, Some(true), Some(subcontractors), Some(pension)) =>
-      Right(EmploymentAPI(Employing.alreadyEmploying, date, true, subcontractors, Some(pension)))
-    case EmploymentView(Some(EmployingAnyone(true, Some(date))), _, Some(false),_, Some(pension)) =>
-      Right(EmploymentAPI(Employing.alreadyEmploying, date, false, false, Some(pension)))
-    case EmploymentView(employingAnyone, Some(willBePaying), Some(true), Some(subcontractors), _) =>
+    case EmploymentView(Some(EmployingAnyone(true, Some(date))), _, Some(cons), Some(subcontractors), Some(pension)) =>
+      Right(EmploymentAPI(Employing.alreadyEmploying, date, cons, if(cons) subcontractors else false, Some(pension)))
+    case EmploymentView(employingAnyone@(None | Some(EmployingAnyone(false,_))), Some(willBePaying), Some(true), Some(subcontractors), _) =>
       Right(EmploymentAPI(returnEmployingEnum(employingAnyone,Some(willBePaying)), returnEmployingDate(willBePaying), true, subcontractors, None))
-    case EmploymentView(employingAnyone, Some(willBePaying), Some(false),_, _) =>
+    case EmploymentView(employingAnyone@(None | Some(EmployingAnyone(false,_))), Some(willBePaying), Some(false),_, _) =>
       Right(EmploymentAPI(returnEmployingEnum(employingAnyone,Some(willBePaying)), returnEmployingDate(willBePaying), false, false, None))
     case _ => Left(viewData)
   }
@@ -81,14 +68,6 @@ trait EmploymentServiceV2 {
     case Employing.willEmployThisYear => (Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(true))))
     case Employing.willEmployNextYear => (Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(false))))
   }
-
-//  private def returnEmployingEnum(employingAnyone: EmployingAnyone, willBePaying: WillBePaying): Employing.Value = {
-//    (employingAnyone, willBePaying) match {
-//      case (EmployingAnyone(false,_), WillBePaying(false,_))          => Employing.notEmploying
-//      case (EmployingAnyone(false,_), WillBePaying(true,Some(false))) => Employing.willEmployNextYear
-//      case (EmployingAnyone(false,_), WillBePaying(true,_))           => Employing.willEmployThisYear
-//    }
-//  }
 
   private def returnEmployingEnum(employingAnyone: Option[EmployingAnyone], willBePaying: Option[WillBePaying]): Employing.Value = {
     (employingAnyone, willBePaying) match {
