@@ -16,13 +16,14 @@
 
 package forms.employmentDetails
 
+import java.time.LocalDate
+
 import helpers.PayeComponentSpec
 import models.view.WillBePaying
 import play.api.data.FormError
 
 class EmployingStaffFormV2Spec extends PayeComponentSpec {
 
-  val testForm = EmployingStaffFormV2.form
   val payInNext2MonthsBeforeNTY = Map("willBePaying" -> "true", "beforeNewTaxYear" -> "true")
   val payInNext2MonthsAfterNTY = Map("willBePaying" -> "true", "beforeNewTaxYear" -> "false")
   val notPayingInNext2Months = Map("willBePaying" -> "false")
@@ -33,6 +34,9 @@ class EmployingStaffFormV2Spec extends PayeComponentSpec {
   val noEntrySecondAnswer = Map("willBePaying" -> "true", "beforeNewTaxYear" -> "")
 
   "EmployingStaffForm" should {
+    val now = LocalDate.of(2017, 2, 6)
+    val testForm = EmployingStaffFormV2.form(now)
+
     "return completed form if user will pay in next 2 months before new tax year" in {
       testForm.bind(payInNext2MonthsBeforeNTY).value.get mustBe WillBePaying(true, Some(true))
     }
@@ -47,6 +51,12 @@ class EmployingStaffFormV2Spec extends PayeComponentSpec {
     }
     "return error if first answer provided but second not provided" in {
       testForm.bind(noEntrySecondAnswer).errors mustBe Seq(FormError("beforeNewTaxYear", "pages.willBePaying.beforeNewTaxYear.empty", Nil))
+    }
+    "return completed if only first answer provided, current date not between 6th Feb and 5th Apr" in {
+      val onlyFirstAnswer = Map("willBePaying" -> "true")
+      val now2 = LocalDate.of(2017, 2, 5)
+      val testForm2 = EmployingStaffFormV2.form(now2)
+      testForm2.bind(onlyFirstAnswer).value.get mustBe WillBePaying(true, None)
     }
   }
 }

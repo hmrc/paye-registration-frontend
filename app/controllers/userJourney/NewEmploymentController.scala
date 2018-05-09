@@ -30,7 +30,8 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
-import views.html.pages.employmentDetails.{applicationDelayed => ApplicationDelayedPage, constructionIndustry => ConstructionIndustryPage, employsSubcontractors => SubcontractorsPage, paidEmployees => PaidEmployeesPage, paysPension => PaysPensionPage, willBePaying => EmployingStaffPage}
+import utils.SystemDate
+import views.html.pages.employmentDetails.{applicationDelayed => ApplicationDelayedPage, constructionIndustry => ConstructionIndustryPage, employsSubcontractors => SubcontractorsPage, paidEmployees => PaidEmployeesPage, paysPension => PaysPensionPage, willBePaying => willBePayingPage}
 
 import scala.concurrent.Future
 
@@ -102,16 +103,18 @@ trait NewEmploymentController extends PayeBaseController {
   def employingStaff: Action[AnyContent] = isAuthorisedWithProfile{ implicit request =>
     implicit profile =>
     employmentService.fetchEmploymentView map { viewModel =>
-      val form = viewModel.willBePaying.fold(EmployingStaffFormV2.form)(EmployingStaffFormV2.form.fill)
-      Ok(EmployingStaffPage(form, weeklyThreshold))
+      val now = SystemDate.getSystemDate.toLocalDate
+      val form = viewModel.willBePaying.fold(EmployingStaffFormV2.form(now))(EmployingStaffFormV2.form(now).fill)
+      Ok(willBePayingPage(form, weeklyThreshold, now))
     } recover {
       case e : FrontendControllerException => e.recover
     }
   }
 
   def submitEmployingStaff: Action[AnyContent] = isAuthorisedWithProfile{ implicit request => implicit profile =>
-    EmployingStaffFormV2.form.bindFromRequest().fold({
-      errors => Future.successful(BadRequest(EmployingStaffPage(errors, weeklyThreshold)))
+    val now = SystemDate.getSystemDate.toLocalDate
+    EmployingStaffFormV2.form(now).bindFromRequest().fold({
+      errors => Future.successful(BadRequest(willBePayingPage(errors, weeklyThreshold, now)))
     },{
       willBePaying => employmentService.saveWillEmployAnyone(willBePaying).map {
         _.willBePaying match {

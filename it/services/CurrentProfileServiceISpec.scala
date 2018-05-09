@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package service
+package services
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlMatching}
 import connectors.{BusinessRegistrationConnector, CompanyRegistrationConnector, KeystoreConnector, PAYERegistrationConnector}

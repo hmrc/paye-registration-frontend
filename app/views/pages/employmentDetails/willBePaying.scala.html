@@ -1,8 +1,10 @@
+@import java.time.LocalDate
 @import helpers.templates.{payeInputRadioGroup, payeErrorSummary, formHiddenYesNoRadio}
 @import models.view.WillBePaying
+@import forms.employmentDetails.EmployingStaffFormV2
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
-@(willBePayingForm: Form[WillBePaying], weeklyThreshold: Int)(implicit request: Request[_], messages: Messages)
+@(willBePayingForm: Form[WillBePaying], weeklyThreshold: Int, now: LocalDate)(implicit request: Request[_], messages: Messages)
 
 @hiddenYesNoContent = {
     @payeInputRadioGroup(
@@ -12,7 +14,7 @@
             "false"->messages("app.common.no")
         ),
         '_legend -> messages("pages.willBePaying.beforeNextTaxYear.label"),
-        '_legendID -> "willBePaying",
+        '_legendID -> "beforeNewTaxYear",
         '_helpText -> None,
         '_labelAfter -> true,
         '_labelClass -> "block-label",
@@ -36,12 +38,28 @@
         </ul>
 
         <div class="inline form-group">
-            @formHiddenYesNoRadio(
-                willBePayingForm,
-                "willBePaying",
-                Messages("pages.willBePaying.description"),
-                hiddenYesNoContent
-            )
+            @if(EmployingStaffFormV2.isRequiredBeforeNewTaxYear(now)) {
+                @formHiddenYesNoRadio(
+                    willBePayingForm,
+                    "willBePaying",
+                    Messages("pages.willBePaying.description"),
+                    hiddenYesNoContent
+                )
+            } else {
+                @payeInputRadioGroup(
+                    willBePayingForm("willBePaying"),
+                    Seq(
+                        "true"->messages("app.common.yes"),
+                        "false"->messages("app.common.no")
+                    ),
+                    '_legend -> messages("pages.willBePaying.description"),
+                    '_legendID -> "willBePaying",
+                    '_helpText -> None,
+                    '_labelAfter -> true,
+                    '_labelClass -> "block-label",
+                    '_groupClass -> "inline"
+                )
+            }
         </div>
         <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
     }
