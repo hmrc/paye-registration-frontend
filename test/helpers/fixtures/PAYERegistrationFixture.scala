@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import enums.PAYEStatus
 import models.api.{PAYEContact => PAYEContactAPI, _}
-import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection, PAYEContact => PAYEContactView}
+import models.view.{EmployingAnyone, EmployingStaffV2, PAYEContactDetails, Summary, SummaryRow, SummarySection, WillBePaying, PAYEContact => PAYEContactView}
 import models.{Address, DigitalContactDetails}
 
 trait PAYERegistrationFixture {
@@ -52,6 +52,21 @@ trait PAYERegistrationFixture {
     construction = true,
     subcontractors = true,
     companyPension = None
+  )
+  val validEmploymentApiV2Incorporated = EmploymentV2(
+    employees = Employing.alreadyEmploying,
+    firstPaymentDate = LocalDate.of(2016,12,20),
+    construction = true,
+    subcontractors = true,
+    companyPension = Some(true)
+  )
+
+  val validEmploymentViewV2Incorporated = EmployingStaffV2(
+    Some(EmployingAnyone(true,Some(LocalDate.of(2016,12,20)))),
+    None,
+    Some(true),
+    Some(true),
+    Some(true)
   )
 
 

@@ -80,7 +80,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(LocalDate.of(2012, 5, 5))))
 
-      when(mockEmploymentServiceV2.fetchEmploymentView(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.fetchEmploymentView(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(emptyView))
 
       mockGetThreshold
@@ -157,7 +157,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(LocalDate.of(2012, 5, 5))))
 
-      when(mockEmploymentServiceV2.saveEmployingAnyone(ArgumentMatchers.anyString(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.saveEmployingAnyone(ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(employingAnyoneView))
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitPaidEmployees, Fixtures.validCurrentProfile, formRequest) {
@@ -175,7 +175,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(LocalDate.of(2012, 5, 5))))
 
-      when(mockEmploymentServiceV2.saveEmployingAnyone(ArgumentMatchers.anyString(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.saveEmployingAnyone(ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(employingAnyoneViewFalse))
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitPaidEmployees, Fixtures.validCurrentProfile, formRequest) {
@@ -195,7 +195,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       }
     }
     "render page" in {
-      when(mockEmploymentServiceV2.fetchEmploymentView(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.fetchEmploymentView(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(emptyView))
 
       mockGetThreshold
@@ -212,7 +212,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "willBePaying" -> "false"
       )
 
-      when(mockEmploymentServiceV2.saveEmployingAnyone(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.saveEmployingAnyone(ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(employingAnyoneView))
 
       AuthHelpers.submitUnauthorised(testController.submitEmployingStaff, request) {
@@ -239,7 +239,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "willBePaying" -> "false"
       )
 
-      when(mockEmploymentServiceV2.saveWillEmployAnyone(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.saveWillEmployAnyone(ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(willBePayingViewFalse))
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitEmployingStaff, Fixtures.validCurrentProfile, formRequest) {
@@ -255,7 +255,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "beforeNewTaxYear" -> "true"
       )
 
-      when(mockEmploymentServiceV2.saveWillEmployAnyone(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.saveWillEmployAnyone(ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(willBePayingView))
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitEmployingStaff, Fixtures.validCurrentProfile, formRequest) {
@@ -271,7 +271,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "beforeNewTaxYear" -> "false"
       )
 
-      when(mockEmploymentServiceV2.saveWillEmployAnyone(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.saveWillEmployAnyone(ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(willBePayingViewNewTaxYear))
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitEmployingStaff, Fixtures.validCurrentProfile, formRequest) {
@@ -330,7 +330,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "render the page" in {
 
-      when(mockEmploymentServiceV2.fetchEmploymentView(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.fetchEmploymentView(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(emptyView))
 
       AuthHelpers.showAuthorisedWithCP(testController.constructionIndustry, Fixtures.validCurrentProfile, request) {
@@ -362,7 +362,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "inConstructionIndustry" -> "true"
       )
 
-      when(mockEmploymentServiceV2.saveConstructionIndustry(ArgumentMatchers.any(), ArgumentMatchers.eq(true))(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.saveConstructionIndustry(ArgumentMatchers.eq(true))(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(constructionIndustryView))
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
@@ -377,7 +377,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "inConstructionIndustry" -> "false"
       )
 
-      when(mockEmploymentServiceV2.saveConstructionIndustry(ArgumentMatchers.any(), ArgumentMatchers.eq(false))(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.saveConstructionIndustry(ArgumentMatchers.eq(false))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(dynamicViewModel(ea = true)))
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
@@ -392,7 +392,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "inConstructionIndustry" -> "false"
       )
 
-      when(mockEmploymentServiceV2.saveConstructionIndustry(ArgumentMatchers.any(), ArgumentMatchers.eq(false))(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.saveConstructionIndustry(ArgumentMatchers.eq(false))(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(dynamicViewModel(wbp = true)))
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
@@ -407,7 +407,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "inConstructionIndustry" -> "false"
       )
 
-      when(mockEmploymentServiceV2.saveConstructionIndustry(ArgumentMatchers.any(), ArgumentMatchers.eq(false))(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.saveConstructionIndustry(ArgumentMatchers.eq(false))(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(dynamicViewModel()))
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
@@ -422,7 +422,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "inConstructionIndustry" -> "false"
       )
 
-      when(mockEmploymentServiceV2.saveConstructionIndustry(ArgumentMatchers.any(), ArgumentMatchers.eq(false))(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.saveConstructionIndustry(ArgumentMatchers.eq(false))(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(dynamicViewModelNoDate(wbp = true)))
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
@@ -437,7 +437,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "inConstructionIndustry" -> "false"
       )
 
-      when(mockEmploymentServiceV2.saveConstructionIndustry(ArgumentMatchers.any(), ArgumentMatchers.eq(false))(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.saveConstructionIndustry(ArgumentMatchers.eq(false))(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(dynamicViewModelNoDate()))
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
@@ -459,7 +459,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "render the page" in {
 
-      when(mockEmploymentServiceV2.fetchEmploymentView(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.fetchEmploymentView(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(emptyView))
 
       AuthHelpers.showAuthorisedWithCP(testController.subcontractors, Fixtures.validCurrentProfile, request) {
@@ -494,7 +494,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "employsSubcontractors" -> "true"
       )
 
-      when(mockEmploymentServiceV2.saveSubcontractors(ArgumentMatchers.any(), ArgumentMatchers.eq(true))(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.saveSubcontractors(ArgumentMatchers.eq(true))(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(dynamicViewModel(ea = true, cis = true)))
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitSubcontractors, Fixtures.validCurrentProfile, formRequest) {
@@ -509,7 +509,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "employsSubcontractors" -> "false"
       )
 
-      when(mockEmploymentServiceV2.saveSubcontractors(ArgumentMatchers.any(), ArgumentMatchers.eq(false))(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.saveSubcontractors(ArgumentMatchers.eq(false))(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(dynamicViewModel(wbp = true, cis = true)))
 
 
@@ -532,7 +532,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "render the page" in {
 
-      when(mockEmploymentServiceV2.fetchEmploymentView(ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.fetchEmploymentView(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(emptyView))
 
       AuthHelpers.showAuthorisedWithCP(testController.pensions, Fixtures.validCurrentProfile, request) {
@@ -567,7 +567,7 @@ class NewEmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "paysPension" -> "true"
       )
 
-      when(mockEmploymentServiceV2.savePensionPayment(ArgumentMatchers.any(), ArgumentMatchers.eq(true))(ArgumentMatchers.any()))
+      when(mockEmploymentServiceV2.savePensionPayment(ArgumentMatchers.eq(true))(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(pensionsView))
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitPensions, Fixtures.validCurrentProfile, formRequest) {

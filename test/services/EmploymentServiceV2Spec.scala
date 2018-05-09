@@ -33,6 +33,7 @@ class EmploymentServiceV2Spec extends PayeComponentSpec {
     override def now: LocalDate   = LocalDate.of(2018, 1, 1)
     override val s4LService       = mockS4LService
     override val payeRegConnector = mockPayeRegistrationConnector
+    override val iiService        = mockIncorpInfoService
   }
 
   val anotherDateEntered                   = LocalDate.of(2016,1,1)
@@ -105,20 +106,27 @@ class EmploymentServiceV2Spec extends PayeComponentSpec {
   }
 
   "apiToView" should {
+    val incorpDate = Some(LocalDate.now)
     "return corresponding converted EmploymentStaff View Model with Employing = alreadyEmploying" in {
-      testService.apiToView(alreadyEmployingApiModel) mustBe alreadyEmployingViewModel
+      testService.apiToView(alreadyEmployingApiModel,incorpDate) mustBe alreadyEmployingViewModel
     }
-
     "return corresponding converted EmploymentStaff View Model with Employing = notEmploying and default subcontractors to false" in {
-      testService.apiToView(notEmployingApiModel) mustBe notEmployingViewModel
+      testService.apiToView(notEmployingApiModel,incorpDate) mustBe notEmployingViewModel
     }
-
-    "return corresponding converted EmployingStaff API model with Employing = willEmployThisYear" in {
-      testService.apiToView(willEmployThisYearApiModel) mustBe willEmployThisYearViewModel
+    "return corresponding converted EmployingStaff View model with Employing = willEmployThisYear" in {
+      testService.apiToView(willEmployThisYearApiModel,incorpDate) mustBe willEmployThisYearViewModel
     }
-
     "return corresponding converted EmployingStaff View model with Employing = willEmployNextYear and set payment date as 6 4 of this year" in {
-      testService.apiToView(willEmployNextYearApiModel) mustBe willEmployNextYearViewModel
+      testService.apiToView(willEmployNextYearApiModel,incorpDate) mustBe willEmployNextYearViewModel
+    }
+    "return corresponding EmploymentStaff View model with Employing = notEmploying and default subcontractors to false (AND default Employing to None) for pre incorp" in {
+      testService.apiToView(notEmployingApiModel,None) mustBe notEmployingViewModel.copy(employingAnyone = None, companyPension = None)
+    }
+    "return corresponding EmploymentStaff View model with Employing = willEmployThisYear and pension is None (AND default Employing to None) for pre incorp" in {
+      testService.apiToView(willEmployThisYearApiModel,None) mustBe willEmployThisYearViewModel.copy(employingAnyone = None, companyPension = None)
+    }
+    "return corresponding EmploymentStaff View model with Employing = willEmployNextYear (AND default Employing to None) for pre incorp" in {
+      testService.apiToView(willEmployNextYearApiModel,None) mustBe willEmployNextYearViewModel.copy(employingAnyone = None, companyPension = None)
     }
   }
 
@@ -129,7 +137,10 @@ class EmploymentServiceV2Spec extends PayeComponentSpec {
       when(mockS4LService.fetchAndGet[EmployingStaffV2](any(), any())(any(), any()))
         .thenReturn(Future(Some(partialView)))
 
-      val result = await(testService.fetchEmploymentView("testRegId"))
+      when(mockIncorpInfoService.getIncorporationDate(any(),any())(any()))
+        .thenReturn(Future.successful(Some(LocalDate.now)))
+
+      val result = await(testService.fetchEmploymentView)
       result mustBe partialView
     }
 
@@ -140,7 +151,10 @@ class EmploymentServiceV2Spec extends PayeComponentSpec {
       when(mockPayeRegistrationConnector.getEmploymentV2(any())(any(), any()))
         .thenReturn(Future(Some(willEmployNextYearApiModel)))
 
-      val result = await(testService.fetchEmploymentView("testRegId"))
+      when(mockIncorpInfoService.getIncorporationDate(any(),any())(any()))
+        .thenReturn(Future.successful(Some(LocalDate.now)))
+
+      val result = await(testService.fetchEmploymentView)
       result mustBe willEmployNextYearViewModel
     }
 
@@ -151,7 +165,10 @@ class EmploymentServiceV2Spec extends PayeComponentSpec {
       when(mockPayeRegistrationConnector.getEmploymentV2(any())(any(), any()))
         .thenReturn(Future(None))
 
-      val result = await(testService.fetchEmploymentView("testRegId"))
+      when(mockIncorpInfoService.getIncorporationDate(any(),any())(any()))
+        .thenReturn(Future.successful(Some(LocalDate.now)))
+
+      val result = await(testService.fetchEmploymentView)
       result mustBe EmployingStaffV2(None, None, None, None, None)
     }
   }
@@ -190,32 +207,31 @@ class EmploymentServiceV2Spec extends PayeComponentSpec {
       when(mockS4LService.clear(any())(any()))
         .thenReturn(Future(HttpResponse(200)))
 
-      await(testService.fetchAndUpdateViewModel("testRegId")(identity)) mustBe alreadyEmployingViewModel
+      await(testService.fetchAndUpdateViewModel(identity)) mustBe alreadyEmployingViewModel
     }
   }
 
   val partialView = EmployingStaffV2(None, None, None, None, None)
 
-  Seq(
-    (
+  Seq((
       "saveEmployingAnyone",
-      () => testService.saveEmployingAnyone("testRegId", EmployingAnyone(true, Some(anotherDateEntered))),
+      () => testService.saveEmployingAnyone(EmployingAnyone(true, Some(anotherDateEntered))),
       partialView.copy(employingAnyone = Some(EmployingAnyone(true, Some(anotherDateEntered))))
     ),(
       "saveWillEmployAnyone",
-      () => testService.saveWillEmployAnyone("testRegId", WillBePaying(false, None)),
+      () => testService.saveWillEmployAnyone(WillBePaying(false, None)),
       partialView.copy(willBePaying = Some(WillBePaying(false, None)))
     ),(
       "saveConstructionIndustry",
-      () => testService.saveConstructionIndustry("testRegId", construction = true),
+      () => testService.saveConstructionIndustry(construction = true),
       partialView.copy(construction = Some(true))
     ),(
       "saveSubcontractors",
-      () => testService.saveSubcontractors("testRegId", subcontractors = true),
+      () => testService.saveSubcontractors(subcontractors = true),
       partialView.copy(subcontractors = Some(true))
     ),(
       "savePensionPayment",
-      () => testService.savePensionPayment("testRegId", companyPension = true),
+      () => testService.savePensionPayment(companyPension = true),
       partialView.copy(companyPension = Some(true))
     )
   ) foreach {
@@ -231,6 +247,9 @@ class EmploymentServiceV2Spec extends PayeComponentSpec {
 
           when(mockS4LService.saveForm[EmployingStaffV2](any(), any(), any())(any(), any()))
             .thenReturn(Future(Fixtures.blankCacheMap))
+
+          when(mockIncorpInfoService.getIncorporationDate(any(),any())(any()))
+              .thenReturn(Future.successful(Some(LocalDate.now)))
 
           await(function()) mustBe expected
         }

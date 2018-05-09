@@ -55,7 +55,7 @@ trait SummaryController extends PayeBaseController {
     invalidSubmissionGuard(profile) {
       (for {
         _       <- emailService.primeEmailData(profile.registrationID)
-        summary <- summaryService.getRegistrationSummary(profile.registrationID)
+        summary <- summaryService.getRegistrationSummary(profile.registrationID, profile.companyTaxRegistration.transactionId)
       } yield {
         Ok(SummaryPage(summary))
       }).recover{

@@ -19,10 +19,11 @@ package services
 import java.time.LocalDate
 
 import com.google.inject.Inject
-import connectors.PAYERegistrationConnector
+import connectors.{IncorporationInformationConnector, PAYERegistrationConnector}
 import controllers.exceptions.GeneralException
 import enums.CacheKeys
 import models.api.{Employing, EmploymentV2 => EmploymentAPI}
+import models.external.CurrentProfile
 import models.view.{EmployingAnyone, WillBePaying, EmployingStaffV2 => EmploymentView}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -31,7 +32,8 @@ import utils.SystemDate
 import scala.concurrent.Future
 
 class EmploymentServiceV2Impl @Inject()(val s4LService: S4LService,
-                                        val payeRegConnector: PAYERegistrationConnector) extends EmploymentServiceV2 {
+                                        val payeRegConnector: PAYERegistrationConnector,
+                                        val iiService: IncorporationInformationService) extends EmploymentServiceV2 {
   override def now: LocalDate = SystemDate.getSystemDate.toLocalDate
 }
 
@@ -39,6 +41,7 @@ trait EmploymentServiceV2 {
 
   def now: LocalDate
 
+  val iiService: IncorporationInformationService
   val s4LService: S4LService
   val payeRegConnector: PAYERegistrationConnector
 
@@ -52,9 +55,9 @@ trait EmploymentServiceV2 {
     case _ => Left(viewData)
   }
 
-  private[services] def apiToView(employmentAPI: EmploymentAPI): EmploymentView = employmentAPI match {
+  private[services] def apiToView(employmentAPI: EmploymentAPI, incorpDate: Option[LocalDate]): EmploymentView = employmentAPI match {
     case EmploymentAPI(enumValue, date, cis, subcontractors, pensions) =>
-      val (employingAnyone, willBePaying) = enumToTuple(enumValue, date)
+      val (employingAnyone, willBePaying) = enumToTuple(enumValue, date, incorpDate)
       EmploymentView(employingAnyone, willBePaying, Some(cis), if(cis) Some(subcontractors) else None, employingAnyone.filter(_.employing).flatMap(_ => pensions))
   }
 
@@ -62,12 +65,15 @@ trait EmploymentServiceV2 {
     willBePaying.beforeSixApril.fold(now)(b => if(!b) LocalDate.of(now.getYear, 4, 6) else now)
   }
 
-  private def enumToTuple(value: Employing.Value, date: LocalDate): (Option[EmployingAnyone], Option[WillBePaying]) = value match {
+  private def enumToTuple(value: Employing.Value, date: LocalDate, incorpDate: Option[LocalDate]): (Option[EmployingAnyone], Option[WillBePaying]) = value match {
     case Employing.alreadyEmploying   => (Some(EmployingAnyone(true, Some(date))), None)
-    case Employing.notEmploying       => (Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)))
-    case Employing.willEmployThisYear => (Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(true))))
-    case Employing.willEmployNextYear => (Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(false))))
+    case Employing.notEmploying       => employingAnyonConverter((Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None))),incorpDate)
+    case Employing.willEmployThisYear => employingAnyonConverter((Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(true)))), incorpDate)
+    case Employing.willEmployNextYear => employingAnyonConverter((Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(false)))), incorpDate)
   }
+
+  private def employingAnyonConverter(tuple: (Option[EmployingAnyone], Option[WillBePaying]), incorpDate: Option[LocalDate]) : (Option[EmployingAnyone], Option[WillBePaying]) =
+    incorpDate.fold((Option.empty[EmployingAnyone], tuple._2))(_ => tuple)
 
   private def returnEmployingEnum(employingAnyone: Option[EmployingAnyone], willBePaying: Option[WillBePaying]): Employing.Value = {
     (employingAnyone, willBePaying) match {
@@ -79,14 +85,16 @@ trait EmploymentServiceV2 {
     }
   }
 
-  def fetchEmploymentView(regId: String)(implicit hc: HeaderCarrier): Future[EmploymentView] = {
-    s4LService.fetchAndGet[EmploymentView](CacheKeys.EmploymentV2.toString, regId) flatMap {
+  def fetchEmploymentView(implicit hc: HeaderCarrier, cp: CurrentProfile): Future[EmploymentView] = {
+    s4LService.fetchAndGet[EmploymentView](CacheKeys.EmploymentV2.toString, cp.registrationID) flatMap {
       case Some(employment) => Future.successful(employment)
-      case None             => payeRegConnector.getEmploymentV2(regId) map {
-        _.fold(EmploymentView(None, None, None, None, None))(apiToView)
+      case None             => payeRegConnector.getEmploymentV2(cp.registrationID) flatMap { employment =>
+        iiService.getIncorporationDate(cp.registrationID, cp.companyTaxRegistration.transactionId) map {
+          date =>  employment.fold(EmploymentView(None, None, None, None, None))(e => apiToView(e, date))
+        }
       }
     } recover {
-      case e: Exception => throw GeneralException(s"[EmploymentServiceV2][fetchEmploymentView] an error occured for regId $regId with error - ${e.getMessage}")
+      case e: Exception => throw GeneralException(s"[EmploymentServiceV2][fetchEmploymentView] an error occured for regId ${cp.registrationID} with error - ${e.getMessage}")
     }
   }
 
@@ -102,27 +110,27 @@ trait EmploymentServiceV2 {
     }
   }
 
-  def fetchAndUpdateViewModel(regId: String)(f: EmploymentView => EmploymentView)(implicit hc: HeaderCarrier): Future[EmploymentView] = {
-    fetchEmploymentView(regId) flatMap(viewModel => saveEmploymentView(regId, f(viewModel)))
+  def fetchAndUpdateViewModel(f: EmploymentView => EmploymentView)(implicit hc: HeaderCarrier, cp: CurrentProfile): Future[EmploymentView] = {
+    fetchEmploymentView flatMap(viewModel => saveEmploymentView(cp.registrationID, f(viewModel)))
   }
 
-  def saveEmployingAnyone(regId: String, employingAnyone: EmployingAnyone)(implicit hc: HeaderCarrier): Future[EmploymentView] = {
-    fetchAndUpdateViewModel(regId)(_.copy(employingAnyone = Some(employingAnyone)))
+  def saveEmployingAnyone(employingAnyone: EmployingAnyone)(implicit hc: HeaderCarrier, cp: CurrentProfile): Future[EmploymentView] = {
+    fetchAndUpdateViewModel(_.copy(employingAnyone = Some(employingAnyone)))
   }
 
-  def saveWillEmployAnyone(regId: String, willBePaying: WillBePaying)(implicit hc: HeaderCarrier): Future[EmploymentView] = {
-    fetchAndUpdateViewModel(regId)(_.copy(willBePaying = Some(willBePaying)))
+  def saveWillEmployAnyone(willBePaying: WillBePaying)(implicit hc: HeaderCarrier, cp: CurrentProfile): Future[EmploymentView] = {
+    fetchAndUpdateViewModel(_.copy(willBePaying = Some(willBePaying)))
   }
 
-  def saveConstructionIndustry(regId: String, construction: Boolean)(implicit hc: HeaderCarrier): Future[EmploymentView] = {
-    fetchAndUpdateViewModel(regId)(_.copy(construction = Some(construction)))
+  def saveConstructionIndustry(construction: Boolean)(implicit hc: HeaderCarrier, cp: CurrentProfile): Future[EmploymentView] = {
+    fetchAndUpdateViewModel(_.copy(construction = Some(construction)))
   }
 
-  def saveSubcontractors(regId: String, subcontractors: Boolean)(implicit hc: HeaderCarrier): Future[EmploymentView] = {
-    fetchAndUpdateViewModel(regId)(_.copy(subcontractors = Some(subcontractors)))
+  def saveSubcontractors(subcontractors: Boolean)(implicit hc: HeaderCarrier, cp: CurrentProfile): Future[EmploymentView] = {
+    fetchAndUpdateViewModel(_.copy(subcontractors = Some(subcontractors)))
   }
 
-  def savePensionPayment(regId: String, companyPension: Boolean)(implicit hc: HeaderCarrier): Future[EmploymentView] = {
-    fetchAndUpdateViewModel(regId)(_.copy(companyPension = Some(companyPension)))
+  def savePensionPayment(companyPension: Boolean)(implicit hc: HeaderCarrier, cp: CurrentProfile): Future[EmploymentView] = {
+    fetchAndUpdateViewModel(_.copy(companyPension = Some(companyPension)))
   }
 }

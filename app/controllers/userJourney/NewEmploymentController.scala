@@ -68,9 +68,10 @@ trait NewEmploymentController extends PayeBaseController {
     }
 
   // PAID EMPLOYEES
-  def paidEmployees: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+  def paidEmployees: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    implicit profile =>
     ifIncorpDateExist(profile.registrationID, profile.companyTaxRegistration.transactionId) { incorpDate =>
-      employmentService.fetchEmploymentView(profile.registrationID) map { viewModel =>
+      employmentService.fetchEmploymentView map { viewModel =>
         val form = viewModel.employingAnyone.fold(PaidEmployeesForm.form(incorpDate))(PaidEmployeesForm.form(incorpDate).fill)
         Ok(PaidEmployeesPage(form, weeklyThreshold))
       }
@@ -80,12 +81,12 @@ trait NewEmploymentController extends PayeBaseController {
   }
 
   def submitPaidEmployees: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
-    profile =>
+    implicit profile =>
       ifIncorpDateExist(profile.registrationID, profile.companyTaxRegistration.transactionId) { incorpDate =>
         PaidEmployeesForm.form(incorpDate).bindFromRequest.fold(
           errors => Future.successful(BadRequest(PaidEmployeesPage(errors, weeklyThreshold))),
           model => {
-            employmentService.saveEmployingAnyone(profile.registrationID, model) map { model =>
+            employmentService.saveEmployingAnyone(model) map { model =>
               model.employingAnyone match {
                 case Some(EmployingAnyone(false, _)) => Redirect(controllers.userJourney.routes.NewEmploymentController.employingStaff())
                 case Some(EmployingAnyone(true, _)) => Redirect(controllers.userJourney.routes.NewEmploymentController.constructionIndustry())
@@ -98,8 +99,9 @@ trait NewEmploymentController extends PayeBaseController {
       }
     }
 
-  def employingStaff: Action[AnyContent] = isAuthorisedWithProfile{ implicit request => profile =>
-    employmentService.fetchEmploymentView(profile.registrationID) map { viewModel =>
+  def employingStaff: Action[AnyContent] = isAuthorisedWithProfile{ implicit request =>
+    implicit profile =>
+    employmentService.fetchEmploymentView map { viewModel =>
       val form = viewModel.willBePaying.fold(EmployingStaffFormV2.form)(EmployingStaffFormV2.form.fill)
       Ok(EmployingStaffPage(form, weeklyThreshold))
     } recover {
@@ -107,11 +109,11 @@ trait NewEmploymentController extends PayeBaseController {
     }
   }
 
-  def submitEmployingStaff: Action[AnyContent] = isAuthorisedWithProfile{ implicit request => profile =>
+  def submitEmployingStaff: Action[AnyContent] = isAuthorisedWithProfile{ implicit request => implicit profile =>
     EmployingStaffFormV2.form.bindFromRequest().fold({
       errors => Future.successful(BadRequest(EmployingStaffPage(errors, weeklyThreshold)))
     },{
-      willBePaying => employmentService.saveWillEmployAnyone(profile.registrationID, willBePaying).map {
+      willBePaying => employmentService.saveWillEmployAnyone(willBePaying).map {
         _.willBePaying match {
           case Some(WillBePaying(true, Some(false)))  => Redirect(controllers.userJourney.routes.NewEmploymentController.applicationDelayed())
           case None                                   =>
@@ -125,8 +127,9 @@ trait NewEmploymentController extends PayeBaseController {
   }
 
   // CONSTRUCTION INDUSTRY
-  def constructionIndustry: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    employmentService.fetchEmploymentView(profile.registrationID) map {
+  def constructionIndustry: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    implicit profile =>
+    employmentService.fetchEmploymentView map {
       viewModel => val form = viewModel.construction.fold(ConstructionIndustryForm.form)(ConstructionIndustryForm.form.fill)
         Ok(ConstructionIndustryPage(form))
     } recover {
@@ -134,11 +137,12 @@ trait NewEmploymentController extends PayeBaseController {
     }
   }
 
-  def submitConstructionIndustry: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
+  def submitConstructionIndustry: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    implicit profile =>
     ConstructionIndustryForm.form.bindFromRequest().fold({
       errors => Future.successful(BadRequest(ConstructionIndustryPage(errors)))
     },{
-      cis => employmentService.saveConstructionIndustry(profile.registrationID, cis) map {
+      cis => employmentService.saveConstructionIndustry(cis) map {
         viewModel => if(cis){
           Redirect(controllers.userJourney.routes.NewEmploymentController.subcontractors())
         } else {
@@ -160,8 +164,9 @@ trait NewEmploymentController extends PayeBaseController {
   }
 
   // SUBCONTRACTORS
-  def subcontractors: Action[AnyContent] = isAuthorisedWithProfile{ implicit request => profile =>
-    employmentService.fetchEmploymentView(profile.registrationID) map {
+  def subcontractors: Action[AnyContent] = isAuthorisedWithProfile{ implicit request =>
+    implicit profile =>
+    employmentService.fetchEmploymentView map {
       viewModel => val form = viewModel.subcontractors.fold(SubcontractorsFormV2.form)(SubcontractorsFormV2.form.fill)
         Ok(SubcontractorsPage(form))
     } recover {
@@ -169,11 +174,12 @@ trait NewEmploymentController extends PayeBaseController {
     }
   }
 
-  def submitSubcontractors: Action[AnyContent] =  isAuthorisedWithProfile{ implicit request => profile =>
+  def submitSubcontractors: Action[AnyContent] =  isAuthorisedWithProfile{ implicit request =>
+    implicit profile =>
     SubcontractorsFormV2.form.bindFromRequest().fold({
       errors => Future.successful(BadRequest(SubcontractorsPage(errors)))
     },{
-      employsSubcontractors => employmentService.saveSubcontractors(profile.registrationID, employsSubcontractors).map(handleJourneyPostConstruction)
+      employsSubcontractors => employmentService.saveSubcontractors(employsSubcontractors).map(handleJourneyPostConstruction)
     }).recover {
       case e : FrontendControllerException => e.recover
       case e: Exception => GeneralException(s"ouch ${e.getMessage}").recover
@@ -181,8 +187,9 @@ trait NewEmploymentController extends PayeBaseController {
   }
 
   // PENSIONS
-  def pensions: Action[AnyContent] = isAuthorisedWithProfile{ implicit request => profile =>
-    employmentService.fetchEmploymentView(profile.registrationID) map {
+  def pensions: Action[AnyContent] = isAuthorisedWithProfile{ implicit request =>
+    implicit profile =>
+    employmentService.fetchEmploymentView map {
       viewModel => val form = viewModel.companyPension.fold(PaysPensionForm.form)(PaysPensionForm.form.fill)
         Ok(PaysPensionPage(form))
     } recover {
@@ -190,16 +197,15 @@ trait NewEmploymentController extends PayeBaseController {
     }
   }
 
-  def submitPensions: Action[AnyContent] =  isAuthorisedWithProfile{ implicit request => profile =>
+  def submitPensions: Action[AnyContent] =  isAuthorisedWithProfile{ implicit request =>
+    implicit profile =>
     PaysPensionForm.form.bindFromRequest().fold({
       errors => Future.successful(BadRequest(PaysPensionPage(errors)))
-    },{
-      paysPension => employmentService.savePensionPayment(profile.registrationID, paysPension) map {
+    },{ paysPension => employmentService.savePensionPayment(paysPension) map {
         _ => Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
       }
     }) recover {
       case e : FrontendControllerException => e.recover
     }
   }
-
 }

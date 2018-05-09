@@ -66,7 +66,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockEmailService.primeEmailData(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future(Fixtures.blankCacheMap))
 
-      when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validSummaryView))
 
       showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
@@ -85,7 +85,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockEmailService.primeEmailData(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future(Fixtures.blankCacheMap))
 
-      when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalError()))
+      when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalError()))
 
       showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
         (response: Future[Result]) =>
@@ -98,7 +98,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.held)))
 
-        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalError()))
+        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalError()))
 
         showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
           (response: Future[Result]) =>
@@ -111,7 +111,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.submitted)))
 
-        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalError()))
+        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalError()))
 
         showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
           (response: Future[Result]) =>
@@ -124,7 +124,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.invalid)))
 
-        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalError()))
+        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalError()))
 
         showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
           (response: Future[Result]) =>
@@ -137,7 +137,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.rejected)))
 
-        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalError()))
+        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.failed(new InternalError()))
 
         showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
           (response: Future[Result]) =>

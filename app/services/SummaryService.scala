@@ -16,6 +16,7 @@
 
 package services
 
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import javax.inject.Inject
@@ -38,7 +39,8 @@ class SummaryServiceImpl @Inject()(
                                     val payeRegistrationConnector: PAYERegistrationConnector,
                                     val employmentServiceV2: EmploymentServiceV2,
                                     val pAYEFeatureSwitches: PAYEFeatureSwitches,
-                                    val s4LService: S4LService
+                                    val s4LService: S4LService,
+                                    val iiService: IncorporationInformationService
                                   ) extends SummaryService {
   val newApiEnabled: Boolean = pAYEFeatureSwitches.newApiStructure.enabled
 }
@@ -47,20 +49,23 @@ trait SummaryService {
   val payeRegistrationConnector: PAYERegistrationConnector
   val employmentServiceV2: EmploymentServiceV2
   val s4LService: S4LService
+  val iiService: IncorporationInformationService
   val newApiEnabled: Boolean
 
-  def getRegistrationSummary(regId: String)(implicit hc: HeaderCarrier): Future[Summary] = {
+  def getRegistrationSummary(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[Summary] = {
     for {
       regResponse <- payeRegistrationConnector.getRegistration(regId)
-      summary     <- registrationToSummary(regResponse, regId)
+      summary     <- registrationToSummary(regResponse, regId, txId)
     } yield summary
   } recover {
     case e: FrontendControllerException => throw e
   }
 
-  private[services] def registrationToSummary(apiModel: PAYERegistrationAPI, regId: String)(implicit hc: HeaderCarrier): Future[Summary] = {
+  private[services] def registrationToSummary(apiModel: PAYERegistrationAPI, regId: String, txId: String)(implicit hc: HeaderCarrier): Future[Summary] = {
     if(newApiEnabled) {
-      buildEmploymentSectionFromView(apiModel.employmentInfo, regId) map (section => buildSummary(section, apiModel))
+      iiService.getIncorporationDate(regId, txId) flatMap {
+        date => buildEmploymentSectionFromView(apiModel.employmentInfo, regId, date) map (section => buildSummary(section, apiModel))
+      }
     }else {
       Future.successful(buildSummary(buildEmploymentSection(apiModel.employment, regId), apiModel))
     }
@@ -168,10 +173,10 @@ trait SummaryService {
                                                               address.country).flatten.map(Right(_))
   }
 
-  private[services] def buildEmploymentSectionFromView(oEmployment: Option[EmploymentV2], regId: String)(implicit hc: HeaderCarrier): Future[SummarySection] = {
+  private[services] def buildEmploymentSectionFromView(oEmployment: Option[EmploymentV2], regId: String, incorpDate: Option[LocalDate])(implicit hc: HeaderCarrier): Future[SummarySection] = {
     s4LService.fetchAndGet[EmploymentView](CacheKeys.EmploymentV2.toString, regId).map(
       _.fold(
-        buildEmploymentV2Section(employmentServiceV2.apiToView(oEmployment.getOrElse(throw MissingSummaryBlockException("EmploymentV2", regId))), regId)
+        buildEmploymentV2Section(employmentServiceV2.apiToView(oEmployment.getOrElse(throw MissingSummaryBlockException("EmploymentV2", regId)), incorpDate), regId)
       )(
         x => buildEmploymentV2Section(x, regId)
       )
@@ -180,8 +185,8 @@ trait SummaryService {
   private[services] def buildEmploymentV2Section(employmentView: EmploymentView, regId: String): SummarySection = {
 
     employmentServiceV2.viewToApi(employmentView).fold(_ => throw IncompleteSummaryBlockException(block = "EmployingStaffV2", regId), identity)
-
     val cis                     = employmentView.construction.getOrElse(throw MissingSummaryBlockItemException(block = "EmploymentStaffV2", item = "construction", regId))
+
     val employingAnyoneSection  = employmentView.employingAnyone.map { paidEmployees =>
       Seq(
         Some(SummaryRow(

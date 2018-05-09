@@ -29,8 +29,6 @@ import scala.concurrent.Future
 
 class EmailServiceSpec extends PayeComponentSpec {
 
-  implicit val cp: CurrentProfile = Fixtures.validCurrentProfile.get
-
   def service(enabled: Boolean = false) = new EmailService {
     override val incorporationInformationConnector = mockIncorpInfoConnector
     override val payeRegistrationConnector         = mockPayeRegistrationConnector
