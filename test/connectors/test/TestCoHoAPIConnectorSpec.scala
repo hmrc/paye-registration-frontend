@@ -27,6 +27,7 @@ class TestCoHoAPIConnectorSpec extends PayeComponentSpec {
   class Setup extends CodeMocks {
     val testConnector = new TestIncorpInfoConnector {
       override val incorpFEStubsUrl = testUrl
+      override val incorpInfoUrl    = testUrl
       override val http             = mockWSHttp
     }
   }

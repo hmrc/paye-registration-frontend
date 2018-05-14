@@ -43,6 +43,12 @@ pages.nextTaxYear.title                                         = The date of th
 pages.nextTaxYear.heading                                       = The date of the company''s first payment is in the next tax year
 pages.nextTaxYear.body                                          = You can continue with your application but we won''t process it until after 6 April {0}.
 
+## Application Delayed
+pages.applicationDelayed.title                                  = Your application will be delayed
+pages.applicationDelayed.description                            = Your application will be delayed
+pages.applicationDelayed.para1                                  = This is because the company won''t employ someone or provide expenses or benefits until the new tax year.
+pages.applicationDelayed.para2                                  = You can continue with your application but we won''t process it until after 6 April.
+
 ## User error messages
 errors.invalid.email                                            = Enter an email address using only letters, numbers and - . @ _ +
 errors.invalid.email.noEntry                                    = Enter an email address
@@ -88,6 +94,7 @@ pages.employingStaff.directorEligibility2                       = any goods
 pages.employingStaff.directorEligibility3                       = prizes for employer-run competitions
 pages.employingStaff.directorEligibility4                       = holidays that the company''s paid for (but don''t include statutory holiday pay)
 pages.directorEligibility.error                                 = Tell us if over the next 2 months, the company pay out any non-cash incentive awards
+
 
 ## Completion Capacity page
 pages.completionCapacity.description                            = What is your relationship to the company?
@@ -153,6 +160,46 @@ pages.payeContact.othercontact                                  = Other contact 
 pages.payeContact.noFieldsCompleted                             = Enter at least one contact detail for the company''s PAYE
 pages.payeContact.nameMandatory                                 = Enter a contact name
 
+## Paid Employees
+pages.paidEmployees.title                                       = Does the company do any of the following?
+pages.paidEmployees.description                                 = Does the company do any of the following?
+pages.paidEmployees.para                                        = Tell us if the company has already started any of the following:
+pages.paidEmployees.bullet1                                     = paying employees, including company directors, £{0} or more a week
+pages.paidEmployees.bullet2                                     = employing anyone, including company directors, who''s already receiving a pension or who has another job
+pages.paidEmployees.bullet3                                     = providing expenses or benefits to employees, including company directors
+pages.paidEmployees.hiddenLabel                                 = What was the earliest date it started doing any of these things?
+pages.paidEmployees.input.hint-text                             = For example, 12 8 2017
+pages.paidEmployees.error                                       = Tell us if the company employs anyone or provides expenses or benefits to staff
+pages.paidEmployees.date.dateTooEarly                           = Enter a date that''s after the date the company was set up: {0}
+pages.paidEmployees.date.dateInFuture                           = Enter a date that''s in the past
+pages.paidEmployees.date.empty                                  = Enter a date for when you first started employing someone or providing expenses or benefits to staff
+pages.paidEmployees.date.invalid                                = Enter a valid date
+pages.paidEmployees.date.moreThanTwoYears                       = Enter a date in the last 2 years
+
+
+## Will Be Paying
+pages.willBePaying.title                                      = Over the next 2 months, will the company do any of the following?
+pages.willBePaying.description                                = Over the next 2 months, will the company do any of the following?
+pages.willBePaying.para                                       = Tell us if the company will:
+pages.willBePaying.bullet1                                    = pay employees, including company directors, £{0} or more a week
+pages.willBePaying.bullet2                                    = employ anyone, including company directors, who''s already receiving a pension or who has another job
+pages.willBePaying.bullet3                                    = provide expenses or benefits to employees, including company directors
+pages.willBePaying.beforeNextTaxYear.label                    = Will any of this happen before 6 April?
+pages.willBePaying.empty                                      = Tell us if, over the next 2 months, the company will employ anyone or provide expenses or benefits to staff
+pages.willBePaying.beforeNewTaxYear.empty                     = Tell us if the company will start employing someone or providing expenses or benefits to staff after 6 April?
+
+
+## Construction Industry
+pages.constructionIndustry.title                                = Does the company work in the construction industry?
+pages.constructionIndustry.description                          = Does the company work in the construction industry?
+pages.constructionIndustry.error                                = Tell us if the company will work in the construction industry
+
+## Employs Subcontractors
+pages.employsSubcontractors.title                               = During the current tax year will the company hire any subcontractors in the construction industry?
+pages.employsSubcontractors.description                         = During the current tax year will the company hire any subcontractors in the construction industry?
+pages.employsSubcontractors.para                                = The current tax year is 6 April 2018 to 5 April 2019.
+pages.employsSubcontractors.error                               = Tell us if the company will hire any subcontractors in the construction industry in the current tax year
+
 ## Employing Staff Page
 pages.employingStaff.description                                = Over the next 2 months will the company pay any staff, including directors?
 pages.employingStaff.employingStaffRulesIntro                   = This includes:
@@ -174,7 +221,13 @@ pages.companyPension.setUpPensionIntro                          = This includes 
 pages.companyPension.setUpPension1                              = an employee who has retired
 pages.companyPension.setUpPension2                              = any dependants of an employee who has died
 pages.companyPension.error                                      = Tell us if you will make pension payments to a former employee or their dependants in the next 2 months
-pages.companyPension.error.invalidDate                          = Enter a date within 2 months
+
+## pages.companyPension.error.invalidDate                          = Enter a date within 2 months
+
+## Pays Pension
+pages.paysPension.title                                         = Does the company make pension payments to a former employee or their dependants?
+pages.paysPension.description                                   = Does the company make pension payments to a former employee or their dependants?
+pages.paysPension.error                                         = Tell us if the company makes pension payments to a former employee or their dependants
 
 ## First Payment Page
 pages.firstPayment.description                                  = Set the company''s PAYE scheme start date
@@ -225,6 +278,31 @@ pages.summary.subcontractors.hiddenChangeText                   = whether you wi
 
 pages.summary.firstPaymentDate.question                         = What do you want your PAYE start date to be?
 pages.summary.firstPaymentDate.hiddenChangeText                 = your PAYE start date.
+
+pages.summary.employing.question                                = Does the company employ anyone or provide expenses or benefits to staff?
+pages.summary.earliestDate.question                             = When did it first start employing someone or providing expenses or benefits to staff?
+pages.summary.employing.answers.true                            = Yes
+pages.summary.employing.answers.false                           = No
+
+pages.summary.willBePaying.question                             = Over the next 2 months will the company employ anyone or provide expenses or benefits to staff?
+pages.summary.beforeNextTaxYear.question                        = Will the company start employing someone or providing expenses or benefits to staff after 6 April?
+pages.summary.willBePaying.answers.true                         = Yes
+pages.summary.willBePaying.answers.false                        = No
+pages.summary.beforeNextTaxYear.answers.true                    = Yes
+pages.summary.beforeNextTaxYear.answers.false                   = No
+
+pages.summary.inConstructionIndustry.question                   = Does the company work in the construction industry?
+pages.summary.inConstructionIndustry.answers.true               = Yes
+pages.summary.inConstructionIndustry.answers.false              = No
+
+pages.summary.employsSubcontractors.question                    = During the current tax year will the company hire any subcontractors in the construction industry?
+pages.summary.employsSubcontractors.answers.true                = Yes
+pages.summary.employsSubcontractors.answers.false               = No
+
+pages.summary.paysPension.question                              = Does the company make pension payments to a former employee or their dependants?
+pages.summary.paysPension.answers.true                          = Yes
+pages.summary.paysPension.answers.false                         = No
+
 
 pages.summary.completionCapacity.sectionHeading                 = About you
 pages.summary.completionCapacity.question                       = What is your relationship to the company?
@@ -331,6 +409,16 @@ pages.ineligible.l3                                             = business activ
 pages.ineligible.l4                                             = Unique Taxpayer Reference (UTR)
 pages.ineligible.l5                                             = company registration number
 pages.ineligible.l6                                             = the names and National Insurance numbers of every company director
+
+## New Ineligible
+errorPages.newIneligible.title                                  = You don''t need to register as an employer for PAYE
+errorPages.newIneligible.description                            = You don''t need to register as an employer for PAYE
+errorPages.newIneligible.para                                   = You''ll need to register if the company starts doing any of these things:
+errorPages.newIneligible.bullet1                                = paying employees, including company directors, £{0} or more a week
+errorPages.newIneligible.bullet2                                = employing anyone, including company directors, who''s already receiving a pension or who has another job
+errorPages.newIneligible.bullet3                                = providing expenses or benefits to employees, including company directors
+errorPages.newIneligible.bullet4                                = hiring subcontractors in the construction industry
+errorPages.newIneligible.link                                   = Back to GOV.UK
 
 ## Error Pages
 errorPages.restart.description                                  = Sorry, we''re having technical issues.

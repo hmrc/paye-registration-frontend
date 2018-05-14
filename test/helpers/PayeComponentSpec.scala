@@ -21,7 +21,7 @@ import helpers.auth.AuthHelpers
 import helpers.fixtures._
 import helpers.mocks.internal.BusinessRegistrationConnectorMock
 import helpers.mocks.{KeystoreMock, SaveForLaterMock, WSHTTPMock}
-import models.external.AuditingInformation
+import models.external.{AuditingInformation, CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.Mockito.reset
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
@@ -54,7 +54,7 @@ trait PayeComponentSpec
     with JsonFormValidation {
 
   override implicit def defaultAwaitTimeout: Timeout = 5.seconds
-
+  implicit val cp: CurrentProfile = Fixtures.validCurrentProfile.get
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   implicit val auditInformation: AuditingInformation = AuditingInformation("testExternalId", "testAuthProviderId")
@@ -93,7 +93,9 @@ trait PayeComponentSpec
       mockIncorpInfoService,
       mockCompanyDetailsService,
       mockS4LService,
-      mockThresholdService
+      mockThresholdService,
+      mockEmploymentService,
+      mockEmploymentServiceV2
     )
   }
 

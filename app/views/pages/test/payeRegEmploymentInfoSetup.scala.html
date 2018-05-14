@@ -1,0 +1,49 @@
+@import helpers.templates.{inlineDateInput, payeErrorSummary, payeInput}
+@import models.api.EmploymentV2
+@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+
+@(form: Form[EmploymentV2])(implicit request: Request[_], messages: Messages)
+
+
+@payeErrorSummary(
+    Messages("app.common.errorSummaryLabel"), form
+)
+
+<h1 class="form-title heading-xlarge" id="pageHeading">Enter test company details</h1>
+
+@govHelpers.form(action = controllers.test.routes.TestRegSetupController.submitRegSetupEmploymentInfo) {
+
+    <div class="inline form-group">
+        @payeInput(
+            form("employees"),
+            '_label -> "hiring Employees Enum"
+        )
+    </div>
+    <div class="inline form-group">
+        @inlineDateInput(
+            form,
+            "earliestDate",
+            Some(Html("First Pay Date")))
+    </div>
+    <div class="inline form-group">
+        @payeInput(
+            form("cis"),
+            '_label -> "in construction industry (true/false)"
+        )
+    </div>
+    <div class="inline form-group">
+        @payeInput(
+            form("subcontractors"),
+            '_label -> "Subcontractors (true/false)"
+        )
+    </div>
+    <div class="inline form-group">
+        @payeInput(
+            form("pensions"),
+            '_label -> "Pensions (optional)(true/false)"
+        )
+    </div>
+
+    <button class="button" type="submit" id="continue" >Submit</button>
+
+}
