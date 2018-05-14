@@ -16,11 +16,13 @@
 
 package connectors
 
-import javax.inject.Inject
+import java.time.LocalDateTime
+import java.util.NoSuchElementException
 
+import javax.inject.Inject
 import config.WSHttp
 import enums.{DownstreamOutcome, PAYEStatus, RegistrationDeletion}
-import models.api.{Director, Eligibility, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
+import models.api.{Director, Eligibility, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, EmploymentV2 => EmploymentAPIV2, PAYERegistration => PAYERegistrationAPI}
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, Reads}
 import services.MetricsService
@@ -140,6 +142,34 @@ trait PAYERegistrationConnector {
   def upsertEmployment(regID: String, employment: EmploymentAPI)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPI]): Future[EmploymentAPI] = {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
     http.PATCH[EmploymentAPI, EmploymentAPI](s"$payeRegUrl/paye-registration/$regID/employment", employment) map { resp =>
+      payeRegTimer.stop()
+      resp
+    } recover {
+      case e: Exception =>
+        payeRegTimer.stop()
+        throw logResponse(e, "upsertEmployment", "upserting employment", regID)
+    }
+  }
+
+  def getEmploymentV2(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPIV2]): Future[Option[EmploymentAPIV2]] = {
+    val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
+    val url = s"$payeRegUrl/paye-registration/$regID/employment-info"
+    http.GET[HttpResponse](url) map { employment =>
+      payeRegTimer.stop()
+      if(employment.status == 204) None else employment.json.validate[EmploymentAPIV2] fold(
+        _   => throw new NoSuchElementException(s"Call to $url returned a ${employment.status} but no EmploymentAPIV2 could be created"),
+        Some(_)
+      )
+    } recover {
+      case e: Exception =>
+        payeRegTimer.stop()
+        throw logResponse(e, "getEmployment", "getting employment", regID)
+    }
+  }
+
+  def upsertEmploymentV2(regID: String, employment: EmploymentAPIV2)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPI]): Future[EmploymentAPIV2] = {
+    val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
+    http.PATCH[EmploymentAPIV2, EmploymentAPIV2](s"$payeRegUrl/paye-registration/$regID/employment-info", employment) map { resp =>
       payeRegTimer.stop()
       resp
     } recover {
@@ -314,6 +344,15 @@ trait PAYERegistrationConnector {
         payeRegTimer.stop()
         logResponse(e, "getStatus", "getting PAYE registration document status", regId)
         None
+    }
+  }
+// Test Endpoint
+  def setBackendDate(date: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
+    val newDate = if (date.isEmpty) "time-clear" else s"${date}Z"
+    http.GET[HttpResponse](s"$payeRegUrl/paye-registration/test-only/feature-flag/system-date/$newDate") map {
+      _ => true
+    } recover {
+      case _: Exception => false
     }
   }
 

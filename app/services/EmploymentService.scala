@@ -17,10 +17,10 @@
 package services
 
 import java.time.LocalDate
-import javax.inject.Inject
 
 import connectors.PAYERegistrationConnector
 import enums.CacheKeys
+import javax.inject.Inject
 import models.api.{Employment => EmploymentAPI}
 import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment => EmploymentView, FirstPayment => FirstPaymentView}
 import play.api.libs.json.Json

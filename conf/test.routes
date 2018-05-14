@@ -17,6 +17,9 @@ POST       /reg-setup-company-details                    controllers.test.TestRe
 GET        /reg-setup-paye-contact                       controllers.test.TestRegSetupController.regSetupPAYEContact
 POST       /reg-setup-paye-contact                       controllers.test.TestRegSetupController.submitRegSetupPAYEContact
 
+GET        /reg-setup-employment-info                    controllers.test.TestRegSetupController.regSetupEmploymentInfo
+POST       /reg-setup-employment-info                    controllers.test.TestRegSetupController.submitRegSetupEmploymentInfo
+
 GET        /reg-setup                                    controllers.test.TestRegSetupController.regSetup
 POST       /reg-setup                                    controllers.test.TestRegSetupController.submitRegSetup
 
@@ -34,3 +37,5 @@ GET        /update-cc                                    controllers.test.TestCC
 POST       /update-cc                                    controllers.test.TestCCController.submitUpdateCC
 
 GET        /set-session-id/:sessionId                    controllers.test.EditSessionController.setSessionId(sessionId: String)
+
+GET        /add-incorp-update-to-ii                      controllers.test.TestSetupController.addIncorpUpdate(success: Boolean ?= false, incorpDate: Option[String] ?= None, crn: Option[String] ?= None)

@@ -29,14 +29,13 @@ import scala.concurrent.Future
 
 class EmailServiceSpec extends PayeComponentSpec {
 
-  implicit val cp: CurrentProfile = Fixtures.validCurrentProfile.get
-
-  val service = new EmailService {
+  def service(enabled: Boolean = false) = new EmailService {
     override val incorporationInformationConnector = mockIncorpInfoConnector
     override val payeRegistrationConnector         = mockPayeRegistrationConnector
     override val s4LConnector                      = mockS4LConnector
     override val companyRegistrationConnector      = mockCompRegConnector
     override val emailConnector                    = mockEmailConnector
+    override val newApiEnabled: Boolean            = enabled
   }
 
   "primeEmailData" should {
@@ -48,7 +47,17 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockS4LConnector.saveForm(any(), any(), any())(any(), any()))
           .thenReturn(Future(Fixtures.blankCacheMap))
 
-        val result = await(service.primeEmailData("testRegId"))
+        val result = await(service().primeEmailData("testRegId"))
+        result mustBe Fixtures.blankCacheMap
+      }
+      "the first payment date has been stashed using new api" in {
+        when(mockPayeRegistrationConnector.getEmploymentV2(any())(any(), any()))
+          .thenReturn(Future(Some(Fixtures.validEmploymentApiV2)))
+
+        when(mockS4LConnector.saveForm(any(), any(), any())(any(), any()))
+          .thenReturn(Future(Fixtures.blankCacheMap))
+
+        val result = await(service(true).primeEmailData("testRegId"))
         result mustBe Fixtures.blankCacheMap
       }
     }
@@ -69,7 +78,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockEmailConnector.requestEmailToBeSent(any())(any()))
           .thenReturn(Future.successful(EmailSent))
 
-        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service().sendAcknowledgementEmail(cp, "testAckRef"))
         result mustBe EmailSent
       }
 
@@ -86,7 +95,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockEmailConnector.requestEmailToBeSent(any())(any()))
           .thenReturn(Future.successful(EmailSent))
 
-        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service().sendAcknowledgementEmail(cp, "testAckRef"))
         result mustBe EmailSent
       }
     }
@@ -99,7 +108,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockS4LConnector.fetchAndGet[LocalDate](any(), any())(any(), any()))
           .thenReturn(Future(None))
 
-        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service().sendAcknowledgementEmail(cp, "testAckRef"))
         result mustBe EmailDifficulties
       }
 
@@ -113,7 +122,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockIncorpInfoConnector.getCoHoCompanyDetails(any(), any())(any()))
           .thenReturn(Future(IncorpInfoBadRequestResponse))
 
-        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service().sendAcknowledgementEmail(cp, "testAckRef"))
         result mustBe EmailDifficulties
       }
 
@@ -130,7 +139,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockEmailConnector.requestEmailToBeSent(any())(any()))
           .thenReturn(Future.successful(EmailDifficulties))
 
-        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service().sendAcknowledgementEmail(cp, "testAckRef"))
         result mustBe EmailDifficulties
       }
     }
@@ -140,7 +149,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockCompRegConnector.getVerifiedEmail(any())(any()))
           .thenReturn(Future.successful(None))
 
-        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service().sendAcknowledgementEmail(cp, "testAckRef"))
         result mustBe EmailNotFound
       }
     }

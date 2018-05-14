@@ -17,8 +17,8 @@
 package controllers.userJourney
 
 import javax.inject.Inject
-
 import connectors._
+import controllers.exceptions.{FrontendControllerException, GeneralException}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.PAYEStatus
 import models.external.CurrentProfile
@@ -55,11 +55,11 @@ trait SummaryController extends PayeBaseController {
     invalidSubmissionGuard(profile) {
       (for {
         _       <- emailService.primeEmailData(profile.registrationID)
-        summary <- summaryService.getRegistrationSummary(profile.registrationID)
+        summary <- summaryService.getRegistrationSummary(profile.registrationID, profile.companyTaxRegistration.transactionId)
       } yield {
         Ok(SummaryPage(summary))
-      }).recover {
-        case _ => InternalServerError(restart())
+      }).recover{
+        case e: FrontendControllerException => e.recover
       }
     }
   }

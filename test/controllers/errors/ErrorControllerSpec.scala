@@ -35,6 +35,7 @@ class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val keystoreConnector      = mockKeystoreConnector
       override val messagesApi            = mockMessagesApi
       override val authConnector          = mockAuthConnector
+      override val thresholdService       = mockThresholdService
     }
   }
 

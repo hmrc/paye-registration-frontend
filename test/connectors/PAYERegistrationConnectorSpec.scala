@@ -20,9 +20,10 @@ import config.WSHttp
 import enums.{DownstreamOutcome, RegistrationDeletion}
 import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics
-import models.api.{Director, Eligibility, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, PAYERegistration => PAYERegistrationAPI}
+import models.api.{Director, Eligibility, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, EmploymentV2 => EmploymentAPIV2, PAYERegistration => PAYERegistrationAPI}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
+import play.api.libs.json.Json
 import uk.gov.hmrc.http._
 
 import scala.concurrent.Future
@@ -229,6 +230,70 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
       mockHttpFailedPATCH[EmploymentAPI, EmploymentAPI]("tst-url", internalServiceException)
 
       intercept[InternalServerException](await(connector.upsertEmployment("tstID", Fixtures.validEmploymentAPI)))
+    }
+  }
+
+  "Calling getEmploymentV2" should {
+    "return the correct PAYEResponse when the microservice returns an Employment API model" in new Setup {
+      mockHttpGet[HttpResponse]("tst-url", HttpResponse(200, Some(Json.toJson(Fixtures.validEmploymentApiV2))))
+
+      await(connector.getEmploymentV2("tstID")) mustBe Some(Fixtures.validEmploymentApiV2)
+    }
+
+    "return a None when the microservice returns a 204 status code" in new Setup {
+      mockHttpGet[HttpResponse]("tst-url", HttpResponse(204))
+
+      await(connector.getEmploymentV2("tstID")) mustBe None
+    }
+
+    "return the correct PAYEResponse when a Bad Request response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[EmploymentAPI]("tst-url", badRequest)
+
+      intercept[BadRequestException](await(connector.getEmploymentV2("tstID")))
+    }
+
+    "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[EmploymentAPI]("test-url", forbidden)
+
+      intercept[Upstream4xxResponse](await(connector.getEmploymentV2("tstID")))
+    }
+
+    "return a exception PAYEResponse when the microservice returns no doc" in new Setup {
+      mockHttpFailedGET[EmploymentAPI]("tst-url", notFound)
+
+      intercept[NotFoundException](await(connector.getEmploymentV2("tstID")))
+    }
+
+    "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
+      mockHttpFailedGET[EmploymentAPI]("tst-url", internalServiceException)
+
+      intercept[InternalServerException](await(connector.getEmploymentV2("tstID")))
+    }
+  }
+
+  "Calling upsertEmploymentV2" should {
+    "return the correct PAYEResponse when the microservice completes and returns an Employment API model" in new Setup {
+      mockHttpPATCH[EmploymentAPIV2, EmploymentAPIV2]("tst-url", Fixtures.validEmploymentApiV2)
+
+      await(connector.upsertEmploymentV2("tstID", Fixtures.validEmploymentApiV2)) mustBe Fixtures.validEmploymentApiV2
+    }
+
+    "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
+      mockHttpFailedPATCH[EmploymentAPIV2, EmploymentAPIV2]("tst-url", forbidden)
+
+      intercept[Upstream4xxResponse](await(connector.upsertEmploymentV2("tstID", Fixtures.validEmploymentApiV2)))
+    }
+
+    "return a Not Found PAYEResponse when the microservice returns a NotFound response (No PAYERegistration in database)" in new Setup {
+      mockHttpFailedPATCH[EmploymentAPIV2, EmploymentAPIV2]("tst-url", notFound)
+
+      intercept[NotFoundException](await(connector.upsertEmploymentV2("tstID", Fixtures.validEmploymentApiV2)))
+    }
+
+    "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
+      mockHttpFailedPATCH[EmploymentAPIV2, EmploymentAPIV2]("tst-url", internalServiceException)
+
+      intercept[InternalServerException](await(connector.upsertEmploymentV2("tstID", Fixtures.validEmploymentApiV2)))
     }
   }
 

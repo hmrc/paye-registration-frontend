@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import enums.PAYEStatus
 import models.api.{PAYEContact => PAYEContactAPI, _}
-import models.view.{PAYEContactDetails, Summary, SummaryRow, SummarySection, PAYEContact => PAYEContactView}
+import models.view.{EmployingAnyone, EmployingStaffV2, PAYEContactDetails, Summary, SummaryRow, SummarySection, WillBePaying, PAYEContact => PAYEContactView}
 import models.{Address, DigitalContactDetails}
 
 trait PAYERegistrationFixture {
@@ -45,6 +45,45 @@ trait PAYERegistrationFixture {
                                   companyPension = Some(true),
                                   subcontractors = true,
                                   firstPayDate = validDate)
+
+  val validEmploymentApiV2 = EmploymentV2(
+    employees = Employing.willEmployNextYear,
+    firstPaymentDate = LocalDate.of(2018, 1, 1),
+    construction = true,
+    subcontractors = true,
+    companyPension = None
+  )
+  val validEmploymentApiV2Incorporated = EmploymentV2(
+    employees = Employing.alreadyEmploying,
+    firstPaymentDate = LocalDate.of(2016,12,20),
+    construction = true,
+    subcontractors = true,
+    companyPension = Some(true)
+  )
+
+  val validEmploymentApiV2NotIncorporated = EmploymentV2(
+    employees = Employing.willEmployThisYear,
+    firstPaymentDate = LocalDate.of(2016,12,20),
+    construction = true,
+    subcontractors = true,
+    companyPension = None
+  )
+
+  val validEmploymentViewV2Incorporated = EmployingStaffV2(
+    Some(EmployingAnyone(true,Some(LocalDate.of(2016,12,20)))),
+    None,
+    Some(true),
+    Some(true),
+    Some(true)
+  )
+
+  val validEmploymentViewV2NotIncorporated = EmployingStaffV2(
+    None,
+    Some(WillBePaying(true, None)),
+    Some(true),
+    Some(true),
+    None
+  )
 
 
   val validSICCodes = List(SICCode(None, Some("Accounting")))
@@ -82,7 +121,8 @@ trait PAYERegistrationFixture {
     status = PAYEStatus.draft,
     completionCapacity = "High Priest",
     companyDetails = validCompanyDetailsAPI,
-    employment = validEmploymentAPI,
+    employment = Some(validEmploymentAPI),
+    employmentInfo = Some(validEmploymentApiV2),
     sicCodes = validSICCodes,
     directors = Nil,
     payeContact = validPAYEContactAPI

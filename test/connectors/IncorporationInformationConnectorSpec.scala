@@ -18,13 +18,14 @@ package connectors
 
 import common.exceptions.DownstreamExceptions.OfficerListNotFoundException
 import config.WSHttp
+import controllers.exceptions.GeneralException
 import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics
 import models.api.Name
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.{JsObject, Json}
-import uk.gov.hmrc.http.{BadRequestException, NotFoundException}
+import play.api.libs.json.{JsObject, JsValue, Json}
+import uk.gov.hmrc.http.{BadRequestException, HttpResponse, InternalServerException, NotFoundException}
 
 import scala.concurrent.Future
 
@@ -77,6 +78,35 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with Guice
     }
   }
 
+  "getIncorporationData" should {
+
+    val testTransId = "testTransId"
+    val testRegId   = "regId"
+
+    val testJsonWithDate = Json.parse(
+      """
+        |{
+        |   "crn" : "some-crn",
+        |   "incorporationDate" : "2018-05-05"
+        |}
+      """.stripMargin)
+
+    "return an Incorp Info JsValue" in new Setup(true) {
+      mockHttpGet[HttpResponse](connector.incorpInfoUrl, Future.successful(HttpResponse(200, Some(testJsonWithDate))))
+      await(connector.getIncorporationInfo(testRegId, testTransId)) mustBe testJsonWithDate
+    }
+
+    "return an empty json" in new Setup(true) {
+      mockHttpGet[HttpResponse](connector.incorpInfoUrl, Future.successful(HttpResponse(204)))
+      await(connector.getIncorporationInfo(testRegId, testTransId)) mustBe Json.obj()
+    }
+
+    "return a BadRequest for a bad request" in new Setup(true) {
+      mockHttpGet[JsValue](connector.incorpInfoUrl, Future.failed(new BadRequestException("tstException")))
+      intercept[GeneralException](await(connector.getIncorporationInfo(testRegId, testTransId)))
+    }
+  }
+
   "getOfficerList" should {
 
     val tstOfficerList = OfficerList(
@@ -124,6 +154,7 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with Guice
 
 
     val tstOfficerListObject = Json.parse(tstOfficerListJson).as[JsObject]
+
     val testTransId = "testTransId"
     val testRegId = "regId"
 

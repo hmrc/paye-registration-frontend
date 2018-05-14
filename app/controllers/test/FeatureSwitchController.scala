@@ -16,6 +16,7 @@
 
 package controllers.test
 
+import connectors.PAYERegistrationConnector
 import javax.inject.Inject
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
@@ -25,16 +26,18 @@ import utils._
 import scala.concurrent.Future
 
 class FeatureSwitchControllerImpl @Inject()(val featureManager: FeatureManager,
-                                            val payeFeatureSwitch: PAYEFeatureSwitches) extends FeatureSwitchController
+                                            val payeFeatureSwitch: PAYEFeatureSwitches,
+                                            val payeRegConnector: PAYERegistrationConnector) extends FeatureSwitchController
 
 trait FeatureSwitchController extends FrontendController {
 
   val featureManager: FeatureManager
   val payeFeatureSwitch: PAYEFeatureSwitches
+  val payeRegConnector: PAYERegistrationConnector
 
   def switcher(featureName: String, featureState: String): Action[AnyContent] = Action.async {
     implicit request =>
-      def feature: FeatureSwitch = featureState match {
+      def updateFeature: FeatureSwitch = featureState match {
         case "true"                                      => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
         case "addressLookupFrontend"                     => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
         case x if x.matches(Validators.datePatternRegex) => featureManager.setSystemDate(ValueSetFeatureSwitch(featureName, featureState))
@@ -43,8 +46,13 @@ trait FeatureSwitchController extends FrontendController {
       }
 
       payeFeatureSwitch(featureName) match {
-        case Some(_)  => Future.successful(Ok(feature.toString))
-        case None     => Future.successful(BadRequest)
+        case Some(f) if f.name == "system-date" =>
+          val feature = updateFeature
+          payeRegConnector.setBackendDate(feature.value) map {
+            if(_) Ok(s"${feature.toString} set in frontend and back end") else Ok(s"${feature.toString} not set in backend something went wrong")
+          }
+        case Some(_)                            => Future.successful(Ok(updateFeature.toString))
+        case None                               => Future.successful(BadRequest)
       }
   }
 

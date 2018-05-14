@@ -13,12 +13,18 @@
             @elements.args.get('_legend)
         </legend>
     }
+
+    @elements.errors.map{error => <span class="error-notification" id='@{field.id+"-error-message"}'>@Messages(error)</span>}
+
+    @{args.filter(a => a._1.name == "_title").map { a =>
+        <strong>{a._2.toString}</strong>
+    }}
+
     @if(elements.args.get('_helpText).isDefined) {
         <span class="error-message">
             @elements.args.get('_helpText)
         </span>
     }
-    @elements.errors.map{error => <span class="error-notification" id='@{field.id+"-error-message"}'>@Messages(error)</span>}
 
     @radioOptions.map { case (value, label) =>
         @defining(s"${elements.field.name}-${value.toLowerCase.replace(" ","_")}")  { inputId =>

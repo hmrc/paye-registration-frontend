@@ -20,8 +20,8 @@ import java.time.LocalDate
 
 import enums.CacheKeys
 import helpers.PayeComponentSpec
-import models.api.{Employment => EmploymentAPI}
-import models.view.{CompanyPension, EmployingStaff, Subcontractors, Employment => EmploymentView, FirstPayment => FirstPaymentView}
+import models.api.{Employing, EmploymentV2, Employment => EmploymentAPI}
+import models.view.{CompanyPension, EmployingAnyone, EmployingStaff, EmployingStaffV2, Subcontractors, WillBePaying, Employment => EmploymentView, FirstPayment => FirstPaymentView}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.{times, verify, when}
 import play.api.libs.json.{Format, Json}
@@ -49,7 +49,6 @@ class EmploymentServiceSpec extends PayeComponentSpec {
 
     val dateUtil = new DateUtil {}
   }
-
   "calling viewToAPI with EmployingStaff" should {
     "return the corresponding converted Employment API Model with CompanyPension" in new Setup {
       override def testNow = LocalDate.now
