@@ -20,6 +20,7 @@ import org.scalatest._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
+import uk.gov.hmrc.mongo.MongoSpecSupport
 
 import scala.concurrent.duration._
 
@@ -32,7 +33,8 @@ trait IntegrationSpecBase
     with BeforeAndAfterEach
     with BeforeAndAfterAll
     with FutureAwaits
-    with DefaultAwaitTimeout {
+    with DefaultAwaitTimeout
+    with MongoSpecSupport {
 
   override implicit def defaultAwaitTimeout: Timeout = 5.seconds
 

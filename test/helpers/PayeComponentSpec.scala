@@ -31,6 +31,7 @@ import play.api.mvc.{Call, Result}
 import play.api.mvc.Results.Redirect
 import play.api.test._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.logging.SessionId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -55,7 +56,7 @@ trait PayeComponentSpec
 
   override implicit def defaultAwaitTimeout: Timeout = 5.seconds
   implicit val cp: CurrentProfile = Fixtures.validCurrentProfile.get
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId("testSessionId")))
 
   implicit val auditInformation: AuditingInformation = AuditingInformation("testExternalId", "testAuthProviderId")
 
@@ -95,7 +96,8 @@ trait PayeComponentSpec
       mockS4LService,
       mockThresholdService,
       mockEmploymentService,
-      mockEmploymentServiceV2
+      mockEmploymentServiceV2,
+      mockSessionRepository
     )
   }
 

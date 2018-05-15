@@ -65,7 +65,8 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
     "defaultCTStatus" -> "aGVsZA==",
     "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ==",
     "defaultCHROAddress" -> "eyJsaW5lMSI6IjE0IFRlc3QgRGVmYXVsdCBTdHJlZXQiLCJsaW5lMiI6IlRlc3RsZXkiLCJsaW5lMyI6IlRlc3Rmb3JkIiwibGluZTQiOiJUZXN0c2hpcmUiLCJwb3N0Q29kZSI6IlRFMSAzU1QifQ==",
-    "defaultSeqDirector" -> "W3siZGlyZWN0b3IiOnsiZm9yZW5hbWUiOiJmYXVsdHkiLCJzdXJuYW1lIjoiZGVmYXVsdCJ9fV0="
+    "defaultSeqDirector" -> "W3siZGlyZWN0b3IiOnsiZm9yZW5hbWUiOiJmYXVsdHkiLCJzdXJuYW1lIjoiZGVmYXVsdCJ9fV0=",
+    "mongodb.uri" -> s"$mongoUri"
   ))
 
   override def beforeEach() {

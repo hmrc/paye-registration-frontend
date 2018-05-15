@@ -19,8 +19,13 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import org.scalatestplus.play.OneServerPerSuite
+import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
+import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSClient
+import repositories.ReactiveMongoRepository
+import uk.gov.hmrc.http.cache.client.CacheMap
+
+import scala.concurrent.{Await, Future}
 
 object WiremockHelper {
   val wiremockPort = 11111

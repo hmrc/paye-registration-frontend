@@ -55,7 +55,8 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     "microservice.services.business-registration.host" -> s"$mockHost",
     "microservice.services.business-registration.port" -> s"$mockPort",
     "microservice.services.address-lookup-frontend.host" -> s"$mockHost",
-    "microservice.services.address-lookup-frontend.port" -> s"$mockPort"
+    "microservice.services.address-lookup-frontend.port" -> s"$mockPort",
+    "mongodb.uri" -> s"$mongoUri"
   ))
 
   override def beforeEach() {

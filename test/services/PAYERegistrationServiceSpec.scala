@@ -67,7 +67,7 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
           .thenReturn(Future.successful(RegistrationDeletion.success))
 
         when(mockKeystoreConnector.remove()(ArgumentMatchers.any[HeaderCarrier]()))
-          .thenReturn(Future.successful(HttpResponse(200)))
+          .thenReturn(Future.successful(true))
 
         val result = await(service.deletePayeRegistrationDocument("testRegId", "testTxId"))
         result mustBe RegistrationDeletion.success

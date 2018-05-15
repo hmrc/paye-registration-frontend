@@ -20,25 +20,11 @@ import javax.inject.{Inject, Singleton}
 import play.api.libs.json._
 import uk.gov.hmrc.http.cache.client.CacheMap
 
-//@Singleton
-//class CascadeUpsert {
-//
-//  val funcMap: Map[String, (JsValue, CacheMap) => CacheMap] =
-//    Map()
-//
-//  def apply[A](key: String, value: A, originalCacheMap: CacheMap)(implicit fmt: Format[A]): CacheMap =
-//    funcMap.get(key).fold(store(key, value, originalCacheMap)) { fn => fn(Json.toJson(value), originalCacheMap)}
-//
 
-//
+object CascadeUpsert {
 
-//
-//}
-
-class CascadeUpsertImpl @Inject()() extends CascadeUpsert
-
-trait CascadeUpsert {
-  val funcMap: Map[String, (JsValue, CacheMap) => CacheMap] = Map()
+  def apply[A](key: String, value: A, originalCacheMap: CacheMap)(implicit fmt: Format[A]): CacheMap =
+    store(key, value, originalCacheMap)
 
   def addRepeatedValue[A](key: String, value: A, originalCacheMap: CacheMap)(implicit fmt: Format[A]): CacheMap = {
     val values = originalCacheMap.getEntry[Seq[A]](key).getOrElse(Seq()) :+ value

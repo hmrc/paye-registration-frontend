@@ -20,7 +20,7 @@ import connectors.{KeystoreConnector, PAYERegistrationConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.RegistrationDeletion
 import javax.inject.Inject
-import play.api.Configuration
+import play.api.{Configuration, Logger}
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
@@ -46,6 +46,7 @@ trait RegistrationController extends PayeBaseController {
 
   def delete(regId: String): Action[AnyContent] = Action.async { implicit request =>
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+    Logger.error(s"====================== sessionId ${hc.sessionId}")
     authorised() {
       payeRegistrationService.deletePayeRegistrationInProgress(regId) map {
         case RegistrationDeletion.success       => Ok

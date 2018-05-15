@@ -51,7 +51,8 @@ class RegistrationMethodISpec extends IntegrationSpecBase
     "microservice.services.company-registration.host" -> s"$mockHost",
     "microservice.services.company-registration.port" -> s"$mockPort",
     "microservice.services.incorporation-frontend-stubs.host" -> s"$mockHost",
-    "microservice.services.incorporation-frontend-stubs.port" -> s"$mockPort"
+    "microservice.services.incorporation-frontend-stubs.port" -> s"$mockPort",
+    "mongodb.uri" -> s"$mongoUri"
   ))
 
   override def beforeEach() {
@@ -80,10 +81,10 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubKeystoreMetadata("sessionId", regId)
 
       val fResponse = buildClientInternal(s"/4/delete").
-        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
+        withHeaders("X-Session-ID" -> "sessionId", "Authorization" -> authorisationToken).
         delete()
 
       val response = await(fResponse)

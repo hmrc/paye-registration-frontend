@@ -21,7 +21,6 @@ import helpers.mocks.MockMetrics
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
@@ -29,12 +28,13 @@ import scala.concurrent.Future
 class KeystoreConnectorSpec extends PayeComponentSpec {
 
   val connector = new KeystoreConnector {
-    override val metricsService = new MockMetrics
-    override val sessionCache = mockSessionCache
-    override val successCounter = metricsService.keystoreSuccessResponseCounter
-    override val failedCounter = metricsService.keystoreFailedResponseCounter
+    override val metricsService       = new MockMetrics
+    override val sessionCache         = mockSessionCache
+    override val sessionRepository    = mockSessionRepository
+    override val successCounter       = metricsService.keystoreSuccessResponseCounter
+    override val failedCounter        = metricsService.keystoreFailedResponseCounter
     override val emptyResponseCounter = metricsService.keystoreFailedResponseCounter
-    override def timer = metricsService.keystoreResponseTimer.time()
+    override def timer   = metricsService.keystoreResponseTimer.time()
   }
 
   case class TestModel(test: String)
@@ -46,10 +46,15 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
     "save the model" in {
       val testModel = TestModel("test")
 
-      val returnCacheMap = CacheMap("", Map("" -> Json.toJson(testModel)))
+      val returnCacheMap = CacheMap("testSessionId", Map("testKey" -> Json.toJson(testModel)))
 
-      when(mockSessionCache.cache[TestModel](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(returnCacheMap))
+      when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
+
+      when(mockReactiveMongoRepo.get(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(None))
+
+      when(mockReactiveMongoRepo.upsert(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(true))
 
       val result = await(connector.cache[TestModel]("testKey", testModel))
       result mustBe returnCacheMap
@@ -60,9 +65,15 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
     "return a list" in {
       val testModel = TestModel("test")
       val list = List(testModel)
+      val returnCacheMap = CacheMap("testSessionId", Map("testKey" -> Json.toJson(list)))
 
       when(mockSessionCache.fetchAndGetEntry[List[TestModel]](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(list)))
+
+      when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
+
+      when(mockReactiveMongoRepo.get(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(returnCacheMap)))
 
       val result = await(connector.fetchAndGet[List[TestModel]]("testKey"))
       result mustBe Some(list)
@@ -73,9 +84,11 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
     "return a CacheMap" in {
       val testModel = TestModel("test")
 
-      val returnCacheMap = CacheMap("", Map("" -> Json.toJson(testModel)))
+      val returnCacheMap = CacheMap("testSessionId", Map("testKey" -> Json.toJson(testModel)))
 
-      when(mockSessionCache.fetch()(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
+
+      when(mockReactiveMongoRepo.get(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(returnCacheMap)))
 
       val result = await(connector.fetch())
@@ -85,11 +98,20 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
 
   "Removing from KeyStore" should {
     "return a HTTP Response" in {
-      when(mockSessionCache.remove()(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(HttpResponse(OK)))
+
+      val testModel = TestModel("test")
+      val returnCacheMap = CacheMap("testSessionId", Map("testKey" -> Json.toJson(testModel)))
+
+      when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
+
+      when(mockReactiveMongoRepo.get(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(returnCacheMap)))
+
+      when(mockReactiveMongoRepo.removeDocument(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(true))
 
       val result = await(connector.remove())
-      result.status mustBe HttpResponse(OK).status
+      result mustBe true
     }
   }
 }

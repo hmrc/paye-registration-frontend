@@ -49,12 +49,16 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
   extends ReactiveRepository[DatedCacheMap, BSONObjectID](config.getString("appName").get, mongo, DatedCacheMap.formats) {
 
   val fieldName = "lastUpdated"
-  val createdIndexName = "userAnswersExpiry"
+  val createdIndexName = "currentProfileIndex"
+
   val expireAfterSeconds = "expireAfterSeconds"
   val timeToLiveInSeconds: Int = config.getInt("mongodb.timeToLiveInSeconds").get
 
-  private def createIndex(field: String, indexName: String, ttl: Int): Future[Boolean] = {
-    collection.indexesManager.ensure(Index(Seq((field, IndexType.Ascending)), Some(indexName),
+  createIndex(Seq("id", "data.CurrentProfile.companyTaxRegistration.transactionID", "data.currentProfile.registrationId"), createdIndexName, timeToLiveInSeconds)
+
+  private def createIndex(fields: Seq[String], indexName: String, ttl: Int): Future[Boolean] = {
+    val indexes = fields.map(field => (field, IndexType.Ascending))
+    collection.indexesManager.ensure(Index(indexes, Some(indexName),
       options = BSONDocument(expireAfterSeconds -> ttl))) map {
       result => {
         Logger.debug(s"set [$indexName] with value $ttl -> result : $result")
@@ -86,14 +90,14 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
     collection.find(Json.obj("id" -> id)).one[CacheMap]
 
   def addRejectionFlag(id: String): Future[Boolean] = {
-    val selector = BSONDocument("data.CurrentProfile.transactionID" -> id)
+    val selector = BSONDocument("data.CurrentProfile.companyTaxRegistration.transactionID" -> id)
     val modifier = BSONDocument("$set" -> BSONDocument("data.CurrentProfile.incorpRejected" -> true))
 
     collection.update(selector, modifier).map { lastError => lastError.ok}
   }
 
   def getRegistrationID(transactionID: String): Future[Option[String]] =
-    collection.find(Json.obj("data.CurrentProfile.transactionID" -> transactionID)).one[CacheMap].map {
+    collection.find(Json.obj("data.CurrentProfile.companyTaxRegistration.transactionID" -> transactionID)).one[CacheMap].map {
        _.flatMap(_.getEntry[CurrentProfile]("CurrentProfile").map(_.registrationID))
      }
 

@@ -17,96 +17,50 @@
 package itutil
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import play.api.libs.json.{JsObject, JsString, Json}
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import org.scalatestplus.play.PlaySpec
+import play.api.Application
+import play.api.libs.json.{JsObject, JsString, JsValue, Json}
+import repositories.ReactiveMongoRepository
 import uk.gov.hmrc.crypto.json.JsonEncryptor
 import uk.gov.hmrc.crypto.{ApplicationCrypto, Protected}
+import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.mongo.MongoSpecSupport
 
-trait CachingStub {
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.concurrent.ExecutionContext.Implicits.global
+
+trait CachingStub extends PlaySpec with MongoSpecSupport {
 
   implicit lazy val jsonCrypto = ApplicationCrypto.JsonCrypto
   implicit lazy val encryptionFormat = new JsonEncryptor[JsObject]()
 
-  def stubKeystoreMetadata(session: String,
-                           regId: String) = {
+  import scala.concurrent.duration._
+  def customAwait[A](future: Future[A])(implicit timeout: Duration): A = Await.result(future, timeout)
 
-    val keystoreUrl = s"/keystore/paye-registration-frontend/$session"
-    stubFor(get(urlMatching(keystoreUrl))
-      .willReturn(
-        aResponse().
-          withStatus(200).
-          withBody(
-            s"""{
-               |"id": "$session",
-               |"data": {
-               | "CurrentProfile": {
-               |   "registrationID": "$regId",
-               |   "companyTaxRegistration": {
-               |      "status": "submitted",
-               |      "transactionId": "12345"
-               |   },
-               |   "language": "ENG"
-               |  }
-               |}
-               |}""".stripMargin
-          )
-      )
-    )
-  }
+  def stubKeystoreMetadata(session: String, regId: String, submitted: Boolean = false)(implicit app: Application) = {
 
-  def stubKeystoreGet(session: String, data: String) = {
-    val keystoreUrl = s"/keystore/paye-registration-frontend/$session"
-    stubFor(get(urlMatching(keystoreUrl))
-      .willReturn(
-        aResponse().
-          withStatus(200).
-          withBody(
-            s"""{
-               |"id": "$session",
-               |"data": $data
-               |}""".stripMargin
-          )
-      )
-    )
-  }
+    val repo = new ReactiveMongoRepository(app.configuration, mongo)
+    val defaultTimeout: FiniteDuration = 5 seconds
 
-  def stubEmptyKeystore(sessionId: String) = {
-    val keystoreUrl = s"/keystore/paye-registration-frontend/$sessionId"
-    stubFor(get(urlMatching(keystoreUrl))
-      .willReturn(
-        aResponse().
-          withStatus(200).
-          withBody(
-            s"""{
-               |"id": "$sessionId",
-               |"data": {}
-               |}""".stripMargin
-          )
-      )
-    )
-  }
+    customAwait(repo.ensureIndexes)(defaultTimeout)
+    customAwait(repo.drop)(defaultTimeout)
 
-  def stubKeystoreDelete(sessionId: String) = {
-    stubFor(delete(urlMatching(s"/keystore/paye-registration-frontend/$sessionId"))
-      .willReturn(
-        aResponse()
-          .withStatus(200)
-      )
+    val preawait = customAwait(repo.count)(defaultTimeout)
+    val cp = CurrentProfile(
+      registrationID            = regId,
+      companyTaxRegistration    =
+        CompanyRegistrationProfile(
+          status = "submitted",
+          transactionId = "12345"),
+      language                  = "ENG",
+      payeRegistrationSubmitted = submitted
     )
-  }
-
-  def stubKeystoreCache(sessionId: String, key: String) = {
-    stubFor(put(urlMatching(s"/keystore/paye-registration-frontend/$sessionId/data/$key"))
-      .willReturn(
-        aResponse()
-          .withStatus(200).
-          withBody(
-          s"""{
-             |"id": "$sessionId",
-             |"data": {}
-             |}""".stripMargin
-          )
-      )
-    )
+    val currentProfileMapping: Map[String, JsValue] = Map("CurrentProfile" -> Json.toJson(cp))
+    val res = customAwait(repo.upsert(CacheMap(session, currentProfileMapping)))(defaultTimeout)
+    customAwait(repo.count)(defaultTimeout) mustBe preawait + 1
+    res
   }
 
   def stubPayeRegDocumentStatus(regId: String) = {

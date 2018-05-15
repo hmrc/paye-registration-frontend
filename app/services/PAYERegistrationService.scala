@@ -17,10 +17,10 @@
 package services
 
 import javax.inject.Inject
-
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome, RegistrationDeletion}
 import models.external.CurrentProfile
+import play.api.Logger
 import play.api.http.Status._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -54,7 +54,9 @@ trait PAYERegistrationService {
 
   def deletePayeRegistrationInProgress(regId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
     getCurrentProfile flatMap { profile =>
+      Logger.error(s"=========================== $profile and regId: $regId")
       if( regId != profile.registrationID ) {
+
         Future.successful(RegistrationDeletion.forbidden)
       } else {
         s4LService.clear(regId) flatMap { response =>

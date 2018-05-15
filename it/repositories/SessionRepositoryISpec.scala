@@ -32,14 +32,14 @@ import uk.gov.hmrc.mongo.MongoSpecSupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SessionRepositoryISpec extends IntegrationSpecBase with MongoSpecSupport {
+class SessionRepositoryISpec extends IntegrationSpecBase {
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
   val additionalConfiguration = Map(
-    "microservice.services.vat-registration.host" -> s"$mockHost",
-    "microservice.services.vat-registration.port" -> s"$mockPort",
+    "microservice.services.paye-registration.host" -> s"$mockHost",
+    "microservice.services.paye-registration.port" -> s"$mockPort",
     "microservice.services.cachable.session-cache.host" -> s"$mockHost",
     "microservice.services.cachable.session-cache.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
@@ -95,7 +95,7 @@ class SessionRepositoryISpec extends IntegrationSpecBase with MongoSpecSupport {
     }
     "fetch" when {
       "given a currentProfile exists" in new Setup(){
-        val currentProfileData: CurrentProfile = currentProfile("regId2").copy(incorpRejected = Some(true))
+        val currentProfileData: CurrentProfile = currentProfile("regId2") //.copy(incorpRejected = Some(true))
         val key: String = "CurrentProfile"
 
         await(connector.cache(key, currentProfileData))
@@ -105,22 +105,22 @@ class SessionRepositoryISpec extends IntegrationSpecBase with MongoSpecSupport {
         res.get.data mustBe Map(key -> Json.toJson(currentProfileData))
       }
     }
-    "addRejectionFlag" when {
-      "given a currentProfile exists" in new Setup(){
-        val currentProfileData: CurrentProfile = currentProfile("regId2")
-        val key: String = "CurrentProfile"
-
-        val expectedResult = CacheMap(sId, Map("CurrentProfile" ->
-          Json.toJson(currentProfileData.copy(incorpRejected = Some(true))))
-        )
-
-        await(connector.cache(key, currentProfileData))
-
-        await(connector.addRejectionFlag("40-123456")) mustBe Some("regId2")
-
-        await(connector.fetch(hc)).get mustBe expectedResult
-      }
-    }
+//    "addRejectionFlag" when {
+//      "given a currentProfile exists" in new Setup(){
+//        val currentProfileData: CurrentProfile = currentProfile("regId2")
+//        val key: String = "CurrentProfile"
+//
+//        val expectedResult = CacheMap(sId, Map("CurrentProfile" ->
+//          Json.toJson(currentProfileData.copy(incorpRejected = Some(true))))
+//        )
+//
+//        await(connector.cache(key, currentProfileData))
+//
+//        await(connector.addRejectionFlag("40-123456")) mustBe Some("regId2")
+//
+//        await(connector.fetch(hc)).get mustBe expectedResult
+//      }
+//    }
     "fetchAndGet" when {
       "given a currentProfile and key" in new Setup(){
         val currentProfileData: CurrentProfile = currentProfile("regId3")
@@ -162,7 +162,7 @@ class SessionRepositoryISpec extends IntegrationSpecBase with MongoSpecSupport {
         await(connector.cache("CurrentProfile", currentProfile("regId"))(hc.copy(sessionId = Some(SessionId("id2"))), CurrentProfile.format))
         count mustBe 2
 
-        val res: Boolean = await(connector.remove(hc1))
+        val res: Boolean = await(connector.remove()(hc1))
         res mustBe true
         count mustBe 1
       }

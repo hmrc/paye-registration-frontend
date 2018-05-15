@@ -50,7 +50,8 @@ class EligiblityMethodISpec extends IntegrationSpecBase
     "microservice.services.company-registration-frontend.www.url" -> s"$mockHost",
     "microservice.services.company-registration-frontend.www.uri" -> "/test-uri",
     "microservice.services.incorporation-information.host" -> s"$mockHost",
-    "microservice.services.incorporation-information.port" -> s"$mockPort"
+    "microservice.services.incorporation-information.port" -> s"$mockPort",
+    "mongodb.uri" -> s"$mongoUri"
   ))
 
   override def beforeEach() {

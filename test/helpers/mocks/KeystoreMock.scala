@@ -45,9 +45,9 @@ trait KeystoreMock {
       .thenReturn(Future.failed(err))
   }
 
-  def mockKeystoreClear(): OngoingStubbing[Future[HttpResponse]] = {
+  def mockKeystoreClear(): OngoingStubbing[Future[Boolean]] = {
     when(mockKeystoreConnector.remove()(ArgumentMatchers.any()))
-      .thenReturn(Future.successful(HttpResponse(200)))
+      .thenReturn(Future.successful(true))
   }
 
   def mockFetchCurrentProfile(regID: String = "12345"): OngoingStubbing[Future[Option[CurrentProfile]]] = {
