@@ -17,96 +17,61 @@
 package itutil
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import play.api.libs.json.{JsObject, JsString, Json}
+import models.api.SessionMap
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import org.scalatest.BeforeAndAfterEach
+import play.api.libs.json._
+import repositories.ReactiveMongoRepository
 import uk.gov.hmrc.crypto.json.JsonEncryptor
 import uk.gov.hmrc.crypto.{ApplicationCrypto, Protected}
+import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.mongo.MongoSpecSupport
 
-trait CachingStub {
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 
+trait CachingStub extends MongoSpecSupport with BeforeAndAfterEach{
+  self: IntegrationSpecBase =>
   implicit lazy val jsonCrypto = ApplicationCrypto.JsonCrypto
   implicit lazy val encryptionFormat = new JsonEncryptor[JsObject]()
 
-  def stubKeystoreMetadata(session: String,
-                           regId: String) = {
+  lazy val repo = new ReactiveMongoRepository(app.configuration, mongo)
 
-    val keystoreUrl = s"/keystore/paye-registration-frontend/$session"
-    stubFor(get(urlMatching(keystoreUrl))
-      .willReturn(
-        aResponse().
-          withStatus(200).
-          withBody(
-            s"""{
-               |"id": "$session",
-               |"data": {
-               | "CurrentProfile": {
-               |   "registrationID": "$regId",
-               |   "companyTaxRegistration": {
-               |      "status": "submitted",
-               |      "transactionId": "12345"
-               |   },
-               |   "language": "ENG"
-               |  }
-               |}
-               |}""".stripMargin
-          )
-      )
-    )
+  def customAwait[A](future: Future[A])(implicit timeout: Duration): A = Await.result(future, timeout)
+  val defaultTimeout: FiniteDuration = 5 seconds
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    customAwait(repo.drop)(defaultTimeout)
+    await(repo.count) mustBe 0
+    resetWiremock()
   }
 
-  def stubKeystoreGet(session: String, data: String) = {
-    val keystoreUrl = s"/keystore/paye-registration-frontend/$session"
-    stubFor(get(urlMatching(keystoreUrl))
-      .willReturn(
-        aResponse().
-          withStatus(200).
-          withBody(
-            s"""{
-               |"id": "$session",
-               |"data": $data
-               |}""".stripMargin
-          )
-      )
+  def stubSessionCacheMetadata(session: String, regId: String, submitted: Boolean = false) = {
+    customAwait(repo.ensureIndexes)(defaultTimeout)
+    customAwait(repo.drop)(defaultTimeout)
+
+    val preawait = customAwait(repo.count)(defaultTimeout)
+    val cp = CurrentProfile(
+      registrationID            = regId,
+      companyTaxRegistration    =
+        CompanyRegistrationProfile(
+          status = "submitted",
+          transactionId = "12345"),
+      language                  = "ENG",
+      payeRegistrationSubmitted = submitted,
+      incorpStatus = None
     )
+    val currentProfileMapping: Map[String, JsValue] = Map("CurrentProfile" -> Json.toJson(cp))
+    val res = customAwait(repo.upsertSessionMap(SessionMap(session, regId, "12345", currentProfileMapping)))(defaultTimeout)
+    if(customAwait(repo.count)(defaultTimeout) != preawait + 1) throw new Exception("Error adding data to database")
+    res
   }
 
-  def stubEmptyKeystore(sessionId: String) = {
-    val keystoreUrl = s"/keystore/paye-registration-frontend/$sessionId"
-    stubFor(get(urlMatching(keystoreUrl))
-      .willReturn(
-        aResponse().
-          withStatus(200).
-          withBody(
-            s"""{
-               |"id": "$sessionId",
-               |"data": {}
-               |}""".stripMargin
-          )
-      )
-    )
-  }
-
-  def stubKeystoreDelete(sessionId: String) = {
-    stubFor(delete(urlMatching(s"/keystore/paye-registration-frontend/$sessionId"))
-      .willReturn(
-        aResponse()
-          .withStatus(200)
-      )
-    )
-  }
-
-  def stubKeystoreCache(sessionId: String, key: String) = {
-    stubFor(put(urlMatching(s"/keystore/paye-registration-frontend/$sessionId/data/$key"))
-      .willReturn(
-        aResponse()
-          .withStatus(200).
-          withBody(
-          s"""{
-             |"id": "$sessionId",
-             |"data": {}
-             |}""".stripMargin
-          )
-      )
-    )
+  def verifySessionCacheData[T](id: String, key: String, data: Option[T])(implicit format: Format[T]): Unit ={
+    val dataFromDb = customAwait(repo.getSessionMap(id))(defaultTimeout).flatMap(_.getEntry(key))
+    if (data != dataFromDb) throw new Exception(s"Data in database doesn't match expected data:\n expected data $data was not equal to actual data $dataFromDb")
   }
 
   def stubPayeRegDocumentStatus(regId: String) = {

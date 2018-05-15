@@ -17,6 +17,7 @@ package frontend
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
 import play.api.test.FakeApplication
@@ -48,7 +49,8 @@ class RestartPAYEISpec extends IntegrationSpecBase
     "microservice.services.company-registration.port" -> s"$mockPort",
     "microservice.services.business-registration.host" -> s"$mockHost",
     "microservice.services.business-registration.port" -> s"$mockPort",
-    "application.router" -> "testOnlyDoNotUseInAppConf.Routes"
+    "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
+    "mongodb.uri" -> s"$mongoUri"
   ))
 
   override def beforeEach() {
@@ -67,8 +69,6 @@ class RestartPAYEISpec extends IntegrationSpecBase
 
         setupSimpleAuthMocks()
         stubSuccessfulLogin()
-        stubEmptyKeystore(SessionId)
-        stubKeystoreDelete(SessionId)
 
         stubGet("/business-registration/business-tax-registration", 200,
           s"""{
@@ -106,7 +106,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
 
         response.status mustBe 303
         response.header("Location") mustBe Some("/register-for-paye/start-pay-as-you-earn")
-        verify(deleteRequestedFor(urlEqualTo(s"/keystore/paye-registration-frontend/$SessionId")))
+        verifySessionCacheData[CurrentProfile](SessionId, key = "CurrentProfile", None)
         verify(getRequestedFor(urlEqualTo(s"/business-registration/business-tax-registration")))
         verify(getRequestedFor(urlEqualTo(s"/company-registration/corporation-tax-registration/$regId/corporation-tax-registration")))
       }
@@ -115,8 +115,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
 
         setupSimpleAuthMocks()
         stubSuccessfulLogin()
-        stubKeystoreMetadata(SessionId, regId)
-        stubKeystoreDelete(SessionId)
+        stubSessionCacheMetadata(SessionId, regId)
 
         stubFor(delete(urlMatching(s"/paye-registration/$regId/delete"))
           .willReturn(
@@ -133,7 +132,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
 
         response.status mustBe 303
         response.header("Location") mustBe Some("/register-for-paye/start-pay-as-you-earn")
-        verify(deleteRequestedFor(urlEqualTo(s"/keystore/paye-registration-frontend/$SessionId")))
+        verifySessionCacheData[CurrentProfile](SessionId, "CurrentProfile", None)
       }
     }
 
@@ -142,7 +141,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
 
         setupSimpleAuthMocks()
         stubSuccessfulLogin()
-        stubKeystoreMetadata(SessionId, regId)
+        stubSessionCacheMetadata(SessionId, regId)
 
         stubFor(delete(urlMatching(s"/paye-registration/$regId/delete"))
           .willReturn(
@@ -167,7 +166,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
 
         setupSimpleAuthMocks()
         stubSuccessfulLogin()
-        stubKeystoreMetadata(SessionId, regId)
+        stubSessionCacheMetadata(SessionId, regId)
 
         stubFor(delete(urlMatching(s"/paye-registration/$regId/delete"))
           .willReturn(

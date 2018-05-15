@@ -77,6 +77,13 @@ trait AuthHelpers {
     test(action(request))
   }
 
+  def submitUnauthorisedT[T](action: Action[T], request: Request[T])(test: Future[Result] => Any) = {
+    when(authConnector.authorise[Unit](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      .thenReturn(Future.failed(InsufficientConfidenceLevel("")))
+
+    test(action(request))
+  }
+
   def showAuthorisedWithCP(action: Action[AnyContent], currentProfile: Option[CurrentProfile], request: Request[AnyContent])(test: Future[Result] => Any) {
     when(authConnector.authorise[Unit](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(()))

@@ -17,14 +17,13 @@
 package controllers.userJourney
 
 import javax.inject.Inject
-
-import connectors.KeystoreConnector
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.directorDetails.DirectorDetailsForm
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.{CompanyDetailsService, DirectorDetailsService, IncorporationInformationService, S4LService}
+import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{directorDetails => DirectorDetailsPage}
 
@@ -35,7 +34,9 @@ class DirectorDetailsControllerImpl @Inject()(val messagesApi: MessagesApi,
                                               val s4LService: S4LService,
                                               val companyDetailsService: CompanyDetailsService,
                                               val incorpInfoService: IncorporationInformationService,
-                                              val authConnector: AuthConnector) extends DirectorDetailsController with AuthRedirectUrls
+                                              val authConnector: AuthConnector,
+                                              val incorporationInformationConnector: IncorporationInformationConnector,
+                                              val payeRegistrationService: PAYERegistrationService) extends DirectorDetailsController with AuthRedirectUrls
 
 trait DirectorDetailsController extends PayeBaseController {
   val directorDetailsService : DirectorDetailsService

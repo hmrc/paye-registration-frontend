@@ -17,9 +17,8 @@
 package controllers.userJourney
 
 import javax.inject.Inject
-
 import common.exceptions.DownstreamExceptions.S4LFetchException
-import connectors.KeystoreConnector
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
 import forms.companyDetails.{BusinessContactDetailsForm, PPOBForm, TradingNameForm}
@@ -45,7 +44,9 @@ class CompanyDetailsControllerImpl @Inject()(val s4LService: S4LService,
                                              val addressLookupService: AddressLookupService,
                                              val prepopService: PrepopulationService,
                                              val config: Configuration,
-                                             val auditService: AuditService) extends CompanyDetailsController with AuthRedirectUrls
+                                             val auditService: AuditService,
+                                             val incorporationInformationConnector: IncorporationInformationConnector,
+                                             val payeRegistrationService: PAYERegistrationService) extends CompanyDetailsController with AuthRedirectUrls
 
 trait CompanyDetailsController extends PayeBaseController {
   val s4LService: S4LService

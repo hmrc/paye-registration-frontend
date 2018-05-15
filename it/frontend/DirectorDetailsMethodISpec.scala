@@ -56,7 +56,9 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
     "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ==",
     "defaultCHROAddress" -> "eyJwcmVtaXNlcyI6IjE0IiwiYWRkcmVzc19saW5lXzEiOiJUZXN0IERlZmF1bHQgU3RyZWV0IiwiYWRkcmVzc19saW5lXzIiOiJUZXN0bGV5IiwibG9jYWxpdHkiOiJUZXN0Zm9yZCIsImNvdW50cnkiOiJVSyIsInBvc3RhbF9jb2RlIjoiVEUxIDFTVCJ9",
     "defaultSeqDirector" -> "W3siZGlyZWN0b3IiOnsiZm9yZW5hbWUiOiJmYXVsdHkiLCJzdXJuYW1lIjoiZGVmYXVsdCJ9fSx7ImRpcmVjdG9yIjp7ImZvcmVuYW1lIjoiVGVzdCIsInN1cm5hbWUiOiJSZWdJZFdoaXRlbGlzdCIsInRpdGxlIjoiTXJzIn19XQ==",
-    "defaultOfficerList" -> "WwogICAgewogICAgICAibmFtZSIgOiAidGVzdCIsCiAgICAgICJuYW1lX2VsZW1lbnRzIiA6IHsKICAgICAgICAiZm9yZW5hbWUiIDogInRlLHN0MSIsCiAgICAgICAgIm90aGVyX2ZvcmVuYW1lcyIgOiAidGUsc3QxMSIsCiAgICAgICAgInN1cm5hbWUiIDogInRlc3QsYSIsCiAgICAgICAgInRpdGxlIiA6ICJNLC5yIgogICAgICB9LAogICAgICAib2ZmaWNlcl9yb2xlIiA6ICJkaXJlY3RvciIKICAgIH0sIHsKICAgICAgIm5hbWUiIDogInRlc3QiLAogICAgICAibmFtZV9lbGVtZW50cyIgOiB7CiAgICAgICAgImZvcmVuYW1lIiA6ICJ0ZXN0MiIsCiAgICAgICAgIm90aGVyX2ZvcmVuYW1lcyIgOiAidGVzdDIyIiwKICAgICAgICAic3VybmFtZSIgOiAidGVzdGIiLAogICAgICAgICJ0aXRsZSIgOiAiTXIiCiAgICAgIH0sCiAgICAgICJvZmZpY2VyX3JvbGUiIDogImRpcmVjdG9yIgogICAgfSwgewogICAgICAibmFtZSIgOiAidGVzdCIsCiAgICAgICJuYW1lX2VsZW1lbnRzIiA6IHsKICAgICAgICAiZm9yZW5hbWUiIDogInRlc3QzIiwKICAgICAgICAib3RoZXJfZm9yZW5hbWVzIiA6ICJ0ZXN0MzMiLAogICAgICAgICJzdXJuYW1lIiA6ICJ0ZXN0YyIsCiAgICAgICAgInRpdGxlIiA6ICJUZXN0IFRpdGxlIFRoYXQgSXMgTW9yZSBUaGFuIFR3ZW50eSBDaGFycyIKICAgICAgfSwKICAgICAgIm9mZmljZXJfcm9sZSIgOiAiZGlyZWN0b3IiCiAgICB9CiAgXQ=="))
+    "defaultOfficerList" -> "WwogICAgewogICAgICAibmFtZSIgOiAidGVzdCIsCiAgICAgICJuYW1lX2VsZW1lbnRzIiA6IHsKICAgICAgICAiZm9yZW5hbWUiIDogInRlLHN0MSIsCiAgICAgICAgIm90aGVyX2ZvcmVuYW1lcyIgOiAidGUsc3QxMSIsCiAgICAgICAgInN1cm5hbWUiIDogInRlc3QsYSIsCiAgICAgICAgInRpdGxlIiA6ICJNLC5yIgogICAgICB9LAogICAgICAib2ZmaWNlcl9yb2xlIiA6ICJkaXJlY3RvciIKICAgIH0sIHsKICAgICAgIm5hbWUiIDogInRlc3QiLAogICAgICAibmFtZV9lbGVtZW50cyIgOiB7CiAgICAgICAgImZvcmVuYW1lIiA6ICJ0ZXN0MiIsCiAgICAgICAgIm90aGVyX2ZvcmVuYW1lcyIgOiAidGVzdDIyIiwKICAgICAgICAic3VybmFtZSIgOiAidGVzdGIiLAogICAgICAgICJ0aXRsZSIgOiAiTXIiCiAgICAgIH0sCiAgICAgICJvZmZpY2VyX3JvbGUiIDogImRpcmVjdG9yIgogICAgfSwgewogICAgICAibmFtZSIgOiAidGVzdCIsCiAgICAgICJuYW1lX2VsZW1lbnRzIiA6IHsKICAgICAgICAiZm9yZW5hbWUiIDogInRlc3QzIiwKICAgICAgICAib3RoZXJfZm9yZW5hbWVzIiA6ICJ0ZXN0MzMiLAogICAgICAgICJzdXJuYW1lIiA6ICJ0ZXN0YyIsCiAgICAgICAgInRpdGxlIiA6ICJUZXN0IFRpdGxlIFRoYXQgSXMgTW9yZSBUaGFuIFR3ZW50eSBDaGFycyIKICAgICAgfSwKICAgICAgIm9mZmljZXJfcm9sZSIgOiAiZGlyZWN0b3IiCiAgICB9CiAgXQ==",
+    "mongodb.uri" -> s"$mongoUri"
+  ))
 
 
 
@@ -74,7 +76,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubPayeRegDocumentStatus(regIdWhitelisted)
-      stubKeystoreMetadata(SessionId, regIdWhitelisted)
+      stubSessionCacheMetadata(SessionId, regIdWhitelisted)
 
       stubGet(s"/save4later/paye-registration-frontend/$regIdWhitelisted", 404, "")
 
@@ -109,7 +111,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       stubPayeRegDocumentStatus(regId)
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
@@ -171,7 +173,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       stubPayeRegDocumentStatus(regId)
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
@@ -253,7 +255,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       stubPayeRegDocumentStatus(regId)
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 

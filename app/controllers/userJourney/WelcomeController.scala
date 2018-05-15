@@ -17,13 +17,12 @@
 package controllers.userJourney
 
 import javax.inject.Inject
-
-import connectors.KeystoreConnector
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.{CompanyDetailsService, IncorporationInformationService, S4LService, ThresholdService}
+import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.Future
@@ -35,7 +34,9 @@ class WelcomeControllerImpl @Inject()(val messagesApi: MessagesApi,
                                       val incorpInfoService: IncorporationInformationService,
                                       val keystoreConnector: KeystoreConnector,
                                       val thresholdService: ThresholdService,
-                                      val authConnector: AuthConnector) extends WelcomeController with AuthRedirectUrls
+                                      val authConnector: AuthConnector,
+                                      val incorporationInformationConnector: IncorporationInformationConnector,
+                                      val payeRegistrationService: PAYERegistrationService) extends WelcomeController with AuthRedirectUrls
 
 trait WelcomeController extends PayeBaseController {
   val thresholdService: ThresholdService

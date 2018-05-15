@@ -55,7 +55,8 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     "microservice.services.business-registration.host" -> s"$mockHost",
     "microservice.services.business-registration.port" -> s"$mockPort",
     "microservice.services.address-lookup-frontend.host" -> s"$mockHost",
-    "microservice.services.address-lookup-frontend.port" -> s"$mockPort"
+    "microservice.services.address-lookup-frontend.port" -> s"$mockPort",
+    "mongodb.uri" -> s"$mongoUri"
   ))
 
   override def beforeEach() {
@@ -70,7 +71,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     "not be prepopulated if no data is found in Paye Registration and error is returned from Business Registration" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/paye-registration/$regId/company-details", 404, "")
       stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")
@@ -97,7 +98,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     "Return an unpopulated page if PayeReg returns a NotFound response and corrupted data is returned from Business Registration" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       val invalidPrepopResponse =
         s"""
@@ -138,7 +139,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     "Return a prepopulated page if PayeReg returns a NotFound response and data is returned from Business Registration" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       val validPrepopResponse =
         s"""
@@ -192,7 +193,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     "upsert the contact details in Business Registration" in {
       setupAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       val currentPayeDoc =
         s"""{
@@ -339,7 +340,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       setupAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/save4later/paye-registration-frontend/$regId/data/PAYEContact", 200, "")
       stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")
@@ -400,7 +401,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     "not be prepopulated if an error is returned from Business Registration" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/business-registration/$regId/contact-details", 200, prepopContactJson)
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
@@ -450,7 +451,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/business-registration/$regId/contact-details", 200, prepopContactJson)
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
@@ -492,7 +493,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/business-registration/$regId/contact-details", 200, prepopContactJson)
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
@@ -568,7 +569,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
     "upsert PAYE Contact Details in PAYE Registration with a prepop address" in {
       setupAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/PAYEContact", 200, dummyS4LResponse)
@@ -612,7 +613,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
       stubGet(s"/save4later/paye-registration-frontend/$regId", 200, "")
       stubS4LGet(regId, CacheKeys.PrePopAddresses.toString, addresses)
 
@@ -646,7 +647,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       setupAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       stubPatch(s"/paye-registration/$regId/contact-correspond-paye", 200, updatedPayeDoc)
@@ -700,7 +701,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       setupAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       stubPatch(s"/paye-registration/$regId/contact-correspond-paye", 200, updatedPayeDoc)
@@ -799,7 +800,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/PAYEContact", 200, dummyS4LResponse)

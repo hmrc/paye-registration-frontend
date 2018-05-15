@@ -17,10 +17,10 @@
 package services
 
 import javax.inject.Inject
-
 import connectors._
-import enums.{CacheKeys, DownstreamOutcome, RegistrationDeletion}
+import enums.{CacheKeys, DownstreamOutcome, IncorporationStatus, RegistrationDeletion}
 import models.external.CurrentProfile
+import play.api.Logger
 import play.api.http.Status._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -43,14 +43,32 @@ trait PAYERegistrationService {
     payeRegistrationConnector.createNewRegistration(regId, txId)
   }
 
-  def deletePayeRegistrationDocument(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
-    payeRegistrationConnector.deleteCurrentRegistrationDocument(regId, txId) flatMap  {
+  def deleteRejectedRegistration(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
+    payeRegistrationConnector.deleteRejectedRegistrationDocument(regId, txId) flatMap  {
       case RegistrationDeletion.success => keyStoreConnector.remove() map {
         _ => RegistrationDeletion.success
       }
       case RegistrationDeletion.invalidStatus => Future.successful(RegistrationDeletion.invalidStatus)
     }
   }
+
+  def handleIIResponse(txId: String, status: IncorporationStatus.Value)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
+    currentProfileService.updateCurrentProfileWithIncorpStatus(txId, status).flatMap { oRegIdFromCp =>
+      if (status == IncorporationStatus.rejected) {
+        oRegIdFromCp.fold(payeRegistrationConnector.getRegistrationId(txId))(Future.successful) flatMap { regId =>
+          tearDownUserData(regId, txId)
+        }
+      }
+      else {
+        Future.successful(RegistrationDeletion.invalidStatus)
+      }
+    }
+  }
+
+  private def tearDownUserData(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = for{
+    _         <- s4LService.clear(regId)
+    response  <- payeRegistrationConnector.deleteRegistrationForRejectedIncorp(regId, txId)
+  } yield response
 
   def deletePayeRegistrationInProgress(regId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
     getCurrentProfile flatMap { profile =>

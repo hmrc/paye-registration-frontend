@@ -32,7 +32,8 @@ class CurrentProfileSpec extends PayeComponentSpec {
             transactionId = "12345"
           ),
           language = "ENG",
-          payeRegistrationSubmitted = true
+          payeRegistrationSubmitted = true,
+          None
         )
 
         val tstJson = Json.parse(
@@ -59,7 +60,8 @@ class CurrentProfileSpec extends PayeComponentSpec {
           transactionId = "12345"
         ),
         language = "ENG",
-        payeRegistrationSubmitted = false
+        payeRegistrationSubmitted = false,
+        None
       )
 
       val tstJson = Json.parse(
@@ -75,5 +77,4 @@ class CurrentProfileSpec extends PayeComponentSpec {
       Json.fromJson[CurrentProfile](tstJson) mustBe JsSuccess(tstCurrentProfile)
     }
   }
-
 }

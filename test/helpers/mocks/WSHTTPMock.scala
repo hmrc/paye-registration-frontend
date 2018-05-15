@@ -74,4 +74,12 @@ trait WSHTTPMock {
     when(mockWSHttp.PUT[I, O](ArgumentMatchers.anyString(), ArgumentMatchers.any[I]())(ArgumentMatchers.any[Writes[I]](), ArgumentMatchers.any[HttpReads[O]](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
       .thenReturn(Future.failed(exception))
   }
+
+  def mockHttpDelete[O](thenReturn: O): OngoingStubbing[Future[O]] = {
+    when(mockWSHttp.DELETE[O](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(thenReturn))
+  }
+
+  def mockHttpFailedDelete[O](exception: Exception): OngoingStubbing[Future[O]] = {
+    when(mockWSHttp.DELETE[O](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.failed(exception))
+  }
 }

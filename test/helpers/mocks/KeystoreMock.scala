@@ -17,6 +17,7 @@
 package helpers.mocks
 
 import helpers.MockedComponents
+import models.api.SessionMap
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
@@ -35,19 +36,19 @@ trait KeystoreMock {
       .thenReturn(Future.successful(model))
   }
 
-  def mockKeystoreCache[T](key: String, cacheMap: CacheMap): OngoingStubbing[Future[CacheMap]] = {
-    when(mockKeystoreConnector.cache(ArgumentMatchers.contains(key), ArgumentMatchers.any[T]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[T]]()))
-      .thenReturn(Future.successful(cacheMap))
+  def mockKeystoreCache[T](key: String, regId: String, txId: String, sessionMap: SessionMap): OngoingStubbing[Future[SessionMap]] = {
+    when(mockKeystoreConnector.cache(ArgumentMatchers.contains(key), ArgumentMatchers.contains(regId), ArgumentMatchers.contains(txId), ArgumentMatchers.any[T]())(ArgumentMatchers.any(), ArgumentMatchers.any[Format[T]]()))
+      .thenReturn(Future.successful(sessionMap))
   }
 
-  def mockKeystoreCacheError[T](key: String, err: Exception): OngoingStubbing[Future[CacheMap]] = {
-    when(mockKeystoreConnector.cache(ArgumentMatchers.contains(key), ArgumentMatchers.any[T]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[T]]()))
+  def mockKeystoreCacheError[T](key: String, regId: String, txId: String, err: Exception): OngoingStubbing[Future[SessionMap]] = {
+    when(mockKeystoreConnector.cache(ArgumentMatchers.contains(key), ArgumentMatchers.contains(regId), ArgumentMatchers.contains(txId), ArgumentMatchers.any[T]())(ArgumentMatchers.any(), ArgumentMatchers.any[Format[T]]()))
       .thenReturn(Future.failed(err))
   }
 
-  def mockKeystoreClear(): OngoingStubbing[Future[HttpResponse]] = {
+  def mockKeystoreClear(): OngoingStubbing[Future[Boolean]] = {
     when(mockKeystoreConnector.remove()(ArgumentMatchers.any()))
-      .thenReturn(Future.successful(HttpResponse(200)))
+      .thenReturn(Future.successful(true))
   }
 
   def mockFetchCurrentProfile(regID: String = "12345"): OngoingStubbing[Future[Option[CurrentProfile]]] = {
@@ -56,7 +57,8 @@ trait KeystoreMock {
           regID,
           CompanyRegistrationProfile("held", "txId"),
           "ENG",
-          payeRegistrationSubmitted = false
+          payeRegistrationSubmitted = false,
+          incorpStatus = None
         ))))
   }
 }

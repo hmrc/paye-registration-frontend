@@ -16,12 +16,15 @@
 
 package services
 
-import enums.PAYEStatus
+import connectors.IncorporationInformationConnector
+import enums.{IncorporationStatus, PAYEStatus}
 import helpers.PayeComponentSpec
+import models.api.SessionMap
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, NotFoundException}
 
@@ -31,10 +34,11 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
 
   class Setup {
     val service = new CurrentProfileService {
-      override val businessRegistrationConnector  = mockBusinessRegistrationConnector
-      override val companyRegistrationConnector   = mockCompRegConnector
-      override val payeRegistrationConnector      = mockPAYERegConnector
-      override val keystoreConnector              = mockKeystoreConnector
+      override val businessRegistrationConnector        = mockBusinessRegistrationConnector
+      override val companyRegistrationConnector         = mockCompRegConnector
+      override val payeRegistrationConnector            = mockPAYERegConnector
+      override val keystoreConnector                    = mockKeystoreConnector
+      override val incorporationInformationConnector    = mockIncorpInfoConnector
     }
   }
 
@@ -45,7 +49,8 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
     validBusinessProfile.registrationID,
     validCompanyProfile,
     validBusinessProfile.language,
-    payeRegistrationSubmitted = false
+    payeRegistrationSubmitted = false,
+    incorpStatus = Some(IncorporationStatus.accepted)
   )
 
   "fetchAndStoreCurrentProfile" should {
@@ -57,13 +62,35 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
       when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCompanyProfile))
 
-      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(CacheMap("", Map.empty)))
+      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(SessionMap("", "", "", Map.empty[String, JsValue])))
+
+      when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(),ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(Some(IncorporationStatus.accepted)))
 
       when(mockPAYERegConnector.getStatus(ArgumentMatchers.contains(validBusinessProfile.registrationID))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Some(PAYEStatus.draft)))
 
       await(service.fetchAndStoreCurrentProfile) mustBe validCurrentProfile
+    }
+
+    "Return a successful outcome after nothing is returned from II subscription" in new Setup {
+      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future(validBusinessProfile))
+
+      when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validCompanyProfile))
+
+      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(SessionMap("", "", "", Map.empty[String, JsValue])))
+
+      when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(),ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(None))
+
+      when(mockPAYERegConnector.getStatus(ArgumentMatchers.contains(validBusinessProfile.registrationID))(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(Some(PAYEStatus.draft)))
+
+      await(service.fetchAndStoreCurrentProfile) mustBe validCurrentProfile.copy(incorpStatus = None)
     }
 
     "Return an unsuccessful outcome when there is no record in Business Registration" in new Setup {
@@ -107,6 +134,29 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
 
     "return false when no status is returned" in new Setup {
       service.regSubmitted(None) mustBe false
+    }
+  }
+
+  "updateCurrentProfileWithIncorpStatus" should {
+    "return some regId" in new Setup {
+
+      val testSessionMap = SessionMap(
+        sessionId      = "testSessionId",
+        registrationId = validCurrentProfile.registrationID,
+        transactionId  = validCurrentProfile.companyTaxRegistration.transactionId,
+        data           = Map(
+          "CurrentProfile" -> Json.toJson(validCurrentProfile)
+        )
+      )
+
+      when(mockKeystoreConnector.fetchByTransactionId(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future(Some(testSessionMap)))
+
+      when(mockKeystoreConnector.cacheSessionMap(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future(testSessionMap))
+
+      val result = await(service.updateCurrentProfileWithIncorpStatus(txId = "testTxId", status = IncorporationStatus.rejected))
+      result mustBe Some(validCurrentProfile.registrationID)
     }
   }
 }

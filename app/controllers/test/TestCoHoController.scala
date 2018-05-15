@@ -17,15 +17,14 @@
 package controllers.test
 
 import javax.inject.Inject
-
 import connectors.test.TestIncorpInfoConnector
-import connectors.{BusinessRegistrationConnector, KeystoreConnector}
+import connectors.{BusinessRegistrationConnector, IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.test.TestCoHoCompanyDetailsForm
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request}
-import services.{CompanyDetailsService, IncorporationInformationService, S4LService}
+import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.Future
@@ -39,7 +38,9 @@ class TestCoHoControllerImpl @Inject()(val testIncorpInfoConnector: TestIncorpIn
                                        val config: Configuration,
                                        val companyDetailsService: CompanyDetailsService,
                                        val incorpInfoService: IncorporationInformationService,
-                                       val messagesApi: MessagesApi) extends TestCoHoController with AuthRedirectUrls
+                                       val messagesApi: MessagesApi,
+                                       val incorporationInformationConnector: IncorporationInformationConnector,
+                                       val payeRegistrationService: PAYERegistrationService) extends TestCoHoController with AuthRedirectUrls
 
 trait TestCoHoController extends PayeBaseController {
   val testIncorpInfoConnector: TestIncorpInfoConnector

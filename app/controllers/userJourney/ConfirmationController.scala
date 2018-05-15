@@ -17,7 +17,7 @@
 package controllers.userJourney
 
 import javax.inject.Inject
-import connectors.KeystoreConnector
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import play.api.Configuration
 import play.api.i18n.MessagesApi
@@ -34,7 +34,9 @@ class ConfirmationControllerImpl @Inject()(val messagesApi: MessagesApi,
                                            val companyDetailsService: CompanyDetailsService,
                                            val incorpInfoService: IncorporationInformationService,
                                            val emailService: EmailService,
-                                           val authConnector: AuthConnector) extends ConfirmationController with AuthRedirectUrls
+                                           val authConnector: AuthConnector,
+                                           val incorporationInformationConnector: IncorporationInformationConnector,
+                                           val payeRegistrationService: PAYERegistrationService) extends ConfirmationController with AuthRedirectUrls
 
 trait ConfirmationController extends PayeBaseController {
   val confirmationService: ConfirmationService

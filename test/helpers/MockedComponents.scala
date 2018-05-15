@@ -20,6 +20,7 @@ import config.WSHttp
 import connectors._
 import connectors.test.{TestBusinessRegConnector, TestIncorpInfoConnector, TestPAYERegConnector}
 import org.scalatest.mockito.MockitoSugar
+import repositories.{ReactiveMongoRepository, SessionRepository}
 import services._
 import uk.gov.hmrc.auth.core.{AuthConnector => AuthClientConnector}
 import uk.gov.hmrc.http.cache.client.SessionCache
@@ -68,4 +69,7 @@ trait MockedComponents {
   val mockThresholdService      = mock[ThresholdService]
   val mockEmploymentService     = mock[EmploymentService]
   val mockEmploymentServiceV2   = mock[EmploymentServiceV2]
+
+  val mockSessionRepository     = mock[SessionRepository]
+  val mockReactiveMongoRepo     = mock[ReactiveMongoRepository]
 }

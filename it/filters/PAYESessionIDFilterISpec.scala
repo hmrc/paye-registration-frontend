@@ -35,7 +35,8 @@ class PAYESessionIDFilterISpec extends IntegrationSpecBase
     "microservice.services.business-registration.host" -> s"$mockHost",
     "microservice.services.business-registration.port" -> s"$mockPort",
     "microservice.services.address-lookup-frontend.host" -> s"$mockHost",
-    "microservice.services.address-lookup-frontend.port" -> s"$mockPort"))
+    "microservice.services.address-lookup-frontend.port" -> s"$mockPort",
+    "mongodb.uri" -> s"$mongoUri"))
 
 
 
@@ -50,7 +51,7 @@ class PAYESessionIDFilterISpec extends IntegrationSpecBase
       "sessionId is invalid" in {
         setupSimpleAuthMocks()
         stubSuccessfulLogin()
-        stubKeystoreMetadata(SessionId, regId)
+        stubSessionCacheMetadata(SessionId, regId)
 
         stubGet(s"/paye-registration/$regId/company-details", 404, "")
         stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")
@@ -82,7 +83,7 @@ class PAYESessionIDFilterISpec extends IntegrationSpecBase
       "sessionId is Valid" in {
         setupSimpleAuthMocks()
         stubSuccessfulLogin()
-        stubKeystoreMetadata(SessionId, regId)
+        stubSessionCacheMetadata(SessionId, regId)
 
         stubGet(s"/paye-registration/$regId/company-details", 404, "")
         stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")

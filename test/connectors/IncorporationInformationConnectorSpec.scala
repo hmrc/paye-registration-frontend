@@ -16,15 +16,16 @@
 
 package connectors
 
-import common.exceptions.DownstreamExceptions.OfficerListNotFoundException
+import common.exceptions.DownstreamExceptions.{IncorporationInformationResponseException, OfficerListNotFoundException}
 import config.WSHttp
 import controllers.exceptions.GeneralException
+import enums.IncorporationStatus
 import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics
 import models.api.Name
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.libs.json.{JsObject, JsResultException, JsValue, Json}
 import uk.gov.hmrc.http.{BadRequestException, HttpResponse, InternalServerException, NotFoundException}
 
 import scala.concurrent.Future
@@ -35,13 +36,15 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with Guice
   val testUri = "testIIUri"
   val testStubUrl = "testIIStubUrl"
   val testStubUri = "testIIStubUri"
+  val testPayeRegFeUrl = "http://paye-fe"
 
-  class Setup(unStubbed: Boolean) extends CodeMocks {
+  class Setup(unStubbed: Boolean =  true) extends CodeMocks {
     val connector = new IncorporationInformationConnector {
       val stubUrl                 = testStubUrl
       val stubUri                 = testStubUri
       val incorpInfoUrl           = testUrl
       val incorpInfoUri           = testUri
+      val payeRegFeUrl            = testPayeRegFeUrl
       override val http : WSHttp  = mockWSHttp
       override val metricsService = new MockMetrics
       override val successCounter = metricsService.companyDetailsSuccessResponseCounter
@@ -49,7 +52,77 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with Guice
       override def timer          = metricsService.incorpInfoResponseTimer.time()
     }
   }
+  "setupSubscription" should {
+    val responseJson = Json.parse(
+      s"""
+        |{
+        | "SCRSIncorpStatus": {
+        |   "IncorpSubscriptionKey" : {
+        |     "transactionId" : "fooTxID",
+        |     "subscriber"    : "SCRS",
+        |     "discriminator" : "paye-fe"
+        |   },
+        |   "IncorpStatusEvent": {
+        |     "status" : "accepted",
+        |     "crn" : "12345678",
+        |     "description" : "test desc"
+        |   }
+        | }
+        |}
+      """.stripMargin)
+    "return Some(IncorporationStatus.Value) when II returns a 200" in new Setup {
+      val httpResponse = HttpResponse(200, Some(responseJson))
+      mockHttpPOST[JsObject, HttpResponse]("", httpResponse)
 
+      await(connector.setupSubscription("fooTxID","barSubscriber")) mustBe Some(IncorporationStatus.accepted)
+    }
+    "return JsResultException when subscriber does not match with the one returned from II" in new Setup {
+      val httpResponse = HttpResponse(200, Some(responseJson))
+      mockHttpPOST[JsObject, HttpResponse]("", httpResponse)
+
+      intercept[JsResultException](await(connector.setupSubscription("fooTxID","bar",subscriber = "fooBarWillNotMatch")))
+    }
+
+    "return None when II returns a 202" in new Setup {
+      val httpResponse = HttpResponse(202, Some(responseJson))
+      mockHttpPOST[JsObject, HttpResponse]("", httpResponse)
+
+      await(connector.setupSubscription("foo","bar")) mustBe None
+    }
+
+    "return IncorporationInformationResponseException when II returns any other status than 200 / 202 but still a success response" in new Setup {
+      val httpResponse = HttpResponse(203, Some(responseJson))
+      mockHttpPOST[JsObject, HttpResponse]("", httpResponse)
+
+      intercept[IncorporationInformationResponseException](await(connector.setupSubscription("foo","bar")))
+    }
+    "return an JsResultException when json cannot be parsed for a 200 from II" in new Setup {
+      val httpResponse = HttpResponse(200, Some(Json.obj("foo" -> "bar")))
+      mockHttpPOST[JsObject, HttpResponse]("", httpResponse)
+
+      intercept[JsResultException](await(connector.setupSubscription("fooTxID","barSubscriber")))
+    }
+    "return an Exception when something goes wrong whilst calling ii" in new Setup {
+      mockHttpFailedPOST[JsObject, HttpResponse]("",new BadRequestException("foo"))
+
+      intercept[BadRequestException](await(connector.setupSubscription("foo","bar")))
+    }
+  }
+
+  "cancelSubscription" should {
+    "return true if an OK is returned from ii" in new Setup {
+      mockHttpDelete[HttpResponse](HttpResponse(200))
+      await(connector.cancelSubscription("tx-12345", "12345")) mustBe true
+    }
+    "return true if a NotFound is returned from ii" in new Setup {
+      mockHttpFailedDelete[HttpResponse](new NotFoundException("Not Found"))
+      await(connector.cancelSubscription("tx-12345", "12345")) mustBe true
+    }
+    "return false if an Intrernal Server Exception is returned from ii" in new Setup {
+      mockHttpFailedDelete[HttpResponse](new InternalServerException("Internal Server Exception"))
+      await(connector.cancelSubscription("tx-12345", "12345")) mustBe false
+    }
+  }
 
   "getCoHoCompanyDetails" should {
     "return a successful CoHo api response object for valid data" in new Setup(true) {

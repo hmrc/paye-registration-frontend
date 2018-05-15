@@ -21,9 +21,10 @@ object DownstreamExceptions extends DownstreamExceptions
 trait DownstreamExceptions {
 
   class CurrentProfileNotFoundException extends Exception
-  class PAYEMicroserviceException(msg:String) extends Exception (msg)
+  class PAYEMicroserviceException(msg: String) extends Exception(msg)
   class OfficerListNotFoundException extends Exception
   class S4LFetchException(msg: String) extends Exception(msg)
   class PPOBAddressNotFoundException extends Exception
   class ConfirmationRefsNotFoundException extends Exception
+  class IncorporationInformationResponseException(msg: String) extends Exception(msg)
 }

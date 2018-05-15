@@ -17,9 +17,11 @@
 package internal
 
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
-import models.external.BusinessProfile
+import models.api.SessionMap
+import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProfile}
 import org.scalatest.BeforeAndAfterEach
 import play.api.libs.json.Json
+import play.api.test.Helpers._
 import play.api.test.FakeApplication
 
 class RegistrationMethodISpec extends IntegrationSpecBase
@@ -51,7 +53,8 @@ class RegistrationMethodISpec extends IntegrationSpecBase
     "microservice.services.company-registration.host" -> s"$mockHost",
     "microservice.services.company-registration.port" -> s"$mockPort",
     "microservice.services.incorporation-frontend-stubs.host" -> s"$mockHost",
-    "microservice.services.incorporation-frontend-stubs.port" -> s"$mockPort"
+    "microservice.services.incorporation-frontend-stubs.port" -> s"$mockPort",
+    "mongodb.uri" -> s"$mongoUri"
   ))
 
   override def beforeEach() {
@@ -80,10 +83,10 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata("sessionId", regId)
 
       val fResponse = buildClientInternal(s"/4/delete").
-        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
+        withHeaders("X-Session-ID" -> "sessionId", "Authorization" -> authorisationToken).
         delete()
 
       val response = await(fResponse)
@@ -96,7 +99,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubGet(s"/keystore/paye-registration-frontend/$SessionId", 404, "")
+      stubSessionCacheMetadata(SessionId,regId,false)
 
       val businessProfile = BusinessProfile(
         regId,
@@ -115,14 +118,13 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfile).toString)
       stubGet(s"/incorporation-frontend-stubs/$regId/corporation-tax-registration", 200, companyRegistrationResp)
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/keystore/paye-registration-frontend/$SessionId/data/CurrentProfile", 200, dummyS4LResponse)
+      stubPost(s"/incorporation-information/subscribe/000-434-$regId/regime/paye-fe/subscriber/SCRS", 202, "")
 
       val fResponse = buildClientInternal(s"/4/delete").
         withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
         delete()
 
       val response = await(fResponse)
-
       response.status mustBe 400
     }
 
@@ -131,7 +133,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubDelete(s"/save4later/paye-registration-frontend/$regId", 204, "")
 
@@ -142,7 +144,6 @@ class RegistrationMethodISpec extends IntegrationSpecBase
         delete()
 
       val response = await(fResponse)
-
       response.status mustBe 412
     }
 
@@ -151,7 +152,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubDelete(s"/save4later/paye-registration-frontend/$regId", 204, "")
 
@@ -171,7 +172,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubDelete(s"/save4later/paye-registration-frontend/$regId", 204, "")
 
@@ -191,7 +192,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubDelete(s"/save4later/paye-registration-frontend/$regId", 204, "")
 
@@ -211,7 +212,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubDelete(s"/save4later/paye-registration-frontend/$regId", 500, "")
 
@@ -229,7 +230,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubDelete(s"/save4later/paye-registration-frontend/$regId", 204, "")
 
@@ -242,6 +243,133 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       val response = await(fResponse)
 
       response.status mustBe 200
+    }
+  }
+
+  "companyIncorporation" should {
+    val testIIBody = Json.parse(
+      """
+        |{
+        |   "SCRSIncorpStatus" : {
+        |       "IncorpSubscriptionKey" : {
+        |           "transactionId" : "testTxId"
+        |       },
+        |       "IncorpStatusEvent" : {
+        |           "status" : "rejected"
+        |       }
+        |   }
+        |}
+      """.stripMargin
+    )
+
+    val testSessionMap = SessionMap(
+      sessionId      = "testSessionId",
+      registrationId = s"$regId",
+      transactionId  = "testTxId",
+      data           = Map(
+        "CurrentProfile" -> Json.toJson(CurrentProfile(
+          registrationID            = s"$regId",
+          companyTaxRegistration    = CompanyRegistrationProfile(
+            status        = "",
+            transactionId = "testTxId"
+          ),
+          language                  = "en",
+          payeRegistrationSubmitted = false,
+          incorpStatus              = None
+        ))
+      )
+    )
+
+    "return an Ok" when {
+      "the users incorp status has been updated and they have a active session" in {
+        await(repo.upsertSessionMap(testSessionMap))
+
+        stubDelete(s"/save4later/paye-registration-frontend/$regId", NO_CONTENT, "")
+        stubDelete(s"/paye-registration/$regId/delete-rejected-incorp", OK, "")
+
+        val result = await(buildClientInternal("/company-incorporation").post(testIIBody))
+        result.status mustBe OK
+      }
+
+      "the user incorp status has been updated but the user is not present" in {
+        stubGet("/paye-registration/testTxId/registration-id", OK, "testRegId")
+
+        stubDelete(s"/save4later/paye-registration-frontend/$regId", NO_CONTENT, "")
+        stubDelete(s"/paye-registration/$regId/delete-rejected-incorp", OK, "")
+
+        val result = await(buildClientInternal("/company-incorporation").post(testIIBody))
+        result.status mustBe OK
+      }
+
+      "the user incorp status but not deleted because the status wasn't rejected and there is an active session" in {
+        val testIIBody = Json.parse(
+          """
+            |{
+            |   "SCRSIncorpStatus" : {
+            |       "IncorpSubscriptionKey" : {
+            |           "transactionId" : "testTxId"
+            |       },
+            |       "IncorpStatusEvent" : {
+            |           "status" : "accepted"
+            |       }
+            |   }
+            |}
+          """.stripMargin
+        )
+
+        await(repo.upsertSessionMap(testSessionMap))
+
+        val result = await(buildClientInternal("/company-incorporation").post(testIIBody))
+        result.status mustBe OK
+      }
+
+      "the user incorp status but not deleted because the status wasn't rejected but there is no user present" in {
+        val testIIBody = Json.parse(
+          """
+            |{
+            |   "SCRSIncorpStatus" : {
+            |       "IncorpSubscriptionKey" : {
+            |           "transactionId" : "testTxId"
+            |       },
+            |       "IncorpStatusEvent" : {
+            |           "status" : "accepted"
+            |       }
+            |   }
+            |}
+          """.stripMargin
+        )
+
+        val result = await(buildClientInternal("/company-incorporation").post(testIIBody))
+        result.status mustBe OK
+      }
+    }
+
+    "return an InternalServerError" when {
+      "no matching PAYE doc can be found and they have an active session" in {
+        await(repo.upsertSessionMap(testSessionMap))
+
+        stubDelete(s"/save4later/paye-registration-frontend/$regId", INTERNAL_SERVER_ERROR, "")
+        stubDelete(s"/paye-registration/$regId/delete-rejected-incorp", INTERNAL_SERVER_ERROR, "")
+
+        val result = await(buildClientInternal("/company-incorporation").post(testIIBody))
+        result.status mustBe INTERNAL_SERVER_ERROR
+      }
+
+      "no matching PAYE doc can be found but the user is not present" in {
+        stubGet("/paye-registration/testTxId/registration-id", NOT_FOUND, "")
+
+        stubDelete(s"/save4later/paye-registration-frontend/$regId", INTERNAL_SERVER_ERROR, "")
+        stubDelete(s"/paye-registration/$regId/delete-rejected-incorp", INTERNAL_SERVER_ERROR, "")
+
+        val result = await(buildClientInternal("/company-incorporation").post(testIIBody))
+        result.status mustBe INTERNAL_SERVER_ERROR
+      }
+
+      "there was a problem parsing out the required data from the II body" in {
+
+        val result = await(buildClientInternal("/company-incorporation").post(Json.parse("""{ "abc" : "xyz"}""")))
+        result.status mustBe INTERNAL_SERVER_ERROR
+      }
     }
   }
 }

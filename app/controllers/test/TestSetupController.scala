@@ -43,7 +43,9 @@ class TestSetupControllerImpl @Inject()(val keystoreConnector: KeystoreConnector
                                         val testPAYERegConnector: TestPAYERegConnector,
                                         val payeRegService: PAYERegistrationService,
                                         val authConnector: AuthConnector,
-                                        val s4LService: S4LService) extends TestSetupController with AuthRedirectUrls
+                                        val s4LService: S4LService,
+                                        val incorporationInformationConnector: IncorporationInformationConnector,
+                                        val payeRegistrationService: PAYERegistrationService) extends TestSetupController with AuthRedirectUrls
 
 trait TestSetupController
   extends BusinessProfileController

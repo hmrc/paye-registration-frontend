@@ -46,7 +46,8 @@ class SignOutISpec extends IntegrationSpecBase with LoginStub with CachingStub w
     "microservice.services.company-registration-frontend.www.uri" -> "/register-your-company",
     "microservice.services.business-registration.host" -> s"$mockHost",
     "microservice.services.business-registration.port" -> s"$mockPort",
-    "application.router" -> "testOnlyDoNotUseInAppConf.Routes"
+    "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
+    "mongodb.uri" -> s"$mongoUri"
   ))
 
   override def beforeEach() {
@@ -60,8 +61,6 @@ class SignOutISpec extends IntegrationSpecBase with LoginStub with CachingStub w
       "hitting /register-for-paye/sign-out" in {
         setupSimpleAuthMocks()
         stubSuccessfulLogin()
-        stubEmptyKeystore(SessionId)
-        stubKeystoreDelete(SessionId)
 
         await(buildClient("/").withHeaders(HeaderNames.COOKIE -> getSessionCookie()).get())
 

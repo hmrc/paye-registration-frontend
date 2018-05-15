@@ -56,6 +56,8 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp with 
       override val employmentService = mockEmploymentService
       override val keystoreConnector = mockKeystoreConnector
       implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+      override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val payeRegistrationService = mockPayeRegService
     }
   }
 

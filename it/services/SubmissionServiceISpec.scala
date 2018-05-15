@@ -19,8 +19,8 @@ package services
 import java.util.UUID
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import connectors.{Failed, KeystoreConnector, PAYERegistrationConnector, Success}
-import enums.CacheKeys
+import connectors._
+import enums.{CacheKeys, IncorporationStatus}
 import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import play.api.Application
@@ -37,14 +37,18 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
 
   lazy val payeRegistrationConnector = app.injector.instanceOf[PAYERegistrationConnector]
   lazy val keystoreConnector         = app.injector.instanceOf[KeystoreConnector]
+  lazy val incorpInfoConnector       = app.injector.instanceOf[IncorporationInformationConnector]
 
   val additionalConfiguration = Map(
     "microservice.services.paye-registration.host" -> s"$mockHost",
     "microservice.services.paye-registration.port" -> s"$mockPort",
+    "microservice.services.incorporation-information.host" -> s"$mockHost",
+    "microservice.services.incorporation-information.port" -> s"$mockPort",
     "microservice.services.cachable.session-cache.host" -> s"$mockHost",
     "microservice.services.cachable.session-cache.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
-    "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng=="
+    "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng==",
+    "mongodb.uri" -> s"$mongoUri"
   )
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
@@ -61,58 +65,81 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
       transactionId = "40-123456"
     ),
     language = "ENG",
-    payeRegistrationSubmitted = false
+    payeRegistrationSubmitted = false,
+    incorpStatus = None
   )
 
   "submitRegistration" should {
     "NOT send the submission if the regId is in whitelist" in {
       val regIdWhitelisted = "regWhitelist123"
 
-      val submissionService = new SubmissionServiceImpl(payeRegistrationConnector, keystoreConnector)
+      val submissionService = new SubmissionServiceImpl(payeRegistrationConnector, keystoreConnector, incorpInfoConnector)
       def getResponse = submissionService.submitRegistration(currentProfile(regIdWhitelisted))
 
       an[Exception] mustBe thrownBy(await(getResponse))
     }
 
     "send the submission and update keystore if the regId is not in whitelist" in {
-      val regId = "12345"
+      val regId         = "12345"
+      val transactionId = "40-123456"
 
       stubPut(s"/paye-registration/$regId/submit-registration", 200, "")
-      stubKeystoreCache(sId, CacheKeys.CurrentProfile.toString)
+      stubDelete(s"/incorporation-information/subscribe/$transactionId/regime/paye-fe/subscriber/SCRS", 200, "")
 
-      val submissionService = new SubmissionServiceImpl(payeRegistrationConnector, keystoreConnector)
+      val submissionService = new SubmissionServiceImpl(payeRegistrationConnector, keystoreConnector, incorpInfoConnector)
       def getResponse = submissionService.submitRegistration(currentProfile(regId))
 
       await(getResponse) mustBe Success
 
-      verify(putRequestedFor(urlEqualTo(s"/keystore/paye-registration-frontend/$sId/data/${CacheKeys.CurrentProfile.toString}"))
-        .withRequestBody(
-          equalToJson(Json.parse(
-            s"""{
-               |  "registrationID":"12345",
-               |  "companyTaxRegistration":{
-               |    "status":"acknowledged",
-               |    "transactionId":"40-123456"
-               |  },"language":"ENG",
-               |  "payeRegistrationSubmitted":true
-               |}
-             """.stripMargin).toString)
-        )
-      )
+      verifySessionCacheData[CurrentProfile](sId, CacheKeys.CurrentProfile.toString, Some(
+        CurrentProfile(
+          registrationID = "12345",
+          companyTaxRegistration = CompanyRegistrationProfile(
+            status = "acknowledged",
+            transactionId = "40-123456"
+          ),
+          language = "ENG",
+          payeRegistrationSubmitted = true,
+          incorpStatus = None
+        )))
+    }
+
+    "send the submission, update keystore and cancel subscription if the regId is not in whitelist" in {
+      val regId = "12345"
+      val transactionId = "40-123456"
+
+      stubPut(s"/paye-registration/$regId/submit-registration", 204, "")
+      stubDelete(s"/incorporation-information/subscribe/$transactionId/regime/paye-fe/subscriber/SCRS", 404, "")
+
+      val submissionService = new SubmissionServiceImpl(payeRegistrationConnector, keystoreConnector, incorpInfoConnector)
+      def getResponse = submissionService.submitRegistration(currentProfile(regId))
+
+      await(getResponse) mustBe Cancelled
+
+      verifySessionCacheData[CurrentProfile](sId, CacheKeys.CurrentProfile.toString, Some(
+        CurrentProfile(
+          registrationID = "12345",
+          companyTaxRegistration = CompanyRegistrationProfile(
+            status = "acknowledged",
+            transactionId = "40-123456"
+          ),
+          language = "ENG",
+          payeRegistrationSubmitted = false,
+          incorpStatus = Some(IncorporationStatus.rejected)
+        )))
     }
 
     "send the submission and leave keystore unchanged if the DES submission fails" in {
       val regId = "12345"
 
       stubPut(s"/paye-registration/$regId/submit-registration", 400, "")
-      stubKeystoreCache(sId, CacheKeys.CurrentProfile.toString)
 
-      val submissionService = new SubmissionServiceImpl(payeRegistrationConnector, keystoreConnector)
+      val submissionService = new SubmissionServiceImpl(payeRegistrationConnector, keystoreConnector, incorpInfoConnector)
       def getResponse = submissionService.submitRegistration(currentProfile(regId))
 
       await(getResponse) mustBe Failed
 
-      verify(0, putRequestedFor(urlEqualTo(s"/keystore/paye-registration-frontend/$sId/data/${CacheKeys.CurrentProfile.toString}")))
+      verifySessionCacheData[CurrentProfile](sId, CacheKeys.CurrentProfile.toString, None)
     }
   }
 }

@@ -45,13 +45,16 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val authConnector              = mockAuthConnector
       override val keystoreConnector          = mockKeystoreConnector
       override val testBusinessRegConnector   = mockTestBusRegConnector
+      override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val payeRegistrationService = mockPayeRegService
 
       override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(CurrentProfile(
           "12345",
           CompanyRegistrationProfile("held", "txId"),
           "ENG",
-          payeRegistrationSubmitted = false
+          payeRegistrationSubmitted = false,
+          None
         ))
       }
     }

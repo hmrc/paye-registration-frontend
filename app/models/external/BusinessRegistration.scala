@@ -16,6 +16,7 @@
 
 package models.external
 
+import enums.IncorporationStatus
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{Json, _}
 
@@ -43,7 +44,8 @@ object CompanyRegistrationProfile {
 case class CurrentProfile(registrationID: String,
                           companyTaxRegistration: CompanyRegistrationProfile,
                           language: String,
-                          payeRegistrationSubmitted: Boolean)
+                          payeRegistrationSubmitted: Boolean,
+                          incorpStatus: Option[IncorporationStatus.Value])
 
 object CurrentProfile {
 
@@ -51,7 +53,8 @@ object CurrentProfile {
     (__ \ "registrationID").read[String] and
     (__ \ "companyTaxRegistration").read[CompanyRegistrationProfile] and
     (__ \ "language").read[String] and
-    ((__ \ "payeRegistrationSubmitted").read[Boolean] or Reads.pure(false))
+    ((__ \ "payeRegistrationSubmitted").read[Boolean] or Reads.pure(false)) and
+    (__ \ "incorpStatus").readNullable[IncorporationStatus.Value]
   )(CurrentProfile.apply _)
 
   val writes = Json.writes[CurrentProfile]

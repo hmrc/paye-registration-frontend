@@ -17,12 +17,12 @@
 package controllers.errors
 
 import javax.inject.Inject
-import connectors.KeystoreConnector
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.{CompanyDetailsService, IncorporationInformationService, S4LService, ThresholdService}
+import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.error.{ineligible => Ineligible, newIneligible => IneligiblePage, _}
 
@@ -35,7 +35,9 @@ class ErrorControllerImpl @Inject()(val messagesApi: MessagesApi,
                                     val companyDetailsService: CompanyDetailsService,
                                     val s4LService: S4LService,
                                     val incorpInfoService: IncorporationInformationService,
-                                    val authConnector: AuthConnector) extends ErrorController with AuthRedirectUrls
+                                    val authConnector: AuthConnector,
+                                    val incorporationInformationConnector: IncorporationInformationConnector,
+                                    val payeRegistrationService: PAYERegistrationService) extends ErrorController with AuthRedirectUrls
 
 trait ErrorController extends PayeBaseController {
 

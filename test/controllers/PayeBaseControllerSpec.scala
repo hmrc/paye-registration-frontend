@@ -16,6 +16,7 @@
 
 package controllers
 
+import connectors.IncorporationInformationConnector
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.CurrentProfile
 import org.mockito.ArgumentMatchers
@@ -41,6 +42,8 @@ class PayeBaseControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val messagesApi             = mockMessagesApi
       override val authConnector           = mockAuthConnector
       override val keystoreConnector       = mockKeystoreConnector
+      override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val payeRegistrationService = mockPayeRegService
     }
 
     def testOkFunction(msg: String): Future[Result] = Future.successful(Ok(msg))
@@ -110,6 +113,8 @@ class PayeBaseControllerSpec extends PayeComponentSpec with PayeFakedApp {
           .thenReturn(Future.successful(()))
 
         when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+          .thenReturn(Future.successful(None))
+        when(mockKeystoreConnector.fetchAndGetFromKeystore(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(None))
 
         val result: Future[Result] = testBaseController.isAuthorisedWithProfile {
