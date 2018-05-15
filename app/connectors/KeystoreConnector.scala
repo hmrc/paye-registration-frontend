@@ -17,18 +17,19 @@
 package connectors
 
 import javax.inject.Inject
-
 import com.codahale.metrics.{Counter, Timer}
 import play.api.libs.json.Format
 import services.MetricsService
 import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import repositories.{ReactiveMongoRepository, SessionRepository}
 
 import scala.concurrent.Future
 
 class KeystoreConnectorImpl @Inject()(val sessionCache: SessionCache,
-                                      val metricsService: MetricsService) extends KeystoreConnector {
+                                      val metricsService: MetricsService,
+                                      val sessionRepository: SessionRepository) extends KeystoreConnector {
   val successCounter        = metricsService.keystoreSuccessResponseCounter
   val emptyResponseCounter  = metricsService.keystoreEmptyResponseCounter
   val failedCounter         = metricsService.keystoreFailedResponseCounter
@@ -38,15 +39,22 @@ class KeystoreConnectorImpl @Inject()(val sessionCache: SessionCache,
 trait KeystoreConnector {
   val sessionCache: SessionCache
   val metricsService: MetricsService
+  val sessionRepository: SessionRepository
 
   val successCounter: Counter
   val emptyResponseCounter: Counter
   val failedCounter: Counter
   def timer: Timer.Context
 
+  private def sessionID(implicit hc:HeaderCarrier): String = hc.sessionId.getOrElse(throw new RuntimeException("Active User had no Session ID")).value
+
   def cache[T](formId: String, body : T)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {
     metricsService.processDataResponseWithMetrics[CacheMap](successCounter, failedCounter, timer) {
-      sessionCache.cache[T](formId, body)
+      //sessionCache.cache[T](formId, body)
+      sessionRepository().get(sessionID).flatMap { map =>
+        val updatedCacheMap = sescascadeUpsert(formId, body, map.getOrElse(new CacheMap(sessionID, Map())))
+        sessionRepository().upsert(updatedCacheMap).map { _ => updatedCacheMap }
+      }
     }
   }
 

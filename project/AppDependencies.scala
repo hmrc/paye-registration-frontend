@@ -29,6 +29,7 @@ object MainDependencies {
   private val playWhitelistVersion            = "2.0.0"
   private val playConditionalMappingVersion   = "0.2.0"
   private val commonsValidatorVersion         = "1.6"
+  private val reactiveMongoVersion            = "6.2.0"
 
   def apply() = Seq(
     "uk.gov.hmrc"         %% "frontend-bootstrap"             % frontendBootstrapVersion,
@@ -37,6 +38,7 @@ object MainDependencies {
     "uk.gov.hmrc"         %% "http-caching-client"            % httpCachingVersion,
     "uk.gov.hmrc"         %% "play-whitelist-filter"          % playWhitelistVersion,
     "uk.gov.hmrc"         %% "play-conditional-form-mapping"  % playConditionalMappingVersion,
+    "uk.gov.hmrc"         %% "play-reactivemongo"             % reactiveMongoVersion,
     "commons-validator"   %  "commons-validator"              % commonsValidatorVersion
   )
 }
@@ -49,6 +51,7 @@ trait TestDependencies {
   val mockitoCoreVersion       = "2.13.0"
   val jsoupVersion             = "1.10.3"
   val wireMockVersion          = "2.9.0"
+  val playMongoTestVersion     = "3.1.0"
 
   val scope: Configuration
   val test: Seq[ModuleID]
@@ -72,7 +75,8 @@ object IntegrationTestDependencies extends TestDependencies {
     "org.scalatestplus.play"  %% "scalatestplus-play" % scalaTestPlusVersion      % scope,
     "org.pegdown"             %  "pegdown"            % pegdownVersion            % scope,
     "org.jsoup"               %  "jsoup"              % jsoupVersion              % scope,
-    "com.github.tomakehurst"  %  "wiremock"           % wireMockVersion           % scope
+    "com.github.tomakehurst"  %  "wiremock"           % wireMockVersion           % scope,
+    "uk.gov.hmrc"             %% "reactivemongo-test" % playMongoTestVersion      % scope
   )
 
   def apply() = test
