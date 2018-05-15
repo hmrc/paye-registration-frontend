@@ -24,11 +24,13 @@ import models.view.EmployingAnyone
 import play.api.data.{Form, FormError}
 import play.api.data.Forms.{mapping, optional}
 import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
+import utils.SystemDate
 
 object PaidEmployeesForm extends RequiredBooleanForm with CustomDateForm {
 
   override val errorMsg = "pages.paidEmployees.error"
   override lazy val customFormPrefix = "earliestDate"
+  def now: LocalDate = SystemDate.getSystemDate.toLocalDate
 
   val dateTimeFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy")
   def isOnOrAfter(date: LocalDate, comparator: LocalDate): Boolean = date.isEqual(comparator) || date.isAfter(comparator)
@@ -36,9 +38,9 @@ object PaidEmployeesForm extends RequiredBooleanForm with CustomDateForm {
   override def validation(dt: LocalDate, cdt: LocalDate) = {
     if (dt.isBefore(cdt)) {
       Left(Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.dateTooEarly", Seq(cdt.format(dateTimeFormat)))))
-    } else if (isOnOrAfter(dt, cdt) && !isOnOrAfter(dt, LocalDate.now().minusYears(2))) {
+    } else if (isOnOrAfter(dt, cdt) && !isOnOrAfter(dt, now.minusYears(2))) {
       Left(Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.moreThanTwoYears")))
-    } else if (dt.isAfter(LocalDate.now)) {
+    } else if (dt.isAfter(now)) {
       Left(Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.dateInFuture")))
     } else {
       Right(dt)

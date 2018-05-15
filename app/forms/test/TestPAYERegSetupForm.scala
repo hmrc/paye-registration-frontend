@@ -26,6 +26,7 @@ import models.{Address, DigitalContactDetails}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError, Forms, Mapping}
+import utils.SystemDate
 
 import scala.util.Try
 
@@ -36,6 +37,7 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm with Custo
 
   override def validation(dt: LocalDate) = Right(dt)
   override def validation(dt: LocalDate, cdt: LocalDate) = Right(dt)
+  def now: LocalDate = SystemDate.getSystemDate.toLocalDate
 
   implicit def payeStatusFormatter: Formatter[PAYEStatus.Value] = new Formatter[PAYEStatus.Value] {
     def bind(key: String, data: Map[String, String]) = {
@@ -67,7 +69,7 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm with Custo
 
   def employmentInfoMapping: Mapping[EmploymentV2] = mapping(
     "employees" -> employingStatus,
-    "earliestDate" -> threePartDateWithComparison(LocalDate.now),
+    "earliestDate" -> threePartDateWithComparison(now),
     "cis" -> requiredBoolean,
     "subcontractors" -> requiredBoolean,
     "pensions" -> optional(requiredBoolean)

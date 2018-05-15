@@ -24,10 +24,12 @@ import models.api.{Employing, EmploymentV2}
 import play.api.data.Forms.{mapping, _}
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError, Forms, Mapping}
+import utils.SystemDate
 
 object TestPAYERegEmploymentInfoSetupForm extends CustomDateForm {
   override val customFormPrefix = "earliestDate"
   override def validation(dt: LocalDate, cdt: LocalDate) = Right(dt)
+  def now: LocalDate = SystemDate.getSystemDate.toLocalDate
 
   implicit def employingStatusFormatter: Formatter[Employing.Value] = new Formatter[Employing.Value] {
     def bind(key: String, data: Map[String, String]) = {
@@ -47,7 +49,7 @@ object TestPAYERegEmploymentInfoSetupForm extends CustomDateForm {
   val form = Form(
     mapping(
       "employees"      -> employingStatus,
-      "earliestDate"   -> threePartDateWithComparison(LocalDate.now),
+      "earliestDate"   -> threePartDateWithComparison(now),
       "cis"            -> requiredBoolean,
       "subcontractors" -> requiredBoolean,
       "pensions"       -> optional(requiredBoolean)
