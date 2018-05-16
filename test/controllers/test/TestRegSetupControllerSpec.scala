@@ -51,7 +51,8 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
           "12345",
           CompanyRegistrationProfile("held", "txId"),
           "ENG",
-          payeRegistrationSubmitted = false
+          payeRegistrationSubmitted = false,
+          None
         ))
       }
     }

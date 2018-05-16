@@ -35,9 +35,9 @@ trait SessionProfile extends InternalExceptions {
     keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString) flatMap {
       case Some(currentProfile) =>
         currentProfile match {
-          case CurrentProfile(_, CompanyRegistrationProfile(_, _, Some(a)), _, _) if Try(a.toInt).getOrElse(6) >= 6 =>
+          case CurrentProfile(_, CompanyRegistrationProfile(_, _, Some(a)), _, _, _) if Try(a.toInt).getOrElse(6) >= 6 =>
             Future.successful(Redirect(controllers.userJourney.routes.SignInOutController.postSignIn()))
-          case CurrentProfile(_, _, _, true) if checkSubmissionStatus =>
+          case CurrentProfile(_, _, _, true, _) if checkSubmissionStatus =>
             Future.successful(Redirect(controllers.userJourney.routes.DashboardController.dashboard()))
           case _ => f(currentProfile)
         }

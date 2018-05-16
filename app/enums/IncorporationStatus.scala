@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-package helpers.fixtures
+package enums
 
-import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import play.api.libs.json.{Format, Reads, Writes}
 
-trait CurrentProfileFixtures {
-  val validCurrentProfile = Some(CurrentProfile(
-    registrationID = "testRegId",
-    companyTaxRegistration = CompanyRegistrationProfile(
-      status = "testStatus",
-      transactionId = "testTxId"
-    ),
-    language = "EN",
-    payeRegistrationSubmitted = false,
-    None
-  ))
+object IncorporationStatus extends Enumeration {
+  val accepted = Value
+  val rejected = Value
 
-  val invalidCurrentProfile = None
+  implicit val format = Format(Reads.enumNameReads(IncorporationStatus), Writes.enumNameWrites)
 }

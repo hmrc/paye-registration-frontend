@@ -62,7 +62,8 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
       transactionId = "40-123456"
     ),
     language = "ENG",
-    payeRegistrationSubmitted = false
+    payeRegistrationSubmitted = false,
+    incorpStatus = None
   )
 
   "submitRegistration" should {

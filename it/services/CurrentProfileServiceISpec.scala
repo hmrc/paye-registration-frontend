@@ -86,7 +86,8 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
       val expectedCurrentProfile = CurrentProfile(regIdWhitelisted,
                                                   CompanyRegistrationProfile("held", s"fakeTxId-$regIdWhitelisted"),
                                                   "ENG",
-                                                  payeRegistrationSubmitted = false)
+                                                  payeRegistrationSubmitted = false,
+                                                  incorpStatus = None)
 
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfileWithRegIdWhitelisted).toString)
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
@@ -118,7 +119,8 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
         regId,
         CompanyRegistrationProfile("held", s"000-434-$regId"),
         "ENG",
-        payeRegistrationSubmitted = false)
+        payeRegistrationSubmitted = false,
+        incorpStatus = None)
 
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfile).toString)
       stubGet(s"/incorporation-frontend-stubs/$regId/corporation-tax-registration", 200, companyRegistrationResp)
@@ -160,7 +162,8 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
       val expectedCurrentProfile = CurrentProfile(regId,
         CompanyRegistrationProfile("held", s"000-434-$regId"),
         "ENG",
-        payeRegistrationSubmitted = true)
+        payeRegistrationSubmitted = true,
+        incorpStatus = None)
 
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfile).toString)
       stubGet(s"/company-registration/corporation-tax-registration/$regId/corporation-tax-registration", 200, companyRegistrationResp)

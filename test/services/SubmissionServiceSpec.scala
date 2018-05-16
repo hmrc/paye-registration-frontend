@@ -46,7 +46,8 @@ class SubmissionServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
       transactionId = "40-123456"
     ),
     language = "ENG",
-    payeRegistrationSubmitted = false
+    payeRegistrationSubmitted = false,
+    None
   )
 
   "submitRegistration" should {

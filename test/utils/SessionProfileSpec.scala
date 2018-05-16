@@ -38,7 +38,7 @@ class SessionProfileSpec extends PayeComponentSpec {
   implicit val request = FakeRequest()
 
   def validProfile(regSubmitted: Boolean, ackRefStatus : Option[String] = None)
-    = CurrentProfile("regId", CompanyRegistrationProfile("held", "txId", ackRefStatus), "", regSubmitted)
+    = CurrentProfile("regId", CompanyRegistrationProfile("held", "txId", ackRefStatus), "", regSubmitted, None)
 
   "calling withCurrentProfile" should {
     "carry out the passed function" when {

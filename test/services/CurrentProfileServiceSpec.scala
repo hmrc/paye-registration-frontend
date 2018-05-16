@@ -45,7 +45,8 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
     validBusinessProfile.registrationID,
     validCompanyProfile,
     validBusinessProfile.language,
-    payeRegistrationSubmitted = false
+    payeRegistrationSubmitted = false,
+    None
   )
 
   "fetchAndStoreCurrentProfile" should {

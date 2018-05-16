@@ -58,7 +58,8 @@ trait CachingStub extends MongoSpecSupport with BeforeAndAfterEach{
           status = "submitted",
           transactionId = "12345"),
       language                  = "ENG",
-      payeRegistrationSubmitted = submitted
+      payeRegistrationSubmitted = submitted,
+      incorpStatus = None
     )
     val currentProfileMapping: Map[String, JsValue] = Map("CurrentProfile" -> Json.toJson(cp))
     val res = customAwait(repo.upsert(CacheMap(session, currentProfileMapping)))(defaultTimeout)

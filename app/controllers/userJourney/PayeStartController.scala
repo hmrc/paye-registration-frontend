@@ -112,9 +112,9 @@ trait PayeStartController extends PayeBaseController {
 
   private def checkAndStoreCurrentProfile(f: => CurrentProfile => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
     currentProfileService.fetchAndStoreCurrentProfile flatMap {
-      case CurrentProfile(_, CompanyRegistrationProfile(_, _, Some(a)), _, _) if Try(a.toInt).getOrElse(6) >= 6 =>
+      case CurrentProfile(_, CompanyRegistrationProfile(_, _,Some(a)), _, _, _) if Try(a.toInt).getOrElse(6) >= 6 =>
         Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/post-sign-in"))
-      case CurrentProfile(_, compRegProfile, _, _) if compRegProfile.status equals "draft" =>
+      case CurrentProfile(_, compRegProfile, _, _, _) if compRegProfile.status equals "draft" =>
         Future.successful(Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes"))
       case currentProfile => f(currentProfile)
     } recover {

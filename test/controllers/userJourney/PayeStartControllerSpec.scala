@@ -63,7 +63,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
   val fakeRequest = FakeRequest()
 
   def validCurrentProfile(status: String, ackRefStatus : Option[String] = None) =
-    CurrentProfile("testRegId", CompanyRegistrationProfile(status, "txId", ackRefStatus), "en", false)
+    CurrentProfile("testRegId", CompanyRegistrationProfile(status, "txId", ackRefStatus), "en", false, None)
 
   "steppingStone" should {
     "redirect to PREFE" when {

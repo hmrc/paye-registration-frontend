@@ -64,7 +64,8 @@ class SessionRepositoryISpec extends IntegrationSpecBase {
       ackRefStatus  = None
     ),
     language                  = "en",
-    payeRegistrationSubmitted = false
+    payeRegistrationSubmitted = false,
+    incorpStatus = None
   )
 
   class Setup {

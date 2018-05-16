@@ -38,7 +38,7 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
 
   implicit val context = AuthHelpers.buildAuthContext
 
-  val validCurrentProfile = CurrentProfile("testRegId", CompanyRegistrationProfile("rejected", "txId"), "en", false)
+  val validCurrentProfile = CurrentProfile("testRegId", CompanyRegistrationProfile("rejected", "txId"), "en", false, None)
 
   val forbidden = Upstream4xxResponse("403", 403, 403)
   val notFound = new NotFoundException("404")
