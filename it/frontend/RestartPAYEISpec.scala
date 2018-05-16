@@ -17,6 +17,7 @@ package frontend
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
 import play.api.test.FakeApplication
@@ -105,7 +106,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
 
         response.status mustBe 303
         response.header("Location") mustBe Some("/register-for-paye/start-pay-as-you-earn")
-//        verify(deleteRequestedFor(urlEqualTo(s"/keystore/paye-registration-frontend/$SessionId")))
+        verifyKeystoreData[CurrentProfile](SessionId, key = "CurrentProfile", None)
         verify(getRequestedFor(urlEqualTo(s"/business-registration/business-tax-registration")))
         verify(getRequestedFor(urlEqualTo(s"/company-registration/corporation-tax-registration/$regId/corporation-tax-registration")))
       }
@@ -131,7 +132,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
 
         response.status mustBe 303
         response.header("Location") mustBe Some("/register-for-paye/start-pay-as-you-earn")
-//        verify(deleteRequestedFor(urlEqualTo(s"/keystore/paye-registration-frontend/$SessionId")))
+        verifyKeystoreData[CurrentProfile](SessionId, "CurrentProfile", None)
       }
     }
 

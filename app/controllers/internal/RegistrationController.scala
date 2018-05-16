@@ -46,7 +46,6 @@ trait RegistrationController extends PayeBaseController {
 
   def delete(regId: String): Action[AnyContent] = Action.async { implicit request =>
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
-    Logger.error(s"====================== sessionId ${hc.sessionId}")
     authorised() {
       payeRegistrationService.deletePayeRegistrationInProgress(regId) map {
         case RegistrationDeletion.success       => Ok

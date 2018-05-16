@@ -18,9 +18,8 @@ package itutil
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
-import org.scalatestplus.play.PlaySpec
-import play.api.Application
-import play.api.libs.json.{JsObject, JsString, JsValue, Json}
+import org.scalatest.BeforeAndAfterEach
+import play.api.libs.json._
 import repositories.ReactiveMongoRepository
 import uk.gov.hmrc.crypto.json.JsonEncryptor
 import uk.gov.hmrc.crypto.{ApplicationCrypto, Protected}
@@ -28,22 +27,26 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.mongo.MongoSpecSupport
 
 import scala.concurrent.{Await, Future}
-import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait CachingStub extends PlaySpec with MongoSpecSupport {
-
+trait CachingStub extends MongoSpecSupport with BeforeAndAfterEach{
+  self: IntegrationSpecBase =>
   implicit lazy val jsonCrypto = ApplicationCrypto.JsonCrypto
   implicit lazy val encryptionFormat = new JsonEncryptor[JsObject]()
 
-  import scala.concurrent.duration._
+  lazy val repo = new ReactiveMongoRepository(app.configuration, mongo)
+
   def customAwait[A](future: Future[A])(implicit timeout: Duration): A = Await.result(future, timeout)
+  val defaultTimeout: FiniteDuration = 5 seconds
 
-  def stubKeystoreMetadata(session: String, regId: String, submitted: Boolean = false)(implicit app: Application) = {
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    customAwait(repo.drop)(defaultTimeout)
+    resetWiremock()
+  }
 
-    val repo = new ReactiveMongoRepository(app.configuration, mongo)
-    val defaultTimeout: FiniteDuration = 5 seconds
-
+  def stubKeystoreMetadata(session: String, regId: String, submitted: Boolean = false) = {
     customAwait(repo.ensureIndexes)(defaultTimeout)
     customAwait(repo.drop)(defaultTimeout)
 
@@ -59,8 +62,13 @@ trait CachingStub extends PlaySpec with MongoSpecSupport {
     )
     val currentProfileMapping: Map[String, JsValue] = Map("CurrentProfile" -> Json.toJson(cp))
     val res = customAwait(repo.upsert(CacheMap(session, currentProfileMapping)))(defaultTimeout)
-    customAwait(repo.count)(defaultTimeout) mustBe preawait + 1
+    if(customAwait(repo.count)(defaultTimeout) != preawait + 1) throw new Exception("Error adding data to database")
     res
+  }
+
+  def verifyKeystoreData[T](id: String, key: String, data: Option[T])(implicit format: Format[T]): Unit ={
+    val dataFromDb = customAwait(repo.get(id))(defaultTimeout).flatMap(_.getEntry(key))
+    if (data != dataFromDb) throw new Exception(s"Data in database doesn't match expected data:\n expected data $data was not equal to actual data $dataFromDb")
   }
 
   def stubPayeRegDocumentStatus(regId: String) = {

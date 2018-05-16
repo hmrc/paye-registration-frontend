@@ -85,21 +85,16 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
 
       await(getResponse) mustBe Success
 
-      //TODO how to verify that the data has been put in properly
-//      verify(putRequestedFor(urlEqualTo(s"/keystore/paye-registration-frontend/$sId/data/${CacheKeys.CurrentProfile.toString}"))
-//        .withRequestBody(
-//          equalToJson(Json.parse(
-//            s"""{
-//               |  "registrationID":"12345",
-//               |  "companyTaxRegistration":{
-//               |    "status":"acknowledged",
-//               |    "transactionId":"40-123456"
-//               |  },"language":"ENG",
-//               |  "payeRegistrationSubmitted":true
-//               |}
-//             """.stripMargin).toString)
-//        )
-//      )
+      verifyKeystoreData[CurrentProfile](sId, CacheKeys.CurrentProfile.toString, Some(
+        CurrentProfile(
+          registrationID = "12345",
+          companyTaxRegistration = CompanyRegistrationProfile(
+            status = "acknowledged",
+            transactionId = "40-123456"
+          ),
+          language = "ENG",
+          payeRegistrationSubmitted = true
+        )))
     }
 
     "send the submission and leave keystore unchanged if the DES submission fails" in {
@@ -112,8 +107,7 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
 
       await(getResponse) mustBe Failed
 
-      //TODO how to verify that the data has not been put in properly
-//      verify(0, putRequestedFor(urlEqualTo(s"/keystore/paye-registration-frontend/$sId/data/${CacheKeys.CurrentProfile.toString}")))
+      verifyKeystoreData[CurrentProfile](sId, CacheKeys.CurrentProfile.toString, None)
     }
   }
 }

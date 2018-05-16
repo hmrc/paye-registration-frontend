@@ -34,7 +34,7 @@ class EmailServiceImpl @Inject()(val companyRegistrationConnector: CompanyRegist
                                  val incorporationInformationConnector: IncorporationInformationConnector,
                                  val s4LConnector: S4LConnector,
                                  val pAYEFeatureSwitches: PAYEFeatureSwitches) extends EmailService {
-  val newApiEnabled: Boolean = pAYEFeatureSwitches.newApiStructure.enabled
+  def newApiEnabled: Boolean = pAYEFeatureSwitches.newApiStructure.enabled
 }
 
 trait EmailService {
@@ -43,7 +43,7 @@ trait EmailService {
   val emailConnector: EmailConnector
   val s4LConnector: S4LConnector
   val incorporationInformationConnector: IncorporationInformationConnector
-  val newApiEnabled: Boolean
+  def newApiEnabled: Boolean
 
   private val FIRST_PAYMENT_DATE = "firstPaymentDate"
 

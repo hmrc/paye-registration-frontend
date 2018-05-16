@@ -42,7 +42,7 @@ class SummaryServiceImpl @Inject()(
                                     val s4LService: S4LService,
                                     val iiService: IncorporationInformationService
                                   ) extends SummaryService {
-  val newApiEnabled: Boolean = pAYEFeatureSwitches.newApiStructure.enabled
+  def newApiEnabled: Boolean = pAYEFeatureSwitches.newApiStructure.enabled
 }
 
 trait SummaryService {
@@ -50,7 +50,7 @@ trait SummaryService {
   val employmentServiceV2: EmploymentServiceV2
   val s4LService: S4LService
   val iiService: IncorporationInformationService
-  val newApiEnabled: Boolean
+  def newApiEnabled: Boolean
 
   def getRegistrationSummary(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[Summary] = {
     for {

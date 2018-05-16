@@ -54,9 +54,7 @@ trait PAYERegistrationService {
 
   def deletePayeRegistrationInProgress(regId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
     getCurrentProfile flatMap { profile =>
-      Logger.error(s"=========================== $profile and regId: $regId")
       if( regId != profile.registrationID ) {
-
         Future.successful(RegistrationDeletion.forbidden)
       } else {
         s4LService.clear(regId) flatMap { response =>
