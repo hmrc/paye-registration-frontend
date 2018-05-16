@@ -16,8 +16,11 @@
 
 package helpers.fixtures
 
+import models.api.SessionMap
 import models.external.BusinessProfile
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.cache.client.CacheMap
+
 
 trait KeystoreFixture {
 
@@ -26,9 +29,16 @@ trait KeystoreFixture {
     "ENG"
   )
 
-  val blankCacheMap = CacheMap(
+  val blankSessionMap = SessionMap(
+    sessionId = "tstID",
+    registrationId = "testRegId",
+    transactionId = "testTxId",
+    data = Map.empty[String, JsValue]
+  )
+
+  val blankCacheMap = CacheMap (
     id = "tstID",
-    data = Map.empty
+    data = Map.empty[String, JsValue]
   )
 
 }

@@ -16,15 +16,17 @@
 
 package connectors
 
-import javax.inject.Inject
 import com.codahale.metrics.{Counter, Timer}
+import enums.IncorporationStatus
+import javax.inject.Inject
+import models.api.SessionMap
+import models.external.CurrentProfile
 import play.api.libs.json.Format
-import services.MetricsService
-import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import repositories.SessionRepository
-import utils.CascadeUpsert
+import services.MetricsService
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.cache.client.SessionCache
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
@@ -50,31 +52,32 @@ trait KeystoreConnector {
 
   private def sessionID(implicit hc: HeaderCarrier): String = hc.sessionId.getOrElse(throw new RuntimeException("Active User had no Session ID")).value
 
-  def cache[T](formId: String, body : T)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {
-    metricsService.processDataResponseWithMetrics[CacheMap](successCounter, failedCounter, timer) {
-      sessionRepository().get(sessionID).flatMap { map =>
-        val updatedCacheMap = CascadeUpsert(formId, body, map.getOrElse(new CacheMap(sessionID, Map())))
-        sessionRepository().upsert(updatedCacheMap).map { _ => updatedCacheMap }
+  def cache[T](formId: String, body : T)(implicit hc: HeaderCarrier, cp: CurrentProfile, format: Format[T]): Future[SessionMap] = {
+    metricsService.processDataResponseWithMetrics[SessionMap](successCounter, failedCounter, timer) {
+      sessionRepository().getSessionMap(sessionID).flatMap { map =>
+        val updatedCacheMap = map.fold(SessionMap(sessionID, cp, formId, body))(_.store(formId, body))
+        sessionRepository().upsertSessionMap(updatedCacheMap).map { _ => updatedCacheMap }
       }
     }
   }
 
-  def fetch()(implicit hc : HeaderCarrier) : Future[Option[CacheMap]] = {
-    metricsService.processOptionalDataWithMetrics[CacheMap](successCounter, emptyResponseCounter, timer) {
-      sessionRepository().get(sessionID)
+  def fetch()(implicit hc : HeaderCarrier) : Future[Option[SessionMap]] = {
+    metricsService.processOptionalDataWithMetrics[SessionMap](successCounter, emptyResponseCounter, timer) {
+      sessionRepository().getSessionMap(sessionID)
     }
   }
 
   def fetchAndGet[T](key : String)(implicit hc: HeaderCarrier, format: Format[T]): Future[Option[T]] = {
     metricsService.processOptionalDataWithMetrics[T](successCounter, emptyResponseCounter, timer) {
-      sessionRepository().get(sessionID).map{_.flatMap(_.getEntry(key))
+      sessionRepository().getSessionMap(sessionID).map {
+        _.flatMap(_.getEntry(key))
       }
     }
   }
 
   def remove()(implicit hc : HeaderCarrier) : Future[Boolean] = {
     metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
-      sessionRepository().get(sessionID).flatMap { optionalCacheMap =>
+      sessionRepository().getSessionMap(sessionID).flatMap { optionalCacheMap =>
         optionalCacheMap.fold(Future(false)) { _ =>
           sessionRepository().removeDocument(sessionID)
         }
@@ -82,9 +85,9 @@ trait KeystoreConnector {
     }
   }
 
-  def addRejectionFlag(txId: String)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+  def setIncorpStatus(txId: String, status: IncorporationStatus.Value)(implicit hc: HeaderCarrier): Future[Option[String]] = {
     for {
-      _     <- sessionRepository().addRejectionFlag(txId)
+      _     <- sessionRepository().setIncorpStatus(txId, status)
       regId <- sessionRepository().getRegistrationID(txId)
     } yield regId
   }

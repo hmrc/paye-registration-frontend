@@ -18,10 +18,12 @@ package services
 
 import enums.PAYEStatus
 import helpers.PayeComponentSpec
+import models.api.SessionMap
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, NotFoundException}
 
@@ -58,8 +60,8 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
       when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCompanyProfile))
 
-      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(CacheMap("", Map.empty)))
+      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(SessionMap("", "", "", Map.empty[String, JsValue])))
 
       when(mockPAYERegConnector.getStatus(ArgumentMatchers.contains(validBusinessProfile.registrationID))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Some(PAYEStatus.draft)))

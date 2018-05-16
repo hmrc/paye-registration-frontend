@@ -74,7 +74,7 @@ class SessionTimeoutFilterISpec extends IntegrationSpecBase
         setupSimpleAuthMocks()
         //stubSuccessfulLogin()
         stubPayeRegDocumentStatus(regId)
-        stubKeystoreMetadata(SessionId, regId)
+        stubSessionCacheMetadata(SessionId, regId)
 
         val companyProfileDoc =
           """

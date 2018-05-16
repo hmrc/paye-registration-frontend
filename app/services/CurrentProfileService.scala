@@ -47,8 +47,10 @@ trait CurrentProfileService extends RegistrationWhitelist {
       }
       oRegStatus      <- payeRegistrationConnector.getStatus(businessProfile.registrationID)
       submitted       =  regSubmitted(oRegStatus)
-      currentProfile  =  CurrentProfile(businessProfile.registrationID, companyProfile, businessProfile.language, submitted, None) //TODO: fetch and set value for incorpStatus
-      _               <- keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, currentProfile)
+      currentProfile  = CurrentProfile(businessProfile.registrationID, companyProfile, businessProfile.language, submitted, None)
+      _               <- Future.successful(currentProfile).map {
+        implicit cp => keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, cp)
+      }
     } yield {
       currentProfile
     }

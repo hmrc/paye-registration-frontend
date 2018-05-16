@@ -76,7 +76,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubPayeRegDocumentStatus(regIdWhitelisted)
-      stubKeystoreMetadata(SessionId, regIdWhitelisted)
+      stubSessionCacheMetadata(SessionId, regIdWhitelisted)
 
       stubGet(s"/save4later/paye-registration-frontend/$regIdWhitelisted", 404, "")
 
@@ -111,7 +111,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       stubPayeRegDocumentStatus(regId)
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
@@ -173,7 +173,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       stubPayeRegDocumentStatus(regId)
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
@@ -255,7 +255,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       stubPayeRegDocumentStatus(regId)
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 

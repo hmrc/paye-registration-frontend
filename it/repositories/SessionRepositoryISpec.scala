@@ -20,7 +20,10 @@ import java.time.LocalDate
 import java.util.UUID
 
 import connectors.KeystoreConnector
+import enums.IncorporationStatus
 import itutil.{IntegrationSpecBase, WiremockHelper}
+import models.api.SessionMap
+import models.external
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -28,7 +31,6 @@ import play.api.libs.json.{JsObject, Json, OWrites}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.logging.SessionId
-import uk.gov.hmrc.mongo.MongoSpecSupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -56,11 +58,11 @@ class SessionRepositoryISpec extends IntegrationSpecBase {
   val sId = UUID.randomUUID().toString
   implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sId)))
 
-  def currentProfile(regId: String) = CurrentProfile(
-    registrationID            = "testRegId",
+  def currentProfile(regId: String, txId: String = "someTxID") = CurrentProfile(
+    registrationID            = regId,
     companyTaxRegistration    = CompanyRegistrationProfile(
       status        = "draft",
-      transactionId = "someTxID",
+      transactionId = txId,
       ackRefStatus  = None
     ),
     language                  = "en",
@@ -83,49 +85,53 @@ class SessionRepositoryISpec extends IntegrationSpecBase {
   "SessionRepository" should {
     "cache" when {
       "given a new currentProfile" in new Setup(){
+        implicit val currentProfileData: CurrentProfile = currentProfile("regId")
         count mustBe 0
-        await(connector.cache("CurrentProfile", currentProfile("regId")))
+        await(connector.cache("CurrentProfile", currentProfileData))
         count mustBe 1
       }
       "given an existing currentProfile" in new Setup(){
-        await(connector.cache("CurrentProfile", currentProfile("regId")))
+        implicit val currentProfileData: CurrentProfile = currentProfile("regId")
+        await(connector.cache("CurrentProfile", currentProfileData))
         count mustBe 1
-        await(connector.cache("CurrentProfile", currentProfile("newregId")))
+        await(connector.cache("CurrentProfile", currentProfile("newregId"))(hc, currentProfile("newregId"), CurrentProfile.format))
         count mustBe 1
       }
     }
     "fetch" when {
       "given a currentProfile exists" in new Setup(){
-        val currentProfileData: CurrentProfile = currentProfile("regId2") //.copy(incorpRejected = Some(true))
+        implicit val currentProfileData: CurrentProfile = currentProfile("regId2") //.copy(incorpRejected = Some(true))
         val key: String = "CurrentProfile"
 
         await(connector.cache(key, currentProfileData))
 
-        val res: Option[CacheMap] = await(connector.fetch)
+        val res: Option[SessionMap] = await(connector.fetch)
         res.isDefined mustBe true
         res.get.data mustBe Map(key -> Json.toJson(currentProfileData))
       }
     }
-//    "addRejectionFlag" when {
-//      "given a currentProfile exists" in new Setup(){
-//        val currentProfileData: CurrentProfile = currentProfile("regId2")
-//        val key: String = "CurrentProfile"
-//
-//        //TODO Fix when Merged
-//        val expectedResult = CacheMap(sId, Map("CurrentProfile" ->
-//          Json.toJson(currentProfileData))
-//        )
-//
-//        await(connector.cache(key, currentProfileData))
-//
-//        await(connector.addRejectionFlag("40-123456")) mustBe Some("regId2")
-//
-//        await(connector.fetch()(hc)).get mustBe expectedResult
-//      }
-//    }
+    "setIncorpStatus" when {
+      "given a currentProfile exists" in new Setup(){
+        val txId = "test123"
+        val currentProfileData: CurrentProfile = currentProfile("regId2", txId)
+        val nhc = HeaderCarrier(sessionId = Some(SessionId("Some-Session-Id")))
+        val key: String = "CurrentProfile"
+
+        //TODO Fix when Merged
+        val expectedResult = SessionMap("Some-Session-Id", "regId2", "test123", Map("CurrentProfile" ->
+          Json.toJson(currentProfileData.copy(incorpStatus = Some(IncorporationStatus.rejected))))
+        )
+
+        await(connector.cache(key, currentProfileData)(nhc, currentProfileData, CurrentProfile.format))
+
+        await(connector.setIncorpStatus(txId, IncorporationStatus.rejected)(nhc)) mustBe Some("regId2")
+
+        await(connector.fetch()(nhc)).get mustBe expectedResult
+      }
+    }
     "fetchAndGet" when {
       "given a currentProfile and key" in new Setup(){
-        val currentProfileData: CurrentProfile = currentProfile("regId3")
+        implicit val currentProfileData: CurrentProfile = currentProfile("regId3")
         val key: String = "CurrentProfile"
 
         await(connector.cache(key, currentProfileData))
@@ -143,7 +149,8 @@ class SessionRepositoryISpec extends IntegrationSpecBase {
     }
     "remove" when {
       "there is a current profile to remove" in new Setup() {
-        await(connector.cache("CurrentProfile", currentProfile("regId")))
+        implicit val currentProfileData = currentProfile("regId")
+        await(connector.cache("CurrentProfile", currentProfileData))
         count mustBe 1
 
         val res: Boolean = await(connector.remove)
@@ -158,10 +165,11 @@ class SessionRepositoryISpec extends IntegrationSpecBase {
       }
 
       "there are two current profiles" in new Setup(){
+        implicit val currentProfileData = currentProfile("regId")
         val hc1 = hc.copy(sessionId = Some(SessionId("id1")))
 
-        await(connector.cache("CurrentProfile", currentProfile("regId"))(hc1, CurrentProfile.format))
-        await(connector.cache("CurrentProfile", currentProfile("regId"))(hc.copy(sessionId = Some(SessionId("id2"))), CurrentProfile.format))
+        await(connector.cache("CurrentProfile", currentProfileData)(hc1, currentProfileData, CurrentProfile.format))
+        await(connector.cache("CurrentProfile", currentProfileData)(hc.copy(sessionId = Some(SessionId("id2"))), currentProfileData, CurrentProfile.format))
         count mustBe 2
 
         val res: Boolean = await(connector.remove()(hc1))

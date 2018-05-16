@@ -16,11 +16,14 @@
 
 package repositories
 
+import common.Logging
+import common.exceptions.InternalExceptions.RegistrationIdMismatchException
+import enums.IncorporationStatus
 import javax.inject.{Inject, Singleton}
-
+import models.api.SessionMap
 import models.external.CurrentProfile
 import org.joda.time.{DateTime, DateTimeZone}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{Format, JsValue, Json}
 import play.api.{Configuration, Logger}
 import play.modules.reactivemongo.MongoDbConnection
 import reactivemongo.api.DefaultDB
@@ -34,72 +37,78 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class DatedCacheMap(id: String,
-                         data: Map[String, JsValue],
-                         lastUpdated: DateTime = DateTime.now(DateTimeZone.UTC))
+case class DatedSessionMap(sessionId: String,
+                           registrationId: String,
+                           transactionId: String,
+                           data: Map[String, JsValue],
+                           lastUpdated: DateTime = DateTime.now(DateTimeZone.UTC))
 
-object DatedCacheMap {
+object DatedSessionMap {
   implicit val dateFormat = ReactiveMongoFormats.dateTimeFormats
-  implicit val formats = Json.format[DatedCacheMap]
+  implicit val formats    = Json.format[DatedSessionMap]
 
-  def apply(cacheMap: CacheMap): DatedCacheMap = DatedCacheMap(cacheMap.id, cacheMap.data)
+  def apply(sessionMap: SessionMap): DatedSessionMap = DatedSessionMap(sessionMap.sessionId, sessionMap.registrationId, sessionMap.transactionId, sessionMap.data)
 }
 
 class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
-  extends ReactiveRepository[DatedCacheMap, BSONObjectID](config.getString("appName").get, mongo, DatedCacheMap.formats) {
+  extends ReactiveRepository[DatedSessionMap, BSONObjectID](config.getString("appName").get, mongo, DatedSessionMap.formats) {
 
-  val fieldName = "lastUpdated"
+  val fieldName        = "lastUpdated"
   val createdIndexName = "currentProfileIndex"
 
   val expireAfterSeconds = "expireAfterSeconds"
   val timeToLiveInSeconds: Int = config.getInt("mongodb.timeToLiveInSeconds").get
 
-  createIndex(Seq("id", "data.CurrentProfile.companyTaxRegistration.transactionID", "data.currentProfile.registrationId"), createdIndexName, timeToLiveInSeconds)
+  createIndex(Seq("sessionId", "transactionId", "registrationId"), createdIndexName, timeToLiveInSeconds)
 
   private def createIndex(fields: Seq[String], indexName: String, ttl: Int): Future[Boolean] = {
     val indexes = fields.map(field => (field, IndexType.Ascending))
-    collection.indexesManager.ensure(Index(indexes, Some(indexName),
-      options = BSONDocument(expireAfterSeconds -> ttl))) map {
-      result => {
-        Logger.debug(s"set [$indexName] with value $ttl -> result : $result")
+    collection.indexesManager.ensure(Index(indexes, Some(indexName), options = BSONDocument(expireAfterSeconds -> ttl))) map {
+      result =>
+        logger.debug(s"set [$indexName] with value $ttl -> result : $result")
         result
-      }
     } recover {
-      case e => Logger.error("Failed to set TTL index", e)
+      case e =>
+        logger.error("Failed to set TTL index", e)
         false
     }
   }
 
-  def upsert(cm: CacheMap): Future[Boolean] = {
-    val selector = BSONDocument("id" -> cm.id)
-    val cmDocument = Json.toJson(DatedCacheMap(cm))
-    val modifier = BSONDocument("$set" -> cmDocument)
+  def upsertSessionMap(sm: SessionMap): Future[Boolean] = {
+    val selector   = Json.obj("sessionId" -> sm.sessionId)
+    val cmDocument = Json.toJson(DatedSessionMap(sm))
+    val modifier   = BSONDocument("$set" -> cmDocument)
 
-    collection.update(selector, modifier, upsert = true).map { lastError =>
-      lastError.ok
-    }
+    collection.update(selector, modifier, upsert = true).map(_.ok)
   }
 
   def removeDocument(id: String): Future[Boolean] = {
-    collection.remove(BSONDocument("id" -> id)).map( lastError =>
-      lastError.ok
-    )
+    collection.remove(BSONDocument("sessionId" -> id)).map(_.ok)
   }
 
-  def get(id: String): Future[Option[CacheMap]] =
-    collection.find(Json.obj("id" -> id)).one[CacheMap]
-
-  def addRejectionFlag(id: String): Future[Boolean] = {
-    val selector = BSONDocument("data.CurrentProfile.companyTaxRegistration.transactionID" -> id)
-    val modifier = BSONDocument("$set" -> BSONDocument("data.CurrentProfile.incorpRejected" -> true))
-
-    collection.update(selector, modifier).map { lastError => lastError.ok}
+  def getSessionMap(id: String): Future[Option[SessionMap]] = {
+    collection.find(Json.obj("sessionId" -> id)).one[SessionMap]
   }
 
-  def getRegistrationID(transactionID: String): Future[Option[String]] =
-    collection.find(Json.obj("data.CurrentProfile.companyTaxRegistration.transactionID" -> transactionID)).one[CacheMap].map {
-       _.flatMap(_.getEntry[CurrentProfile]("CurrentProfile").map(_.registrationID))
-     }
+  def setIncorpStatus(id: String, status: IncorporationStatus.Value): Future[Boolean] = {
+    val selector = BSONDocument("transactionId" -> id)
+    val modifier = BSONDocument("$set" -> BSONDocument("data.CurrentProfile.incorpStatus" -> Json.toJson(status)))
+
+    collection.update(selector, modifier) map(_.nModified == 1)
+  }
+
+  def getRegistrationID(transactionID: String): Future[Option[String]] = {
+    collection.find(Json.obj("transactionId" -> transactionID)).one[SessionMap].map {
+      _.fold(Option.empty[String]) { sessionMap =>
+        sessionMap.getEntry[CurrentProfile]("CurrentProfile").collect {
+          case cp if cp.registrationID == sessionMap.registrationId => cp.registrationID
+          case cp => throw new RegistrationIdMismatchException(sessionMap.registrationId, cp.registrationID)
+        }
+      }
+
+      //_.flatMap(_.getEntry[CurrentProfile]("CurrentProfile").map(_.registrationID))
+    }
+  }
 
 }
 

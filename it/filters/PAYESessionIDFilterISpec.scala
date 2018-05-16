@@ -51,7 +51,7 @@ class PAYESessionIDFilterISpec extends IntegrationSpecBase
       "sessionId is invalid" in {
         setupSimpleAuthMocks()
         stubSuccessfulLogin()
-        stubKeystoreMetadata(SessionId, regId)
+        stubSessionCacheMetadata(SessionId, regId)
 
         stubGet(s"/paye-registration/$regId/company-details", 404, "")
         stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")
@@ -83,7 +83,7 @@ class PAYESessionIDFilterISpec extends IntegrationSpecBase
       "sessionId is Valid" in {
         setupSimpleAuthMocks()
         stubSuccessfulLogin()
-        stubKeystoreMetadata(SessionId, regId)
+        stubSessionCacheMetadata(SessionId, regId)
 
         stubGet(s"/paye-registration/$regId/company-details", 404, "")
         stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")

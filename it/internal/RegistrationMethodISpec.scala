@@ -81,7 +81,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata("sessionId", regId)
+      stubSessionCacheMetadata("sessionId", regId)
 
       val fResponse = buildClientInternal(s"/4/delete").
         withHeaders("X-Session-ID" -> "sessionId", "Authorization" -> authorisationToken).
@@ -132,7 +132,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubDelete(s"/save4later/paye-registration-frontend/$regId", 204, "")
 
@@ -152,7 +152,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubDelete(s"/save4later/paye-registration-frontend/$regId", 204, "")
 
@@ -172,7 +172,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubDelete(s"/save4later/paye-registration-frontend/$regId", 204, "")
 
@@ -192,7 +192,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubDelete(s"/save4later/paye-registration-frontend/$regId", 204, "")
 
@@ -212,7 +212,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubDelete(s"/save4later/paye-registration-frontend/$regId", 500, "")
 
@@ -230,7 +230,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubDelete(s"/save4later/paye-registration-frontend/$regId", 204, "")
 

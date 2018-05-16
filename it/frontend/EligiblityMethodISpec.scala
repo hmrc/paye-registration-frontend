@@ -69,7 +69,7 @@ class EligiblityMethodISpec extends IntegrationSpecBase
 
       stubPayeRegDocumentStatus(regId)
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
@@ -113,7 +113,7 @@ class EligiblityMethodISpec extends IntegrationSpecBase
 
       stubPayeRegDocumentStatus(regId)
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 

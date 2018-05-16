@@ -18,6 +18,7 @@ package connectors
 
 import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics
+import models.api.SessionMap
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.Json
@@ -46,14 +47,14 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
     "save the model" in {
       val testModel = TestModel("test")
 
-      val returnCacheMap = CacheMap("testSessionId", Map("testKey" -> Json.toJson(testModel)))
+      val returnCacheMap = SessionMap("testSessionId", "testRegId", "testTxId", Map("testKey" -> Json.toJson(testModel)))
 
       when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
 
-      when(mockReactiveMongoRepo.get(ArgumentMatchers.any()))
+      when(mockReactiveMongoRepo.getSessionMap(ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
-      when(mockReactiveMongoRepo.upsert(ArgumentMatchers.any()))
+      when(mockReactiveMongoRepo.upsertSessionMap(ArgumentMatchers.any()))
         .thenReturn(Future.successful(true))
 
       val result = await(connector.cache[TestModel]("testKey", testModel))
@@ -65,14 +66,14 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
     "return a list" in {
       val testModel = TestModel("test")
       val list = List(testModel)
-      val returnCacheMap = CacheMap("testSessionId", Map("testKey" -> Json.toJson(list)))
+      val returnCacheMap = SessionMap("testSessionId", "testRegId", "testTxId", Map("testKey" -> Json.toJson(list)))
 
       when(mockSessionCache.fetchAndGetEntry[List[TestModel]](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(list)))
 
       when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
 
-      when(mockReactiveMongoRepo.get(ArgumentMatchers.any()))
+      when(mockReactiveMongoRepo.getSessionMap(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(returnCacheMap)))
 
       val result = await(connector.fetchAndGet[List[TestModel]]("testKey"))
@@ -84,11 +85,11 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
     "return a CacheMap" in {
       val testModel = TestModel("test")
 
-      val returnCacheMap = CacheMap("testSessionId", Map("testKey" -> Json.toJson(testModel)))
+      val returnCacheMap = SessionMap("testSessionId", "testRegId", "testTxId", Map("testKey" -> Json.toJson(testModel)))
 
       when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
 
-      when(mockReactiveMongoRepo.get(ArgumentMatchers.any()))
+      when(mockReactiveMongoRepo.getSessionMap(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(returnCacheMap)))
 
       val result = await(connector.fetch())
@@ -100,11 +101,11 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
     "return a HTTP Response" in {
 
       val testModel = TestModel("test")
-      val returnCacheMap = CacheMap("testSessionId", Map("testKey" -> Json.toJson(testModel)))
+      val returnCacheMap = SessionMap("testSessionId", "testRegId", "testTxId", Map("testKey" -> Json.toJson(testModel)))
 
       when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
 
-      when(mockReactiveMongoRepo.get(ArgumentMatchers.any()))
+      when(mockReactiveMongoRepo.getSessionMap(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(returnCacheMap)))
 
       when(mockReactiveMongoRepo.removeDocument(ArgumentMatchers.any()))

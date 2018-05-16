@@ -91,7 +91,7 @@ with WiremockHelper {
       stubSuccessfulLogin()
 
 //      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(false), regId = regId))
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
@@ -117,7 +117,7 @@ with WiremockHelper {
       stubSuccessfulLogin()
 
 
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
 //      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = None, regId = regId))
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
@@ -143,7 +143,7 @@ with WiremockHelper {
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId, true)
+      stubSessionCacheMetadata(SessionId, regId, true)
 //      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(true), regId = regId))
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
@@ -173,7 +173,7 @@ with WiremockHelper {
 
       stubSuccessfulLogin()
 
-      stubKeystoreMetadata(SessionId, regId, true)
+      stubSessionCacheMetadata(SessionId, regId, true)
 //      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(true), regId = regId))
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")

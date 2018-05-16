@@ -17,6 +17,7 @@
 package itutil
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import models.api.SessionMap
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.scalatest.BeforeAndAfterEach
 import play.api.libs.json._
@@ -46,7 +47,7 @@ trait CachingStub extends MongoSpecSupport with BeforeAndAfterEach{
     resetWiremock()
   }
 
-  def stubKeystoreMetadata(session: String, regId: String, submitted: Boolean = false) = {
+  def stubSessionCacheMetadata(session: String, regId: String, submitted: Boolean = false) = {
     customAwait(repo.ensureIndexes)(defaultTimeout)
     customAwait(repo.drop)(defaultTimeout)
 
@@ -62,13 +63,13 @@ trait CachingStub extends MongoSpecSupport with BeforeAndAfterEach{
       incorpStatus = None
     )
     val currentProfileMapping: Map[String, JsValue] = Map("CurrentProfile" -> Json.toJson(cp))
-    val res = customAwait(repo.upsert(CacheMap(session, currentProfileMapping)))(defaultTimeout)
+    val res = customAwait(repo.upsertSessionMap(SessionMap(session, regId, "12345", currentProfileMapping)))(defaultTimeout)
     if(customAwait(repo.count)(defaultTimeout) != preawait + 1) throw new Exception("Error adding data to database")
     res
   }
 
-  def verifyKeystoreData[T](id: String, key: String, data: Option[T])(implicit format: Format[T]): Unit ={
-    val dataFromDb = customAwait(repo.get(id))(defaultTimeout).flatMap(_.getEntry(key))
+  def verifySessionCacheData[T](id: String, key: String, data: Option[T])(implicit format: Format[T]): Unit ={
+    val dataFromDb = customAwait(repo.getSessionMap(id))(defaultTimeout).flatMap(_.getEntry(key))
     if (data != dataFromDb) throw new Exception(s"Data in database doesn't match expected data:\n expected data $data was not equal to actual data $dataFromDb")
   }
 

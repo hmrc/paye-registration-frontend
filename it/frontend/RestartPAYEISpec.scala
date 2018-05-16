@@ -106,7 +106,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
 
         response.status mustBe 303
         response.header("Location") mustBe Some("/register-for-paye/start-pay-as-you-earn")
-        verifyKeystoreData[CurrentProfile](SessionId, key = "CurrentProfile", None)
+        verifySessionCacheData[CurrentProfile](SessionId, key = "CurrentProfile", None)
         verify(getRequestedFor(urlEqualTo(s"/business-registration/business-tax-registration")))
         verify(getRequestedFor(urlEqualTo(s"/company-registration/corporation-tax-registration/$regId/corporation-tax-registration")))
       }
@@ -115,7 +115,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
 
         setupSimpleAuthMocks()
         stubSuccessfulLogin()
-        stubKeystoreMetadata(SessionId, regId)
+        stubSessionCacheMetadata(SessionId, regId)
 
         stubFor(delete(urlMatching(s"/paye-registration/$regId/delete"))
           .willReturn(
@@ -132,7 +132,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
 
         response.status mustBe 303
         response.header("Location") mustBe Some("/register-for-paye/start-pay-as-you-earn")
-        verifyKeystoreData[CurrentProfile](SessionId, "CurrentProfile", None)
+        verifySessionCacheData[CurrentProfile](SessionId, "CurrentProfile", None)
       }
     }
 
@@ -141,7 +141,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
 
         setupSimpleAuthMocks()
         stubSuccessfulLogin()
-        stubKeystoreMetadata(SessionId, regId)
+        stubSessionCacheMetadata(SessionId, regId)
 
         stubFor(delete(urlMatching(s"/paye-registration/$regId/delete"))
           .willReturn(
@@ -166,7 +166,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
 
         setupSimpleAuthMocks()
         stubSuccessfulLogin()
-        stubKeystoreMetadata(SessionId, regId)
+        stubSessionCacheMetadata(SessionId, regId)
 
         stubFor(delete(urlMatching(s"/paye-registration/$regId/delete"))
           .willReturn(

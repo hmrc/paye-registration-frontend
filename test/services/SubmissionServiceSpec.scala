@@ -19,10 +19,12 @@ package services
 import connectors.{Failed, Success, TimedOut}
 import enums.CacheKeys
 import helpers.PayeComponentSpec
+import models.api.SessionMap
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 
@@ -55,10 +57,10 @@ class SubmissionServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
       when(mockPAYERegConnector.submitRegistration(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Success))
 
-      mockKeystoreCache(CacheKeys.CurrentProfile.toString, CacheMap("CurrentProfile", Map.empty))
+      mockKeystoreCache(CacheKeys.CurrentProfile.toString, SessionMap("sessionId", "regId", "txId", Map.empty[String, JsValue]))
 
-      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(CacheMap("CurrentProfile", Map.empty)))
+      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(SessionMap("sessionId", "regId", "txId", Map.empty[String, JsValue])))
 
       await(service.submitRegistration(currentProfile(regId))) mustBe Success
     }

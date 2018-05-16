@@ -86,7 +86,7 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
 
       await(getResponse) mustBe Success
 
-      verifyKeystoreData[CurrentProfile](sId, CacheKeys.CurrentProfile.toString, Some(
+      verifySessionCacheData[CurrentProfile](sId, CacheKeys.CurrentProfile.toString, Some(
         CurrentProfile(
           registrationID = "12345",
           companyTaxRegistration = CompanyRegistrationProfile(
@@ -94,7 +94,8 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
             transactionId = "40-123456"
           ),
           language = "ENG",
-          payeRegistrationSubmitted = true
+          payeRegistrationSubmitted = true,
+          incorpStatus = None
         )))
     }
 
@@ -108,7 +109,7 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
 
       await(getResponse) mustBe Failed
 
-      verifyKeystoreData[CurrentProfile](sId, CacheKeys.CurrentProfile.toString, None)
+      verifySessionCacheData[CurrentProfile](sId, CacheKeys.CurrentProfile.toString, None)
     }
   }
 }
