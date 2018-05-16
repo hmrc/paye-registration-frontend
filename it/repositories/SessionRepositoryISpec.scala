@@ -110,15 +110,16 @@ class SessionRepositoryISpec extends IntegrationSpecBase {
 //        val currentProfileData: CurrentProfile = currentProfile("regId2")
 //        val key: String = "CurrentProfile"
 //
+//        //TODO Fix when Merged
 //        val expectedResult = CacheMap(sId, Map("CurrentProfile" ->
-//          Json.toJson(currentProfileData.copy(incorpRejected = Some(true))))
+//          Json.toJson(currentProfileData))
 //        )
 //
 //        await(connector.cache(key, currentProfileData))
 //
 //        await(connector.addRejectionFlag("40-123456")) mustBe Some("regId2")
 //
-//        await(connector.fetch(hc)).get mustBe expectedResult
+//        await(connector.fetch()(hc)).get mustBe expectedResult
 //      }
 //    }
     "fetchAndGet" when {

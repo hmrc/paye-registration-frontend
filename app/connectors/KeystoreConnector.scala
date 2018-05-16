@@ -52,7 +52,6 @@ trait KeystoreConnector {
 
   def cache[T](formId: String, body : T)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {
     metricsService.processDataResponseWithMetrics[CacheMap](successCounter, failedCounter, timer) {
-      //sessionCache.cache[T](formId, body)
       sessionRepository().get(sessionID).flatMap { map =>
         val updatedCacheMap = CascadeUpsert(formId, body, map.getOrElse(new CacheMap(sessionID, Map())))
         sessionRepository().upsert(updatedCacheMap).map { _ => updatedCacheMap }
@@ -62,14 +61,12 @@ trait KeystoreConnector {
 
   def fetch()(implicit hc : HeaderCarrier) : Future[Option[CacheMap]] = {
     metricsService.processOptionalDataWithMetrics[CacheMap](successCounter, emptyResponseCounter, timer) {
-//      sessionCache.fetch()
       sessionRepository().get(sessionID)
     }
   }
 
   def fetchAndGet[T](key : String)(implicit hc: HeaderCarrier, format: Format[T]): Future[Option[T]] = {
     metricsService.processOptionalDataWithMetrics[T](successCounter, emptyResponseCounter, timer) {
-//      sessionCache.fetchAndGetEntry(key)
       sessionRepository().get(sessionID).map{_.flatMap(_.getEntry(key))
       }
     }
@@ -77,12 +74,18 @@ trait KeystoreConnector {
 
   def remove()(implicit hc : HeaderCarrier) : Future[Boolean] = {
     metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
-//      sessionCache.remove()
       sessionRepository().get(sessionID).flatMap { optionalCacheMap =>
         optionalCacheMap.fold(Future(false)) { _ =>
           sessionRepository().removeDocument(sessionID)
         }
       }
     }
+  }
+
+  def addRejectionFlag(txId: String)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    for {
+      _     <- sessionRepository().addRejectionFlag(txId)
+      regId <- sessionRepository().getRegistrationID(txId)
+    } yield regId
   }
 }
