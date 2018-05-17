@@ -18,16 +18,15 @@ package services
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlMatching}
 import connectors.{BusinessRegistrationConnector, CompanyRegistrationConnector, KeystoreConnector, PAYERegistrationConnector}
-import itutil.{IntegrationSpecBase, WiremockHelper}
+import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProfile}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import services.CurrentProfileServiceImpl
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
 
-class CurrentProfileServiceISpec extends IntegrationSpecBase {
+class CurrentProfileServiceISpec extends IntegrationSpecBase with CachingStub {
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
@@ -56,7 +55,8 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
     "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng==",
     "defaultCTStatus" -> "aGVsZA==",
-    "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ=="
+    "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ==",
+    "mongodb.uri" -> s"$mongoUri"
   )
 
   def backendStatus(status: String) = {
@@ -90,8 +90,6 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
                                                   incorpStatus = None)
 
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfileWithRegIdWhitelisted).toString)
-      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/keystore/paye-registration-frontend/${sessionId}/data/CurrentProfile", 200, dummyS4LResponse)
       stubGet(s"/paye-registration/$regIdWhitelisted/status", 200, backendStatus("draft"))
 
       val currentProfileService = new CurrentProfileServiceImpl(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector)
@@ -124,14 +122,14 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
 
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfile).toString)
       stubGet(s"/incorporation-frontend-stubs/$regId/corporation-tax-registration", 200, companyRegistrationResp)
-      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/keystore/paye-registration-frontend/${sessionId}/data/CurrentProfile", 200, dummyS4LResponse)
       stubGet(s"/paye-registration/$regId/status", 404, "")
 
       val currentProfileService = new CurrentProfileServiceImpl(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector)
       def getResponse = currentProfileService.fetchAndStoreCurrentProfile
 
       await(getResponse) mustBe expectedCurrentProfile
+
+      verifySessionCacheData(sessionId, "CurrentProfile", Some(expectedCurrentProfile))
     }
 
     "get a Current Profile" in {
@@ -167,14 +165,14 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase {
 
       stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfile).toString)
       stubGet(s"/company-registration/corporation-tax-registration/$regId/corporation-tax-registration", 200, companyRegistrationResp)
-      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/keystore/paye-registration-frontend/${sessionId}/data/CurrentProfile", 200, dummyS4LResponse)
       stubGet(s"/paye-registration/$regId/status",200,backendStatus("submitted"))
 
       val currentProfileService = new CurrentProfileServiceImpl(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector)
       def getResponse = currentProfileService.fetchAndStoreCurrentProfile
 
       await(getResponse) mustBe expectedCurrentProfile
+
+      verifySessionCacheData(sessionId, "CurrentProfile", Some(expectedCurrentProfile))
     }
   }
 }

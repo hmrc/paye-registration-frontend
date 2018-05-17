@@ -21,7 +21,7 @@ import enums.IncorporationStatus
 import javax.inject.Inject
 import models.api.SessionMap
 import models.external.CurrentProfile
-import play.api.libs.json.Format
+import play.api.libs.json.{Format, Json}
 import repositories.SessionRepository
 import services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -52,12 +52,10 @@ trait KeystoreConnector {
 
   private def sessionID(implicit hc: HeaderCarrier): String = hc.sessionId.getOrElse(throw new RuntimeException("Active User had no Session ID")).value
 
-  def cache[T](formId: String, body : T)(implicit hc: HeaderCarrier, cp: CurrentProfile, format: Format[T]): Future[SessionMap] = {
+  def cache[T](formId: String, regId: String, txId: String, body : T)(implicit hc: HeaderCarrier, format: Format[T]): Future[SessionMap] = {
     metricsService.processDataResponseWithMetrics[SessionMap](successCounter, failedCounter, timer) {
-      sessionRepository().getSessionMap(sessionID).flatMap { map =>
-        val updatedCacheMap = map.fold(SessionMap(sessionID, cp, formId, body))(_.store(formId, body))
-        sessionRepository().upsertSessionMap(updatedCacheMap).map { _ => updatedCacheMap }
-      }
+      val updatedCacheMap = SessionMap(sessionID, regId, txId, Map(formId -> Json.toJson(body)))
+      sessionRepository().upsertSessionMap(updatedCacheMap) map(_ => updatedCacheMap)
     }
   }
 
@@ -66,6 +64,17 @@ trait KeystoreConnector {
       sessionRepository().getSessionMap(sessionID)
     }
   }
+
+  def fetchAndGetFromKeystore(key: String)(implicit hc: HeaderCarrier, format: Format[CurrentProfile]): Future[Option[CurrentProfile]] = {
+    metricsService.processOptionalDataWithMetrics(successCounter, emptyResponseCounter, timer) {
+      sessionCache.fetchAndGetEntry(key) flatMap { data =>
+        data.fold(Future.successful(data)) { cp =>
+          cache(key, cp.registrationID, cp.companyTaxRegistration.transactionId, cp).map(_ => data)
+        }
+      }
+    }
+  }
+
 
   def fetchAndGet[T](key : String)(implicit hc: HeaderCarrier, format: Format[T]): Future[Option[T]] = {
     metricsService.processOptionalDataWithMetrics[T](successCounter, emptyResponseCounter, timer) {
@@ -83,12 +92,5 @@ trait KeystoreConnector {
         }
       }
     }
-  }
-
-  def setIncorpStatus(txId: String, status: IncorporationStatus.Value)(implicit hc: HeaderCarrier): Future[Option[String]] = {
-    for {
-      _     <- sessionRepository().setIncorpStatus(txId, status)
-      regId <- sessionRepository().getRegistrationID(txId)
-    } yield regId
   }
 }

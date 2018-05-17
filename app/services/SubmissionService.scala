@@ -38,8 +38,8 @@ trait SubmissionService extends RegistrationWhitelist {
     ifRegIdNotWhitelisted(profile.registrationID) {
       payeRegistrationConnector.submitRegistration(profile.registrationID).flatMap {
         case Success =>
-          implicit val cp: CurrentProfile = profile.copy(payeRegistrationSubmitted = true)
-          keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, cp).map {
+          val cp: CurrentProfile = profile.copy(payeRegistrationSubmitted = true)
+          keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, profile.registrationID, profile.companyTaxRegistration.transactionId, cp).map {
             _ => Success
           }
         case other => Future.successful(other)

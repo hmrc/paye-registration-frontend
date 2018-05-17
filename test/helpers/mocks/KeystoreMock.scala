@@ -36,13 +36,13 @@ trait KeystoreMock {
       .thenReturn(Future.successful(model))
   }
 
-  def mockKeystoreCache[T](key: String, sessionMap: SessionMap): OngoingStubbing[Future[SessionMap]] = {
-    when(mockKeystoreConnector.cache(ArgumentMatchers.contains(key), ArgumentMatchers.any[T]())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[Format[T]]()))
+  def mockKeystoreCache[T](key: String, regId: String, txId: String, sessionMap: SessionMap): OngoingStubbing[Future[SessionMap]] = {
+    when(mockKeystoreConnector.cache(ArgumentMatchers.contains(key), ArgumentMatchers.contains(regId), ArgumentMatchers.contains(txId), ArgumentMatchers.any[T]())(ArgumentMatchers.any(), ArgumentMatchers.any[Format[T]]()))
       .thenReturn(Future.successful(sessionMap))
   }
 
-  def mockKeystoreCacheError[T](key: String, err: Exception): OngoingStubbing[Future[SessionMap]] = {
-    when(mockKeystoreConnector.cache(ArgumentMatchers.contains(key), ArgumentMatchers.any[T]())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[Format[T]]()))
+  def mockKeystoreCacheError[T](key: String, regId: String, txId: String, err: Exception): OngoingStubbing[Future[SessionMap]] = {
+    when(mockKeystoreConnector.cache(ArgumentMatchers.contains(key), ArgumentMatchers.contains(regId), ArgumentMatchers.contains(txId), ArgumentMatchers.any[T]())(ArgumentMatchers.any(), ArgumentMatchers.any[Format[T]]()))
       .thenReturn(Future.failed(err))
   }
 

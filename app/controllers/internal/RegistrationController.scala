@@ -22,6 +22,7 @@ import enums.RegistrationDeletion
 import javax.inject.Inject
 import play.api.{Configuration, Logger}
 import play.api.i18n.MessagesApi
+import play.api.libs.json.{JsObject, JsValue}
 import play.api.mvc.{Action, AnyContent}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -29,6 +30,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class RegistrationControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
                                            val payeRegistrationConnector: PAYERegistrationConnector,
@@ -63,5 +65,13 @@ trait RegistrationController extends PayeBaseController {
         logger.warn(s"[RegistrationController] [delete] - Can't get the Authority")
         Unauthorized
     }
+  }
+
+  def incorporationRejected: Action[JsValue] = Action.async(parse.json) { implicit request =>
+    val jsResp = request.body.as[JsObject]
+    val txId = (jsResp \ "IncorpSubscriptionKey" \ "transactionId").as[String]
+    val incorpStatus = (jsResp \ "IncorpSubscriptionKey" \ "transactionId").as[String]
+
+    Future.successful(Ok(txId))
   }
 }

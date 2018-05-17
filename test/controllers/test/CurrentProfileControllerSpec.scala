@@ -53,7 +53,7 @@ class CurrentProfileControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[HttpReads[BusinessProfile]]()))
           .thenReturn(Future.successful(testProfile))
 
-        when(mockKeystoreConnector.cache[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any(),ArgumentMatchers.any()))
+        when(mockKeystoreConnector.cache[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.blankSessionMap))
 
         AuthHelpers.showAuthorised(controller.businessProfileSetup, request) { result =>
@@ -70,7 +70,7 @@ class CurrentProfileControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockTestBusRegConnector.createBusinessProfileEntry(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testProfile))
 
-        when(mockKeystoreConnector.cache[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        when(mockKeystoreConnector.cache[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.blankSessionMap))
 
         AuthHelpers.showAuthorised(controller.businessProfileSetup, request) { result =>

@@ -62,4 +62,9 @@ trait SignInOutController extends PayeBaseController {
   def timeoutShow = Action.async { implicit request =>
     Future.successful(Ok(views.html.timeout()))
   }
+
+  def incorporationRejected: Action[AnyContent] = isAuthorised {
+    implicit request =>
+      Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/rejection"))
+  }
 }

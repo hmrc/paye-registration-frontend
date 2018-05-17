@@ -21,17 +21,16 @@ import connectors._
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.{CacheKeys, DownstreamOutcome, RegistrationDeletion}
 import javax.inject.Inject
-import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import models.external.CurrentProfile
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http.HeaderCarrier
 import utils.PAYEFeatureSwitches
 
 import scala.concurrent.Future
-import scala.util.Try
 
 class PayeStartControllerImpl @Inject()(val currentProfileService: CurrentProfileService,
                                         val payeRegistrationService: PAYERegistrationService,
@@ -54,9 +53,6 @@ trait PayeStartController extends PayeBaseController {
   val payeRegistrationService: PAYERegistrationService
   val businessRegistrationConnector: BusinessRegistrationConnector
   val companyRegistrationConnector: CompanyRegistrationConnector
-
-  val compRegFEURL: String
-  val compRegFEURI: String
 
   val payeRegElFEURL: String
   val payeRegElFEURI: String
@@ -111,14 +107,9 @@ trait PayeStartController extends PayeBaseController {
   }
 
   private def checkAndStoreCurrentProfile(f: => CurrentProfile => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
-    currentProfileService.fetchAndStoreCurrentProfile flatMap {
-      case CurrentProfile(_, CompanyRegistrationProfile(_, _,Some(a)), _, _, _) if Try(a.toInt).getOrElse(6) >= 6 =>
-        Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/post-sign-in"))
-      case CurrentProfile(_, compRegProfile, _, _, _) if compRegProfile.status equals "draft" =>
-        Future.successful(Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes"))
-      case currentProfile => f(currentProfile)
+    currentProfileService.fetchAndStoreCurrentProfile flatMap { currentProfile: CurrentProfile =>
+      currentProfileChecks(currentProfile)(f)
     } recover {
-      case _: NotFoundException                 => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
       case _: ConfirmationRefsNotFoundException => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
       case _                                    => InternalServerError(views.html.pages.error.restart())
     }

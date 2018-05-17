@@ -44,6 +44,7 @@ trait CachingStub extends MongoSpecSupport with BeforeAndAfterEach{
   override def beforeEach(): Unit = {
     super.beforeEach()
     customAwait(repo.drop)(defaultTimeout)
+    await(repo.count) mustBe 0
     resetWiremock()
   }
 

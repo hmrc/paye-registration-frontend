@@ -16,19 +16,12 @@
 
 package models.api
 
-import models.external.CurrentProfile
-import play.api.Logger
-import play.api.libs.json.{Format, JsValue, Json, Reads}
+import play.api.libs.json.{JsValue, Json, Reads}
 
-case class SessionMap(sessionId: String, registrationId: String, transactionId: String, data: Map[String, JsValue]) extends Product with Serializable {
+case class SessionMap(sessionId: String, registrationId: String, transactionId: String, data: Map[String, JsValue]) {
   def getEntry[T](key: String)(implicit reads: Reads[T]): Option[T] = data.get(key).flatMap(_.asOpt[T])
-  def store[A](key: String, value: A)(implicit format: Format[A]): SessionMap = this copy (data = this.data + (key -> Json.toJson(value)))
 }
 
 object SessionMap {
   implicit val format = Json.format[SessionMap]
-
-  def apply(sessionId: String, cp: CurrentProfile, data: Map[String, JsValue]): SessionMap = new SessionMap(sessionId, cp.registrationID, cp.companyTaxRegistration.transactionId, data)
-  def apply[T](sessionId: String, cp: CurrentProfile, formId: String, data: T)(implicit format: Format[T]): SessionMap =
-    new SessionMap(sessionId, cp.registrationID, cp.companyTaxRegistration.transactionId, Map[String, JsValue]()).store(formId, data)
 }

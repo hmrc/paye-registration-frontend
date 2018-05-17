@@ -16,21 +16,16 @@
 
 package repositories
 
-import common.Logging
-import common.exceptions.InternalExceptions.RegistrationIdMismatchException
-import enums.IncorporationStatus
 import javax.inject.{Inject, Singleton}
 import models.api.SessionMap
-import models.external.CurrentProfile
 import org.joda.time.{DateTime, DateTimeZone}
-import play.api.libs.json.{Format, JsValue, Json}
-import play.api.{Configuration, Logger}
+import play.api.Configuration
+import play.api.libs.json.{JsValue, Json}
 import play.modules.reactivemongo.MongoDbConnection
 import reactivemongo.api.DefaultDB
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.play.json.ImplicitBSONHandlers._
-import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -54,7 +49,7 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
   extends ReactiveRepository[DatedSessionMap, BSONObjectID](config.getString("appName").get, mongo, DatedSessionMap.formats) {
 
   val fieldName        = "lastUpdated"
-  val createdIndexName = "currentProfileIndex"
+  val createdIndexName = "sessionRegistrationIndex"
 
   val expireAfterSeconds = "expireAfterSeconds"
   val timeToLiveInSeconds: Int = config.getInt("mongodb.timeToLiveInSeconds").get
@@ -89,27 +84,6 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
   def getSessionMap(id: String): Future[Option[SessionMap]] = {
     collection.find(Json.obj("sessionId" -> id)).one[SessionMap]
   }
-
-  def setIncorpStatus(id: String, status: IncorporationStatus.Value): Future[Boolean] = {
-    val selector = BSONDocument("transactionId" -> id)
-    val modifier = BSONDocument("$set" -> BSONDocument("data.CurrentProfile.incorpStatus" -> Json.toJson(status)))
-
-    collection.update(selector, modifier) map(_.nModified == 1)
-  }
-
-  def getRegistrationID(transactionID: String): Future[Option[String]] = {
-    collection.find(Json.obj("transactionId" -> transactionID)).one[SessionMap].map {
-      _.fold(Option.empty[String]) { sessionMap =>
-        sessionMap.getEntry[CurrentProfile]("CurrentProfile").collect {
-          case cp if cp.registrationID == sessionMap.registrationId => cp.registrationID
-          case cp => throw new RegistrationIdMismatchException(sessionMap.registrationId, cp.registrationID)
-        }
-      }
-
-      //_.flatMap(_.getEntry[CurrentProfile]("CurrentProfile").map(_.registrationID))
-    }
-  }
-
 }
 
 @Singleton

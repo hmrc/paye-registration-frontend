@@ -37,6 +37,4 @@ trait InternalExceptions {
   class MissingDocumentStatus(msg: String) extends Exception(msg)
 
   class NoCurrentSessionException(msg: String) extends Exception(msg)
-
-  class RegistrationIdMismatchException(rootRegId: String, cpRegId: String) extends Exception(s"$rootRegId did not match $cpRegId")
 }

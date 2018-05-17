@@ -97,7 +97,8 @@ trait PayeComponentSpec
       mockThresholdService,
       mockEmploymentService,
       mockEmploymentServiceV2,
-      mockSessionRepository
+      mockSessionRepository,
+      mockReactiveMongoRepo
     )
   }
 

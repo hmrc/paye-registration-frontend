@@ -57,9 +57,9 @@ class SubmissionServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
       when(mockPAYERegConnector.submitRegistration(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Success))
 
-      mockKeystoreCache(CacheKeys.CurrentProfile.toString, SessionMap("sessionId", "regId", "txId", Map.empty[String, JsValue]))
+      mockKeystoreCache(CacheKeys.CurrentProfile.toString, "regId", "txId", SessionMap("sessionId", "regId", "txId", Map.empty[String, JsValue]))
 
-      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(SessionMap("sessionId", "regId", "txId", Map.empty[String, JsValue])))
 
       await(service.submitRegistration(currentProfile(regId))) mustBe Success
