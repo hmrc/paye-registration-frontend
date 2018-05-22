@@ -1,2 +1,4 @@
 # microservice specific internal routes
 DELETE      /:regID/delete                                    controllers.internal.RegistrationController.delete(regID: String)
+
+POST        /company-incorporation                            controllers.internal.RegistrationController.companyIncorporation

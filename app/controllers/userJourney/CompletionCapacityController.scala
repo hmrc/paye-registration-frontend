@@ -17,14 +17,13 @@
 package controllers.userJourney
 
 import javax.inject.Inject
-
-import connectors.KeystoreConnector
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.completionCapacity.CompletionCapacityForm
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.{CompanyDetailsService, CompletionCapacityService, IncorporationInformationService, S4LService}
+import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{completionCapacity => CompletionCapacityView}
 
@@ -37,7 +36,9 @@ class CompletionCapacityControllerImpl @Inject()(val messagesApi: MessagesApi,
                                                  val s4LService: S4LService,
                                                  val companyDetailsService: CompanyDetailsService,
                                                  val incorpInfoService: IncorporationInformationService,
-                                                 val authConnector: AuthConnector) extends CompletionCapacityController with AuthRedirectUrls
+                                                 val authConnector: AuthConnector,
+                                                 val incorporationInformationConnector: IncorporationInformationConnector,
+                                                 val payeRegistrationService: PAYERegistrationService) extends CompletionCapacityController with AuthRedirectUrls
 
 trait CompletionCapacityController extends PayeBaseController {
   val completionCapacityService: CompletionCapacityService

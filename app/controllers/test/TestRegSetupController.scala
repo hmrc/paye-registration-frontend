@@ -39,7 +39,9 @@ class TestRegSetupControllerImpl @Inject()(val payeRegService:PAYERegistrationSe
                                            val s4LService: S4LService,
                                            val companyDetailsService: CompanyDetailsService,
                                            val incorpInfoService: IncorporationInformationService,
-                                           val messagesApi: MessagesApi) extends TestRegSetupController with AuthRedirectUrls
+                                           val messagesApi: MessagesApi,
+                                           val incorporationInformationConnector: IncorporationInformationConnector,
+                                           val payeRegistrationService: PAYERegistrationService) extends TestRegSetupController with AuthRedirectUrls
 
 trait TestRegSetupController extends PayeBaseController {
   val payeRegService: PAYERegistrationService

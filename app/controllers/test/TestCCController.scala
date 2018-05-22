@@ -17,15 +17,14 @@
 package controllers.test
 
 import javax.inject.Inject
-
 import connectors.test.TestBusinessRegConnector
-import connectors.{KeystoreConnector, PAYERegistrationConnector}
+import connectors.{IncorporationInformationConnector, KeystoreConnector, PAYERegistrationConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.test.TestCCUpdateForm
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.{CompanyDetailsService, IncorporationInformationService, S4LService}
+import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.test.updateCCPage
 
@@ -39,7 +38,9 @@ class TestCCControllerImpl @Inject()(val messagesApi: MessagesApi,
                                      val config: Configuration,
                                      val companyDetailsService: CompanyDetailsService,
                                      val incorpInfoService: IncorporationInformationService,
-                                     val payeRegistrationConnector: PAYERegistrationConnector) extends TestCCController with AuthRedirectUrls
+                                     val payeRegistrationConnector: PAYERegistrationConnector,
+                                     val incorporationInformationConnector: IncorporationInformationConnector,
+                                     val payeRegistrationService: PAYERegistrationService) extends TestCCController with AuthRedirectUrls
 
 trait TestCCController extends PayeBaseController {
   val testBusRegConnector: TestBusinessRegConnector

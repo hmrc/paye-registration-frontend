@@ -26,7 +26,8 @@ trait CurrentProfileFixtures {
       transactionId = "testTxId"
     ),
     language = "EN",
-    payeRegistrationSubmitted = false
+    payeRegistrationSubmitted = false,
+    None
   ))
 
   val invalidCurrentProfile = None

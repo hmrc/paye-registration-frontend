@@ -25,7 +25,6 @@ import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.view.CompletionCapacity
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import services.CompletionCapacityServiceImpl
 import uk.gov.hmrc.http.HeaderCarrier
 
 class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStub {

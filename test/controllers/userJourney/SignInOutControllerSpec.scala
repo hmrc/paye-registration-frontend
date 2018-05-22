@@ -37,6 +37,8 @@ class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
       implicit val messagesApi: MessagesApi = mockMessagesApi
       override val compRegFEURL: String = "testUrl"
       override val compRegFEURI: String = "/testUri"
+      override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val payeRegistrationService = mockPayeRegService
     }
   }
 

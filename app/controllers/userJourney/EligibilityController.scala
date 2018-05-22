@@ -17,14 +17,13 @@
 package controllers.userJourney
 
 import javax.inject.Inject
-
-import connectors.KeystoreConnector
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.eligibility.{CompanyEligibilityForm, DirectorEligibilityForm}
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Configuration, Environment}
-import services.{CompanyDetailsService, EligibilityService, IncorporationInformationService, S4LService}
+import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import views.html.pages.eligibility.{companyEligibility => CompanyEligibilityPage, directorEligibility => DirectorEligibilityPage, ineligible => IneligiblePage}
@@ -40,7 +39,9 @@ class EligibilityControllerImpl @Inject()(val messagesApi: MessagesApi,
                                           val s4LService: S4LService,
                                           val companyDetailsService: CompanyDetailsService,
                                           val incorpInfoService: IncorporationInformationService,
-                                          servicesConfig: ServicesConfig) extends EligibilityController with AuthRedirectUrls
+                                          servicesConfig: ServicesConfig,
+                                          val incorporationInformationConnector: IncorporationInformationConnector,
+                                          val payeRegistrationService: PAYERegistrationService) extends EligibilityController with AuthRedirectUrls
 
 trait EligibilityController extends PayeBaseController {
   val eligibilityService: EligibilityService

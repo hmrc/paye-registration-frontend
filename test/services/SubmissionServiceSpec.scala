@@ -16,13 +16,15 @@
 
 package services
 
-import connectors.{Failed, Success, TimedOut}
-import enums.CacheKeys
+import connectors._
+import enums.{CacheKeys, IncorporationStatus}
 import helpers.PayeComponentSpec
+import models.api.SessionMap
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 
@@ -34,19 +36,21 @@ class SubmissionServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
     val service = new SubmissionService {
       override val payeRegistrationConnector = mockPAYERegConnector
       override val keystoreConnector         = mockKeystoreConnector
+      override val iiConnector               = mockIncorpInfoConnector
     }
   }
 
   val regId = "12345"
 
-  def currentProfile(regId: String) = CurrentProfile(
-    registrationID = regId,
+  def currentProfile(nRegId: String) = CurrentProfile(
+    registrationID = nRegId,
     companyTaxRegistration = CompanyRegistrationProfile(
       status = "acknowledged",
       transactionId = "40-123456"
     ),
     language = "ENG",
-    payeRegistrationSubmitted = false
+    payeRegistrationSubmitted = false,
+    None
   )
 
   "submitRegistration" should {
@@ -54,12 +58,30 @@ class SubmissionServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
       when(mockPAYERegConnector.submitRegistration(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Success))
 
-      mockKeystoreCache(CacheKeys.CurrentProfile.toString, CacheMap("CurrentProfile", Map.empty))
+      when(mockIncorpInfoConnector.cancelSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(true))
 
-      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(CacheMap("CurrentProfile", Map.empty)))
+      val cp = currentProfile(regId).copy(payeRegistrationSubmitted = true)
+
+      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(cp))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(SessionMap("testSessionId", regId, "40-123456", Map.empty[String, JsValue])))
 
       await(service.submitRegistration(currentProfile(regId))) mustBe Success
+    }
+
+    "return a Cancelled DES Response" in new Setup {
+      when(mockPAYERegConnector.submitRegistration(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
+        .thenReturn(Future.successful(Cancelled))
+
+      when(mockIncorpInfoConnector.cancelSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(true))
+
+      val cp = currentProfile(regId).copy(incorpStatus = Some(IncorporationStatus.rejected))
+
+      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(cp))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(SessionMap("testSessionId", regId, "40-123456", Map.empty[String, JsValue])))
+
+      await(service.submitRegistration(currentProfile(regId))) mustBe Cancelled
     }
 
     "return a Failed DES Response" in new Setup {

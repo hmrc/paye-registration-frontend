@@ -32,7 +32,8 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
     "microservice.services.company-registration-frontend.www.url" -> s"$mockHost",
     "microservice.services.company-registration-frontend.www.uri" -> "/test-uri",
     "microservice.services.incorporation-information.host" -> s"$mockHost",
-    "microservice.services.incorporation-information.port" -> s"$mockPort"
+    "microservice.services.incorporation-information.port" -> s"$mockPort",
+    "mongodb.uri" -> s"$mongoUri"
   ))
 
   def setSystemDate() = {
@@ -92,7 +93,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubPayeRegDocumentStatus(regId)
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       stubGet(s"/paye-registration/$regId/employment-info", 204, "")
       stubGet(s"/incorporation-information/$txId/incorporation-update", 200, incorpUpdateSuccessResponse)
@@ -109,7 +110,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubPayeRegDocumentStatus(regId)
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       stubGet(s"/paye-registration/$regId/employment-info", 200, employmentInfoAlreadyEmploying)
       stubGet(s"/incorporation-information/$txId/incorporation-update", 200, incorpUpdateSuccessResponse)
@@ -132,7 +133,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubPayeRegDocumentStatus(regId)
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       stubGet(s"/paye-registration/$regId/employment-info", 204, "")
       stubGet(s"/incorporation-information/$txId/incorporation-update", 204, "")
@@ -150,7 +151,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubPayeRegDocumentStatus(regId)
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       stubGet(s"/paye-registration/$regId/employment-info", 204, "")
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/EmploymentV2", 200, dummyS4LResponse)
@@ -174,7 +175,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubPayeRegDocumentStatus(regId)
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       stubGet(s"/paye-registration/$regId/employment-info", 204, "")
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/EmploymentV2", 200, dummyS4LResponse)
@@ -198,7 +199,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubPayeRegDocumentStatus(regId)
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
       stubGet(s"/incorporation-information/$txId/incorporation-update", 200, incorpUpdateSuccessResponse)
 
       val fResponse = buildClient("/employ-anyone").
@@ -222,7 +223,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubPayeRegDocumentStatus(regId)
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       stubGet(s"/paye-registration/$regId/employment-info", 200, employmentInfoWillEmployThisYear)
       stubGet(s"/incorporation-information/$txId/incorporation-update", 200, incorpUpdateSuccessResponse)
@@ -246,7 +247,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubPayeRegDocumentStatus(regId)
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
       stubGet(s"/paye-registration/$regId/employment-info", 204, "")
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/EmploymentV2", 200, dummyS4LResponse)
       stubGet(s"/incorporation-information/$txId/incorporation-update", 200, incorpUpdateSuccessResponse)
@@ -269,7 +270,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubPayeRegDocumentStatus(regId)
-      stubKeystoreMetadata(SessionId, regId)
+      stubSessionCacheMetadata(SessionId, regId)
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/EmploymentV2", 200, dummyS4LResponse)
       stubGet(s"/incorporation-information/$txId/incorporation-update", 200, incorpUpdateSuccessResponse)
@@ -294,7 +295,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
         setupSimpleAuthMocks()
         stubSuccessfulLogin()
         stubPayeRegDocumentStatus(regId)
-        stubKeystoreMetadata(SessionId, regId)
+        stubSessionCacheMetadata(SessionId, regId)
         stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
         stubPut(s"/save4later/paye-registration-frontend/$regId/data/EmploymentV2", 200, dummyS4LResponse)
         stubGet(s"/incorporation-information/$txId/incorporation-update", 200, incorpUpdateSuccessResponse)

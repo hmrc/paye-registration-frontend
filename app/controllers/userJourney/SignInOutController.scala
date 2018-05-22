@@ -17,14 +17,14 @@
 package controllers.userJourney
 
 import java.io.File
-import javax.inject.Inject
 
-import connectors.KeystoreConnector
+import javax.inject.Inject
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Configuration, Environment}
-import services.{CompanyDetailsService, IncorporationInformationService, S4LService}
+import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.Future
@@ -36,7 +36,9 @@ class SignInOutControllerImpl @Inject()(val messagesApi: MessagesApi,
                                         val s4LService: S4LService,
                                         val companyDetailsService: CompanyDetailsService,
                                         val incorpInfoService: IncorporationInformationService,
-                                        val keystoreConnector: KeystoreConnector) extends SignInOutController with AuthRedirectUrls
+                                        val keystoreConnector: KeystoreConnector,
+                                        val incorporationInformationConnector: IncorporationInformationConnector,
+                                        val payeRegistrationService: PAYERegistrationService) extends SignInOutController with AuthRedirectUrls
 
 trait SignInOutController extends PayeBaseController {
 
@@ -61,5 +63,10 @@ trait SignInOutController extends PayeBaseController {
 
   def timeoutShow = Action.async { implicit request =>
     Future.successful(Ok(views.html.timeout()))
+  }
+
+  def incorporationRejected: Action[AnyContent] = isAuthorised {
+    implicit request =>
+      Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/cant-continue"))
   }
 }

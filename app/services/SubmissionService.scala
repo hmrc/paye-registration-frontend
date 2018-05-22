@@ -17,9 +17,8 @@
 package services
 
 import javax.inject.Inject
-
 import connectors._
-import enums.CacheKeys
+import enums.{CacheKeys, IncorporationStatus}
 import models.external.CurrentProfile
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -28,18 +27,22 @@ import utils.RegistrationWhitelist
 import scala.concurrent.Future
 
 class SubmissionServiceImpl @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,
-                                      val keystoreConnector: KeystoreConnector) extends SubmissionService
+                                      val keystoreConnector: KeystoreConnector,
+                                      val iiConnector: IncorporationInformationConnector) extends SubmissionService
 
 trait SubmissionService extends RegistrationWhitelist {
   val payeRegistrationConnector: PAYERegistrationConnector
   val keystoreConnector: KeystoreConnector
+  val iiConnector: IncorporationInformationConnector
 
   def submitRegistration(profile: CurrentProfile)(implicit hc: HeaderCarrier): Future[DESResponse] = {
     ifRegIdNotWhitelisted(profile.registrationID) {
       payeRegistrationConnector.submitRegistration(profile.registrationID).flatMap {
-        case Success =>
-          keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, profile.copy(payeRegistrationSubmitted = true)).map {
-            _ => Success
+        case status@(Success | Cancelled) =>
+          val cp: CurrentProfile = if(status == Success) profile.copy(payeRegistrationSubmitted = true) else profile.copy(incorpStatus = Some(IncorporationStatus.rejected))
+
+          keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, profile.registrationID, profile.companyTaxRegistration.transactionId, cp).flatMap {
+            sessionMap => iiConnector.cancelSubscription(sessionMap.transactionId, sessionMap.registrationId).map{_ => status}
           }
         case other => Future.successful(other)
       }

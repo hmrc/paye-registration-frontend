@@ -18,23 +18,24 @@ package connectors
 
 import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics
+import models.api.SessionMap
+import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.Future
 
 class KeystoreConnectorSpec extends PayeComponentSpec {
 
   val connector = new KeystoreConnector {
-    override val metricsService = new MockMetrics
-    override val sessionCache = mockSessionCache
-    override val successCounter = metricsService.keystoreSuccessResponseCounter
-    override val failedCounter = metricsService.keystoreFailedResponseCounter
+    override val metricsService       = new MockMetrics
+    override val sessionCache         = mockSessionCache
+    override val sessionRepository    = mockSessionRepository
+    override val successCounter       = metricsService.keystoreSuccessResponseCounter
+    override val failedCounter        = metricsService.keystoreFailedResponseCounter
     override val emptyResponseCounter = metricsService.keystoreFailedResponseCounter
-    override def timer = metricsService.keystoreResponseTimer.time()
+    override def timer   = metricsService.keystoreResponseTimer.time()
   }
 
   case class TestModel(test: String)
@@ -42,54 +43,88 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
     implicit val formats = Json.format[TestModel]
   }
 
-  "Saving into KeyStore" should {
+  "Saving into SessionRepository" should {
     "save the model" in {
       val testModel = TestModel("test")
 
-      val returnCacheMap = CacheMap("", Map("" -> Json.toJson(testModel)))
+      val returnSessionMap = SessionMap("testSessionId", "testRegId", "testTxId", Map("testKey" -> Json.toJson(testModel)))
 
-      when(mockSessionCache.cache[TestModel](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(returnCacheMap))
+      when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
 
-      val result = await(connector.cache[TestModel]("testKey", testModel))
-      result mustBe returnCacheMap
+      when(mockReactiveMongoRepo.upsertSessionMap(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(true))
+
+      val result = await(connector.cache[TestModel]("testKey", "testRegId", "testTxId", testModel))
+      result mustBe returnSessionMap
     }
   }
 
-  "Fetching and getting from KeyStore" should {
+  "Fetching and getting from SessionRepository" should {
     "return a list" in {
       val testModel = TestModel("test")
       val list = List(testModel)
+      val returnSessionMap = SessionMap("testSessionId", "testRegId", "testTxId", Map("testKey" -> Json.toJson(list)))
 
       when(mockSessionCache.fetchAndGetEntry[List[TestModel]](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(list)))
+
+      when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
+
+      when(mockReactiveMongoRepo.getSessionMap(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(returnSessionMap)))
 
       val result = await(connector.fetchAndGet[List[TestModel]]("testKey"))
       result mustBe Some(list)
     }
   }
 
-  "Fetching from KeyStore" should {
-    "return a CacheMap" in {
-      val testModel = TestModel("test")
+  "Fetching and getting from Keystore & saving into SessionRepository" should {
+    "return a CurrentProfile" in {
+      val cp = CurrentProfile("regId", CompanyRegistrationProfile("held", "txId", None), "", false, None)
+      val returnSessionMap = SessionMap("testSessionId", "testRegId", "testTxId", Map("testKey" -> Json.toJson(cp)))
 
-      val returnCacheMap = CacheMap("", Map("" -> Json.toJson(testModel)))
+      when(mockSessionCache.fetchAndGetEntry[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(cp)))
 
-      when(mockSessionCache.fetch()(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(returnCacheMap)))
+      when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
 
-      val result = await(connector.fetch())
-      result mustBe Some(returnCacheMap)
+      when(mockReactiveMongoRepo.upsertSessionMap(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(true))
+
+      val result = await(connector.fetchAndGetFromKeystore("testKey"))
+      result mustBe Some(cp)
     }
   }
 
-  "Removing from KeyStore" should {
+  "Fetching from SessionRepository" should {
+    "return a CacheMap" in {
+      val testModel = TestModel("test")
+
+      val returnSessionMap = SessionMap("testSessionId", "testRegId", "testTxId", Map("testKey" -> Json.toJson(testModel)))
+
+      when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
+
+      when(mockReactiveMongoRepo.getSessionMap(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(returnSessionMap)))
+
+      val result = await(connector.fetch())
+      result mustBe Some(returnSessionMap)
+    }
+  }
+
+  "Removing from SessionRepository" should {
     "return a HTTP Response" in {
-      when(mockSessionCache.remove()(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(HttpResponse(OK)))
+
+      val testModel = TestModel("test")
+      val returnSessionMap = SessionMap("testSessionId", "testRegId", "testTxId", Map("testKey" -> Json.toJson(testModel)))
+
+      when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
+
+      when(mockReactiveMongoRepo.removeDocument(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(true))
 
       val result = await(connector.remove())
-      result.status mustBe HttpResponse(OK).status
+      result mustBe true
     }
   }
 }

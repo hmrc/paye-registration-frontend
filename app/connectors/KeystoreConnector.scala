@@ -16,19 +16,23 @@
 
 package connectors
 
-import javax.inject.Inject
-
 import com.codahale.metrics.{Counter, Timer}
-import play.api.libs.json.Format
+import enums.IncorporationStatus
+import javax.inject.Inject
+import models.api.SessionMap
+import models.external.CurrentProfile
+import play.api.libs.json.{Format, Json}
+import repositories.SessionRepository
 import services.MetricsService
-import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
 class KeystoreConnectorImpl @Inject()(val sessionCache: SessionCache,
-                                      val metricsService: MetricsService) extends KeystoreConnector {
+                                      val metricsService: MetricsService,
+                                      val sessionRepository: SessionRepository) extends KeystoreConnector {
   val successCounter        = metricsService.keystoreSuccessResponseCounter
   val emptyResponseCounter  = metricsService.keystoreEmptyResponseCounter
   val failedCounter         = metricsService.keystoreFailedResponseCounter
@@ -38,33 +42,63 @@ class KeystoreConnectorImpl @Inject()(val sessionCache: SessionCache,
 trait KeystoreConnector {
   val sessionCache: SessionCache
   val metricsService: MetricsService
+  val sessionRepository: SessionRepository
+
 
   val successCounter: Counter
   val emptyResponseCounter: Counter
   val failedCounter: Counter
   def timer: Timer.Context
 
-  def cache[T](formId: String, body : T)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {
-    metricsService.processDataResponseWithMetrics[CacheMap](successCounter, failedCounter, timer) {
-      sessionCache.cache[T](formId, body)
+  private def sessionID(implicit hc: HeaderCarrier): String = hc.sessionId.getOrElse(throw new RuntimeException("Active User had no Session ID")).value
+
+  def cache[T](formId: String, regId: String, txId: String, body : T)(implicit hc: HeaderCarrier, format: Format[T]): Future[SessionMap] = {
+    metricsService.processDataResponseWithMetrics[SessionMap](successCounter, failedCounter, timer) {
+      val updatedCacheMap = SessionMap(sessionID, regId, txId, Map(formId -> Json.toJson(body)))
+      sessionRepository().upsertSessionMap(updatedCacheMap) map(_ => updatedCacheMap)
     }
   }
 
-  def fetch()(implicit hc : HeaderCarrier) : Future[Option[CacheMap]] = {
-    metricsService.processOptionalDataWithMetrics[CacheMap](successCounter, emptyResponseCounter, timer) {
-      sessionCache.fetch()
+  def cacheSessionMap(map: SessionMap)(implicit hc: HeaderCarrier): Future[SessionMap] = {
+    metricsService.processDataResponseWithMetrics[SessionMap](successCounter, failedCounter, timer) {
+      sessionRepository().upsertSessionMap(map) map(_ => map)
     }
   }
+
+  def fetch()(implicit hc : HeaderCarrier) : Future[Option[SessionMap]] = {
+    metricsService.processOptionalDataWithMetrics[SessionMap](successCounter, emptyResponseCounter, timer) {
+      sessionRepository().getSessionMap(sessionID)
+    }
+  }
+
+  def fetchAndGetFromKeystore(key: String)(implicit hc: HeaderCarrier, format: Format[CurrentProfile]): Future[Option[CurrentProfile]] = {
+    metricsService.processOptionalDataWithMetrics(successCounter, emptyResponseCounter, timer) {
+      sessionCache.fetchAndGetEntry(key) flatMap { data =>
+        data.fold(Future.successful(data)) { cp =>
+          cache(key, cp.registrationID, cp.companyTaxRegistration.transactionId, cp).map(_ => data)
+        }
+      }
+    }
+  }
+
 
   def fetchAndGet[T](key : String)(implicit hc: HeaderCarrier, format: Format[T]): Future[Option[T]] = {
     metricsService.processOptionalDataWithMetrics[T](successCounter, emptyResponseCounter, timer) {
-      sessionCache.fetchAndGetEntry(key)
+      sessionRepository().getSessionMap(sessionID).map {
+        _.flatMap(_.getEntry(key))
+      }
     }
   }
 
-  def remove()(implicit hc : HeaderCarrier) : Future[HttpResponse] = {
+  def fetchByTransactionId(txId: String)(implicit hc: HeaderCarrier): Future[Option[SessionMap]] = {
+    metricsService.processOptionalDataWithMetrics(successCounter, emptyResponseCounter, timer) {
+      sessionRepository().getLatestSessionMapByTransactionId(txId)
+    }
+  }
+
+  def remove()(implicit hc : HeaderCarrier) : Future[Boolean] = {
     metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
-      sessionCache.remove()
+      sessionRepository().removeDocument(sessionID)
     }
   }
 }

@@ -45,6 +45,8 @@ class TestSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val payeRegService           = mockPayeRegService
       override val testPAYERegConnector     = mockTestPayeRegConnector
       override val s4LService               = mockS4LService
+      override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val payeRegistrationService = mockPayeRegService
 
       override def doBusinessProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = Future.successful(BusinessProfile("regId", "en"))
       override def doCoHoCompanyDetailsTearDown(regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")

@@ -45,7 +45,8 @@ with WiremockHelper {
     "microservice.services.cachable.session-cache.domain" -> "keystore",
     "microservice.services.cachable.short-lived-cache.host" -> s"$mockHost",
     "microservice.services.cachable.short-lived-cache.port" -> s"$mockPort",
-    "microservice.services.cachable.short-lived-cache.domain" -> "save4later"
+    "microservice.services.cachable.short-lived-cache.domain" -> "save4later",
+    "mongodb.uri" -> s"$mongoUri"
   ))
 
   override def beforeEach() {
@@ -89,7 +90,8 @@ with WiremockHelper {
 
       stubSuccessfulLogin()
 
-      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(false), regId = regId))
+//      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(false), regId = regId))
+      stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
@@ -114,7 +116,9 @@ with WiremockHelper {
 
       stubSuccessfulLogin()
 
-      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = None, regId = regId))
+
+      stubSessionCacheMetadata(SessionId, regId)
+//      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = None, regId = regId))
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
@@ -139,7 +143,8 @@ with WiremockHelper {
 
       stubSuccessfulLogin()
 
-      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(true), regId = regId))
+      stubSessionCacheMetadata(SessionId, regId, true)
+//      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(true), regId = regId))
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
@@ -168,7 +173,8 @@ with WiremockHelper {
 
       stubSuccessfulLogin()
 
-      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(true), regId = regId))
+      stubSessionCacheMetadata(SessionId, regId, true)
+//      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(true), regId = regId))
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 

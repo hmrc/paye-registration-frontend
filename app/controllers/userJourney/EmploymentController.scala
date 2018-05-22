@@ -17,15 +17,14 @@
 package controllers.userJourney
 
 import javax.inject.Inject
-
-import connectors.KeystoreConnector
+import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.employmentDetails._
 import models.view.{EmployingStaff, Subcontractors}
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import services.{CompanyDetailsService, EmploymentService, IncorporationInformationService, S4LService}
+import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.annual.FirstPaymentInNextTaxYear
 import views.html.pages.employmentDetails.{companyPension => CompanyPensionPage, employingStaff => EmployingStaffPage, firstPayment => FirstPaymentPage, subcontractors => SubcontractorsPage}
@@ -39,7 +38,9 @@ class EmploymentControllerImpl @Inject()(val employmentService: EmploymentServic
                                          val s4LService: S4LService,
                                          val companyDetailsService: CompanyDetailsService,
                                          val incorpInfoService: IncorporationInformationService,
-                                         implicit val messagesApi: MessagesApi) extends EmploymentController with AuthRedirectUrls
+                                         implicit val messagesApi: MessagesApi,
+                                         val incorporationInformationConnector: IncorporationInformationConnector,
+                                         val payeRegistrationService: PAYERegistrationService) extends EmploymentController with AuthRedirectUrls
 
 trait EmploymentController extends PayeBaseController {
   val employmentService: EmploymentService

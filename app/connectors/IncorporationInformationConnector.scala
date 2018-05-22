@@ -18,11 +18,14 @@ package connectors
 
 import javax.inject.Inject
 import com.codahale.metrics.{Counter, Timer}
-import common.exceptions.DownstreamExceptions.OfficerListNotFoundException
+import common.exceptions.DownstreamExceptions.{IncorporationInformationResponseException, OfficerListNotFoundException}
 import config.WSHttp
 import controllers.exceptions.GeneralException
-import models.external.{CoHoCompanyDetailsModel, OfficerList}
+import enums.IncorporationStatus
+import models.external.{CoHoCompanyDetailsModel, IncorpUpdateResponse, OfficerList}
 import org.apache.http.HttpStatus
+import play.api.Logger
+import play.api.http.Status.{ACCEPTED, OK}
 import play.api.libs.json._
 import services.MetricsService
 import uk.gov.hmrc.http._
@@ -35,11 +38,13 @@ import scala.concurrent.Future
 class IncorporationInformationConnectorImpl @Inject()(val metricsService: MetricsService,
                                                       val http: WSHttp,
                                                       servicesConfig: ServicesConfig) extends IncorporationInformationConnector {
-  lazy val incorpInfoUrl = servicesConfig.baseUrl("incorporation-information")
-  lazy val incorpInfoUri = servicesConfig.getConfString("incorporation-information.uri","")
-  val successCounter     = metricsService.companyDetailsSuccessResponseCounter
-  val failedCounter      = metricsService.companyDetailsFailedResponseCounter
-  def timer              = metricsService.incorpInfoResponseTimer.time()
+  lazy val incorpInfoUrl        = servicesConfig.baseUrl("incorporation-information")
+  lazy val incorpInfoUri        = servicesConfig.getConfString("incorporation-information.uri","")
+  lazy val payeRegFeUrl         = servicesConfig.getConfString("paye-registration-frontend.ii-callback.url",
+    throw new IllegalArgumentException("[IncorporationInformationConnector] config value payeRegFeUrl cannot be found"))
+  val successCounter            = metricsService.companyDetailsSuccessResponseCounter
+  val failedCounter             = metricsService.companyDetailsFailedResponseCounter
+  def timer: Timer.Context      = metricsService.incorpInfoResponseTimer.time()
 }
 
 sealed trait IncorpInfoResponse
@@ -51,12 +56,44 @@ case class IncorpInfoErrorResponse(ex: Exception) extends IncorpInfoResponse
 trait IncorporationInformationConnector extends RegistrationWhitelist {
   val incorpInfoUrl: String
   val incorpInfoUri: String
-  val http: CoreGet
+  val payeRegFeUrl: String
+  val http: CoreGet with CorePost with CoreDelete
   val metricsService: MetricsService
 
   val successCounter: Counter
   val failedCounter: Counter
   def timer: Timer.Context
+
+  def setupSubscription(transactionId: String, regId: String, regime: String = "paye-fe", subscriber: String = "SCRS")(implicit hc: HeaderCarrier): Future[Option[IncorporationStatus.Value]] = {
+    def constructIncorporationInfoUri(transactionId: String, regime: String, subscriber: String): String = {
+      s"/incorporation-information/subscribe/$transactionId/regime/$regime/subscriber/$subscriber"
+    }
+    val postJson = Json.obj("SCRSIncorpSubscription" -> Json.obj("callbackUrl" -> s"$payeRegFeUrl/company-incorporation"))
+    http.POST[JsObject, HttpResponse](s"$incorpInfoUrl${constructIncorporationInfoUri(transactionId, regime, subscriber)}", postJson) map { resp =>
+      resp.status match {
+        case OK => Some(resp.json.as[IncorporationStatus.Value](IncorpUpdateResponse.reads(transactionId, subscriber, regime)))
+        case ACCEPTED => None
+        case _ =>
+          Logger.warn(s"[IncorporationInformationConnect] - [setupSubscription] returned a successful response but with an incorrect code of: ${resp.status} for regId: $regId and txId: $transactionId")
+          throw new IncorporationInformationResponseException(s"Calling II on ${constructIncorporationInfoUri(transactionId, regime, subscriber)} returned a ${resp.status}")
+      }
+    } recover {
+      case e =>
+        Logger.warn(s"[IncorporationInformationConnect] - [setupSubscription] an unexpected error ${e.getMessage} occurred when calling II for regId: $regId txId: $transactionId")
+        throw e
+    }
+  }
+
+  def cancelSubscription(transactionId: String, regId: String, regime: String = "paye-fe", subscriber: String = "SCRS")(implicit hc: HeaderCarrier): Future[Boolean] = {
+    http.DELETE[HttpResponse](s"$incorpInfoUrl/incorporation-information/subscribe/$transactionId/regime/$regime/subscriber/$subscriber").map(_ => true)
+    .recover {
+      case _: NotFoundException => Logger.info(s"[IncorporationInformationConnect] - [cancelSubscription] no subscription found when trying to delete subscription. it might already have been deleted")
+        true
+      case e =>
+        Logger.warn(s"[IncorporationInformationConnect] - [cancelSubscription] an unexpected error ${e.getMessage} occurred when calling II for regId: $regId txId: $transactionId")
+        false
+    }
+  }
 
   def getCoHoCompanyDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[IncorpInfoResponse] = {
     ifRegIdNotWhitelisted(regId) {

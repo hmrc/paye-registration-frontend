@@ -77,6 +77,18 @@ trait PAYERegistrationConnector {
     }
   }
 
+  def getRegistrationId(txId: String)(implicit hc: HeaderCarrier): Future[String] = {
+    val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
+    http.GET[String](s"$payeRegUrl/paye-registration/$txId/registration-id") map { res =>
+      payeRegTimer.stop()
+      res
+    } recover {
+      case e: Exception =>
+        payeRegTimer.stop()
+        throw logResponse(e, "getRegistrationId by txId", "getting registrationId", "", Some(txId))
+    }
+  }
+
   def submitRegistration(regId: String)(implicit hc: HeaderCarrier): Future[DESResponse] = {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
     http.PUT[String, HttpResponse](s"$payeRegUrl/paye-registration/$regId/submit-registration", "") map {
@@ -356,17 +368,17 @@ trait PAYERegistrationConnector {
     }
   }
 
-  def deleteCurrentRegistrationDocument(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
+  def deleteRejectedRegistrationDocument(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
     http.DELETE[HttpResponse](s"$payeRegUrl/paye-registration/$regId/delete") map {
       _.status match {
         case OK => RegistrationDeletion.success
       }
     } recover {
       case fourXX: Upstream4xxResponse if fourXX.upstreamResponseCode == PRECONDITION_FAILED =>
-        logger.warn(s"[PAYERegistrationConnector] - [deleteCurrentRegistrationDocument] Deleting document for regId $regId and txId $txId failed as document was not rejected")
+        logger.warn(s"[PAYERegistrationConnector] - [deleteRejectedRegistrationDocument] Deleting document for regId $regId and txId $txId failed as document was not rejected")
         RegistrationDeletion.invalidStatus
       case fiveXX: Upstream5xxResponse =>
-        throw logResponse(fiveXX, "deleteCurrentRegistrationDocument", s"deleting document, error message: ${fiveXX.message}", regId, Some(txId))
+        throw logResponse(fiveXX, "deleteRejectedRegistrationDocument", s"deleting document, error message: ${fiveXX.message}", regId, Some(txId))
     }
   }
 
@@ -381,6 +393,20 @@ trait PAYERegistrationConnector {
         RegistrationDeletion.invalidStatus
       case fiveXX: Upstream5xxResponse =>
         throw logResponse(fiveXX, "deleteCurrentRegistrationInProgress", s"deleting document, error message: ${fiveXX.message}", regId, Some(txId))
+    }
+  }
+
+  def deleteRegistrationForRejectedIncorp(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
+    http.DELETE[HttpResponse](s"$payeRegUrl/paye-registration/$regId/delete-rejected-incorp") map {
+      _.status match {
+        case OK => RegistrationDeletion.success
+      }
+    } recover {
+      case fourXX: Upstream4xxResponse if fourXX.upstreamResponseCode == PRECONDITION_FAILED =>
+        logger.warn(s"[PAYERegistrationConnector] - [deleteRegistrationForRejectedIncorp] Deleting document for regId $regId and txId $txId failed as document was not draft or invalid")
+        RegistrationDeletion.invalidStatus
+      case fiveXX: Upstream5xxResponse =>
+        throw logResponse(fiveXX, "deleteRegistrationForRejectedIncorp", s"deleting document, error message: ${fiveXX.message}", regId, Some(txId))
     }
   }
 

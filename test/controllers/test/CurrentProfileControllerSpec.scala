@@ -42,6 +42,8 @@ class CurrentProfileControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val keystoreConnector        = mockKeystoreConnector
       override val testBusinessRegConnector = mockTestBusRegConnector
       override val authConnector            = mockAuthConnector
+      override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val payeRegistrationService = mockPayeRegService
     }
   }
 
@@ -53,8 +55,8 @@ class CurrentProfileControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[HttpReads[BusinessProfile]]()))
           .thenReturn(Future.successful(testProfile))
 
-        when(mockKeystoreConnector.cache[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
-          .thenReturn(Future.successful(Fixtures.blankCacheMap))
+        when(mockKeystoreConnector.cache[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+          .thenReturn(Future.successful(Fixtures.blankSessionMap))
 
         AuthHelpers.showAuthorised(controller.businessProfileSetup, request) { result =>
           status(result) mustBe OK
@@ -70,8 +72,8 @@ class CurrentProfileControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockTestBusRegConnector.createBusinessProfileEntry(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testProfile))
 
-        when(mockKeystoreConnector.cache[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
-          .thenReturn(Future.successful(Fixtures.blankCacheMap))
+        when(mockKeystoreConnector.cache[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+          .thenReturn(Future.successful(Fixtures.blankSessionMap))
 
         AuthHelpers.showAuthorised(controller.businessProfileSetup, request) { result =>
           status(result) mustBe OK

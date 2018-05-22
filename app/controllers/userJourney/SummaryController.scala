@@ -43,7 +43,9 @@ class SummaryControllerImpl @Inject()(val summaryService: SummaryService,
                                       val incorpInfoService: IncorporationInformationService,
                                       val payeRegistrationConnector: PAYERegistrationConnector,
                                       val emailService: EmailService,
-                                      val messagesApi: MessagesApi) extends SummaryController with AuthRedirectUrls
+                                      val messagesApi: MessagesApi,
+                                      val incorporationInformationConnector: IncorporationInformationConnector,
+                                      val payeRegistrationService: PAYERegistrationService) extends SummaryController with AuthRedirectUrls
 
 trait SummaryController extends PayeBaseController {
   val summaryService: SummaryService
