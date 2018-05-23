@@ -49,7 +49,7 @@ trait BusinessRegistrationConnector {
     } recover {
       case e =>
         businessRegistrationTimer.stop()
-        throw logResponse(e, "retrieving completion capacity")
+        throw logResponse(e, "retrieving current profile")
     }
   }
 

@@ -27,7 +27,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import utils.PAYEFeatureSwitches
 
 import scala.concurrent.Future
@@ -111,6 +111,7 @@ trait PayeStartController extends PayeBaseController {
     currentProfileService.fetchAndStoreCurrentProfile flatMap { currentProfile: CurrentProfile =>
       currentProfileChecks(currentProfile)(f)
     } recover {
+      case _: NotFoundException                 => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
       case _: ConfirmationRefsNotFoundException => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
       case _                                    => InternalServerError(views.html.pages.error.restart())
     }
