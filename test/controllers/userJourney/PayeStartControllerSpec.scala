@@ -24,6 +24,7 @@ import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
+import uk.gov.hmrc.http.NotFoundException
 
 import scala.concurrent.Future
 
@@ -159,6 +160,17 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("/register-for-paye/register-as-employer")
+      }
+    }
+
+    "redirect to OTRS for a user with no CT Footprint found" in new Setup {
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new NotFoundException("404")))
+
+      AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
+        result =>
+          status(result) mustBe Status.SEE_OTHER
+          redirectLocation(result) mustBe Some("https://www.tax.service.gov.uk/business-registration/select-taxes")
       }
     }
 
