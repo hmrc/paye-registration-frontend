@@ -40,9 +40,6 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
       override val redirectToLogin         = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
 
-      override val incorpInfoService = mockIncorpInfoService
-      override val companyDetailsService = mockCompanyDetailsService
-      override val s4LService = mockS4LService
       override val directorDetailsService = mockDirectorDetailService
       override val messagesApi = mockMessagesApi
       override val authConnector = mockAuthConnector

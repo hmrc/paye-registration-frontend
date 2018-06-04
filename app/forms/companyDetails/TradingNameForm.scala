@@ -63,4 +63,14 @@ object TradingNameForm extends RequiredBooleanForm {
       "tradingName" -> optional(text)
     )(TradingName.apply)(TradingName.unapply)
   )
+
+  def fillWithPrePop(prePopTradingName:Option[String], tradingName: Option[TradingName]): Form[TradingName] = {
+    if (tradingName.exists(_.differentName)) {
+      form.fill(tradingName.get)
+    } else {
+      val diffName = tradingName.map(_.differentName.toString).getOrElse("")
+      val tradeName = prePopTradingName.getOrElse("")
+      form.bind(Map("differentName" -> diffName,"tradingName" -> tradeName)).discardingErrors
+    }
+  }
 }

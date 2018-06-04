@@ -27,11 +27,13 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
+import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, Call, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
+import play.api.mvc.Results.Ok
 
 import scala.concurrent.Future
 
@@ -71,14 +73,10 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "show the correctly pre-populated trading name page when data has already been entered" in new Setup {
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
-
-      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Fixtures.validCoHoCompanyDetailsResponse))
-
-      when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
+      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(None))
 
       AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest) {
         (response: Future[Result]) =>
@@ -94,14 +92,10 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     "show the correctly pre-populated trading name page when negative data has already been entered" in new Setup {
       val cName = "Tst Company Name"
       val negativeTradingNameCompanyDetails = Fixtures.validCompanyDetailsViewModel.copy(tradingName = Some(Fixtures.negativeTradingNameViewModel))
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(negativeTradingNameCompanyDetails))
-
-      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Fixtures.validCoHoCompanyDetailsResponse))
-
-      when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
+      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some("foo bar")))
 
       AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest) {
         (response: Future[Result]) =>
@@ -110,59 +104,49 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
           result.body.getElementById("pageHeading").text() mustBe "Does or will the company trade using a different name?"
           result.body.getElementById("differentName-true").attr("checked") mustBe ""
           result.body.getElementById("differentName-false").attr("checked") mustBe "checked"
-          result.body.getElementById("tradingName").attr("value") mustBe ""
+          result.body.getElementById("tradingName").attr("value") mustBe "foo bar"
       }
     }
 
-    "show a blank trading name page when no Trading Name data has been entered" in new Setup {
+    "show a blank trading name page when no Trading Name data has been entered and no pre pop exists" in new Setup {
       val cName = "Tst Company Name"
       val noTradingNameCompanyDetails = Fixtures.validCompanyDetailsViewModel.copy(tradingName = None)
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(noTradingNameCompanyDetails))
-
-      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Fixtures.validCoHoCompanyDetailsResponse))
-
-      when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
+      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(None))
 
       AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest) {
         (response: Future[Result]) =>
           status(response) mustBe Status.OK
           val result = Jsoup.parse(contentAsString(response))
           result.body().getElementById("pageHeading").text() mustBe "Does or will the company trade using a different name?"
-          result.body.getElementById("differentName-true").parent.classNames().contains("selected") mustBe false
-          result.body.getElementById("differentName-false").parent.classNames().contains("selected") mustBe false
+          result.body.getElementById("differentName-true").attr("checked") mustBe ""
+          result.body.getElementById("differentName-false").attr("checked") mustBe ""
           result.body().getElementById("tradingName").attr("value") mustBe ""
       }
     }
 
-    "show a blank trading name page when no Company Details data has been entered" in new Setup {
+    "show a pre popped trading name page when no Company Details data has been entered but pre pop returns a string" in new Setup {
       val cName = "Tst Company Name"
       val defaultCompanyDetailsView = CompanyDetailsView(cName, None, Fixtures.validROAddress, None, None)
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(defaultCompanyDetailsView))
-
-      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Fixtures.validCoHoCompanyDetailsResponse))
-
-      when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
-
+      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some("foo bar wizz")))
       AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest) {
         response =>
           status(response) mustBe Status.OK
           val result = Jsoup.parse(contentAsString(response))
           result.body().getElementById("pageHeading").text() mustBe "Does or will the company trade using a different name?"
-          result.body.getElementById("differentName-true").parent.classNames().contains("selected") mustBe false
-          result.body.getElementById("differentName-false").parent.classNames().contains("selected") mustBe false
-          result.body().getElementById("tradingName").attr("value") mustBe ""
+          result.body.getElementById("differentName-true").attr("checked") mustBe ""
+          result.body.getElementById("differentName-false").attr("checked") mustBe ""
+          result.body().getElementById("tradingName").attr("value") mustBe "foo bar wizz"
       }
     }
   }
 
   "calling the submitTradingName action" should {
-
     "return 303 for an unauthorised user" in new Setup {
       AuthHelpers.showUnauthorised(controller.submitTradingName, fakeRequest) {
         result =>
@@ -243,15 +227,8 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
             Some("testPostCode"),
             None
           )
-
-        when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-          .thenReturn(Future(Fixtures.validCoHoCompanyDetailsResponse))
-
-        when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
-
-        when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-          .thenReturn(Future(Fixtures.blankCacheMap))
 
         AuthHelpers.showAuthorisedWithCP(controller.roAddress, Fixtures.validCurrentProfile, fakeRequest) {
           result =>

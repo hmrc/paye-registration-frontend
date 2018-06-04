@@ -18,6 +18,7 @@ package forms.companyDetails
 
 import common.exceptions.InternalExceptions._
 import helpers.PayeComponentSpec
+import models.view.TradingName
 
 class TradingNameFormSpec extends PayeComponentSpec {
 
@@ -68,6 +69,53 @@ class TradingNameFormSpec extends PayeComponentSpec {
 
     "return the form with errors as the trading name is too long" in {
       TradingNameForm.validateForm(testForm.bind(invalidDataTooLong)) mustBe testForm.bind(invalidDataTooLong).withError("tradingName", "pages.tradingName.error.length")
+    }
+  }
+  "fillWithPrePop" should {
+    "return a form with just trading Name populated and differentName set to blank string if TradingName model = None" in {
+      val mappingOfForm = Map(
+        "differentName" -> "",
+        "tradingName" -> "foo bar wizz pre pop"
+      )
+      val prePopName = Some("foo bar wizz pre pop")
+      val tradingNameModel = None
+
+      val res = TradingNameForm.fillWithPrePop(prePopName,tradingNameModel)
+      res.errors mustBe Seq.empty
+      res mustBe testForm.bind(mappingOfForm).discardingErrors
+    }
+    "return a form populated with the model not the pre pop trading name as the model = Some and answer is true" in {
+      val mappingOfForm = Map(
+        "differentName" -> "true",
+        "tradingName" -> "foo"
+      )
+      val prePopName = Some("foo bar wizz pre pop")
+      val tradingNameModel = Some(TradingName(true,Some("foo")))
+
+      val res = TradingNameForm.fillWithPrePop(prePopName,tradingNameModel)
+      res.errors mustBe Seq.empty
+      res mustBe testForm.bind(mappingOfForm).discardingErrors
+    }
+    "return a form populated with the model and the pre pop trading name as the model = Some and answer is false" in {
+      val mappingOfForm = Map(
+        "differentName" -> "false",
+        "tradingName" -> "foo bar wizz pre pop"
+      )
+      val prePopName = Some("foo bar wizz pre pop")
+      val tradingNameModel = Some(TradingName(false,None))
+
+      val res = TradingNameForm.fillWithPrePop(prePopName,tradingNameModel)
+      res.errors mustBe Seq.empty
+      res mustBe testForm.bind(mappingOfForm).discardingErrors
+    }
+    "return a form with nothing populated as there is neither pre pop nor is there a model" in {
+      val mappingOfForm = Map(
+        "differentName" -> "",
+        "tradingName" -> "")
+
+      val res = TradingNameForm.fillWithPrePop(None,None)
+      res.errors mustBe Seq.empty
+      res mustBe testForm.bind(mappingOfForm).discardingErrors
     }
   }
 }

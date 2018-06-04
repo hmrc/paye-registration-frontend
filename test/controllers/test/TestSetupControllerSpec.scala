@@ -33,8 +33,6 @@ class TestSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val redirectToLogin         = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
 
-      override val incorpInfoService        = mockIncorpInfoService
-      override val companyDetailsService    = mockCompanyDetailsService
       override val businessRegConnector     = mockBusinessRegistrationConnector
       override val keystoreConnector        = mockKeystoreConnector
       override val testBusinessRegConnector = mockTestBusRegConnector

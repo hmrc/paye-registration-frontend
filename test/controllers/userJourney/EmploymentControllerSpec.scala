@@ -49,9 +49,6 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp with 
       override val redirectToLogin         = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
 
-      override val incorpInfoService = mockIncorpInfoService
-      override val companyDetailsService = mockCompanyDetailsService
-      override val s4LService = mockS4LService
       override val authConnector = mockAuthConnector
       override val employmentService = mockEmploymentService
       override val keystoreConnector = mockKeystoreConnector

@@ -52,6 +52,13 @@ trait PrepopulationService {
     busRegConnector.upsertContactDetails(regId, contactDetails) map(_ => contactDetails)
   }
 
+  def getTradingName(regId: String)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    busRegConnector.retrieveTradingName(regId)
+  }
+  def saveTradingName(regId:String, tradingName:String)(implicit hc: HeaderCarrier): Future[String] = {
+    busRegConnector.upsertTradingName(regId,tradingName)
+  }
+
   def getPrePopAddresses(regId: String, roAddress: Address, ppobAddress: Option[Address], otherAddress: Option[Address])(implicit hc: HeaderCarrier): Future[Map[Int,Address]] = {
     busRegConnector.retrieveAddresses(regId) flatMap {
       addresses =>

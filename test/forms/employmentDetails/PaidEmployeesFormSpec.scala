@@ -17,7 +17,9 @@
 package forms.employmentDetails
 
 import java.time.LocalDate
-import forms.employmentDetails.PaidEmployeesForm.{dateTimeFormat, customFormPrefix}
+import java.time.temporal.ChronoUnit
+
+import forms.employmentDetails.PaidEmployeesForm.{customFormPrefix, dateTimeFormat}
 import helpers.PayeComponentSpec
 import models.view.EmployingAnyone
 import play.api.data.FormError
@@ -64,12 +66,12 @@ class PaidEmployeesFormSpec extends PayeComponentSpec {
     "earliestDateMonth" -> today.getMonthValue.toString,
     "earliestDateYear" -> today.minusYears(2).getYear.toString
   )
-
+val futureDate = today.plus(1,ChronoUnit.DAYS)
   val payingSomeoneInFuture = Map(
     "alreadyPaying" -> "true",
-    "earliestDateDay" -> today.plusDays(1).getDayOfMonth.toString,
-    "earliestDateMonth" -> today.getMonthValue.toString,
-    "earliestDateYear" -> today.getYear.toString
+    "earliestDateDay" -> futureDate.getDayOfMonth.toString,
+    "earliestDateMonth" -> futureDate.getMonthValue.toString,
+    "earliestDateYear" -> futureDate.getYear.toString
   )
 
   "PaidEmployeesForm" should {
@@ -95,5 +97,4 @@ class PaidEmployeesFormSpec extends PayeComponentSpec {
       testFormIncorped3YearsAgo.bind(payingSomeoneInFuture).errors mustBe Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.dateInFuture"))
     }
   }
-
 }

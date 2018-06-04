@@ -34,8 +34,6 @@ class TestAddressLookupControllerSpec extends PayeComponentSpec with PayeFakedAp
       override val redirectToLogin        = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign     = MockAuthRedirects.redirectToPostSign
 
-      override val incorpInfoService      = mockIncorpInfoService
-      override val s4LService             = mockS4LService
       override val messagesApi            = mockMessagesApi
       override val authConnector          = mockAuthConnector
       override val companyDetailsService  = mockCompanyDetailsService

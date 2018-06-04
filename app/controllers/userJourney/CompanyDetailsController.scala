@@ -57,12 +57,12 @@ trait CompanyDetailsController extends PayeBaseController {
   val auditService: AuditService
 
   def tradingName: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    withLatestCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) { companyDetails =>
-      companyDetails.tradingName match {
-        case Some(model)  => Ok(TradingNamePage(TradingNameForm.form.fill(model), companyDetails.companyName))
-        case _            => Ok(TradingNamePage(TradingNameForm.form, companyDetails.companyName))
+      for {
+        companyDetails  <- companyDetailsService.withLatestCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
+        tName           <- companyDetailsService.getTradingNamePrepop(profile.registrationID,companyDetails.tradingName)
+      } yield {
+        Ok(TradingNamePage(TradingNameForm.fillWithPrePop(tName,companyDetails.tradingName), companyDetails.companyName))
       }
-    }
   }
 
   def submitTradingName: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
@@ -84,7 +84,7 @@ trait CompanyDetailsController extends PayeBaseController {
   }
 
   def roAddress: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    withLatestCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) { companyDetails =>
+    companyDetailsService.withLatestCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId).map { companyDetails =>
       Ok(confirmROAddress(companyDetails.companyName, companyDetails.roAddress))
     }
   }

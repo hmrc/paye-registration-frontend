@@ -17,11 +17,10 @@
 package connectors
 
 import javax.inject.Inject
-
 import config.WSHttp
 import models.Address
 import models.external.BusinessProfile
-import models.view.PAYEContactDetails
+import models.view.{CompanyDetails, PAYEContactDetails}
 import play.api.libs.json.JsValue
 import services.MetricsService
 import uk.gov.hmrc.http._
@@ -65,6 +64,31 @@ trait BusinessRegistrationConnector {
       case e =>
         businessRegistrationTimer.stop()
         throw logResponse(e, "retrieving completion capacity")
+    }
+  }
+  def retrieveTradingName(regId: String)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
+    http.GET[JsValue](s"$businessRegUrl/business-registration/$regId/trading-name") map {
+      businessRegistrationTimer.stop()
+      _.as[Option[String]](CompanyDetails.tradingNameApiPrePopReads)
+    } recover {
+      case e =>
+        businessRegistrationTimer.stop()
+        logResponse(e, "retrieving Trading Name from pre-pop", Some(regId))
+        None
+    }
+  }
+  def upsertTradingName(regId: String, tradingName: String)(implicit hc: HeaderCarrier): Future[String] = {
+    val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
+    implicit val prepopWrites     = CompanyDetails.tradingNameApiPrePopWrites
+    http.POST[String,HttpResponse](s"$businessRegUrl/business-registration/$regId/trading-name",tradingName) map {
+      _ => businessRegistrationTimer.stop()
+      tradingName
+    } recover {
+      case e =>
+        businessRegistrationTimer.stop()
+        logResponse(e,"upserting Trading Name to pre-pop", Some(regId))
+        tradingName
     }
   }
 

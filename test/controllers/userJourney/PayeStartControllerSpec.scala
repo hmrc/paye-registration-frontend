@@ -45,9 +45,6 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val payeRegElFEURL          = MockAuthRedirects.payeRegElFEUrl
       override val payeRegElFEURI          = MockAuthRedirects.payeRegElFEUri
 
-      override val incorpInfoService              = mockIncorpInfoService
-      override val companyDetailsService          = mockCompanyDetailsService
-      override val s4LService                     = mockS4LService
       override val authConnector                  = mockAuthConnector
       override val currentProfileService          = mockCurrentProfileService
       override val payeRegistrationService        = mockPayeRegService

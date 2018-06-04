@@ -76,6 +76,11 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
   val regId = "3"
   val txId = "12345"
   val companyName = "Foo Ltd"
+  val tradingNameFromPrePop = """
+      |{
+      | "tradingName" : "fooBarWizz From Pre Pop"
+      |}
+    """.stripMargin
 
 
   "GET Trading Name" should {
@@ -137,7 +142,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       document.getElementById("lead-paragraph").text mustBe "Tell us if the company will use a trading name that's different from test company."
     }
 
-    "Return an unpopulated page if PayeReg returns a NotFound response" in {
+    "Return a populated from pre pop page if PayeReg returns a NotFound response" in {
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
       stubPayeRegDocumentStatus(regId)
@@ -146,6 +151,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
       stubGet(s"/paye-registration/$regId/company-details", 404, "")
       stubGet(s"/business-registration/$regId/contact-details", 404, "")
+      stubGet(s"/business-registration/$regId/trading-name", 200, tradingNameFromPrePop)
       val companyProfileDoc =
         """
           |{
@@ -184,12 +190,11 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       document.getElementById("pageHeading").text mustBe "Does or will the company trade using a different name?"
       document.getElementById("differentName-true").attr("checked") mustBe ""
       document.getElementById("differentName-false").attr("checked") mustBe ""
-      document.getElementById("tradingName").`val` mustBe ""
+      document.getElementById("tradingName").`val` mustBe "fooBarWizz From Pre Pop"
 
-      // TODO verify S4L put
     }
 
-    "Return a populated page with a default Company Name if the regId is part of the whitelist" in {
+    "Return a populated page with a default Company Name if the regId is part of the whitelist with trading name pre populated" in {
       val regIdWhitelisted = "regWhitelist123"
 
       setupSimpleAuthMocks()
@@ -197,11 +202,11 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubPayeRegDocumentStatus(regIdWhitelisted)
       stubSessionCacheMetadata(SessionId, regIdWhitelisted)
 
-      stubGet(s"/save4later/paye-registration-frontend/$regIdWhitelisted", 404, "")
 
+      stubGet(s"/save4later/paye-registration-frontend/$regIdWhitelisted", 404, "")
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/save4later/paye-registration-frontend/$regIdWhitelisted/data/CompanyDetails", 200, dummyS4LResponse)
-
+      stubGet(s"/business-registration/$regIdWhitelisted/trading-name", 200, tradingNameFromPrePop)
       val fResponse = buildClient("/trading-name").
         withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
@@ -209,10 +214,13 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val response = await(fResponse)
 
       response.status mustBe 200
-
       val document = Jsoup.parse(response.body)
       document.title() mustBe "Does or will the company trade using a different name?"
       document.getElementById("pageHeading").text mustBe "Does or will the company trade using a different name?"
+      document.getElementById("differentName-true").attr("checked") mustBe ""
+      document.getElementById("differentName-false").attr("checked") mustBe "checked"
+      document.getElementById("tradingName").`val` mustBe "fooBarWizz From Pre Pop"
+      document.getElementById("lead-paragraph").html.contains("TEST-DEFAULT-COMPANY-NAME") mustBe true
     }
   }
 
@@ -220,6 +228,11 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
     "Accept information and send to PR" in {
       val tradingName = "Foo Trading"
+      val tradingNameJsonResponse =
+        """ {
+          | "tradingName": "Foo Trading"
+          | }
+        """.stripMargin
       val csrfToken = UUID.randomUUID().toString
 
       setupSimpleAuthMocks()
@@ -240,7 +253,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
           |}
         """.stripMargin
       stubGet(s"/incorporation-information/$txId/company-profile", 200, companyProfileDoc)
-
+      stubPost(s"/business-registration/$regId/trading-name", 200, tradingNameJsonResponse)
       val roDoc = s"""{"line1":"1", "line2":"2", "postCode":"pc"}"""
       val payeDoc =s"""{
            |"companyName": "$companyName",
@@ -282,9 +295,12 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/confirm-registered-office-address")
 
       val crPuts = findAll(patchRequestedFor(urlMatching(s"/paye-registration/$regId/company-details")))
+      val prePopPost = findAll(postRequestedFor(urlMatching(s"/business-registration/$regId/trading-name")))
       val captor = crPuts.get(0)
       val json = Json.parse(captor.getBodyAsString)
       (json \ "tradingName").as[String] mustBe tradingName
+      val jsonOfPrePopPost =  Json.parse(prePopPost.get(0).getBodyAsString)
+      (jsonOfPrePopPost \ "tradingName").as[String] mustBe tradingName
     }
   }
 
