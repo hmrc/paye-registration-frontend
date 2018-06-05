@@ -41,14 +41,9 @@ class RegistrationControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val keystoreConnector: KeystoreConnector = mockKeystoreConnector
       override val incorporationInformationConnector: IncorporationInformationConnector = mockIncorpInfoConnector
       override def authConnector: AuthConnector = mockAuthConnector
-      override val incorpInfoService: IncorporationInformationService = mockIncorpInfoService
-      override val companyDetailsService: CompanyDetailsService = mockCompanyDetailsService
-      override val s4LService: S4LService = mockS4LService
       override def messagesApi: MessagesApi = mockMessagesApi
     }
   }
-
-
 
   "companyIncorporation" should {
     "return a 200" when {

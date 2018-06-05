@@ -303,7 +303,61 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
 
       an[Exception] mustBe thrownBy(await(service.getCompanyDetails("54321", "txId")))
     }
+  }
 
+  "calling withLatestCompanyDetails" should {
+    "return an up to date Company Details with Incorporation Information data" in new Setup {
+      val defaultCompanyDetails = CompanyDetailsView("test Name", None, Fixtures.validAddress, None, None)
+      val expectedCompanyDetails = CompanyDetailsView(Fixtures.validCoHoCompanyDetailsResponse.companyName, None, Fixtures.validCoHoCompanyDetailsResponse.roAddress, None, None)
+
+      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Fixtures.validCoHoCompanyDetailsResponse))
+
+      when(mockS4LService.fetchAndGet[CompanyDetailsView](ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
+          .thenReturn(Future.successful(Some(defaultCompanyDetails)))
+
+      when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
+
+      val result = await(service.withLatestCompanyDetails("testRegId", "testTxId"))
+      result mustBe expectedCompanyDetails
+    }
+
+    "return a default Company Details from Company Details service if Incorporation Information returns an error" in new Setup {
+      val defaultCompanyDetails = CompanyDetailsView("test Name", None, Fixtures.validAddress, None, None)
+
+      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new Exception))
+
+      when(mockS4LService.fetchAndGet[CompanyDetailsView](ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(defaultCompanyDetails)))
+
+      when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(CacheMap("key", Map.empty)))
+
+      val result = await(service.withLatestCompanyDetails("testRegId", "testTxId"))
+      result mustBe defaultCompanyDetails
+    }
+  }
+  "Calling getTradingNamePrepop" should {
+    "return Some of pre pop trading name if trading name model is None" in new Setup {
+      when(mockPrepopulationService.getTradingName(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(Some("foo bar wizz")))
+
+      await(service.getTradingNamePrepop("12345",None)) mustBe Some("foo bar wizz")
+    }
+    "return None as the trading name model = Some of true" in new Setup {
+      await(service.getTradingNamePrepop("12345",Some(TradingNameView(true,Some("foo"))))) mustBe None
+    }
+    "return Some of pre pop trading name as the trading name model = Some of false" in new Setup {
+      when(mockPrepopulationService.getTradingName(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(Some("foo bar wizz")))
+
+      await(service.getTradingNamePrepop("12345",Some(TradingNameView(false,None)))) mustBe Some("foo bar wizz")
+    }
+    "return None if prep pop returns nothing and trading name model = None" in new Setup {
+      when(mockPrepopulationService.getTradingName(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(None))
+
+      await(service.getTradingNamePrepop("12345",None)) mustBe None
+    }
   }
 
   "Calling saveCompanyDetails" should {
@@ -335,10 +389,16 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
 
   "Calling submitTradingName" should {
     "return a success response when submit is completed successfully" in new CompanyDetailsMockedSetup {
+      when(mockPrepopulationService.saveTradingName(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(""))
       await(service.submitTradingName(Fixtures.validTradingNameViewModel, "54322", "txId")) mustBe DownstreamOutcome.Success
     }
 
+    "return a success response when submit is completed successfully but user selected false so prepop was not called" in new CompanyDetailsMockedSetup {
+      await(service.submitTradingName(TradingNameView(false, None), "54322", "txId")) mustBe DownstreamOutcome.Success
+    }
+
     "return a failure response when submit is not completed successfully" in new NoCompanyDetailsMockedSetup {
+      when(mockPrepopulationService.saveTradingName(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(""))
       await(service.submitTradingName(Fixtures.validTradingNameViewModel, "543222", "txId")) mustBe DownstreamOutcome.Failure
     }
   }

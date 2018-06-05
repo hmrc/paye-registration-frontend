@@ -41,6 +41,7 @@ class ConfirmationControllerImpl @Inject()(val messagesApi: MessagesApi,
 trait ConfirmationController extends PayeBaseController {
   val confirmationService: ConfirmationService
   val emailService: EmailService
+  val s4LService: S4LService
 
   def showConfirmation: Action[AnyContent] = isAuthorisedWithProfileNoSubmissionCheck { implicit request => profile =>
     (for {

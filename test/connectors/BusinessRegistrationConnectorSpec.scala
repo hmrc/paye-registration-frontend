@@ -110,6 +110,66 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
       intercept[RuntimeException](await(testConnector.retrieveCompletionCapacity))
     }
   }
+  val tradingName = "tradingName is here and now 12345"
+  val validTradingNameJson = Json.parse(
+    s"""
+       |{
+       | "tradingName" : "$tradingName"
+       |}
+      """.stripMargin)
+
+  val invalidTradingNameJson = Json.parse(
+    """
+      |{
+      |  "tradingName": 1234567890
+      |}
+    """.stripMargin)
+
+  "retrieveTradingName" should {
+    val regId = "12345"
+    "return an optional string Some(trading name)" in new Setup {
+      when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains(s"/business-registration/$regId/trading-name"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(validTradingNameJson))
+
+      await(testConnector.retrieveTradingName(regId)) mustBe Some(tradingName)
+    }
+    "return None when anything but a success response is returned" in new Setup {
+      when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains(s"/business-registration/$regId/trading-name"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new Exception("foo")))
+
+      await(testConnector.retrieveTradingName(regId)) mustBe None
+    }
+    "return None when success response is received but json is empty" in new Setup {
+      when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains(s"/business-registration/$regId/trading-name"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Json.obj()))
+
+      await(testConnector.retrieveTradingName(regId)) mustBe None
+    }
+    "return None when success repsonse is received but json is invalid" in new Setup {
+      when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains(s"/business-registration/$regId/trading-name"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(invalidTradingNameJson))
+
+      await(testConnector.retrieveTradingName(regId)) mustBe None
+    }
+  }
+  "upsertTradingName" should {
+    val regId = "12345"
+    "return the trading name on successful response from Business-Registration" in new Setup {
+      when(mockWSHttp.POST[String, HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
+        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(HttpResponse(204)))
+
+      await(testConnector.upsertTradingName(regId,tradingName)) mustBe tradingName
+
+    }
+    "return the trading name on a non success response from Business-Registration" in new Setup {
+      when(mockWSHttp.POST[String, HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
+        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new Exception("foo bar wizz bang")))
+
+      await(testConnector.upsertTradingName(regId,tradingName)) mustBe tradingName
+    }
+  }
 
   "retrieveContactDetails" should {
     val regId = "12345"

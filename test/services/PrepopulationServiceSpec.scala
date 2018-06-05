@@ -191,4 +191,28 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
       intercept[S4LFetchException](await(service.getAddress(regId, 2)))
     }
   }
+
+  "getTradingName" should {
+    "return Some of trading name from Business Reg Connector" in new Setup {
+      when(mockBusinessRegistrationConnector.retrieveTradingName(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some("foo")))
+
+      await(service.getTradingName("1")) mustBe Some("foo")
+    }
+    "return None of trading name from Business Reg Connector" in new Setup {
+      when(mockBusinessRegistrationConnector.retrieveTradingName(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(None))
+
+      await(service.getTradingName("1")) mustBe None
+    }
+  }
+
+  "saveTradingName" should {
+    "return String from Business Reg Connector" in new Setup {
+      when(mockBusinessRegistrationConnector.upsertTradingName(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful("foo"))
+
+      await(service.saveTradingName("1","foo")) mustBe "foo"
+    }
+  }
 }

@@ -17,14 +17,14 @@
 package services
 
 import javax.inject.Inject
-
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import models.external.AuditingInformation
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.{Address, DigitalContactDetails}
-import play.api.mvc.{AnyContent, Request}
+import play.api.data.Form
+import play.api.mvc.{AnyContent, Request, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.RegistrationWhitelist
@@ -59,6 +59,18 @@ trait CompanyDetailsService extends RegistrationWhitelist {
       } yield viewDetails
     }
   }
+  def withLatestCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+    for {
+      oCoHoCompanyDetails <- incorpInfoService.getCompanyDetails(regId, txId) map(Some(_)) recover {case _ => None}
+      companyDetails      <- getCompanyDetails(regId, txId)
+      details             =  oCoHoCompanyDetails.map(ch => companyDetails.copy(companyName = ch.companyName, roAddress = ch.roAddress)).getOrElse(companyDetails)
+      _                   <- s4LService.saveForm[CompanyDetailsView](CacheKeys.CompanyDetails.toString, details, regId)
+    } yield details
+  }
+
+  def getTradingNamePrepop(regId: String, tradingName: Option[TradingNameView])(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    if(tradingName.exists(_.differentName)) Future.successful(None) else prepopService.getTradingName(regId)
+  }
 
   private[services] def convertOrCreateCompanyDetailsView(regId: String, txId: String, oAPI: Option[CompanyDetailsAPI])(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
     oAPI match {
@@ -87,10 +99,13 @@ trait CompanyDetailsService extends RegistrationWhitelist {
   }
 
   def submitTradingName(tradingNameView: TradingNameView, regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    for {
-      details <- getCompanyDetails(regId, txId)
-      outcome <- saveCompanyDetails(details.copy(tradingName = Some(tradingNameView)), regId)
-    } yield outcome
+    getCompanyDetails(regId, txId).flatMap { details =>
+      saveCompanyDetails(details.copy(tradingName = Some(tradingNameView)), regId).flatMap { outcome =>
+        tradingNameView.tradingName.fold(Future.successful(outcome)) { tName =>
+          prepopService.saveTradingName(regId, tName).map(_ => outcome)
+        }
+      }
+    }
   }
 
   def getPPOBPageAddresses(companyDetailsView: CompanyDetailsView): (Map[String, Address]) = {

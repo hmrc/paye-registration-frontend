@@ -45,9 +45,6 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val redirectToLogin            = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign         = MockAuthRedirects.redirectToPostSign
       override val emailService               = mockEmailService
-      override val incorpInfoService          = mockIncorpInfoService
-      override val companyDetailsService      = mockCompanyDetailsService
-      override val s4LService                 = mockS4LService
       override val summaryService             = mockSummaryService
       override val authConnector              = mockAuthConnector
       override val keystoreConnector          = mockKeystoreConnector
@@ -198,5 +195,4 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
       }
     }
   }
-
 }

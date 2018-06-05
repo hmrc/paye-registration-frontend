@@ -28,11 +28,11 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import utils.{SessionProfile, UpToDateCompanyDetails}
+import utils.SessionProfile
 
 import scala.concurrent.Future
 
-trait PayeBaseController extends FrontendController with AuthorisedFunctions with Logging with SessionProfile with UpToDateCompanyDetails with I18nSupport {
+trait PayeBaseController extends FrontendController with AuthorisedFunctions with Logging with SessionProfile with I18nSupport {
 
   type AuthorisedActionWithProfile                = Request[AnyContent] => CurrentProfile => Future[Result]
   type AuthorisedActionWithProfileAndAuditingInfo = Request[AnyContent] => CurrentProfile => AuditingInformation => Future[Result]

@@ -17,7 +17,8 @@
 package models.view
 
 import models.{Address, DigitalContactDetails}
-import play.api.libs.json.Json
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
 case class CompanyDetails(companyName: String,
                           tradingName: Option[TradingName],
@@ -35,5 +36,10 @@ object TradingName {
 
 object CompanyDetails {
   implicit val businessContactFormat = DigitalContactDetails.format
-  implicit val format                = Json.format[CompanyDetails]
+  implicit val format = Json.format[CompanyDetails]
+
+  val tradingNameApiPrePopReads: Reads[Option[String]] = (__ \ "tradingName").readNullable[String]
+  val tradingNameApiPrePopWrites: Writes[String] = new Writes[String] {
+    override def writes(tradingName: String): JsValue = Json.obj("tradingName" -> tradingName)
+  }
 }
