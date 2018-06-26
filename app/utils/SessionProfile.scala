@@ -69,7 +69,9 @@ trait SessionProfile extends InternalExceptions {
     currentProfile match {
       case CurrentProfile(_, CompanyRegistrationProfile(_, _, Some(a)), _, _, _) if Try(a.toInt).getOrElse(6) >= 6 =>
         Future.successful(Redirect(controllers.userJourney.routes.SignInOutController.postSignIn()))
-      case CurrentProfile(_, compRegProfile, _, _, _) if compRegProfile.status equals "draft" =>
+      case CurrentProfile(_, CompanyRegistrationProfile("locked", _, _) , _, _, _) =>
+        Future.successful(Redirect(controllers.userJourney.routes.SignInOutController.postSignIn()))
+      case CurrentProfile(_, CompanyRegistrationProfile("draft", _, _) , _, _, _) =>
         Future.successful(Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes"))
       case CurrentProfile(_, _, _, true, _) if checkSubmissionStatus =>
         Future.successful(Redirect(controllers.userJourney.routes.DashboardController.dashboard()))
