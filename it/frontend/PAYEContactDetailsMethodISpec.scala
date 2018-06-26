@@ -726,7 +726,6 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       val reqPosts = findAll(postRequestedFor(urlMatching(s"/write/audit")))
       val captorPost = reqPosts.get(0)
       val json = Json.parse(captorPost.getBodyAsString)
-      println("json")
       (json \ "auditSource").as[JsString].value mustBe "paye-registration-frontend"
       (json \ "auditType").as[JsString].value mustBe "correspondenceAddress"
       (json \ "detail" \ "externalUserId").as[JsString].value mustBe "Ext-xxx"
@@ -735,7 +734,6 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       (json \ "detail" \ "addressUsed").as[JsString].value mustBe "PrincipalPlaceOfBusiness"
 
       val tags = (json \ "tags").as[JsObject].value
-      println(tags)
       tags("clientIP") mustBe Json.toJson("-")
       tags("path") mustBe Json.toJson("/register-for-paye/where-to-send-post")
       tags("clientPort") mustBe Json.toJson("-")

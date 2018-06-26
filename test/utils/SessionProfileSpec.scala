@@ -166,8 +166,14 @@ class SessionProfileSpec extends PayeComponentSpec {
       val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
       redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
     }
+    s"redirect user to ${controllers.userJourney.routes.SignInOutController.postSignIn().url} when CT is locked status" in new Setup {
+      val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("locked","bar",None))
+
+      val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
+      redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
+    }
     s"redirect user to otrs" in new Setup {
-      val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("draft","bar",Some("3")))
+      val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("draft","bar",None))
 
       val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
       redirectLocation(res) mustBe Some("https://www.tax.service.gov.uk/business-registration/select-taxes")

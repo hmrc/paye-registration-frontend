@@ -29,14 +29,14 @@ class DirectorDetailsViewSpec extends PayeComponentSpec with PayeFakedApp with I
   implicit val request = FakeRequest()
   implicit lazy val messagesApi : MessagesApi = mockMessagesApi
 
-  val d1 = "Henri Lay (id 0)"
-  val d2 = "Chris Walker (id 1)"
-  val d3 = "Tom Stacey (id 2)"
-  val d4 = "Jhansi Tummala (id 3)"
-  val d5 = "Chris Poole (id 4)"
+  val d1 = "Toto Tata (id 0)"
+  val d2 = "Bib Bloup (id 1)"
+  val d3 = "Pill Poll (id 2)"
+  val d4 = "Jag Land (id 3)"
+  val d5 = "Grep Sed (id 4)"
 
   val userNinos = Ninos(List(UserEnteredNino("0", Some("ZY123456A"))))
-  val directorMap = Map("0" -> "Henri Lay (id 0)")
+  val directorMap = Map("0" -> "Toto Tata (id 0)")
 
   val userNinosMany = Ninos(
     List(
@@ -66,7 +66,7 @@ class DirectorDetailsViewSpec extends PayeComponentSpec with PayeFakedApp with I
     }
 
     "display the directors name and prepopped Nino" in {
-      document.getElementsByClass("form-field").get(0).text mustBe "Henri Lay (id 0)'s National Insurance number For example, QQ 12 34 56 C"
+      document.getElementsByClass("form-field").get(0).text mustBe "Toto Tata (id 0)'s National Insurance number For example, QQ 12 34 56 C"
       document.getElementsByAttributeValueContaining("value", "ZY 12 34 56 A").size mustBe 1
     }
 
