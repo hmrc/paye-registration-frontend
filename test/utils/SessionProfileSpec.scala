@@ -14,17 +14,32 @@
  * limitations under the License.
  */
 
+/*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package utils
 
 import enums.{CacheKeys, IncorporationStatus, RegistrationDeletion}
 import helpers.PayeComponentSpec
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
+import org.mockito.Mockito._
 import play.api.mvc.Result
 import play.api.mvc.Results.Ok
 import play.api.test.FakeRequest
-import org.mockito.Mockito._
-import services.PAYERegistrationService
 
 import scala.concurrent.Future
 
@@ -43,7 +58,7 @@ class SessionProfileSpec extends PayeComponentSpec {
   implicit val request = FakeRequest()
 
   def validProfile(regSubmitted: Boolean, ackRefStatus : Option[String] = None)
-    = CurrentProfile("regId", CompanyRegistrationProfile("held", "txId", ackRefStatus), "", regSubmitted, None)
+    = CurrentProfile("regId", CompanyRegistrationProfile("submitted", "txId", ackRefStatus), "", regSubmitted, None)
 
   "calling withCurrentProfile" should {
     "carry out the passed function when it is in the Session Repository" when {
@@ -172,9 +187,21 @@ class SessionProfileSpec extends PayeComponentSpec {
       val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
       redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
     }
-    s"redirect user to otrs" in new Setup {
-      val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("draft","bar",None))
+    s"redirect user to ${controllers.userJourney.routes.SignInOutController.postSignIn().url} when CT is held status and unpaid" in new Setup {
+      val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("held","bar",None, paidIncorporation = None))
 
+      val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
+      redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
+    }
+    s"redirect user to ${controllers.userJourney.routes.SignInOutController.postSignIn().url} when CT is held status and paid" in new Setup {
+      val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("held","bar",None, Some("paid")))
+
+      val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
+      status(res) mustBe 200
+    }
+    s"redirect user to otrs" in new Setup {
+      val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("draft","bar",None, Some("paid")))
+      
       val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
       redirectLocation(res) mustBe Some("https://www.tax.service.gov.uk/business-registration/select-taxes")
     }

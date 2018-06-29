@@ -134,7 +134,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "redirect to the start page for an authorised user with a registration ID and CoHo Company Details, with PAYE Footprint correctly asserted" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCurrentProfile("held")))
+        .thenReturn(Future.successful(validCurrentProfile("submitted")))
 
       when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future(DownstreamOutcome.Success))
@@ -148,7 +148,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "redirect to the start page for an authorised user with valid details, with PAYE Footprint correctly asserted, with CT accepted" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCurrentProfile("held", Some("04"))))
+        .thenReturn(Future.successful(validCurrentProfile("acknowledged", Some("04"))))
 
       when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future(DownstreamOutcome.Success))
@@ -157,6 +157,38 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("/register-for-paye/register-as-employer")
+      }
+    }
+
+    "redirect to Start Page for an authorised user with valid details, with CT submitted and with incorporation paid" in new Setup {
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(
+            CurrentProfile("testRegId", CompanyRegistrationProfile("held", "txId", None, Some("paid")), "en", false, None)
+          ))
+
+      when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future(DownstreamOutcome.Success))
+
+      AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/register-for-paye/register-as-employer")
+      }
+    }
+
+    "redirect to Company Registration for an authorised user with valid details, with CT submitted but with incorporation unpaid" in new Setup {
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(
+            CurrentProfile("testRegId", CompanyRegistrationProfile("held", "txId", None, None), "en", false, None)
+          ))
+
+      when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future(DownstreamOutcome.Success))
+
+      AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/register-for-paye/post-sign-in")
       }
     }
 
@@ -197,7 +229,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "redirect the user to post sign in if their CT is rejected" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validCurrentProfile("submitted", Some("06"))))
+        .thenReturn(Future.successful(validCurrentProfile("acknowledged", Some("06"))))
 
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>

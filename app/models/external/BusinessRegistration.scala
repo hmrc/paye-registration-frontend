@@ -35,7 +35,8 @@ object BusinessProfile {
 
 case class CompanyRegistrationProfile(status: String,
                                       transactionId: String,
-                                      ackRefStatus: Option[String] = None)
+                                      ackRefStatus: Option[String] = None,
+                                      paidIncorporation: Option[String] = None)
 
 object CompanyRegistrationProfile {
   implicit val formats = Json.format[CompanyRegistrationProfile]
