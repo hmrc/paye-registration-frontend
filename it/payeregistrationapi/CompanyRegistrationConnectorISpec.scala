@@ -61,9 +61,20 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
           |{
           |    "status" : "testStatus",
           |    "confirmationReferences" : {
-          |      "transaction-id" : "$transId"
+          |      "transaction-id" : "$transId",
+          |      "payment-reference" : "paidcashmoney"
           |    }
           |}
+        """.stripMargin).as[JsObject]
+    def responseBodyUnpaid(transId: String) =
+      Json.parse(
+        s"""
+           |{
+           |    "status" : "testStatus",
+           |    "confirmationReferences" : {
+           |      "transaction-id" : "$transId"
+           |    }
+           |}
         """.stripMargin).as[JsObject]
 
     "get a status and a transaction id" when {
@@ -94,6 +105,7 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
         val result = await(getResponse)
         result.status mustBe "testStatus"
         result.transactionId mustBe "testTransactionID-001"
+        result.paidIncorporation mustBe Some("paidcashmoney")
       }
 
       "the feature flag points at the Company Registration" in {
@@ -125,13 +137,14 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
           .willReturn(
             aResponse()
               .withStatus(200)
-              .withBody(Json.toJson(responseBody("testTransactionID-001")).toString())
+              .withBody(Json.toJson(responseBodyUnpaid("testTransactionID-001")).toString())
           )
         )
 
         val result = await(getResponse)
         result.status mustBe "testStatus"
         result.transactionId mustBe "testTransactionID-001"
+        result.paidIncorporation mustBe None
       }
     }
   }

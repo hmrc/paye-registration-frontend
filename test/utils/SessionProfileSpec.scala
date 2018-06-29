@@ -14,22 +14,6 @@
  * limitations under the License.
  */
 
-/*
- * Copyright 2018 HM Revenue & Customs
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package utils
 
 import enums.{CacheKeys, IncorporationStatus, RegistrationDeletion}
@@ -174,52 +158,63 @@ class SessionProfileSpec extends PayeComponentSpec {
       }
     }
   }
+
   "currentProfileChecks" should {
-    s"redirect user to ${controllers.userJourney.routes.SignInOutController.postSignIn().url}" in new Setup {
-      val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("foo","bar",Some("6")))
+    "execute the wrapped function" when {
+      "CR document has a held status and incorporatoin has been paid" in new Setup {
+        val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("held","bar",None, Some("paid")))
 
-      val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
-      redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
+        val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
+        status(res) mustBe 200
+      }
+      "CR document is submitted" in new Setup {
+        val res = testSession.currentProfileChecks(validProfile(false))(_ => Future.successful(Ok))
+        status(res) mustBe 200
+      }
     }
-    s"redirect user to ${controllers.userJourney.routes.SignInOutController.postSignIn().url} when CT is locked status" in new Setup {
-      val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("locked","bar",None))
+    s"redirect user to ${controllers.userJourney.routes.SignInOutController.postSignIn().url}" when {
+      "the corporation tax was rejected by the head of duty" in new Setup {
+        val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("foo","bar",Some("6")))
 
-      val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
-      redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
-    }
-    s"redirect user to ${controllers.userJourney.routes.SignInOutController.postSignIn().url} when CT is held status and unpaid" in new Setup {
-      val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("held","bar",None, paidIncorporation = None))
+        val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
+        redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
+      }
+      "CR document has a locked status" in new Setup {
+        val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("locked","bar",None))
 
-      val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
-      redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
-    }
-    s"redirect user to ${controllers.userJourney.routes.SignInOutController.postSignIn().url} when CT is held status and paid" in new Setup {
-      val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("held","bar",None, Some("paid")))
+        val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
+        redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
+      }
+      "CR document has a held status and incorporation is unpaid" in new Setup {
+        val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("held","bar",None, paidIncorporation = None))
 
-      val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
-      status(res) mustBe 200
+        val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
+        redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
+      }
     }
-    s"redirect user to otrs" in new Setup {
-      val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("draft","bar",None, Some("paid")))
-      
-      val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
-      redirectLocation(res) mustBe Some("https://www.tax.service.gov.uk/business-registration/select-taxes")
-    }
-    s"redirect user to ${controllers.userJourney.routes.DashboardController.dashboard().url}" in new Setup {
-      val cp = validProfile(regSubmitted = true)
+    "redirect user to OTRS" when {
+      "the user has not submitted an in-flight company registration" in new Setup {
+        val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("draft", "bar", None, Some("paid")))
 
-      val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
-      redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.DashboardController.dashboard()}")
+        val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
+        redirectLocation(res) mustBe Some("https://www.tax.service.gov.uk/business-registration/select-taxes")
+      }
     }
-    s"redirect user to ${controllers.userJourney.routes.SignInOutController.incorporationRejected().url}" in new Setup{
-      val cp = validProfile(regSubmitted = false).copy(incorpStatus = Some(IncorporationStatus.rejected))
+    s"redirect user to ${controllers.userJourney.routes.DashboardController.dashboard().url}" when {
+      "PAYE has already been submitted" in new Setup {
+        val cp = validProfile(regSubmitted = true)
 
-      val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
-      redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.incorporationRejected()}")
+        val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
+        redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.DashboardController.dashboard()}")
+      }
     }
-    s"carry on with passed in function and return 200" in new Setup {
-      val res = testSession.currentProfileChecks(validProfile(false))(_ => Future.successful(Ok))
-      status(res) mustBe 200
+    s"redirect user to ${controllers.userJourney.routes.SignInOutController.incorporationRejected().url}" when {
+      "the company incorporation has been rejected" in new Setup{
+        val cp = validProfile(regSubmitted = false).copy(incorpStatus = Some(IncorporationStatus.rejected))
+
+        val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
+        redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.incorporationRejected()}")
+      }
     }
   }
 }
