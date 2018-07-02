@@ -44,11 +44,13 @@ trait SessionProfile extends InternalExceptions {
               payeRegistrationService.handleIIResponse(cp.companyTaxRegistration.transactionId, res.get) map {
                 case RegistrationDeletion.success => Redirect(controllers.userJourney.routes.SignInOutController.incorporationRejected())
                 case _ =>
-                  Logger.warn(s"Registration txId: ${cp.companyTaxRegistration.transactionId} - regId: ${cp.registrationID} incorporation is rejected but the cleanup failed probably due to the wrong status of the paye registration")
+                  Logger.warn(s"Registration txId: ${cp.companyTaxRegistration.transactionId} - regId: ${cp.registrationID} " +
+                    s"incorporation is rejected but the cleanup failed probably due to the wrong status of the paye registration")
                   Redirect(controllers.userJourney.routes.SignInOutController.postSignIn())
               } recover {
                 case err =>
-                  Logger.error(s"Registration txId: ${cp.companyTaxRegistration.transactionId} - regId: ${cp.registrationID} Incorporation is rejected but handleIIResponse threw an unexpected exception whilst trying to cleanup with message: ${err.getMessage}")
+                  Logger.error(s"Registration txId: ${cp.companyTaxRegistration.transactionId} - regId: ${cp.registrationID} " +
+                    s"Incorporation is rejected but handleIIResponse threw an unexpected exception whilst trying to cleanup with message: ${err.getMessage}")
                   Redirect(controllers.userJourney.routes.SignInOutController.incorporationRejected())
               }
             } else {
@@ -67,17 +69,28 @@ trait SessionProfile extends InternalExceptions {
 
   protected[utils] def currentProfileChecks(currentProfile: CurrentProfile, checkSubmissionStatus: Boolean = true)(f: CurrentProfile => Future[Result]): Future[Result] = {
     currentProfile match {
-      case CurrentProfile(_, CompanyRegistrationProfile(_, _, Some(a)), _, _, _) if Try(a.toInt).getOrElse(6) >= 6 =>
+      case ctRejected @ CurrentProfile(_, CompanyRegistrationProfile(_, _, Some(a), _), _, _, _) if Try(a.toInt).getOrElse(6) >= 6 =>
         Future.successful(Redirect(controllers.userJourney.routes.SignInOutController.postSignIn()))
-      case CurrentProfile(_, CompanyRegistrationProfile("locked", _, _) , _, _, _) =>
+
+      case ctHeldButNoPayment @ CurrentProfile(_, CompanyRegistrationProfile("held", _, _, None) , _, _, _) =>
         Future.successful(Redirect(controllers.userJourney.routes.SignInOutController.postSignIn()))
-      case CurrentProfile(_, CompanyRegistrationProfile("draft", _, _) , _, _, _) =>
+
+      case ctLocked @ CurrentProfile(_, CompanyRegistrationProfile("locked", _, _, _) , _, _, _) =>
+        Future.successful(Redirect(controllers.userJourney.routes.SignInOutController.postSignIn()))
+
+      case ctDraft @ CurrentProfile(_, CompanyRegistrationProfile("draft", _, _, hasPaid) , _, _, _) =>
+        if(hasPaid.isDefined){ Logger.warn("[CurrentProfileChecks] CR Document status DRAFT but user HAS PAID for incorporation") }
         Future.successful(Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes"))
-      case CurrentProfile(_, _, _, true, _) if checkSubmissionStatus =>
+
+      case payeSubmitted @ CurrentProfile(_, _, _, true, _) if checkSubmissionStatus =>
         Future.successful(Redirect(controllers.userJourney.routes.DashboardController.dashboard()))
-      case CurrentProfile(_, _, _, _, Some(IncorporationStatus.rejected)) =>
+
+      case incorporationRejected @ CurrentProfile(_, _, _, _, Some(IncorporationStatus.rejected)) =>
         Future.successful(Redirect(controllers.userJourney.routes.SignInOutController.incorporationRejected()))
-      case cp => f(cp)
+
+      case validProfile @ CurrentProfile(_, CompanyRegistrationProfile(_, _, _, hasPaid), _, _, _) =>
+        if(hasPaid.isEmpty){ Logger.warn("[CurrentProfileChecks] CT PROCESSED but user HAS NO PAYMENT REFERENCE for incorporation") }
+        f(validProfile)
     }
   }
 }

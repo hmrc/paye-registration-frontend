@@ -23,7 +23,9 @@ trait CurrentProfileFixtures {
     registrationID = "testRegId",
     companyTaxRegistration = CompanyRegistrationProfile(
       status = "testStatus",
-      transactionId = "testTxId"
+      transactionId = "testTxId",
+      ackRefStatus = None,
+      paidIncorporation = None
     ),
     language = "EN",
     payeRegistrationSubmitted = false,

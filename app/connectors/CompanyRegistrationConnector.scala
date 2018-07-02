@@ -18,10 +18,9 @@ package connectors
 
 import common.exceptions
 import common.exceptions.DownstreamExceptions
-import javax.inject.Inject
 import config.WSHttp
+import javax.inject.Inject
 import models.external.CompanyRegistrationProfile
-import play.api.Logger
 import play.api.libs.json._
 import services.MetricsService
 import uk.gov.hmrc.http.{BadRequestException, CoreGet, HeaderCarrier, HttpException}
@@ -62,8 +61,9 @@ trait CompanyRegistrationConnector {
         _ => throw new exceptions.DownstreamExceptions.ConfirmationRefsNotFoundException,
         identity
       )
+      val paidIncorporation = (response \ "confirmationReferences" \ "payment-reference").asOpt[String]
       val ackStatus = (response \ "acknowledgementReferences" \ "status").asOpt[String]
-      CompanyRegistrationProfile(status, txId, ackStatus)
+      CompanyRegistrationProfile(status, txId, ackStatus, paidIncorporation)
     } recover {
       case badRequestErr: BadRequestException =>
         companyRegTimer.stop()

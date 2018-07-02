@@ -23,8 +23,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.mockito.stubbing.OngoingStubbing
 import play.api.libs.json.Format
-import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
@@ -55,7 +54,7 @@ trait KeystoreMock {
     when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CurrentProfile]]()))
         .thenReturn(Future.successful(Some(CurrentProfile(
           regID,
-          CompanyRegistrationProfile("held", "txId"),
+          CompanyRegistrationProfile("held", "txId", None, None),
           "ENG",
           payeRegistrationSubmitted = false,
           incorpStatus = None
