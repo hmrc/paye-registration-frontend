@@ -222,7 +222,7 @@ pages.companyPension.setUpPension1                              = an employee wh
 pages.companyPension.setUpPension2                              = any dependants of an employee who has died
 pages.companyPension.error                                      = Tell us if you will make pension payments to a former employee or their dependants in the next 2 months
 
-## pages.companyPension.error.invalidDate                          = Enter a date within 2 months
+## pages.companyPension.error.invalidDate                        = Enter a date within 2 months
 
 ## Pays Pension
 pages.paysPension.title                                         = Does the company make pension payments to a former employee or their dependants?
@@ -367,10 +367,7 @@ pages.confirmation.description                                  = Application su
 pages.confirmation.reference                                    = Your reference number is
 
 ## Confirmation standard content
-pages.confirmation.standard.heading                             = What happens next?
-pages.confirmation.standard.section-1                           = You''ll receive:
-pages.confirmation.standard.section-1.bullet1                   = an email now with your application reference number
-pages.confirmation.standard.section-1.bullet2                   = another email with 10 working days letting you know the outcome of your application
+pages.confirmation.standard.section-1.bullet1                   = another email with 10 working days letting you know the outcome of your application
 pages.confirmation.standard.section-2                           = If your application is successful you''ll receive:
 pages.confirmation.standard.section-2.bullet1                   = a letter with your PAYE and Accounts Office reference numbers within 5 working days of the company registering with Companies House
 pages.confirmation.standard.section-2.bullet2                   = an activation code to do PAYE online

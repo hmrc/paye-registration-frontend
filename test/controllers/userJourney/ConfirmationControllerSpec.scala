@@ -19,73 +19,73 @@ package controllers.userJourney
 import connectors.{EmailDifficulties, EmailSent}
 import helpers.auth.AuthHelpers
 import helpers.{PayeComponentSpec, PayeFakedApp}
+import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.http.Status
-import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
-import services.ConfirmationService
 import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
 
 class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
-  val mockConfirmationService = mock[ConfirmationService]
-
   class Setup extends AuthHelpers {
-    override val authConnector = mockAuthConnector
-    override val keystoreConnector = mockKeystoreConnector
+    override val authConnector      = mockAuthConnector
+    override val keystoreConnector  = mockKeystoreConnector
 
     val controller = new ConfirmationController {
-      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
-
-
-      override val emailService             = mockEmailService
-      override val s4LService               = mockS4LService
-      override val authConnector            = mockAuthConnector
-      override val keystoreConnector        = mockKeystoreConnector
-      override val confirmationService      = mockConfirmationService
-      implicit val messagesApi: MessagesApi = mockMessagesApi
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService  = mockPayeRegService
+      override val redirectToLogin                    = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign                 = MockAuthRedirects.redirectToPostSign
+      override val emailService                       = mockEmailService
+      override val s4LService                         = mockS4LService
+      override val authConnector                      = mockAuthConnector
+      override val keystoreConnector                  = mockKeystoreConnector
+      override val confirmationService                = mockConfirmationService
+      implicit val messagesApi                        = mockMessagesApi
+      override val incorporationInformationConnector  = mockIncorpInfoConnector
+      override val payeRegistrationService            = mockPayeRegService
     }
   }
 
   val successHttpResponse = HttpResponse(200, None, Map.empty, None)
 
   "showConfirmation" should {
-    "display the confirmation page with an acknowledgement reference retrieved from backend" in new Setup {
+    "display the confirmation page with an acknowledgement reference retrieved from backend with Inclusive content not shown" in new Setup {
       when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("BRPY00000000001")))
+      when(mockConfirmationService.determineIfInclusiveContentIsShown) thenReturn false
 
       when(mockEmailService.sendAcknowledgementEmail(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future(EmailSent))
-
-      when(mockS4LService.clear(any())(any()))
-        .thenReturn(Future(successHttpResponse))
+      when(mockS4LService.clear(any())(any())) thenReturn Future(successHttpResponse)
 
       showAuthorisedWithCP(controller.showConfirmation, Fixtures.validCurrentProfile, FakeRequest()) {
         result =>
           status(result) mustBe OK
+          val doc = Jsoup.parse(contentAsString(result))
+          doc.getElementById("ack-ref").html mustBe "BRPY00000000001"
+          doc.getElementsByAttributeValueContaining("id","standard-content").isEmpty mustBe false
+          doc.getElementsByAttributeValueContaining("id","inclusive-content").isEmpty mustBe true
       }
     }
 
-    "display the confirmation page with an acknowledgement reference retrieved from backend even if email fails" in new Setup {
+    "display the confirmation page with an acknowledgement reference retrieved from backend even if email fails and inclusive content is shown" in new Setup {
       when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("BRPY00000000001")))
+      when(mockConfirmationService.determineIfInclusiveContentIsShown) thenReturn true
 
       when(mockEmailService.sendAcknowledgementEmail(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future(EmailDifficulties))
-
-      when(mockS4LService.clear(any())(any()))
-        .thenReturn(Future(successHttpResponse))
+      when(mockS4LService.clear(any())(any())) thenReturn Future(successHttpResponse)
 
       showAuthorisedWithCP(controller.showConfirmation, Fixtures.validCurrentProfile, FakeRequest()) {
         result =>
-          status(result) mustBe OK
+          val doc = Jsoup.parse(contentAsString(result))
+          doc.getElementById("ack-ref").html mustBe "BRPY00000000001"
+          doc.getElementsByAttributeValueContaining("id","standard-content").isEmpty mustBe true
+          doc.getElementsByAttributeValueContaining("id","inclusive-content").isEmpty mustBe false
       }
     }
 
