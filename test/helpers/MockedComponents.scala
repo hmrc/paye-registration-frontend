@@ -53,6 +53,7 @@ trait MockedComponents {
   val mockTestBusRegConnector           = mock[TestBusinessRegConnector]
   val mockTestIncorpInfoConnector       = mock[TestIncorpInfoConnector]
   val mockTestPayeRegConnector          = mock[TestPAYERegConnector]
+  val mockConfirmationService           = mock[ConfirmationService]
 
   //Service mocks
   val mockIncorpInfoService     = mock[IncorporationInformationService]
