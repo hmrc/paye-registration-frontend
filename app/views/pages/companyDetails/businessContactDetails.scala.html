@@ -59,7 +59,7 @@
         messages("app.common.errorSummaryLabel"), contactForm, dataJourney=Some("DigitalContactDetails")
     )
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.businessContact.description")</h1>
+    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.businessContact.description")</h1>
 
     @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.submitBusinessContactDetails()) {
 

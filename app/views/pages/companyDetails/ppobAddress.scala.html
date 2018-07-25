@@ -14,21 +14,29 @@
  * limitations under the License.
  *@
 
-@import helpers.templates.{addressDisplay, payeInputRadioGroup, payeErrorSummary}
+@import helpers.templates.{addressDisplay, payeInputRadioGroup, payeErrorSummary, hiddenDetails}
 @import models.Address
 @import models.view.{ChosenAddress, PrepopAddress}
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
 @(chooseAddressForm: Form[ChosenAddress], roAddress: Option[Address], ppobAddress: Option[Address], prepopAddresses: Map[Int, Address])(implicit request: Request[_], messages: Messages)
 
+@hiddenContent = {
+        @messages("pages.ppobAddress.help.content")
+}
+
 @main_template(title = messages("pages.ppobAddress.description")) {
     @payeErrorSummary(
         messages("app.common.errorSummaryLabel"), chooseAddressForm, dataJourney=Some("PPOBAddress")
     )
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.ppobAddress.description")</h1>
-       <p>@Messages("pages.ppobAddress.peopleIntro1")</p>
-       <p>@Messages("pages.ppobAddress.peopleIntro2")</p>
+    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.ppobAddress.description")</h1>
+        <p>@messages("pages.ppobAddress.peopleIntro1")</p>
+        <p>@messages("pages.ppobAddress.peopleIntro2")</p>
+        <div class="panel panel-border-wide">@messages("pages.ppobAddress.hint")</div>
+        <div class="form-group">
+            @hiddenDetails("unknown-ppob-", messages("pages.ppobAddress.help.link"), hiddenContent)
+        </div>
 
     @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.submitPPOBAddress) {
         <div class="form-group">
@@ -50,7 +58,7 @@
         </div>
 
         <div class="form-group">
-            <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
+            <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
         </div>
     }
 }

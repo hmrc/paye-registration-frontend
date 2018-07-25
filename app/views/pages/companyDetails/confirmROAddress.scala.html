@@ -21,9 +21,9 @@
 
 @(companyName : String, address : Address)(implicit request: Request[_], messages: Messages)
 
-@main_template(title = messages("pages.confirmRO.description")) {
+@main_template(title = messages("pages.confirmRO.description", companyName)) {
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages("pages.confirmRO.description"))</h1>
+    <h1 class="form-title heading-large" id="pageHeading">@Html(messages("pages.confirmRO.description", companyName))</h1>
 
     <p id="lead-paragraph">@messages("pages.confirmRO.lede", companyName)</p>
 
@@ -44,14 +44,13 @@
 
 @incorrectAddressContent = {
     <p>
-        @Messages("pages.common.companiesHouse.hiddenIntro.1", Messages("pages.confirmRO.hiddenIntro.value"))
-        @linkNewWindow(Messages("pages.common.companiesHouse.hiddenIntro.url"), Messages("pages.confirmRO.hiddenIntro.label"), "confirmROAddress", Some("companies-house-link"))
+        @Messages("pages.common.companiesHouse.hiddenIntro.1")
+        @linkNewWindow(Messages("pages.common.companiesHouse.hiddenIntro.url"), Messages("pages.confirmRO.hiddenIntro.label"), "confirmROAddress", Some("companies-house-link"), true)
         @Messages("pages.common.companiesHouse.hiddenIntro.2")
     </p>
     <p>
         @Messages("pages.common.companiesHouse.hiddenIntro2.1")
-        @linkNewWindow(Messages("pages.common.companiesHouse.hiddenIntro2.url"), Messages("pages.common.companiesHouse.hiddenIntro2.label"), "confirmROAddress")
-        @Messages("pages.common.companiesHouse.hiddenIntro2.2")
+        @linkNewWindow(Messages("pages.common.companiesHouse.hiddenIntro2.url"), Messages("pages.common.companiesHouse.hiddenIntro2.label"), "confirmROAddress", None, true)
     </p>
 }
 

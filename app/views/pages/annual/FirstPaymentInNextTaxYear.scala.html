@@ -21,7 +21,7 @@
 
 @main_template(title = messages("pages.nextTaxYear.title")) {
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@messages("pages.nextTaxYear.heading")</h1>
+    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.nextTaxYear.heading")</h1>
 
     <p id="bodyText">@messages("pages.nextTaxYear.body", SystemDate.getSystemDate.getYear.toString.replace(",",""))</p>
 

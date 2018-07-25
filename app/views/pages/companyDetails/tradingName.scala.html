@@ -17,7 +17,6 @@
 @import helpers.templates.{formHiddenYesNoRadio, hiddenDetails, payeErrorSummary, payeInput}
 @import models.view.TradingName
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
-@import helpers.templates.linkNewWindow
 
 @(tradingNameForm: Form[TradingName], companyName: String)(implicit request: Request[_], messages: Messages)
 
@@ -41,7 +40,7 @@
         Messages("app.common.errorSummaryLabel"), tradingNameForm, dataJourney=Some("TradingName")
     )
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Messages("pages.tradingName.description")</h1>
+    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.tradingName.description")</h1>
 
 
      <p id="lead-paragraph">@messages("pages.tradingName.lede", companyName)</p>
