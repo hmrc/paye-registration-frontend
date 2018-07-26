@@ -17,40 +17,31 @@
 package utils
 
 import java.text.Normalizer
+import java.text.Normalizer.{Form, normalize}
 
 import play.api.data.validation._
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json._
 
+import scala.util.matching.Regex
+
 object Formatters {
+  val specialCharacterConverts = Map('æ' -> "ae", 'Æ' -> "AE", 'œ' -> "oe", 'Œ' -> "OE", 'ß' -> "ss", 'ø' -> "o", 'Ø' -> "O")
+  def normaliseString(string: String, charFilter: Option[Regex] = None, extraSpecialCharacters: Map[Char,String] = Map()): String = {
+    normalize(string, Form.NFKD)
+      .replaceAll("\\p{M}", "")
+      .map(char => extraSpecialCharacters.getOrElse(char, char))
+      .mkString
+      .replaceAll(charFilter.fold("")(_.toString),"")
+      .trim
+  }
+
+  lazy val normalizeTrimmedReads: Reads[String]            = Reads.StringReads.map(s => normaliseString(s,extraSpecialCharacters = specialCharacterConverts))
+  lazy val normalizeTrimmedListReads: Reads[List[String]]  = Reads.list[String](normalizeTrimmedReads)
+  lazy val normalizeTrimmedHMRCReads: Reads[String]        = Reads.StringReads.map(s => normaliseString(s,Some("[^A-Za-z 0-9\\-']".r)))
+  lazy val normalizeTrimmedHMRCAddressReads: Reads[String] = Reads.StringReads.map(s => normaliseString(s,Some("""[^a-zA-Z0-9, .\(\)/&'\"\-\\]""".r)))
+
   def ninoFormatter(nino: String): String = nino.grouped(2).mkString(" ")
-
-  private def normalize(str: String): String = Normalizer.normalize(str, Normalizer.Form.NFKD)
-    .replaceAll("\\p{M}", "")
-    .trim
-
-  lazy val normalizeTrimmedReads = new Reads[String] {
-    override def reads(json: JsValue): JsResult[String] = Json.fromJson[String](json) flatMap (s => JsSuccess(normalize(s)))
-  }
-
-  lazy val normalizeTrimmedHMRCReads = new Reads[String] {
-    override def reads(json: JsValue): JsResult[String] = Json.fromJson[String](json) flatMap {
-      str => JsSuccess(normalize(str).replaceAll("[^A-Za-z 0-9\\-']", ""))
-    }
-  }
-
-  lazy val normalizeTrimmedHMRCAddressReads = new Reads[String] {
-    override def reads(json: JsValue): JsResult[String] = Json.fromJson[String](json) flatMap {
-      str => JsSuccess(normalize(str).replaceAll("""[^a-zA-Z0-9, .\(\)/&'\"\-\\]""", ""))
-    }
-  }
-
-  lazy val normalizeTrimmedListReads = new Reads[List[String]] {
-    override def reads(json: JsValue): JsResult[List[String]] = Json.fromJson[List[String]](json).flatMap {
-      l => JsSuccess(l map (normalize _))
-    }
-  }
-
   def intMapReads[V]()(implicit formatV: Format[V]): Reads[Map[Int, V]] = new Reads[Map[Int, V]] {
     def reads(jv: JsValue): JsResult[Map[Int, V]] = {
       JsSuccess(jv.as[Map[String, JsValue]].map { case (k, v) =>
@@ -79,7 +70,7 @@ object Formatters {
   }
 
   lazy val emailReads = Reads.StringReads.filter(ValidationError("Invalid email")) {
-    email => Validators.emailValidation(normalize(email)) match {
+    email => Validators.emailValidation(normaliseString(email)) match {
       case e: Invalid => false
       case _          => true
     }

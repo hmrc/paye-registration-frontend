@@ -336,6 +336,68 @@ class AddressSpec extends PayeComponentSpec {
         Json.fromJson[Address](inputJson)(Address.addressLookupReads) mustBe JsSuccess(expected)
       }
     }
+    "Succeed AND normalise" when {
+      "All lines are too long and contain special chars with every field populated, With a country of United Kingdom, country set to None" in {
+        val inputJson = Json.parse(
+          """
+            |{
+            | "address" : {
+            |   "lines": [
+            |     "æÆœŒßØûabcdefghijklmnopqrstuvwxyz@#",
+            |     "æÆœŒßØûabcdefghijklmnopqrstuvwxyz@#",
+            |     "æÆœŒßØûabcdefghijklmnopqrstuvwxyz@#",
+            |     "æÆœŒßØûabcdefghijklmnopqrstuvwxyz@#"
+            |   ],
+            |   "postcode" : "Æ4 2Æ",
+            |   "country" : {
+            |     "code" : "UK",
+            |     "name" : "United Kingdom"
+            |   }
+            | }
+            |}
+          """.stripMargin)
+
+        val expected = Address(
+          line1 = "aeAEoeOEssOuabcdefghijklmno",
+          line2 = "aeAEoeOEssOuabcdefghijklmno",
+          line3 = Some("aeAEoeOEssOuabcdefghijklmno"),
+          line4 = Some("aeAEoeOEssOuabcdef"),
+          postCode = Some("AE4 2AE"),
+          country = None
+        )
+        Json.fromJson[Address](inputJson)(Address.addressLookupReads) mustBe JsSuccess(expected)
+      }
+      "max limit is provided, special characters normalised push limit over, address trimmed, country not set to None" in {
+        val inputJson = Json.parse(
+          """
+            |{
+            | "address" : {
+            |   "lines": [
+            |     "abc27charsabcdfedgehdjtretæ",
+            |     "abc27charsabcdfedgehdjtretæ",
+            |     "abc27charsabcdfedgehdjtretæ",
+            |     "abc18chars78hshdgæ"
+            |   ],
+            |   "postcode" : "Æ42ÆÆ42ÆÆ42ÆÆ42Æ",
+            |   "country" : {
+            |     "code" : "UK",
+            |     "name" : "æabcdefghijklmnopqrstuvwxyz@#"
+            |   }
+            | }
+            |}
+          """.stripMargin)
+
+        val expected = Address(
+          line1 = "abc27charsabcdfedgehdjtreta",
+          line2 = "abc27charsabcdfedgehdjtreta",
+          line3 = Some("abc27charsabcdfedgehdjtreta"),
+          line4 = Some("abc18chars78hshdga"),
+          postCode = None,
+          country = Some("aeabcdefghijklmnopqrstuvwxyz@#")
+        )
+        Json.fromJson[Address](inputJson)(Address.addressLookupReads) mustBe JsSuccess(expected)
+      }
+    }
 
     "fail" when {
       "neither postcode nor country are completed" in {
@@ -384,9 +446,33 @@ class AddressSpec extends PayeComponentSpec {
     }
   }
 
+
   "Reading Address from CoHo Json format" should {
     def readCoHoAddress(json: JsValue) = Json.fromJson[Address](json)(Address.incorpInfoReads)
     "succeed" when {
+
+      "removes characters that would normally split out into 2 (e.g. Æ -> AE)" in {
+          val tstCHROAddressJson = Json.parse(
+            """{
+              |  "premises":"Unit 14234æ",
+              |  "address_line_1":"ReallyÆ Long Street Name",
+              |  "address_line_2":"TØesœtley",
+              |  "locality":"TestŒford",
+              |  "country":"UKß",
+              |  "postal_code":"TE1 ø1ST"
+              |}""".stripMargin)
+
+          val testAddress = Address(
+            line1 = "Unit 14234",
+            line2 = "Really Long Street Name",
+            line3 = Some("Testley"),
+            line4 = Some("Testford"),
+            country = None,
+            postCode = Some("TE1 1ST")
+          )
+
+          readCoHoAddress(tstCHROAddressJson) mustBe JsSuccess(testAddress)
+        }
 
       "there is a long first line" in {
         val tstCHROAddressJson = Json.parse(
