@@ -86,24 +86,24 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
       await(getAddress) mustBe testAddressModel
     }
 
-    "get an address from a 200 and trim the lines if they are too long" in {
+    "get an address from a 200 and trim the lines if they are too long with normaliseation" in {
       val testAddressLongLines = Json.parse(
         """{
           |  "address":{
           |    "lines":[
-          |      "14 St Test Walker on stupidly long road",
-          |      "Testford"
+          |      "14 St Test Ælker on sæpid long road",
+          |      "Tßtford"
           |    ],
-          |    "postcode":"TE1 1ST"
+          |    "postcode":"Œ1 1ST"
           |  }
           |}""".stripMargin)
 
       val testAddressModelTrimmed = Address(
-        line1 = "14 St Test Walker on stupid",
-        line2 = "Testford",
+        line1 = "14 St Test AElker on saepid",
+        line2 = "Tsstford",
         line3 = None,
         line4 = None,
-        postCode = Some("TE1 1ST"),
+        postCode = Some("OE1 1ST"),
         country = None
       )
 
