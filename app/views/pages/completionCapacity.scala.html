@@ -35,7 +35,7 @@
         messages("app.common.errorSummaryLabel"), completionCapacityForm, dataJourney=Some("CompletionCapacity")
     )
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@messages("pages.completionCapacity.description")</h1>
+    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.completionCapacity.description")</h1>
 
     @govHelpers.form(action = controllers.userJourney.routes.CompletionCapacityController.submitCompletionCapacity()) {
 

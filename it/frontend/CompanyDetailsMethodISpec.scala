@@ -331,8 +331,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "Confirm the company's registered office address"
-      document.getElementById("lead-paragraph").text.contains(defaultCompanyName) mustBe true
+      document.title() mustBe s"Confirm $defaultCompanyName's registered office address"
       document.getElementById("ro-address-address-line-1").text mustBe "14 Test Default Street"
     }
   }
@@ -369,7 +368,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "Where will the company carry out most of its business activities?"
+      document.title() mustBe "What is the company's 'principal place of business'?"
       document.getElementById("ro-address-line-1").text mustBe "11"
       document.getElementsByAttributeValue("id", "ppob-address-line-1").size() mustBe 0
     }
@@ -407,7 +406,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "Where will the company carry out most of its business activities?"
+      document.title() mustBe "What is the company's 'principal place of business'?"
       document.getElementById("ppob-address-line-1").text mustBe "11"
       document.getElementsByAttributeValue("id", "ro-address-line-1").size() mustBe 0
 
@@ -446,7 +445,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "Where will the company carry out most of its business activities?"
+      document.title() mustBe "What is the company's 'principal place of business'?"
       document.getElementById("ro-address-line-1").text mustBe "11"
       document.getElementById("ppob-address-line-1").text mustBe "22"
 
@@ -483,7 +482,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "Where will the company carry out most of its business activities?"
+      document.title() mustBe "What is the company's 'principal place of business'?"
       document.getElementById("ro-address-line-1").text mustBe "11"
       document.getElementsByAttributeValue("id", "ppob-address-line-1").size() mustBe 0
       an[Exception] mustBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
@@ -537,7 +536,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "Where will the company carry out most of its business activities?"
+      document.title() mustBe "What is the company's 'principal place of business'?"
       document.getElementById("ro-address-line-1").text mustBe "11"
       document.getElementsByAttributeValue("id", "ppob-address-line-1").size() mustBe 0
       an[Exception] mustBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
@@ -593,7 +592,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "Where will the company carry out most of its business activities?"
+      document.title() mustBe "What is the company's 'principal place of business'?"
       document.getElementById("ro-address-line-1").text mustBe "11"
       document.getElementById("ppob-address-line-1").text mustBe "22"
 

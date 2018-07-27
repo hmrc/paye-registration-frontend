@@ -44,7 +44,7 @@ class ConfirmROAddressViewSpec extends PayeComponentSpec with PayeFakedApp with 
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct title" in {
-      document.getElementById("pageHeading").text mustBe messagesApi("pages.confirmRO.description")
+      document.getElementById("pageHeading").text mustBe messagesApi("pages.confirmRO.description", testCompanyName)
     }
 
     "have the correct lede paragraph" in {
@@ -56,7 +56,6 @@ class ConfirmROAddressViewSpec extends PayeComponentSpec with PayeFakedApp with 
     }
 
     "have the correct drop down body text" in {
-      document.getElementById("incorrect-address-Details").text.contains(messagesApi("pages.confirmRO.hiddenIntro.value")) mustBe true
       document.getElementById("incorrect-address-Details").text.contains(messagesApi("pages.confirmRO.hiddenIntro.label")) mustBe true
       document.getElementById("incorrect-address-Details").text.contains(messagesApi("pages.common.companiesHouse.hiddenIntro.2")) mustBe true
     }

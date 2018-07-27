@@ -24,14 +24,13 @@ app.common.startNow                                             = Start now
 app.common.finish                                               = Finish
 app.common.whatDidYouThink                                      = What do you think of the service? (usually takes one minute to complete)
 app.common.linkHelperText                                       = (opens in a new window)
-pages.common.companiesHouse.hiddenIntro.1                       = If the {0} wrong,
-pages.common.companiesHouse.hiddenIntro.url                     = https://ewf.companieshouse.gov.uk//seclogin?tc=1
-pages.common.companiesHouse.hiddenIntro.2                       = It will take less than 24 hours for Companies House to confirm the changes via email.
-pages.common.companiesHouse.hiddenIntro2.1                      = After you get the email,
-pages.common.companiesHouse.hiddenIntro2.label                  = sign back into this service from GOV.UK
-pages.common.companiesHouse.hiddenIntro2.url                    = https://www.gov.uk/limited-company-formation/register-your-company
-pages.common.companiesHouse.hiddenIntro2.2                      = to continue your application.
-                                                                
+pages.common.companiesHouse.hiddenIntro.1                       = Contact Companies House to
+pages.common.companiesHouse.hiddenIntro.url                     = https://www.gov.uk/file-changes-to-a-company-with-companies-house
+pages.common.companiesHouse.hiddenIntro.2                       = They’ll confirm any changes via email.
+pages.common.companiesHouse.hiddenIntro2.1                      = After you get the email, sign back in to continue this application using the link on the
+pages.common.companiesHouse.hiddenIntro2.label                  = Register as an employer GOV.UK page
+pages.common.companiesHouse.hiddenIntro2.url                    = https://www.gov.uk/register-employer
+
 ## timeout page                                                 
 page.timeout.description                                        = Your session has timed out due to inactivity
 page.timeout.p1                                                 = Your answers have been saved.
@@ -122,18 +121,20 @@ pages.tradingdetails.input.hint-text                            = You can''t inc
 
 
 ## Confirm RO Address
-pages.confirmRO.description                                     = Confirm the company''s registered office address
-pages.confirmRO.lede                                            = This is the official address of {0}. It''s where legal notices and company''s post will be sent.
-pages.confirmRO.help.link                                       = Not the right address?
-pages.confirmRO.hiddenIntro.value                               = registered office address is
-pages.confirmRO.hiddenIntro.label                               = change it with Companies House.
+pages.confirmRO.description                                     = Confirm {0}''s registered office address
+pages.confirmRO.lede                                            = This is the address on its Companies House record.
+pages.confirmRO.help.link                                       = What if the registered office address is wrong?
+pages.confirmRO.hiddenIntro.label                               = change the registered office address
 
 ## PPOB Address
-pages.ppobAddress.description                                   = Where will the company carry out most of its business activities?
+pages.ppobAddress.description                                   = What is the company''s ''principal place of business''?
 pages.ppobAddress.other                                         = A different address
-pages.ppobAddress.addressChoice.noEntry                         = Tell us where you''ll carry out most of your business activities
-pages.ppobAddress.peopleIntro1                                  = This can be your home, a commercial office, a studio or workshop. You or the company don''t need to own the property.
-pages.ppobAddress.peopleIntro2                                  = If you work in different locations, use the address where the company keeps its stock or equipment.
+pages.ppobAddress.addressChoice.noEntry                         = Tell us the company''s principal place of business
+pages.ppobAddress.peopleIntro1                                  = This is where the company will carry out most of its business activities.
+pages.ppobAddress.peopleIntro2                                  = If this will be in different locations, use the address where the company will keep its financial or business records.
+pages.ppobAddress.hint                                          = This address will not go on the public record.
+pages.ppobAddress.help.link                                     = The company doesn''t have a principal place of business yet
+pages.ppobAddress.help.content                                  = Use the company''s registered office address for now and tell HMRC when it changes.
 
 ##Correspondence Address
 pages.correspondenceAddress.description                         = Where should we send post about the company''s PAYE?
@@ -254,7 +255,7 @@ pages.directorDetails.information.dropdown.header               = Not the right 
 pages.directorDetails.information.dropdown.body                 = If the direct names are incorrect, you can change them with
 pages.directorDetails.input.hint-text                           = For example, QQ 12 34 56 C
 pages.directorDetails.hiddenIntro.value                         = director names are
-pages.directorDetails.hiddenIntro.label                         = change them with Companies House.
+pages.directorDetails.hiddenIntro.label                         = change information about the company''s directors
 pages.directorDetails.name-suffix                               = {0}''s National Insurance number
 
 ## Summary Page

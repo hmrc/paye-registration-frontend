@@ -42,13 +42,12 @@
 @hiddenDetailsContent = {
     <p>
         @Messages("pages.common.companiesHouse.hiddenIntro.1", Messages("pages.directorDetails.hiddenIntro.value"))
-        @linkNewWindow(Messages("pages.common.companiesHouse.hiddenIntro.url"), Messages("pages.directorDetails.hiddenIntro.label"), "directorDetails")
+        @linkNewWindow(Messages("pages.common.companiesHouse.hiddenIntro.url"), Messages("pages.directorDetails.hiddenIntro.label"), "directorDetails", None, true)
         @Messages("pages.common.companiesHouse.hiddenIntro.2")
     </p>
     <p>
         @Messages("pages.common.companiesHouse.hiddenIntro2.1")
-        @linkNewWindow(Messages("pages.common.companiesHouse.hiddenIntro2.url"), Messages("pages.common.companiesHouse.hiddenIntro2.label"), "directorDetails")
-        @Messages("pages.common.companiesHouse.hiddenIntro2.2")
+        @linkNewWindow(Messages("pages.common.companiesHouse.hiddenIntro2.url"), Messages("pages.common.companiesHouse.hiddenIntro2.label"), "directorDetails", None, true)
     </p>
 }
 
@@ -58,7 +57,7 @@
         messages("app.common.errorSummaryLabel"), ninoForm, dataJourney=Some("DirectorNINOs")
     )
 
-    <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages(s"pages.directorDetails.description"))</h1>
+    <h1 class="form-title heading-large" id="pageHeading">@Html(messages(s"pages.directorDetails.description"))</h1>
 
     <div class="form-group">
         @hiddenDetails("directors", Messages("pages.directorDetails.information.dropdown.header"), hiddenDetailsContent)
