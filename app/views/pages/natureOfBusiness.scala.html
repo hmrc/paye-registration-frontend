@@ -29,23 +29,24 @@
     <h1 class="form-title heading-xlarge" id="pageHeading">@Html(messages("pages.natureOfBusiness.description"))</h1>
 
     @govHelpers.form(action = controllers.userJourney.routes.NatureOfBusinessController.submitNatureOfBusiness()) {
-        <div class="form-group">
-            <div class="char-counter" data-char-counter>
+            <fieldset>
+              <div class="char-counter" data-char-counter>
                 @payeTextArea(
                     sicForm("description"),
-                    '_inputClass -> "form-control--block",
+                    '_divClass   -> "form-group",
+                    '_inputClass -> "form-control fill-width",
                     '_labelClass -> "form-label",
-                    '_label -> messages("pages.natureOfBusiness.textArea.label"),
-                    '_percentageWidth -> 98,
-                    '_rows -> 5,
-                    '_maxlength -> 100,
+                    '_label      -> messages("pages.natureOfBusiness.textArea.label"),
+                    '_percentageWidth -> "100",
+                    '_rows       -> "4",
+                    '_maxlength  -> 100,
                     '_dataCharField -> "data_char_field"
                 )
                 <p class="char-counter-text flush" id="no-js-counter-text">
                     Max 100 characters
                 </p>
-            </div>
-        </div>
+              </div>
+            </fieldset>
 
         <div class="form-group">
             <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
