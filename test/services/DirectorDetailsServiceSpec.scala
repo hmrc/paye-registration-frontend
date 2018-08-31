@@ -397,7 +397,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSu
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
         .thenReturn(Future.successful(payeregDirectors))
 
       when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
@@ -453,7 +453,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSu
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Seq(dir)))
 
       when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
@@ -475,7 +475,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSu
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Nil))
 
       when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any()))
@@ -503,14 +503,14 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSu
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
         .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
 
       an[Upstream4xxResponse] mustBe thrownBy(await(service.getDirectorDetails("12345", "txId")))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
-      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new ArrayIndexOutOfBoundsException))
 
       an[Exception] mustBe thrownBy(await(service.getDirectorDetails("12345", "txId")))

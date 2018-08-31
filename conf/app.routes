@@ -20,19 +20,6 @@ GET         /start-pay-as-you-earn                            controllers.userJo
 ## PAYE RESTART
 GET         /re-register-as-an-employer                       controllers.userJourney.PayeStartController.restartPaye
 
-## WELCOME PAGE
-GET         /register-as-employer                             controllers.userJourney.WelcomeController.show
-POST        /register-as-employer                             controllers.userJourney.WelcomeController.submit
-
-## COMPANY ELIGIBILITY
-GET         /offshore-employer                                controllers.userJourney.EligibilityController.companyEligibility
-POST        /offshore-employer                                controllers.userJourney.EligibilityController.submitCompanyEligibility
-
-## DIRECTOR ELIGIBILITY
-GET         /pay-non-cash-incentive-awards                    controllers.userJourney.EligibilityController.directorEligibility
-POST        /pay-non-cash-incentive-awards                    controllers.userJourney.EligibilityController.submitDirectorEligibility
-
-
 ## COMPLETION CAPACITY
 GET         /relationship-to-company                          controllers.userJourney.CompletionCapacityController.completionCapacity
 POST        /relationship-to-company                          controllers.userJourney.CompletionCapacityController.submitCompletionCapacity
@@ -55,48 +42,28 @@ GET         /business-contact-details                         controllers.userJo
 POST        /business-contact-details                         controllers.userJourney.CompanyDetailsController.submitBusinessContactDetails
 
 ## PAID EMPLOYEES
-GET         /employ-anyone                                   controllers.userJourney.NewEmploymentController.paidEmployees
-POST        /employ-anyone                                   controllers.userJourney.NewEmploymentController.submitPaidEmployees
+GET         /employ-anyone                                   controllers.userJourney.EmploymentController.paidEmployees
+POST        /employ-anyone                                   controllers.userJourney.EmploymentController.submitPaidEmployees
 
 ## EMPLOYING STAFF
-GET         /will-employ-anyone                              controllers.userJourney.NewEmploymentController.employingStaff
-POST        /will-employ-anyone                              controllers.userJourney.NewEmploymentController.submitEmployingStaff
+GET         /will-employ-anyone                              controllers.userJourney.EmploymentController.employingStaff
+POST        /will-employ-anyone                              controllers.userJourney.EmploymentController.submitEmployingStaff
 
 ## CONSTRUCTION INDUSTRY
-GET         /work-construction-industry                      controllers.userJourney.NewEmploymentController.constructionIndustry
-POST        /work-construction-industry                      controllers.userJourney.NewEmploymentController.submitConstructionIndustry
+GET         /work-construction-industry                      controllers.userJourney.EmploymentController.constructionIndustry
+POST        /work-construction-industry                      controllers.userJourney.EmploymentController.submitConstructionIndustry
 
 ## APPLICATION DELAYED
-GET        /application-delayed                              controllers.userJourney.NewEmploymentController.applicationDelayed
-GET        /application-delayed-confirmed                    controllers.userJourney.NewEmploymentController.submitApplicationDelayed
-
-## EMPLOYMENT
-GET         /employ-staff-next-two-months                     controllers.userJourney.EmploymentController.employingStaff
-POST        /employ-staff-next-two-months                     controllers.userJourney.EmploymentController.submitEmployingStaff
+GET        /application-delayed                              controllers.userJourney.EmploymentController.applicationDelayed
+GET        /application-delayed-confirmed                    controllers.userJourney.EmploymentController.submitApplicationDelayed
 
 ## SUBCONTRACTORS
-GET         /use-subcontractors-construction-industry         controllers.userJourney.EmploymentController.subcontractors
-POST        /use-subcontractors-construction-industry         controllers.userJourney.EmploymentController.submitSubcontractors
-
-## SUBCONTRACTORS V2
-GET         /hire-subcontractors                              controllers.userJourney.NewEmploymentController.subcontractors
-POST        /hire-subcontractors                              controllers.userJourney.NewEmploymentController.submitSubcontractors
+GET         /hire-subcontractors                              controllers.userJourney.EmploymentController.subcontractors
+POST        /hire-subcontractors                              controllers.userJourney.EmploymentController.submitSubcontractors
 
 ## COMPANY PENSION
-GET         /make-pension-payment-next-two-months             controllers.userJourney.EmploymentController.companyPension
-POST        /make-pension-payment-next-two-months             controllers.userJourney.EmploymentController.submitCompanyPension
-
-## COMPANY PENSION V2
-GET         /pension-payments                                 controllers.userJourney.NewEmploymentController.pensions
-POST        /pension-payments                                 controllers.userJourney.NewEmploymentController.submitPensions
-
-## FIRST PAYMENT
-GET         /set-paye-scheme-start-date                       controllers.userJourney.EmploymentController.firstPayment
-POST        /set-paye-scheme-start-date                       controllers.userJourney.EmploymentController.submitFirstPayment
-
-## PAYMENT IN NEXT TAX YEAR
-GET         /first-payment-next-tax-year                      controllers.userJourney.EmploymentController.ifFirstPaymentIsInTheNextTaxYear
-POST        /first-payment-next-tax-year                      controllers.userJourney.EmploymentController.redirectBackToStandardFlow
+GET         /pension-payments                                 controllers.userJourney.EmploymentController.pensions
+POST        /pension-payments                                 controllers.userJourney.EmploymentController.submitPensions
 
 ## NATURE OF BUSINESS
 GET         /what-company-does                                controllers.userJourney.NatureOfBusinessController.natureOfBusiness
@@ -130,7 +97,6 @@ GET        /thankyou                                          controllers.feedba
 ## ERRORS
 GET        /ineligible-for-paye                               controllers.errors.ErrorController.ineligible
 GET        /dont-need-to-register                             controllers.errors.ErrorController.newIneligible
-GET        /you-cant-register-online                          controllers.userJourney.EligibilityController.ineligible
 
 GET        /something-went-wrong                              controllers.errors.ErrorController.failedSubmission
 GET        /submission-failure                                controllers.errors.ErrorController.retrySubmission

@@ -32,16 +32,12 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
-    System.clearProperty("feature.publicBeta")
   }
 
   class Setup {
-    def controller(pbEnabled: Boolean = false, naEnabled: Boolean = false) = new PayeStartController {
-      override val publicBetaEnabled       = pbEnabled
+    def controller() = new PayeStartController {
       override val redirectToLogin         = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
-      override val newApiEnabled           = naEnabled
-
       override val payeRegElFEURL          = MockAuthRedirects.payeRegElFEUrl
       override val payeRegElFEURI          = MockAuthRedirects.payeRegElFEUri
 
@@ -62,33 +58,11 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
     CurrentProfile("testRegId", CompanyRegistrationProfile(status, "txId", ackRefStatus), "en", false, None)
 
   "steppingStone" should {
-    "redirect to PREFE" when {
-      "public beta is enabled" in new Setup {
-        System.setProperty("feature.publicBeta", "true")
-
-        AuthHelpers.showUnauthorised(controller(pbEnabled = true).steppingStone(), fakeRequest) { resp =>
+    "redirect to PREFE" in new Setup {
+        AuthHelpers.showUnauthorised(controller().steppingStone(), fakeRequest) { resp =>
           status(resp)           mustBe SEE_OTHER
           redirectLocation(resp) mustBe Some("/prefe/test/")
         }
-      }
-    }
-
-    "redirect to the startPaye route" when {
-      "public beta is disabled" in new Setup {
-        System.setProperty("feature.publicBeta", "false")
-
-        AuthHelpers.showUnauthorised(controller().steppingStone(), fakeRequest) { resp =>
-          status(resp) mustBe SEE_OTHER
-          redirectLocation(resp) mustBe Some("/register-for-paye/start-pay-as-you-earn")
-        }
-      }
-
-      "public beta is not defined" in new Setup {
-        AuthHelpers.showUnauthorised(controller().steppingStone(), fakeRequest) { resp =>
-          status(resp) mustBe SEE_OTHER
-          redirectLocation(resp) mustBe Some("/register-for-paye/start-pay-as-you-earn")
-        }
-      }
     }
   }
 
@@ -132,7 +106,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       }
     }
 
-    "redirect to the start page for an authorised user with a registration ID and CoHo Company Details, with PAYE Footprint correctly asserted" in new Setup {
+    "redirect to the paid employees page for an authorised user with a registration ID and CoHo Company Details, with PAYE Footprint correctly asserted" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("submitted")))
 
@@ -142,11 +116,11 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/register-for-paye/register-as-employer")
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.paidEmployees().url)
       }
     }
 
-    "redirect to the start page for an authorised user with valid details, with PAYE Footprint correctly asserted, with CT accepted" in new Setup {
+    "redirect to the paid employees page for an authorised user with valid details, with PAYE Footprint correctly asserted, with CT accepted" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("acknowledged", Some("04"))))
 
@@ -156,11 +130,11 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/register-for-paye/register-as-employer")
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.paidEmployees().url)
       }
     }
 
-    "redirect to Start Page for an authorised user with valid details, with CT submitted and with incorporation paid" in new Setup {
+    "redirect to the paid employees page for an authorised user with valid details, with CT submitted and with incorporation paid" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(
             CurrentProfile("testRegId", CompanyRegistrationProfile("held", "txId", None, Some("paid")), "en", false, None)
@@ -172,7 +146,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/register-for-paye/register-as-employer")
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.paidEmployees().url)
       }
     }
 

@@ -36,11 +36,6 @@ page.timeout.description                                        = Your session h
 page.timeout.p1                                                 = Your answers have been saved.
 page.timeout.p2                                                 = Sign in to
 page.timeout.url                                                = continue registration
-                                                                
-## First payment in the next tax year                           
-pages.nextTaxYear.title                                         = The date of the company''s first payment is in the next tax year
-pages.nextTaxYear.heading                                       = The date of the company''s first payment is in the next tax year
-pages.nextTaxYear.body                                          = You can continue with your application but we won''t process it until after 6 April {0}.
 
 ## Application Delayed
 pages.applicationDelayed.title                                  = Your application will be delayed
@@ -61,39 +56,6 @@ errors.invalid.sic.noEntry                                      = Tell us what t
 errors.invalid.sic.overCharLimit                                = Enter a business description using 100 characters or less
 errors.invalid.sic.invalidChars                                 = Enter a business description using only letters, numbers and - , / & ''
 errors.invalid.name.invalidChars                                = Tell us the contact name using only letters (without accents), hyphens and apostrophes
-
-## Welcome page
-pages.welcome.description                                       = Register an employer for PAYE
-pages.welcome.heading1.register                                 = PAYE is HM Revenue and Customs'' (HMRC) system to collect Income Tax and National Insurance from employment. It stands for '' Pay As You Earn''.
-pages.welcome.heading2.register                                 = Use this service if any of the following apply:
-pages.welcome.bullet.pay                                        = it pays employees - including company directors - £{0} or more a week (this is the same as £{1} a month or £{2} a year)
-pages.welcome.bullet.pension                                    = it pays any amount to employees - including company directors - who also receive pension payments or income from another job
-pages.welcome.bullet.subcontractors                             = it uses subcontractors for construction work
-pages.welcome.beforeStart                                       = Before you start
-pages.welcome.otherWaysToRegister1                              = You''ll need to use
-pages.welcome.otherWaysToRegister2                              = another service to register
-pages.welcome.otherWaysToRegister3                              = if the company:
-pages.welcome.bullet.timeToComplete                             = provides employees with expenses or benefits
-pages.welcome.bullet.timeToProcess                              = claims tax back from Construction Industry Scheme (CIS) payments
-pages.welcome.2months                                           = A company can''t register an employer more than 2 months before it starts paying people, including company directors.
-pages.welcome.nino                                              = You''ll need the National Insurance number of at least one company director.
-pages.welcome.application                                       = Your application shouldn''t take more than 10 minutes to complete. You''ll need to allow 2 weeks for HMRC to process it.
-
-## Company Eligibility
-pages.companyEligibility.description                            = Is the company an offshore employer outside the European Economic Area that doesn''t pay UK National Insurance?
-pages.companyEligibility.error                                  = Tell us if the company''s an offshore employer outside the EEA who doesn''t pay UK National Insurance
-
-## Director Eligibility
-pages.directorEligibility.description                           = Over the next 2 months, will the company pay out any non-cash incentive awards?
-pages.employingStaff.directorEligibilityRulesIntro1             = This could be to anyone, not just your own staff.
-pages.employingStaff.directorEligibilityRulesIntro2             = Non-cash incentive awards include:
-pages.employingStaff.directorEligibility.indent                 = If it does, you won''t be able to use this service to register the company for PAYE. We''ll give you another way to register.
-pages.employingStaff.directorEligibility1                       = vouchers - including ones that can be exchanged for cash
-pages.employingStaff.directorEligibility2                       = any goods
-pages.employingStaff.directorEligibility3                       = prizes for employer-run competitions
-pages.employingStaff.directorEligibility4                       = holidays that the company''s paid for (but don''t include statutory holiday pay)
-pages.directorEligibility.error                                 = Tell us if over the next 2 months, the company pay out any non-cash incentive awards
-
 
 ## Completion Capacity page
 pages.completionCapacity.description                            = What is your relationship to the company?
@@ -118,7 +80,6 @@ pages.tradingName.error                                         = Tell us if the
 pages.tradingName.error.length                                  = Enter a trading name using 35 characters or less
 pages.tradingName.error.invalidChars                            = Tell us the trading name using only letters, numbers and - , . ( ) / & '' !
 pages.tradingdetails.input.hint-text                            = You can''t include ''limited'', ''Ltd'', ''limited liability partnership'', ''LLP'', ''public limited company'' or ''plc''
-
 
 ## Confirm RO Address
 pages.confirmRO.description                                     = Confirm {0}''s registered office address
@@ -177,7 +138,6 @@ pages.paidEmployees.date.empty                                  = Enter a date f
 pages.paidEmployees.date.invalid                                = Enter a valid date
 pages.paidEmployees.date.moreThanTwoYears                       = Enter a date in the last 2 years
 
-
 ## Will Be Paying
 pages.willBePaying.title                                      = Over the next 2 months, will the company do any of the following?
 pages.willBePaying.description                                = Over the next 2 months, will the company do any of the following?
@@ -201,47 +161,10 @@ pages.employsSubcontractors.description                         = During the cur
 pages.employsSubcontractors.para                                = The current tax year is 6 April 2018 to 5 April 2019.
 pages.employsSubcontractors.error                               = Tell us if the company will hire any subcontractors in the construction industry in the current tax year
 
-## Employing Staff Page
-pages.employingStaff.description                                = Over the next 2 months will the company pay any staff, including directors?
-pages.employingStaff.employingStaffRulesIntro                   = This includes:
-pages.employingStaff.employingStaffRules1                       = people already employed by the company
-pages.employingStaff.employingStaffRules2                       = directors or company secretaries who receive a salary either as a regular wage or lump sum
-pages.employingStaff.error                                      = Tell us if over the next 2 months you will pay any staff, including yourself
-
-
-## Subcontractors Page
-pages.subcontractors.description                                = Over the next 2 months, will the company hire subcontractors in the construction industry?
-pages.subcontractors.nameRulesIntro                             = We''ll register you with the Construction Industry Scheme (CIS) if you pay subcontractors to do construction work.
-pages.subcontractors.findout1                                   = Find out
-pages.subcontractors.findout2                                   = what work is covered by the CIS
-pages.subcontractors.error                                      = Tell us if the company will use subcontractors in the construction industry over the next 2 months
-
-## Company Pension Page
-pages.companyPension.description                                = Will the company make pension payments to a former employee or their dependants in the next 2 months?
-pages.companyPension.setUpPensionIntro                          = This includes payments to:
-pages.companyPension.setUpPension1                              = an employee who has retired
-pages.companyPension.setUpPension2                              = any dependants of an employee who has died
-pages.companyPension.error                                      = Tell us if you will make pension payments to a former employee or their dependants in the next 2 months
-
-## pages.companyPension.error.invalidDate                        = Enter a date within 2 months
-
 ## Pays Pension
 pages.paysPension.title                                         = Does the company make pension payments to a former employee or their dependants?
 pages.paysPension.description                                   = Does the company make pension payments to a former employee or their dependants?
 pages.paysPension.error                                         = Tell us if the company makes pension payments to a former employee or their dependants
-
-## First Payment Page
-pages.firstPayment.description                                  = Set the company''s PAYE scheme start date
-pages.firstPayment.firstPaymentLabel                            = First Payment
-pages.firstPayment.intro                                        = The PAYE scheme will start on the date of the company''s first payment to an employee or subcontractor.
-pages.firstPayment.hint                                         = For example, 12 8 2017
-pages.firstPayment.date.invalidRange                            = Enter a date within 2 months
-pages.firstPayment.date.dateTooEarly                            = Enter a date after 1900
-pages.firstPayment.firstPaymentRulesSummary                     = What counts as a payment?
-pages.firstPayment.list                                         = This date can be:
-pages.firstPayment.listElement1                                 = in the past
-pages.firstPayment.listElement2                                 = within the next 2 months
-pages.firstPayment.indent                                       = The PAYE scheme will be cancelled if the company doesn''t pay anyone within the next 2 months.
 
 ## NATURE OF BUSINESS
 pages.natureOfBusiness.description                              = What does the company do?
@@ -261,25 +184,12 @@ pages.directorDetails.name-suffix                               = {0}''s Nationa
 ## Summary Page
 pages.summary.description                                       = Check and confirm your answers
 
-pages.summary.employees.sectionHeading                          = Employment information
-pages.summary.employees.question                                = Over the next 2 months will you pay any staff, including yourself?
-pages.summary.employees.answers.true                            = Yes
-pages.summary.employees.answers.false                           = No
-pages.summary.employees.hiddenChangeText                        = whether over the next 2 months you will pay any staff.
-
-pages.summary.companyPension.question                           = Will you make pension payments to a former employee or their dependants in the next 2 months?
-pages.summary.companyPension.answers.true                       = Yes
-pages.summary.companyPension.answers.false                      = No
-pages.summary.companyPension.hiddenChangeText                   = whether you will make pension payments to a former employee or their dependants in the next 2 months.
-
 pages.summary.subcontractors.question                           = Will the company use subcontractors in the construction industry?
 pages.summary.subcontractors.answers.true                       = Yes
 pages.summary.subcontractors.answers.false                      = No
 pages.summary.subcontractors.hiddenChangeText                   = whether you will employ subcontractors in the construction industry.
 
-pages.summary.firstPaymentDate.question                         = What do you want your PAYE start date to be?
-pages.summary.firstPaymentDate.hiddenChangeText                 = your PAYE start date.
-
+pages.summary.employees.sectionHeading                          = Employment information
 pages.summary.employing.question                                = Does the company employ anyone or provide expenses or benefits to staff?
 pages.summary.earliestDate.question                             = When did it first start employing someone or providing expenses or benefits to staff?
 pages.summary.employing.answers.true                            = Yes
@@ -303,7 +213,6 @@ pages.summary.employsSubcontractors.answers.false               = No
 pages.summary.paysPension.question                              = Does the company make pension payments to a former employee or their dependants?
 pages.summary.paysPension.answers.true                          = Yes
 pages.summary.paysPension.answers.false                         = No
-
 
 pages.summary.completionCapacity.sectionHeading                 = About you
 pages.summary.completionCapacity.question                       = What is your relationship to the company?
@@ -393,20 +302,6 @@ pages.confirmation.inclusive.section-2.disclosure.bullet3       = enter HMRC cod
 pages.confirmation.email.heading                                = What happens next?
 pages.confirmation.email.body                                   = You''ll receive:
 pages.confirmation.email.bullet-1                               = an email now with your application reference number
-
-
-## Ineligible
-pages.ineligible.description                                    = The company can''t register an employer online
-pages.ineligible.p1                                             = You should register by phone or post.
-pages.ineligible.p2.1                                           = Contact HMRC
-pages.ineligible.p2.2                                           = - they''ll arrange for someone to call you back to help you register.
-pages.ineligible.p3                                             = You''ll need to provide the following details about the company.
-pages.ineligible.l1                                             = company name, registered address and phone number
-pages.ineligible.l2                                             = trading name if this is different
-pages.ineligible.l3                                             = business activities - for example, electrical engineering
-pages.ineligible.l4                                             = Unique Taxpayer Reference (UTR)
-pages.ineligible.l5                                             = company registration number
-pages.ineligible.l6                                             = the names and National Insurance numbers of every company director
 
 ## New Ineligible
 errorPages.newIneligible.title                                  = You don''t need to register as an employer for PAYE

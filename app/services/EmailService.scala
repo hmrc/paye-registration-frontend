@@ -33,9 +33,7 @@ class EmailServiceImpl @Inject()(val companyRegistrationConnector: CompanyRegist
                                  val payeRegistrationConnector: PAYERegistrationConnector,
                                  val incorporationInformationConnector: IncorporationInformationConnector,
                                  val s4LConnector: S4LConnector,
-                                 val pAYEFeatureSwitches: PAYEFeatureSwitches) extends EmailService {
-  def newApiEnabled: Boolean = pAYEFeatureSwitches.newApiStructure.enabled
-}
+                                 val pAYEFeatureSwitches: PAYEFeatureSwitches) extends EmailService
 
 trait EmailService {
   val companyRegistrationConnector: CompanyRegistrationConnector
@@ -43,7 +41,6 @@ trait EmailService {
   val emailConnector: EmailConnector
   val s4LConnector: S4LConnector
   val incorporationInformationConnector: IncorporationInformationConnector
-  def newApiEnabled: Boolean
 
   private val FIRST_PAYMENT_DATE = "firstPaymentDate"
 
@@ -68,17 +65,10 @@ trait EmailService {
   )
 
   def primeEmailData(regId: String)(implicit hc: HeaderCarrier): Future[CacheMap] = {
-    if(newApiEnabled) {
-      for {
-        Some(employment) <- payeRegistrationConnector.getEmploymentV2(regId)
-        stashed          <- s4LConnector.saveForm[LocalDate](regId, FIRST_PAYMENT_DATE, employment.firstPaymentDate)
-      } yield stashed
-    } else {
       for {
         Some(employment) <- payeRegistrationConnector.getEmployment(regId)
-        stashed          <- s4LConnector.saveForm[LocalDate](regId, FIRST_PAYMENT_DATE, employment.firstPayDate)
+        stashed          <- s4LConnector.saveForm[LocalDate](regId, FIRST_PAYMENT_DATE, employment.firstPaymentDate)
       } yield stashed
-    }
   }
 
   def sendAcknowledgementEmail(profile: CurrentProfile, ackRef: String)(implicit hc: HeaderCarrier): Future[EmailResponse] = {

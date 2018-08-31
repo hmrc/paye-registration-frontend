@@ -29,7 +29,4 @@ trait DateUtil {
     val arrDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")).split("-")
     (arrDate(0), arrDate(1), arrDate(2))
   }
-
-  def lessOrEqualThanXDaysAfter(today: LocalDate, dateToCheck: LocalDate, inc: Int) =
-    !dateToCheck.isAfter(today.plus(inc, ChronoUnit.DAYS))
 }

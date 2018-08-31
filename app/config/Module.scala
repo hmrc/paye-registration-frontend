@@ -35,16 +35,11 @@ import utils.{FeatureManager, FeatureSwitchManager, PAYEFeatureSwitch, PAYEFeatu
 class Module extends AbstractModule {
   override def configure(): Unit = {
     bindHmrcDependencies()
-    bindStartUpJobs()
     bindUtils()
     bindConnectors()
     bindServices()
     bindOtherControllers()
     bindUserJourneyControllers()
-  }
-
-  private def bindStartUpJobs(): Unit = {
-
   }
 
   private def bindHmrcDependencies(): Unit = {
@@ -86,10 +81,8 @@ class Module extends AbstractModule {
     bind(classOf[ConfirmationService]).to(classOf[ConfirmationServiceImpl]).asEagerSingleton()
     bind(classOf[CurrentProfileService]).to(classOf[CurrentProfileServiceImpl]).asEagerSingleton()
     bind(classOf[IncorporationInformationService]).to(classOf[IncorporationInformationServiceImpl]).asEagerSingleton()
-    bind(classOf[EligibilityService]).to(classOf[EligibilityServiceImpl]).asEagerSingleton()
     bind(classOf[S4LService]).to(classOf[S4LServiceImpl]).asEagerSingleton()
     bind(classOf[EmploymentService]).to(classOf[EmploymentServiceImpl]).asEagerSingleton()
-    bind(classOf[EmploymentServiceV2]).to(classOf[EmploymentServiceV2Impl]).asEagerSingleton()
     bind(classOf[NatureOfBusinessService]).to(classOf[NatureOfBusinessServiceImpl]).asEagerSingleton()
     bind(classOf[PAYEContactService]).to(classOf[PAYEContactServiceImpl]).asEagerSingleton()
     bind(classOf[PAYERegistrationService]).to(classOf[PAYERegistrationServiceImpl]).asEagerSingleton()
@@ -124,12 +117,10 @@ class Module extends AbstractModule {
     bind(classOf[DirectorDetailsController]).to(classOf[DirectorDetailsControllerImpl]).asEagerSingleton()
     bind(classOf[EligibilityController]).to(classOf[EligibilityControllerImpl]).asEagerSingleton()
     bind(classOf[EmploymentController]).to(classOf[EmploymentControllerImpl]).asEagerSingleton()
-    bind(classOf[NewEmploymentController]).to(classOf[NewEmploymentControllerImpl]).asEagerSingleton()
     bind(classOf[NatureOfBusinessController]).to(classOf[NatureOfBusinessControllerImpl]).asEagerSingleton()
     bind(classOf[PAYEContactController]).to(classOf[PAYEContactControllerImpl]).asEagerSingleton()
     bind(classOf[PayeStartController]).to(classOf[PayeStartControllerImpl]).asEagerSingleton()
     bind(classOf[SignInOutController]).to(classOf[SignInOutControllerImpl]).asEagerSingleton()
     bind(classOf[SummaryController]).to(classOf[SummaryControllerImpl]).asEagerSingleton()
-    bind(classOf[WelcomeController]).to(classOf[WelcomeControllerImpl]).asEagerSingleton()
   }
 }

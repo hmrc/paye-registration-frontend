@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import forms.helpers.CustomDateForm
 import forms.test.TestPAYERegSetupForm.{requiredBoolean, threePartDateWithComparison}
-import models.api.{Employing, EmploymentV2}
+import models.api.{Employing, Employment}
 import play.api.data.Forms.{mapping, _}
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError, Forms, Mapping}
@@ -53,6 +53,6 @@ object TestPAYERegEmploymentInfoSetupForm extends CustomDateForm {
       "cis"            -> requiredBoolean,
       "subcontractors" -> requiredBoolean,
       "pensions"       -> optional(requiredBoolean)
-    )(EmploymentV2.apply)(EmploymentV2.unapply)
+    )(Employment.apply)(Employment.unapply)
   )
 }

@@ -20,11 +20,11 @@ import java.time.LocalDate
 
 import play.api.libs.json.Json
 
-case class EmployingStaffV2(employingAnyone: Option[EmployingAnyone],
-                            willBePaying: Option[WillBePaying],
-                            construction: Option[Boolean],
-                            subcontractors: Option[Boolean],
-                            companyPension: Option[Boolean])
+case class EmployingStaff(employingAnyone: Option[EmployingAnyone],
+                          willBePaying: Option[WillBePaying],
+                          construction: Option[Boolean],
+                          subcontractors: Option[Boolean],
+                          companyPension: Option[Boolean])
 
 case class EmployingAnyone(employing: Boolean,
                            startDate: Option[LocalDate])
@@ -32,8 +32,8 @@ case class EmployingAnyone(employing: Boolean,
 case class WillBePaying(willPay: Boolean,
                         beforeSixApril: Option[Boolean])
 
-object EmployingStaffV2 {
+object EmployingStaff {
   implicit val formatEmployingAnyone  = Json.format[EmployingAnyone]
   implicit val formatWillbePaying     = Json.format[WillBePaying]
-  implicit val format                 = Json.format[EmployingStaffV2]
+  implicit val format                 = Json.format[EmployingStaff]
 }

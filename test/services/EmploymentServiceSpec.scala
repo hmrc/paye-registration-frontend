@@ -18,243 +18,261 @@ package services
 
 import java.time.LocalDate
 
-import enums.CacheKeys
 import helpers.PayeComponentSpec
-import models.api.{Employing, EmploymentV2, Employment => EmploymentAPI}
-import models.view.{CompanyPension, EmployingAnyone, EmployingStaff, EmployingStaffV2, Subcontractors, WillBePaying, Employment => EmploymentView, FirstPayment => FirstPaymentView}
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito.{times, verify, when}
-import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import utils.DateUtil
+import models.api.{Employing, Employment}
+import models.view.{EmployingAnyone, EmployingStaff, WillBePaying}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
 
 class EmploymentServiceSpec extends PayeComponentSpec {
-  val now = LocalDate.now()
-  implicit val formatEmploymentView = Json.format[EmploymentView]
 
-  val returnCacheMap = CacheMap("", Map("" -> Json.toJson("")))
-  val returnHttpResponse = HttpResponse(200)
-
-  trait Setup {
-    def testNow: LocalDate
-
-    val service = new EmploymentService {
-      override def now              = testNow
-      override val payeRegConnector = mockPAYERegConnector
-      override val s4LService       = mockS4LService
-    }
-
-    val dateUtil = new DateUtil {}
-  }
-  "calling viewToAPI with EmployingStaff" should {
-    "return the corresponding converted Employment API Model with CompanyPension" in new Setup {
-      override def testNow = LocalDate.now
-
-      val viewModel = EmploymentView(Some(EmployingStaff(true)), Some(CompanyPension(true)), Some(Subcontractors(true)), Some(FirstPaymentView(LocalDate.now())))
-      service.viewToAPI(viewModel) mustBe Right(EmploymentAPI(true, Some(true), true, now))
-    }
-
-    "return the corresponding converted Employment API Model without CompanyPension" in new Setup {
-      override def testNow = LocalDate.now
-
-      val viewModel = EmploymentView(Some(EmployingStaff(false)), None, Some(Subcontractors(true)), Some(FirstPaymentView(LocalDate.now())))
-      service.viewToAPI(viewModel) mustBe Right(EmploymentAPI(false, None, true, now))
-    }
-
-    "return the Employment VIEW Model with EmployingStaff set as true and CompanyPension set as None" in new Setup {
-      override def testNow = LocalDate.now
-
-      val viewModel = EmploymentView(Some(EmployingStaff(true)), None, Some(Subcontractors(true)), Some(FirstPaymentView(LocalDate.now())))
-      service.viewToAPI(viewModel) mustBe Left(viewModel)
-    }
-
-    "return the Employment VIEW Model with Subcontractors set as None" in new Setup {
-      override def testNow = LocalDate.now
-
-      val viewModel = EmploymentView(Some(EmployingStaff(false)), None, None, Some(FirstPaymentView(LocalDate.now())))
-      service.viewToAPI(viewModel) mustBe Left(viewModel)
-    }
-
-    "return the Employment VIEW Model with FirstPayment set as None" in new Setup {
-      override def testNow = LocalDate.now
-
-      val viewModel = EmploymentView(Some(EmployingStaff(false)), None, None, None)
-      service.viewToAPI(viewModel) mustBe Left(viewModel)
-    }
+  def testService(date: LocalDate = LocalDate.of(2018, 1, 1)): EmploymentService = new EmploymentService {
+    override def now: LocalDate   = date
+    override val s4LService       = mockS4LService
+    override val payeRegConnector = mockPayeRegistrationConnector
+    override val iiService        = mockIncorpInfoService
   }
 
-  "calling apiToView with EmployingStaff" should {
-    "return the corresponding converted Employment View Model with CompanyPension" in new Setup {
-      override def testNow = LocalDate.now
+  val anotherDateEntered                   = LocalDate.of(2016,1,1)
+  val newTaxYearDateInRange                = LocalDate.of(2018, 4, 4)
+  val alreadyEmployingViewModel            = EmployingStaff(Some(EmployingAnyone(true, Some(anotherDateEntered))), None, Some(true), Some(true), Some(true))
+  val alreadyEmployingApiModel             = Employment(Employing.alreadyEmploying, anotherDateEntered, true, true, Some(true))
+  val notEmployingViewModel                = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)), Some(false), None, None)
+  val notEmployingApiModel                 = Employment(Employing.notEmploying, testService().now, false, false, None)
+  val notEmployingApiModelPreIncorpSubs    = Employment(Employing.notEmploying, testService().now, true, true, None)
+  val notEmployingViewModelPreIncorp       = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)), Some(false), None, None)
+  val notEmployingViewModelPreIncorpSubs   = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)), Some(true), Some(true), None)
+  val willEmployThisYearViewModel          = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(true))), Some(false), None, None)
+  val willEmployThisYearViewModelCTY       = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, None)), Some(false), None, None)
+  val willEmployThisYearViewModelPreIncorp = EmployingStaff(None, Some(WillBePaying(true, Some(true))), Some(false), None, None)
+  val willEmployThisYearApiModel           = Employment(Employing.willEmployThisYear, testService().now , false, false, None)
+  val willEmployNextYearViewModel          = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(false))), Some(true), Some(false), None)
+  val willEmployNextYearViewModelCTY       = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, None)), Some(true), Some(false), None)
+  val willEmployNextYearViewModelPreIncorp = EmployingStaff(None, Some(WillBePaying(true, Some(false))), Some(true), Some(false), None)
+  val willEmployNextYearApiModel           = Employment(Employing.willEmployNextYear, LocalDate.of(2018, 4, 6), true, false, None)
+  val defaultPensionViewModelPreIncorp     = EmployingStaff(None, Some(WillBePaying(true, Some(false))), Some(true), Some(false), Some(true))
+  val defaultPensionApiModelPreIncorp      = Employment(Employing.willEmployNextYear, LocalDate.of(2018, 4, 6), true, false, None)
+  val defaultPensionViewModel              = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)), Some(false), None, Some(true))
+  val defaultPensionApiModel               = Employment(Employing.notEmploying, testService().now, false, false, None)
 
-      val apiModel = EmploymentAPI(true, Some(true), false, now)
-      val expected = EmploymentView(Some(EmployingStaff(true)), Some(CompanyPension(true)), Some(Subcontractors(false)), Some(FirstPaymentView(LocalDate.now())))
-      service.apiToView(apiModel) mustBe expected
+
+  "calling viewToAPIV2 with EmployingStaffV2" should {
+    "return corresponding converted Employment API Model with Employing = alreadyEmploying with contractors None" in {
+      testService().viewToApi(
+        EmployingStaff(Some(EmployingAnyone(true, Some(LocalDate.of(2017, 12, 12)))), None, Some(false), None, Some(true))
+      ) mustBe Right(Employment(Employing.alreadyEmploying, LocalDate.of(2017, 12, 12), false, false, Some(true)))
+    }
+    "return corresponding converted Employment API Model with Employing = alreadyEmploying" in {
+      testService().viewToApi(alreadyEmployingViewModel) mustBe Right(alreadyEmployingApiModel)
     }
 
-    "return the corresponding converted Employment View Model without CompanyPension" in new Setup {
-      override def testNow = LocalDate.now
-
-      val apiModel = EmploymentAPI(false, None, false, now)
-      service.apiToView(apiModel) mustBe EmploymentView(Some(EmployingStaff(false)), None, Some(Subcontractors(false)), Some(FirstPaymentView(LocalDate.now())))
-    }
-  }
-
-  "calling fetchEmploymentView" should {
-    "return the Employment VIEW model if found in S4L" in new Setup {
-      override def testNow = LocalDate.now
-
-      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
-        .thenReturn(Future.successful(Some(Fixtures.validEmploymentViewModel)))
-
-      await(service.fetchEmploymentView("54321")) mustBe Fixtures.validEmploymentViewModel
+    "return corresponding converted Employment API model with Employing = notEmploying and default subcontractors to false and setting pension to None" in {
+      testService().viewToApi(notEmployingViewModel) mustBe Right(notEmployingApiModel)
     }
 
-    "return the Employment VIEW model from the connector if not found in S4L" in new Setup {
-      override def testNow = LocalDate.now
-
-      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
-        .thenReturn(Future.successful(None))
-
-      when(mockPAYERegConnector.getEmployment(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(Fixtures.validEmploymentAPIModel)))
-
-      await(service.fetchEmploymentView("54321")) mustBe service.apiToView(Fixtures.validEmploymentAPIModel)
+    "return corresponding converted Employment API model with Employing = willEmployThisYear" in {
+      testService().viewToApi(willEmployThisYearViewModel) mustBe Right(willEmployThisYearApiModel)
     }
 
-    "return an empty Employment VIEW model if not found in S4L or in connector" in new Setup {
-      override def testNow = LocalDate.now
+    "return corresponding converted Employment API model with Employing = willEmployNextYear and set payment date as 6 4 of this year" in {
+      testService().viewToApi(willEmployNextYearViewModel) mustBe Right(willEmployNextYearApiModel)
+    }
+    "return corresponding converted Employment API model with employing = notEmploying and default pension to None" in {
+      testService().viewToApi(defaultPensionViewModel) mustBe Right(defaultPensionApiModel)
+    }
 
-      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
-        .thenReturn(Future.successful(None))
+    "return corresponding converted Employment API model with Employing = notEmploying user is pre incorp and default subcontractors to false" in {
+      testService().viewToApi(notEmployingViewModelPreIncorp) mustBe Right(notEmployingApiModel)
+    }
 
-      when(mockPAYERegConnector.getEmployment(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(None))
+    "return corresponding converted Employment API model with Employing = notEmploying and dont default subcontractors user is pre incorp" in {
+      testService().viewToApi(notEmployingViewModelPreIncorp) mustBe Right(notEmployingApiModel)
+    }
 
-      await(service.fetchEmploymentView("54321")) mustBe EmploymentView(None, None, None, None)
+    "return corresponding converted Employment API model with Employing = willEmployThisYear user is pre incorp" in {
+      testService().viewToApi(willEmployThisYearViewModelPreIncorp) mustBe Right(willEmployThisYearApiModel)
+    }
+
+    "return corresponding converted Employment API model with Employing = willEmployNextYear and set payment date as 6 4 of this year user is pre incorp" in {
+      testService().viewToApi(willEmployNextYearViewModel) mustBe Right(willEmployNextYearApiModel)
+    }
+    "return corresponding Employment API model when pension is provided user is pre incorp so pension is defaulted to None" in {
+      testService().viewToApi(defaultPensionViewModelPreIncorp) mustBe Right(defaultPensionApiModelPreIncorp)
+    }
+
+    "return viewModel if model is not complete" in {
+      val viewModel = EmployingStaff(Some(EmployingAnyone(false, None)), None, None, None, Some(true))
+      testService().viewToApi(viewModel) mustBe Left(viewModel)
+    }
+    "return viewModel if model is not complete pre incorp" in {
+      val viewModel = EmployingStaff(None, Some(WillBePaying(true,Some(false))), None, Some(true), None)
+      testService().viewToApi(viewModel) mustBe Left(viewModel)
     }
   }
 
-  "calling saveEmploymentView" should {
-    "save the Employment VIEW model in S4L if the model is incomplete" in new Setup {
-      override def testNow = LocalDate.now
-
-      when(mockS4LService.saveForm[EmploymentView](ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
-        .thenReturn(Future.successful(returnCacheMap))
-
-      await(service.saveEmploymentView(Fixtures.incompleteEmploymentViewModel, "54321")) mustBe S4LSaved
+  "apiToView" should {
+    val incorpDate = Some(LocalDate.now)
+    "return corresponding converted EmploymentStaff View Model with Employing = alreadyEmploying" in {
+      testService().apiToView(alreadyEmployingApiModel,incorpDate) mustBe alreadyEmployingViewModel
     }
-
-    "save the Employment VIEW model in BE if the model is complete" in new Setup {
-      override def testNow = LocalDate.now
-
-      when(mockPAYERegConnector.upsertEmployment(ArgumentMatchers.eq("54321"), ArgumentMatchers.eq(Fixtures.validEmploymentAPIModel))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Fixtures.validEmploymentAPIModel))
-
-      when(mockS4LService.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future.successful(returnHttpResponse))
-
-      await(service.saveEmploymentView(Fixtures.validEmploymentViewModel, "54321")) mustBe MongoSaved(Fixtures.validEmploymentViewModel)
+    "return corresponding converted EmploymentStaff View Model with Employing = notEmploying and default subcontractors to false" in {
+      testService().apiToView(notEmployingApiModel,incorpDate) mustBe notEmployingViewModel
     }
-
-    "clear S4L data if the Employment VIEW model is saved in BE" in new Setup {
-      override def testNow = LocalDate.now
-
-      when(mockPAYERegConnector.upsertEmployment(ArgumentMatchers.eq("54321"), ArgumentMatchers.eq(Fixtures.validEmploymentAPIModel))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Fixtures.validEmploymentAPIModel))
-
-      when(mockS4LService.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future.successful(returnHttpResponse))
-
-      await(service.saveEmployment(Fixtures.validEmploymentViewModel, "54321"))
-      verify(mockS4LService, times(1)).clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]())
+    "return corresponding converted EmployingStaff View model with Employing = willEmployThisYear" in {
+      testService().apiToView(willEmployThisYearApiModel,incorpDate) mustBe willEmployThisYearViewModelCTY
     }
-  }
-
-  "calling saveEmployingStaff" should {
-    "update the Employment VIEW model" in new Setup {
-      override def testNow = LocalDate.now
-
-      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
-        .thenReturn(Future.successful(Some(Fixtures.incompleteEmploymentViewModel)))
-
-      when(mockS4LService.saveForm[EmploymentView](ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
-        .thenReturn(Future.successful(returnCacheMap))
-
-      await(service.saveEmployingStaff(EmployingStaff(false), "54321")) mustBe Fixtures.incompleteEmploymentViewModel.copy(employing = Some(EmployingStaff(false)))
+    "return corresponding converted EmployingStaff View model with Employing = willEmployThisYear in before next tax year range" in {
+      testService(newTaxYearDateInRange).apiToView(willEmployThisYearApiModel,incorpDate) mustBe willEmployThisYearViewModel
+    }
+    "return corresponding converted EmployingStaff View model with Employing = willEmployNextYear and set payment date as 6 4 of this year" in {
+      testService().apiToView(willEmployNextYearApiModel,incorpDate) mustBe willEmployNextYearViewModelCTY
+    }
+    "return corresponding converted EmployingStaff View model with Employing = willEmployNextYear and set payment date as 6 4 of this year in before next tax year range" in {
+      testService(newTaxYearDateInRange).apiToView(willEmployNextYearApiModel,incorpDate) mustBe willEmployNextYearViewModel
+    }
+    "return corresponding EmploymentStaff View model with Employing = notEmploying and default subcontractors to false (AND default Employing to None) for pre incorp" in {
+      testService().apiToView(notEmployingApiModel,None) mustBe notEmployingViewModel.copy(employingAnyone = None, companyPension = None)
+    }
+    "return corresponding EmploymentStaff View model with Employing = willEmployThisYear and pension is None (AND default Employing to None) for pre incorp" in {
+      testService().apiToView(willEmployThisYearApiModel,None) mustBe willEmployThisYearViewModelCTY.copy(employingAnyone = None, companyPension = None)
+    }
+    "return corresponding EmploymentStaff View model with Employing = willEmployThisYear and pension is None (AND default Employing to None) for pre incorp in before tax year range" in {
+      testService(newTaxYearDateInRange).apiToView(willEmployThisYearApiModel,None) mustBe willEmployThisYearViewModel.copy(employingAnyone = None, companyPension = None)
+    }
+    "return corresponding EmploymentStaff View model with Employing = willEmployNextYear (AND default Employing to None) for pre incorp" in {
+      testService().apiToView(willEmployNextYearApiModel,None) mustBe willEmployNextYearViewModelCTY.copy(employingAnyone = None, companyPension = None)
+    }
+    "return corresponding EmploymentStaff View model with Employing = willEmployNextYear (AND default Employing to None) for pre incorp in before next tax year range" in {
+      testService(newTaxYearDateInRange).apiToView(willEmployNextYearApiModel,None) mustBe willEmployNextYearViewModel.copy(employingAnyone = None, companyPension = None)
     }
   }
 
-  "calling saveCompanyPension" should {
-    "update the Employment VIEW model" in new Setup {
-      override def testNow = LocalDate.now
+  "fetchEmploymentView" should {
+    "return a View model from S4L" in {
+      val partialView = EmployingStaff(Some(EmployingAnyone(false, None)), None, None, None, Some(true))
 
-      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
-        .thenReturn(Future.successful(Some(Fixtures.incompleteEmploymentViewModel)))
+      when(mockS4LService.fetchAndGet[EmployingStaff](any(), any())(any(), any()))
+        .thenReturn(Future(Some(partialView)))
 
-      when(mockS4LService.saveForm[EmploymentView](ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
-        .thenReturn(Future.successful(returnCacheMap))
+      when(mockIncorpInfoService.getIncorporationDate(any(),any())(any()))
+        .thenReturn(Future.successful(Some(LocalDate.now)))
 
-      await(service.saveCompanyPension(CompanyPension(false), "54321")) mustBe Fixtures.incompleteEmploymentViewModel.copy(companyPension = Some(CompanyPension(false)))
+      val result = await(testService().fetchEmployingStaff)
+      result mustBe partialView
+    }
+
+    "return a view model that's been converted from an api model" in {
+      when(mockS4LService.fetchAndGet[EmployingStaff](any(), any())(any(), any()))
+        .thenReturn(Future(None))
+
+      when(mockPayeRegistrationConnector.getEmployment(any())(any(), any()))
+        .thenReturn(Future(Some(willEmployNextYearApiModel)))
+
+      when(mockIncorpInfoService.getIncorporationDate(any(),any())(any()))
+        .thenReturn(Future.successful(Some(LocalDate.now)))
+
+      val result = await(testService(newTaxYearDateInRange).fetchEmployingStaff)
+      result mustBe willEmployNextYearViewModel
+    }
+
+    "return an empty view model because both S4L and the api returned nothing" in {
+      when(mockS4LService.fetchAndGet[EmployingStaff](any(), any())(any(), any()))
+        .thenReturn(Future(None))
+
+      when(mockPayeRegistrationConnector.getEmployment(any())(any(), any()))
+        .thenReturn(Future(None))
+
+      when(mockIncorpInfoService.getIncorporationDate(any(),any())(any()))
+        .thenReturn(Future.successful(Some(LocalDate.now)))
+
+      val result = await(testService().fetchEmployingStaff)
+      result mustBe EmployingStaff(None, None, None, None, None)
     }
   }
 
-  "calling saveSubcontractors" should {
-    "update the Employment VIEW model" in new Setup {
-      override def testNow = LocalDate.now
+  "saveEmploymentView" should {
+    "return a view model" when {
+      "the view model being processed isn't complete and has been saved into S4L" in {
+        when(mockS4LService.saveForm[EmployingStaff](any(), any(), any())(any(), any()))
+          .thenReturn(Future(Fixtures.blankCacheMap))
 
-      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
-        .thenReturn(Future.successful(Some(Fixtures.incompleteEmploymentViewModel)))
-
-      when(mockS4LService.saveForm[EmploymentView](ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
-        .thenReturn(Future.successful(returnCacheMap))
-
-      await(service.saveSubcontractors(Subcontractors(false), "54321")) mustBe Fixtures.incompleteEmploymentViewModel.copy(subcontractors = Some(Subcontractors(false)))
-    }
-  }
-
-  "calling saveFirstPayment" should {
-    "update the Employment VIEW model" in new Setup {
-      override def testNow = LocalDate.now
-
-      when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
-        .thenReturn(Future.successful(Some(Fixtures.incompleteEmploymentViewModel)))
-
-      when(mockS4LService.saveForm[EmploymentView](ArgumentMatchers.eq(CacheKeys.Employment.toString), ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[EmploymentView]]()))
-        .thenReturn(Future.successful(returnCacheMap))
-
-      val date = LocalDate.of(2016, 12, 1)
-
-      await(service.saveFirstPayment(FirstPaymentView(date), "54321")) mustBe Fixtures.incompleteEmploymentViewModel.copy(firstPayment = Some(FirstPaymentView(date)))
-    }
-  }
-
-  "firstPaymentDateInNextYear" should {
-    "return true" when {
-      "now is before 6 Apr AND entered date is equal to 6 Apr" in new Setup {
-        override def testNow = LocalDate.of(now.getYear,1,1)
-        service.firstPaymentDateInNextYear(LocalDate.of(now.getYear,4,6)) mustBe true
+        val result = await(testService().saveEmployingStaff("testRegId", EmployingStaff(Some(EmployingAnyone(false, None)), None, None, None, Some(true))))
+        result mustBe EmployingStaff(Some(EmployingAnyone(false, None)), None, None, None, Some(true))
       }
 
-      "now is before 6 Apr AND entered date is after 6 Apr" in new Setup {
-        override def testNow = LocalDate.of(now.getYear,1,1)
-        service.firstPaymentDateInNextYear(LocalDate.of(now.getYear,4,7)) mustBe true
+      "the view model is complete and the view model has been transformed into an api model and has been saved into the api" in {
+        when(mockPayeRegistrationConnector.upsertEmployment(any(), any())(any()))
+          .thenReturn(Future(willEmployNextYearApiModel))
+
+        when(mockS4LService.clear(any())(any()))
+          .thenReturn(Future(HttpResponse(200)))
+
+        val result = await(testService().saveEmployingStaff("testRegId", willEmployNextYearViewModel))
+        result mustBe willEmployNextYearViewModel
       }
     }
+  }
 
-    "return false" when {
-      "now is before 6 Apr AND entered date is before 6 Apr" in new Setup {
-        override def testNow = LocalDate.of(now.getYear,1,1)
-        service.firstPaymentDateInNextYear(LocalDate.of(now.getYear,1,1)) mustBe false
-      }
+  "fetchAndUpdateViewModel" should {
+    "return a view model" in {
+      when(mockS4LService.fetchAndGet[EmployingStaff](any(), any())(any(), any()))
+        .thenReturn(Future(Some(alreadyEmployingViewModel)))
 
-      "now is after 6 Apr" in new Setup {
-        override def testNow = LocalDate.of(now.getYear,4,10)
-        service.firstPaymentDateInNextYear(LocalDate.of(now.getYear,4,15))
-      }
+      when(mockPayeRegistrationConnector.upsertEmployment(any(), any())(any()))
+        .thenReturn(Future(alreadyEmployingApiModel))
+
+      when(mockS4LService.clear(any())(any()))
+        .thenReturn(Future(HttpResponse(200)))
+
+      await(testService().fetchAndUpdateViewModel(identity)) mustBe alreadyEmployingViewModel
     }
+  }
+
+  val partialView = EmployingStaff(None, None, None, None, None)
+
+  Seq((
+      "saveEmployingAnyone",
+      () => testService().saveEmployingAnyone(EmployingAnyone(true, Some(anotherDateEntered))),
+      partialView.copy(employingAnyone = Some(EmployingAnyone(true, Some(anotherDateEntered))))
+    ),(
+      "saveWillEmployAnyone",
+      () => testService().saveWillEmployAnyone(WillBePaying(false, None)),
+      partialView.copy(willBePaying = Some(WillBePaying(false, None)))
+    ),(
+      "saveConstructionIndustry",
+      () => testService().saveConstructionIndustry(construction = true),
+      partialView.copy(construction = Some(true))
+    ),(
+      "saveSubcontractors",
+      () => testService().saveSubcontractors(subcontractors = true),
+      partialView.copy(subcontractors = Some(true))
+    ),(
+      "savePensionPayment",
+      () => testService().savePensionPayment(companyPension = true),
+      partialView.copy(companyPension = Some(true))
+    )
+  ) foreach {
+    case (functionName, function, expected) =>
+      s"$functionName" should {
+        "return a view model" in {
+
+          when(mockS4LService.fetchAndGet[EmployingStaff](any(), any())(any(), any()))
+            .thenReturn(Future(None))
+
+          when(mockPayeRegistrationConnector.getEmployment(any())(any(), any()))
+            .thenReturn(Future(None))
+
+          when(mockS4LService.saveForm[EmployingStaff](any(), any(), any())(any(), any()))
+            .thenReturn(Future(Fixtures.blankCacheMap))
+
+          when(mockIncorpInfoService.getIncorporationDate(any(),any())(any()))
+              .thenReturn(Future.successful(Some(LocalDate.now)))
+
+          await(function()) mustBe expected
+        }
+      }
   }
 }

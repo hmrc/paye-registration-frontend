@@ -15,10 +15,10 @@
  *@
 
 @import helpers.templates.{inlineDateInput, payeErrorSummary, payeInput}
-@import models.api.EmploymentV2
+@import models.api.Employment
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
-@(form: Form[EmploymentV2])(implicit request: Request[_], messages: Messages)
+@(form: Form[Employment])(implicit request: Request[_], messages: Messages)
 
 
 @payeErrorSummary(
@@ -61,5 +61,4 @@
     </div>
 
     <button class="button" type="submit" id="continue" >Submit</button>
-
 }

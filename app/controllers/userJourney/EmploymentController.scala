@@ -16,22 +16,27 @@
 
 package controllers.userJourney
 
+import java.time.LocalDate
+
 import javax.inject.Inject
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
+import controllers.exceptions.{FrontendControllerException, GeneralException, MissingViewElementException}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.employmentDetails._
-import models.view.{EmployingStaff, Subcontractors}
+import models.view._
 import play.api.Configuration
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, Request, Result}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
-import views.html.pages.annual.FirstPaymentInNextTaxYear
-import views.html.pages.employmentDetails.{companyPension => CompanyPensionPage, employingStaff => EmployingStaffPage, firstPayment => FirstPaymentPage, subcontractors => SubcontractorsPage}
+import uk.gov.hmrc.http.HeaderCarrier
+import utils.SystemDate
+import views.html.pages.employmentDetails.{applicationDelayed => ApplicationDelayedPage, constructionIndustry => ConstructionIndustryPage, employsSubcontractors => SubcontractorsPage, paidEmployees => PaidEmployeesPage, paysPension => PaysPensionPage, willBePaying => willBePayingPage}
 
 import scala.concurrent.Future
 
 class EmploymentControllerImpl @Inject()(val employmentService: EmploymentService,
+                                         val thresholdService: ThresholdService,
                                          val keystoreConnector: KeystoreConnector,
                                          val config: Configuration,
                                          val authConnector: AuthConnector,
@@ -42,102 +47,168 @@ class EmploymentControllerImpl @Inject()(val employmentService: EmploymentServic
                                          val incorporationInformationConnector: IncorporationInformationConnector,
                                          val payeRegistrationService: PAYERegistrationService) extends EmploymentController with AuthRedirectUrls
 
+
 trait EmploymentController extends PayeBaseController {
   val employmentService: EmploymentService
+  val thresholdService: ThresholdService
+  val incorpInfoService: IncorporationInformationService
+
+  private val handleJourneyPostConstruction: EmployingStaff => Result = {
+    case EmployingStaff(Some(EmployingAnyone(true, _)), _, _, _, _) => Redirect(controllers.userJourney.routes.EmploymentController.pensions())
+    case EmployingStaff(_, Some(WillBePaying(true, _)), _, _, _) | EmployingStaff(_, Some(WillBePaying(false, _)), Some(true), _, _)  =>
+      Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+    case EmployingStaff(_, Some(WillBePaying(false, _)), Some(false), _, _) => Redirect(controllers.errors.routes.ErrorController.newIneligible())
+    case  _ => throw GeneralException(s"[EmploymentController][handleJourneyPostConstruction] an invalid scenario was met for employment staff")
+  }
+
+  def weeklyThreshold: Int = thresholdService.getCurrentThresholds.getOrElse("weekly", 116)
+
+  private def ifIncorpDateExist(regId: String, txId: String)(action: LocalDate => Future[Result])(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] =
+    incorpInfoService.getIncorporationDate(regId, txId) flatMap {
+      _.fold(Future.successful(Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())))(action)
+    } recover {
+      case e: FrontendControllerException => e.recover
+    }
+
+  // PAID EMPLOYEES
+  def paidEmployees: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    implicit profile =>
+    ifIncorpDateExist(profile.registrationID, profile.companyTaxRegistration.transactionId) { incorpDate =>
+      employmentService.fetchEmployingStaff map { viewModel =>
+        val form = viewModel.employingAnyone.fold(PaidEmployeesForm.form(incorpDate))(PaidEmployeesForm.form(incorpDate).fill)
+        Ok(PaidEmployeesPage(form, weeklyThreshold))
+      }
+    } recover {
+      case e : FrontendControllerException => e.recover
+    }
+  }
+
+  def submitPaidEmployees: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    implicit profile =>
+      ifIncorpDateExist(profile.registrationID, profile.companyTaxRegistration.transactionId) { incorpDate =>
+        PaidEmployeesForm.form(incorpDate).bindFromRequest.fold(
+          errors => Future.successful(BadRequest(PaidEmployeesPage(errors, weeklyThreshold))),
+          model => { employmentService.saveEmployingAnyone(model) map { model =>
+              model.employingAnyone match {
+                case Some(EmployingAnyone(false, _))  => Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
+                case Some(EmployingAnyone(true, _))   => Redirect(controllers.userJourney.routes.EmploymentController.constructionIndustry())
+              }
+            }
+          }
+        )
+      } recover {
+        case e : FrontendControllerException => e.recover
+      }
+    }
+
+  def employingStaff: Action[AnyContent] = isAuthorisedWithProfile{ implicit request =>
+    implicit profile =>
+    employmentService.fetchEmployingStaff map { viewModel =>
+      val now = SystemDate.getSystemDate.toLocalDate
+      val form = viewModel.willBePaying.fold(EmployingStaffForm.form(now))(EmployingStaffForm.form(now).fill)
+      Ok(willBePayingPage(form, weeklyThreshold, now))
+    } recover {
+      case e : FrontendControllerException => e.recover
+    }
+  }
+
+  def submitEmployingStaff: Action[AnyContent] = isAuthorisedWithProfile{ implicit request => implicit profile =>
+    val now = SystemDate.getSystemDate.toLocalDate
+    EmployingStaffForm.form(now).bindFromRequest().fold(
+      errors => Future.successful(BadRequest(willBePayingPage(errors, weeklyThreshold, now))),
+      willBePaying => employmentService.saveWillEmployAnyone(willBePaying).map {
+        _.willBePaying match {
+          case Some(WillBePaying(true, Some(false)))  => Redirect(controllers.userJourney.routes.EmploymentController.applicationDelayed())
+          case None                                   =>
+            throw MissingViewElementException(s"[EmploymentController][SubmitEmployingStaff] no WillBePaying block found on save for regId: ${profile.registrationID}")
+          case _                                      => Redirect(controllers.userJourney.routes.EmploymentController.constructionIndustry())
+        }
+      }
+    ) recover {
+      case e : FrontendControllerException => e.recover
+    }
+  }
+
+  // CONSTRUCTION INDUSTRY
+  def constructionIndustry: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    implicit profile =>
+    employmentService.fetchEmployingStaff map {
+      viewModel =>
+        val form = viewModel.construction.fold(ConstructionIndustryForm.form)(ConstructionIndustryForm.form.fill)
+        Ok(ConstructionIndustryPage(form))
+    } recover {
+      case e : FrontendControllerException => e.recover
+    }
+  }
+
+  def submitConstructionIndustry: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    implicit profile =>
+    ConstructionIndustryForm.form.bindFromRequest().fold(
+      errors => Future.successful(BadRequest(ConstructionIndustryPage(errors))),
+      cis => employmentService.saveConstructionIndustry(cis) map {
+        viewModel => if(cis){
+          Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
+        } else {
+          handleJourneyPostConstruction(viewModel)
+        }
+      }
+    ) recover {
+      case e : FrontendControllerException => e.recover
+    }
+  }
+
+  // APPLICATION DELAYED
+  def applicationDelayed: Action[AnyContent] = isAuthorised { implicit request =>
+    Future.successful(Ok(ApplicationDelayedPage()))
+  }
+
+  def submitApplicationDelayed: Action[AnyContent] = isAuthorised { implicit request =>
+     Future.successful(Redirect(controllers.userJourney.routes.EmploymentController.constructionIndustry()))
+  }
 
   // SUBCONTRACTORS
-  def subcontractors: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    employmentService.fetchEmploymentView(profile.registrationID) map {
-      _.subcontractors match {
-        case Some(model) => Ok(SubcontractorsPage(SubcontractorsForm.form.fill(model)))
-        case _           => Ok(SubcontractorsPage(SubcontractorsForm.form))
-      }
+  def subcontractors: Action[AnyContent] = isAuthorisedWithProfile{ implicit request =>
+    implicit profile =>
+    employmentService.fetchEmployingStaff map {
+      viewModel =>
+        val form = viewModel.subcontractors.fold(SubcontractorsForm.form)(SubcontractorsForm.form.fill)
+        Ok(SubcontractorsPage(form))
+    } recover {
+      case e : FrontendControllerException => e.recover
     }
   }
 
-  def submitSubcontractors: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    SubcontractorsForm.form.bindFromRequest.fold(
+  def submitSubcontractors: Action[AnyContent] =  isAuthorisedWithProfile{ implicit request =>
+    implicit profile =>
+    SubcontractorsForm.form.bindFromRequest().fold(
       errors => Future.successful(BadRequest(SubcontractorsPage(errors))),
-      model => employmentService.saveSubcontractors(model, profile.registrationID) map { model =>
-        (model.employing, model.subcontractors) match {
-          case (Some(EmployingStaff(false)), Some(Subcontractors(false))) => Redirect(controllers.errors.routes.ErrorController.ineligible())
-          case _ => Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
-        }
-      }
-    )
-  }
-
-  // EMPLOYING STAFF
-  def employingStaff: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    employmentService.fetchEmploymentView(profile.registrationID) map {
-      _.employing match {
-        case Some(model)  => Ok(EmployingStaffPage(EmployingStaffForm.form.fill(model)))
-        case _            => Ok(EmployingStaffPage(EmployingStaffForm.form))
-      }
+      employsSubcontractors => employmentService.saveSubcontractors(employsSubcontractors).map(handleJourneyPostConstruction)
+    ).recover {
+      case e : FrontendControllerException => e.recover
     }
   }
 
-  def submitEmployingStaff: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    EmployingStaffForm.form.bindFromRequest.fold(
-      errors => Future.successful(BadRequest(EmployingStaffPage(errors))),
-      model => employmentService.saveEmployingStaff(model, profile.registrationID) map { model =>
-        (model.employing, model.subcontractors) match {
-          case (Some(EmployingStaff(false)), Some(Subcontractors(false))) => Redirect(controllers.errors.routes.ErrorController.ineligible())
-          case (Some(EmployingStaff(true)), _)                            => Redirect(controllers.userJourney.routes.EmploymentController.companyPension())
-          case _                                                          => Redirect(controllers.userJourney.routes.EmploymentController.firstPayment())
-        }
-      }
-    )
-  }
-
-  // COMPANY PENSION
-  def companyPension: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    employmentService.fetchEmploymentView(profile.registrationID) map {
-      _.companyPension match {
-        case Some(model)  => Ok(CompanyPensionPage(CompanyPensionForm.form.fill(model)))
-        case _            => Ok(CompanyPensionPage(CompanyPensionForm.form))
-      }
+  // PENSIONS
+  def pensions: Action[AnyContent] = isAuthorisedWithProfile{ implicit request =>
+    implicit profile =>
+    employmentService.fetchEmployingStaff map {
+      viewModel =>
+        val form = viewModel.companyPension.fold(PaysPensionForm.form)(PaysPensionForm.form.fill)
+        Ok(PaysPensionPage(form))
+    } recover {
+      case e : FrontendControllerException => e.recover
     }
   }
 
-  def submitCompanyPension: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    CompanyPensionForm.form.bindFromRequest.fold(
-      errors => Future.successful(BadRequest(CompanyPensionPage(errors))),
-      model => employmentService.saveCompanyPension(model, profile.registrationID) map {
-        _ => Redirect(controllers.userJourney.routes.EmploymentController.firstPayment())
+  def submitPensions: Action[AnyContent] =  isAuthorisedWithProfile{ implicit request =>
+    implicit profile =>
+    PaysPensionForm.form.bindFromRequest().fold(
+      errors => Future.successful(BadRequest(PaysPensionPage(errors))),
+      paysPension => employmentService.savePensionPayment(paysPension) map {
+        _ => Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
       }
-    )
-  }
-
-  // FIRST PAYMENT
-  def firstPayment: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    employmentService.fetchEmploymentView(profile.registrationID) map {
-      _.firstPayment match {
-        case Some(model) => Ok(FirstPaymentPage(FirstPaymentForm.form.fill(model)))
-        case _           => Ok(FirstPaymentPage(FirstPaymentForm.form))
-      }
+    ) recover {
+      case e : FrontendControllerException => e.recover
     }
-  }
-
-  def submitFirstPayment = isAuthorisedWithProfile { implicit request => profile =>
-    FirstPaymentForm.form.bindFromRequest.fold(
-      errors => Future.successful(BadRequest(FirstPaymentPage(errors))),
-      model => for {
-        _                           <- employmentService.saveFirstPayment(model, profile.registrationID)
-        firstPaymentDateInNextYear  =  employmentService.firstPaymentDateInNextYear(model.firstPayDate)
-      } yield if(firstPaymentDateInNextYear) {
-        Redirect(controllers.userJourney.routes.EmploymentController.ifFirstPaymentIsInTheNextTaxYear() )
-      } else {
-        Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
-      }
-    )
-  }
-
-  def ifFirstPaymentIsInTheNextTaxYear: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
-    Future.successful(Ok(FirstPaymentInNextTaxYear()))
-  }
-
-  def redirectBackToStandardFlow: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
-    Future.successful(Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity()))
   }
 }

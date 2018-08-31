@@ -53,12 +53,6 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "companyDetails.businessContactDetails.businessEmail" -> "test@test.com",
         "companyDetails.businessContactDetails.mobileNumber" -> "1234567",
         "companyDetails.businessContactDetails.phoneNumber" -> "099876545",
-        "employment.employees" -> "true",
-        "employment.companyPension" -> "false",
-        "employment.subcontractors" -> "true",
-        "employment.firstPayDateDay" -> "1",
-        "employment.firstPayDateMonth" -> "1",
-        "employment.firstPayDateYear" -> "2017",
         "employmentInfo.employees" -> "alreadyEmploying",
         "employmentInfo.pensions" -> "false",
         "employmentInfo.cis" -> "true",
@@ -123,19 +117,13 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
             phoneNumber = Some("099876545")
           )
         ),
-        employment = Some(Employment(
-          employees = true,
-          companyPension = Some(false),
-          subcontractors = true,
-          firstPayDate = LocalDate.of(2017, 1, 1)
-        )),
-        employmentInfo = Some(EmploymentV2(
+        employmentInfo = Employment(
           employees = Employing.alreadyEmploying,
           firstPaymentDate = LocalDate.of(2017, 1, 1),
           construction = true,
           companyPension = Some(false),
           subcontractors = true
-        )),
+        ),
         sicCodes = List(
           SICCode(Some("84"), Some("consulting")),
           SICCode(Some("150"), Some("laundring"))
@@ -197,12 +185,6 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
           "companyDetails.businessContactDetails.businessEmail" -> "test@test.com",
           "companyDetails.businessContactDetails.mobileNumber" -> "1234567",
           "companyDetails.businessContactDetails.phoneNumber" -> "099876545",
-          "employment.employees" -> "true",
-          "employment.companyPension" -> "false",
-          "employment.subcontractors" -> "true",
-          "employment.firstPayDateDay" -> "1",
-          "employment.firstPayDateMonth" -> "1",
-          "employment.firstPayDateYear" -> "2017",
           "employmentInfo.employees" -> "alreadyEmploying",
           "employmentInfo.pensions" -> "false",
           "employmentInfo.cis" -> "true",
@@ -262,12 +244,6 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "companyDetails.businessContactDetails.businessEmail" -> "test@test.com",
         "companyDetails.businessContactDetails.mobileNumber" -> "",
         "companyDetails.businessContactDetails.phoneNumber" -> "099876545",
-        "employment.employees" -> "false",
-        "employment.companyPension" -> "",
-        "employment.subcontractors" -> "true",
-        "employment.firstPayDateDay" -> "1",
-        "employment.firstPayDateMonth" -> "1",
-        "employment.firstPayDateYear" -> "2017",
         "employmentInfo.employees" -> "alreadyEmploying",
         "employmentInfo.pensions" -> "false",
         "employmentInfo.cis" -> "true",
@@ -332,19 +308,13 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
             phoneNumber = Some("099876545")
           )
         ),
-        employment = Some(Employment(
-          employees = false,
-          companyPension = None,
-          subcontractors = true,
-          firstPayDate = LocalDate.of(2017, 1, 1)
-        )),
-        employmentInfo = Some(EmploymentV2(
+        employmentInfo = Employment(
           employees = Employing.alreadyEmploying,
           firstPaymentDate = LocalDate.of(2017, 1, 1),
           construction = true,
           companyPension = Some(false),
           subcontractors = true
-        )),
+        ),
         sicCodes = List(
           SICCode(None, Some("consulting")),
           SICCode(Some("150"), None)
@@ -401,11 +371,6 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
           "companyDetails.ppobAddress.country" -> "UK",
           "companyDetails.businessContactDetails.businessEmail" -> "test@test.com",
           "companyDetails.businessContactDetails.phoneNumber" -> "099876545",
-          "employment.employees" -> "false",
-          "employment.subcontractors" -> "true",
-          "employment.firstPayDateDay" -> "1",
-          "employment.firstPayDateMonth" -> "1",
-          "employment.firstPayDateYear" -> "2017",
           "employmentInfo.employees" -> "alreadyEmploying",
           "employmentInfo.pensions" -> "false",
           "employmentInfo.cis" -> "true",
@@ -451,11 +416,13 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "companyDetails.ppobAddress.country" -> "UK",
         "companyDetails.businessContactDetails.businessEmail" -> "test@test.com",
         "companyDetails.businessContactDetails.phoneNumber" -> "099876545",
-        "employment.employees" -> "false",
-        "employment.subcontractors" -> "true",
-        "employment.firstPayDateDay" -> "1",
-        "employment.firstPayDateMonth" -> "1",
-        "employment.firstPayDateYear" -> "2017",
+        "employmentInfo.employees" -> "alreadyEmploying",
+        "employmentInfo.pensions" -> "false",
+        "employmentInfo.cis" -> "true",
+        "employmentInfo.subcontractors" -> "true",
+        "employmentInfo.earliestDateDay" -> "1",
+        "employmentInfo.earliestDateMonth" -> "1",
+        "employmentInfo.earliestDateYear" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -496,11 +463,13 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "companyDetails.ppobAddress.country" -> "UK",
         "companyDetails.businessContactDetails.businessEmail" -> "test@test.com",
         "companyDetails.businessContactDetails.phoneNumber" -> "099876545",
-        "employment.employees" -> "false",
-        "employment.subcontractors" -> "true",
-        "employment.firstPayDateDay" -> "1",
-        "employment.firstPayDateMonth" -> "1",
-        "employment.firstPayDateYear" -> "2017",
+        "employmentInfo.employees" -> "alreadyEmploying",
+        "employmentInfo.pensions" -> "false",
+        "employmentInfo.cis" -> "true",
+        "employmentInfo.subcontractors" -> "true",
+        "employmentInfo.earliestDateDay" -> "1",
+        "employmentInfo.earliestDateMonth" -> "1",
+        "employmentInfo.earliestDateYear" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -541,11 +510,13 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "companyDetails.ppobAddress.country" -> "UK",
         "companyDetails.businessContactDetails.businessEmail" -> "test@test.com",
         "companyDetails.businessContactDetails.phoneNumber" -> "099876545",
-        "employment.employees" -> "false",
-        "employment.subcontractors" -> "true",
-        "employment.firstPayDateDay" -> "1",
-        "employment.firstPayDateMonth" -> "1",
-        "employment.firstPayDateYear" -> "2017",
+        "employmentInfo.employees" -> "alreadyEmploying",
+        "employmentInfo.pensions" -> "false",
+        "employmentInfo.cis" -> "true",
+        "employmentInfo.subcontractors" -> "true",
+        "employmentInfo.earliestDateDay" -> "1",
+        "employmentInfo.earliestDateMonth" -> "1",
+        "employmentInfo.earliestDateYear" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -586,11 +557,13 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "companyDetails.ppobAddress.country" -> "UK",
         "companyDetails.businessContactDetails.businessEmail" -> "test@test.com",
         "companyDetails.businessContactDetails.phoneNumber" -> "099876545",
-        "employment.employees" -> "false",
-        "employment.subcontractors" -> "true",
-        "employment.firstPayDateDay" -> "1",
-        "employment.firstPayDateMonth" -> "1",
-        "employment.firstPayDateYear" -> "2017",
+        "employmentInfo.employees" -> "alreadyEmploying",
+        "employmentInfo.pensions" -> "false",
+        "employmentInfo.cis" -> "true",
+        "employmentInfo.subcontractors" -> "true",
+        "employmentInfo.earliestDateDay" -> "1",
+        "employmentInfo.earliestDateMonth" -> "1",
+        "employmentInfo.earliestDateYear" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -630,11 +603,13 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "companyDetails.ppobAddress.country" -> "UK",
         "companyDetails.businessContactDetails.businessEmail" -> "test@test.com",
         "companyDetails.businessContactDetails.phoneNumber" -> "099876545",
-        "employment.employees" -> "false",
-        "employment.subcontractors" -> "true",
-        "employment.firstPayDateDay" -> "1",
-        "employment.firstPayDateMonth" -> "1",
-        "employment.firstPayDateYear" -> "2017",
+        "employmentInfo.employees" -> "alreadyEmploying",
+        "employmentInfo.pensions" -> "false",
+        "employmentInfo.cis" -> "true",
+        "employmentInfo.subcontractors" -> "true",
+        "employmentInfo.earliestDateDay" -> "1",
+        "employmentInfo.earliestDateMonth" -> "1",
+        "employmentInfo.earliestDateYear" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -676,11 +651,13 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "companyDetails.ppobAddress.country" -> "UK",
         "companyDetails.businessContactDetails.businessEmail" -> "test@test.com",
         "companyDetails.businessContactDetails.phoneNumber" -> "099876545",
-        "employment.employees" -> "false",
-        "employment.subcontractors" -> "true",
-        "employment.firstPayDateDay" -> "1",
-        "employment.firstPayDateMonth" -> "1",
-        "employment.firstPayDateYear" -> "2017",
+        "employmentInfo.employees" -> "alreadyEmploying",
+        "employmentInfo.pensions" -> "false",
+        "employmentInfo.cis" -> "true",
+        "employmentInfo.subcontractors" -> "true",
+        "employmentInfo.earliestDateDay" -> "1",
+        "employmentInfo.earliestDateMonth" -> "1",
+        "employmentInfo.earliestDateYear" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -724,10 +701,12 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "companyDetails.ppobAddress.country" -> "UK",
         "companyDetails.businessContactDetails.businessEmail" -> "test@test.com",
         "companyDetails.businessContactDetails.phoneNumber" -> "099876545",
-        "employment.subcontractors" -> "true",
-        "employment.firstPayDateDay" -> "1",
-        "employment.firstPayDateMonth" -> "1",
-        "employment.firstPayDateYear" -> "2017",
+        "employmentInfo.pensions" -> "false",
+        "employmentInfo.cis" -> "true",
+        "employmentInfo.subcontractors" -> "true",
+        "employmentInfo.earliestDateDay" -> "1",
+        "employmentInfo.earliestDateMonth" -> "1",
+        "employmentInfo.earliestDateYear" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -744,7 +723,7 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "payeContact.correspondenceAddress.postCode" -> "TE1 1ST"
       )
       val boundForm = testForm.bind(data)
-      val employeesError = FormError("employment.employees", "error.required")
+      val employeesError = FormError("employmentInfo.employees", "error.required")
 
       boundForm.errors mustBe Seq(employeesError)
       boundForm.data mustBe data
@@ -769,10 +748,12 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "companyDetails.ppobAddress.country" -> "UK",
         "companyDetails.businessContactDetails.businessEmail" -> "test@test.com",
         "companyDetails.businessContactDetails.phoneNumber" -> "099876545",
-        "employment.employees" -> "false",
-        "employment.firstPayDateDay" -> "1",
-        "employment.firstPayDateMonth" -> "1",
-        "employment.firstPayDateYear" -> "2017",
+        "employmentInfo.employees" -> "alreadyEmploying",
+        "employmentInfo.pensions" -> "false",
+        "employmentInfo.cis" -> "true",
+        "employmentInfo.earliestDateDay" -> "1",
+        "employmentInfo.earliestDateMonth" -> "1",
+        "employmentInfo.earliestDateYear" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -789,7 +770,7 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "payeContact.correspondenceAddress.postCode" -> "TE1 1ST"
       )
       val boundForm = testForm.bind(data)
-      val subcontractorsError = FormError("employment.subcontractors", "error.required")
+      val subcontractorsError = FormError("employmentInfo.subcontractors", "error.required")
 
       boundForm.errors mustBe Seq(subcontractorsError)
       boundForm.data mustBe data
@@ -814,10 +795,12 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "companyDetails.ppobAddress.country" -> "UK",
         "companyDetails.businessContactDetails.businessEmail" -> "test@test.com",
         "companyDetails.businessContactDetails.phoneNumber" -> "099876545",
-        "employment.employees" -> "false",
-        "employment.subcontractors" -> "true",
-        "employment.firstPayDateMonth" -> "1",
-        "employment.firstPayDateYear" -> "2017",
+        "employmentInfo.employees" -> "alreadyEmploying",
+        "employmentInfo.pensions" -> "false",
+        "employmentInfo.cis" -> "true",
+        "employmentInfo.subcontractors" -> "true",
+        "employmentInfo.earliestDateMonth" -> "1",
+        "employmentInfo.earliestDateYear" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -834,9 +817,10 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "payeContact.correspondenceAddress.postCode" -> "TE1 1ST"
       )
       val boundForm = testForm.bind(data)
-      val firstPaymentDayError = FormError("employment.firstPayDateDay", "pages.firstPayment.date.invalidRange")
+      val firstPaymentDayError = FormError("employmentInfo.earliestDate-fieldset", "pages.paidEmployees.date.empty")
 
-      boundForm.error("employment.firstPayDateDay") mustBe Some(firstPaymentDayError)
+
+      boundForm.error("employmentInfo.earliestDate-fieldset") mustBe Some(firstPaymentDayError)
       boundForm.data mustBe data
     }
 
@@ -859,10 +843,12 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "companyDetails.ppobAddress.country" -> "UK",
         "companyDetails.businessContactDetails.businessEmail" -> "test@test.com",
         "companyDetails.businessContactDetails.phoneNumber" -> "099876545",
-        "employment.employees" -> "false",
-        "employment.subcontractors" -> "true",
-        "employment.firstPayDateDay" -> "1",
-        "employment.firstPayDateYear" -> "2017",
+        "employmentInfo.employees" -> "alreadyEmploying",
+        "employmentInfo.pensions" -> "false",
+        "employmentInfo.cis" -> "true",
+        "employmentInfo.subcontractors" -> "true",
+        "employmentInfo.earliestDateDay" -> "1",
+        "employmentInfo.earliestDateYear" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -879,9 +865,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "payeContact.correspondenceAddress.postCode" -> "TE1 1ST"
       )
       val boundForm = testForm.bind(data)
-      val firstPaymentDayError = FormError("employment.firstPayDateDay", "pages.firstPayment.date.invalidRange")
+      val firstPaymentDayError = FormError("employmentInfo.earliestDate-fieldset", "pages.paidEmployees.date.empty")
 
-      boundForm.error("employment.firstPayDateDay") mustBe Some(firstPaymentDayError)
+      boundForm.error("employmentInfo.earliestDate-fieldset") mustBe Some(firstPaymentDayError)
       boundForm.data mustBe data
     }
 
@@ -904,10 +890,12 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "companyDetails.ppobAddress.country" -> "UK",
         "companyDetails.businessContactDetails.businessEmail" -> "test@test.com",
         "companyDetails.businessContactDetails.phoneNumber" -> "099876545",
-        "employment.employees" -> "false",
-        "employment.subcontractors" -> "true",
-        "employment.firstPayDateDay" -> "1",
-        "employment.firstPayDateMonth" -> "1",
+        "employmentInfo.employees" -> "alreadyEmploying",
+        "employmentInfo.pensions" -> "false",
+        "employmentInfo.cis" -> "true",
+        "employmentInfo.subcontractors" -> "true",
+        "employmentInfo.earliestDateDay" -> "1",
+        "employmentInfo.earliestDateMonth" -> "1",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -924,9 +912,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "payeContact.correspondenceAddress.postCode" -> "TE1 1ST"
       )
       val boundForm = testForm.bind(data)
-      val firstPaymentDayError = FormError("employment.firstPayDateDay", "pages.firstPayment.date.invalidRange")
+      val firstPaymentDayError = FormError("employmentInfo.earliestDate-fieldset", "pages.paidEmployees.date.empty")
 
-      boundForm.error("employment.firstPayDateDay") mustBe Some(firstPaymentDayError)
+      boundForm.error("employmentInfo.earliestDate-fieldset") mustBe Some(firstPaymentDayError)
       boundForm.data mustBe data
     }
 
@@ -949,11 +937,13 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "companyDetails.ppobAddress.country" -> "UK",
         "companyDetails.businessContactDetails.businessEmail" -> "test@test.com",
         "companyDetails.businessContactDetails.phoneNumber" -> "099876545",
-        "employment.employees" -> "false",
-        "employment.subcontractors" -> "true",
-        "employment.firstPayDateDay" -> "1",
-        "employment.firstPayDateMonth" -> "1",
-        "employment.firstPayDateYear" -> "2017",
+        "employmentInfo.employees" -> "alreadyEmploying",
+        "employmentInfo.pensions" -> "false",
+        "employmentInfo.cis" -> "true",
+        "employmentInfo.subcontractors" -> "true",
+        "employmentInfo.earliestDateDay" -> "1",
+        "employmentInfo.earliestDateMonth" -> "1",
+        "employmentInfo.earliestDateYear" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -992,11 +982,13 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "companyDetails.ppobAddress.country" -> "UK",
         "companyDetails.businessContactDetails.businessEmail" -> "test@test.com",
         "companyDetails.businessContactDetails.phoneNumber" -> "099876545",
-        "employment.employees" -> "false",
-        "employment.subcontractors" -> "true",
-        "employment.firstPayDateDay" -> "1",
-        "employment.firstPayDateMonth" -> "1",
-        "employment.firstPayDateYear" -> "2017",
+        "employmentInfo.employees" -> "alreadyEmploying",
+        "employmentInfo.pensions" -> "false",
+        "employmentInfo.cis" -> "true",
+        "employmentInfo.subcontractors" -> "true",
+        "employmentInfo.earliestDateDay" -> "1",
+        "employmentInfo.earliestDateMonth" -> "1",
+        "employmentInfo.earliestDateYear" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",

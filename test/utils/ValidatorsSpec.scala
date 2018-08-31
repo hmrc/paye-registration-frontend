@@ -16,53 +16,9 @@
 
 package utils
 
-import java.time.temporal.ChronoUnit
-
-import forms.employmentDetails.FirstPaymentForm
 import helpers.PayeComponentSpec
 
 class ValidatorsSpec extends PayeComponentSpec with DateUtil {
-  "calling isInvalidDate" should {
-    "return an error message if the day is not valid" in {
-      val data : Map[String, String] = Map(
-        "firstPayYear" -> "2016",
-        "firstPayMonth" -> "12",
-        "firstPayDay" -> "32")
-      val boundForm = FirstPaymentForm.form.bind(data)
-      boundForm.errors.map(_.message) mustBe List("pages.firstPayment.date.invalidRange")
-    }
-
-    "return an error message if the month is not valid" in {
-      val data : Map[String, String] = Map(
-        "firstPayYear" -> "2016",
-        "firstPayMonth" -> "13",
-        "firstPayDay" -> "31")
-      val boundForm = FirstPaymentForm.form.bind(data)
-      boundForm.errors.map(_.message) mustBe List("pages.firstPayment.date.invalidRange")
-    }
-
-    "return an error message if the year is not valid" in {
-      val data : Map[String, String] = Map(
-        "firstPayYear" -> "-3",
-        "firstPayMonth" -> "12",
-        "firstPayDay" -> "31")
-      val boundForm = FirstPaymentForm.form.bind(data)
-      boundForm.errors.map(_.message) mustBe List("pages.firstPayment.date.invalidRange")
-    }
-  }
-
-  "calling firstPaymentDateRange" should {
-    "return an error message if the date is more than 61 days in the future" in {
-      val today = SystemDate.getSystemDate.toLocalDate
-      val futureDate = fromDate(today.plus(3, ChronoUnit.MONTHS))
-      val data : Map[String, String] = Map(
-        "firstPayYear" -> futureDate._1,
-        "firstPayMonth" -> futureDate._2,
-        "firstPayDay" -> futureDate._3)
-      val boundForm = FirstPaymentForm.form.bind(data)
-      boundForm.errors.map(_.message) mustBe List("pages.firstPayment.date.invalidRange")
-    }
-  }
 
   "dateRegex" should {
     "validate 2018-01-01T12:00:00" in {

@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import enums.PAYEStatus
 import models.api.{PAYEContact => PAYEContactAPI, _}
-import models.view.{EmployingAnyone, EmployingStaffV2, PAYEContactDetails, Summary, SummaryRow, SummarySection, WillBePaying, PAYEContact => PAYEContactView}
+import models.view.{EmployingAnyone, EmployingStaff, PAYEContactDetails, Summary, SummaryRow, SummarySection, WillBePaying, PAYEContact => PAYEContactView}
 import models.{Address, DigitalContactDetails}
 
 trait PAYERegistrationFixture {
@@ -41,19 +41,15 @@ trait PAYERegistrationFixture {
   )
 
   val validDate = LocalDate.of(2016,12,20)
-  val validEmploymentAPI = Employment(employees = true,
-                                  companyPension = Some(true),
-                                  subcontractors = true,
-                                  firstPayDate = validDate)
 
-  val validEmploymentApiV2 = EmploymentV2(
+  val validEmploymentApi = Employment(
     employees = Employing.willEmployNextYear,
     firstPaymentDate = LocalDate.of(2018, 1, 1),
     construction = true,
     subcontractors = true,
     companyPension = None
   )
-  val validEmploymentApiV2Incorporated = EmploymentV2(
+  val validEmploymentApiIncorporated = Employment(
     employees = Employing.alreadyEmploying,
     firstPaymentDate = LocalDate.of(2016,12,20),
     construction = true,
@@ -61,7 +57,7 @@ trait PAYERegistrationFixture {
     companyPension = Some(true)
   )
 
-  val validEmploymentApiV2NotIncorporated = EmploymentV2(
+  val validEmploymentApiNotIncorporated = Employment(
     employees = Employing.willEmployThisYear,
     firstPaymentDate = LocalDate.of(2016,12,20),
     construction = true,
@@ -69,7 +65,7 @@ trait PAYERegistrationFixture {
     companyPension = None
   )
 
-  val validEmploymentViewV2Incorporated = EmployingStaffV2(
+  val validEmploymentViewIncorporated = EmployingStaff(
     Some(EmployingAnyone(true,Some(LocalDate.of(2016,12,20)))),
     None,
     Some(true),
@@ -77,7 +73,7 @@ trait PAYERegistrationFixture {
     Some(true)
   )
 
-  val validEmploymentViewV2NotIncorporated = EmployingStaffV2(
+  val validEmploymentViewNotIncorporated = EmployingStaff(
     None,
     Some(WillBePaying(true, None)),
     Some(true),
@@ -121,8 +117,7 @@ trait PAYERegistrationFixture {
     status = PAYEStatus.draft,
     completionCapacity = "High Priest",
     companyDetails = validCompanyDetailsAPI,
-    employment = Some(validEmploymentAPI),
-    employmentInfo = Some(validEmploymentApiV2),
+    employmentInfo = validEmploymentApi,
     sicCodes = validSICCodes,
     directors = Nil,
     payeContact = validPAYEContactAPI
@@ -141,12 +136,6 @@ trait PAYERegistrationFixture {
     ))
   )
 
-  val validEmploymentAPIModel = Employment(
-    employees = true,
-    companyPension = Some(true),
-    subcontractors = true,
-    LocalDate.of(2016, 12, 20)
-  )
 
   val validROAddress = Address(
     line1 = "14 St Test Walker",

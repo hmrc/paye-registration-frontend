@@ -16,8 +16,6 @@
 
 package helpers.fixtures
 
-import java.time.LocalDate
-
 import models.api.{Director, Name}
 import models.view._
 import models.{Address, DigitalContactDetails}
@@ -49,20 +47,6 @@ trait S4LFixture {
     Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
     Some(Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK"))),
     Some(DigitalContactDetails(Some("test@paye.co.uk"), None, None))
-  )
-
-  val validEmploymentViewModel = Employment(
-    Some(EmployingStaff(true)),
-    Some(CompanyPension(true)),
-    Some(Subcontractors(true)),
-    Some(FirstPayment(LocalDate.of(2016,12,20)))
-  )
-
-  val incompleteEmploymentViewModel = Employment(
-    Some(EmployingStaff(true)),
-    None,
-    None,
-    None
   )
 
   val validBusinessContactModel = DigitalContactDetails(

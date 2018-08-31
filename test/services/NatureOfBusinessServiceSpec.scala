@@ -77,21 +77,21 @@ class NatureOfBusinessServiceSpec extends PayeComponentSpec {
 
   "Calling getNatureOfBusiness" should {
     "return the correct View response when SIC Codes are returned from the microservice" in new Setup {
-      when(mockPAYERegConnector.getSICCodes(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getSICCodes(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validSICCodesList))
 
       await(service.getNatureOfBusiness("54321")) mustBe Some(NatureOfBusiness(natureOfBusiness = "laundring"))
     }
 
     "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
-      when(mockPAYERegConnector.getSICCodes(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getSICCodes(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any()))
         .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
 
       an[Upstream4xxResponse] mustBe thrownBy(await(service.getNatureOfBusiness("54321")))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
-      when(mockPAYERegConnector.getSICCodes(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getSICCodes(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new ArrayIndexOutOfBoundsException))
 
       an[Exception] mustBe thrownBy(await(service.getNatureOfBusiness("54321")))

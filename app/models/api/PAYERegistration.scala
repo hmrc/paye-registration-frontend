@@ -26,8 +26,7 @@ case class PAYERegistration(registrationID: String,
                             status: PAYEStatus.Value,
                             completionCapacity: String,
                             companyDetails: CompanyDetails,
-                            employment: Option[Employment],
-                            employmentInfo: Option[EmploymentV2],
+                            employmentInfo: Employment,
                             sicCodes: List[SICCode],
                             directors: List[Director],
                             payeContact: PAYEContact)
@@ -40,8 +39,7 @@ object PAYERegistration {
     (__ \ "status").format[PAYEStatus.Value] and
     (__ \ "completionCapacity").format[String] and
     (__ \ "companyDetails").format[CompanyDetails] and
-    (__ \ "employment").formatNullable[Employment] and
-    (__ \ "employmentInfo").formatNullable[EmploymentV2] and
+    (__ \ "employmentInfo").format[Employment] and
     (__ \ "sicCodes").format[List[SICCode]] and
     (__ \ "directors").format[List[Director]] and
     (__ \ "payeContact").format[PAYEContact]

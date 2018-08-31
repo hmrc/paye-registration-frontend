@@ -19,9 +19,9 @@ package forms.employmentDetails
 import helpers.PayeComponentSpec
 import play.api.data.FormError
 
-class SubcontractorsFormV2Spec extends PayeComponentSpec {
+class SubcontractorsFormSpec extends PayeComponentSpec {
 
-  val testForm = SubcontractorsFormV2.form
+  val testForm = SubcontractorsForm.form
   val employsSubcontractors = Map("employsSubcontractors" -> "true")
   val doesNotEmploySubcontractors = Map("employsSubcontractors" -> "false")
   val noEntry = Map("employsSubcontractors" -> "")
