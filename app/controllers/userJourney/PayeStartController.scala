@@ -44,10 +44,7 @@ class PayeStartControllerImpl @Inject()(val currentProfileService: CurrentProfil
                                         val companyRegistrationConnector: CompanyRegistrationConnector,
                                         val featureSwitches: PAYEFeatureSwitches,
                                         val messagesApi: MessagesApi,
-                                        val incorporationInformationConnector: IncorporationInformationConnector) extends PayeStartController with AuthRedirectUrls {
-  override def publicBetaEnabled: Boolean = featureSwitches.publicBeta.enabled
-  override def newApiEnabled: Boolean = featureSwitches.newApiStructure.enabled
-}
+                                        val incorporationInformationConnector: IncorporationInformationConnector) extends PayeStartController with AuthRedirectUrls
 
 trait PayeStartController extends PayeBaseController {
   val currentProfileService: CurrentProfileService
@@ -58,29 +55,14 @@ trait PayeStartController extends PayeBaseController {
   val payeRegElFEURL: String
   val payeRegElFEURI: String
 
-  def publicBetaEnabled: Boolean
-  def newApiEnabled: Boolean
-
   def steppingStone(): Action[AnyContent] = Action { implicit request =>
-    if(publicBetaEnabled) {
       Redirect(s"$payeRegElFEURL$payeRegElFEURI")
-    } else {
-      Redirect(routes.PayeStartController.startPaye())
-    }
   }
 
   val startPaye = isAuthorisedAndIsOrg { implicit request =>
     checkAndStoreCurrentProfile { profile =>
       assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId) {
-        if(publicBetaEnabled) {
-          if(newApiEnabled) {
-            Redirect(routes.NewEmploymentController.paidEmployees())
-          } else {
-            Redirect(routes.EmploymentController.subcontractors())
-          }
-        } else {
-          Redirect(routes.WelcomeController.show())
-        }
+            Redirect(routes.EmploymentController.paidEmployees())
       }
     }
   }

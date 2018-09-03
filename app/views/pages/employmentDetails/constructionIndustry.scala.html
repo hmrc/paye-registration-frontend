@@ -24,7 +24,7 @@
         Messages("app.common.errorSummaryLabel"), constructionIndustryForm, dataJourney=Some("ConstructionIndustry")
     )
     <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.constructionIndustry.description")</h1>
-    @govHelpers.form(action = controllers.userJourney.routes.NewEmploymentController.submitConstructionIndustry) {
+    @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitConstructionIndustry) {
 
         <div class="inline form-group">
             @payeInputRadioGroup(

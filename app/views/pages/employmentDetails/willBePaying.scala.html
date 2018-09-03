@@ -17,7 +17,7 @@
 @import java.time.LocalDate
 @import helpers.templates.{payeInputRadioGroup, payeErrorSummary, formHiddenYesNoRadio}
 @import models.view.WillBePaying
-@import forms.employmentDetails.EmployingStaffFormV2
+@import forms.employmentDetails.EmployingStaffForm
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
 @(willBePayingForm: Form[WillBePaying], weeklyThreshold: Int, now: LocalDate)(implicit request: Request[_], messages: Messages)
@@ -44,7 +44,7 @@
         Messages("app.common.errorSummaryLabel"), willBePayingForm, dataJourney=Some("Employing")
     )
     <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.willBePaying.description")</h1>
-    @govHelpers.form(action = controllers.userJourney.routes.NewEmploymentController.submitEmployingStaff) {
+    @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitEmployingStaff) {
         <p>@Messages("pages.willBePaying.para")</p>
         <ul class="list list-bullet">
             <li>@Messages("pages.willBePaying.bullet1", weeklyThreshold)</li>
@@ -54,7 +54,7 @@
         </ul>
 
         <div class="inline form-group">
-            @if(EmployingStaffFormV2.isRequiredBeforeNewTaxYear(now)) {
+            @if(EmployingStaffForm.isRequiredBeforeNewTaxYear(now)) {
                 @formHiddenYesNoRadio(
                     willBePayingForm,
                     "willBePaying",

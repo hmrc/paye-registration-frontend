@@ -51,28 +51,4 @@ class DateUtilSpec extends PayeComponentSpec with DateUtil {
       fromDate(LocalDate.parse("31-12-2016", DateTimeFormatter.ofPattern("dd-MM-yyyy"))) mustBe (("2016", "12", "31"))
     }
   }
-
-  "calling lessOrEqualThanXDaysAfter" should {
-    "return false if the date is more than 61 days in the future (case leap year)" in {
-      lessOrEqualThanXDaysAfter(LocalDate.parse("2016-02-29"), LocalDate.parse("2016-05-01"), 61) mustBe false
-    }
-  }
-
-  "calling lessOrEqualThanXDaysAfter" should {
-    "return false if the date is more than 61 days in the future" in {
-      lessOrEqualThanXDaysAfter(LocalDate.parse("2017-02-28"), LocalDate.parse("2017-05-01"), 61) mustBe false
-    }
-  }
-
-  "calling lessOrEqualThanXDaysAfter" should {
-    "return true if the date is less than 61 days in the future" in {
-      lessOrEqualThanXDaysAfter(LocalDate.parse("2016-12-31"), LocalDate.parse("2017-03-01"), 61) mustBe true
-    }
-  }
-
-  "calling lessOrEqualThanXDaysAfter" should {
-    "return true if the date is equal to 61 days in the future" in {
-      lessOrEqualThanXDaysAfter(LocalDate.parse("2016-12-31"), LocalDate.parse("2017-03-02"), 61) mustBe true
-    }
-  }
 }

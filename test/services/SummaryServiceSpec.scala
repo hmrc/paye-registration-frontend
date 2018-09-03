@@ -19,10 +19,9 @@ package services
 import java.time.LocalDate
 
 import common.exceptions.InternalExceptions.APIConversionException
-import controllers.exceptions.IncompleteSummaryBlockException
-import enums.{CacheKeys, PAYEStatus}
+import enums.PAYEStatus
 import helpers.PayeComponentSpec
-import models.api.{Director, Employment, Name, SICCode, CompanyDetails => CompanyDetailsAPI, PAYEContact => PAYEContactAPI, PAYERegistration => PAYERegistrationAPI}
+import models.api.{Director, Name, SICCode, CompanyDetails => CompanyDetailsAPI, PAYEContact => PAYEContactAPI, PAYERegistration => PAYERegistrationAPI}
 import models.view._
 import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
@@ -37,10 +36,9 @@ class SummaryServiceSpec extends PayeComponentSpec {
     val service = new SummaryService {
       val keystoreConnector         = mockKeystoreConnector
       val payeRegistrationConnector = mockPAYERegConnector
-      val employmentServiceV2       = mockEmploymentServiceV2
+      val employmentService       = mockEmploymentService
       val s4LService                = mockS4LService
-      val newApiEnabled: Boolean    = enabled
-      val iiService = mockIncorpInfoService
+      val iiService                 = mockIncorpInfoService
     }
 
     val apiRegistrationNoTName = PAYERegistrationAPI(
@@ -56,8 +54,7 @@ class SummaryServiceSpec extends PayeComponentSpec {
         Address("15 St Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE4 1ST"), Some("UK")),
         businessContactDetails = Fixtures.validBusinessContactDetails
       ),
-      employment = Some(Fixtures.validEmploymentAPI),
-      employmentInfo = Some(Fixtures.validEmploymentApiV2),
+      employmentInfo = Fixtures.validEmploymentApi,
       sicCodes = simpleSICCodes,
       directors = List(
         Director(
@@ -77,28 +74,28 @@ class SummaryServiceSpec extends PayeComponentSpec {
     val formatHMTLPPOBAddress = service.addressToSummaryRowAnswers(apiRegistrationNoTName.companyDetails.ppobAddress)
     val formatHMTLCorrespondenceAddress = service.addressToSummaryRowAnswers(Fixtures.validPAYEContactAPI.correspondenceAddress)
 
-    val oldEmployeeApiSS = SummarySection(
+    val employeeAPISS = SummarySection(
       id = "employees",
       Seq(
         SummaryRow(
-          id = "employees",
+          id = "employing",
           answers = List(Left("true")),
-          Some(controllers.userJourney.routes.EmploymentController.employingStaff())
+          Some(controllers.userJourney.routes.EmploymentController.paidEmployees())
         ),
         SummaryRow(
-          id = "companyPension",
-          answers = List(Left("true")),
-          Some(controllers.userJourney.routes.EmploymentController.companyPension())
-        ),
-        SummaryRow(
-          id = "subcontractors",
-          answers = List(Left("true")),
-          Some(controllers.userJourney.routes.EmploymentController.subcontractors())
-        ),
-        SummaryRow(
-          id = "firstPaymentDate",
+          id = "earliestDate",
           answers = List(Right("20/12/2016")),
-          Some(controllers.userJourney.routes.EmploymentController.firstPayment())
+          Some(controllers.userJourney.routes.EmploymentController.paidEmployees())
+        ),
+        SummaryRow(
+          id = "inConstructionIndustry",
+          answers = List(Left("true")),
+          Some(controllers.userJourney.routes.EmploymentController.constructionIndustry())
+        ),
+        SummaryRow(
+          id = "paysPension",
+          answers = List(Left("true")),
+          Some(controllers.userJourney.routes.EmploymentController.pensions())
         )
       )
     )
@@ -205,7 +202,7 @@ class SummaryServiceSpec extends PayeComponentSpec {
       )
     )
 
-    def generateSummarySections(employee: SummarySection = oldEmployeeApiSS,
+    def generateSummarySections(employee: SummarySection = employeeAPISS,
                                 cc: SummarySection = completionCapacitySS,
                                 compDets: SummarySection = companyDetailsSS,
                                 bcDets: SummarySection = businessContactDetailsSS,
@@ -239,8 +236,7 @@ class SummaryServiceSpec extends PayeComponentSpec {
       Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK")),
       businessContactDetails = Fixtures.validBusinessContactDetails
     ),
-    employment = Some(Fixtures.validEmploymentAPI),
-    employmentInfo = Some(Fixtures.validEmploymentApiV2),
+    employmentInfo = Fixtures.validEmploymentApi,
     sicCodes = simpleSICCodes,
     directors = List(
       Director(
@@ -256,144 +252,43 @@ class SummaryServiceSpec extends PayeComponentSpec {
     payeContact = Fixtures.validPAYEContactAPI
   )
 
-  lazy val oldApiSummary = Summary(
-    Seq(
-      SummarySection(
-        id = "employees",
-        Seq(
-          SummaryRow(
-            id = "employees",
-            answers = List(Left("true")),
-            Some(controllers.userJourney.routes.EmploymentController.employingStaff())
-          ),
-          SummaryRow(
-            id = "companyPension",
-            answers = List(Left("true")),
-            Some(controllers.userJourney.routes.EmploymentController.companyPension())
-          ),
-          SummaryRow(
-            id = "subcontractors",
-            answers = List(Left("true")),
-            Some(controllers.userJourney.routes.EmploymentController.subcontractors())
-          ),
-          SummaryRow(
-            id = "firstPaymentDate",
-            answers = List(Right("20/12/2016")),
-            Some(controllers.userJourney.routes.EmploymentController.firstPayment())
-          )
-        )
-      ),
-      SummarySection(
-        id = "completionCapacity",
-        Seq(
-          SummaryRow(
-            id ="completionCapacity",
-            answers = List(Right("High Priest")),
-            changeLink = Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
-          )
-        )
-      ),
-      SummarySection(
-        id = "companyDetails",
-        Seq(
-          SummaryRow(
-            id = "tradingName",
-            answers = List(Right("tstTrade")),
-            changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
-          ),
-          SummaryRow(
-            id = "roAddress",
-            answers = List(Right("14 St Test Walk"), Right("Testley")),
-            None
-          ),
-          SummaryRow(
-            id = "ppobAddress",
-            answers = List(Right("15 St Test Avenue"), Right("Testpool"), Right("TestUponAvon"), Right("Nowhereshire"), Right("LE1 1ST"), Right("UK")),
-            Some(controllers.userJourney.routes.CompanyDetailsController.ppobAddress())
-          ),
-          SummaryRow(
-            id = "natureOfBusiness",
-            answers = List(Right("Firearms")),
-            Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
-          )
-        )
-      ),
-      SummarySection(
-        id = "businessContactDetails",
-        Seq(
-          SummaryRow(
-            id = "businessEmail",
-            answers = List(Right("test@email.com")),
-            changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
-          ),
-          SummaryRow(
-            id = "mobileNumber",
-            answers = List(Right("1234567890")),
-            changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
-          ),
-          SummaryRow(
-            id = "businessTelephone",
-            answers = List(Right("0987654321")),
-            changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
-          )
-        )
-      ),
-      SummarySection(
-        id = "directorDetails",
-        Seq(
-          SummaryRow(
-            id = "director0",
-            answers = List(Right("ZZ 12 34 56 A")),
-            Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails()),
-            Some(Seq("Timothy Buttersford")),
-            Some("director")
-          )
-        )
-      ),
-      SummarySection(
-        id = "payeContactDetails",
-        Seq(
-          SummaryRow(
-            id = "contactName",
-            answers = List(Right("testName")),
-            changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
-          ),
-          SummaryRow(
-            id = "emailPAYEContact",
-            answers = List(Right("testEmail")),
-            changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
-          ),
-          SummaryRow(
-            id = "mobileNumberPAYEContact",
-            answers = List(Right("1234567890")),
-            changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
-          ),
-          SummaryRow(
-            id = "phoneNumberPAYEContact",
-            answers = List(Right("0987654321")),
-            changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails())
-          ),
-          SummaryRow(
-            id = "correspondenceAddress",
-            answers = List(Right("22 Test test"), Right("Testerarium"), Right("TE0 0ST")),
-            changeLink = Some(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress())
-          )
-        )
-      )
-    )
-  )
-
   val forbidden = Upstream4xxResponse("403", 403, 403)
   val notFound = new NotFoundException("404")
   val runTimeException = new RuntimeException("tst")
 
   "Calling getRegistrationSummary" should {
     "return a defined Summary when the connector returns a valid PAYE Registration response" in new Setup {
+      lazy val summaryNoTName = generateSummarySections(employee =
+        SummarySection(
+          id = "employees",
+          Seq(
+            SummaryRow(
+              id = "willBePaying",
+              answers = List(Left("true")),
+              Some(controllers.userJourney.routes.EmploymentController.employingStaff())
+            ),
+            SummaryRow(
+              id = "inConstructionIndustry",
+              answers = List(Left("true")),
+              Some(controllers.userJourney.routes.EmploymentController.constructionIndustry())
+            ),
+            SummaryRow(
+              id = "employsSubcontractors",
+              answers = List(Left("true")),
+              Some(controllers.userJourney.routes.EmploymentController.subcontractors())
+            )
+          )
+        )
+      )
 
       when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(apiRegistration))
+        .thenReturn(Future.successful(apiRegistrationNoTName))
+      when(mockEmploymentService.apiToView(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Fixtures.validEmploymentViewNotIncorporated)
+      when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(None))
 
-      await(service.getRegistrationSummary("45632", "fooBar")) mustBe oldApiSummary
+      await(service.getRegistrationSummary("45632", "fooBar")) mustBe summaryNoTName
     }
 
     "return None when the connector returns a Forbidden response" in new Setup {
@@ -418,44 +313,8 @@ class SummaryServiceSpec extends PayeComponentSpec {
     }
   }
 
-  "Calling registrationToSummary" should {
-    "convert a PAYE Registration API Model  to a summary model with a trading name and company is incorporated" in new Setup {
-      when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(LocalDate.now)))
-      await(service.registrationToSummary(apiRegistration, "regId", "fooBar")) mustBe oldApiSummary
-    }
-
-    "throw an exception if no employment v2 block is present in the newApi model" in new Setup(true) {
-      val emptyEmploymentView = EmployingStaffV2(None, None, None, None, None)
-
-      when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(apiRegistration))
-
-      when(mockS4LService.fetchAndGet[EmployingStaffV2](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(emptyEmploymentView)))
-
-      when(mockEmploymentServiceV2.viewToApi(ArgumentMatchers.any()))
-        .thenReturn(Left(emptyEmploymentView))
-      when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(LocalDate.now)))
-
-      when(mockEmploymentServiceV2.apiToView(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(emptyEmploymentView)
-
-      intercept[IncompleteSummaryBlockException](await(service.getRegistrationSummary("45632", "fooBarWizz")))
-    }
-  }
   "getRegistrationSummary valid test" should {
-
-    "convert a PAYE Registration API Model to a summary model without a trading name" in new Setup {
-
-      lazy val summaryNoTName = generateSummarySections()
-
-      when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(LocalDate.now)))
-
-      await(service.registrationToSummary(apiRegistrationNoTName, "regId","fooBarWizz")) mustBe summaryNoTName
-    }
-    "convert a PAYE Registration API Model to a Summary model with feature switch on for new Employment Block" in new Setup(true) {
+    "convert a PAYE Registration API Model to a Summary model with feature switch on for new Employment Block. incorped and trading name does not exist" in new Setup(true) {
 
       lazy val summaryNoTName = generateSummarySections(employee =
         SummarySection(
@@ -464,43 +323,110 @@ class SummaryServiceSpec extends PayeComponentSpec {
             SummaryRow(
               id = "employing",
               answers = List(Left("true")),
-              Some(controllers.userJourney.routes.NewEmploymentController.paidEmployees())
+              Some(controllers.userJourney.routes.EmploymentController.paidEmployees())
             ),
             SummaryRow(
               id = "earliestDate",
               answers = List(Right("20/12/2016")),
-              Some(controllers.userJourney.routes.NewEmploymentController.paidEmployees())
+              Some(controllers.userJourney.routes.EmploymentController.paidEmployees())
             ),
             SummaryRow(
               id = "inConstructionIndustry",
               answers = List(Left("true")),
-              Some(controllers.userJourney.routes.NewEmploymentController.constructionIndustry())
+              Some(controllers.userJourney.routes.EmploymentController.constructionIndustry())
             ),
             SummaryRow(
               id = "employsSubcontractors",
               answers = List(Left("true")),
-              Some(controllers.userJourney.routes.NewEmploymentController.subcontractors())
+              Some(controllers.userJourney.routes.EmploymentController.subcontractors())
             ),
             SummaryRow(
               id = "paysPension",
               answers = List(Left("true")),
-              Some(controllers.userJourney.routes.NewEmploymentController.pensions())
+              Some(controllers.userJourney.routes.EmploymentController.pensions())
             )
           )
         )
       )
 
-      when(mockS4LService.fetchAndGet[EmployingStaffV2](ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
-          .thenReturn(Future.successful(None))
-      when(mockEmploymentServiceV2.apiToView(ArgumentMatchers.any(),ArgumentMatchers.any()))
-          .thenReturn(Fixtures.validEmploymentViewV2Incorporated)
-      when(mockEmploymentServiceV2.viewToApi(ArgumentMatchers.any())).thenReturn(Right(Fixtures.validEmploymentApiV2Incorporated))
+      when(mockEmploymentService.apiToView(ArgumentMatchers.any(),ArgumentMatchers.any()))
+          .thenReturn(Fixtures.validEmploymentViewIncorporated)
+
       when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(LocalDate.now)))
 
       await(service.registrationToSummary(apiRegistrationNoTName, "regId","fooBarWizz")) mustBe summaryNoTName
     }
+    "convert a PAYE Registration API Model to a Summary model with feature switch on for new Employment Block. incorped and trading name exists" in new Setup(true) {
+    lazy val companyDetailsWithTradingNameSS = SummarySection(
+        id = "companyDetails",
+        Seq(
+          SummaryRow(
+            id = "tradingName",
+            answers = List(Right("foo")),
+            changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName())
+          ),
+          SummaryRow(
+            id = "roAddress",
+            answers = formatHMTLROAddress,
+            None
+          ),
+          SummaryRow(
+            id = "ppobAddress",
+            answers = formatHMTLPPOBAddress,
+            Some(controllers.userJourney.routes.CompanyDetailsController.ppobAddress())
+          ),
+          SummaryRow(
+            id = "natureOfBusiness",
+            answers = List(Right("Firearms")),
+            Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness())
+          )
+        )
+      )
 
+      lazy val SummaryTradingName = generateSummarySections(
+        compDets = companyDetailsWithTradingNameSS,
+        employee =
+        SummarySection(
+          id = "employees",
+          Seq(
+            SummaryRow(
+              id = "employing",
+              answers = List(Left("true")),
+              Some(controllers.userJourney.routes.EmploymentController.paidEmployees())
+            ),
+            SummaryRow(
+              id = "earliestDate",
+              answers = List(Right("20/12/2016")),
+              Some(controllers.userJourney.routes.EmploymentController.paidEmployees())
+            ),
+            SummaryRow(
+              id = "inConstructionIndustry",
+              answers = List(Left("true")),
+              Some(controllers.userJourney.routes.EmploymentController.constructionIndustry())
+            ),
+            SummaryRow(
+              id = "employsSubcontractors",
+              answers = List(Left("true")),
+              Some(controllers.userJourney.routes.EmploymentController.subcontractors())
+            ),
+            SummaryRow(
+              id = "paysPension",
+              answers = List(Left("true")),
+              Some(controllers.userJourney.routes.EmploymentController.pensions())
+            )
+          )
+        )
+      )
+
+      when(mockEmploymentService.apiToView(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Fixtures.validEmploymentViewIncorporated)
+
+      when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(LocalDate.now)))
+
+      await(service.registrationToSummary(apiRegistrationNoTName.copy(companyDetails = apiRegistrationNoTName.companyDetails.copy(tradingName = Some("foo"))), "regId","fooBarWizz")) mustBe SummaryTradingName
+    }
     "convert a PAYE Registration API Model to a Summary model with feature switch on for new Employment Block that is not incorped" in new Setup(true) {
 
       lazy val summaryNoTName = generateSummarySections(employee =
@@ -510,35 +436,30 @@ class SummaryServiceSpec extends PayeComponentSpec {
             SummaryRow(
               id = "willBePaying",
               answers = List(Left("true")),
-              Some(controllers.userJourney.routes.NewEmploymentController.employingStaff())
+              Some(controllers.userJourney.routes.EmploymentController.employingStaff())
             ),
             SummaryRow(
               id = "inConstructionIndustry",
               answers = List(Left("true")),
-              Some(controllers.userJourney.routes.NewEmploymentController.constructionIndustry())
+              Some(controllers.userJourney.routes.EmploymentController.constructionIndustry())
             ),
             SummaryRow(
               id = "employsSubcontractors",
               answers = List(Left("true")),
-              Some(controllers.userJourney.routes.NewEmploymentController.subcontractors())
+              Some(controllers.userJourney.routes.EmploymentController.subcontractors())
             )
           )
         )
       )
 
-      when(mockS4LService.fetchAndGet[EmployingStaffV2](ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
-        .thenReturn(Future.successful(None))
-      when(mockEmploymentServiceV2.apiToView(ArgumentMatchers.any(),ArgumentMatchers.any()))
-        .thenReturn(Fixtures.validEmploymentViewV2NotIncorporated)
-      when(mockEmploymentServiceV2.viewToApi(ArgumentMatchers.any())).thenReturn(Right(Fixtures.validEmploymentApiV2NotIncorporated))
+      when(mockEmploymentService.apiToView(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Fixtures.validEmploymentViewNotIncorporated)
       when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(LocalDate.now)))
+        .thenReturn(Future.successful(None))
 
       await(service.registrationToSummary(apiRegistrationNoTName, "regId","fooBarWizz")) mustBe summaryNoTName
     }
   }
-
-
 
   "buildCompanyDetailsSection" should {
     "return a valid summary section" in new Setup {
@@ -604,45 +525,6 @@ class SummaryServiceSpec extends PayeComponentSpec {
       val sicCodesModel = List.empty
 
       a[NoSuchElementException] mustBe thrownBy(service.buildCompanyDetailsSection(Fixtures.validCompanyDetailsAPI, sicCodesModel))
-    }
-  }
-
-  "buildEmploymentSection" should {
-    "return a valid summary section" in new Setup {
-
-      val validEmploymentAPIFalse = Employment(employees = false,
-        companyPension = Some(false),
-        subcontractors = false,
-        firstPayDate = Fixtures.validDate
-      )
-
-      val employmentSection = SummarySection(
-        id = "employees",
-        Seq(
-          SummaryRow(
-            id = "employees",
-            answers = List(Left("false")),
-            Some(controllers.userJourney.routes.EmploymentController.employingStaff())
-          ),
-          SummaryRow(
-            id = "companyPension",
-            answers = List(Left("false")),
-            Some(controllers.userJourney.routes.EmploymentController.companyPension())
-          ),
-          SummaryRow(
-            id = "subcontractors",
-            answers = List(Left("false")),
-            Some(controllers.userJourney.routes.EmploymentController.subcontractors())
-          ),
-          SummaryRow(
-            id = "firstPaymentDate",
-            answers = List(Right("20/12/2016")),
-            Some(controllers.userJourney.routes.EmploymentController.firstPayment())
-          )
-        )
-      )
-
-      service.buildEmploymentSection(Some(validEmploymentAPIFalse), "regId") mustBe employmentSection
     }
   }
 

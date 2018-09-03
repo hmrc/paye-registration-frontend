@@ -16,18 +16,25 @@
 
 package forms.employmentDetails
 
-import forms.helpers.RequiredBooleanForm
-import models.view.EmployingStaff
-import play.api.data.Form
+
+import java.time.LocalDate
+
+import forms.helpers.BooleanForm
+import models.view.WillBePaying
+import play.api.data.{Form, Mapping}
 import play.api.data.Forms._
+import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
 
-object EmployingStaffForm extends RequiredBooleanForm {
+object EmployingStaffForm extends BooleanForm {
+  def isRequiredBeforeNewTaxYear(now: LocalDate): Boolean = now.isAfter(LocalDate.of(now.getYear, 2, 5)) && now.isBefore(LocalDate.of(now.getYear, 4, 6))
 
-  override val errorMsg = "pages.employingStaff.error"
+  private def beforeNewTaxYearMapping(now: LocalDate): Mapping[Option[Boolean]] =
+    if(isRequiredBeforeNewTaxYear(now)) mandatoryIf(isEqual("willBePaying", "true"),  requiredBoolean("pages.willBePaying.beforeNewTaxYear.empty")) else ignored[Option[Boolean]](None)
 
-  val form = Form(
+  def form(now: LocalDate) = Form(
     mapping(
-      "isEmployingStaff" -> requiredBoolean
-    )(EmployingStaff.apply)(EmployingStaff.unapply)
+      "willBePaying" -> requiredBoolean("pages.willBePaying.empty"),
+      "beforeNewTaxYear" -> beforeNewTaxYearMapping(now)
+    )(WillBePaying.apply)(WillBePaying.unapply)
   )
 }

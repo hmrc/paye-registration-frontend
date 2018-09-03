@@ -135,6 +135,32 @@ class SummarySpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
       an[NullPointerException] mustBe thrownBy(document.getElementById(s"roAddress$suffixIdChangeLink").text)
     }
   }
+  val employeeAPISS = SummarySection(
+    id = "employees",
+    Seq(
+      SummaryRow(
+        id = "employing",
+        answers = List(Left("true")),
+        Some(controllers.userJourney.routes.EmploymentController.paidEmployees())
+      ),
+      SummaryRow(
+        id = "earliestDate",
+        answers = List(Right("20/12/2016")),
+        Some(controllers.userJourney.routes.EmploymentController.paidEmployees())
+      ),
+      SummaryRow(
+        id = "inConstructionIndustry",
+        answers = List(Left("true")),
+        Some(controllers.userJourney.routes.EmploymentController.constructionIndustry())
+      ),
+      SummaryRow(
+        id = "paysPension",
+        answers = List(Left("true")),
+        Some(controllers.userJourney.routes.EmploymentController.pensions())
+      )
+    )
+  )
+
   "The summary page, Employment section" should {
 
     lazy val summaryModelEmployment = Summary(
@@ -143,24 +169,24 @@ class SummarySpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
           id = "employees",
           Seq(
             SummaryRow(
-              id = "employees",
+              id = "employing",
               answers = List(Left("false")),
-              Some(controllers.userJourney.routes.EmploymentController.employingStaff())
+              Some(controllers.userJourney.routes.EmploymentController.paidEmployees())
             ),
             SummaryRow(
-              id = "companyPension",
-              answers = List(Left("false")),
-              Some(controllers.userJourney.routes.EmploymentController.companyPension())
-            ),
-            SummaryRow(
-              id = "subcontractors",
-              answers = List(Left("false")),
-              Some(controllers.userJourney.routes.EmploymentController.subcontractors())
-            ),
-            SummaryRow(
-              id = "firstPaymentDate",
+              id = "earliestDate",
               answers = List(Right("2/9/2016")),
-              Some(controllers.userJourney.routes.EmploymentController.firstPayment())
+              Some(controllers.userJourney.routes.EmploymentController.paidEmployees())
+            ),
+            SummaryRow(
+              id = "inConstructionIndustry",
+              answers = List(Left("false")),
+              Some(controllers.userJourney.routes.EmploymentController.constructionIndustry())
+            ),
+            SummaryRow(
+              id = "paysPension",
+              answers = List(Left("true")),
+              Some(controllers.userJourney.routes.EmploymentController.pensions())
             )
           )
         )
@@ -175,51 +201,51 @@ class SummarySpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
     }
 
     "have the correct question text for Employing staff" in {
-      document.getElementById(s"employees$suffixIdQuestion").text mustBe messagesApi("pages.summary.employees.question")
+      document.getElementById(s"employing$suffixIdQuestion").text mustBe messagesApi("pages.summary.employing.question")
     }
 
     "have the correct answer text for Employing staff" in {
-      document.getElementById(s"employees$suffixIdAnswer").text mustBe messagesApi("pages.summary.employees.answers.false")
+      document.getElementById(s"employing$suffixIdAnswer").text mustBe messagesApi("pages.summary.employing.answers.false")
     }
 
     "have the correct change link for Employing staff" in {
-      document.getElementById(s"employees$suffixIdChangeLink").attr("href") mustBe controllers.userJourney.routes.EmploymentController.employingStaff().toString
+      document.getElementById(s"employing$suffixIdChangeLink").attr("href") mustBe controllers.userJourney.routes.EmploymentController.paidEmployees().toString
     }
 
     "have the correct question text for Company pension" in {
-      document.getElementById(s"companyPension$suffixIdQuestion").text mustBe messagesApi("pages.summary.companyPension.question")
+      document.getElementById(s"paysPension$suffixIdQuestion").text mustBe messagesApi("pages.summary.paysPension.question")
     }
 
     "have the correct answer text for Company pension" in {
-      document.getElementById(s"companyPension$suffixIdAnswer").text mustBe messagesApi("pages.summary.companyPension.answers.false")
+      document.getElementById(s"paysPension$suffixIdAnswer").text mustBe messagesApi("pages.summary.paysPension.answers.true")
     }
 
     "have the correct change link for Company pension" in {
-      document.getElementById(s"companyPension$suffixIdChangeLink").attr("href") mustBe controllers.userJourney.routes.EmploymentController.companyPension().toString
+      document.getElementById(s"paysPension$suffixIdChangeLink").attr("href") mustBe controllers.userJourney.routes.EmploymentController.pensions().toString
     }
 
-    "have the correct question text for Subcontractors" in {
-      document.getElementById(s"subcontractors$suffixIdQuestion").text mustBe messagesApi("pages.summary.subcontractors.question")
+    "have the correct question text for Construction industry" in {
+      document.getElementById(s"inConstructionIndustry$suffixIdQuestion").text mustBe messagesApi("pages.summary.inConstructionIndustry.question")
     }
 
-    "have the correct answer text for Subcontractors" in {
-      document.getElementById(s"subcontractors$suffixIdAnswer").text mustBe messagesApi("pages.summary.subcontractors.answers.false")
+    "have the correct answer text for Construction industry" in {
+      document.getElementById(s"inConstructionIndustry$suffixIdAnswer").text mustBe messagesApi("pages.summary.inConstructionIndustry.answers.false")
     }
 
-    "have the correct change link for Subcontractors" in {
-      document.getElementById(s"subcontractors$suffixIdChangeLink").attr("href") mustBe controllers.userJourney.routes.EmploymentController.subcontractors().toString
+    "have the correct change link for Construction industry" in {
+      document.getElementById(s"inConstructionIndustry$suffixIdChangeLink").attr("href") mustBe controllers.userJourney.routes.EmploymentController.constructionIndustry().toString
     }
 
     "have the correct question text for First payment" in {
-      document.getElementById(s"firstPaymentDate$suffixIdQuestion").text mustBe messagesApi("pages.summary.firstPaymentDate.question")
+      document.getElementById(s"earliestDate$suffixIdQuestion").text mustBe messagesApi("pages.summary.earliestDate.question")
     }
 
     "have the correct answer text for First payment" in {
-      document.getElementById(s"firstPaymentDate$suffixIdAnswer").text.matches("([0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{4})") mustBe true
+      document.getElementById(s"earliestDate$suffixIdAnswer").text.matches("([0-9]{1,2}\\/[0-9]{1,2}\\/[0-9]{4})") mustBe true
     }
 
     "have the correct change link for First payment" in {
-      document.getElementById(s"firstPaymentDate$suffixIdChangeLink").attr("href") mustBe controllers.userJourney.routes.EmploymentController.firstPayment().toString
+      document.getElementById(s"earliestDate$suffixIdChangeLink").attr("href") mustBe controllers.userJourney.routes.EmploymentController.paidEmployees().toString
     }
   }
 

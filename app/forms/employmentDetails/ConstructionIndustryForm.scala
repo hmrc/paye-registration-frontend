@@ -17,7 +17,6 @@
 package forms.employmentDetails
 
 import forms.helpers.RequiredBooleanForm
-import models.view.EmployingStaff
 import play.api.data.Form
 import play.api.data.Forms.single
 

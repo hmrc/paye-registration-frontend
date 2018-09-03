@@ -19,9 +19,9 @@ package forms.test
 import java.time.LocalDate
 
 import enums.PAYEStatus
-import forms.helpers.{CustomDateForm, DateForm, RequiredBooleanForm}
+import forms.helpers.{CustomDateForm, RequiredBooleanForm}
 import models.api._
-import models.view.{EmployingAnyone, EmployingStaffV2, PAYEContactDetails, WillBePaying}
+import models.view.PAYEContactDetails
 import models.{Address, DigitalContactDetails}
 import play.api.data.Forms._
 import play.api.data.format.Formatter
@@ -30,12 +30,8 @@ import utils.SystemDate
 
 import scala.util.Try
 
-object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm with CustomDateForm {
-
-  override val prefix = "employment.firstPayDate"
+object TestPAYERegSetupForm extends RequiredBooleanForm with CustomDateForm {
   override val customFormPrefix = "employmentInfo.earliestDate"
-
-  override def validation(dt: LocalDate) = Right(dt)
   override def validation(dt: LocalDate, cdt: LocalDate) = Right(dt)
   def now: LocalDate = SystemDate.getSystemDate.toLocalDate
 
@@ -67,19 +63,12 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm with Custo
 
   val employingStatus: Mapping[Employing.Value] = Forms.of[Employing.Value](employingStatusFormatter)
 
-  def employmentInfoMapping: Mapping[EmploymentV2] = mapping(
+  def employmentInfoMapping: Mapping[Employment] = mapping(
     "employees" -> employingStatus,
     "earliestDate" -> threePartDateWithComparison(now),
     "cis" -> requiredBoolean,
     "subcontractors" -> requiredBoolean,
     "pensions" -> optional(requiredBoolean)
-  )(EmploymentV2.apply)(EmploymentV2.unapply)
-
-  def employmentMapping: Mapping[Employment] = mapping(
-    "employees"       -> requiredBoolean,
-    "companyPension"  -> optional(requiredBoolean),
-    "subcontractors"  -> requiredBoolean,
-    "firstPayDate"    -> threePartDate
   )(Employment.apply)(Employment.unapply)
 
   val form = Form(
@@ -116,8 +105,7 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with DateForm with Custo
           "phoneNumber"   -> optional(text)
         )(DigitalContactDetails.apply)(DigitalContactDetails.unapply)
       )(CompanyDetails.apply)(CompanyDetails.unapply),
-      "employment" -> optional(employmentMapping),
-      "employmentInfo" -> optional(employmentInfoMapping),
+      "employmentInfo" -> employmentInfoMapping,
       "sicCodes" -> list(mapping(
         "code"        -> optional(text),
         "description" -> optional(text)

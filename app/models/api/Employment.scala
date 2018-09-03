@@ -19,19 +19,30 @@ package models.api
 import java.time.LocalDate
 
 import play.api.libs.functional.syntax._
-import play.api.libs.json.__
+import play.api.libs.json.{Format, Reads, Writes, __}
 
-case class Employment(employees: Boolean,
-                      companyPension: Option[Boolean],
+case class Employment(employees: Employing.Value,
+                      firstPaymentDate: LocalDate,
+                      construction: Boolean,
                       subcontractors: Boolean,
-                      firstPayDate: LocalDate)
+                      companyPension: Option[Boolean])
 
 object Employment {
-  implicit val formatModel = (
-    (__ \ "employees").format[Boolean] and
-    (__ \ "ocpn").formatNullable[Boolean] and
-    (__ \ "cis").format[Boolean] and
-    (__ \ "first-payment-date").format[LocalDate]
+  implicit val format: Format[Employment] = (
+    (__ \ "employees").format[Employing.Value](Employing.format) and
+    (__ \ "firstPaymentDate").format[LocalDate] and
+    (__ \ "construction").format[Boolean] and
+    (__ \ "subcontractors").format[Boolean] and
+    (__ \ "companyPension").formatNullable[Boolean]
   )(Employment.apply, unlift(Employment.unapply))
+}
+
+object Employing extends Enumeration {
+  val alreadyEmploying    = Value
+  val notEmploying        = Value
+  val willEmployThisYear  = Value
+  val willEmployNextYear  = Value
+
+  implicit val format = Format(Reads.enumNameReads(Employing), Writes.enumNameWrites)
 }
 

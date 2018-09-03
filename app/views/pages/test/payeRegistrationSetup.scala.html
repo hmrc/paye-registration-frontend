@@ -187,31 +187,6 @@
     <h2>Employee Details</h2>
     <div class="inline form-group">
         @payeInput(
-        payeForm("employment.employees"),
-        '_label -> "Employees"
-        )
-    </div>
-    <div class="inline form-group">
-        @payeInput(
-        payeForm("employment.companyPension"),
-        '_label -> "Company Pension (optional)"
-        )
-    </div>
-    <div class="inline form-group">
-        @payeInput(
-        payeForm("employment.subcontractors"),
-        '_label -> "Subcontractors"
-        )
-    </div>
-    <div class="inline form-group">
-        @inlineDateInput(
-        payeForm,
-        "employment.firstPayDate",
-        Some(Html("First Pay Date")))
-    </div>
-    <hr />
-    <div class="inline form-group">
-        @payeInput(
         payeForm("employmentInfo.employees"),
         '_label -> "hiring Employees Enum"
         )

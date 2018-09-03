@@ -168,7 +168,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
         ))
       val response = await(fResponse)
       response.status mustBe 303
-      response.header(HeaderNames.LOCATION) mustBe Some(controllers.userJourney.routes.NewEmploymentController.constructionIndustry().url)
+      response.header(HeaderNames.LOCATION) mustBe Some(controllers.userJourney.routes.EmploymentController.constructionIndustry().url)
 
     }
     "return 303 if incorpDate does not exist" in {
@@ -192,7 +192,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
         ))
       val response = await(fResponse)
       response.status mustBe 303
-      response.header(HeaderNames.LOCATION) mustBe Some(controllers.userJourney.routes.NewEmploymentController.employingStaff().url)
+      response.header(HeaderNames.LOCATION) mustBe Some(controllers.userJourney.routes.EmploymentController.employingStaff().url)
     }
 
     "return 400" in {
@@ -263,7 +263,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
 
       val response = await(fResponse)
       response.status mustBe 303
-      response.header(HeaderNames.LOCATION) mustBe Some(controllers.userJourney.routes.NewEmploymentController.constructionIndustry().url)
+      response.header(HeaderNames.LOCATION) mustBe Some(controllers.userJourney.routes.EmploymentController.constructionIndustry().url)
     }
 
     "return a badrequest if nothing is answered" in {

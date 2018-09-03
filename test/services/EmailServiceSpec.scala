@@ -29,35 +29,24 @@ import scala.concurrent.Future
 
 class EmailServiceSpec extends PayeComponentSpec {
 
-  def service(enabled: Boolean = false) = new EmailService {
+  def service() = new EmailService {
     override val incorporationInformationConnector = mockIncorpInfoConnector
     override val payeRegistrationConnector         = mockPayeRegistrationConnector
     override val s4LConnector                      = mockS4LConnector
     override val companyRegistrationConnector      = mockCompRegConnector
     override val emailConnector                    = mockEmailConnector
-    override val newApiEnabled: Boolean            = enabled
   }
 
   "primeEmailData" should {
     "return a cache map" when {
       "the first payment date has been stashed" in {
         when(mockPayeRegistrationConnector.getEmployment(any())(any(), any()))
-          .thenReturn(Future(Some(Fixtures.validEmploymentAPIModel)))
+          .thenReturn(Future(Some(Fixtures.validEmploymentApi)))
 
         when(mockS4LConnector.saveForm(any(), any(), any())(any(), any()))
           .thenReturn(Future(Fixtures.blankCacheMap))
 
         val result = await(service().primeEmailData("testRegId"))
-        result mustBe Fixtures.blankCacheMap
-      }
-      "the first payment date has been stashed using new api" in {
-        when(mockPayeRegistrationConnector.getEmploymentV2(any())(any(), any()))
-          .thenReturn(Future(Some(Fixtures.validEmploymentApiV2)))
-
-        when(mockS4LConnector.saveForm(any(), any(), any())(any(), any()))
-          .thenReturn(Future(Fixtures.blankCacheMap))
-
-        val result = await(service(true).primeEmailData("testRegId"))
         result mustBe Fixtures.blankCacheMap
       }
     }

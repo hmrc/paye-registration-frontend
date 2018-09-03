@@ -18,55 +18,47 @@ package models.api
 
 import java.time.LocalDate
 
-import helpers.PayeComponentSpec
-import play.api.libs.json.{JsSuccess, Json}
+import org.scalatestplus.play.PlaySpec
+import play.api.libs.json.{JsObject, JsResultException, Json}
 
-class EmploymentSpec extends PayeComponentSpec {
+class EmploymentSpec extends PlaySpec {
 
+  "creating an Employment case class from Json" should {
+    "be successful" in {
 
-  "Employment" should {
+      val json = Json.parse(
+        """|{
+           |   "employees": "alreadyEmploying",
+           |   "firstPaymentDate": "2017-12-29",
+           |   "construction": true,
+           |   "subcontractors": true,
+           |   "companyPension": true
+           | }
+        """.stripMargin).as[JsObject]
 
-    val testEmploymentMax = Fixtures.validEmploymentAPI
+      val expectedModel = Employment(
+        employees         = Employing.alreadyEmploying,
+        firstPaymentDate  = LocalDate.of(2017, 12, 29),
+        construction      = true,
+        subcontractors    = true,
+        companyPension    = Some(true)
+      )
 
-    val targetJsonMax = Json.parse(
-      s"""{
-          |  "employees":true,
-          |  "ocpn":true,
-          |  "cis":true,
-          |  "first-payment-date":"${Fixtures.validDate}"
-          |}""".stripMargin)
-
-    "read from maximum Json" in {
-      Json.fromJson[Employment](targetJsonMax) mustBe JsSuccess(testEmploymentMax)
+      json.as[Employment] mustBe expectedModel
     }
 
-    "write to maximum Json" in {
-      Json.toJson[Employment](testEmploymentMax) mustBe targetJsonMax
-    }
+    "be unsuccessful" in {
+      val json = Json.parse(
+        """|{
+           |   "employees": "wrongValue",
+           |   "firstPaymentDate": "2017-12-29",
+           |   "construction": true,
+           |   "subcontractors": true,
+           |   "companyPension": true
+           | }
+        """.stripMargin).as[JsObject]
 
-    val testFutureDate = LocalDate.of(2016,12,20)
-    val testFuturePayment = testFutureDate
-
-    val testEmploymentMin = Fixtures.validEmploymentAPI.copy(
-      employees = false,
-      companyPension = None,
-      subcontractors = false,
-      firstPayDate = testFuturePayment
-    )
-
-    val targetJsonMin = Json.parse(
-      s"""{
-          |  "employees":false,
-          |  "cis":false,
-          |  "first-payment-date":"$testFutureDate"
-          |}""".stripMargin)
-
-    "read from minimum Json" in {
-      Json.fromJson[Employment](targetJsonMin) mustBe JsSuccess(testEmploymentMin)
-    }
-
-    "write to minimum Json" in {
-      Json.toJson[Employment](testEmploymentMin) mustBe targetJsonMin
+      a[JsResultException] mustBe thrownBy(json.as[Employment])
     }
   }
 }

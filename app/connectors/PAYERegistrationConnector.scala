@@ -16,13 +16,12 @@
 
 package connectors
 
-import java.time.LocalDateTime
 import java.util.NoSuchElementException
 
-import javax.inject.Inject
 import config.WSHttp
 import enums.{DownstreamOutcome, PAYEStatus, RegistrationDeletion}
-import models.api.{Director, Eligibility, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment => EmploymentAPI, EmploymentV2 => EmploymentAPIV2, PAYERegistration => PAYERegistrationAPI}
+import javax.inject.Inject
+import models.api.{Director, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment, PAYERegistration => PAYERegistrationAPI}
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, Reads}
 import services.MetricsService
@@ -136,40 +135,13 @@ trait PAYERegistrationConnector {
     }
   }
 
-  def getEmployment(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPI]): Future[Option[EmploymentAPI]] = {
-    val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
-    http.GET[EmploymentAPI](s"$payeRegUrl/paye-registration/$regID/employment") map { employment =>
-      payeRegTimer.stop()
-      Some(employment)
-    } recover {
-      case _: NotFoundException =>
-        payeRegTimer.stop()
-        None
-      case e: Exception =>
-        payeRegTimer.stop()
-        throw logResponse(e, "getEmployment", "getting employment", regID)
-    }
-  }
-
-  def upsertEmployment(regID: String, employment: EmploymentAPI)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPI]): Future[EmploymentAPI] = {
-    val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
-    http.PATCH[EmploymentAPI, EmploymentAPI](s"$payeRegUrl/paye-registration/$regID/employment", employment) map { resp =>
-      payeRegTimer.stop()
-      resp
-    } recover {
-      case e: Exception =>
-        payeRegTimer.stop()
-        throw logResponse(e, "upsertEmployment", "upserting employment", regID)
-    }
-  }
-
-  def getEmploymentV2(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPIV2]): Future[Option[EmploymentAPIV2]] = {
+  def getEmployment(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[Employment]): Future[Option[Employment]] = {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
     val url = s"$payeRegUrl/paye-registration/$regID/employment-info"
     http.GET[HttpResponse](url) map { employment =>
       payeRegTimer.stop()
-      if(employment.status == 204) None else employment.json.validate[EmploymentAPIV2] fold(
-        _   => throw new NoSuchElementException(s"Call to $url returned a ${employment.status} but no EmploymentAPIV2 could be created"),
+      if(employment.status == 204) None else employment.json.validate[Employment] fold(
+        _   => throw new NoSuchElementException(s"Call to $url returned a ${employment.status} but no Employment could be created"),
         Some(_)
       )
     } recover {
@@ -179,9 +151,9 @@ trait PAYERegistrationConnector {
     }
   }
 
-  def upsertEmploymentV2(regID: String, employment: EmploymentAPIV2)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPI]): Future[EmploymentAPIV2] = {
+  def upsertEmployment (regID: String, employment: Employment)(implicit hc: HeaderCarrier): Future[Employment] = {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
-    http.PATCH[EmploymentAPIV2, EmploymentAPIV2](s"$payeRegUrl/paye-registration/$regID/employment-info", employment) map { resp =>
+    http.PATCH[Employment, Employment](s"$payeRegUrl/paye-registration/$regID/employment-info", employment) map { resp =>
       payeRegTimer.stop()
       resp
     } recover {
@@ -191,7 +163,7 @@ trait PAYERegistrationConnector {
     }
   }
 
-  def getDirectors(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPI]): Future[Seq[Director]] = {
+  def getDirectors(regID: String)(implicit hc: HeaderCarrier): Future[Seq[Director]] = {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
     http.GET[Seq[Director]](s"$payeRegUrl/paye-registration/$regID/directors") map { resp =>
       payeRegTimer.stop()
@@ -218,7 +190,7 @@ trait PAYERegistrationConnector {
     }
   }
 
-  def getSICCodes(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[EmploymentAPI]): Future[Seq[SICCode]] = {
+  def getSICCodes(regID: String)(implicit hc: HeaderCarrier): Future[Seq[SICCode]] = {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
     http.GET[Seq[SICCode]](s"$payeRegUrl/paye-registration/$regID/sic-codes") map { resp =>
       payeRegTimer.stop()
@@ -296,33 +268,6 @@ trait PAYERegistrationConnector {
       case e: Exception =>
         payeRegTimer.stop()
         throw logResponse(e, "upsertCompletionCapacity", "upserting completion capacity", regID)
-    }
-  }
-
-  def getEligibility(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[String]): Future[Option[Eligibility]] = {
-    val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
-    http.GET[Eligibility](s"$payeRegUrl/paye-registration/$regID/eligibility") map { details =>
-      payeRegTimer.stop()
-      Some(details)
-    } recover {
-      case _: NotFoundException =>
-        payeRegTimer.stop()
-        None
-      case e: Exception =>
-        payeRegTimer.stop()
-        throw logResponse(e, "getEligibility", "getting eligibility", regID)
-    }
-  }
-
-  def upsertEligibility(regID: String, data: Eligibility)(implicit hc: HeaderCarrier, rds: HttpReads[String]): Future[Eligibility] = {
-    val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
-    http.PATCH[Eligibility, Eligibility](s"$payeRegUrl/paye-registration/$regID/eligibility", data) map { resp =>
-      payeRegTimer.stop()
-      resp
-    } recover {
-      case e: Exception =>
-        payeRegTimer.stop()
-        throw logResponse(e, "upsertEligibility", "upserting eligibility", regID)
     }
   }
 

@@ -17,17 +17,16 @@
 package forms.employmentDetails
 
 import forms.helpers.RequiredBooleanForm
-import models.view.Subcontractors
 import play.api.data.Form
-import play.api.data.Forms.mapping
+import play.api.data.Forms.single
 
 object SubcontractorsForm extends RequiredBooleanForm {
 
-  override val errorMsg = "pages.subcontractors.error"
+  override val errorMsg = "pages.employsSubcontractors.error"
 
   val form = Form(
-    mapping(
-      "hasContractors" -> requiredBoolean
-    )(Subcontractors.apply)(Subcontractors.unapply)
+    single(
+      "employsSubcontractors" -> requiredBoolean
+    )
   )
 }

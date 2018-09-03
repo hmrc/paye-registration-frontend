@@ -35,7 +35,7 @@
         Messages("app.common.errorSummaryLabel"), paidEmployeesForm, dataJourney=Some("PaidEmployees")
     )
     <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.paidEmployees.description")</h1>
-    @govHelpers.form(action = controllers.userJourney.routes.NewEmploymentController.submitPaidEmployees) {
+    @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitPaidEmployees) {
         <p>@Messages("pages.paidEmployees.para")</p>
     <ul class="list list-bullet">
         <li>@Messages("pages.paidEmployees.bullet1", weeklyThreshold)</li>

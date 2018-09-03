@@ -21,7 +21,7 @@ import common.Logging
 import config.WSHttp
 import connectors._
 import enums.DownstreamOutcome
-import models.api.{EmploymentV2, CompanyDetails => CompanyDetailsAPI, PAYEContact => PAYEContactAPI, PAYERegistration => PAYERegistrationAPI}
+import models.api.{Employment, CompanyDetails => CompanyDetailsAPI, PAYEContact => PAYEContactAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpResponse}
@@ -67,8 +67,8 @@ trait TestPAYERegConnector extends Logging {
     }
   }
 
-  def addTestEmploymentInfo(details: EmploymentV2, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    payeRegConnector.upsertEmploymentV2(regId,  details) map {
+  def addTestEmploymentInfo(details: Employment, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+    payeRegConnector.upsertEmployment(regId,  details) map {
       _ => DownstreamOutcome.Success
     } recover {
       case _ => DownstreamOutcome.Failure

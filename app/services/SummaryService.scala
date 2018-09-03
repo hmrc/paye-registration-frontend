@@ -19,16 +19,16 @@ package services
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import javax.inject.Inject
 import common.exceptions.InternalExceptions.APIConversionException
 import connectors._
 import controllers.exceptions._
-import enums.{CacheKeys, UserCapacity}
-import models.api.{CompanyDetails, Director, Employment, EmploymentV2, PAYEContact, SICCode, PAYERegistration => PAYERegistrationAPI}
-import models.view.{Summary, SummaryRow, SummarySection, EmployingStaffV2 => EmploymentView}
+import enums.UserCapacity
+import javax.inject.Inject
+import models.api.{CompanyDetails, Director, Employment, PAYEContact, SICCode, PAYERegistration => PAYERegistrationAPI}
+import models.view.{Summary, SummaryRow, SummarySection,EmployingStaff}
 import models.{Address, DigitalContactDetails}
 import play.api.mvc.Call
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, Upstream4xxResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.{Formatters, PAYEFeatureSwitches}
 
@@ -37,20 +37,17 @@ import scala.util.{Success, Try}
 
 class SummaryServiceImpl @Inject()(
                                     val payeRegistrationConnector: PAYERegistrationConnector,
-                                    val employmentServiceV2: EmploymentServiceV2,
+                                    val employmentService: EmploymentService,
                                     val pAYEFeatureSwitches: PAYEFeatureSwitches,
                                     val s4LService: S4LService,
                                     val iiService: IncorporationInformationService
-                                  ) extends SummaryService {
-  def newApiEnabled: Boolean = pAYEFeatureSwitches.newApiStructure.enabled
-}
+                                  ) extends SummaryService
 
 trait SummaryService {
   val payeRegistrationConnector: PAYERegistrationConnector
-  val employmentServiceV2: EmploymentServiceV2
+  val employmentService: EmploymentService
   val s4LService: S4LService
   val iiService: IncorporationInformationService
-  def newApiEnabled: Boolean
 
   def getRegistrationSummary(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[Summary] = {
     for {
@@ -62,13 +59,11 @@ trait SummaryService {
   }
 
   private[services] def registrationToSummary(apiModel: PAYERegistrationAPI, regId: String, txId: String)(implicit hc: HeaderCarrier): Future[Summary] = {
-    if(newApiEnabled) {
-      iiService.getIncorporationDate(regId, txId) flatMap {
-        date => buildEmploymentSectionFromView(apiModel.employmentInfo, regId, date) map (section => buildSummary(section, apiModel))
+      iiService.getIncorporationDate(regId, txId) map {
+        date =>
+          val employmentSection = buildEmploymentSectionFromView(apiModel.employmentInfo, regId, date)
+          buildSummary(employmentSection, apiModel)
       }
-    }else {
-      Future.successful(buildSummary(buildEmploymentSection(apiModel.employment, regId), apiModel))
-    }
   }
 
   private[services] def buildSummary(employmentSection: SummarySection, apiModel: PAYERegistrationAPI): Summary = {
@@ -173,18 +168,12 @@ trait SummaryService {
                                                               address.country).flatten.map(Right(_))
   }
 
-  private[services] def buildEmploymentSectionFromView(oEmployment: Option[EmploymentV2], regId: String, incorpDate: Option[LocalDate])(implicit hc: HeaderCarrier): Future[SummarySection] = {
-    s4LService.fetchAndGet[EmploymentView](CacheKeys.EmploymentV2.toString, regId).map(
-      _.fold(
-        buildEmploymentV2Section(employmentServiceV2.apiToView(oEmployment.getOrElse(throw MissingSummaryBlockException("EmploymentV2", regId)), incorpDate), regId)
-      )(
-        x => buildEmploymentV2Section(x, regId)
-      )
-    )
+  private[services] def buildEmploymentSectionFromView(oEmployment: Employment, regId: String, incorpDate: Option[LocalDate])(implicit hc: HeaderCarrier): SummarySection = {
+        buildEmploymentSection(employmentService.apiToView(oEmployment, incorpDate), regId)
   }
-  private[services] def buildEmploymentV2Section(employmentView: EmploymentView, regId: String): SummarySection = {
 
-    employmentServiceV2.viewToApi(employmentView).fold(_ => throw IncompleteSummaryBlockException(block = "EmployingStaffV2", regId), identity)
+  private[services] def buildEmploymentSection(employmentView: EmployingStaff, regId: String): SummarySection = {
+
     val cis                     = employmentView.construction.getOrElse(throw MissingSummaryBlockItemException(block = "EmploymentStaffV2", item = "construction", regId))
 
     val employingAnyoneSection  = employmentView.employingAnyone.map { paidEmployees =>
@@ -195,13 +184,13 @@ trait SummaryService {
             case true => Left("true")
             case false => Left("false")
           }),
-          changeLink = Some(controllers.userJourney.routes.NewEmploymentController.paidEmployees())
+          changeLink = Some(controllers.userJourney.routes.EmploymentController.paidEmployees())
         )), paidEmployees.startDate.map {
           date =>
             SummaryRow(
               id = "earliestDate",
               answers = List(Right(DateTimeFormatter.ofPattern("dd/MM/yyyy").format(date))),
-              changeLink = Some(controllers.userJourney.routes.NewEmploymentController.paidEmployees())
+              changeLink = Some(controllers.userJourney.routes.EmploymentController.paidEmployees())
             )
         }
       ).flatten
@@ -212,14 +201,14 @@ trait SummaryService {
         Some(SummaryRow(
           id = "willBePaying",
           answers = List(Left(wbp.willPay.toString)),
-          changeLink = Some(controllers.userJourney.routes.NewEmploymentController.employingStaff())
+          changeLink = Some(controllers.userJourney.routes.EmploymentController.employingStaff())
         )),
         wbp.beforeSixApril.map {
           bsa =>
             SummaryRow(
               id = "beforeNextTaxYear",
               answers = List(Left(bsa.toString)),
-              changeLink = Some(controllers.userJourney.routes.NewEmploymentController.employingStaff())
+              changeLink = Some(controllers.userJourney.routes.EmploymentController.employingStaff())
             )
         }
       ).flatten
@@ -228,14 +217,14 @@ trait SummaryService {
     val cisSection = Seq(SummaryRow(
       id = "inConstructionIndustry",
       answers = List(Left(cis.toString)),
-      changeLink = Some(controllers.userJourney.routes.NewEmploymentController.constructionIndustry())
+      changeLink = Some(controllers.userJourney.routes.EmploymentController.constructionIndustry())
     ))
 
     val subContractorsSection = employmentView.subcontractors.map{ sc =>
       SummaryRow(
         id = "employsSubcontractors",
         answers = List(Left(sc.toString)),
-        changeLink = Some(controllers.userJourney.routes.NewEmploymentController.subcontractors())
+        changeLink = Some(controllers.userJourney.routes.EmploymentController.subcontractors())
       )
     }.toSeq
 
@@ -243,7 +232,7 @@ trait SummaryService {
       SummaryRow(
         id = "paysPension",
         answers = List(Left(cp.toString)),
-        changeLink = Some(controllers.userJourney.routes.NewEmploymentController.pensions())
+        changeLink = Some(controllers.userJourney.routes.EmploymentController.pensions())
       )
     }.toSeq
 
@@ -252,50 +241,6 @@ trait SummaryService {
       employingAnyoneSection ++ willBePayingSection ++ cisSection ++ subContractorsSection ++ pensionsSection
     )
   }
-
-  private[services] def buildEmploymentSection(oEmployment : Option[Employment], regId: String) : SummarySection = {
-
-    val employment = oEmployment.getOrElse(throw MissingSummaryBlockException(block = "Employment", regId))
-
-    SummarySection(
-      id = "employees",
-      Seq(
-        Some(SummaryRow(
-          id = "employees",
-          answers = List(employment.employees match {
-            case true => Left("true")
-            case false => Left("false")
-          }),
-          changeLink = Some(controllers.userJourney.routes.EmploymentController.employingStaff())
-        )),
-        employment.companyPension map {
-          ocpn =>
-            SummaryRow(
-              id = "companyPension",
-              answers = List(ocpn match {
-                case true => Left("true")
-                case false => Left("false")
-              }),
-              changeLink = Some(controllers.userJourney.routes.EmploymentController.companyPension())
-            )
-        },
-        Some(SummaryRow(
-          id = "subcontractors",
-          answers = List(employment.subcontractors match {
-            case true => Left("true")
-            case false => Left("false")
-          }),
-          changeLink = Some(controllers.userJourney.routes.EmploymentController.subcontractors())
-        )),
-        Some(SummaryRow(
-          id = "firstPaymentDate",
-          answers = List(Right(DateTimeFormatter.ofPattern("dd/MM/yyyy").format(employment.firstPayDate))),
-          changeLink = Some(controllers.userJourney.routes.EmploymentController.firstPayment())
-        ))
-      ).flatten
-    )
-  }
-
   private[services] def buildDirectorsSection(directors: Seq[Director]) = {
     def directorRow(director: Director, i: Int) = {
       SummaryRow(

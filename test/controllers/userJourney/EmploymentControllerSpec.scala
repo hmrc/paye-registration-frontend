@@ -17,373 +17,577 @@
 package controllers.userJourney
 
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 
-import helpers.auth.AuthHelpers
+import connectors.KeystoreConnector
 import helpers.{PayeComponentSpec, PayeFakedApp}
-import models.view.{CompanyPension, EmployingStaff, FirstPayment, Subcontractors, Employment => EmploymentView}
+import models.view.{EmployingAnyone, EmployingStaff, WillBePaying}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import services.EmploymentService
-import utils.DateUtil
+import services._
+import uk.gov.hmrc.auth.core.AuthConnector
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp with DateUtil {
+class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
-  val ineligible = EmploymentView(Some(EmployingStaff(false)), None, Some(Subcontractors(false)), None)
-  val validEmploymentViewModel = EmploymentView(Some(EmployingStaff(true)), Some(CompanyPension(true)), Some(Subcontractors(true)), Some(FirstPayment(LocalDate.of(2016, 12, 1))))
-  val validEmploymentViewModel2 = EmploymentView(Some(EmployingStaff(false)), Some(CompanyPension(true)), Some(Subcontractors(true)), Some(FirstPayment(LocalDate.of(2016, 12, 1))))
-  val nonValidEmploymentViewModel = EmploymentView(None, None, None, None)
+  val request = FakeRequest()
 
-  class Setup extends AuthHelpers {
-    override val authConnector = mockAuthConnector
-    override val keystoreConnector = mockKeystoreConnector
-
-    val controller = new EmploymentController {
-      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
-
-      override val authConnector = mockAuthConnector
-      override val employmentService = mockEmploymentService
-      override val keystoreConnector = mockKeystoreConnector
-      implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService = mockPayeRegService
-    }
+  val testController = new EmploymentController {
+    override val redirectToLogin          = MockAuthRedirects.redirectToLogin
+    override val redirectToPostSign       = MockAuthRedirects.redirectToPostSign
+    override val thresholdService         = mockThresholdService
+    override val incorpInfoService        = mockIncorpInfoService
+    override val authConnector            = mockAuthConnector
+    override val keystoreConnector        = mockKeystoreConnector
+    override val employmentService        = mockEmploymentService
+    implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+    override val incorporationInformationConnector = mockIncorpInfoConnector
+    override val payeRegistrationService  = mockPayeRegService
   }
 
-  val fakeRequest = FakeRequest("GET", "/")
+  val emptyView                       = EmployingStaff(None, None, None, None, None)
+  val employingAnyoneView             = EmployingStaff(Some(EmployingAnyone(true, Some(LocalDate.now()))),None,None,None,None)
+  val employingAnyoneViewFalse        = EmployingStaff(Some(EmployingAnyone(false, None)),None,None,None,None)
+  val willBePayingView                = EmployingStaff(None, Some(WillBePaying(true, Some(true))), None, None, None)
+  val willBePayingViewFalse           = EmployingStaff(None, Some(WillBePaying(false, None)), None, None, None)
+  val willBePayingViewNewTaxYear      = EmployingStaff(None, Some(WillBePaying(true, Some(false))), None, None, None)
+  val constructionIndustryViewFalse   = EmployingStaff(None, None, Some(false), None, None)
+  val constructionIndustryView        = EmployingStaff(None, None, Some(true), None, None)
+  val pensionsView                    = EmployingStaff(None, None, None, None, Some(true))
+  val pensionsViewFalse               = EmployingStaff(None, None, None, None, Some(false))
 
-  "calling the employingStaff action" should {
-    "return 200 for an authorised user with data already saved" in new Setup {
-      when(mockEmploymentService.fetchEmploymentView(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(validEmploymentViewModel))
-      showAuthorisedWithCP(controller.employingStaff, Fixtures.validCurrentProfile, fakeRequest) {
-        (response: Future[Result]) =>
-          status(response) mustBe Status.OK
-      }
-    }
+  def mockGetThreshold = when(mockThresholdService.getCurrentThresholds).thenReturn(Map("weekly" -> 116))
+  def dynamicViewModel(ea: Boolean = false, wbp: Boolean = false, nty: Boolean = false, cis: Boolean = false, subContractor: Boolean = false) =
+    EmployingStaff(Some(EmployingAnyone(ea, Some(LocalDate.now()))), Some(WillBePaying(wbp, Some(nty))), Some(cis), Some(subContractor), None)
 
-    "return 200 for an authorised user with no data" in new Setup {
-      when(mockEmploymentService.fetchEmploymentView(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(nonValidEmploymentViewModel))
-      showAuthorisedWithCP(controller.employingStaff, Fixtures.validCurrentProfile, fakeRequest) {
-        (response: Future[Result]) =>
-          status(response) mustBe Status.OK
-      }
-    }
-  }
+  def dynamicViewModelNoDate(wbp: Boolean = false, nty: Boolean = false, cis: Boolean = false, subContractor: Boolean = false) =
+    EmployingStaff(None, Some(WillBePaying(wbp, Some(nty))), Some(cis), Some(subContractor), None)
 
-  "calling the submitEmployingStaff action" should {
-    "return 400 for an invalid answer" in new Setup {
-      submitAuthorisedWithCP(controller.submitEmployingStaff, Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody()) {
+
+  "paidEmployees" should {
+    "redirect if the user is not authorised" in {
+      AuthHelpers.showUnauthorised(testController.paidEmployees, request) {
         result =>
-          status(result) mustBe Status.BAD_REQUEST
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
+      }
+    }
+    "render the page if an incorp date exists" in {
+
+      when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(LocalDate.of(2012, 5, 5))))
+
+      when(mockEmploymentService.fetchEmployingStaff(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(emptyView))
+
+      mockGetThreshold
+
+      AuthHelpers.showAuthorisedWithCP(testController.paidEmployees, Fixtures.validCurrentProfile, request) {
+        result => status(result) mustBe OK
       }
     }
 
-    "redirect to the Company Pension page when a user enters YES answer" in new Setup {
-      when(mockEmploymentService.saveEmployingStaff(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future(validEmploymentViewModel))
+    "redirect to will be paying page if an incorp date doesn't exists" in {
 
-      submitAuthorisedWithCP(controller.submitEmployingStaff, Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
-        "isEmployingStaff" -> "true"
-      )) {
-        result =>
-          status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result) mustBe Some("/register-for-paye/make-pension-payment-next-two-months")
-      }
-    }
+      when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(None))
 
-    "redirect to the First Payment page when a user enters NO answer" in new Setup {
-      when(mockEmploymentService.saveEmployingStaff(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future(validEmploymentViewModel2))
+      mockGetThreshold
 
-      submitAuthorisedWithCP(controller.submitEmployingStaff(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
-        "isEmployingStaff" -> "false"
-      )) {
-        result =>
-          status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result) mustBe Some("/register-for-paye/set-paye-scheme-start-date")
-      }
-    }
-
-    "redirect to the Ineligible page when a user enters NO answer while also having a NO for Subcontractors" in new Setup {
-      when(mockEmploymentService.saveEmployingStaff(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future(ineligible))
-
-      submitAuthorisedWithCP(controller.submitEmployingStaff(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
-        "isEmployingStaff" -> "false"
-      )) {
-        result =>
-          status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result) mustBe Some("/register-for-paye/ineligible-for-paye")
+      AuthHelpers.showAuthorisedWithCP(testController.paidEmployees, Fixtures.validCurrentProfile, request) {
+        result => status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.employingStaff().url)
       }
     }
   }
 
-  "calling the companyPension action" should {
-    "return 200 for an authorised user with data already saved" in new Setup {
-      when(mockEmploymentService.fetchEmploymentView(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validEmploymentViewModel))
-
-      showAuthorisedWithCP(controller.companyPension, Fixtures.validCurrentProfile, fakeRequest) {
-        (response: Future[Result]) =>
-          status(response) mustBe Status.OK
+  "submitPaidEmployees" should {
+    "redirect if the user is not authorised" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "alreadyPaying" -> "false"
+      )
+      AuthHelpers.submitUnauthorised(testController.submitPaidEmployees, request) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
       }
     }
 
-    "return 200 for an authorised user with no data" in new Setup {
-      when(mockEmploymentService.fetchEmploymentView(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(nonValidEmploymentViewModel))
+    "return a bad request if the form isn't filled in" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "" -> ""
+      )
 
-      showAuthorisedWithCP(controller.companyPension, Fixtures.validCurrentProfile, fakeRequest) {
-        (response: Future[Result]) =>
-          status(response) mustBe Status.OK
+      when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(LocalDate.of(2012, 5, 5))))
+
+      mockGetThreshold
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitPaidEmployees, Fixtures.validCurrentProfile, formRequest) {
+        result => status(result) mustBe BAD_REQUEST
+      }
+    }
+
+    "return a bad request if the alreadyPays = yes and no date filed in" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "alreadyPays" -> "yes"
+      )
+
+      when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(LocalDate.of(2012, 5, 5))))
+
+      mockGetThreshold
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitPaidEmployees, Fixtures.validCurrentProfile, formRequest) {
+        result => status(result) mustBe BAD_REQUEST
+      }
+    }
+
+    "redirect to CIS if the company already pays employees" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "alreadyPaying" -> "true",
+        "earliestDateDay" -> "12",
+        "earliestDateMonth" -> "4",
+        "earliestDateYear" -> "2017"
+      )
+
+      when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(LocalDate.of(2012, 5, 5))))
+
+      when(mockEmploymentService.saveEmployingAnyone(ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(employingAnyoneView))
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitPaidEmployees, Fixtures.validCurrentProfile, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.constructionIndustry().url)
+      }
+    }
+
+    "redirect to will you be paying page if the company doesn't already pay employees" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "alreadyPaying" -> "false"
+      )
+
+      when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(LocalDate.of(2012, 5, 5))))
+
+      when(mockEmploymentService.saveEmployingAnyone(ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(employingAnyoneViewFalse))
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitPaidEmployees, Fixtures.validCurrentProfile, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.employingStaff().url)
       }
     }
   }
 
-  "calling the submitCompanyPension action" should {
-    "return 400 for an invalid answer" in new Setup {
-      submitAuthorisedWithCP(controller.submitCompanyPension(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody()) {
+  "employingStaff" should {
+    "redirect if the user is not authorised" in {
+      AuthHelpers.showUnauthorised(testController.employingStaff, request) {
         result =>
-          status(result) mustBe Status.BAD_REQUEST
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
       }
     }
+    "render page" in {
+      when(mockEmploymentService.fetchEmployingStaff(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(emptyView))
 
-    "redirect to the First Payment page when a user enters NO answer" in new Setup {
-      when(mockEmploymentService.saveCompanyPension(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future(validEmploymentViewModel))
+      mockGetThreshold
 
-      submitAuthorisedWithCP(controller.submitCompanyPension(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
-        "pensionProvided" -> "false"
-      )) {
-        result =>
-          status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result) mustBe Some("/register-for-paye/set-paye-scheme-start-date")
+      AuthHelpers.showAuthorisedWithCP(testController.employingStaff, Fixtures.validCurrentProfile, request) {
+        result => status(result) mustBe OK
       }
     }
   }
 
-  "calling the subcontractors action" should {
-    "return 200 for an authorised user with data already saved" in new Setup {
-      when(mockEmploymentService.fetchEmploymentView(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(validEmploymentViewModel))
+  "submitEmployingStaff" should {
+    "redirect if the user is not authorised" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "willBePaying" -> "false"
+      )
 
-      showAuthorisedWithCP(controller.subcontractors, Fixtures.validCurrentProfile, fakeRequest) {
-        (response: Future[Result]) =>
-          status(response) mustBe Status.OK
+      when(mockEmploymentService.saveEmployingAnyone(ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(employingAnyoneView))
+
+      AuthHelpers.submitUnauthorised(testController.submitEmployingStaff, request) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
       }
     }
 
-    "return 200 for an authorised user with no data" in new Setup {
-      when(mockEmploymentService.fetchEmploymentView(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(nonValidEmploymentViewModel))
-      showAuthorisedWithCP(controller.subcontractors, Fixtures.validCurrentProfile, fakeRequest) {
-        (response: Future[Result]) =>
-          status(response) mustBe Status.OK
+    "return  a bad request if form is not filled in" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "" -> ""
+      )
+
+      mockGetThreshold
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitEmployingStaff, Fixtures.validCurrentProfile, formRequest) {
+        result => status(result) mustBe BAD_REQUEST
+      }
+    }
+
+    "redirect to CIS if user selects no" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "willBePaying" -> "false"
+      )
+
+      when(mockEmploymentService.saveWillEmployAnyone(ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(willBePayingViewFalse))
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitEmployingStaff, Fixtures.validCurrentProfile, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.constructionIndustry().url)
+      }
+    }
+
+    "redirect to CIS if user will be paying employees before 6th april" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "willBePaying" -> "true",
+        "beforeNewTaxYear" -> "true"
+      )
+
+      when(mockEmploymentService.saveWillEmployAnyone(ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(willBePayingView))
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitEmployingStaff, Fixtures.validCurrentProfile, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.constructionIndustry().url)
+      }
+    }
+
+    "redirect to Application Delayed Page if user will be paying employees after 6th april" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "willBePaying" -> "true",
+        "beforeNewTaxYear" -> "false"
+      )
+
+      when(mockEmploymentService.saveWillEmployAnyone(ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(willBePayingViewNewTaxYear))
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitEmployingStaff, Fixtures.validCurrentProfile, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.applicationDelayed().url)
       }
     }
   }
 
-  //TODO
-  "calling the submitSubcontractors action" should {
-    "return 400 for an invalid answer" in new Setup {
-      submitAuthorisedWithCP(controller.submitSubcontractors(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody()) {
+
+  "applicationDelayed" should {
+    "redirect if the user is not authorised" in {
+      AuthHelpers.showUnauthorised(testController.applicationDelayed, request) {
         result =>
-          status(result) mustBe Status.BAD_REQUEST
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
       }
     }
 
-    "redirect to the Employment page when a user enters an answer" in new Setup {
-      when(mockEmploymentService.saveSubcontractors(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future(validEmploymentViewModel))
-
-      submitAuthorisedWithCP(controller.submitSubcontractors(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
-        "hasContractors" -> "false"
-      )) {
-        result =>
-          status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result) mustBe Some("/register-for-paye/employ-staff-next-two-months")
-      }
-    }
-
-    "redirect to the Ineligible page when a user enters NO answer while also having a NO for Employment" in new Setup {
-      when(mockEmploymentService.saveSubcontractors(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future(ineligible))
-
-      submitAuthorisedWithCP(controller.submitSubcontractors(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
-        "hasContractors" -> "false"
-      )) {
-        result =>
-          status(result)           mustBe Status.SEE_OTHER
-          redirectLocation(result) mustBe Some("/register-for-paye/ineligible-for-paye")
+    "render the page" in {
+      AuthHelpers.showAuthorised(testController.applicationDelayed, request) {
+        result => status(result) mustBe OK
       }
     }
   }
 
-  "calling the firstPayment action" should {
-    "return 200 for an authorised user with data already saved" in new Setup {
-      when(mockEmploymentService.fetchEmploymentView(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(validEmploymentViewModel))
-      showAuthorisedWithCP(controller.firstPayment, Fixtures.validCurrentProfile, fakeRequest) {
-        (response: Future[Result]) =>
-          status(response) mustBe Status.OK
+  "submitApplicationDelayed" should {
+    "redirect if the user is not authorised" in {
+      AuthHelpers.submitUnauthorised(testController.submitApplicationDelayed, request) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
       }
     }
 
-    "return 200 for an authorised user with no data" in new Setup {
-      when(mockEmploymentService.fetchEmploymentView(ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(nonValidEmploymentViewModel))
-      showAuthorisedWithCP(controller.firstPayment, Fixtures.validCurrentProfile, fakeRequest) {
-        (response: Future[Result]) =>
-          status(response) mustBe Status.OK
+    "redirect to the CIS page" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "" -> ""
+      )
+      AuthHelpers.submitAuthorised(testController.submitApplicationDelayed, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.constructionIndustry().url)
       }
     }
   }
 
-  "calling the submitFirstPayment action" should {
-    "return 400 for an empty year" in new Setup {
-      submitAuthorisedWithCP(controller.submitFirstPayment(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
-        "firstPayYear" -> "",
-        "firstPayMonth" -> "10",
-        "firstPayDay" -> "01"
-      )) {
+  "constructionIndustry" should {
+    "redirect if the user is not authorised" in {
+      AuthHelpers.showUnauthorised(testController.constructionIndustry, request) {
         result =>
-          status(result) mustBe Status.BAD_REQUEST
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
       }
     }
 
-    "return 400 for an empty month" in new Setup {
-      submitAuthorisedWithCP(controller.submitFirstPayment(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
-        "firstPayYear" -> "2017",
-        "firstPayMonth" -> "",
-        "firstPayDay" -> "01"
-      )) {
-        result =>
-          status(result) mustBe Status.BAD_REQUEST
-      }
-    }
+    "render the page" in {
 
-    "return 400 for an empty day" in new Setup {
-      submitAuthorisedWithCP(controller.submitFirstPayment(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
-        "firstPayYear" -> "2017",
-        "firstPayMonth" -> "10",
-        "firstPayDay" -> ""
-      )) {
-        result =>
-          status(result) mustBe Status.BAD_REQUEST
-      }
-    }
+      when(mockEmploymentService.fetchEmployingStaff(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(emptyView))
 
-    "return 400 for an invalid year" in new Setup {
-      submitAuthorisedWithCP(controller.submitFirstPayment(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
-        "firstPayYear" -> "-3",
-        "firstPayMonth" -> "12",
-        "firstPayDay" -> "31"
-      )) {
-        result =>
-          status(result) mustBe Status.BAD_REQUEST
-      }
-    }
-
-    "return 400 for an invalid day" in new Setup {
-      submitAuthorisedWithCP(controller.submitFirstPayment(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
-        "firstPayYear" -> "2016",
-        "firstPayMonth" -> "12",
-        "firstPayDay" -> "32"
-      )) {
-        result =>
-          status(result) mustBe Status.BAD_REQUEST
-      }
-    }
-
-    "return 400 for an invalid month" in new Setup {
-      submitAuthorisedWithCP(controller.submitFirstPayment(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
-        "firstPayYear" -> "2016",
-        "firstPayMonth" -> "13",
-        "firstPayDay" -> "12"
-      )) {
-        result =>
-          status(result) mustBe Status.BAD_REQUEST
-      }
-    }
-
-    "return 400 for a date more than 2 months in the future" in new Setup {
-      val today = LocalDate.now()
-      val futureDate = fromDate(today.plus(4, ChronoUnit.MONTHS))
-      submitAuthorisedWithCP(controller.submitFirstPayment(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
-        "firstPayYear" -> futureDate._1,
-        "firstPayMonth" -> futureDate._2,
-        "firstPayDay" -> futureDate._3
-      )) {
-        result =>
-          status(result) mustBe Status.BAD_REQUEST
-      }
-    }
-
-    "return 400 for a date before 1900" in new Setup {
-      submitAuthorisedWithCP(controller.submitFirstPayment(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
-        "firstPayYear" -> "1899",
-        "firstPayMonth" -> "12",
-        "firstPayDay" -> "31"
-      )) {
-        result =>
-          status(result) mustBe Status.BAD_REQUEST
-      }
-    }
-
-    "redirect to the Summary page when a user enters a valid past date" in new Setup {
-      when(mockEmploymentService.saveFirstPayment(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future(validEmploymentViewModel))
-
-      submitAuthorisedWithCP(controller.submitFirstPayment(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
-        "firstPayYear" -> "2016",
-        "firstPayMonth" -> "12",
-        "firstPayDay" -> "01"
-      )) {
-        result =>
-          status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result) mustBe Some("/register-for-paye/relationship-to-company")
-      }
-    }
-
-    "redirect to the Summary page when a user enters a valid future date" in new Setup {
-      val today = LocalDate.now()
-      val futureDate = fromDate(today.plus(1, ChronoUnit.MONTHS))
-
-      when(mockEmploymentService.saveFirstPayment(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future(validEmploymentViewModel))
-
-      submitAuthorisedWithCP(controller.submitFirstPayment(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
-        "firstPayYear" -> futureDate._1,
-        "firstPayMonth" -> futureDate._2,
-        "firstPayDay" -> futureDate._3
-      )) {
-        result =>
-          status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result) mustBe Some("/register-for-paye/relationship-to-company")
+      AuthHelpers.showAuthorisedWithCP(testController.constructionIndustry, Fixtures.validCurrentProfile, request) {
+        result => status(result) mustBe OK
       }
     }
   }
 
-  "ifFirstPaymentIsInTheNextTaxYear" should {
-    "return an Ok" in new Setup {
-      showAuthorisedWithCP(controller.ifFirstPaymentIsInTheNextTaxYear, Fixtures.validCurrentProfile, fakeRequest) {
-        (response: Future[Result]) =>
-          status(response) mustBe Status.OK
+  "submitConstructionIndustry" should {
+    "redirect if the user is not authorised" in {
+      AuthHelpers.submitUnauthorised(testController.submitConstructionIndustry, request) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
+      }
+    }
+    "return a 500 testing handlePostJourneyConstruction error scenario" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "inConstructionIndustry" -> "false"
+      )
+
+      when(mockEmploymentService.saveConstructionIndustry(ArgumentMatchers.eq(false))(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(constructionIndustryView.copy(construction = Some(false))))
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
+        result =>
+          status(result) mustBe 500
+      }
+    }
+
+    "return a bad request if the form is empty" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "" -> ""
+      )
+      AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
+        result => status(result) mustBe BAD_REQUEST
+      }
+    }
+
+    "redirect to the subcontractors page if yes is selected" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "inConstructionIndustry" -> "true"
+      )
+
+      when(mockEmploymentService.saveConstructionIndustry(ArgumentMatchers.eq(true))(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(constructionIndustryView))
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.subcontractors().url)
+      }
+    }
+
+    "redirect to the pensions page if no is selected and the company already pays employees" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "inConstructionIndustry" -> "false"
+      )
+
+      when(mockEmploymentService.saveConstructionIndustry(ArgumentMatchers.eq(false))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(dynamicViewModel(ea = true)))
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.pensions().url)
+      }
+    }
+
+    "redirect to the completion capacity page if no is selected and the company will pay employees" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "inConstructionIndustry" -> "false"
+      )
+
+      when(mockEmploymentService.saveConstructionIndustry(ArgumentMatchers.eq(false))(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(dynamicViewModel(wbp = true)))
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity().url)
+      }
+    }
+
+    "redirect to the don't register page if no is selected and the company will not and has never paid employees" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "inConstructionIndustry" -> "false"
+      )
+
+      when(mockEmploymentService.saveConstructionIndustry(ArgumentMatchers.eq(false))(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(dynamicViewModel()))
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.errors.routes.ErrorController.newIneligible().url)
+      }
+    }
+
+    "redirect to the completion capacity page if no is selected and the company will pay employees and no incorp date" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "inConstructionIndustry" -> "false"
+      )
+
+      when(mockEmploymentService.saveConstructionIndustry(ArgumentMatchers.eq(false))(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(dynamicViewModelNoDate(wbp = true)))
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity().url)
+      }
+    }
+
+    "redirect to the don't register page if no is selected and the company will not and has never paid employees and no incorp date" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "inConstructionIndustry" -> "false"
+      )
+
+      when(mockEmploymentService.saveConstructionIndustry(ArgumentMatchers.eq(false))(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(dynamicViewModelNoDate()))
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.errors.routes.ErrorController.newIneligible().url)
       }
     }
   }
 
-  "redirectBackToStandardFlow" should {
-    "return an Redirect" in new Setup {
-      submitAuthorisedWithCP(controller.redirectBackToStandardFlow(), Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody()) {
+  "subcontractors" should {
+    "redirect if the user is not authorised" in {
+      AuthHelpers.showUnauthorised(testController.subcontractors, request) {
         result =>
-          status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result) mustBe Some("/register-for-paye/relationship-to-company")
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
+      }
+    }
+
+    "render the page" in {
+
+      when(mockEmploymentService.fetchEmployingStaff(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(emptyView))
+
+      AuthHelpers.showAuthorisedWithCP(testController.subcontractors, Fixtures.validCurrentProfile, request) {
+        result => status(result) mustBe OK
+      }
+    }
+  }
+
+  "submitSubcontractors" should {
+    "redirect if the user is not authorised" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "inConstructionIndustry" -> "false"
+      )
+      AuthHelpers.submitUnauthorised(testController.submitSubcontractors, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
+      }
+    }
+
+    "return a bad request if the form is empty" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "" -> ""
+      )
+      AuthHelpers.submitAuthorisedWithCP(testController.submitSubcontractors, Fixtures.validCurrentProfile, formRequest) {
+        result => status(result) mustBe BAD_REQUEST
+      }
+    }
+
+    "redirect to pension page if the company already pays employees" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "employsSubcontractors" -> "true"
+      )
+
+      when(mockEmploymentService.saveSubcontractors(ArgumentMatchers.eq(true))(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(dynamicViewModel(ea = true, cis = true)))
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitSubcontractors, Fixtures.validCurrentProfile, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.pensions().url)
+      }
+    }
+
+    "redirect to the completion capacity page if the company has never paid employees" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "employsSubcontractors" -> "false"
+      )
+
+      when(mockEmploymentService.saveSubcontractors(ArgumentMatchers.eq(false))(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(dynamicViewModel(wbp = true, cis = true)))
+
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitSubcontractors, Fixtures.validCurrentProfile, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity().url)
+      }
+    }
+  }
+
+  "pensions" should {
+    "redirect if the user is not authorised" in {
+      AuthHelpers.showUnauthorised(testController.pensions, request) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
+      }
+    }
+
+    "render the page" in {
+
+      when(mockEmploymentService.fetchEmployingStaff(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(emptyView))
+
+      AuthHelpers.showAuthorisedWithCP(testController.pensions, Fixtures.validCurrentProfile, request) {
+        result => status(result) mustBe OK
+      }
+    }
+  }
+
+  "submitPensions" should {
+    "redirect if the user is not authorised" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "payPension" -> "false"
+      )
+      AuthHelpers.submitUnauthorised(testController.submitPensions, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some("/test/login")
+      }
+    }
+
+    "return a bad request if the form is empty" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "" -> ""
+      )
+      AuthHelpers.submitAuthorisedWithCP(testController.submitPensions, Fixtures.validCurrentProfile, formRequest) {
+        result => status(result) mustBe BAD_REQUEST
+      }
+    }
+
+    "redirect to completion capacity if pays pensions" in {
+      val formRequest = request.withFormUrlEncodedBody(
+        "paysPension" -> "true"
+      )
+
+      when(mockEmploymentService.savePensionPayment(ArgumentMatchers.eq(true))(ArgumentMatchers.any(),ArgumentMatchers.any()))
+        .thenReturn(Future.successful(pensionsView))
+
+      AuthHelpers.submitAuthorisedWithCP(testController.submitPensions, Fixtures.validCurrentProfile, formRequest) {
+        result =>
+          status(result) mustBe SEE_OTHER
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity().url)
       }
     }
   }

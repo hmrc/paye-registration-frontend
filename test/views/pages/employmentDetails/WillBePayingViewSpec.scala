@@ -18,7 +18,7 @@ package views.pages.employmentDetails
 
 import java.time.LocalDate
 
-import forms.employmentDetails.EmployingStaffFormV2
+import forms.employmentDetails.EmployingStaffForm
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.WillBePaying
 import org.jsoup.Jsoup
@@ -36,21 +36,21 @@ class WillBePayingViewSpec extends PayeComponentSpec with PayeFakedApp with I18n
 
       "the current date is 6th Feb" in {
         val now = LocalDate.of(2017, 2, 6)
-        lazy val view = willBePaying(EmployingStaffFormV2.form(now).fill(data), 116, now)
+        lazy val view = willBePaying(EmployingStaffForm.form(now).fill(data), 116, now)
         lazy val document = Jsoup.parse(view.body)
 
         document.getElementById("beforeNewTaxYear-true").attr("value") mustBe "true"
       }
       "the current date is 5th Apr" in {
         val now = LocalDate.of(2017, 4, 5)
-        lazy val view = willBePaying(EmployingStaffFormV2.form(now).fill(data), 116, now)
+        lazy val view = willBePaying(EmployingStaffForm.form(now).fill(data), 116, now)
         lazy val document = Jsoup.parse(view.body)
 
         document.getElementById("beforeNewTaxYear-true").attr("value") mustBe "true"
       }
       "the current date is between 6th Feb and 5th Apr" in {
         val now = LocalDate.of(2017, 2, 7)
-        lazy val view = willBePaying(EmployingStaffFormV2.form(now).fill(data), 116, now)
+        lazy val view = willBePaying(EmployingStaffForm.form(now).fill(data), 116, now)
         lazy val document = Jsoup.parse(view.body)
 
         document.getElementById("beforeNewTaxYear-true").attr("value") mustBe "true"
@@ -62,21 +62,21 @@ class WillBePayingViewSpec extends PayeComponentSpec with PayeFakedApp with I18n
 
       "the current date is 5th Feb" in {
         val now = LocalDate.of(2017, 2, 5)
-        lazy val view = willBePaying(EmployingStaffFormV2.form(now).fill(data), 116, now)
+        lazy val view = willBePaying(EmployingStaffForm.form(now).fill(data), 116, now)
         lazy val document = Jsoup.parse(view.body)
 
         a[NullPointerException] mustBe thrownBy(document.getElementById("beforeNewTaxYear-true").attr("value"))
       }
       "the current date is 6th Apr" in {
         val now = LocalDate.of(2017, 4, 6)
-        lazy val view = willBePaying(EmployingStaffFormV2.form(now).fill(data), 116, now)
+        lazy val view = willBePaying(EmployingStaffForm.form(now).fill(data), 116, now)
         lazy val document = Jsoup.parse(view.body)
 
         a[NullPointerException] mustBe thrownBy(document.getElementById("beforeNewTaxYear-true").attr("value"))
       }
       "the current date is not between 6th Feb and 5th Apr" in {
         val now = LocalDate.of(2017, 8, 7)
-        lazy val view = willBePaying(EmployingStaffFormV2.form(now).fill(data), 116, now)
+        lazy val view = willBePaying(EmployingStaffForm.form(now).fill(data), 116, now)
         lazy val document = Jsoup.parse(view.body)
 
         a[NullPointerException] mustBe thrownBy(document.getElementById("beforeNewTaxYear-true").attr("value"))
