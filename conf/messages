@@ -136,7 +136,7 @@ pages.paidEmployees.date.dateTooEarly                           = Enter a date t
 pages.paidEmployees.date.dateInFuture                           = Enter a date that''s in the past
 pages.paidEmployees.date.empty                                  = Enter a date for when you first started employing someone or providing expenses or benefits to staff
 pages.paidEmployees.date.invalid                                = Enter a valid date
-pages.paidEmployees.date.moreThanTwoYears                       = Enter a date in the last 2 years
+pages.paidEmployees.date.moreThanTwoTaxYears                    = Enter a date within the last 2 tax years
 
 ## Will Be Paying
 pages.willBePaying.title                                      = Over the next 2 months, will the company do any of the following?
