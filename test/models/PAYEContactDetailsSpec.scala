@@ -227,15 +227,9 @@ class PAYEContactDetailsSpec extends PayeComponentSpec {
       )
     )
 
-    val err = "No name components defined\n" +
-      s"Lines defined:\n" +
-      s"firstName: false\n" +
-      s"middleName: false\n" +
-      s"surname: false\n"
-
-    "return an error when read from Json" in {
+    "return no errors as name is no longer sent by CRFE - when read from Json, set name to blank string" in {
       val result = Json.fromJson[PAYEContactDetails](json)(PAYEContactDetails.prepopReads)
-      shouldHaveErrors(result, JsPath(), Seq(ValidationError(err)))
+      result mustBe JsSuccess(model)
     }
     "write to Json without firstName, middleName and surname" in {
       Json.toJson[PAYEContactDetails](model)(PAYEContactDetails.prepopWrites) mustBe json

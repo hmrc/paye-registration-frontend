@@ -33,17 +33,6 @@ object PAYEContactDetails {
       val oMiddleName = json.\("middleName").asOpt[String](Formatters.normalizeTrimmedReads)
       val oLastName = json.\("surname").asOpt[String](Formatters.normalizeTrimmedReads)
 
-      def incorrectContactDetails(msg: String): String = {
-        s"$msg\n" +
-          s"Lines defined:\n" +
-          s"firstName: ${oFirstName.isDefined}\n" +
-          s"middleName: ${oMiddleName.isDefined}\n" +
-          s"surname: ${oLastName.isDefined}\n"
-      }
-
-      if(oFirstName.isEmpty && oMiddleName.isEmpty && oLastName.isEmpty) {
-        JsError(incorrectContactDetails(s"No name components defined"))
-      } else {
         DigitalContactDetails.prepopReads.reads(json) match {
           case jsSuccess: JsSuccess[DigitalContactDetails] => JsSuccess(
             PAYEContactDetails(
@@ -52,7 +41,6 @@ object PAYEContactDetails {
             )
           case jsErr: JsError => jsErr
         }
-      }
     }
   }
 

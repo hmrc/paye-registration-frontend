@@ -103,9 +103,6 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       val invalidPrepopResponse =
         s"""
            |{
-           |   "firstName": "fName",
-           |   "middleName": "mName1 mName2",
-           |   "surname": "sName",
            |   "email": "email1",
            |   "telephoneNumber": "012345",
            |   "mobileNumber": "543210"
@@ -172,6 +169,43 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       val document = Jsoup.parse(response.body)
       document.title() mustBe "Who should we contact about the company's PAYE?"
       document.getElementById("name").attr("value") mustBe "fName mName1 mName2 sName"
+      document.getElementById("digitalContact.contactEmail").attr("value") mustBe "email1@email.co.uk"
+      document.getElementById("digitalContact.mobileNumber").attr("value") mustBe "543210543210"
+      document.getElementById("digitalContact.phoneNumber").attr("value") mustBe "012345012345"
+    }
+    "Return a prepopulated page only with Digital contact details as name is no longer mandatory from prepop" in {
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubSessionCacheMetadata(SessionId, regId)
+
+      val validPrepopResponse =
+        s"""
+           |{
+           |   "email": "email1@email.co.uk",
+           |   "telephoneNumber": "012345012345",
+           |   "mobileNumber": "543210543210"
+           |}
+         """.stripMargin
+
+      val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
+
+      stubGet(s"/paye-registration/$regId/company-details", 404, "")
+      stubGet(s"/paye-registration/$regId/contact-correspond-paye", 404, "")
+      stubGet(s"/business-registration/$regId/contact-details", 200, validPrepopResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/PrepopPAYEContactDetails", 200, dummyS4LResponse)
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/PAYEContact", 200, dummyS4LResponse)
+
+      val response = await(buildClient("/who-should-we-contact")
+        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .get())
+
+      response.status mustBe 200
+
+      val document = Jsoup.parse(response.body)
+      document.title() mustBe "Who should we contact about the company's PAYE?"
+      document.getElementById("name").attr("value") mustBe ""
       document.getElementById("digitalContact.contactEmail").attr("value") mustBe "email1@email.co.uk"
       document.getElementById("digitalContact.mobileNumber").attr("value") mustBe "543210543210"
       document.getElementById("digitalContact.phoneNumber").attr("value") mustBe "012345012345"
