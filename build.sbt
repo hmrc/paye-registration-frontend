@@ -15,9 +15,10 @@
  */
 
 import TestPhases.oneForkedJvmPerTest
-import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings}
+import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings, integrationTestSettings}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import scoverage.ScoverageKeys
+import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 val appName: String = "paye-registration-frontend"
 
@@ -29,14 +30,15 @@ lazy val scoverageSettings = Seq(
 )
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(Seq(PlayScala,SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) : _*)
+  .enablePlugins(Seq(PlayScala,SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) : _*)
   .settings(PlayKeys.playDefaultPort := 9870)
   .settings(scoverageSettings : _*)
   .settings(scalaSettings: _*)
   .settings(publishingSettings: _*)
   .settings(defaultSettings(): _*)
+  .settings(integrationTestSettings())
+  .settings(majorVersion := 1)
   .configs(IntegrationTest)
-  .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(
     scalaVersion                                  :=  "2.11.11",
     resolvers                                     ++= Seq(Resolver.bintrayRepo("hmrc", "releases"), Resolver.jcenterRepo),
@@ -44,9 +46,5 @@ lazy val microservice = Project(appName, file("."))
     retrieveManaged                               :=  true,
     routesGenerator                               :=  InjectedRoutesGenerator,
     evictionWarningOptions     in update          :=  EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
-    Keys.fork                  in IntegrationTest :=  false,
-    unmanagedSourceDirectories in IntegrationTest :=  (baseDirectory in IntegrationTest)(base => Seq(base / "it")).value,
-    testGrouping               in IntegrationTest :=  oneForkedJvmPerTest((definedTests in IntegrationTest).value),
-    parallelExecution          in IntegrationTest :=  false,
     addTestReportOption(IntegrationTest, "int-test-reports")
   )
