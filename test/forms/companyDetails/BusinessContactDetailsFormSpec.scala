@@ -27,59 +27,103 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
   "Binding BusinessContactDetailsForm to a model" should {
     "Bind successfully with full data" in {
       val data = Map(
-        "businessEmail" -> "testEmail@testing.com",
+        "businessEmail" -> "testEmail@testing.aaaaaaaaaaa",
         "mobileNumber" -> "01234567987",
         "phoneNumber" -> "07798123456"
       )
       val model = DigitalContactDetails(
-        email = Some("testEmail@testing.com"),
+        email = Some("testEmail@testing.aaaaaaaaaaa"),
         mobileNumber = Some("01234567987"),
         phoneNumber = Some("07798123456")
       )
 
-      val boundModel = testForm.bind(data).fold(
-        errors => errors,
-        success => success
-      )
+      val boundModel = testForm.bind(data).get
       boundModel mustBe model
     }
 
     "Bind successfully with full data with email at full length" in {
       val data = Map(
-        "businessEmail" -> "test@emailllllllllllllllllllllllllllllllllllllllllllllllllllllllll.com",
+        "businessEmail" -> "test@emailllllllllllllllllllllllllllllllllllllllllllllllll.aaaaaaaaaaa",
         "mobileNumber" -> "01234567987",
         "phoneNumber" -> "07798123456"
       )
       val model = DigitalContactDetails(
-        email = Some("test@emailllllllllllllllllllllllllllllllllllllllllllllllllllllllll.com"),
+        email = Some("test@emailllllllllllllllllllllllllllllllllllllllllllllllll.aaaaaaaaaaa"),
         mobileNumber = Some("01234567987"),
         phoneNumber = Some("07798123456")
       )
 
-      val boundModel = testForm.bind(data).fold(
-        errors => errors,
-        success => success
-      )
+      val boundModel = testForm.bind(data).get
       boundModel mustBe model
     }
 
-    "Bind successfully with minimal data (email)" in {
+    "Bind successfully with minimal data (email 2.11 )" in {
       val data = Map(
-        "businessEmail" -> "testEmail@testing.com",
+        "businessEmail" -> "testEmail@co.aaaaaaaaaaa",
         "mobileNumber" -> "",
         "phoneNumber" -> ""
       )
       val model = DigitalContactDetails(
-        email = Some("testEmail@testing.com"),
+        email = Some("testEmail@co.aaaaaaaaaaa"),
         mobileNumber = None,
         phoneNumber = None
       )
 
-      val boundModel = testForm.bind(data).fold(
-        errors => errors,
-        success => success
-      )
+      val boundModel = testForm.bind(data).get
       boundModel mustBe model
+    }
+
+    "Bind successfully with minimal data (email 11.11)" in {
+      val data = Map(
+        "businessEmail" -> "testEmail@aaaaaaaaaaa.aaaaaaaaaaa",
+        "mobileNumber" -> "",
+        "phoneNumber" -> ""
+      )
+      val model = DigitalContactDetails(
+        email = Some("testEmail@aaaaaaaaaaa.aaaaaaaaaaa"),
+        mobileNumber = None,
+        phoneNumber = None
+      )
+
+      val boundModel = testForm.bind(data).get
+      boundModel mustBe model
+    }
+
+    "Bind successfully with minimal data (email 2.11.5)" in {
+      val data = Map(
+        "businessEmail" -> "testEmail@co.aaaaaaaaaaa.bbbbb",
+        "mobileNumber" -> "",
+        "phoneNumber" -> ""
+      )
+      val model = DigitalContactDetails(
+        email = Some("testEmail@co.aaaaaaaaaaa.bbbbb"),
+        mobileNumber = None,
+        phoneNumber = None
+      )
+
+      val boundModel = testForm.bind(data).get
+      boundModel mustBe model
+    }
+
+    "Have the correct error if length after final full stop is too long" in {
+      val data: Map[String, String] = Map(
+        "businessEmail" -> "testEmail@test.cccccccccccc",
+        "mobileNumber" -> "",
+        "phoneNumber" -> ""
+      )
+      val boundForm = testForm.bind(data)
+      val errForm = Form(
+        testForm.mapping,
+        Map(
+          "businessEmail" -> "testEmail@test.cccccccccccc",
+          "mobileNumber" -> "",
+          "phoneNumber" -> ""
+        ),
+        List(FormError("businessEmail", List("errors.invalid.email"), List())),
+        None
+      )
+
+      boundForm mustBe errForm
     }
 
     "Bind successfully with minimal data (mobile)" in {
@@ -94,10 +138,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
         phoneNumber = None
       )
 
-      val boundModel = testForm.bind(data).fold(
-        errors => errors,
-        success => success
-      )
+      val boundModel = testForm.bind(data).get
       boundModel mustBe model
     }
 
@@ -113,10 +154,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
         phoneNumber = Some("07798123456")
       )
 
-      val boundModel = testForm.bind(data).fold(
-        errors => errors,
-        success => success
-      )
+      val boundModel = testForm.bind(data).get
       boundModel mustBe model
     }
 
@@ -194,7 +232,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
 
     "Have the correct error if the email is of a valid structure but too long" in {
       val data: Map[String,String] = Map(
-        "businessEmail" -> "test-email-address@test-email-address-that-is-just-far-far-too-long-to-be-valid.com",
+        "businessEmail" -> "test-email-address@test-email-address-that-is-just-far-far-too-long-to-be-valid.aaaaaaaaaaa",
         "mobileNumber" -> "",
         "phoneNumber" -> ""
       )
@@ -203,7 +241,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
       val errForm = Form(
         testForm.mapping,
         Map(
-          "businessEmail" -> "test-email-address@test-email-address-that-is-just-far-far-too-long-to-be-valid.com",
+          "businessEmail" -> "test-email-address@test-email-address-that-is-just-far-far-too-long-to-be-valid.aaaaaaaaaaa",
           "mobileNumber" -> "",
           "phoneNumber" -> ""
         ),

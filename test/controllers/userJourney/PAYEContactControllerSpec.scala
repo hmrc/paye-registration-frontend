@@ -116,7 +116,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
     "show an error page when there is an error response from the microservice" in new Setup {
       val request = FakeRequest().withFormUrlEncodedBody(
         "name" -> "tata",
-        "digitalContact.contactEmail" -> "tata@test.com"
+        "digitalContact.contactEmail" -> "tata@test.aaaaaaaaaaa"
       )
 
       when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
@@ -131,7 +131,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
     "return a SEE_OTHER and redirect to the Correspondence Address page" in new Setup {
       val request = FakeRequest().withFormUrlEncodedBody(
         "name" -> "tata",
-        "digitalContact.contactEmail" -> "tata@test.com"
+        "digitalContact.contactEmail" -> "tata@test.aaaaaaaaaaa"
       )
 
       when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any(), ArgumentMatchers.any()))
