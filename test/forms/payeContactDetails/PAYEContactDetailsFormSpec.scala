@@ -29,69 +29,100 @@ class PAYEContactDetailsFormSpec extends PayeComponentSpec {
     "Bind successfully with full data" in {
       val data = Map(
         "name" -> "test Mary-Jane84 de l'aurore",
-        "digitalContact.contactEmail" -> "testEmail@testing.com",
+        "digitalContact.contactEmail" -> "testEmail@testing.aaaaaaaaaaa",
         "digitalContact.mobileNumber" -> "01234567987",
         "digitalContact.phoneNumber" -> "07798123456"
       )
       val model = PAYEContactDetails(
         name = "test Mary-Jane84 de l'aurore",
         DigitalContactDetails(
-          email = Some("testEmail@testing.com"),
+          email = Some("testEmail@testing.aaaaaaaaaaa"),
           mobileNumber = Some("01234567987"),
           phoneNumber = Some("07798123456")
         )
       )
 
-      val boundModel = testForm.bind(data).fold(
-        errors => errors,
-        success => success
-      )
+      val boundModel = testForm.bind(data).get
       boundModel mustBe model
     }
 
     "Bind successfully with full data with email at full length" in {
       val data = Map(
         "name" -> "test Mary-Jane84 de l'aurore",
-        "digitalContact.contactEmail" -> "test@emailllllllllllllllllllllllllllllllllllllllllllllllllllllllll.com",
+        "digitalContact.contactEmail" -> "test@emailllllllllllllllllllllllllllllllllllllllllllllllll.aaaaaaaaaaa",
         "digitalContact.mobileNumber" -> "01234567987",
         "digitalContact.phoneNumber" -> "07798123456"
       )
       val model = PAYEContactDetails(
         name = "test Mary-Jane84 de l'aurore",
         DigitalContactDetails(
-          email = Some("test@emailllllllllllllllllllllllllllllllllllllllllllllllllllllllll.com"),
+          email = Some("test@emailllllllllllllllllllllllllllllllllllllllllllllllll.aaaaaaaaaaa"),
           mobileNumber = Some("01234567987"),
           phoneNumber = Some("07798123456")
         )
       )
 
-      val boundModel = testForm.bind(data).fold(
-        errors => errors,
-        success => success
-      )
+      val boundModel = testForm.bind(data).get
       boundModel mustBe model
     }
 
     "Bind successfully with minimal data (email)" in {
       val data = Map(
         "name" -> "testName",
-        "digitalContact.contactEmail" -> "testEmail@testing.com",
+        "digitalContact.contactEmail" -> "testEmail@testing.aaaaaaaaaaa",
         "digitalContact.mobileNumber" -> "",
         "digitalContact.phoneNumber" -> ""
       )
       val model = PAYEContactDetails(
         name = "testName",
         DigitalContactDetails(
-          email = Some("testEmail@testing.com"),
+          email = Some("testEmail@testing.aaaaaaaaaaa"),
           mobileNumber = None,
           phoneNumber = None
         )
       )
 
-      val boundModel = testForm.bind(data).fold(
-        errors => errors,
-        success => success
+      val boundModel = testForm.bind(data).get
+      boundModel mustBe model
+    }
+
+    "Bind successfully with minimal data (email 11.11)" in {
+      val data = Map(
+        "name" -> "testName",
+        "digitalContact.contactEmail" -> "testEmail@aaaaaaaaaaa.aaaaaaaaaaa",
+        "digitalContact.mobileNumber" -> "",
+        "digitalContact.phoneNumber" -> ""
       )
+      val model = PAYEContactDetails(
+        name = "testName",
+        DigitalContactDetails(
+          email = Some("testEmail@aaaaaaaaaaa.aaaaaaaaaaa"),
+          mobileNumber = None,
+          phoneNumber = None
+        )
+      )
+
+      val boundModel = testForm.bind(data).get
+      boundModel mustBe model
+    }
+
+    "Bind successfully with minimal data (email 2.11.5)" in {
+      val data = Map(
+        "name" -> "testName",
+        "digitalContact.contactEmail" -> "testEmail@co.aaaaaaaaaaa.bbbbb",
+        "digitalContact.mobileNumber" -> "",
+        "digitalContact.phoneNumber" -> ""
+      )
+      val model = PAYEContactDetails(
+        name = "testName",
+        DigitalContactDetails(
+          email = Some("testEmail@co.aaaaaaaaaaa.bbbbb"),
+          mobileNumber = None,
+          phoneNumber = None
+        )
+      )
+
+      val boundModel = testForm.bind(data).get
       boundModel mustBe model
     }
 
@@ -111,10 +142,7 @@ class PAYEContactDetailsFormSpec extends PayeComponentSpec {
         )
       )
 
-      val boundModel = testForm.bind(data).fold(
-        errors => errors,
-        success => success
-      )
+      val boundModel = testForm.bind(data).get
       boundModel mustBe model
     }
 
@@ -134,10 +162,7 @@ class PAYEContactDetailsFormSpec extends PayeComponentSpec {
         )
       )
 
-      val boundModel = testForm.bind(data).fold(
-        errors => errors,
-        success => success
-      )
+      val boundModel = testForm.bind(data).get
       boundModel mustBe model
     }
 
@@ -159,7 +184,7 @@ class PAYEContactDetailsFormSpec extends PayeComponentSpec {
     "Have the correct error if name is not completed" in {
       val data: Map[String,String] = Map(
         "name" -> "    ",
-        "digitalContact.contactEmail" -> "email@business.net",
+        "digitalContact.contactEmail" -> "email@business.com",
         "digitalContact.mobileNumber" -> "",
         "digitalContact.phoneNumber" -> ""
       )
@@ -173,7 +198,7 @@ class PAYEContactDetailsFormSpec extends PayeComponentSpec {
     "Have the correct error if name is invalid" in {
       val data: Map[String,String] = Map(
         "name" -> "<h1>dgdgfd",
-        "digitalContact.contactEmail" -> "email@business.net",
+        "digitalContact.contactEmail" -> "email@business.com",
         "digitalContact.mobileNumber" -> "",
         "digitalContact.phoneNumber" -> ""
       )
@@ -187,7 +212,7 @@ class PAYEContactDetailsFormSpec extends PayeComponentSpec {
     "Have the correct error if name is more than 100 characters" in {
       val data: Map[String,String] = Map(
         "name" -> "test Mary-Jane84 de l'aurore TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST",
-        "digitalContact.contactEmail" -> "email@business.net",
+        "digitalContact.contactEmail" -> "email@business.com",
         "digitalContact.mobileNumber" -> "",
         "digitalContact.phoneNumber" -> ""
       )
@@ -215,7 +240,7 @@ class PAYEContactDetailsFormSpec extends PayeComponentSpec {
     "Have the correct error if email is longer than 70 characters" in {
       val data: Map[String,String] = Map(
         "name" -> "testName",
-        "digitalContact.contactEmail" -> "test@emaillllllllllllllllllllllllllllllllllllllllllllllllllllllllll.com",
+        "digitalContact.contactEmail" -> "test@emaillllllllllllllllllllllllllllllllllllllllllllllllllllllllll.aaaaaaaaaaa",
         "digitalContact.mobileNumber" -> "",
         "digitalContact.phoneNumber" -> ""
       )
