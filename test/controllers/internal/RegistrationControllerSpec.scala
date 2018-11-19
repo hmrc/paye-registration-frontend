@@ -99,7 +99,7 @@ class RegistrationControllerSpec extends PayeComponentSpec with PayeFakedApp {
           res => status(res) mustBe 500
         }
       }
-      "deletion is unsuccesfull" in new Setup {
+      "deletion is unsuccesful with generic exception" in new Setup {
         val responseJson = Json.parse(
           s"""
              |{
@@ -123,6 +123,32 @@ class RegistrationControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
         AuthHelpers.submitUnauthorisedT[JsValue](controller.companyIncorporation, FakeRequest().withBody(responseJson)){
           res => status(res) mustBe 500
+        }
+      }
+      "deletion is not success and returns 404" in new Setup {
+        val responseJson = Json.parse(
+          s"""
+             |{
+             | "SCRSIncorpStatus": {
+             |   "IncorpSubscriptionKey" : {
+             |     "transactionId" : "fooTxID",
+             |     "subscriber"    : "SCRS",
+             |     "discriminator" : "paye-fe"
+             |   },
+             |   "IncorpStatusEvent": {
+             |     "status" : "accepted",
+             |     "crn" : "12345678",
+             |     "description" : "test desc"
+             |   }
+             | }
+             |}
+      """.stripMargin)
+
+        when(mockPayeRegService.handleIIResponse(ArgumentMatchers.eq("fooTxID"), ArgumentMatchers.any())(ArgumentMatchers.any()))
+          .thenReturn(Future.successful(RegistrationDeletion.notfound))
+
+        AuthHelpers.submitUnauthorisedT[JsValue](controller.companyIncorporation, FakeRequest().withBody(responseJson)){
+          res => status(res) mustBe 200
         }
       }
     }

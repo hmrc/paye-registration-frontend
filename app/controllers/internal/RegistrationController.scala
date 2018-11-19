@@ -20,7 +20,7 @@ import connectors.{IncorporationInformationConnector, KeystoreConnector, PAYEReg
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.{IncorporationStatus, RegistrationDeletion}
 import javax.inject.Inject
-import play.api.Configuration
+import play.api.{Configuration, Logger}
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsObject, JsSuccess, JsValue}
 import play.api.mvc.{Action, AnyContent}
@@ -76,7 +76,11 @@ trait RegistrationController extends PayeBaseController {
 
     (txId, incorpStatus) match {
       case (JsSuccess(id, _), JsSuccess(status, _)) => payeRegistrationService.handleIIResponse(id, status).map {
-        _ => Ok
+        s =>
+          if(s ==  RegistrationDeletion.notfound) {
+            Logger.warn(s"II returned $txId with status $incorpStatus but no paye doc found, returned 200 back to II to clear subscription")
+          }
+          Ok
       } recover {
         case _: Exception => InternalServerError
       }

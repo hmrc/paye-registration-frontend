@@ -595,7 +595,13 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
       val result = await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId"))
       result mustBe RegistrationDeletion.invalidStatus
     }
+    "return a not found when 404 is returned from paye reg" in new Setup {
+      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(Upstream4xxResponse("msg",404,404)))
 
+      val result = await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId"))
+      result mustBe RegistrationDeletion.notfound
+    }
     "throw an Upstream5xxResponse" in new Setup {
       when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(Upstream5xxResponse("msg", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))

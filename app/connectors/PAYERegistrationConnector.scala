@@ -21,7 +21,8 @@ import java.util.NoSuchElementException
 import config.WSHttp
 import enums.{DownstreamOutcome, PAYEStatus, RegistrationDeletion}
 import javax.inject.Inject
-import models.api.{Director, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment, PAYERegistration => PAYERegistrationAPI}
+import models.api.{Director, Employment, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
+import play.api.Logger
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, Reads}
 import services.MetricsService
@@ -350,6 +351,9 @@ trait PAYERegistrationConnector {
       case fourXX: Upstream4xxResponse if fourXX.upstreamResponseCode == PRECONDITION_FAILED =>
         logger.warn(s"[PAYERegistrationConnector] - [deleteRegistrationForRejectedIncorp] Deleting document for regId $regId and txId $txId failed as document was not draft or invalid")
         RegistrationDeletion.invalidStatus
+      case notFound: Upstream4xxResponse if notFound.upstreamResponseCode == NOT_FOUND =>
+        Logger.warn(s"s[PAYERegistrationConnector] - deleteRegistrationForRejectedIncorp paye reg returned 404 when expecting to find one for $regId : $txId ")
+        RegistrationDeletion.notfound
       case fiveXX: Upstream5xxResponse =>
         throw logResponse(fiveXX, "deleteRegistrationForRejectedIncorp", s"deleting document, error message: ${fiveXX.message}", regId, Some(txId))
     }

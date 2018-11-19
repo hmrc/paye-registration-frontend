@@ -22,7 +22,7 @@ import enums.{CacheKeys, DownstreamOutcome, IncorporationStatus, RegistrationDel
 import models.external.CurrentProfile
 import play.api.Logger
 import play.api.http.Status._
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
@@ -57,6 +57,8 @@ trait PAYERegistrationService {
       if (status == IncorporationStatus.rejected) {
         oRegIdFromCp.fold(payeRegistrationConnector.getRegistrationId(txId))(Future.successful) flatMap { regId =>
           tearDownUserData(regId, txId)
+        } recoverWith{
+          case e:NotFoundException => Future.successful(RegistrationDeletion.notfound)
         }
       }
       else {
