@@ -20,4 +20,5 @@ object RegistrationDeletion extends Enumeration {
   val success       = Value
   val invalidStatus = Value
   val forbidden     = Value
+  val notfound      = Value
 }

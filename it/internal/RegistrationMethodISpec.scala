@@ -300,6 +300,21 @@ class RegistrationMethodISpec extends IntegrationSpecBase
         val result = await(buildClientInternal("/company-incorporation").post(testIIBody))
         result.status mustBe OK
       }
+      "getRegIdReturns 404" in {
+        stubGet("/paye-registration/testTxId/registration-id", NOT_FOUND, "testRegId")
+
+        val result = await(buildClientInternal("/company-incorporation").post(testIIBody))
+        result.status mustBe OK
+      }
+
+      "delete reject incorp returns 404" in {
+        stubGet("/paye-registration/testTxId/registration-id", OK, "testRegId")
+
+        stubDelete(s"/save4later/paye-registration-frontend/$regId", NO_CONTENT, "")
+        stubDelete(s"/paye-registration/$regId/delete-rejected-incorp", NOT_FOUND, "")
+
+        val result = await(buildClientInternal("/company-incorporation").post(testIIBody))
+      }
 
       "the user incorp status but not deleted because the status wasn't rejected and there is an active session" in {
         val testIIBody = Json.parse(
@@ -345,7 +360,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
     }
 
     "return an InternalServerError" when {
-      "no matching PAYE doc can be found and they have an active session" in {
+      "paye reg returns 500 when deleting rejected incorp and they have an active session" in {
         await(repo.upsertSessionMap(testSessionMap))
 
         stubDelete(s"/save4later/paye-registration-frontend/$regId", INTERNAL_SERVER_ERROR, "")
@@ -355,7 +370,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
         result.status mustBe INTERNAL_SERVER_ERROR
       }
 
-      "no matching PAYE doc can be found but the user is not present" in {
+      "paye reg returns 500 when deleting rejected incorp but the user is not present" in {
         stubGet("/paye-registration/testTxId/registration-id", NOT_FOUND, "")
 
         stubDelete(s"/save4later/paye-registration-frontend/$regId", INTERNAL_SERVER_ERROR, "")
