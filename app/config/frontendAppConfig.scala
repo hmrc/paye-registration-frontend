@@ -27,6 +27,7 @@ import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.play.config.ServicesConfig
 
 trait AppConfig {
+  val googleTagManagerToken: String
   val analyticsToken: String
   val analyticsHost: String
   val reportAProblemPartialUrl: String
@@ -45,6 +46,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   override lazy val contactFrontendPartialBaseUrl = baseUrl("contact-frontend")
 
   override lazy val analyticsToken            = loadConfig("google-analytics.token")
+  override lazy val googleTagManagerToken     = loadConfig("google-tag-manager.token")
   override lazy val analyticsHost             = loadConfig("google-analytics.host")
   override lazy val reportAProblemPartialUrl  = loadConfig("reportAProblemPartialUrl")
   override lazy val reportAProblemNonJSUrl    = loadConfig("reportAProblemNonJSUrl")
