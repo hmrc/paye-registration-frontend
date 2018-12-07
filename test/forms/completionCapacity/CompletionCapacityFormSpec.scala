@@ -86,6 +86,22 @@ class CompletionCapacityFormSpec extends PayeComponentSpec {
       boundModel mustBe model
     }
 
+    "Bind successfully when capacity is Other with a space in the middle" in {
+      val data = Map(
+        "completionCapacity" -> "other",
+        "completionCapacityOther" -> "unimportant clerk person")
+
+      val model = CompletionCapacity(UserCapacity.other, "unimportant clerk person")
+
+      val boundModel = testForm.bind(data).fold(
+        errs => errs,
+        success => success
+      )
+
+      boundModel mustBe model
+    }
+
+
     "Fail to bind when capacity is incomplete" in {
       val data = Map(
         "completionCapacity" -> "",
@@ -105,7 +121,18 @@ class CompletionCapacityFormSpec extends PayeComponentSpec {
 
       boundForm.errors mustBe Seq(FormError("completionCapacityOther", "pages.completionCapacity.other.label"))
     }
+
+    "Fail to bind when other capacity has only blank space" in {
+      val data = Map(
+        "completionCapacity" -> "other",
+        "completionCapacityOther" -> " ")
+
+      val boundForm = testForm.bind(data)
+
+      boundForm.errors mustBe Seq(FormError("completionCapacityOther", "pages.completionCapacity.other.label"))
+    }
   }
+
 
   "Unbinding a Completion Capacity model to a form" should {
     "Unbind successfully when capacity is Director" in {

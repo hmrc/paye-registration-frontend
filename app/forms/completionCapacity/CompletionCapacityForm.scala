@@ -49,10 +49,10 @@ object CompletionCapacityForm {
 
   val otherValidation: Mapping[String] = {
     val otherConstraint: Constraint[String] = Constraint("constraint.other")({ other =>
-      val errors = if(other.matches(ccRegex)) {
+      val errors = if(other.trim.matches(ccRegex)) {
         Nil
       } else {
-        other match {
+        other.trim match {
           case ""                         => Seq(ValidationError("pages.completionCapacity.other.label"))
           case long if long.length >= 100 => Seq(ValidationError("pages.completionCapacity.other.error"))
           case _                          => Seq(ValidationError("pages.completionCapacity.error.invalidChars"))
