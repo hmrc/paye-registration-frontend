@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
+import scala.concurrent.ExecutionContext.Implicits.global
 import utils.PAYEFeatureSwitches
 
 import scala.concurrent.Future

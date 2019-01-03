@@ -17,9 +17,11 @@
 package itutil
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.typesafe.config.ConfigFactory
 import models.api.SessionMap
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.scalatest.BeforeAndAfterEach
+import play.api.Play
 import play.api.libs.json._
 import repositories.ReactiveMongoRepository
 import uk.gov.hmrc.crypto.json.JsonEncryptor
@@ -33,7 +35,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 trait CachingStub extends MongoSpecSupport with BeforeAndAfterEach{
   self: IntegrationSpecBase =>
-  implicit lazy val jsonCrypto = ApplicationCrypto.JsonCrypto
+  implicit lazy val jsonCrypto = new ApplicationCrypto(app.configuration.underlying).JsonCrypto
   implicit lazy val encryptionFormat = new JsonEncryptor[JsObject]()
 
   lazy val repo = new ReactiveMongoRepository(app.configuration, mongo)

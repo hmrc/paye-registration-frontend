@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.SystemDate
 import views.html.pages.employmentDetails.{applicationDelayed => ApplicationDelayedPage, constructionIndustry => ConstructionIndustryPage, employsSubcontractors => SubcontractorsPage, paidEmployees => PaidEmployeesPage, paysPension => PaysPensionPage, willBePaying => willBePayingPage}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 

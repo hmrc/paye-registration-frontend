@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import play.api.data.{Form, FormError}
 import play.api.data.Forms.{mapping, optional}
 import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
 import utils.SystemDate
-import uk.gov.hmrc.time.TaxYearResolver
+import uk.gov.hmrc.time.TaxYear
 
 object PaidEmployeesForm extends PaidEmployeesFormT
 
@@ -34,7 +34,7 @@ trait PaidEmployeesFormT extends RequiredBooleanForm with CustomDateForm {
   override val errorMsg = "pages.paidEmployees.error"
   override lazy val customFormPrefix = "earliestDate"
   def now: LocalDate = SystemDate.getSystemDate.toLocalDate
-  def ctyMinus2Years: Int = TaxYearResolver.currentTaxYear - 2
+  def ctyMinus2Years: Int = TaxYear.current.currentYear - 2
   val dateTimeFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy")
   def isOnOrAfter(date: LocalDate, comparator: LocalDate): Boolean = date.isEqual(comparator) || date.isAfter(comparator)
 

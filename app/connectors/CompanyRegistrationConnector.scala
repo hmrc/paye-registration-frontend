@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,11 @@ import common.exceptions.DownstreamExceptions
 import config.WSHttp
 import javax.inject.Inject
 import models.external.CompanyRegistrationProfile
+import play.api.{Configuration, Environment}
 import play.api.libs.json._
 import services.MetricsService
 import uk.gov.hmrc.http.{BadRequestException, CoreGet, HeaderCarrier, HttpException}
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.{PAYEFeatureSwitch, PAYEFeatureSwitches}
 
@@ -33,11 +34,13 @@ import scala.concurrent.Future
 class CompanyRegistrationConnectorImpl @Inject()(val featureSwitch: PAYEFeatureSwitch,
                                                  val http: WSHttp,
                                                  val metricsService: MetricsService,
-                                                 servicesConfig: ServicesConfig) extends CompanyRegistrationConnector {
-  lazy val companyRegistrationUrl: String = servicesConfig.baseUrl("company-registration")
-  lazy val companyRegistrationUri: String = servicesConfig.getConfString("company-registration.uri","")
-  lazy val stubUrl: String                = servicesConfig.baseUrl("incorporation-frontend-stubs")
-  lazy val stubUri: String                = servicesConfig.getConfString("incorporation-frontend-stubs.uri","")
+                                                 override val runModeConfiguration: Configuration,
+                                                 environment: Environment) extends CompanyRegistrationConnector with ServicesConfig {
+  lazy val companyRegistrationUrl: String = baseUrl("company-registration")
+  lazy val companyRegistrationUri: String = getConfString("company-registration.uri","")
+  lazy val stubUrl: String                = baseUrl("incorporation-frontend-stubs")
+  lazy val stubUri: String                = getConfString("incorporation-frontend-stubs.uri","")
+  override protected def mode = environment.mode
 }
 
 trait CompanyRegistrationConnector {

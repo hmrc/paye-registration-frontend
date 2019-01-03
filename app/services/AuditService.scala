@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,7 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
-class AuditServiceImpl @Inject()() extends AuditService {
-  override val auditConnector = FrontendAuditConnector
+class AuditServiceImpl @Inject()(val auditConnector:AuditConnector) extends AuditService {
 }
 
 trait AuditService {

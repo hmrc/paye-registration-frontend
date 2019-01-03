@@ -26,6 +26,8 @@ import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
 import play.api.libs.json._
 import play.api.test.FakeApplication
+import uk.gov.hmrc.crypto.{Crypted, PlainText}
+import uk.gov.hmrc.play.bootstrap.filters.frontend.crypto.SessionCookieCrypto
 
 
 class CompanyDetailsMethodISpec extends IntegrationSpecBase
@@ -84,7 +86,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
 
   "GET Trading Name" should {
-
     "Return a populated page if PayeReg returns an company details response" in {
       val tradingName = "Foo Trading"
       setupSimpleAuthMocks()

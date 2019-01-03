@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,18 @@
 package connectors
 
 import javax.inject.Inject
-
 import com.codahale.metrics.{Counter, Timer}
 import common.Logging
 import config.WSHttp
 import models.Address
 import models.external._
-import play.api.Configuration
+import play.api.{Configuration, Environment}
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
 import services.MetricsService
 import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
@@ -38,14 +37,15 @@ import scala.util.control.NoStackTrace
 class AddressLookupConnectorImpl @Inject()(val metricsService: MetricsService,
                                            val messagesApi: MessagesApi,
                                            val http: WSHttp,
-                                           config: ServicesConfig,
-                                           playConfig: Configuration) extends AddressLookupConnector {
-  val addressLookupFrontendUrl     = config.baseUrl("address-lookup-frontend")
-  lazy val payeRegistrationUrl     = config.getConfString("paye-registration-frontend.www.url","")
+                                           override val runModeConfiguration: Configuration,
+                                           environment: Environment)extends AddressLookupConnector with ServicesConfig{
+  val addressLookupFrontendUrl     = baseUrl("address-lookup-frontend")
+  lazy val payeRegistrationUrl     = getConfString("paye-registration-frontend.www.url","")
   val successCounter               = metricsService.addressLookupSuccessResponseCounter
   val failedCounter                = metricsService.addressLookupFailedResponseCounter
-  def timer                        = metricsService.addressLookupResponseTimer.time()
-  lazy val timeoutAmount: Int      = playConfig.underlying.getInt("timeoutInSeconds")
+  def timer            = metricsService.addressLookupResponseTimer.time()
+  lazy val timeoutAmount: Int      = runModeConfiguration.underlying.getInt("timeoutInSeconds")
+  override protected def mode = environment.mode
 }
 
 class ALFLocationHeaderNotSetException extends NoStackTrace

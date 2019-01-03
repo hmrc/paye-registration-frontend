@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,9 @@ import common.Logging
 import config.WSHttp
 import javax.inject.Inject
 import models.external.EmailRequest
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
@@ -32,9 +33,11 @@ case object EmailDifficulties extends EmailResponse
 case object EmailNotFound extends EmailResponse
 
 class EmailConnectorImpl @Inject()(val http: WSHttp,
-                                   servicesConfig: ServicesConfig) extends EmailConnector {
-  val sendEmailURL: String = servicesConfig.getConfString("email.sendAnEmailURL",
+                                   override val runModeConfiguration: Configuration,
+                                   environment: Environment) extends EmailConnector with ServicesConfig {
+  val sendEmailURL: String = getConfString("email.sendAnEmailURL",
     throw new Exception("email.sendAnEmailURL not found"))
+  override protected def mode = environment.mode
 }
 
 trait EmailConnector extends Logging {

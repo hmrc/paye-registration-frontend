@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,18 +22,21 @@ import config.WSHttp
 import connectors._
 import enums.DownstreamOutcome
 import models.api.{Employment, CompanyDetails => CompanyDetailsAPI, PAYEContact => PAYEContactAPI, PAYERegistration => PAYERegistrationAPI}
+import play.api.{Configuration, Environment}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
 class TestPAYERegConnectorImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
                                          val http: WSHttp,
-                                         servicesConfig: ServicesConfig) extends TestPAYERegConnector {
-  val payeRegUrl = servicesConfig.baseUrl("paye-registration")
+                                         override val runModeConfiguration: Configuration,
+                                         environment: Environment) extends TestPAYERegConnector with ServicesConfig {
+  val payeRegUrl = baseUrl("paye-registration")
+  override protected def mode = environment.mode
 }
 
 trait TestPAYERegConnector extends Logging {

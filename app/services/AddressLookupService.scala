@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 package services
 
 import javax.inject.Inject
-
 import connectors.AddressLookupConnector
 import models.Address
+import play.api.{Configuration, Environment}
 import play.api.mvc.{Call, Request}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.{PAYEFeatureSwitch, PAYEFeatureSwitches}
 
@@ -30,9 +30,10 @@ import scala.concurrent.Future
 
 class AddressLookupServiceImpl @Inject()(val featureSwitch: PAYEFeatureSwitch,
                                          val addressLookupConnector: AddressLookupConnector,
-                                         servicesConfig: ServicesConfig,
-                                         val metricsService: MetricsService) extends AddressLookupService {
-  lazy val payeRegistrationUrl = servicesConfig.getConfString("paye-registration-frontend.www.url","")
+                                         val metricsService: MetricsService,
+                                         override val runModeConfiguration: Configuration, environment: Environment) extends AddressLookupService with ServicesConfig {
+  lazy val payeRegistrationUrl = getConfString("paye-registration-frontend.www.url","")
+  override protected def mode = environment.mode
 }
 
 trait AddressLookupService {

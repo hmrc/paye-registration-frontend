@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,20 @@ package connectors.test
 
 import config.WSHttp
 import javax.inject.Inject
+import play.api.{Configuration, Environment}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.{CoreGet, CorePost, CorePut, HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
 class TestIncorpInfoConnectorImpl @Inject()(val http: WSHttp,
-                                            servicesConfig: ServicesConfig) extends TestIncorpInfoConnector {
-  val incorpFEStubsUrl  = servicesConfig.baseUrl("incorporation-frontend-stubs")
-  val incorpInfoUrl = servicesConfig.baseUrl("incorporation-information")
+                                            override val runModeConfiguration: Configuration,
+                                            environment: Environment) extends TestIncorpInfoConnector with ServicesConfig {
+  val incorpFEStubsUrl  = baseUrl("incorporation-frontend-stubs")
+  val incorpInfoUrl     = baseUrl("incorporation-information")
+  override protected def mode = environment.mode
 }
 
 trait TestIncorpInfoConnector {

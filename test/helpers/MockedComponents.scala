@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import services._
 import uk.gov.hmrc.auth.core.{AuthConnector => AuthClientConnector}
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import utils.{FeatureManager, PAYEFeatureSwitch, PAYEFeatureSwitches}
 
 trait MockedComponents {
@@ -41,7 +40,7 @@ trait MockedComponents {
   val mockKeystoreConnector             = mock[KeystoreConnector]
   val mockPayeRegistrationConnector     = mock[PAYERegistrationConnector]
   val mockAuthConnector                 = mock[AuthClientConnector]
-  val mockOldAuthConnector              = mock[AuthConnector]
+  val mockOldAuthConnector              = mock[AuthClientConnector]
   val mockBusinessRegistrationConnector = mock[BusinessRegistrationConnector]
   val mockCompRegConnector              = mock[CompanyRegistrationConnector]
   val mockEmailConnector                = mock[EmailConnector]

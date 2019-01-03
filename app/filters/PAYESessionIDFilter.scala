@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,18 @@
 package filters
 
 import akka.event.slf4j.Logger
+import akka.stream.Materializer
 import controllers.userJourney.{routes => userJourneyRoutes}
+import javax.inject.Inject
+import play.api.mvc.Results.Redirect
 import play.api.mvc.{Filter, RequestHeader, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
-import uk.gov.hmrc.play.frontend.filters.MicroserviceFilterSupport
 import utils.Validators
-import play.api.mvc.Results.Redirect
 
 import scala.concurrent.Future
 
-object PAYESessionIDFilter extends PAYESessionIDFilter with MicroserviceFilterSupport
+class PAYESessionIDFilterImpl @Inject()(val mat: Materializer) extends PAYESessionIDFilter
 
 trait PAYESessionIDFilter extends Filter {
 

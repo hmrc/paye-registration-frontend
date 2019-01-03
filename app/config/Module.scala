@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package config
 
 import com.google.inject.AbstractModule
+import com.typesafe.config.{Config, ConfigFactory}
 import connectors._
 import connectors.test._
 import controllers.errors.{ErrorController, ErrorControllerImpl}
@@ -24,17 +25,15 @@ import controllers.feedback.{FeedbackController, FeedbackControllerImpl}
 import controllers.internal.{RegistrationController, RegistrationControllerImpl}
 import controllers.test._
 import controllers.userJourney._
+import filters.{PAYECSRFExceptionsFilter, PAYECSRFExceptionsFilterImpl, PAYESessionIDFilter, PAYESessionIDFilterImpl}
 import services._
-import uk.gov.hmrc.auth.core.{AuthConnector => AuthClientConnector}
-import uk.gov.hmrc.crypto.{ApplicationCrypto, ApplicationCryptoDI}
 import uk.gov.hmrc.http.cache.client.{SessionCache, ShortLivedCache, ShortLivedHttpCaching}
-import uk.gov.hmrc.play.config.inject.{DefaultServicesConfig, ServicesConfig}
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import utils.{FeatureManager, FeatureSwitchManager, PAYEFeatureSwitch, PAYEFeatureSwitches}
 
 class Module extends AbstractModule {
   override def configure(): Unit = {
     bindHmrcDependencies()
+    bindFilters()
     bindUtils()
     bindConnectors()
     bindServices()
@@ -42,16 +41,20 @@ class Module extends AbstractModule {
     bindUserJourneyControllers()
   }
 
+  private def bindFilters(): Unit = {
+    bind(classOf[WhiteListFilter]).to(classOf[WhitelistFilterImpl]).asEagerSingleton()
+    bind(classOf[PAYESessionIDFilter]).to(classOf[PAYESessionIDFilterImpl]).asEagerSingleton()
+    bind(classOf[LoggingFilterCustom]).to(classOf[LoggingFilterImpl]).asEagerSingleton()
+    bind(classOf[PAYECSRFExceptionsFilter]).to(classOf[PAYECSRFExceptionsFilterImpl]).asEagerSingleton()
+  }
   private def bindHmrcDependencies(): Unit = {
+    bind(classOf[Config]).toInstance(ConfigFactory.load())
+
     bind(classOf[MetricsService]).to(classOf[MetricsServiceImpl]).asEagerSingleton()
-    bind(classOf[ServicesConfig]).to(classOf[DefaultServicesConfig]).asEagerSingleton()
     bind(classOf[WSHttp]).to(classOf[WSHttpImpl]).asEagerSingleton()
-    bind(classOf[ApplicationCrypto]).to(classOf[ApplicationCryptoDI]).asEagerSingleton()
     bind(classOf[ShortLivedHttpCaching]).to(classOf[PAYEShortLivedHttpCaching]).asEagerSingleton()
     bind(classOf[ShortLivedCache]).to(classOf[PAYEShortLivedCache]).asEagerSingleton()
     bind(classOf[SessionCache]).to(classOf[PAYESessionCache]).asEagerSingleton()
-    bind(classOf[AuthConnector]).to(classOf[AuthConnectorImpl]).asEagerSingleton()
-    bind(classOf[AuthClientConnector]).to(classOf[AuthClientConnectorImpl]).asEagerSingleton()
   }
 
   private def bindUtils(): Unit = {
@@ -82,6 +85,7 @@ class Module extends AbstractModule {
     bind(classOf[CurrentProfileService]).to(classOf[CurrentProfileServiceImpl]).asEagerSingleton()
     bind(classOf[IncorporationInformationService]).to(classOf[IncorporationInformationServiceImpl]).asEagerSingleton()
     bind(classOf[S4LService]).to(classOf[S4LServiceImpl]).asEagerSingleton()
+    bind(classOf[EmploymentService]).to(classOf[EmploymentServiceImpl]).asEagerSingleton()
     bind(classOf[EmploymentService]).to(classOf[EmploymentServiceImpl]).asEagerSingleton()
     bind(classOf[NatureOfBusinessService]).to(classOf[NatureOfBusinessServiceImpl]).asEagerSingleton()
     bind(classOf[PAYEContactService]).to(classOf[PAYEContactServiceImpl]).asEagerSingleton()

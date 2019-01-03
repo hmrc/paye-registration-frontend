@@ -22,24 +22,28 @@ object AppDependencies {
 }
 
 object MainDependencies {
-  private val frontendBootstrapVersion        = "10.9.0"
+  private val frontendBootstrapVersion        = "4.3.0"
   private val authClientVersion               = "2.17.0-play-25"
-  private val playPartialsVersion             = "6.2.0"
-  private val httpCachingVersion              = "7.2.0"
+  private val playPartialsVersion             = "6.3.0"
+  private val httpCachingVersion              = "8.0.0"
   private val playWhitelistVersion            = "2.0.0"
   private val playConditionalMappingVersion   = "0.2.0"
   private val commonsValidatorVersion         = "1.6"
   private val reactiveMongoVersion            = "6.2.0"
+  private val taxYearVersion                  = "0.4.0"
 
   def apply() = Seq(
-    "uk.gov.hmrc"         %% "frontend-bootstrap"             % frontendBootstrapVersion,
+    "uk.gov.hmrc"         %% "bootstrap-play-25"             % frontendBootstrapVersion,
+    "uk.gov.hmrc"         %% "tax-year"                       % taxYearVersion,
     "uk.gov.hmrc"         %% "auth-client"                    % authClientVersion,
     "uk.gov.hmrc"         %% "play-partials"                  % playPartialsVersion,
     "uk.gov.hmrc"         %% "http-caching-client"            % httpCachingVersion,
     "uk.gov.hmrc"         %% "play-whitelist-filter"          % playWhitelistVersion,
     "uk.gov.hmrc"         %% "play-conditional-form-mapping"  % playConditionalMappingVersion,
     "uk.gov.hmrc"         %% "play-reactivemongo"             % reactiveMongoVersion,
-    "commons-validator"   %  "commons-validator"              % commonsValidatorVersion
+    "commons-validator"   %  "commons-validator"              % commonsValidatorVersion,
+    "uk.gov.hmrc"         %% "govuk-template" % "5.26.0-play-25",
+    "uk.gov.hmrc"         %% "play-ui" % "7.27.0-play-25"
   )
 }
 

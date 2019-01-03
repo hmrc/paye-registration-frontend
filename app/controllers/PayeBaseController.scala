@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,13 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.play.frontend.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.controller.{BaseController, FrontendController}
 import utils.SessionProfile
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
-trait PayeBaseController extends FrontendController with AuthorisedFunctions with Logging with SessionProfile with I18nSupport {
+trait PayeBaseController extends FrontendController with BaseController with AuthorisedFunctions with Logging with SessionProfile with I18nSupport {
 
   type AuthorisedActionWithProfile                = Request[AnyContent] => CurrentProfile => Future[Result]
   type AuthorisedActionWithProfileAndAuditingInfo = Request[AnyContent] => CurrentProfile => AuditingInformation => Future[Result]

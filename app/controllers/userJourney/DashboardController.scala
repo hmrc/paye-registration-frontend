@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,27 +19,29 @@ package controllers.userJourney
 import javax.inject.Inject
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
-import play.api.Configuration
+import play.api.{Configuration, Environment}
 import play.api.i18n.MessagesApi
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.config.ServicesConfig
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
 class DashboardControllerImpl @Inject()(val messagesApi: MessagesApi,
                                         val keystoreConnector: KeystoreConnector,
                                         val authConnector: AuthConnector,
-                                        val config: Configuration,
                                         val s4LService: S4LService,
                                         val companyDetailsService: CompanyDetailsService,
                                         val incorpInfoService: IncorporationInformationService,
-                                        servicesConfig: ServicesConfig,
                                         val incorporationInformationConnector: IncorporationInformationConnector,
-                                        val payeRegistrationService: PAYERegistrationService) extends DashboardController with AuthRedirectUrls {
+                                        val payeRegistrationService: PAYERegistrationService,
+                                        override val runModeConfiguration: Configuration, environment: Environment) extends DashboardController with AuthRedirectUrls with ServicesConfig {
 
-  override lazy val companyRegUrl = servicesConfig.getConfString("company-registration-frontend.www.url", "Could not find Company Registration Frontend URL")
-  override lazy val companyRegUri = servicesConfig.getConfString("company-registration-frontend.www.uri", "Could not find Company Registration Frontend URI")
+  override lazy val companyRegUrl = getConfString("company-registration-frontend.www.url", "Could not find Company Registration Frontend URL")
+  override lazy val companyRegUri = getConfString("company-registration-frontend.www.uri", "Could not find Company Registration Frontend URI")
+  override val config: Configuration = runModeConfiguration
+  override protected def mode = environment.mode
 }
 
 trait DashboardController extends PayeBaseController {

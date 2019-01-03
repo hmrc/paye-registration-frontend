@@ -20,6 +20,7 @@ import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import models.api.SessionMap
 import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProfile}
 import org.scalatest.BeforeAndAfterEach
+import play.api.http.HeaderNames
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.FakeApplication
@@ -54,12 +55,16 @@ class RegistrationMethodISpec extends IntegrationSpecBase
     "microservice.services.company-registration.port" -> s"$mockPort",
     "microservice.services.incorporation-frontend-stubs.host" -> s"$mockHost",
     "microservice.services.incorporation-frontend-stubs.port" -> s"$mockPort",
+    "ip-whitelist-enabled" -> "true",
+    "Csrf-Bypass-value" -> "bm9jaGVjaw==",
+    "whitelist" -> "Zm9vYmFy", // foobar
     "mongodb.uri" -> s"$mongoUri"
   ))
 
   override def beforeEach() {
     resetWiremock()
   }
+  val trueClientIp = "True-Client-IP" -> "foobar"
 
   val regId = "3"
   val companyName = "Foo Ltd"
@@ -70,7 +75,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       setupUnauthorised()
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders("X-Session-ID" -> "1112223355556","Authorization" -> authorisationToken).
+        withHeaders("X-Session-ID" -> "1112223355556","Authorization" -> authorisationToken, trueClientIp).
         delete()
 
       val response = await(fResponse)
@@ -86,7 +91,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubSessionCacheMetadata("sessionId", regId)
 
       val fResponse = buildClientInternal(s"/4/delete").
-        withHeaders("X-Session-ID" -> "sessionId", "Authorization" -> authorisationToken).
+        withHeaders("X-Session-ID" -> "sessionId", "Authorization" -> authorisationToken, trueClientIp).
         delete()
 
       val response = await(fResponse)
@@ -121,7 +126,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubPost(s"/incorporation-information/subscribe/000-434-$regId/regime/paye-fe/subscriber/SCRS", 202, "")
 
       val fResponse = buildClientInternal(s"/4/delete").
-        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
+        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken, trueClientIp).
         delete()
 
       val response = await(fResponse)
@@ -140,7 +145,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubDelete(s"/paye-registration/$regId/delete-in-progress", 412, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
+        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken, trueClientIp).
         delete()
 
       val response = await(fResponse)
@@ -159,7 +164,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubDelete(s"/paye-registration/$regId/delete-in-progress", 404, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
+        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken, trueClientIp).
         delete()
 
       val response = await(fResponse)
@@ -179,7 +184,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubDelete(s"/paye-registration/$regId/delete-in-progress", 403, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
+        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken, trueClientIp).
         delete()
 
       val response = await(fResponse)
@@ -199,7 +204,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubDelete(s"/paye-registration/$regId/delete-in-progress", 500, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
+        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken, trueClientIp).
         delete()
 
       val response = await(fResponse)
@@ -217,7 +222,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubDelete(s"/save4later/paye-registration-frontend/$regId", 500, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
+        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken, trueClientIp).
         delete()
 
       val response = await(fResponse)
@@ -237,7 +242,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       stubDelete(s"/paye-registration/$regId/delete-in-progress", 200, "")
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken).
+        withHeaders("X-Session-ID" -> SessionId, "Authorization" -> authorisationToken, trueClientIp).
         delete()
 
       val response = await(fResponse)
@@ -287,7 +292,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
         stubDelete(s"/save4later/paye-registration-frontend/$regId", NO_CONTENT, "")
         stubDelete(s"/paye-registration/$regId/delete-rejected-incorp", OK, "")
 
-        val result = await(buildClientInternal("/company-incorporation").post(testIIBody))
+        val result = await(buildClientInternal("/company-incorporation").withHeaders(trueClientIp).post(testIIBody))
         result.status mustBe OK
       }
 
@@ -297,13 +302,13 @@ class RegistrationMethodISpec extends IntegrationSpecBase
         stubDelete(s"/save4later/paye-registration-frontend/$regId", NO_CONTENT, "")
         stubDelete(s"/paye-registration/$regId/delete-rejected-incorp", OK, "")
 
-        val result = await(buildClientInternal("/company-incorporation").post(testIIBody))
+        val result = await(buildClientInternal("/company-incorporation").withHeaders(trueClientIp).post(testIIBody))
         result.status mustBe OK
       }
       "getRegIdReturns 404" in {
         stubGet("/paye-registration/testTxId/registration-id", NOT_FOUND, "testRegId")
 
-        val result = await(buildClientInternal("/company-incorporation").post(testIIBody))
+        val result = await(buildClientInternal("/company-incorporation").withHeaders(trueClientIp).post(testIIBody))
         result.status mustBe OK
       }
 
@@ -313,7 +318,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
         stubDelete(s"/save4later/paye-registration-frontend/$regId", NO_CONTENT, "")
         stubDelete(s"/paye-registration/$regId/delete-rejected-incorp", NOT_FOUND, "")
 
-        val result = await(buildClientInternal("/company-incorporation").post(testIIBody))
+        val result = await(buildClientInternal("/company-incorporation").withHeaders(trueClientIp).post(testIIBody))
       }
 
       "the user incorp status but not deleted because the status wasn't rejected and there is an active session" in {
@@ -334,7 +339,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
         await(repo.upsertSessionMap(testSessionMap))
 
-        val result = await(buildClientInternal("/company-incorporation").post(testIIBody))
+        val result = await(buildClientInternal("/company-incorporation").withHeaders(trueClientIp).post(testIIBody))
         result.status mustBe OK
       }
 
@@ -354,7 +359,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
           """.stripMargin
         )
 
-        val result = await(buildClientInternal("/company-incorporation").post(testIIBody))
+        val result = await(buildClientInternal("/company-incorporation").withHeaders(trueClientIp).post(testIIBody))
         result.status mustBe OK
       }
     }
@@ -366,7 +371,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
         stubDelete(s"/save4later/paye-registration-frontend/$regId", INTERNAL_SERVER_ERROR, "")
         stubDelete(s"/paye-registration/$regId/delete-rejected-incorp", INTERNAL_SERVER_ERROR, "")
 
-        val result = await(buildClientInternal("/company-incorporation").post(testIIBody))
+        val result = await(buildClientInternal("/company-incorporation").withHeaders(trueClientIp).post(testIIBody))
         result.status mustBe INTERNAL_SERVER_ERROR
       }
 
@@ -376,15 +381,24 @@ class RegistrationMethodISpec extends IntegrationSpecBase
         stubDelete(s"/save4later/paye-registration-frontend/$regId", INTERNAL_SERVER_ERROR, "")
         stubDelete(s"/paye-registration/$regId/delete-rejected-incorp", INTERNAL_SERVER_ERROR, "")
 
-        val result = await(buildClientInternal("/company-incorporation").post(testIIBody))
+        val result = await(buildClientInternal("/company-incorporation").withHeaders(trueClientIp).post(testIIBody))
         result.status mustBe INTERNAL_SERVER_ERROR
       }
 
       "there was a problem parsing out the required data from the II body" in {
 
-        val result = await(buildClientInternal("/company-incorporation").post(Json.parse("""{ "abc" : "xyz"}""")))
+        val result = await(buildClientInternal("/company-incorporation").withHeaders(trueClientIp).post(Json.parse("""{ "abc" : "xyz"}""")))
         result.status mustBe INTERNAL_SERVER_ERROR
       }
+    }
+    "return 501 when trueClientIpisNotProvided and Ip whitelisting is on" in {
+      val result = await(buildClientInternal("/company-incorporation").post(Json.parse("""{ "abc" : "xyz"}""")))
+      result.status mustBe 501
+    }
+    "return foo when trueClientIpIsProvidedButDoesNotMatch whitelisting and ip whitelisting is on" in {
+      val result = await(buildClientInternal("/company-incorporation").withHeaders("True-Client-IP" -> "foo").post(Json.parse("""{ "abc" : "xyz"}""")))
+      result.status mustBe 303
+      result.header(HeaderNames.LOCATION).get mustBe "https://www.tax.service.gov.uk/outage-register-for-paye"
     }
   }
 }

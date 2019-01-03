@@ -103,7 +103,7 @@ with WiremockHelper {
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
 
       val fResponse = buildClient("/what-company-does").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHeaders(HeaderNames.COOKIE -> getSessionCookie(sessionID = SessionId)).
         get()
 
       val response = await(fResponse)

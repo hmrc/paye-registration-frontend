@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,60 +16,39 @@
 
 package config
 
+import akka.stream.Materializer
 import com.typesafe.config.Config
 import filters.{PAYECSRFExceptionsFilter, PAYESessionIDFilter}
+import javax.inject.Inject
 import net.ceedubs.ficus.Ficus._
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
-import play.api.mvc.{EssentialFilter, Request}
-import play.api.{Application, Configuration, Play}
-import play.twirl.api.Html
-import uk.gov.hmrc.crypto.ApplicationCrypto
-import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
-import uk.gov.hmrc.play.frontend.bootstrap.DefaultFrontendGlobal
-import uk.gov.hmrc.play.frontend.filters.{FrontendAuditFilter, FrontendLoggingFilter, MicroserviceFilterSupport}
+import play.api.http.DefaultHttpFilters
+import play.api.i18n.MessagesApi
+import play.api.mvc.Request
+import play.api.{Configuration, Play}
+import uk.gov.hmrc.play.bootstrap.filters.{FrontendFilters, LoggingFilter}
+import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
+import uk.gov.hmrc.play.config.ControllerConfig
 
-object FrontendGlobal extends FrontendGlobal
 
-trait FrontendGlobal extends DefaultFrontendGlobal {
-
-  override val auditConnector      = FrontendAuditConnector
-  override val loggingFilter       = LoggingFilter
-  override val frontendAuditFilter = AuditFilter
-
-  override def onStart(app: Application) {
-    super.onStart(app)
-    ApplicationCrypto.verifyConfiguration()
-  }
-
-  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit rh: Request[_]): Html =
-   views.html.error_template(pageTitle, heading, message)
-
-  override def microserviceMetricsConfig(implicit app: Application): Option[Configuration] = app.configuration.getConfig(s"microservice.metrics")
-
-  override def csrfExceptionsFilter = new PAYECSRFExceptionsFilter(FrontendAppConfig.uriWhiteList)
-
-  override def filters: Seq[EssentialFilter] = super.filters :+ PAYESessionIDFilter
+class MyErrorHandler @Inject()(
+                                val messagesApi: MessagesApi, val configuration: Configuration) extends FrontendErrorHandler {
+  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]) =  views.html.error_template(pageTitle, heading, message)
 }
 
 object ControllerConfiguration extends ControllerConfig {
   lazy val controllerConfigs = Play.current.configuration.underlying.as[Config]("controllers")
 }
+class PAYEFilters @Inject()(defaultFilters: FrontendFilters,
+                            whitelistFilterCustom: WhiteListFilter,
+                            loggingFilterCustom: LoggingFilterCustom,
+                            sessionIdFilter: PAYESessionIDFilter,
+                            csrfeFilterCustom: PAYECSRFExceptionsFilter) extends DefaultHttpFilters(
+  Seq(csrfeFilterCustom) ++ defaultFilters.frontendFilters
+    :+ whitelistFilterCustom
+    :+ loggingFilterCustom
+    :+ sessionIdFilter: _*)
 
-object LoggingFilter extends FrontendLoggingFilter with MicroserviceFilterSupport {
+class  LoggingFilterImpl @Inject()(val mat: Materializer)  extends LoggingFilterCustom {
   override def controllerNeedsLogging(controllerName: String) = ControllerConfiguration.paramsForController(controllerName).needsLogging
 }
-
-object AuditFilter extends FrontendAuditFilter with RunMode with AppName with MicroserviceFilterSupport {
-  override lazy val maskedFormFields = Seq("password")
-
-  override lazy val applicationPort = None
-
-  override lazy val auditConnector = FrontendAuditConnector
-
-  override def controllerNeedsAuditing(controllerName: String) = ControllerConfiguration.paramsForController(controllerName).needsAuditing
-}
-
-object ProductionFrontendGlobal extends FrontendGlobal {
-  override def filters = WhitelistFilter +: super.filters
-}
+trait LoggingFilterCustom extends LoggingFilter
