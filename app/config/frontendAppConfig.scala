@@ -60,9 +60,6 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
       .map(_.split(",")).getOrElse(Array.empty).toSeq
   }
 
-  lazy val whitelist          = whiteListConfig("whitelist")
-  lazy val whitelistExcluded  = whiteListConfig("whitelist-excluded")
-
   private def loadStringConfigBase64(key : String) : String = {
     new String(Base64.getDecoder.decode(configuration.getString(key).getOrElse("")), Charset.forName("UTF-8"))
   }
@@ -76,7 +73,6 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   }
 
   lazy val regIdWhitelist         = whiteListConfig("regIdWhitelist")
-  lazy val whiteListingEnabled    = configuration.getBoolean("ip-whitelist-enabled").getOrElse(true)
   lazy val defaultCompanyName     = loadStringConfigBase64("defaultCompanyName")
   lazy val defaultCHROAddress     = loadJsonConfigBase64[Address]("defaultCHROAddress")
   lazy val defaultSeqDirector     = loadJsonConfigBase64[Seq[Director]]("defaultSeqDirector")(Director.seqReads)
