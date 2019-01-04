@@ -42,7 +42,6 @@ class Module extends AbstractModule {
   }
 
   private def bindFilters(): Unit = {
-    bind(classOf[WhiteListFilter]).to(classOf[WhitelistFilterImpl]).asEagerSingleton()
     bind(classOf[PAYESessionIDFilter]).to(classOf[PAYESessionIDFilterImpl]).asEagerSingleton()
     bind(classOf[LoggingFilterCustom]).to(classOf[LoggingFilterImpl]).asEagerSingleton()
     bind(classOf[PAYECSRFExceptionsFilter]).to(classOf[PAYECSRFExceptionsFilterImpl]).asEagerSingleton()

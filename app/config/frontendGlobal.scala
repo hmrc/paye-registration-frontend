@@ -39,12 +39,10 @@ object ControllerConfiguration extends ControllerConfig {
   lazy val controllerConfigs = Play.current.configuration.underlying.as[Config]("controllers")
 }
 class PAYEFilters @Inject()(defaultFilters: FrontendFilters,
-                            whitelistFilterCustom: WhiteListFilter,
                             loggingFilterCustom: LoggingFilterCustom,
                             sessionIdFilter: PAYESessionIDFilter,
                             csrfeFilterCustom: PAYECSRFExceptionsFilter) extends DefaultHttpFilters(
   Seq(csrfeFilterCustom) ++ defaultFilters.frontendFilters
-    :+ whitelistFilterCustom
     :+ loggingFilterCustom
     :+ sessionIdFilter: _*)
 

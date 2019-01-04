@@ -84,23 +84,3 @@ class PAYESessionCache @Inject()(val http: WSHttp, override val runModeConfigura
     throw new Exception(s"Could not find config 'cachable.session-cache.domain'"))
   override protected def mode = environment.mode
 }
-
-trait WhiteListFilter extends Filter
-class WhitelistFilterImpl @Inject()(val mat:Materializer) extends AkamaiWhitelistFilter with WhiteListFilter {
-  override def whitelist: Seq[String] = FrontendAppConfig.whitelist
-
-  override def noHeaderAction(f: RequestHeader => Future[Result], rh: RequestHeader): Future[Result] = {
-    if(FrontendAppConfig.whiteListingEnabled) {
-      super.noHeaderAction(f,rh)
-    } else {
-      f(rh)
-    }
-  }
-
-  override def excludedPaths: Seq[Call] = {
-    FrontendAppConfig.whitelistExcluded.map { path =>
-      Call("GET", path)
-    }
-  }
-  override def destination: Call = Call("GET", "https://www.tax.service.gov.uk/outage-register-for-paye")
-}
