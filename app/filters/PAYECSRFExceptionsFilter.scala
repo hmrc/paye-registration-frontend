@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,20 @@
 
 package filters
 
+import akka.stream.Materializer
 import config.FrontendAppConfig
+import javax.inject.Inject
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.http.HttpVerbs.{DELETE, POST}
-import play.api.mvc.{RequestHeader, Result}
-import uk.gov.hmrc.play.frontend.filters.CSRFExceptionsFilter
+import play.api.mvc.{Filter, RequestHeader, Result}
 
 import scala.concurrent.Future
 
-class PAYECSRFExceptionsFilter(whitelist: Set[String]) extends CSRFExceptionsFilter(whitelist) {
+class PAYECSRFExceptionsFilterImpl @Inject()(val mat: Materializer) extends PAYECSRFExceptionsFilter
+
+trait PAYECSRFExceptionsFilter extends Filter {
+
+   lazy val whitelist: Set[String] = FrontendAppConfig.uriWhiteList
 
   override def apply(f: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
     f(deleteFilteredHeaders(rh))

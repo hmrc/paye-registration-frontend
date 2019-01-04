@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -438,7 +438,6 @@ class PAYEContactServiceSpec extends PayeComponentSpec {
     )
 
     "save a copy of paye contact (no audit)" in new Setup {
-      implicit val context = AuthHelpers.buildAuthContext
       implicit val request = FakeRequest()
 
       when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
@@ -454,7 +453,6 @@ class PAYEContactServiceSpec extends PayeComponentSpec {
     }
 
     "save a copy of paye contact" in new Setup {
-      implicit val context = AuthHelpers.buildAuthContext
       implicit val request = FakeRequest()
 
       when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.contains(CacheKeys.PAYEContact.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[PAYEContactView]]()))

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.util.Base64
 import models.Address
 import models.api.Director
 import models.external.OfficerList
+import play.api.{Configuration, Play}
+import play.api.Mode.Mode
 import play.api.Play.{configuration, current}
 import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -35,6 +37,7 @@ trait AppConfig {
   val contactFrontendPartialBaseUrl : String
 
   val timeoutInSeconds: String
+
 }
 
 object FrontendAppConfig extends AppConfig with ServicesConfig {
@@ -72,12 +75,17 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
     )
   }
 
-  lazy val regIdWhitelist     = whiteListConfig("regIdWhitelist")
-  lazy val defaultCompanyName = loadStringConfigBase64("defaultCompanyName")
-  lazy val defaultCHROAddress = loadJsonConfigBase64[Address]("defaultCHROAddress")
-  lazy val defaultSeqDirector = loadJsonConfigBase64[Seq[Director]]("defaultSeqDirector")(Director.seqReads)
-  lazy val defaultCTStatus    = loadStringConfigBase64("defaultCTStatus")
-  lazy val defaultOfficerList = loadJsonConfigBase64[OfficerList]("defaultOfficerList")(OfficerList.formatModel)
-  lazy val uriWhiteList       = configuration.getStringSeq("csrfexceptions.whitelist").getOrElse(Seq.empty).toSet
-  lazy val csrfBypassValue    = loadStringConfigBase64("Csrf-Bypass-value")
+  lazy val regIdWhitelist         = whiteListConfig("regIdWhitelist")
+  lazy val whiteListingEnabled    = configuration.getBoolean("ip-whitelist-enabled").getOrElse(true)
+  lazy val defaultCompanyName     = loadStringConfigBase64("defaultCompanyName")
+  lazy val defaultCHROAddress     = loadJsonConfigBase64[Address]("defaultCHROAddress")
+  lazy val defaultSeqDirector     = loadJsonConfigBase64[Seq[Director]]("defaultSeqDirector")(Director.seqReads)
+  lazy val defaultCTStatus        = loadStringConfigBase64("defaultCTStatus")
+  lazy val defaultOfficerList     = loadJsonConfigBase64[OfficerList]("defaultOfficerList")(OfficerList.formatModel)
+  lazy val uriWhiteList           = configuration.getStringSeq("csrfexceptions.whitelist").getOrElse(Seq.empty).toSet
+  lazy val csrfBypassValue        = loadStringConfigBase64("Csrf-Bypass-value")
+
+  override protected def mode: Mode = Play.current.mode
+
+  override protected def runModeConfiguration: Configuration = Play.current.configuration
 }

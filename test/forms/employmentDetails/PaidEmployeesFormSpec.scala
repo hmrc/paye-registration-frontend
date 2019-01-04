@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package forms.employmentDetails
 
 import java.time.LocalDate
+
 import org.joda.time.{LocalDate => LocalDateJoda}
 import java.time.temporal.ChronoUnit
 
@@ -24,7 +25,7 @@ import forms.employmentDetails.PaidEmployeesForm.{customFormPrefix, dateTimeForm
 import helpers.PayeComponentSpec
 import models.view.EmployingAnyone
 import play.api.data.FormError
-import uk.gov.hmrc.time.TaxYearResolver
+import uk.gov.hmrc.time.TaxYear
 
 class PaidEmployeesFormSpec extends PayeComponentSpec {
 
@@ -32,7 +33,7 @@ class PaidEmployeesFormSpec extends PayeComponentSpec {
     val testForm = new PaidEmployeesFormT {override val now = ourDate}
   }
   val today = LocalDate.now
-  val cty = TaxYearResolver.taxYearFor(LocalDateJoda.now)
+  val cty = TaxYear.taxYearFor(LocalDateJoda.now)
 
   val incorpDate2MonthsPrior = today.minusMonths(2)
   val incorpDateWellInPast = LocalDate.of(2015, 1 , 1)

@@ -16,7 +16,6 @@
 
 package filters
 
-import config.FrontendGlobal
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
@@ -56,7 +55,6 @@ class SessionTimeoutFilterISpec extends IntegrationSpecBase
 
   override implicit lazy val app = new GuiceApplicationBuilder()
     .configure(additionalConfiguration)
-    .global(FrontendGlobal)
     .build()
 
   override def beforeEach() {

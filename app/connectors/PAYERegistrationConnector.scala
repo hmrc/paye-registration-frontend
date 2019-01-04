@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ import config.WSHttp
 import enums.{DownstreamOutcome, PAYEStatus, RegistrationDeletion}
 import javax.inject.Inject
 import models.api.{Director, Employment, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
-import play.api.Logger
+import play.api.{Configuration, Environment, Logger}
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, Reads}
 import services.MetricsService
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
@@ -40,8 +40,10 @@ object TimedOut extends DESResponse
 
 class PAYERegistrationConnectorImpl @Inject()(val metricsService: MetricsService,
                                               val http: WSHttp,
-                                              servicesConfig: ServicesConfig) extends PAYERegistrationConnector {
-  val payeRegUrl = servicesConfig.baseUrl("paye-registration")
+                                              override val runModeConfiguration: Configuration,
+                                              environment: Environment) extends PAYERegistrationConnector with ServicesConfig {
+  val payeRegUrl = baseUrl("paye-registration")
+  override protected def mode = environment.mode
 }
 
 trait PAYERegistrationConnector {

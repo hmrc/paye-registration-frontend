@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ class AuditServiceSpec extends PayeComponentSpec {
 
     "not send audit event if there was no data initially" in new Setup {
       implicit val hc = HeaderCarrier(sessionId = Some(SessionId("session-123")))
-      implicit val context = AuthHelpers.buildAuthContext
 
       implicit val request = FakeRequest()
 

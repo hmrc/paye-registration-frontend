@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 import uk.gov.hmrc.http.{CoreGet, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.filters.frontend.crypto.SessionCookieCrypto
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 
 import scala.concurrent.Future
@@ -52,6 +53,7 @@ class FeedbackControllerSpec extends PayeComponentSpec with PayeFakedApp {
                                        templateParameters: Map[String, String],
                                        errorMessage: Html)(implicit request: RequestHeader): Html = Html("")
       }
+      override val sessionCookieCrypto: SessionCookieCrypto = mock[SessionCookieCrypto]
     }
   }
 

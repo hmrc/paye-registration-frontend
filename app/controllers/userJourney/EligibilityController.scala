@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,26 +19,29 @@ package controllers.userJourney
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import javax.inject.Inject
+import play.api.Mode.Mode
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Configuration, Environment}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.config.ServicesConfig
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
 class EligibilityControllerImpl @Inject()(val messagesApi: MessagesApi,
                                           val keystoreConnector: KeystoreConnector,
                                           val authConnector: AuthConnector,
-                                          val env: Environment,
                                           val config: Configuration,
                                           val s4LService: S4LService,
                                           val companyDetailsService: CompanyDetailsService,
                                           val incorpInfoService: IncorporationInformationService,
-                                          servicesConfig: ServicesConfig,
+                                          override val runModeConfiguration: Configuration, environment: Environment,
                                           val incorporationInformationConnector: IncorporationInformationConnector,
-                                          val payeRegistrationService: PAYERegistrationService) extends EligibilityController with AuthRedirectUrls
+                                          val payeRegistrationService: PAYERegistrationService) extends EligibilityController with AuthRedirectUrls with ServicesConfig {
+  override protected def mode: Mode = environment.mode
+}
 
 trait EligibilityController extends PayeBaseController {
 

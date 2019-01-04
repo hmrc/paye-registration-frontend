@@ -45,7 +45,7 @@ trait LoginStub extends SessionCookieBaker {
   }
 
   def getSessionCookie(additionalData: Map[String, String] = Map(), timeStampRollback: Long = 0, sessionID: String = SessionId) = {
-    cookieValue(cookieData(additionalData, timeStampRollback, sessionID))
+ cookieValue(cookieData(additionalData, timeStampRollback, sessionID))
   }
 
   def stubSuccessfulLogin(withSignIn: Boolean = false) = {
@@ -183,7 +183,7 @@ trait SessionCookieBaker {
       val encoded = data.map {
         case (k, v) => URLEncoder.encode(k, "UTF-8") + "=" + URLEncoder.encode(v, "UTF-8")
       }.mkString("&")
-      val key = "yNhI04vHs9<_HWbC`]20u`37=NGLGYY5:0Tg5?y`W<NoJnXWqmjcgZBec@rOxb^G".getBytes
+      val key = "fqpLDZ4sumDsekHkeEBlCA==".getBytes
       PlainText(Crypto.sign(encoded, key) + "-" + encoded)
     }
 

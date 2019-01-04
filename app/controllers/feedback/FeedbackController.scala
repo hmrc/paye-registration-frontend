@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,27 +17,30 @@
 package controllers.feedback
 
 import java.net.URLEncoder
-import javax.inject.Inject
 
 import config.{FrontendAppConfig, WSHttp}
+import javax.inject.Inject
 import play.api.Logger
 import play.api.http.{Status => HttpStatus}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, RequestHeader}
 import play.twirl.api.Html
+import uk.gov.hmrc.crypto.PlainText
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.frontend.controller.{FrontendController, UnauthorisedAction}
-import uk.gov.hmrc.play.frontend.filters.SessionCookieCryptoFilter
+import uk.gov.hmrc.play.bootstrap.controller.{FrontendController, UnauthorisedAction}
+import uk.gov.hmrc.play.bootstrap.filters.frontend.crypto.SessionCookieCrypto
 import uk.gov.hmrc.play.partials._
 import views.html.feedback_thankyou
 
 import scala.concurrent.Future
 
 class FeedbackControllerImpl @Inject()(val messagesApi: MessagesApi,
-                                       val http: WSHttp) extends FeedbackController
+                                       val http: WSHttp,val sessionCookieCrypto: SessionCookieCrypto) extends FeedbackController {
+}
 
 trait FeedbackController extends FrontendController with I18nSupport {
   val http: WSHttp
+  val sessionCookieCrypto: SessionCookieCrypto
 
   val applicationConfig = FrontendAppConfig
 
@@ -50,7 +53,7 @@ trait FeedbackController extends FrontendController with I18nSupport {
   implicit val formPartialRetriever: FormPartialRetriever = new FormPartialRetriever {
     override def httpGet: CoreGet = http
 
-    override def crypto: (String) => String = cookie => SessionCookieCryptoFilter.encrypt(cookie)
+    override def crypto: (String) => String = cookie => sessionCookieCrypto.crypto.encrypt(PlainText(cookie)).value
   }
 
   def contactFormReferrer(implicit request: Request[AnyContent]): String = request.headers.get(REFERER).getOrElse("")
@@ -71,6 +74,7 @@ trait FeedbackController extends FrontendController with I18nSupport {
 
   def feedbackShow: Action[AnyContent] = UnauthorisedAction {
     implicit request =>
+
       (request.session.get(REFERER), request.headers.get(REFERER)) match {
         case (None, Some(ref)) => Ok(views.html.feedback(feedbackFormPartialUrl, None)).withSession(request.session + (REFERER -> ref))
         case _ => Ok(views.html.feedback(feedbackFormPartialUrl, None))
@@ -112,7 +116,7 @@ trait FeedbackController extends FrontendController with I18nSupport {
     override val crypto = encryptCookieString _
 
     def encryptCookieString(cookie: String): String = {
-      SessionCookieCryptoFilter.encrypt(cookie)
+      sessionCookieCrypto.crypto.encrypt(PlainText(cookie)).value
     }
   }
 

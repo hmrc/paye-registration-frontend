@@ -20,12 +20,11 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import config.WSHttpImpl
 import connectors.CompanyRegistrationConnectorImpl
 import itutil.{IntegrationSpecBase, WiremockHelper}
-import play.api.Application
+import play.api.{Application, Configuration, Environment}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
 import services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.config.inject.DefaultServicesConfig
 import utils.PAYEFeatureSwitch
 
 class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
@@ -83,13 +82,16 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
         lazy val metrics = app.injector.instanceOf[MetricsService]
         lazy val featureSwitch = app.injector.instanceOf[PAYEFeatureSwitch]
         lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
-        lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+        lazy val env = app.injector.instanceOf(classOf[Environment])
+        lazy val config = app.injector.instanceOf(classOf[Configuration])
+
 
         val companyRegistrationConnector = new CompanyRegistrationConnectorImpl(
           featureSwitch,
           http,
           metrics,
-          servicesConfig
+          config,
+          env
         )
 
         def getResponse = companyRegistrationConnector.getCompanyRegistrationDetails(regId)
@@ -120,13 +122,16 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
         lazy val metrics = app.injector.instanceOf[MetricsService]
         lazy val featureSwitch = app.injector.instanceOf[PAYEFeatureSwitch]
         lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
-        lazy val servicesConfig = app.injector.instanceOf(classOf[DefaultServicesConfig])
+        lazy val env = app.injector.instanceOf(classOf[Environment])
+        lazy val config = app.injector.instanceOf(classOf[Configuration])
+
 
         val companyRegistrationConnector = new CompanyRegistrationConnectorImpl(
           featureSwitch,
           http,
           metrics,
-          servicesConfig
+          config,
+          env
         )
 
         await(buildClient("/test-only/feature-flag/companyRegistration/true").get())

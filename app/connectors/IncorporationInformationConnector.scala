@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ import controllers.exceptions.GeneralException
 import enums.IncorporationStatus
 import models.external.{CoHoCompanyDetailsModel, IncorpUpdateResponse, OfficerList}
 import org.apache.http.HttpStatus
-import play.api.Logger
+import play.api.{Configuration, Environment, Logger}
 import play.api.http.Status.{ACCEPTED, OK}
 import play.api.libs.json._
 import services.MetricsService
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.RegistrationWhitelist
 
@@ -37,14 +37,16 @@ import scala.concurrent.Future
 
 class IncorporationInformationConnectorImpl @Inject()(val metricsService: MetricsService,
                                                       val http: WSHttp,
-                                                      servicesConfig: ServicesConfig) extends IncorporationInformationConnector {
-  lazy val incorpInfoUrl        = servicesConfig.baseUrl("incorporation-information")
-  lazy val incorpInfoUri        = servicesConfig.getConfString("incorporation-information.uri","")
-  lazy val payeRegFeUrl         = servicesConfig.getConfString("paye-registration-frontend.ii-callback.url",
+                                                      override val runModeConfiguration: Configuration,
+                                                      environment: Environment) extends IncorporationInformationConnector with ServicesConfig{
+  lazy val incorpInfoUrl        = baseUrl("incorporation-information")
+  lazy val incorpInfoUri        = getConfString("incorporation-information.uri","")
+  lazy val payeRegFeUrl         = getConfString("paye-registration-frontend.ii-callback.url",
     throw new IllegalArgumentException("[IncorporationInformationConnector] config value payeRegFeUrl cannot be found"))
   val successCounter            = metricsService.companyDetailsSuccessResponseCounter
   val failedCounter             = metricsService.companyDetailsFailedResponseCounter
   def timer: Timer.Context      = metricsService.incorpInfoResponseTimer.time()
+  override protected def mode = environment.mode
 }
 
 sealed trait IncorpInfoResponse

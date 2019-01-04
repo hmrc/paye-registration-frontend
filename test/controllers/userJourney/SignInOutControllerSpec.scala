@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,8 @@ class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showAuthorised(controller.renewSession(),FakeRequest()){a =>
         status(a) mustBe 200
         contentType(a) mustBe Some("image/jpeg")
-        await(a).body.dataStream.toString.contains("""renewSession.jpg""")  mustBe true
+        await(a).header.headers("Content-Disposition") mustBe """inline; filename="renewSession.jpg"; filename*=utf-8''renewSession.jpg"""
+        await(a).body.toString.isEmpty mustBe false
       }
     }
   }

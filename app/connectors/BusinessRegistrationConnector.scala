@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,22 @@ import config.WSHttp
 import models.Address
 import models.external.BusinessProfile
 import models.view.{CompanyDetails, PAYEContactDetails}
+import play.api.{Configuration, Environment}
 import play.api.libs.json.JsValue
 import services.MetricsService
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
 class BusinessRegistrationConnectorImpl @Inject()(val metricsService: MetricsService,
                                                   val http: WSHttp,
-                                                  servicesConfig: ServicesConfig) extends BusinessRegistrationConnector {
-  val businessRegUrl = servicesConfig.baseUrl("business-registration")
+                                                  override val runModeConfiguration: Configuration,
+                                                  environment: Environment) extends BusinessRegistrationConnector with ServicesConfig {
+  val businessRegUrl = baseUrl("business-registration")
+  override protected def mode = environment.mode
+
 }
 
 trait BusinessRegistrationConnector {
