@@ -42,7 +42,7 @@ class PAYEFilters @Inject()(defaultFilters: FrontendFilters,
                             loggingFilterCustom: LoggingFilterCustom,
                             sessionIdFilter: PAYESessionIDFilter,
                             csrfeFilterCustom: PAYECSRFExceptionsFilter) extends DefaultHttpFilters(
-  Seq(csrfeFilterCustom) ++ defaultFilters.frontendFilters
+  Seq(csrfeFilterCustom) ++ defaultFilters.filters
     :+ loggingFilterCustom
     :+ sessionIdFilter: _*)
 
