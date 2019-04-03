@@ -21,13 +21,16 @@ import java.time.LocalDate
 import connectors.KeystoreConnector
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.{EmployingAnyone, EmployingStaff, WillBePaying}
+import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.time.TaxYear
 
 import scala.concurrent.Future
 
@@ -472,12 +475,16 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "render the page" in {
+      val currentTaxYearStart = TaxYear.current.startYear.toString
+      val currentTaxYearFinish = TaxYear.current.finishYear.toString
 
       when(mockEmploymentService.fetchEmployingStaff(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(emptyView))
 
       AuthHelpers.showAuthorisedWithCP(testController.subcontractors, Fixtures.validCurrentProfile, request) {
         result => status(result) mustBe OK
+          val document = Jsoup.parse(contentAsString(result))
+          document.getElementById("taxYearText").text() mustBe s"The current tax year is 6 April $currentTaxYearStart to 5 April $currentTaxYearFinish."
       }
     }
   }

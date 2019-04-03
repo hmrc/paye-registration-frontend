@@ -33,6 +33,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.SystemDate
 import views.html.pages.employmentDetails.{applicationDelayed => ApplicationDelayedPage, constructionIndustry => ConstructionIndustryPage, employsSubcontractors => SubcontractorsPage, paidEmployees => PaidEmployeesPage, paysPension => PaysPensionPage, willBePaying => willBePayingPage}
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.time.TaxYear
 
 import scala.concurrent.Future
 
@@ -170,10 +171,10 @@ trait EmploymentController extends PayeBaseController {
   // SUBCONTRACTORS
   def subcontractors: Action[AnyContent] = isAuthorisedWithProfile{ implicit request =>
     implicit profile =>
-    employmentService.fetchEmployingStaff map {
+      employmentService.fetchEmployingStaff map {
       viewModel =>
         val form = viewModel.subcontractors.fold(SubcontractorsForm.form)(SubcontractorsForm.form.fill)
-        Ok(SubcontractorsPage(form))
+        Ok(SubcontractorsPage(form,TaxYear.current.startYear.toString,TaxYear.current.finishYear.toString))
     } recover {
       case e : FrontendControllerException => e.recover
     }
@@ -182,7 +183,7 @@ trait EmploymentController extends PayeBaseController {
   def submitSubcontractors: Action[AnyContent] =  isAuthorisedWithProfile{ implicit request =>
     implicit profile =>
     SubcontractorsForm.form.bindFromRequest().fold(
-      errors => Future.successful(BadRequest(SubcontractorsPage(errors))),
+      errors => Future.successful(BadRequest(SubcontractorsPage(errors,TaxYear.current.startYear.toString,TaxYear.current.finishYear.toString))),
       employsSubcontractors => employmentService.saveSubcontractors(employsSubcontractors).map(handleJourneyPostConstruction)
     ).recover {
       case e : FrontendControllerException => e.recover
