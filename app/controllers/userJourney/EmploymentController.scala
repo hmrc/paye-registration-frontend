@@ -17,8 +17,8 @@
 package controllers.userJourney
 
 import java.time.LocalDate
-
 import javax.inject.Inject
+
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.exceptions.{FrontendControllerException, GeneralException, MissingViewElementException}
 import controllers.{AuthRedirectUrls, PayeBaseController}
@@ -30,11 +30,11 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.SystemDate
-import views.html.pages.employmentDetails.{applicationDelayed => ApplicationDelayedPage, constructionIndustry => ConstructionIndustryPage, employsSubcontractors => SubcontractorsPage, paidEmployees => PaidEmployeesPage, paysPension => PaysPensionPage, willBePaying => willBePayingPage}
-import scala.concurrent.ExecutionContext.Implicits.global
 import uk.gov.hmrc.time.TaxYear
+import utils.{SystemDate, SystemDateT}
+import views.html.pages.employmentDetails.{applicationDelayed => ApplicationDelayedPage, constructionIndustry => ConstructionIndustryPage, employsSubcontractors => SubcontractorsPage, paidEmployees => PaidEmployeesPage, paysPension => PaysPensionPage, willBePaying => willBePayingPage}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class EmploymentControllerImpl @Inject()(val employmentService: EmploymentService,
@@ -54,6 +54,7 @@ trait EmploymentController extends PayeBaseController {
   val employmentService: EmploymentService
   val thresholdService: ThresholdService
   val incorpInfoService: IncorporationInformationService
+  val taxYearObjWithSystemDate: SystemDateT = SystemDate
 
   private val handleJourneyPostConstruction: EmployingStaff => Result = {
     case EmployingStaff(Some(EmployingAnyone(true, _)), _, _, _, _) => Redirect(controllers.userJourney.routes.EmploymentController.pensions())
@@ -63,7 +64,7 @@ trait EmploymentController extends PayeBaseController {
     case  _ => throw GeneralException(s"[EmploymentController][handleJourneyPostConstruction] an invalid scenario was met for employment staff")
   }
 
-  def weeklyThreshold: Int = thresholdService.getCurrentThresholds.getOrElse("weekly", 116)
+  def weeklyThreshold: Int = thresholdService.getCurrentThresholds.getOrElse("weekly", 118)
 
   private def ifIncorpDateExist(regId: String, txId: String)(action: LocalDate => Future[Result])(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] =
     incorpInfoService.getIncorporationDate(regId, txId) flatMap {
@@ -106,7 +107,7 @@ trait EmploymentController extends PayeBaseController {
   def employingStaff: Action[AnyContent] = isAuthorisedWithProfile{ implicit request =>
     implicit profile =>
     employmentService.fetchEmployingStaff map { viewModel =>
-      val now = SystemDate.getSystemDate.toLocalDate
+      val now = taxYearObjWithSystemDate.getSystemDate.toLocalDate
       val form = viewModel.willBePaying.fold(EmployingStaffForm.form(now))(EmployingStaffForm.form(now).fill)
       Ok(willBePayingPage(form, weeklyThreshold, now))
     } recover {
@@ -115,7 +116,7 @@ trait EmploymentController extends PayeBaseController {
   }
 
   def submitEmployingStaff: Action[AnyContent] = isAuthorisedWithProfile{ implicit request => implicit profile =>
-    val now = SystemDate.getSystemDate.toLocalDate
+    val now = taxYearObjWithSystemDate.getSystemDate.toLocalDate
     EmployingStaffForm.form(now).bindFromRequest().fold(
       errors => Future.successful(BadRequest(willBePayingPage(errors, weeklyThreshold, now))),
       willBePaying => employmentService.saveWillEmployAnyone(willBePaying).map {
@@ -171,10 +172,11 @@ trait EmploymentController extends PayeBaseController {
   // SUBCONTRACTORS
   def subcontractors: Action[AnyContent] = isAuthorisedWithProfile{ implicit request =>
     implicit profile =>
+
       employmentService.fetchEmployingStaff map {
       viewModel =>
         val form = viewModel.subcontractors.fold(SubcontractorsForm.form)(SubcontractorsForm.form.fill)
-        Ok(SubcontractorsPage(form,TaxYear.current.startYear.toString,TaxYear.current.finishYear.toString))
+        Ok(SubcontractorsPage(form,SystemDate.current.startYear.toString,SystemDate.current.finishYear.toString))
     } recover {
       case e : FrontendControllerException => e.recover
     }
@@ -182,8 +184,8 @@ trait EmploymentController extends PayeBaseController {
 
   def submitSubcontractors: Action[AnyContent] =  isAuthorisedWithProfile{ implicit request =>
     implicit profile =>
-    SubcontractorsForm.form.bindFromRequest().fold(
-      errors => Future.successful(BadRequest(SubcontractorsPage(errors,TaxYear.current.startYear.toString,TaxYear.current.finishYear.toString))),
+      SubcontractorsForm.form.bindFromRequest().fold(
+      errors => Future.successful(BadRequest(SubcontractorsPage(errors,SystemDate.current.startYear.toString,SystemDate.current.finishYear.toString))),
       employsSubcontractors => employmentService.saveSubcontractors(employsSubcontractors).map(handleJourneyPostConstruction)
     ).recover {
       case e : FrontendControllerException => e.recover

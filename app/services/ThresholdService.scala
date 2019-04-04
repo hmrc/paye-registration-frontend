@@ -23,7 +23,7 @@ import utils.SystemDate
 
 class ThresholdServiceImpl @Inject()() extends ThresholdService {
   override def now: LocalDate   = SystemDate.getSystemDate.toLocalDate
-  override val nextTaxYearStart = LocalDate.of(2018, 4, 6)
+  override val nextTaxYearStart = LocalDate.of(2019, 4, 6)
 }
 
 trait ThresholdService {
@@ -34,9 +34,9 @@ trait ThresholdService {
   //TODO: Raise another story to make this more robust
   def getCurrentThresholds: Map[String, Int] = {
     if(now.isEqual(nextTaxYearStart) | now.isAfter(nextTaxYearStart)) {
-      buildThresholdMap(116, 503, 6032)
+      buildThresholdMap(118, 512, 6136)
     } else {
-      buildThresholdMap(113, 490, 5876)
+      buildThresholdMap(116, 503, 6032)
     }
   }
 
