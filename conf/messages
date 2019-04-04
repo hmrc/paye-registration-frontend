@@ -158,7 +158,7 @@ pages.constructionIndustry.error                                = Tell us if the
 ## Employs Subcontractors
 pages.employsSubcontractors.title                               = During the current tax year will the company hire any subcontractors in the construction industry?
 pages.employsSubcontractors.description                         = During the current tax year will the company hire any subcontractors in the construction industry?
-pages.employsSubcontractors.para                                = The current tax year is 6 April 2018 to 5 April 2019.
+pages.employsSubcontractors.para                                = The current tax year is 6 April {0} to 5 April {1}.
 pages.employsSubcontractors.error                               = Tell us if the company will hire any subcontractors in the construction industry in the current tax year
 
 ## Pays Pension
