@@ -25,7 +25,7 @@ class ThresholdServiceSpec extends PayeComponentSpec {
 
   val testService = new ThresholdService {
     override def now: LocalDate   = SystemDate.getSystemDate.toLocalDate
-    override val nextTaxYearStart = LocalDate.of(2018, 4, 6)
+    override val nextTaxYearStart = LocalDate.of(2019, 4, 6)
   }
 
   override def afterAll(): Unit = {
@@ -35,27 +35,27 @@ class ThresholdServiceSpec extends PayeComponentSpec {
 
   "getCurrentThresholds" should {
     "return a map of the previous tax years thresholds" when {
-      "the system date is before the 6 Apr 2018" in {
-        System.setProperty("feature.system-date", "2018-04-05T12:00:00")
+      "the system date is before the 6 Apr 2019" in {
+        System.setProperty("feature.system-date", "2019-04-05T12:00:00")
 
         val result = testService.getCurrentThresholds
-        result mustBe Map("weekly" -> 113, "monthly" -> 490, "annually" -> 5876)
+        result mustBe Map("weekly" -> 116, "monthly" -> 503, "annually" -> 6032)
       }
     }
 
     "return a map of the next tax years thresholds" when {
-      "the system date is on the 6 Apr 2018" in {
-        System.setProperty("feature.system-date", "2018-04-06T12:00:00")
+      "the system date is on the 6 Apr 2019" in {
+        System.setProperty("feature.system-date", "2019-04-06T12:00:00")
 
         val result = testService.getCurrentThresholds
-        result mustBe Map("weekly" -> 116, "monthly" -> 503, "annually" -> 6032)
+        result mustBe Map("weekly" -> 118, "monthly" -> 512, "annually" -> 6136)
       }
 
-      "the system date is after the 6 Apr 2018" in {
-        System.setProperty("feature.system-date", "2018-04-10T12:00:00")
+      "the system date is after the 6 Apr 2019" in {
+        System.setProperty("feature.system-date", "2019-04-10T12:00:00")
 
         val result = testService.getCurrentThresholds
-        result mustBe Map("weekly" -> 116, "monthly" -> 503, "annually" -> 6032)
+        result mustBe Map("weekly" -> 118, "monthly" -> 512, "annually" -> 6136)
       }
     }
   }

@@ -16,7 +16,8 @@
 
 package controllers.userJourney
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
+import java.time.format.DateTimeFormatter
 
 import connectors.KeystoreConnector
 import helpers.{PayeComponentSpec, PayeFakedApp}
@@ -30,7 +31,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.time.TaxYear
+import uk.gov.hmrc.time.{CurrentTaxYear, TaxYear}
+import utils.SystemDate
 
 import scala.concurrent.Future
 
@@ -49,6 +51,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
     override val incorporationInformationConnector = mockIncorpInfoConnector
     override val payeRegistrationService  = mockPayeRegService
+
   }
 
   val emptyView                       = EmployingStaff(None, None, None, None, None)
@@ -475,8 +478,9 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "render the page" in {
-      val currentTaxYearStart = TaxYear.current.startYear.toString
-      val currentTaxYearFinish = TaxYear.current.finishYear.toString
+      System.setProperty("feature.system-date", "2019-05-01T00:00:00")
+      val currentTaxYearStart = SystemDate.current.startYear.toString
+      val currentTaxYearFinish = SystemDate.current.finishYear.toString
 
       when(mockEmploymentService.fetchEmployingStaff(ArgumentMatchers.any(),ArgumentMatchers.any()))
         .thenReturn(Future.successful(emptyView))
@@ -486,6 +490,11 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
           val document = Jsoup.parse(contentAsString(result))
           document.getElementById("taxYearText").text() mustBe s"The current tax year is 6 April $currentTaxYearStart to 5 April $currentTaxYearFinish."
       }
+
+      val format: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+
+      val theTimeNow = format.format(LocalDateTime.now)
+      System.setProperty("feature.system-date", theTimeNow)
     }
   }
 
