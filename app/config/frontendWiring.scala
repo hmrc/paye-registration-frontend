@@ -19,6 +19,8 @@ package config
 import akka.stream.Materializer
 import com.typesafe.config.Config
 import javax.inject.Inject
+
+import akka.actor.ActorSystem
 import play.api.mvc.{Call, Filter, RequestHeader, Result}
 import play.api.{Configuration, Environment, Play}
 import uk.gov.hmrc.auth.core.PlayAuthConnector
@@ -50,7 +52,7 @@ trait WSHttp extends
   HttpPost with WSPost with
   HttpDelete with WSDelete with Hooks
 
-class WSHttpImpl @Inject()(override val runModeConfiguration: Configuration, environment: Environment, frontendAuditCon: FrontendAuditConnector) extends WSHttp with ServicesConfig {
+class WSHttpImpl @Inject()(override val runModeConfiguration: Configuration, environment: Environment, frontendAuditCon: FrontendAuditConnector,val actorSystem: ActorSystem) extends WSHttp with ServicesConfig {
   override val appName        = getString("appName")
   override val hooks          = NoneRequired
   override def auditConnector = frontendAuditCon
