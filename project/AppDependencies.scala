@@ -22,14 +22,14 @@ object AppDependencies {
 }
 
 object MainDependencies {
-  private val frontendBootstrapVersion        = "4.3.0"
-  private val authClientVersion               = "2.17.0-play-25"
-  private val playPartialsVersion             = "6.3.0"
-  private val httpCachingVersion              = "8.0.0"
+  private val frontendBootstrapVersion        = "4.10.0"
+  private val authClientVersion               = "2.20.0-play-25"
+  private val playPartialsVersion             = "6.7.0-play-25"
+  private val httpCachingVersion              = "8.2.0"
   private val playWhitelistVersion            = "2.0.0"
   private val playConditionalMappingVersion   = "0.2.0"
   private val commonsValidatorVersion         = "1.6"
-  private val reactiveMongoVersion            = "6.2.0"
+  private val reactiveMongoVersion            = "6.5.0"
   private val taxYearVersion                  = "0.4.0"
 
   def apply() = Seq(
@@ -43,7 +43,7 @@ object MainDependencies {
     "uk.gov.hmrc"         %% "play-reactivemongo"             % reactiveMongoVersion,
     "commons-validator"   %  "commons-validator"              % commonsValidatorVersion,
     "uk.gov.hmrc"         %% "govuk-template" % "5.26.0-play-25",
-    "uk.gov.hmrc"         %% "play-ui" % "7.27.0-play-25"
+    "uk.gov.hmrc"         %% "play-ui" % "7.38.0-play-25"
   )
 }
 
