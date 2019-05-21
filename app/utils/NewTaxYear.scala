@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 object NewTaxYear {
   val startPeriod = LocalDate.of(SystemDate.getSystemDate.getYear, 2, 6)
-  val endPeriod   = LocalDate.of(SystemDate.getSystemDate.getYear, 5, 17)
+  val endPeriod   = LocalDate.of(SystemDate.getSystemDate.getYear, 6, 14)
 
   val taxYearStart = LocalDate.of(SystemDate.getSystemDate.getYear, 4, 6)
 }

@@ -290,8 +290,8 @@ pages.confirmation.inclusive.section-1.bullet1                  = a letter with 
 pages.confirmation.inclusive.section-1.bullet2                  = an activation code to do PAYE online
 pages.confirmation.inclusive.section-1.last                     = You''ll need these to send payroll information to HMRC.
 
-pages.confirmation.inclusive.section-2.heading                  = If the company''s first payment to someone is in the next tax year
-pages.confirmation.inclusive.section-2.body                     = We won''t start processing your application until after the next tax year begins (6 April). Please don''t contact us about the application until after 17 May.
+pages.confirmation.inclusive.section-2.heading                  = Please don''t contact us about the application until after 14 June.
+pages.confirmation.inclusive.section-2.body                     =
 pages.confirmation.inclusive.section-2.disclosure.heading       = Paying someone before we''ve processed the application?
 pages.confirmation.inclusive.section-2.disclosure.body          = You''l need to:
 pages.confirmation.inclusive.section-2.disclosure.bullet1       = follow these instructions on
