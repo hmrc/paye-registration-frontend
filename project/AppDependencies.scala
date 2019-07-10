@@ -22,28 +22,30 @@ object AppDependencies {
 }
 
 object MainDependencies {
-  private val frontendBootstrapVersion        = "4.10.0"
-  private val authClientVersion               = "2.20.0-play-25"
-  private val playPartialsVersion             = "6.7.0-play-25"
-  private val httpCachingVersion              = "8.2.0"
+  private val bootstrapVersion                = "4.13.0"
+  private val authClientVersion               = "2.22.0-play-25"
+  private val playPartialsVersion             = "6.9.0-play-25"
+  private val httpCachingVersion              = "8.4.0-play-25"
   private val playWhitelistVersion            = "2.0.0"
   private val playConditionalMappingVersion   = "0.2.0"
   private val commonsValidatorVersion         = "1.6"
-  private val reactiveMongoVersion            = "6.5.0"
+  private val reactiveMongoVersion            = "7.20.0-play-25"
   private val taxYearVersion                  = "0.4.0"
+  private val govukTemplateVersion            = "5.36.0-play-25"
+  private val playUiVersion                   = "7.40.0-play-25"
 
   def apply() = Seq(
-    "uk.gov.hmrc"         %% "bootstrap-play-25"             % frontendBootstrapVersion,
+    "uk.gov.hmrc"         %% "bootstrap-play-25"              % bootstrapVersion,
     "uk.gov.hmrc"         %% "tax-year"                       % taxYearVersion,
     "uk.gov.hmrc"         %% "auth-client"                    % authClientVersion,
     "uk.gov.hmrc"         %% "play-partials"                  % playPartialsVersion,
     "uk.gov.hmrc"         %% "http-caching-client"            % httpCachingVersion,
     "uk.gov.hmrc"         %% "play-whitelist-filter"          % playWhitelistVersion,
     "uk.gov.hmrc"         %% "play-conditional-form-mapping"  % playConditionalMappingVersion,
-    "uk.gov.hmrc"         %% "play-reactivemongo"             % reactiveMongoVersion,
+    "uk.gov.hmrc"         %% "simple-reactivemongo"           % reactiveMongoVersion,
     "commons-validator"   %  "commons-validator"              % commonsValidatorVersion,
-    "uk.gov.hmrc"         %% "govuk-template" % "5.26.0-play-25",
-    "uk.gov.hmrc"         %% "play-ui" % "7.38.0-play-25"
+    "uk.gov.hmrc"         %% "govuk-template"                 % govukTemplateVersion,
+    "uk.gov.hmrc"         %% "play-ui"                        % playUiVersion
   )
 }
 
@@ -55,7 +57,7 @@ trait TestDependencies {
   val mockitoCoreVersion       = "2.13.0"
   val jsoupVersion             = "1.10.3"
   val wireMockVersion          = "2.9.0"
-  val playMongoTestVersion     = "3.1.0"
+  val playMongoTestVersion     = "4.15.0-play-25"
 
   val scope: Configuration
   val test: Seq[ModuleID]
