@@ -286,12 +286,12 @@ pages.confirmation.standard.last                                = You''ll need t
 ## Confirmation inclusive date content
 pages.confirmation.inclusive.section-1.heading                  = What happens after we''ve processed the application?
 pages.confirmation.inclusive.section-1                          = If your application is successful you''ll receive:
-pages.confirmation.inclusive.section-1.bullet1                  = a letter with your PAYE and Accounts Office reference numbers
+pages.confirmation.inclusive.section-1.bullet1                  = a letter with your PAYE and Accounts Office reference numbers within 5 working days of your application being approved
 pages.confirmation.inclusive.section-1.bullet2                  = an activation code to do PAYE online
 pages.confirmation.inclusive.section-1.last                     = You''ll need these to send payroll information to HMRC.
 
-pages.confirmation.inclusive.section-2.heading                  = Because we are currently working on a lot of applications, it may take up to 20 days before you receive your employer PAYE reference number.
-pages.confirmation.inclusive.section-2.body                     =
+pages.confirmation.inclusive.section-2.heading                  = If the company''s first payment to someone is in the next tax year
+pages.confirmation.inclusive.section-2.body                     = We won''t start processing your application until after the next tax year begins (6 April). Please don''t contact us about the application until after 17 May.
 pages.confirmation.inclusive.section-2.disclosure.heading       = Paying someone before we''ve processed the application?
 pages.confirmation.inclusive.section-2.disclosure.body          = You''l need to:
 pages.confirmation.inclusive.section-2.disclosure.bullet1       = follow these instructions on
