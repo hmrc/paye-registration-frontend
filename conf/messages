@@ -277,10 +277,11 @@ pages.confirmation.description                                  = Application su
 pages.confirmation.reference                                    = Your reference number is
 
 ## Confirmation standard content
-pages.confirmation.standard.section-1.bullet1                   = another email with 10 working days letting you know the outcome of your application
+pages.confirmation.standard.section-1.bullet1                   = another email letting you know the outcome of your application
 pages.confirmation.standard.section-2                           = If your application is successful you''ll receive:
-pages.confirmation.standard.section-2.bullet1                   = a letter with your PAYE and Accounts Office reference numbers within 5 working days of the company registering with Companies House
+pages.confirmation.standard.section-2.bullet1                   = a letter with your PAYE and Accounts Office reference numbers
 pages.confirmation.standard.section-2.bullet2                   = an activation code to do PAYE online
+pages.confirmation.standard.info                                = Due to the volume of registrations that we currently have, it may take longer for you to receive your employer PAYE reference number.  We are working hard to resolve the backlog of cases and apologise for any inconvenience this may cause.
 pages.confirmation.standard.last                                = You''ll need these to send payroll information to HMRC.
 
 ## Confirmation inclusive date content
