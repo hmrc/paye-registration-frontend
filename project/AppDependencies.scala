@@ -22,17 +22,17 @@ object AppDependencies {
 }
 
 object MainDependencies {
-  private val bootstrapVersion                = "4.13.0"
-  private val authClientVersion               = "2.24.0-play-25"
+  private val bootstrapVersion                = "5.1.0"
+  private val authClientVersion               = "2.32.1-play-25"
   private val playPartialsVersion             = "6.9.0-play-25"
-  private val httpCachingVersion              = "8.4.0-play-25"
-  private val playWhitelistVersion            = "2.0.0"
-  private val playConditionalMappingVersion   = "0.2.0"
+  private val httpCachingVersion              = "9.0.0-play-25"
+  private val playWhitelistVersion            = "3.1.0-play-25"
+  private val playConditionalMappingVersion   = "1.2.0-play-25"
   private val commonsValidatorVersion         = "1.6"
-  private val reactiveMongoVersion            = "7.20.0-play-25"
-  private val taxYearVersion                  = "0.4.0"
-  private val govukTemplateVersion            = "5.36.0-play-25"
-  private val playUiVersion                   = "7.40.0-play-25"
+  private val reactiveMongoVersion            = "7.22.0-play-25"
+  private val taxYearVersion                  = "1.0.0"
+  private val govukTemplateVersion            = "5.48.0-play-25"
+  private val playUiVersion                   = "8.6.0-play-25"
 
   def apply() = Seq(
     "uk.gov.hmrc"         %% "bootstrap-play-25"              % bootstrapVersion,
@@ -57,7 +57,7 @@ trait TestDependencies {
   val mockitoCoreVersion       = "2.13.0"
   val jsoupVersion             = "1.10.3"
   val wireMockVersion          = "2.9.0"
-  val playMongoTestVersion     = "4.15.0-play-25"
+  val playMongoTestVersion     = "4.16.0-play-25"
 
   val scope: Configuration
   val test: Seq[ModuleID]

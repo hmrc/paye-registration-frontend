@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,17 @@ import config.WSHttp
 import enums.{DownstreamOutcome, RegistrationDeletion}
 import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics
-import models.api.{Director, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, Employment, PAYERegistration => PAYERegistrationAPI}
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito.when
+import models.api.{Director, Employment, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http._
-
-import scala.concurrent.Future
 
 class PAYERegistrationConnectorSpec extends PayeComponentSpec {
 
   class Setup extends CodeMocks {
     val connector = new PAYERegistrationConnector {
       override val payeRegUrl: String = "tst-url"
-      override val http: WSHttp       = mockWSHttp
-      override val metricsService     = new MockMetrics
+      override val http: WSHttp = mockWSHttp
+      override val metricsService = new MockMetrics
     }
   }
 
@@ -556,55 +552,48 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
 
   "deleteRejectedRegistrationDocument" should {
     "return a RegistrationDeletion Success" in new Setup {
-      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(HttpResponse(OK)))
+      mockHttpDelete[HttpResponse](HttpResponse(OK))
 
-      val result = await(connector.deleteRejectedRegistrationDocument("testRegId", "testTxID"))
+      val result: RegistrationDeletion.Value = await(connector.deleteRejectedRegistrationDocument("testRegId", "testTxID"))
       result mustBe RegistrationDeletion.success
     }
 
     "return a RegistrationDeletion failure" in new Setup {
-      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(Upstream5xxResponse("msg", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
+      mockHttpFailedDelete[HttpResponse](Upstream5xxResponse("msg", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR))
 
       intercept[Upstream5xxResponse](await(connector.deleteRejectedRegistrationDocument("testRegId", "testTxID")))
     }
 
     "return a RegistrationDeletion invalidStatus" in new Setup {
-      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(Upstream4xxResponse("msg", PRECONDITION_FAILED, PRECONDITION_FAILED)))
+      mockHttpFailedDelete[HttpResponse](Upstream4xxResponse("msg", PRECONDITION_FAILED, PRECONDITION_FAILED))
 
-      val result = await(connector.deleteRejectedRegistrationDocument("testRegId", "testTxID"))
+      val result: RegistrationDeletion.Value = await(connector.deleteRejectedRegistrationDocument("testRegId", "testTxID"))
       result mustBe RegistrationDeletion.invalidStatus
     }
   }
 
   "deleteRegistrationForRejectedIncorp" should {
     "return a success" in new Setup {
-      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(HttpResponse(OK)))
+      mockHttpDelete[HttpResponse](HttpResponse(OK))
 
-      val result = await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId"))
+      val result: RegistrationDeletion.Value = await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId"))
       result mustBe RegistrationDeletion.success
     }
 
     "return an invalid status" in new Setup {
-      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(Upstream4xxResponse("msg", PRECONDITION_FAILED, PRECONDITION_FAILED)))
+      mockHttpFailedDelete[HttpResponse](Upstream4xxResponse("msg", PRECONDITION_FAILED, PRECONDITION_FAILED))
 
-      val result = await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId"))
+      val result: RegistrationDeletion.Value = await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId"))
       result mustBe RegistrationDeletion.invalidStatus
     }
     "return a not found when 404 is returned from paye reg" in new Setup {
-      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(Upstream4xxResponse("msg",404,404)))
+      mockHttpFailedDelete[HttpResponse](Upstream4xxResponse("msg", 404, 404))
 
-      val result = await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId"))
+      val result: RegistrationDeletion.Value = await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId"))
       result mustBe RegistrationDeletion.notfound
     }
     "throw an Upstream5xxResponse" in new Setup {
-      when(mockWSHttp.DELETE[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(Upstream5xxResponse("msg", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)))
+      mockHttpFailedDelete[HttpResponse](Upstream5xxResponse("msg", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR))
 
       intercept[Upstream5xxResponse](await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId")))
     }
