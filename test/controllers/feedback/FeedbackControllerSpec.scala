@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
-import play.api.mvc.RequestHeader
+import play.api.mvc.{RequestHeader, Result}
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 import uk.gov.hmrc.http.{CoreGet, HttpResponse}
@@ -31,7 +31,7 @@ import scala.concurrent.Future
 
 class FeedbackControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
-  class Setup {
+  class Setup extends CodeMocks {
     val controller = new FeedbackController {
 
       override def messagesApi = mockMessagesApi
@@ -61,12 +61,12 @@ class FeedbackControllerSpec extends PayeComponentSpec with PayeFakedApp {
     val fakeRequest = FakeRequest("GET", "/")
 
     "return feedback page" in new Setup {
-      val result = controller.feedbackShow(fakeRequest)
+      val result: Future[Result] = controller.feedbackShow(fakeRequest)
       status(result) mustBe Status.OK
     }
 
     "capture the referrer in the session on initial session on the feedback load" in new Setup {
-      val result = controller.feedbackShow(fakeRequest.withHeaders("Referer" -> "Blah"))
+      val result: Future[Result] = controller.feedbackShow(fakeRequest.withHeaders("Referer" -> "Blah"))
       status(result) mustBe Status.OK
     }
   }
@@ -75,32 +75,34 @@ class FeedbackControllerSpec extends PayeComponentSpec with PayeFakedApp {
     val fakeRequest = FakeRequest("GET", "/")
     val fakePostRequest = FakeRequest("POST", "/register-for-paye/feedback").withFormUrlEncodedBody("test" -> "test")
     "return form with thank you for valid selections" in new Setup {
-      when(mockWSHttp.POSTForm[HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
-        Future.successful(HttpResponse(Status.OK, responseString = Some("1234"))))
+      val res = HttpResponse(Status.OK, responseString = Some("1234"))
+      mockHttpPOSTForm[HttpResponse](fakePostRequest.uri, res)
 
-      val result = controller.submitFeedback(fakePostRequest)
+      val result: Future[Result] = controller.submitFeedback(fakePostRequest)
       redirectLocation(result) mustBe Some(routes.FeedbackController.thankyou().url)
     }
 
     "return form with errors for invalid selections" in new Setup {
-      when(mockWSHttp.POSTForm[HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
-        Future.successful(HttpResponse(Status.BAD_REQUEST, responseString = Some("<p>:^(</p>"))))
-      val result = controller.submitFeedback(fakePostRequest)
+      val res = HttpResponse(Status.BAD_REQUEST, responseString = Some("<p>:^(</p>"))
+      mockHttpPOSTForm[HttpResponse](fakePostRequest.uri, res)
+
+      val result: Future[Result] = controller.submitFeedback(fakePostRequest)
       status(result) mustBe Status.BAD_REQUEST
     }
 
     "return error for other http code back from contact-frontend" in new Setup {
-      when(mockWSHttp.POSTForm[HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
-        Future.successful(HttpResponse(418))) // 418 - I'm a teapot
-      val result = controller.submitFeedback(fakePostRequest)
+      val res = HttpResponse(418)
+      mockHttpPOSTForm[HttpResponse](fakePostRequest.uri, res)
+
+      val result: Future[Result] = controller.submitFeedback(fakePostRequest)
       status(result) mustBe Status.INTERNAL_SERVER_ERROR
     }
 
     "return internal server error when there is an empty form" in new Setup {
-      when(mockWSHttp.POSTForm[HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(
-        Future.successful(HttpResponse(Status.OK, responseString = Some("1234"))))
+      val res = HttpResponse(Status.OK, responseString = Some("1234"))
+      mockHttpPOSTForm[HttpResponse](fakePostRequest.uri, res)
 
-      val result = controller.submitFeedback(fakeRequest)
+      val result: Future[Result] = controller.submitFeedback(fakeRequest)
       status(result) mustBe Status.INTERNAL_SERVER_ERROR
     }
   }
@@ -108,7 +110,8 @@ class FeedbackControllerSpec extends PayeComponentSpec with PayeFakedApp {
   "GET /feedback/thankyou" should {
     "should return the thank you page" in new Setup {
       val fakeRequest = FakeRequest("GET", "/")
-      val result = controller.thankyou(fakeRequest)
+
+      val result: Future[Result] = controller.thankyou(fakeRequest)
       status(result) mustBe Status.OK
     }
   }
