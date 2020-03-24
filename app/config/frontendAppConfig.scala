@@ -37,6 +37,7 @@ trait AppConfig {
   val contactFrontendPartialBaseUrl : String
 
   val timeoutInSeconds: String
+  val timeoutDisplayLength: String
 
 }
 
@@ -53,6 +54,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   override lazy val reportAProblemNonJSUrl    = loadConfig("reportAProblemNonJSUrl")
 
   override lazy val timeoutInSeconds: String = loadConfig("timeoutInSeconds")
+  override lazy val timeoutDisplayLength: String = loadConfig("timeoutDisplayLength")
 
   private def whiteListConfig(key : String) : Seq[String] = {
     Some(new String(Base64.getDecoder
