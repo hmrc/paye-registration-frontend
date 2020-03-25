@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import enums.PAYEStatus
 import models.api.{PAYEContact => PAYEContactAPI, _}
-import models.view.{EmployingAnyone, EmployingStaff, PAYEContactDetails, Summary, SummaryRow, SummarySection, WillBePaying, PAYEContact => PAYEContactView}
+import models.view.{EmployingAnyone, EmployingStaff, PAYEContactDetails, Summary, SummaryChangeLink, SummaryRow, SummarySection, WillBePaying, PAYEContact => PAYEContactView}
 import models.{Address, DigitalContactDetails}
 
 trait PAYERegistrationFixture {
@@ -40,7 +40,7 @@ trait PAYERegistrationFixture {
     businessContactDetails = validBusinessContactDetails
   )
 
-  val validDate = LocalDate.of(2016,12,20)
+  val validDate = LocalDate.of(2016, 12, 20)
 
   val validEmploymentApi = Employment(
     employees = Employing.willEmployNextYear,
@@ -51,7 +51,7 @@ trait PAYERegistrationFixture {
   )
   val validEmploymentApiIncorporated = Employment(
     employees = Employing.alreadyEmploying,
-    firstPaymentDate = LocalDate.of(2016,12,20),
+    firstPaymentDate = LocalDate.of(2016, 12, 20),
     construction = true,
     subcontractors = true,
     companyPension = Some(true)
@@ -59,14 +59,14 @@ trait PAYERegistrationFixture {
 
   val validEmploymentApiNotIncorporated = Employment(
     employees = Employing.willEmployThisYear,
-    firstPaymentDate = LocalDate.of(2016,12,20),
+    firstPaymentDate = LocalDate.of(2016, 12, 20),
     construction = true,
     subcontractors = true,
     companyPension = None
   )
 
   val validEmploymentViewIncorporated = EmployingStaff(
-    Some(EmployingAnyone(true,Some(LocalDate.of(2016,12,20)))),
+    Some(EmployingAnyone(true, Some(LocalDate.of(2016, 12, 20)))),
     None,
     Some(true),
     Some(true),
@@ -93,7 +93,7 @@ trait PAYERegistrationFixture {
         phoneNumber = Some("0987654321")
       )
     ),
-    Address("22 Test test","Testerarium",None, None, Some("TE0 0ST"))
+    Address("22 Test test", "Testerarium", None, None, Some("TE0 0ST"))
   )
 
   val validPAYEContactView = PAYEContactView(
@@ -105,7 +105,7 @@ trait PAYERegistrationFixture {
         phoneNumber = Some("0987654321")
       )
     )),
-    correspondenceAddress = Some(Address("22 Test test","Testerarium",None, None, Some("TE0 0ST")))
+    correspondenceAddress = Some(Address("22 Test test", "Testerarium", None, None, Some("TE0 0ST")))
   )
 
   val emptyPAYEContactView = PAYEContactView(None, None)
@@ -125,13 +125,16 @@ trait PAYERegistrationFixture {
 
   lazy val validSummaryView = Summary(
     Seq(SummarySection(
-      id="tradingName",
-      Seq(SummaryRow(
-        id="tradingName",
-        answers = List(Right("tstTrade")),
-        changeLink = Some(controllers.userJourney.routes.CompanyDetailsController.tradingName()),
-        None,
-        None
+      id = "tradingName",
+      sectionHeading = "testSectionHeading",
+      rows = Seq(SummaryRow(
+        id = "tradingName",
+        question = "testQuestion",
+        answers = Seq("tstTrade"),
+        optChangeLink = Some(SummaryChangeLink(
+          controllers.userJourney.routes.CompanyDetailsController.tradingName(),
+          "testTradingNameHiddenText"
+        ))
       ))
     ))
   )
@@ -146,7 +149,7 @@ trait PAYERegistrationFixture {
     postCode = Some("TE1 1ST")
   )
 
-  def validName(f: String, m: Option[String], l:String) = Name(Some(f), m, l, None)
+  def validName(f: String, m: Option[String], l: String) = Name(Some(f), m, l, None)
 
   val validDirectorList = Seq(Director(validName("Bob", None, "Smith"), Some("NINO")), Director(validName("Michael", Some("Jay"), "Fudgedybar"), None))
 

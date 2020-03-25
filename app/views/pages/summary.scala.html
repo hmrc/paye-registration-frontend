@@ -24,7 +24,7 @@
     <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.summary.description")</h1>
 
     @for(section <- summaryModel.sections) {
-        <h2 class="heading-medium" id="@{section.id}SectionHeading">@Messages(s"pages.summary.${section.id}.sectionHeading")</h2>
+        <h2 class="heading-medium" id="@{section.id}SectionHeading">@{section.sectionHeading}</h2>
         <dl class="govuk-check-your-answers cya-questions-long" id="@{section.id}Table">
             @for(row <- section.rows) {
                 @summaryRow(row)

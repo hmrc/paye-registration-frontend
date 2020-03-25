@@ -149,7 +149,6 @@ pages.willBePaying.beforeNextTaxYear.label                    = Will any of this
 pages.willBePaying.empty                                      = Tell us if, over the next 2 months, the company will employ anyone or provide expenses or benefits to staff
 pages.willBePaying.beforeNewTaxYear.empty                     = Tell us if the company will start employing someone or providing expenses or benefits to staff after 6 April?
 
-
 ## Construction Industry
 pages.constructionIndustry.title                                = Does the company work in the construction industry?
 pages.constructionIndustry.description                          = Does the company work in the construction industry?
@@ -190,29 +189,39 @@ pages.summary.subcontractors.answers.false                      = No
 pages.summary.subcontractors.hiddenChangeText                   = whether you will employ subcontractors in the construction industry.
 
 pages.summary.employees.sectionHeading                          = Employment information
+
 pages.summary.employing.question                                = Does the company employ anyone or provide expenses or benefits to staff?
-pages.summary.earliestDate.question                             = When did it first start employing someone or providing expenses or benefits to staff?
 pages.summary.employing.answers.true                            = Yes
 pages.summary.employing.answers.false                           = No
+pages.summary.employing.hiddenChangeText                        = if the company employs anyone or provides expenses or benefits to staff.
+
+pages.summary.earliestDate.question                             = When did it first start employing someone or providing expenses or benefits to staff?
+pages.summary.earliestDate.hiddenChangeText                     = when the company first started employing someone or providing expenses or benefits to staff.
 
 pages.summary.willBePaying.question                             = Over the next 2 months will the company employ anyone or provide expenses or benefits to staff?
-pages.summary.beforeNextTaxYear.question                        = Will the company start employing someone or providing expenses or benefits to staff after 6 April?
 pages.summary.willBePaying.answers.true                         = Yes
 pages.summary.willBePaying.answers.false                        = No
+pages.summary.willBePaying.hiddenChangeText                     = if the company will employ anyone or provide expenses or benefits to staff, over the next 2 months.
+
+pages.summary.beforeNextTaxYear.question                        = Will the company start employing someone or providing expenses or benefits to staff after 6 April?
 pages.summary.beforeNextTaxYear.answers.true                    = Yes
 pages.summary.beforeNextTaxYear.answers.false                   = No
+pages.summary.beforeNextTaxYear.hiddenChangeText                = if the company will start employing someone or providing expenses or benefits to staff after 6 April.
 
 pages.summary.inConstructionIndustry.question                   = Does the company work in the construction industry?
 pages.summary.inConstructionIndustry.answers.true               = Yes
 pages.summary.inConstructionIndustry.answers.false              = No
+pages.summary.inConstructionIndustry.hiddenChangeText           = whether or not the company works in the construction industry.
 
 pages.summary.employsSubcontractors.question                    = During the current tax year will the company hire any subcontractors in the construction industry?
 pages.summary.employsSubcontractors.answers.true                = Yes
 pages.summary.employsSubcontractors.answers.false               = No
+pages.summary.employsSubcontractors.hiddenChangeText            = if the company will hire any subcontractors in the construction industry during the current tax year.
 
 pages.summary.paysPension.question                              = Does the company make pension payments to a former employee or their dependants?
 pages.summary.paysPension.answers.true                          = Yes
 pages.summary.paysPension.answers.false                         = No
+pages.summary.paysPension.hiddenChangeText                      = if the company makes pension payments to a former employee or their dependants.
 
 pages.summary.completionCapacity.sectionHeading                 = About you
 pages.summary.completionCapacity.question                       = What is your relationship to the company?
@@ -222,23 +231,26 @@ pages.summary.completionCapacity.answers.agent                  = Agent
 pages.summary.completionCapacity.hiddenChangeText               = your relationship to the company.
 
 pages.summary.companyDetails.sectionHeading                     = Company information
+
 pages.summary.tradingName.question                              = Does or will the company trade using a different name?
 pages.summary.tradingName.answers.noAnswerGiven                 = No
 pages.summary.tradingName.hiddenChangeText                      = whether your company will trade under another name.
 
 pages.summary.roAddress.question                                = What is your company''s registered office address?
-pages.summary.roAddress.hiddenChangeText                        = your company''s registered office address.
 
 pages.summary.ppobAddress.question                              = Where will the company carry out most of its business activities?
 pages.summary.ppobAddress.hiddenChangeText                      = where your company will carry out most of its business activities.
 
 pages.summary.businessContactDetails.sectionHeading             = Company contact details
+
 pages.summary.businessEmail.question                            = What is the company contact''s email address?
 pages.summary.businessEmail.answers.noAnswerGiven               = '
 pages.summary.businessEmail.hiddenChangeText                    = the company contact''s email address.
+
 pages.summary.mobileNumber.question                             = What is the company contact''s number?
 pages.summary.mobileNumber.answers.noAnswerGiven                = '
 pages.summary.mobileNumber.hiddenChangeText                     = the company contact''s number.
+
 pages.summary.businessTelephone.question                        = What is the company contact''s other number?
 pages.summary.businessTelephone.answers.noAnswerGiven           = '
 pages.summary.businessTelephone.hiddenChangeText                = the company contact''s other number.
@@ -248,29 +260,32 @@ pages.summary.natureOfBusiness.hiddenChangeText                 = what your comp
 
 pages.summary.directorDetails.sectionHeading                    = Director details
 pages.summary.director.question                                 = {0}''s National Insurance number
+pages.summary.director.hiddenChangeText                         = {0}''s National Insurance number
 
 pages.summary.payeContactDetails.sectionHeading                 = PAYE contact details
+
 pages.summary.contactName.question                              = What is the name of the company''s PAYE contact?
-pages.summary.emailPAYEContact.question                         = What is the email address of the company''s PAYE contact?
-pages.summary.mobileNumberPAYEContact.question                  = What is the contact number of the company''s PAYE contact?
-pages.summary.phoneNumberPAYEContact.question                   = What is the other contact number of the company''s PAYE contact?
-pages.summary.correspondenceAddress.question                    = Where should we send PAYE-related post to?
-
 pages.summary.contactName.hiddenChangeText                      = the name of the company''s PAYE contact.
-pages.summary.emailPAYEContact.hiddenChangeText                 = the email address of the company''s PAYE contact.
-pages.summary.mobileNumberPAYEContact.hiddenChangeText          = the contact number of the company''s PAYE contact.
-pages.summary.phoneNumberPAYEContact.hiddenChangeText           = the other contact number of the company''s PAYE contact.
-pages.summary.correspondenceAddress.hiddenChangeText            = where we should send PAYE-related post to.
 
+pages.summary.emailPAYEContact.question                         = What is the email address of the company''s PAYE contact?
 pages.summary.emailPAYEContact.answers.noAnswerGiven            = '
+pages.summary.emailPAYEContact.hiddenChangeText                 = the email address of the company''s PAYE contact.
+
+pages.summary.mobileNumberPAYEContact.question                  = What is the contact number of the company''s PAYE contact?
 pages.summary.mobileNumberPAYEContact.answers.noAnswerGiven     = '
+pages.summary.mobileNumberPAYEContact.hiddenChangeText          = the contact number of the company''s PAYE contact.
+
+pages.summary.phoneNumberPAYEContact.question                   = What is the other contact number of the company''s PAYE contact?
 pages.summary.phoneNumberPAYEContact.answers.noAnswerGiven      = '
+pages.summary.phoneNumberPAYEContact.hiddenChangeText           = the other contact number of the company''s PAYE contact.
+
+pages.summary.correspondenceAddress.question                    = Where should we send PAYE-related post to?
+pages.summary.correspondenceAddress.hiddenChangeText            = where we should send PAYE-related post to.
 
 pages.summary.Description                                       = Review the information you''ve provided before you submit your application.
 pages.summary.heading                                           = Check and confirm your answers
 pages.summary.heading2                                          = Now send your application
 pages.summary.information                                       = By submitting this application you''re confirming that the details you''re providing are correct and reflect the company''s current position.
-
 
 ## Confirmation Page
 pages.confirmation.description                                  = Application submitted
