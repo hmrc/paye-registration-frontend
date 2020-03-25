@@ -20,10 +20,11 @@ import play.api.mvc.Call
 
 case class Summary(sections: Seq[SummarySection])
 
-case class SummarySection(id: String, rows: Seq[SummaryRow])
+case class SummarySection(id: String, sectionHeading: String, rows: Seq[SummaryRow])
 
 case class SummaryRow(id: String,
-                      answers: List[Either[String, String]],
-                      changeLink: Option[Call],
-                      questionArgs: Option[Seq[String]] = None,
-                      commonQuestionKey: Option[String] = None)
+                      question: String,
+                      answers: Seq[String],
+                      optChangeLink: Option[SummaryChangeLink])
+
+case class SummaryChangeLink(location: Call, hiddenText: String)
