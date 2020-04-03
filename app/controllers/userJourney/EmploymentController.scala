@@ -64,7 +64,7 @@ trait EmploymentController extends PayeBaseController {
     case  _ => throw GeneralException(s"[EmploymentController][handleJourneyPostConstruction] an invalid scenario was met for employment staff")
   }
 
-  def weeklyThreshold: Int = thresholdService.getCurrentThresholds.getOrElse("weekly", 118)
+  def weeklyThreshold: Int = thresholdService.getCurrentThresholds.getOrElse("weekly", 120)
 
   private def ifIncorpDateExist(regId: String, txId: String)(action: LocalDate => Future[Result])(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] =
     incorpInfoService.getIncorporationDate(regId, txId) flatMap {

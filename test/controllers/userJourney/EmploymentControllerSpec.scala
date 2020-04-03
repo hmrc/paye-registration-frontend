@@ -65,7 +65,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
   val pensionsView                    = EmployingStaff(None, None, None, None, Some(true))
   val pensionsViewFalse               = EmployingStaff(None, None, None, None, Some(false))
 
-  def mockGetThreshold = when(mockThresholdService.getCurrentThresholds).thenReturn(Map("weekly" -> 116))
+  def mockGetThreshold = when(mockThresholdService.getCurrentThresholds).thenReturn(Map("weekly" -> 120))
   def dynamicViewModel(ea: Boolean = false, wbp: Boolean = false, nty: Boolean = false, cis: Boolean = false, subContractor: Boolean = false) =
     EmployingStaff(Some(EmployingAnyone(ea, Some(LocalDate.now()))), Some(WillBePaying(wbp, Some(nty))), Some(cis), Some(subContractor), None)
 
