@@ -27,8 +27,8 @@ import scala.concurrent.Future
 
 class FeatureSwitchControllerSpec extends PayeComponentSpec {
 
-  val testFeatureSwitch = BooleanFeatureSwitch(name = "addressService", enabled = true)
-  val testDisabledSwitch = BooleanFeatureSwitch(name = "addressService", enabled = false)
+  val testFeatureSwitch = BooleanFeatureSwitch(name = "companyRegistration", enabled = true)
+  val testDisabledSwitch = BooleanFeatureSwitch(name = "companyRegistration", enabled = false)
 
   class Setup {
     val controller = new FeatureSwitchController {
@@ -39,28 +39,28 @@ class FeatureSwitchControllerSpec extends PayeComponentSpec {
   }
 
   "switcher" should {
-    "enable the addressService feature switch and return an OK" when {
-      "addressService and addressLookUpFrontend are passed in the url" in new Setup {
+    "enable the companyReg feature switch and return an OK" when {
+      "companyRegistration and true are passed in the url" in new Setup {
         when(mockFeatureSwitches(ArgumentMatchers.any()))
           .thenReturn(Some(testFeatureSwitch))
 
         when(mockFeatureManager.enable(ArgumentMatchers.any()))
           .thenReturn(testFeatureSwitch)
 
-        val result = controller.switcher("addressService","addressLookupFrontend")(FakeRequest())
+        val result = controller.switcher("companyRegistration","true")(FakeRequest())
         status(result) mustBe OK
       }
     }
 
-    "disable the addressServiceFeature switch and return an OK" when {
-      "addressService and some other featureState is passed into the URL" in new Setup {
+    "disable the companyReg feature switch and return an OK" when {
+      "companyRegistration and some other featureState is passed into the URL" in new Setup {
         when(mockFeatureSwitches(ArgumentMatchers.any()))
           .thenReturn(Some(testFeatureSwitch))
 
         when(mockFeatureManager.disable(ArgumentMatchers.any()))
           .thenReturn(testDisabledSwitch)
 
-        val result = controller.switcher("addressService","someOtherState")(FakeRequest())
+        val result = controller.switcher("companyRegistration","someOtherState")(FakeRequest())
         status(result) mustBe OK
       }
     }

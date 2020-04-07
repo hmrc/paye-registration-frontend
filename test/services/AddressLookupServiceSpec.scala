@@ -48,7 +48,6 @@ class AddressLookupServiceSpec extends PayeComponentSpec {
       override val addressLookupConnector   = mockAddressLookupConnector
       override val featureSwitch            = mockFeatureSwitch
       override val metricsService           = metricsMock
-      override def useAddressLookupFrontend = boole
     }
   }
 
@@ -58,14 +57,6 @@ class AddressLookupServiceSpec extends PayeComponentSpec {
         .thenReturn(Future.successful("test-url"))
 
       await(service.buildAddressLookupUrl("payereg1", Call("GET", "/register-for-paye/test-url"))) mustBe "test-url"
-    }
-
-    "return the Address Lookup stub Url for PPOB" in new SetupWithProxy(false) {
-      await(service.buildAddressLookupUrl("payreg1", Call("GET","/return-from-address-for-ppob"))) mustBe "/no-lookup-ppob-address"
-    }
-
-    "return the Address Lookup stub Url for PAYE Contact" in new SetupWithProxy(false) {
-      await(service.buildAddressLookupUrl("payreg1", Call("GET","/return-from-address-for-corresp-addr"))) mustBe "/no-lookup-correspondence-address"
     }
   }
 
@@ -94,19 +85,6 @@ class AddressLookupServiceSpec extends PayeComponentSpec {
       implicit val request = FakeRequest("GET", "/test-uri")
 
       await(service.getAddress) mustBe None
-    }
-  }
-
-  def feature(b: Boolean) = BooleanFeatureSwitch("addressLookup", enabled = b)
-
-  "Calling useAddressLookupFrontend" should {
-    "return true" in new Setup {
-      when(mockFeatureSwitch.addressLookupFrontend).thenReturn(feature(true))
-      service.useAddressLookupFrontend mustBe true
-    }
-    "return false" in new Setup {
-      when(mockFeatureSwitch.addressLookupFrontend).thenReturn(feature(false))
-      service.useAddressLookupFrontend mustBe false
     }
   }
 }
