@@ -157,7 +157,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "alreadyPaying" -> "true",
         "earliestDateDay" -> "12",
         "earliestDateMonth" -> "4",
-        "earliestDateYear" -> "2017"
+        "earliestDateYear" -> "2018"
       )
 
       when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
