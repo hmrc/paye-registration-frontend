@@ -220,31 +220,31 @@ class FeatureSwitchSpec extends PayeComponentSpec {
 
   "SCRSFeatureSwitches" should {
     "return a disabled feature when the associated system property doesn't exist" in {
-      payeFeatureSwitch.addressLookupFrontend.enabled mustBe false
+      payeFeatureSwitch.companyReg.enabled mustBe false
     }
 
     "return an enabled feature when the associated system property is true" in {
-      featureSwitch.enable(payeFeatureSwitch.addressLookupFrontend)
+      featureSwitch.enable(payeFeatureSwitch.companyReg)
 
-      payeFeatureSwitch.addressLookupFrontend.enabled mustBe true
+      payeFeatureSwitch.companyReg.enabled mustBe true
     }
 
     "return a disable feature when the associated system property is false" in {
-      featureSwitch.disable(payeFeatureSwitch.addressLookupFrontend)
+      featureSwitch.disable(payeFeatureSwitch.companyReg)
 
-      payeFeatureSwitch.addressLookupFrontend.enabled mustBe false
+      payeFeatureSwitch.companyReg.enabled mustBe false
     }
 
-    "return true if the addressService system property is true" in {
-      System.setProperty("feature.addressService", "true")
+    "return true if the companyRegistration system property is true" in {
+      System.setProperty("feature.companyRegistration", "true")
 
-      payeFeatureSwitch("addressService") mustBe Some(BooleanFeatureSwitch("addressService", true))
+      payeFeatureSwitch("companyRegistration") mustBe Some(BooleanFeatureSwitch("companyRegistration", true))
     }
 
-    "return false if the addressService system property is false" in {
-      System.setProperty("feature.addressService", "false")
+    "return false if the companyRegistration system property is false" in {
+      System.setProperty("feature.companyRegistration", "false")
 
-      payeFeatureSwitch("addressService") mustBe Some(BooleanFeatureSwitch("addressService", false))
+      payeFeatureSwitch("companyRegistration") mustBe Some(BooleanFeatureSwitch("companyRegistration", false))
     }
 
     "return an empty option if a system property doesn't exist when using the apply function" in {
