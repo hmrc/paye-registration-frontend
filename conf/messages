@@ -354,18 +354,22 @@ errorPages.failedSubmission.description                         = Something went
 errorPages.failedSubmission.p1                                  = So that we can help you, please give us the following information.
 
 ## Address Lookup Frontend Configuration
-pages.alf.common.lookupPage.title                               = Search for your address
-pages.alf.common.lookupPage.heading                             = Search for your address
-pages.alf.common.navTitle                                                                                                                  = Register an employer for PAYE
+pages.alf.common.navTitle                                       = Register an employer for PAYE
 pages.alf.common.phaseBannerHtml                                = This is a new service. Help us improve it - send your <a href="https://www.tax.service.gov.uk/register-for-paye/feedback">feedback</a>.
 pages.alf.common.deskProServiceName                             = SCRS
+
+pages.alf.common.lookupPage.title                               = Search for your address
+pages.alf.common.lookupPage.heading                             = Search for your address
 pages.alf.common.lookupPage.filterLabel                         = House name or number (optional)
 pages.alf.common.lookupPage.submitLabel                         = Search address
+pages.alf.common.lookupPage.manual                              = The address doesn''t have a UK postcode
 
 pages.alf.ppob.lookupPage.title                                 = Company address
 pages.alf.correspondence.lookupPage.title                       = Search for your address
 
 pages.alf.common.selectPage.description                         = Choose an address
+pages.alf.common.selectPage.searchAgain                         = Search again
+pages.alf.common.selectPage.editAddress                         = Edit address manually
 
 pages.alf.common.editPage.description                           = Enter address
 pages.alf.common.editPage.line1Label                            = Address line 1

@@ -17,45 +17,25 @@
 package services
 
 import connectors.AddressLookupConnector
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.Address
-import play.api.mvc.{Call, Request}
-import play.api.{Configuration, Environment}
+import play.api.i18n.MessagesApi
+import play.api.mvc.Call
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import utils.{PAYEFeatureSwitch, PAYEFeatureSwitches}
 
 import scala.concurrent.Future
 
-class AddressLookupServiceImpl @Inject()(val featureSwitch: PAYEFeatureSwitch,
-                                         val addressLookupConnector: AddressLookupConnector,
-                                         val metricsService: MetricsService,
-                                         override val runModeConfiguration: Configuration, environment: Environment) extends AddressLookupService with ServicesConfig {
-  lazy val payeRegistrationUrl = getConfString("paye-registration-frontend.www.url", "")
-
-  override protected def mode = environment.mode
-}
-
-trait AddressLookupService {
-  val payeRegistrationUrl: String
-  val addressLookupConnector: AddressLookupConnector
-  val featureSwitch: PAYEFeatureSwitches
-  val metricsService: MetricsService
+@Singleton
+class AddressLookupService @Inject()(addressLookupConnector: AddressLookupConnector,
+                                     addressLookupConfigBuilderService: AddressLookupConfigBuilderService,
+                                     metricsService: MetricsService
+                                    )(implicit messagesApi: MessagesApi) {
 
   def buildAddressLookupUrl(key: String, call: Call)(implicit hc: HeaderCarrier): Future[String] = {
-    addressLookupConnector.getOnRampUrl(key, call)
+    val alfJourneyConfig = addressLookupConfigBuilderService.buildConfig(call, key)
+
+    addressLookupConnector.getOnRampUrl(alfJourneyConfig)
   }
 
-  def getAddress(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[Address]] = {
-    request.getQueryString("id") match {
-      case Some(id) =>
-        val addressLookUpTimer = metricsService.addressLookupResponseTimer.time()
-        addressLookupConnector.getAddress(id) map { addr =>
-          addressLookUpTimer.stop()
-          Some(addr)
-        }
-      case None => Future.successful(None)
-    }
-  }
+  def getAddress(id: String)(implicit hc: HeaderCarrier): Future[Address] = addressLookupConnector.getAddress(id)
 }

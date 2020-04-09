@@ -19,12 +19,12 @@ package services
 import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics
 import models.Address
+import models.external.AlfJourneyConfig
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
+import play.api.i18n.MessagesApi
 import play.api.mvc.Call
-import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.BooleanFeatureSwitch
 
 import scala.concurrent.Future
 
@@ -32,28 +32,19 @@ import scala.concurrent.Future
 class AddressLookupServiceSpec extends PayeComponentSpec {
 
   val metricsMock = new MockMetrics
+  implicit val messagesApi: MessagesApi = mock[MessagesApi]
 
   class Setup {
-    val service = new AddressLookupService {
-      override val payeRegistrationUrl    = "/test/url"
-      override val addressLookupConnector = mockAddressLookupConnector
-      override val featureSwitch          = mockFeatureSwitch
-      override val metricsService         = metricsMock
-    }
-  }
-
-  case class SetupWithProxy(boole: Boolean) {
-    val service = new AddressLookupService {
-      override val payeRegistrationUrl      = "/test/url"
-      override val addressLookupConnector   = mockAddressLookupConnector
-      override val featureSwitch            = mockFeatureSwitch
-      override val metricsService           = metricsMock
-    }
+    val service = new AddressLookupService(
+      addressLookupConnector = mockAddressLookupConnector,
+      addressLookupConfigBuilderService = mockAddressLookupConfigBuilderServiceMock,
+      metricsService = metricsMock
+    )
   }
 
   "Calling buildAddressLookupUrl" should {
-    "return the Address Lookup frontend Url with payereg1 journey" in new SetupWithProxy(true) {
-      when(mockAddressLookupConnector.getOnRampUrl(ArgumentMatchers.contains("payereg1"), ArgumentMatchers.any[Call]())(ArgumentMatchers.any[HeaderCarrier]()))
+    "return the Address Lookup frontend Url with payereg1 journey" in new Setup {
+      when(mockAddressLookupConnector.getOnRampUrl(ArgumentMatchers.any[AlfJourneyConfig]())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful("test-url"))
 
       await(service.buildAddressLookupUrl("payereg1", Call("GET", "/register-for-paye/test-url"))) mustBe "test-url"
@@ -62,7 +53,6 @@ class AddressLookupServiceSpec extends PayeComponentSpec {
 
   "Calling getAddress" should {
     "return an address" in new Setup {
-
       val expected =
         Address(
           "L1",
@@ -76,15 +66,7 @@ class AddressLookupServiceSpec extends PayeComponentSpec {
       when(mockAddressLookupConnector.getAddress(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]))
         .thenReturn(Future.successful(expected))
 
-      implicit val request = FakeRequest("GET", "/test-uri?id=1234567890")
-
-      await(service.getAddress) mustBe Some(expected)
-    }
-
-    "return none" in new Setup {
-      implicit val request = FakeRequest("GET", "/test-uri")
-
-      await(service.getAddress) mustBe None
+      await(service.getAddress("1234567890")) mustBe expected
     }
   }
 }

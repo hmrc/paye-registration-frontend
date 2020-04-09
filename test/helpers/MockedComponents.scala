@@ -16,10 +16,11 @@
 
 package helpers
 
-import config.WSHttp
+import config.{FrontendAppConfig, WSHttp}
 import connectors._
 import connectors.test.{TestBusinessRegConnector, TestIncorpInfoConnector, TestPAYERegConnector}
 import org.scalatest.mockito.MockitoSugar
+import play.api.{Configuration, Environment}
 import repositories.{ReactiveMongoRepository, SessionRepository}
 import services._
 import uk.gov.hmrc.auth.core.{AuthConnector => AuthClientConnector}
@@ -35,6 +36,7 @@ trait MockedComponents {
   val mockFeatureSwitch    = mock[PAYEFeatureSwitch]
   val mockFeatureSwitches  = mock[PAYEFeatureSwitches]
   val mockFeatureManager   = mock[FeatureManager]
+  val mockAppConfig = mock[FrontendAppConfig]
 
   //Connector mocks
   val mockKeystoreConnector             = mock[KeystoreConnector]
@@ -68,7 +70,10 @@ trait MockedComponents {
   val mockPrepopService         = mock[PrepopulationService]
   val mockThresholdService      = mock[ThresholdService]
   val mockEmploymentService   = mock[EmploymentService]
+  val mockAddressLookupConfigBuilderServiceMock = mock[AddressLookupConfigBuilderService]
 
   val mockSessionRepository     = mock[SessionRepository]
   val mockReactiveMongoRepo     = mock[ReactiveMongoRepository]
+  val mockConfiguration = mock[Configuration]
+  val mockEnvironment = mock[Environment]
 }

@@ -27,13 +27,11 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, Call, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
-import play.api.mvc.Results.Ok
 
 import scala.concurrent.Future
 
@@ -41,20 +39,20 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup {
     val controller = new CompanyDetailsController {
-      override val redirectToLogin          = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign       = MockAuthRedirects.redirectToPostSign
+      override val redirectToLogin = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
 
-      override val s4LService               = mockS4LService
-      override val keystoreConnector        = mockKeystoreConnector
-      override val authConnector            = mockAuthConnector
-      override val companyDetailsService    = mockCompanyDetailsService
-      override val incorpInfoService        = mockIncorpInfoService
+      override val s4LService = mockS4LService
+      override val keystoreConnector = mockKeystoreConnector
+      override val authConnector = mockAuthConnector
+      override val companyDetailsService = mockCompanyDetailsService
+      override val incorpInfoService = mockIncorpInfoService
       implicit val messagesApi: MessagesApi = mockMessagesApi
-      override val addressLookupService     = mockAddressLookupService
-      override val prepopService            = mockPrepopulationService
-      override val auditService             = mockAuditService
+      override val addressLookupService = mockAddressLookupService
+      override val prepopService = mockPrepopulationService
+      override val auditService = mockAuditService
       override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService  = mockPayeRegService
+      override val payeRegistrationService = mockPayeRegService
     }
   }
 
@@ -75,8 +73,8 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     "show the correctly pre-populated trading name page when data has already been entered" in new Setup {
       when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
-      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
-          .thenReturn(Future.successful(None))
+      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(None))
 
       AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest) {
         (response: Future[Result]) =>
@@ -94,7 +92,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       val negativeTradingNameCompanyDetails = Fixtures.validCompanyDetailsViewModel.copy(tradingName = Some(Fixtures.negativeTradingNameViewModel))
       when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(negativeTradingNameCompanyDetails))
-      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("foo bar")))
 
       AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest) {
@@ -113,7 +111,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       val noTradingNameCompanyDetails = Fixtures.validCompanyDetailsViewModel.copy(tradingName = None)
       when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(noTradingNameCompanyDetails))
-      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
       AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest) {
@@ -132,7 +130,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       val defaultCompanyDetailsView = CompanyDetailsView(cName, None, Fixtures.validROAddress, None, None)
       when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(defaultCompanyDetailsView))
-      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("foo bar wizz")))
       AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest) {
         response =>
@@ -288,7 +286,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
           .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel.copy(businessContactDetails = None)))
 
         when(mockPrepopulationService.getBusinessContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
-            .thenReturn(Future.successful(None))
+          .thenReturn(Future.successful(None))
 
         AuthHelpers.showAuthorisedWithCP(controller.businessContactDetails, Fixtures.validCurrentProfile, fakeRequest) {
           result =>
@@ -405,7 +403,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
       when(mockCompanyDetailsService.getPPOBPageAddresses(ArgumentMatchers.any()))
         .thenReturn(Map(
-          "ro"   -> Fixtures.validCompanyDetailsViewModel.roAddress,
+          "ro" -> Fixtures.validCompanyDetailsViewModel.roAddress,
           "ppob" -> Fixtures.validCompanyDetailsViewModel.ppobAddress.get
         ))
 
@@ -430,7 +428,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "redirect to business contact details if ro is chosen" in new Setup {
       implicit val hc = HeaderCarrier()
-      
+
       implicit val request = FakeRequest().withFormUrlEncodedBody(
         "chosenAddress" -> "roAddress"
       )
@@ -507,52 +505,54 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     implicit val hc = HeaderCarrier()
 
     "return a DownStreamOutcome SUCCESS" in new Setup {
+      val testAlfId = "1234567890"
       val expected =
-        Some(Address(
+        Address(
           "L1",
           "L2",
           Some("L3"),
           Some("L4"),
           Some("testPostcode"),
           Some("testCode")
-        ))
+        )
 
 
-      when(mockAddressLookupService.getAddress(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[_]]()))
+      when(mockAddressLookupService.getAddress(ArgumentMatchers.contains(testAlfId))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(expected))
 
       when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       when(mockPrepopulationService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future.successful(expected.get))
+        .thenReturn(Future.successful(expected))
 
-      AuthHelpers.showAuthorisedWithCP(controller.savePPOBAddress, Fixtures.validCurrentProfile, fakeRequest) { result =>
+      AuthHelpers.showAuthorisedWithCP(controller.savePPOBAddress(Some(testAlfId)), Fixtures.validCurrentProfile, fakeRequest) { result =>
         status(result) mustBe SEE_OTHER
       }
     }
 
     "return a DownstreamOutcome FAILURE" in new Setup {
+      val testAlfId = "1234567890"
       val expected =
-        Some(Address(
+        Address(
           "L1",
           "L2",
           Some("L3"),
           Some("L4"),
           Some("testPostcode"),
           Some("testCode")
-        ))
+        )
 
-      when(mockAddressLookupService.getAddress(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[_]]()))
+      when(mockAddressLookupService.getAddress(ArgumentMatchers.contains(testAlfId))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(expected))
 
       when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       when(mockPrepopulationService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future.successful(expected.get))
+        .thenReturn(Future.successful(expected))
 
-      AuthHelpers.showAuthorisedWithCP(controller.savePPOBAddress, Fixtures.validCurrentProfile, fakeRequest) { result =>
+      AuthHelpers.showAuthorisedWithCP(controller.savePPOBAddress(Some(testAlfId)), Fixtures.validCurrentProfile, fakeRequest) { result =>
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
     }

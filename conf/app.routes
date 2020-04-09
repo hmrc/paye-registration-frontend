@@ -35,7 +35,7 @@ POST        /confirm-registered-office-address                controllers.userJo
 ## PPOB ADDRESS
 GET         /where-company-carries-out-business-activities    controllers.userJourney.CompanyDetailsController.ppobAddress
 POST        /where-company-carries-out-business-activities    controllers.userJourney.CompanyDetailsController.submitPPOBAddress
-GET         /return-from-address-for-ppob                     controllers.userJourney.CompanyDetailsController.savePPOBAddress
+GET         /return-from-address-for-ppob                     controllers.userJourney.CompanyDetailsController.savePPOBAddress(id: Option[String])
 
 ## BUSINESS CONTACT DETAILS
 GET         /business-contact-details                         controllers.userJourney.CompanyDetailsController.businessContactDetails
@@ -80,7 +80,7 @@ POST        /who-should-we-contact                            controllers.userJo
 ## PAYE CONTACT DETAILS
 GET         /where-to-send-post                               controllers.userJourney.PAYEContactController.payeCorrespondenceAddress
 POST        /where-to-send-post                               controllers.userJourney.PAYEContactController.submitPAYECorrespondenceAddress
-GET         /return-from-address-for-corresp-addr             controllers.userJourney.PAYEContactController.savePAYECorrespondenceAddress
+GET         /return-from-address-for-corresp-addr             controllers.userJourney.PAYEContactController.savePAYECorrespondenceAddress(id: Option[String])
 
 ## SUMMARY
 GET         /check-and-confirm-your-answers                   controllers.userJourney.SummaryController.summary

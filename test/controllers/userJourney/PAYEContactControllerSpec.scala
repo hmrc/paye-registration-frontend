@@ -37,17 +37,17 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup {
     val testController = new PAYEContactController {
-      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
+      override val redirectToLogin = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
 
-      override val companyDetailsService  = mockCompanyDetailsService
-      override val payeContactService     = mockPAYEContactService
-      override val addressLookupService   = mockAddressLookupService
-      override val keystoreConnector      = mockKeystoreConnector
-      override val messagesApi            = mockMessagesApi
-      override val authConnector          = mockAuthConnector
-      override val prepopService          = mockPrepopService
-      override val auditService           = mockAuditService
+      override val companyDetailsService = mockCompanyDetailsService
+      override val payeContactService = mockPAYEContactService
+      override val addressLookupService = mockAddressLookupService
+      override val keystoreConnector = mockKeystoreConnector
+      override val messagesApi = mockMessagesApi
+      override val authConnector = mockAuthConnector
+      override val prepopService = mockPrepopService
+      override val auditService = mockAuditService
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
     }
@@ -61,7 +61,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
         .thenReturn(Future(Fixtures.validPAYEContactView))
 
       AuthHelpers.showAuthorisedWithCP(testController.payeContactDetails, Fixtures.validCurrentProfile, request) {
-        (result: Future[Result])  =>
+        (result: Future[Result]) =>
           status(result) mustBe OK
       }
     }
@@ -71,7 +71,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
         .thenReturn(Future(Fixtures.emptyPAYEContactView))
 
       AuthHelpers.showAuthorisedWithCP(testController.payeContactDetails, Fixtures.validCurrentProfile, request) {
-        (result: Future[Result])  =>
+        (result: Future[Result]) =>
           status(result) mustBe OK
       }
     }
@@ -84,7 +84,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
         .thenReturn(Future(None))
 
       AuthHelpers.showAuthorisedWithCP(testController.payeContactDetails, Fixtures.validCurrentProfile, request) {
-        (result: Future[Result])  =>
+        (result: Future[Result]) =>
           status(result) mustBe OK
       }
     }
@@ -134,7 +134,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "digitalContact.contactEmail" -> "tata@test.aaaaaaaaaaa"
       )
 
-      when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       when(mockPrepopService.saveContactDetails(ArgumentMatchers.eq(regId), ArgumentMatchers.any[PAYEContactDetails]())(ArgumentMatchers.any[HeaderCarrier]))
@@ -180,7 +180,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
       )
 
       val addressMap = Map(
-        "ro"             -> Fixtures.validCompanyDetailsViewModel.roAddress,
+        "ro" -> Fixtures.validCompanyDetailsViewModel.roAddress,
         "correspondence" -> Fixtures.validCompanyDetailsViewModel.ppobAddress.get
       )
 
@@ -191,7 +191,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
       when(mockPrepopService.getPrePopAddresses(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future(Map(1 ->Fixtures.validCompanyDetailsViewModel.roAddress)))
+        .thenReturn(Future(Map(1 -> Fixtures.validCompanyDetailsViewModel.roAddress)))
 
       when(mockPAYEContactService.getCorrespondenceAddresses(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(addressMap)
@@ -328,51 +328,53 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
     implicit val hc = HeaderCarrier()
 
     "return a DownStreamOutcome SUCCESS" in new Setup {
+      val testAlfId = "1234567890"
       val expected =
-        Some(Address(
+        Address(
           "L1",
           "L2",
           Some("L3"),
           Some("L4"),
           Some("testPostcode"),
           Some("testCode")
-        ))
+        )
 
-      when(mockAddressLookupService.getAddress(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[_]]()))
+      when(mockAddressLookupService.getAddress(ArgumentMatchers.contains(testAlfId))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(expected))
 
       when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
-          .thenReturn(Future.successful(expected.get))
+        .thenReturn(Future.successful(expected))
 
-      AuthHelpers.showAuthorisedWithCP(testController.savePAYECorrespondenceAddress, Fixtures.validCurrentProfile, request) { result =>
+      AuthHelpers.showAuthorisedWithCP(testController.savePAYECorrespondenceAddress(Some(testAlfId)), Fixtures.validCurrentProfile, request) { result =>
         status(result) mustBe SEE_OTHER
       }
     }
 
     "return a DownstreamOutcome FAILURE" in new Setup {
+      val testAlfId = "1234567890"
       val expected =
-        Some(Address(
+        Address(
           "L1",
           "L2",
           Some("L3"),
           Some("L4"),
           Some("testPostcode"),
           Some("testCode")
-        ))
+        )
 
-      when(mockAddressLookupService.getAddress(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[_]]()))
+      when(mockAddressLookupService.getAddress(ArgumentMatchers.contains(testAlfId))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(expected))
 
       when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future.successful(expected.get))
+        .thenReturn(Future.successful(expected))
 
-      AuthHelpers.showAuthorisedWithCP(testController.savePAYECorrespondenceAddress, Fixtures.validCurrentProfile, request) { result =>
+      AuthHelpers.showAuthorisedWithCP(testController.savePAYECorrespondenceAddress(Some(testAlfId)), Fixtures.validCurrentProfile, request) { result =>
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
     }
