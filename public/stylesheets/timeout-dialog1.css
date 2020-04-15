@@ -43,22 +43,3 @@ tbody tr {
 .spaced-above {
     padding-top: 20px;
 }
-
-
-/* Timeout Modal */
-
-.timeout-overlay {
-    background-color: #000;
-    filter: alpha(opacity=40);
-    -khtml-opacity: 0.4;
-    -moz-opacity: 0.4;
-    opacity: 0.4;
-}
-
-.button.button--link {
-    font-size: 19px;
-    margin: 0;
-    padding: 0;
-    font-weight:700;
-    color: black;
-}

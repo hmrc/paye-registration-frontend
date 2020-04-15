@@ -15,15 +15,16 @@
  *@
 
 @import config.AppConfig
+@import controllers.userJourney.routes.SignInOutController
 
 @(appConfig: AppConfig)
 
 <script type="text/javascript" charset="utf-8">
-    $.timeoutDialog({
+    window.GOVUK.timeoutDialog({
         timeout: @appConfig.timeoutInSeconds,
         countdown: @appConfig.timeoutDisplayLength,
-        keep_alive_url: '/register-for-paye/renew-session',
-        logout_url: '/register-for-paye/error/destroy-session'
+        keepAliveUrl: '@SignInOutController.renewSession.url',
+        signOutUrl: '@SignInOutController.destroySession.url'
     });
 
     var dialogOpen;

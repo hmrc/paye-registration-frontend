@@ -70,7 +70,7 @@
         m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
         })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
     </script>
-    <script src='@controllers.routes.Assets.at("javascripts/timeout-dialog.js")' type="text/javascript"></script>
+    @timeout_script(appConfig)
     <script type="text/javascript" charset="utf-8">$.timeoutDialog({timeout: @appConfig.timeoutInSeconds,countdown: 30,keep_alive_url: '/register-for-paye/renew-session',logout_url: '/register-for-paye/error/destroy-session'});var dialogOpen;</script>
 }
 
