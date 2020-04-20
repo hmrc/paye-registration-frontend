@@ -39,7 +39,6 @@ trait FeatureSwitchController extends FrontendController {
     implicit request =>
       def updateFeature: FeatureSwitch = featureState match {
         case "true"                                      => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
-        case "addressLookupFrontend"                     => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
         case x if x.matches(Validators.datePatternRegex) => featureManager.setSystemDate(ValueSetFeatureSwitch(featureName, featureState))
         case x@"time-clear"                              => featureManager.clearSystemDate(ValueSetFeatureSwitch(featureName, x))
         case _                                           => featureManager.disable(BooleanFeatureSwitch(featureName, enabled = false))

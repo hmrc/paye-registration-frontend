@@ -105,30 +105,26 @@ trait FeatureManager {
 }
 
 class PAYEFeatureSwitch @Inject()(val manager: FeatureManager) extends PAYEFeatureSwitches {
-  val addressLookupUrl         = "addressService"
   val companyRegistration      = "companyRegistration"
   val setSystemDate            = "system-date"
 }
 
 trait PAYEFeatureSwitches {
 
-  protected val addressLookupUrl: String
   protected val companyRegistration: String
   protected val setSystemDate: String
   protected val manager: FeatureManager
 
-  def addressLookupFrontend = manager.getProperty(addressLookupUrl)
   def companyReg            = manager.getProperty(companyRegistration)
   def systemDate            = manager.getProperty(setSystemDate)
 
   def apply(name: String): Option[FeatureSwitch] = name match {
-    case "addressService"       => Some(addressLookupFrontend)
     case "companyRegistration"  => Some(companyReg)
     case "system-date"          => Some(systemDate)
     case _                      => None
   }
 
   def all: Seq[FeatureSwitch] = {
-    Seq(addressLookupFrontend, companyReg, systemDate )
+    Seq(companyReg, systemDate )
   }
 }

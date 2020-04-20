@@ -147,7 +147,7 @@ trait CompanyDetailsController extends PayeBaseController {
       success => submitPPOBAddressChoice(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
         case DownstreamOutcome.Success  => Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
         case DownstreamOutcome.Failure  => Future.successful(InternalServerError(views.html.pages.error.restart()))
-        case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("ppob", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress()) map {
+        case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("ppob", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress(None)) map {
           redirectUrl => Redirect(redirectUrl)
         }
       }
@@ -180,14 +180,19 @@ trait CompanyDetailsController extends PayeBaseController {
     }
   }
 
-  def savePPOBAddress: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    for {
-      Some(address) <- addressLookupService.getAddress
-      res           <- companyDetailsService.submitPPOBAddr(address, profile.registrationID, profile.companyTaxRegistration.transactionId)
-      _             <- prepopService.saveAddress(profile.registrationID, address)
-    } yield res match {
-      case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
-      case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-    }
+  def savePPOBAddress(alfId: Option[String]): Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    profile =>
+      alfId match {
+        case Some(id) => for {
+          address <- addressLookupService.getAddress(id)
+          res <- companyDetailsService.submitPPOBAddr(address, profile.registrationID, profile.companyTaxRegistration.transactionId)
+          _ <- prepopService.saveAddress(profile.registrationID, address)
+        } yield res match {
+          case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
+          case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+        }
+        case None =>
+          throw new Exception("[CompanyDetailsController] [savePPOBAddress] 'id' query string missing from ALF handback")
+      }
   }
 }

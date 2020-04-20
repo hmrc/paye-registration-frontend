@@ -109,7 +109,7 @@ trait PAYEContactController extends PayeBaseController {
       success => submitCorrespondenceAddress(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
         case DownstreamOutcome.Success  => Future.successful(Redirect(controllers.userJourney.routes.SummaryController.summary()))
         case DownstreamOutcome.Failure  => Future.successful(InternalServerError(views.html.pages.error.restart()))
-        case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("correspondence", controllers.userJourney.routes.PAYEContactController.savePAYECorrespondenceAddress()) map {
+        case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("correspondence", controllers.userJourney.routes.PAYEContactController.savePAYECorrespondenceAddress(None)) map {
           Redirect(_)
         }
       }
@@ -159,15 +159,20 @@ trait PAYEContactController extends PayeBaseController {
     }
   }
 
-  def savePAYECorrespondenceAddress: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    for {
-      Some(address) <- addressLookupService.getAddress
-      res           <- payeContactService.submitCorrespondence(profile.registrationID, address )
-      _             <- prepopService.saveAddress(profile.registrationID, address)
-    } yield res match {
-      case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
-      case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-    }
+  def savePAYECorrespondenceAddress(alfId: Option[String]): Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    profile =>
+      alfId match {
+        case Some(id) => for {
+          address <- addressLookupService.getAddress(id)
+          res <- payeContactService.submitCorrespondence(profile.registrationID, address )
+          _ <- prepopService.saveAddress(profile.registrationID, address)
+        } yield res match {
+          case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
+          case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+        }
+        case None =>
+          throw new Exception("[PAYEContactController] [savePAYECorrespondenceAddress] 'id' query string missing from ALF handback")
+      }
   }
 
   private def trimPAYEContactDetails(details: PAYEContactDetails) = details.copy(

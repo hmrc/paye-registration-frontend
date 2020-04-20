@@ -16,121 +16,46 @@
 
 package connectors
 
-import javax.inject.Inject
 import com.codahale.metrics.{Counter, Timer}
 import common.Logging
-import config.WSHttp
+import config.{FrontendAppConfig, WSHttp}
+import javax.inject.{Inject, Singleton}
 import models.Address
 import models.external._
-import play.api.{Configuration, Environment}
 import play.api.i18n.MessagesApi
-import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.Call
+import play.api.libs.json.Reads
 import services.MetricsService
-import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 import scala.util.control.NoStackTrace
 
-class AddressLookupConnectorImpl @Inject()(val metricsService: MetricsService,
-                                           val messagesApi: MessagesApi,
-                                           val http: WSHttp,
-                                           override val runModeConfiguration: Configuration,
-                                           environment: Environment)extends AddressLookupConnector with ServicesConfig{
-  val addressLookupFrontendUrl     = baseUrl("address-lookup-frontend")
-  lazy val payeRegistrationUrl     = getConfString("paye-registration-frontend.www.url","")
-  val successCounter               = metricsService.addressLookupSuccessResponseCounter
-  val failedCounter                = metricsService.addressLookupFailedResponseCounter
-  def timer            = metricsService.addressLookupResponseTimer.time()
-  lazy val timeoutAmount: Int      = runModeConfiguration.underlying.getInt("timeoutInSeconds")
-  override protected def mode = environment.mode
-}
+@Singleton
+class AddressLookupConnector @Inject()(metricsService: MetricsService,
+                                       http: WSHttp,
+                                       frontendAppConfig: FrontendAppConfig
+                                      )(implicit messagesApi: MessagesApi)
+  extends Logging {
 
-class ALFLocationHeaderNotSetException extends NoStackTrace
+  lazy val addressLookupFrontendUrl: String = frontendAppConfig.baseUrl("address-lookup-frontend")
+  val successCounter: Counter = metricsService.addressLookupSuccessResponseCounter
+  val failedCounter: Counter = metricsService.addressLookupFailedResponseCounter
 
-trait AddressLookupConnector extends Logging {
+  def timer: Timer.Context = metricsService.addressLookupResponseTimer.time()
 
-  val addressLookupFrontendUrl: String
-  val payeRegistrationUrl: String
-  val http: CoreGet with CorePost
-  val metricsService: MetricsService
-  val messagesApi: MessagesApi
-
-  val successCounter: Counter
-  val failedCounter: Counter
-  def timer: Timer.Context
-
-  val timeoutAmount: Int
-
-  def getAddress(id: String)(implicit hc: HeaderCarrier) = {
-    implicit val reads = Address.addressLookupReads
+  def getAddress(id: String)(implicit hc: HeaderCarrier): Future[Address] = {
+    implicit val reads: Reads[Address] = Address.addressLookupReads
     metricsService.processDataResponseWithMetrics[Address](successCounter, failedCounter, timer) {
       http.GET[Address](s"$addressLookupFrontendUrl/api/confirmed?id=$id")
     }
   }
 
-  private[connectors] def createOnRampJson(key: String, call: Call): JsObject = {
-    val showBackButtons: Boolean       = true
-    val showPhaseBanner: Boolean       = true
-    val includeHMRCBranding: Boolean   = false
-    val proposalListLimit: Int         = 20
-    val showSearchAgainLink: Boolean   = true
-    val showChangeLink: Boolean        = true
-    val showSubHeadingAndInfo: Boolean = false
-
-    val conf = AddressLookupFrontendConf(
-      continueUrl = s"$payeRegistrationUrl${call.url}",
-      navTitle = messagesApi("pages.alf.common.navTitle"),
-      showPhaseBanner = showPhaseBanner,
-      phaseBannerHtml = messagesApi("pages.alf.common.phaseBannerHtml"),
-      showBackButtons = showBackButtons,
-      includeHMRCBranding = includeHMRCBranding,
-      deskProServiceName = messagesApi("pages.alf.common.deskProServiceName"),
-      lookupPage = LookupPage(
-        title = messagesApi(s"pages.alf.$key.lookupPage.title"),
-        heading = messagesApi(s"pages.alf.common.lookupPage.heading"),
-        filterLabel = messagesApi(s"pages.alf.common.lookupPage.filterLabel"),
-        submitLabel = messagesApi(s"pages.alf.common.lookupPage.submitLabel")
-      ),
-      selectPage = SelectPage(
-        title = messagesApi(s"pages.alf.common.selectPage.description"),
-        heading = messagesApi(s"pages.alf.common.selectPage.description"),
-        proposalListLimit = proposalListLimit,
-        showSearchAgainLink = showSearchAgainLink
-      ),
-      editPage = EditPage(
-        title = messagesApi(s"pages.alf.common.editPage.description"),
-        heading = messagesApi(s"pages.alf.common.editPage.description"),
-        line1Label = messagesApi(s"pages.alf.common.editPage.line1Label"),
-        line2Label = messagesApi(s"pages.alf.common.editPage.line2Label"),
-        line3Label = messagesApi(s"pages.alf.common.editPage.line3Label"),
-        showSearchAgainLink = showSearchAgainLink
-      ),
-      confirmPage = ConfirmPage(
-        title = messagesApi(s"pages.alf.common.confirmPage.title"),
-        heading = messagesApi(s"pages.alf.$key.confirmPage.heading"),
-        showSubHeadingAndInfo = showSubHeadingAndInfo,
-        submitLabel = messagesApi(s"pages.alf.common.confirmPage.submitLabel"),
-        showChangeLink = showChangeLink,
-        changeLinkText = messagesApi(s"pages.alf.common.confirmPage.changeLinkText")
-      ),
-      timeout = Timeout(
-        timeoutAmount = timeoutAmount,
-        timeoutUrl = s"$payeRegistrationUrl${controllers.userJourney.routes.SignInOutController.destroySession().url}"
-      )
-    )
-
-    Json.toJson(conf).as[JsObject]
-  }
-
-  def getOnRampUrl(key: String, call: Call)(implicit hc: HeaderCarrier): Future[String] = {
-    val postUrl      = s"$addressLookupFrontendUrl/api/init"
-    val continueJson = createOnRampJson(key, call)
+  def getOnRampUrl(alfJourneyConfig: AlfJourneyConfig)(implicit hc: HeaderCarrier): Future[String] = {
+    val postUrl = s"$addressLookupFrontendUrl/api/init"
 
     metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
-      http.POST[JsObject, HttpResponse](postUrl, continueJson)
+      http.POST[AlfJourneyConfig, HttpResponse](postUrl, alfJourneyConfig)
     } map {
       _.header("Location").getOrElse {
         logger.warn("[AddressLookupConnector] [getOnRampUrl] - ERROR: Location header not set in ALF response")
@@ -139,3 +64,5 @@ trait AddressLookupConnector extends Logging {
     }
   }
 }
+
+class ALFLocationHeaderNotSetException extends NoStackTrace
