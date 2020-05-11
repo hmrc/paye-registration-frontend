@@ -17,54 +17,57 @@
 @import helpers.templates.{oneOfManyErrorWrapper, payeErrorSummary, payeInput}
 @import models.DigitalContactDetails
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
-@(contactForm: Form[DigitalContactDetails])(implicit request: Request[_], messages: Messages)
+@(contactForm: Form[DigitalContactDetails], companyName: String)(implicit request: Request[_], messages: Messages)
+
+
 
 @formContent = {
     <fieldset>
         <legend class="visually-hidden">
-            @Messages("pages.businessContact.description")
+        @Messages("pages.businessContact.description")
         </legend>
         <div class="form-group">
-            @payeInput(
+        @payeInput(
             contactForm("businessEmail"),
             '_inputClass -> "form-control-1-2",
             '_labelClass -> "form-label cascading",
             '_label -> messages("pages.businessContact.email")
-            )
+        )
         </div>
 
         <div class="form-group">
-            @payeInput(
+        @payeInput(
             contactForm("mobileNumber"),
             '_labelClass -> "form-label cascading",
             '_inputClass -> "form-control-1-2",
             '_label -> messages("pages.businessContact.contact")
-            )
+        )
         </div>
 
         <div>
-            @payeInput(
+        @payeInput(
             contactForm("phoneNumber"),
             '_labelClass -> "form-label cascading",
             '_inputClass -> "form-control-1-2",
             '_label -> messages("pages.businessContact.othercontact")
-            )
+        )
         </div>
     </fieldset>
 }
 
-@main_template(title = messages("pages.businessContact.description")) {
+@main_template(title = messages("pages.businessContact.description", companyName)) {
 
     @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), contactForm, dataJourney=Some("DigitalContactDetails")
+        messages("app.common.errorSummaryLabel"), contactForm, dataJourney = Some("DigitalContactDetails")
     )
 
-    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.businessContact.description")</h1>
+    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.businessContact.description", companyName)</h1>
+    <p id = leadParagraph>@Messages("pages.businessContact.subdescription")</p>
 
     @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.submitBusinessContactDetails()) {
 
         <div class="form-group">
-            @oneOfManyErrorWrapper(contactForm, formContent)
+        @oneOfManyErrorWrapper(contactForm, formContent)
         </div>
 
         <div class="form-group">

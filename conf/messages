@@ -104,13 +104,12 @@ pages.correspondenceAddress.other                               = A different ad
 pages.correspondenceAddress.addressChoice.noEntry               = Tell us where we should send post about the company''s PAYE
 
 ## Business Contact Details
-pages.businessContact.description                               = What are the company''s contact details?
-pages.businessContactDetails.p1                                 = Let us know how we can get in touch if we need more information about the company.
-pages.businessContactDetails.p2.indent                          = You need to provide at least one of the following contact details.
+pages.businessContact.description                               = Give us one or more ways to contact {0}
+pages.businessContact.subdescription                            = We will only do this if we have questions about the company''s Corporation Tax.
 pages.businessContact.email                                     = Email address
 pages.businessContact.contact                                   = Contact number
 pages.businessContact.othercontact                              = Other contact number (optional)
-pages.businessContact.noFieldsCompleted                         = Enter the company''s contact details
+pages.businessContact.noFieldsCompleted                         = Enter at least one way to contact the company
 
 ## PAYE Contact Details
 pages.payeContact.description                                   = Who should we contact about the company''s PAYE?

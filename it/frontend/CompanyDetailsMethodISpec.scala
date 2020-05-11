@@ -973,7 +973,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "What are the company's contact details?"
+      document.title() mustBe s"Give us one or more ways to contact $companyName"
       document.getElementById("businessEmail").attr("value") mustBe "email@email.zzz"
       document.getElementById("mobileNumber").attr("value") mustBe "1234567890"
       document.getElementById("phoneNumber").attr("value") mustBe "0987654321"
@@ -1008,7 +1008,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "What are the company's contact details?"
+      document.title() mustBe s"Give us one or more ways to contact $companyName"
       document.getElementById("businessEmail").attr("value") mustBe "email@email.zzz"
       document.getElementById("mobileNumber").attr("value") mustBe "1234567890"
       document.getElementById("phoneNumber").attr("value") mustBe "0987654321"
@@ -1038,7 +1038,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "What are the company's contact details?"
+      document.title() mustBe s"Give us one or more ways to contact $companyName"
       document.getElementById("businessEmail").attr("value") mustBe ""
       document.getElementById("mobileNumber").attr("value") mustBe ""
       document.getElementById("phoneNumber").attr("value") mustBe ""
@@ -1068,7 +1068,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "What are the company's contact details?"
+      document.title() mustBe s"Give us one or more ways to contact $companyName"
       document.getElementById("businessEmail").attr("value") mustBe ""
       document.getElementById("mobileNumber").attr("value") mustBe ""
       document.getElementById("phoneNumber").attr("value") mustBe ""
@@ -1110,7 +1110,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "What are the company's contact details?"
+      document.title() mustBe s"Give us one or more ways to contact $companyName"
       document.getElementById("businessEmail").attr("value") mustBe ""
       document.getElementById("mobileNumber").attr("value") mustBe ""
       document.getElementById("phoneNumber").attr("value") mustBe ""
@@ -1182,14 +1182,14 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val previousContactDetails = DigitalContactDetails(
         Some(oldEmail),
-        Some(oldMobileNumber),
-        Some(oldTelephoneNumber)
+        Some(oldTelephoneNumber),
+        Some(oldMobileNumber)
       )
 
       val newContactDetails = DigitalContactDetails(
         Some(newEmail),
-        Some(newMobileNumber),
-        Some(newTelephoneNumber)
+        Some(newTelephoneNumber),
+        Some(newMobileNumber)
       )
 
       (jsonAudit \ "auditSource").as[JsString].value mustBe "paye-registration-frontend"
@@ -1202,7 +1202,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val tags = (jsonAudit \ "tags").as[JsObject].value
       tags("clientIP") mustBe Json.toJson("-")
-      tags("path") mustBe Json.toJson("/register-for-paye/business-contact-details")
+      tags("path") mustBe Json.toJson("/register-for-paye/what-company-does")
       tags("clientPort") mustBe Json.toJson("-")
       tags.contains("X-Session-ID") mustBe true
       tags.contains("X-Request-ID") mustBe true
