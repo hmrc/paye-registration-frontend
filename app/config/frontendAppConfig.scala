@@ -16,6 +16,7 @@
 
 package config
 
+import java.net.URLEncoder
 import java.nio.charset.Charset
 import java.util.Base64
 
@@ -31,8 +32,7 @@ import uk.gov.hmrc.play.config.ServicesConfig
 
 @Singleton
 class FrontendAppConfig @Inject()(val environment: Environment,
-                                  val runModeConfiguration: Configuration)
-  extends ServicesConfig {
+                                  val runModeConfiguration: Configuration) extends ServicesConfig {
 
   override protected def mode: Mode = environment.mode
 
@@ -78,6 +78,12 @@ class FrontendAppConfig @Inject()(val environment: Environment,
   lazy val uriWhiteList: Set[String] = configuration.getStringSeq("csrfexceptions.whitelist").getOrElse(Seq.empty).toSet
   lazy val csrfBypassValue: String = loadStringConfigBase64("Csrf-Bypass-value")
 
+  private def encodeUrl(url: String): String = URLEncoder.encode(url, "UTF-8")
+
+  def accessibilityStatementUrl(pageUri: String) = controllers.routes.AccessibilityStatementController.show(pageUri).url
+
+  def accessibilityReportUrl(userAction: String): String =
+    s"$contactFrontendPartialBaseUrl/contact/accessibility-unauthenticated?service=paye-registration-frontend&userAction=${encodeUrl(userAction)}"
 }
 
 trait AppConfig {
@@ -90,6 +96,9 @@ trait AppConfig {
 
   val timeoutInSeconds: String
   val timeoutDisplayLength: String
+  def encodeUrl(url: String): String
+  def accessibilityStatementUrl(pageUri: String): String
+  def accessibilityReportUrl(userAction: String): String
 
 }
 
@@ -138,4 +147,12 @@ object FrontendAppConfig extends AppConfig with ServicesConfig { //TODO Inject t
   override protected def mode: Mode = Play.current.mode
 
   override protected def runModeConfiguration: Configuration = Play.current.configuration
+
+  override def encodeUrl(url: String): String = URLEncoder.encode(url, "UTF-8")
+
+  override def accessibilityStatementUrl(pageUri: String): String = controllers.routes.AccessibilityStatementController.show(pageUri).url
+
+  override def accessibilityReportUrl(userAction: String): String =
+    s"$contactFrontendPartialBaseUrl/contact/accessibility-unauthenticated?service=paye-registration-frontend&userAction=${encodeUrl(userAction)}"
+
 }
