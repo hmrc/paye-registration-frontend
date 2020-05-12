@@ -1161,7 +1161,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubPatch(s"/paye-registration/$regId/company-details", 200, updatedPayeDoc)
       stubDelete(s"/save4later/paye-registration-frontend/$regId", 200, "")
 
-      val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
+      val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken, "CompanyName" -> "CompName"))
       val fResponse = buildClient("/business-contact-details").
         withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
         post(Map(
@@ -1182,14 +1182,14 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val previousContactDetails = DigitalContactDetails(
         Some(oldEmail),
-        Some(oldTelephoneNumber),
-        Some(oldMobileNumber)
+        Some(oldMobileNumber),
+        Some(oldTelephoneNumber)
       )
 
       val newContactDetails = DigitalContactDetails(
         Some(newEmail),
-        Some(newTelephoneNumber),
-        Some(newMobileNumber)
+        Some(newMobileNumber),
+        Some(newTelephoneNumber)
       )
 
       (jsonAudit \ "auditSource").as[JsString].value mustBe "paye-registration-frontend"
@@ -1202,7 +1202,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val tags = (jsonAudit \ "tags").as[JsObject].value
       tags("clientIP") mustBe Json.toJson("-")
-      tags("path") mustBe Json.toJson("/register-for-paye/what-company-does")
+      tags("path") mustBe Json.toJson("/register-for-paye/business-contact-details")
       tags("clientPort") mustBe Json.toJson("-")
       tags.contains("X-Session-ID") mustBe true
       tags.contains("X-Request-ID") mustBe true
@@ -1251,7 +1251,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
 
-      val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
+      val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken, "CompanyName" -> "CompName"))
       val fResponse = buildClient("/business-contact-details").
         withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
         post(Map(

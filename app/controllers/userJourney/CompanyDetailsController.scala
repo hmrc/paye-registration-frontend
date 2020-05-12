@@ -126,8 +126,7 @@ trait CompanyDetailsController extends PayeBaseController {
       implicit audit =>
         optCompanyName match {
           case Some(companyName) => BusinessContactDetailsForm.form.bindFromRequest.fold(
-            errs => Future.successful(BadRequest(BusinessContactDetailsPage(errs,companyName))
-            .removingFromSession(companyNameKey)),
+            errs => Future.successful(BadRequest(BusinessContactDetailsPage(errs,companyName))),
             success => {
               val trimmed = success.copy(email = success.email map (_.trim), phoneNumber = success.phoneNumber map (_.trim), mobileNumber = success.mobileNumber map (_.trim))
               companyDetailsService.submitBusinessContact(trimmed, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
