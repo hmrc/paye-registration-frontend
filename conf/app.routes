@@ -107,3 +107,6 @@ GET        /business-registration-overview                    controllers.userJo
 ## Questionnaire
 
 GET       /questionnaire                                     controllers.userJourney.EligibilityController.questionnaire
+
+## Accessibility
+GET        /accessibility-statement                          controllers.AccessibilityStatementController.show(pageUri: String)
