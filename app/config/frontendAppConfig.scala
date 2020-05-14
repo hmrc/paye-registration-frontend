@@ -84,7 +84,7 @@ class FrontendAppConfig @Inject()(val environment: Environment,
   def accessibilityStatementUrl(pageUri: String) = controllers.routes.AccessibilityStatementController.show(pageUri).url
 
   def accessibilityReportUrl(userAction: String): String =
-    s"$contactFrontendPartialBaseUrl/contact/accessibility-unauthenticated?service=paye-registration-frontend&userAction=${encodeUrl(userAction)}"
+    s"$contactHost/contact/accessibility-unauthenticated?service=paye-registration-frontend&userAction=${encodeUrl(userAction)}"
 }
 
 trait AppConfig {
