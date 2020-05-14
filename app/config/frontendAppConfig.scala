@@ -41,6 +41,7 @@ class FrontendAppConfig @Inject()(val environment: Environment,
   val contactFormServiceIdentifier = "SCRS"
 
   lazy val contactFrontendPartialBaseUrl: String = baseUrl("contact-frontend")
+  lazy val contactHost: String = loadConfig("contact-frontend.host")
 
   lazy val analyticsToken: String = loadConfig("google-analytics.token")
   lazy val analyticsHost: String = loadConfig("google-analytics.host")
@@ -93,6 +94,7 @@ trait AppConfig {
   val reportAProblemNonJSUrl: String
 
   val contactFrontendPartialBaseUrl: String
+  val contactHost: String
 
   val timeoutInSeconds: String
   val timeoutDisplayLength: String
@@ -108,6 +110,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig { //TODO Inject t
   val contactFormServiceIdentifier = "SCRS"
 
   override lazy val contactFrontendPartialBaseUrl = baseUrl("contact-frontend")
+  override lazy val contactHost: String = loadConfig("contact-frontend.host")
 
   override lazy val analyticsToken = loadConfig("google-analytics.token")
   override lazy val analyticsHost = loadConfig("google-analytics.host")
@@ -153,6 +156,6 @@ object FrontendAppConfig extends AppConfig with ServicesConfig { //TODO Inject t
   override def accessibilityStatementUrl(pageUri: String): String = controllers.routes.AccessibilityStatementController.show(pageUri).url
 
   override def accessibilityReportUrl(userAction: String): String =
-    s"$contactFrontendPartialBaseUrl/contact/accessibility-unauthenticated?service=paye-registration-frontend&userAction=${encodeUrl(userAction)}"
+    s"$contactHost/contact/accessibility-unauthenticated?service=paye-registration-frontend&userAction=${encodeUrl(userAction)}"
 
 }
