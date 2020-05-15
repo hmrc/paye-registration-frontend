@@ -17,7 +17,9 @@
 @import helpers.templates.{oneOfManyErrorWrapper, payeErrorSummary, payeInput}
 @import models.DigitalContactDetails
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
-@(contactForm: Form[DigitalContactDetails])(implicit request: Request[_], messages: Messages)
+@(contactForm: Form[DigitalContactDetails], companyName: String)(implicit request: Request[_], messages: Messages)
+
+
 
 @formContent = {
     <fieldset>
@@ -53,13 +55,13 @@
     </fieldset>
 }
 
-@main_template(title = messages("pages.businessContact.description")) {
+@main_template(title = messages("pages.businessContact.description", companyName)) {
 
     @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), contactForm, dataJourney=Some("DigitalContactDetails")
+        messages("app.common.errorSummaryLabel"), contactForm, dataJourney = Some("DigitalContactDetails")
     )
 
-    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.businessContact.description")</h1>
+    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.businessContact.description", companyName)</h1>
 
     @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.submitBusinessContactDetails()) {
 

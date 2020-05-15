@@ -55,6 +55,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val payeRegistrationService = mockPayeRegService
     }
   }
+  val companyNameKey:String = "CompanyName"
 
   val tstTradingNameModel = TradingNameView(differentName = true, tradingName = Some("test trading name"))
 
@@ -335,7 +336,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
-      AuthHelpers.submitAuthorisedWithCPAndAudit(controller.submitBusinessContactDetails, Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody()) {
+      AuthHelpers.submitAuthorisedWithCPAndAudit(controller.submitBusinessContactDetails, Fixtures.validCurrentProfile, fakeRequest.withSession(companyNameKey -> "FakeCompany").withFormUrlEncodedBody()) {
         result =>
           status(result) mustBe BAD_REQUEST
       }
@@ -345,7 +346,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockCompanyDetailsService.submitBusinessContact(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-      AuthHelpers.submitAuthorisedWithCPAndAudit(controller.submitBusinessContactDetails, Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
+      AuthHelpers.submitAuthorisedWithCPAndAudit(controller.submitBusinessContactDetails, Fixtures.validCurrentProfile, fakeRequest.withSession(companyNameKey -> "FakeCompany").withFormUrlEncodedBody(
         "mobileNumber" -> "07123456789"
       )) {
         result =>
@@ -357,7 +358,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockCompanyDetailsService.submitBusinessContact(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      AuthHelpers.submitAuthorisedWithCPAndAudit(controller.submitBusinessContactDetails, Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
+      AuthHelpers.submitAuthorisedWithCPAndAudit(controller.submitBusinessContactDetails, Fixtures.validCurrentProfile, fakeRequest.withSession(companyNameKey -> "FakeCompany").withFormUrlEncodedBody(
         "mobileNumber" -> "07123456789"
       )) {
         result =>
