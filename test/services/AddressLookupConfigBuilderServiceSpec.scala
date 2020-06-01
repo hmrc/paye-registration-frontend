@@ -38,52 +38,64 @@ class AddressLookupConfigBuilderServiceSpec extends PayeComponentSpec with PayeF
       )
 
       val expectedConfig: AlfJourneyConfig = AlfJourneyConfig(
-        topLevelConfig = TopLevelConfig(
+        version = AlfJourneyConfig.defaultConfigVersion,
+        options = JourneyOptions(
           continueUrl = "testPayeRegUrl/foo",
           homeNavHref = "http://www.hmrc.gov.uk/",
-          navTitle = "Register an employer for PAYE",
+          deskProServiceName = "SCRS",
           showPhaseBanner = true,
           alphaPhase = false,
-          phaseBannerHtml = "This is a new service. Help us improve it - send your <a href=\"https://www.tax.service.gov.uk/register-for-paye/feedback\">feedback</a>.",
-          includeHMRCBranding = false,
           showBackButtons = true,
-          deskProServiceName = "SCRS"
+          includeHMRCBranding = false,
+
+          selectPageConfig = SelectPageConfig(
+            proposalListLimit = 30,
+            showSearchAgainLink = true
+          ),
+
+          confirmPageConfig = ConfirmPageConfig(
+            showSearchAgainLink = false,
+            showSubHeadingAndInfo = false,
+            showChangeLink = true
+          ),
+
+          timeoutConfig = TimeoutConfig(
+            timeoutAmount = 22666,
+            timeoutUrl = "testPayeRegUrl/register-for-paye/error/timeout"
+          )
         ),
-        lookupPageConfig = LookupPageConfig(
-          title = "Company address",
-          heading = "Search for your address",
-          filterLabel = "House name or number (optional)",
-          submitLabel = "Search address",
-          manualAddressLinkText = "The address doesn't have a UK postcode"
-        ),
-        selectPageConfig = SelectPageConfig(
-          title = "Choose an address",
-          heading = "Choose an address",
-          proposalListLimit = 20,
-          showSearchAgainLink = true,
-          searchAgainLinkText = "Search again",
-          editAddressLinkText = "Edit address manually"
-        ),
-        editPageConfig = EditPageConfig(
-          title = "Enter address",
-          heading = "Enter address",
-          line1Label = "Address line 1",
-          line2Label = "Address line 2",
-          line3Label = "Address line 3",
-          showSearchAgainLink = true
-        ),
-        confirmPageConfig = ConfirmPageConfig(
-          title = "Confirm address",
-          heading = "Confirm where you'll carry out most of your business activities",
-          showSubHeadingAndInfo = false,
-          submitLabel = "Save and continue",
-          showSearchAgainLink = false,
-          showChangeLink = true,
-          changeLinkText = "Change"
-        ),
-        timeoutConfig = TimeoutConfig(
-          timeoutAmount = 22666,
-          timeoutUrl = "testPayeRegUrl/register-for-paye/error/timeout"
+        labels = JourneyLabels(en = LanguageLabels(
+          appLevelLabels = AppLevelLabels(
+            navTitle = "Register an employer for PAYE",
+            phaseBannerHtml = "This is a new service. Help us improve it - send your <a href=\"https://www.tax.service.gov.uk/register-for-paye/feedback\">feedback</a>."
+          ),
+          SelectPageLabels(
+            title = "Choose an address",
+            heading = "Choose an address",
+            searchAgainLinkText = "Search again",
+            editAddressLinkText = "Edit address manually"
+          ),
+          LookupPageLabels(
+            title = "Company address",
+            heading = "Search for your address",
+            filterLabel = "House name or number (optional)",
+            submitLabel = "Search address",
+            manualAddressLinkText = "The address doesn't have a UK postcode"
+          ),
+          EditPageLabels(
+            title = "Enter address",
+            heading = "Enter address",
+            line1Label = "Address line 1",
+            line2Label = "Address line 2",
+            line3Label = "Address line 3"
+          ),
+          ConfirmPageLabels(
+            title = "Confirm address",
+            heading = "Confirm where you'll carry out most of your business activities",
+            submitLabel = "Save and continue",
+            changeLinkText = "Change"
+          )
+        )
         )
       )
 

@@ -18,134 +18,89 @@ package models.external
 
 import play.api.libs.json._
 
-case class AlfJourneyConfig(topLevelConfig: TopLevelConfig,
-                            timeoutConfig: TimeoutConfig,
-                            lookupPageConfig: LookupPageConfig,
-                            selectPageConfig: SelectPageConfig,
-                            editPageConfig: EditPageConfig,
-                            confirmPageConfig: ConfirmPageConfig)
+case class AlfJourneyConfig(version: Int = AlfJourneyConfig.defaultConfigVersion,
+                            options: JourneyOptions,
+                            labels: JourneyLabels
+                           )
 
-object AlfJourneyConfig {
-  implicit val writer: OWrites[AlfJourneyConfig] = new OWrites[AlfJourneyConfig] {
-    override def writes(alfJourneyConfig: AlfJourneyConfig): JsObject = {
-      Json.toJson(alfJourneyConfig.topLevelConfig).as[JsObject] ++ Json.obj(
-        "timeout" -> Json.toJson(alfJourneyConfig.timeoutConfig),
-        "lookupPage" -> Json.toJson(alfJourneyConfig.lookupPageConfig),
-        "selectPage" -> Json.toJson(alfJourneyConfig.selectPageConfig),
-        "editPage" -> Json.toJson(alfJourneyConfig.editPageConfig),
-        "confirmPage" -> Json.toJson(alfJourneyConfig.confirmPageConfig)
-      )
-    }
-  }
-
-  implicit val reader: Reads[AlfJourneyConfig] = new Reads[AlfJourneyConfig] {
-    override def reads(json: JsValue): JsResult[AlfJourneyConfig] = {
-
-      val continueUrl = (json \ "continueUrl").as[String]
-      val homeNavHref = (json \ "homeNavHref").as[String]
-      val navTitle = (json \ "navTitle").as[String]
-      val showPhaseBanner = (json \ "showPhaseBanner").as[Boolean]
-      val alphaPhaseBanner = (json \ "alphaPhaseBanner").as[Boolean]
-      val phaseBannerHtml = (json \ "phaseBannerHtml").as[String]
-      val includeHMRCBranding = (json \ "includeHMRCBranding").as[Boolean]
-      val showBackButtons = (json \ "showBackButtons").as[Boolean]
-      val deskProServiceName = (json \ "deskProServiceName").as[String]
-
-      val topLevelConfig = TopLevelConfig(
-        continueUrl,
-        homeNavHref,
-        navTitle,
-        showPhaseBanner,
-        alphaPhaseBanner,
-        phaseBannerHtml,
-        includeHMRCBranding,
-        showBackButtons,
-        deskProServiceName
-      )
-
-      val timeoutConfig = (json \ "timeout").as[TimeoutConfig]
-      val lookupPageConfig = (json \ "lookupPage").as[LookupPageConfig]
-      val selectPageConfig = (json \ "selectPage").as[SelectPageConfig]
-      val editPageConfig = (json \ "editPage").as[EditPageConfig]
-      val confirmPageConfig = (json \ "confirmPage").as[ConfirmPageConfig]
-
-      JsSuccess(
-        AlfJourneyConfig(
-          topLevelConfig,
-          timeoutConfig,
-          lookupPageConfig,
-          selectPageConfig,
-          editPageConfig,
-          confirmPageConfig
-        )
-      )
-
-    }
-  }
-
-}
-
-case class TopLevelConfig(continueUrl: String,
+case class JourneyOptions(continueUrl: String,
                           homeNavHref: String,
-                          navTitle: String,
+                          deskProServiceName: String,
                           showPhaseBanner: Boolean,
                           alphaPhase: Boolean,
-                          phaseBannerHtml: String,
-                          includeHMRCBranding: Boolean,
                           showBackButtons: Boolean,
-                          deskProServiceName: String)
+                          includeHMRCBranding: Boolean,
+                          selectPageConfig: SelectPageConfig,
+                          confirmPageConfig: ConfirmPageConfig,
+                          timeoutConfig: TimeoutConfig
+                         )
 
-object TopLevelConfig {
-  implicit val format: OFormat[TopLevelConfig] = Json.format[TopLevelConfig]
-}
+case class SelectPageConfig(proposalListLimit: Int,
+                            showSearchAgainLink: Boolean
+                           )
+
+case class ConfirmPageConfig(showSearchAgainLink: Boolean,
+                             showSubHeadingAndInfo: Boolean,
+                             showChangeLink: Boolean
+                            )
 
 case class TimeoutConfig(timeoutAmount: Int,
-                         timeoutUrl: String)
+                         timeoutUrl: String
+                        )
 
-object TimeoutConfig {
-  implicit val format: OFormat[TimeoutConfig] = Json.format[TimeoutConfig]
-}
+case class JourneyLabels(en: LanguageLabels
+                        )
 
-case class LookupPageConfig(title: String,
+case class LanguageLabels(appLevelLabels: AppLevelLabels,
+                          selectPageLabels: SelectPageLabels,
+                          lookupPageLabels: LookupPageLabels,
+                          editPageLabels: EditPageLabels,
+                          confirmPageLabels: ConfirmPageLabels
+                         )
+
+case class AppLevelLabels(navTitle: String,
+                          phaseBannerHtml: String
+                         )
+
+case class SelectPageLabels(title: String,
+                            heading: String,
+                            searchAgainLinkText: String,
+                            editAddressLinkText: String
+                           )
+
+case class LookupPageLabels(title: String,
                             heading: String,
                             filterLabel: String,
                             submitLabel: String,
-                            manualAddressLinkText: String)
+                            manualAddressLinkText: String
+                           )
 
-object LookupPageConfig {
-  implicit val format: OFormat[LookupPageConfig] = Json.format[LookupPageConfig]
-}
-
-case class SelectPageConfig(title: String,
-                            heading: String,
-                            proposalListLimit: Int,
-                            showSearchAgainLink: Boolean,
-                            searchAgainLinkText: String,
-                            editAddressLinkText: String)
-
-object SelectPageConfig {
-  implicit val format: OFormat[SelectPageConfig] = Json.format[SelectPageConfig]
-}
-
-case class EditPageConfig(title: String,
+case class EditPageLabels(title: String,
                           heading: String,
                           line1Label: String,
                           line2Label: String,
-                          line3Label: String,
-                          showSearchAgainLink: Boolean)
+                          line3Label: String
+                         )
 
-object EditPageConfig {
-  implicit val format: OFormat[EditPageConfig] = Json.format[EditPageConfig]
-}
-
-case class ConfirmPageConfig(title: String,
+case class ConfirmPageLabels(title: String,
                              heading: String,
-                             showSubHeadingAndInfo: Boolean,
                              submitLabel: String,
-                             showSearchAgainLink: Boolean,
-                             showChangeLink: Boolean,
-                             changeLinkText: String)
+                             changeLinkText: String
+                            )
 
-object ConfirmPageConfig {
-  implicit val format: OFormat[ConfirmPageConfig] = Json.format[ConfirmPageConfig]
+object AlfJourneyConfig {
+  val defaultConfigVersion = 2
+
+  implicit lazy val journeyConfigFormat: OFormat[AlfJourneyConfig] = Json.format[AlfJourneyConfig]
+  implicit lazy val journeyOptionsFormat: OFormat[JourneyOptions] = Json.format[JourneyOptions]
+  implicit lazy val selectPageConfigFormat: OFormat[SelectPageConfig] = Json.format[SelectPageConfig]
+  implicit lazy val confirmPageConfigFormat: OFormat[ConfirmPageConfig] = Json.format[ConfirmPageConfig]
+  implicit lazy val timeoutConfigFormat: OFormat[TimeoutConfig] = Json.format[TimeoutConfig]
+  implicit lazy val journeyLabelsFormat: OFormat[JourneyLabels] = Json.format[JourneyLabels]
+  implicit lazy val languageLabelsFormat: OFormat[LanguageLabels] = Json.format[LanguageLabels]
+  implicit lazy val appLevelLabelsFormat: OFormat[AppLevelLabels] = Json.format[AppLevelLabels]
+  implicit lazy val selectPageLabelsFormat: OFormat[SelectPageLabels] = Json.format[SelectPageLabels]
+  implicit lazy val lookupPageLabelsFormat: OFormat[LookupPageLabels] = Json.format[LookupPageLabels]
+  implicit lazy val editPageLabelsFormat: OFormat[EditPageLabels] = Json.format[EditPageLabels]
+  implicit lazy val confirmPageLabelsFormat: OFormat[ConfirmPageLabels] = Json.format[ConfirmPageLabels]
 }
