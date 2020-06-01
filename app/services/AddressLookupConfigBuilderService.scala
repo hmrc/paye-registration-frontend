@@ -38,24 +38,37 @@ class AddressLookupConfigBuilderService @Inject()(frontendAppConfig: FrontendApp
       if (messagesApi.isDefinedAt(journeySpecificAlfMessageKey)) journeySpecificAlfMessageKey else addressLookupMessageKey
     }
 
-    val topLevelConfig = TopLevelConfig(
-      continueUrl = s"$payeRegistrationFrontendURL${handbackLocation.url}",
-      homeNavHref = "http://www.hmrc.gov.uk/",
-      navTitle = messagesApi(messageKeyWithSpecKey("navTitle")),
-      showPhaseBanner = true,
-      alphaPhase = false,
-      phaseBannerHtml = messagesApi(messageKeyWithSpecKey("phaseBannerHtml")),
-      includeHMRCBranding = false,
-      showBackButtons = true,
-      deskProServiceName = messagesApi(messageKeyWithSpecKey("deskProServiceName"))
+    val selectPageConfig = SelectPageConfig(
+      proposalListLimit = 30,
+      showSearchAgainLink = true
     )
-
+    val confirmPageConfig = ConfirmPageConfig(
+      showSubHeadingAndInfo = false,
+      showSearchAgainLink = false,
+      showChangeLink = true
+    )
     val timeoutConfig = TimeoutConfig(
       timeoutAmount = timeoutLength,
       timeoutUrl = s"$payeRegistrationFrontendURL${controllers.userJourney.routes.SignInOutController.timeoutShow().url}"
     )
+    val journeyOptions = JourneyOptions(
+      continueUrl = s"$payeRegistrationFrontendURL${handbackLocation.url}",
+      homeNavHref = "http://www.hmrc.gov.uk/",
+      showPhaseBanner = true,
+      alphaPhase = false,
+      includeHMRCBranding = false,
+      showBackButtons = true,
+      deskProServiceName = messagesApi(messageKeyWithSpecKey("deskProServiceName")),
+      selectPageConfig = selectPageConfig,
+      confirmPageConfig = confirmPageConfig,
+      timeoutConfig = timeoutConfig
+    )
+    val appLevelLabels = AppLevelLabels(
+      navTitle = messagesApi(messageKeyWithSpecKey("navTitle")),
+      phaseBannerHtml = messagesApi(messageKeyWithSpecKey("phaseBannerHtml"))
+    )
 
-    val lookupPageConfig = LookupPageConfig(
+    val lookupPageLabels = LookupPageLabels(
       title = messagesApi(messageKeyWithSpecKey("lookupPage.title")),
       heading = messagesApi(messageKeyWithSpecKey("lookupPage.heading")),
       filterLabel = messagesApi(messageKeyWithSpecKey("lookupPage.filterLabel")),
@@ -63,41 +76,42 @@ class AddressLookupConfigBuilderService @Inject()(frontendAppConfig: FrontendApp
       manualAddressLinkText = messagesApi(messageKeyWithSpecKey("lookupPage.manual"))
     )
 
-    val selectPageConfig = SelectPageConfig(
+    val selectPageLabels = SelectPageLabels(
       title = messagesApi(messageKeyWithSpecKey("selectPage.description")),
       heading = messagesApi(messageKeyWithSpecKey("selectPage.description")),
-      proposalListLimit = 20,
-      showSearchAgainLink = true,
       searchAgainLinkText = messagesApi(messageKeyWithSpecKey("selectPage.searchAgain")),
       editAddressLinkText = messagesApi(messageKeyWithSpecKey("selectPage.editAddress"))
     )
 
-    val editPageConfig = EditPageConfig(
+    val editPageLabels = EditPageLabels(
       title = messagesApi(messageKeyWithSpecKey("editPage.description")),
       heading = messagesApi(messageKeyWithSpecKey("editPage.description")),
       line1Label = messagesApi(messageKeyWithSpecKey("editPage.line1Label")),
       line2Label = messagesApi(messageKeyWithSpecKey("editPage.line2Label")),
-      line3Label = messagesApi(messageKeyWithSpecKey("editPage.line3Label")),
-      showSearchAgainLink = true
+      line3Label = messagesApi(messageKeyWithSpecKey("editPage.line3Label"))
     )
 
-    val confirmPageConfig = ConfirmPageConfig(
+    val confirmPageLabels = ConfirmPageLabels(
       title = messagesApi(messageKeyWithSpecKey("confirmPage.title")),
       heading = messagesApi(messageKeyWithSpecKey("confirmPage.heading")),
-      showSubHeadingAndInfo = false,
       submitLabel = messagesApi(messageKeyWithSpecKey("confirmPage.submitLabel")),
-      showSearchAgainLink = false,
-      showChangeLink = true,
       changeLinkText = messagesApi(messageKeyWithSpecKey("confirmPage.changeLinkText"))
     )
 
+    val journeyLabels = JourneyLabels(
+      en = LanguageLabels(
+        appLevelLabels,
+        selectPageLabels,
+        lookupPageLabels,
+        editPageLabels,
+        confirmPageLabels
+      )
+    )
+
     AlfJourneyConfig(
-      topLevelConfig = topLevelConfig,
-      timeoutConfig = timeoutConfig,
-      lookupPageConfig = lookupPageConfig,
-      selectPageConfig = selectPageConfig,
-      editPageConfig = editPageConfig,
-      confirmPageConfig = confirmPageConfig
+      version = AlfJourneyConfig.defaultConfigVersion,
+      options = journeyOptions,
+      labels = journeyLabels
     )
 
   }

@@ -20,6 +20,7 @@ import akka.util.Timeout
 import org.scalatest._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
+import play.api.libs.ws.WSResponse
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.mongo.MongoSpecSupport
 
@@ -52,5 +53,8 @@ trait IntegrationSpecBase
   override def afterAll(): Unit = {
     super.afterAll()
     stopWiremock()
+  }
+  implicit class ResponseUtils(wsResponse: WSResponse) {
+    lazy val redirectLocation: Option[String] = wsResponse.header("Location")
   }
 }

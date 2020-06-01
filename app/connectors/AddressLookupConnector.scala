@@ -52,7 +52,7 @@ class AddressLookupConnector @Inject()(metricsService: MetricsService,
   }
 
   def getOnRampUrl(alfJourneyConfig: AlfJourneyConfig)(implicit hc: HeaderCarrier): Future[String] = {
-    val postUrl = s"$addressLookupFrontendUrl/api/init"
+    val postUrl = s"$addressLookupFrontendUrl/api/v2/init"
 
     metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
       http.POST[AlfJourneyConfig, HttpResponse](postUrl, alfJourneyConfig)

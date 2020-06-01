@@ -66,12 +66,13 @@ trait WiremockHelper {
       )
     )
 
-  def stubPost(url: String, status: Integer, responseBody: String) =
+  def stubPost(url: String, status: Integer, responseBody: String, responseHeader: (String, String) = ("", "")) =
     stubFor(post(urlMatching(url))
       .willReturn(
         aResponse().
           withStatus(status).
           withBody(responseBody)
+          withHeader(responseHeader._1, responseHeader._2)
       )
     )
 
