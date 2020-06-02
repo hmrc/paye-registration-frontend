@@ -37,8 +37,7 @@ class AddressLookupServiceSpec extends PayeComponentSpec {
   class Setup {
     val service = new AddressLookupService(
       addressLookupConnector = mockAddressLookupConnector,
-      addressLookupConfigBuilderService = mockAddressLookupConfigBuilderServiceMock,
-      metricsService = metricsMock
+      addressLookupConfigBuilderService = mockAddressLookupConfigBuilderServiceMock
     )
   }
 

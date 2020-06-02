@@ -27,8 +27,7 @@ import scala.concurrent.Future
 
 @Singleton
 class AddressLookupService @Inject()(addressLookupConnector: AddressLookupConnector,
-                                     addressLookupConfigBuilderService: AddressLookupConfigBuilderService,
-                                     metricsService: MetricsService
+                                     addressLookupConfigBuilderService: AddressLookupConfigBuilderService
                                     )(implicit messagesApi: MessagesApi) {
 
   def buildAddressLookupUrl(key: String, call: Call)(implicit hc: HeaderCarrier): Future[String] = {

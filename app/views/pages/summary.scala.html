@@ -18,7 +18,8 @@
 @import models.view.Summary
 @import uk.gov.hmrc.play.views.html.helpers.form
 
-@(summaryModel: Summary)(implicit request: Request[_], messages: Messages)
+@import config.AppConfig
+@(summaryModel: Summary)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @main_template(title = Messages("pages.summary.description")) {
     <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.summary.description")</h1>

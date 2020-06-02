@@ -16,6 +16,7 @@
 
 package services
 
+import config.AppConfig
 import javax.inject.Inject
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
@@ -36,10 +37,12 @@ class CompanyDetailsServiceImpl @Inject()(val payeRegConnector: PAYERegistration
                                           val s4LService: S4LService,
                                           val compRegConnector : CompanyRegistrationConnector,
                                           val prepopService: PrepopulationService,
-                                          val auditService: AuditService) extends CompanyDetailsService
+                                          val auditService: AuditService
+                                         )(implicit val appConfig: AppConfig) extends CompanyDetailsService
 
 trait CompanyDetailsService extends RegistrationWhitelist {
 
+  implicit val appConfig: AppConfig
   val payeRegConnector: PAYERegistrationConnector
   val compRegConnector: CompanyRegistrationConnector
   val incorpInfoService: IncorporationInformationService

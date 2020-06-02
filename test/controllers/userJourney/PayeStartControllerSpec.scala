@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import config.AppConfig
 import enums.{DownstreamOutcome, RegistrationDeletion}
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProfile}
@@ -36,33 +37,33 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup {
     def controller() = new PayeStartController {
-      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
-      override val payeRegElFEURL          = MockAuthRedirects.payeRegElFEUrl
-      override val payeRegElFEURI          = MockAuthRedirects.payeRegElFEUri
-
-      override val authConnector                  = mockAuthConnector
-      override val currentProfileService          = mockCurrentProfileService
-      override val payeRegistrationService        = mockPayeRegService
-      implicit val messagesApi: MessagesApi       = mockMessagesApi
-      override val keystoreConnector              = mockKeystoreConnector
-      override val businessRegistrationConnector  = mockBusinessRegistrationConnector
-      override val companyRegistrationConnector   = mockCompRegConnector
+      override val redirectToLogin = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
+      override val payeRegElFEURL = MockAuthRedirects.payeRegElFEUrl
+      override val payeRegElFEURI = MockAuthRedirects.payeRegElFEUri
+      override val authConnector = mockAuthConnector
+      override val currentProfileService = mockCurrentProfileService
+      override val payeRegistrationService = mockPayeRegService
+      implicit val messagesApi: MessagesApi = mockMessagesApi
+      override val keystoreConnector = mockKeystoreConnector
+      override val businessRegistrationConnector = mockBusinessRegistrationConnector
+      override val companyRegistrationConnector = mockCompRegConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector
+      override implicit val appConfig: AppConfig = mockAppConfig
     }
   }
 
   val fakeRequest = FakeRequest()
 
-  def validCurrentProfile(status: String, ackRefStatus : Option[String] = None) =
+  def validCurrentProfile(status: String, ackRefStatus: Option[String] = None) =
     CurrentProfile("testRegId", CompanyRegistrationProfile(status, "txId", ackRefStatus), "en", false, None)
 
   "steppingStone" should {
     "redirect to PREFE" in new Setup {
-        AuthHelpers.showUnauthorised(controller().steppingStone(), fakeRequest) { resp =>
-          status(resp)           mustBe SEE_OTHER
-          redirectLocation(resp) mustBe Some("/prefe/test/")
-        }
+      AuthHelpers.showUnauthorised(controller().steppingStone(), fakeRequest) { resp =>
+        status(resp) mustBe SEE_OTHER
+        redirectLocation(resp) mustBe Some("/prefe/test/")
+      }
     }
   }
 
@@ -137,8 +138,8 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
     "redirect to the paid employees page for an authorised user with valid details, with CT submitted and with incorporation paid" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(
-            CurrentProfile("testRegId", CompanyRegistrationProfile("held", "txId", None, Some("paid")), "en", false, None)
-          ))
+          CurrentProfile("testRegId", CompanyRegistrationProfile("held", "txId", None, Some("paid")), "en", false, None)
+        ))
 
       when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future(DownstreamOutcome.Success))
@@ -153,8 +154,8 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
     "redirect to Company Registration for an authorised user with valid details, with CT submitted but with incorporation unpaid" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.successful(
-            CurrentProfile("testRegId", CompanyRegistrationProfile("held", "txId", None, None), "en", false, None)
-          ))
+          CurrentProfile("testRegId", CompanyRegistrationProfile("held", "txId", None, None), "en", false, None)
+        ))
 
       when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future(DownstreamOutcome.Success))
@@ -178,6 +179,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to OTRS for a user with no CT confirmation references" in new Setup {
+
       import common.exceptions.DownstreamExceptions.ConfirmationRefsNotFoundException
 
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
@@ -224,7 +226,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
         AuthHelpers.showAuthorised(controller().restartPaye, fakeRequest) {
           result =>
-            status(result)           mustBe SEE_OTHER
+            status(result) mustBe SEE_OTHER
             redirectLocation(result) mustBe Some(s"/register-for-paye/start-pay-as-you-earn")
         }
       }

@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import config.AppConfig
 import javax.inject.Inject
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
@@ -25,6 +26,7 @@ import play.api.mvc.{Action, AnyContent}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{confirmation => ConfirmationPage}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class ConfirmationControllerImpl @Inject()(val messagesApi: MessagesApi,
@@ -37,9 +39,11 @@ class ConfirmationControllerImpl @Inject()(val messagesApi: MessagesApi,
                                            val emailService: EmailService,
                                            val authConnector: AuthConnector,
                                            val incorporationInformationConnector: IncorporationInformationConnector,
-                                           val payeRegistrationService: PAYERegistrationService) extends ConfirmationController with AuthRedirectUrls
+                                           val payeRegistrationService: PAYERegistrationService
+                                          )(implicit val appConfig: AppConfig) extends ConfirmationController with AuthRedirectUrls
 
 trait ConfirmationController extends PayeBaseController {
+  implicit val appConfig: AppConfig
   val confirmationService: ConfirmationService
   val emailService: EmailService
   val s4LService: S4LService

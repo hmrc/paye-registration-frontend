@@ -16,8 +16,9 @@
 
 package services
 
+import config.AppConfig
 import enums.{CacheKeys, DownstreamOutcome}
-import helpers.PayeComponentSpec
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import models.external.{CoHoCompanyDetailsModel, CompanyRegistrationProfile}
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
@@ -33,29 +34,31 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import scala.concurrent.Future
 
-class CompanyDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
+class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   val returnHttpResponse = HttpResponse(200)
 
   class Setup {
     val service = new CompanyDetailsService {
       override val incorpInfoService = mockIncorpInfoService
-      override val compRegConnector  = mockCompRegConnector
-      override val payeRegConnector  = mockPAYERegConnector
-      override val s4LService        = mockS4LService
-      override val prepopService     = mockPrepopulationService
-      override val auditService      = mockAuditService
+      override val compRegConnector = mockCompRegConnector
+      override val payeRegConnector = mockPAYERegConnector
+      override val s4LService = mockS4LService
+      override val prepopService = mockPrepopulationService
+      override val auditService = mockAuditService
+      override implicit val appConfig: AppConfig = mockAppConfig
     }
   }
 
   class NoCompanyDetailsMockedSetup {
     val service = new CompanyDetailsService {
       override val incorpInfoService = mockIncorpInfoService
-      override val compRegConnector  = mockCompRegConnector
-      override val payeRegConnector  = mockPAYERegConnector
-      override val s4LService        = mockS4LService
-      override val prepopService     = mockPrepopulationService
-      override val auditService      = mockAuditService
+      override val compRegConnector = mockCompRegConnector
+      override val payeRegConnector = mockPAYERegConnector
+      override val s4LService = mockS4LService
+      override val prepopService = mockPrepopulationService
+      override val auditService = mockAuditService
+      override implicit val appConfig: AppConfig = mockAppConfig
 
       override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
         Future.successful(CompanyDetailsView("test compay name", None, Fixtures.validROAddress, None, None))
@@ -70,11 +73,12 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
   class CompanyDetailsMockedSetup {
     val service = new CompanyDetailsService {
       override val incorpInfoService = mockIncorpInfoService
-      override val compRegConnector  = mockCompRegConnector
-      override val payeRegConnector  = mockPAYERegConnector
-      override val s4LService        = mockS4LService
-      override val prepopService     = mockPrepopulationService
-      override val auditService      = mockAuditService
+      override val compRegConnector = mockCompRegConnector
+      override val payeRegConnector = mockPAYERegConnector
+      override val s4LService = mockS4LService
+      override val prepopService = mockPrepopulationService
+      override val auditService = mockAuditService
+      override implicit val appConfig: AppConfig = mockAppConfig
 
       override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
         Future.successful(Fixtures.validCompanyDetailsViewModel)
@@ -89,11 +93,12 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
   class APIConverterMockedSetup {
     val service = new CompanyDetailsService {
       override val incorpInfoService = mockIncorpInfoService
-      override val compRegConnector  = mockCompRegConnector
-      override val payeRegConnector  = mockPAYERegConnector
-      override val s4LService        = mockS4LService
-      override val prepopService     = mockPrepopulationService
-      override val auditService      = mockAuditService
+      override val compRegConnector = mockCompRegConnector
+      override val payeRegConnector = mockPAYERegConnector
+      override val s4LService = mockS4LService
+      override val prepopService = mockPrepopulationService
+      override val auditService = mockAuditService
+      override implicit val appConfig: AppConfig = mockAppConfig
 
       override def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
         Fixtures.validCompanyDetailsViewModel
@@ -311,8 +316,8 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
       when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCoHoCompanyDetailsResponse))
 
-      when(mockS4LService.fetchAndGet[CompanyDetailsView](ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
-          .thenReturn(Future.successful(Some(defaultCompanyDetails)))
+      when(mockS4LService.fetchAndGet[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(defaultCompanyDetails)))
 
       when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
@@ -327,7 +332,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
       when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new Exception))
 
-      when(mockS4LService.fetchAndGet[CompanyDetailsView](ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(),ArgumentMatchers.any()))
+      when(mockS4LService.fetchAndGet[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(defaultCompanyDetails)))
 
       when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
@@ -341,20 +346,20 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
     "return Some of pre pop trading name if trading name model is None" in new Setup {
       when(mockPrepopulationService.getTradingName(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(Some("foo bar wizz")))
 
-      await(service.getTradingNamePrepop("12345",None)) mustBe Some("foo bar wizz")
+      await(service.getTradingNamePrepop("12345", None)) mustBe Some("foo bar wizz")
     }
     "return None as the trading name model = Some of true" in new Setup {
-      await(service.getTradingNamePrepop("12345",Some(TradingNameView(true,Some("foo"))))) mustBe None
+      await(service.getTradingNamePrepop("12345", Some(TradingNameView(true, Some("foo"))))) mustBe None
     }
     "return Some of pre pop trading name as the trading name model = Some of false" in new Setup {
       when(mockPrepopulationService.getTradingName(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(Some("foo bar wizz")))
 
-      await(service.getTradingNamePrepop("12345",Some(TradingNameView(false,None)))) mustBe Some("foo bar wizz")
+      await(service.getTradingNamePrepop("12345", Some(TradingNameView(false, None)))) mustBe Some("foo bar wizz")
     }
     "return None if prep pop returns nothing and trading name model = None" in new Setup {
       when(mockPrepopulationService.getTradingName(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(None))
 
-      await(service.getTradingNamePrepop("12345",None)) mustBe None
+      await(service.getTradingNamePrepop("12345", None)) mustBe None
     }
   }
 
@@ -387,7 +392,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
 
   "Calling submitTradingName" should {
     "return a success response when submit is completed successfully" in new CompanyDetailsMockedSetup {
-      when(mockPrepopulationService.saveTradingName(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(""))
+      when(mockPrepopulationService.saveTradingName(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(""))
       await(service.submitTradingName(Fixtures.validTradingNameViewModel, "54322", "txId")) mustBe DownstreamOutcome.Success
     }
 
@@ -396,7 +401,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
     }
 
     "return a failure response when submit is not completed successfully" in new NoCompanyDetailsMockedSetup {
-      when(mockPrepopulationService.saveTradingName(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(""))
+      when(mockPrepopulationService.saveTradingName(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(""))
       await(service.submitTradingName(Fixtures.validTradingNameViewModel, "543222", "txId")) mustBe DownstreamOutcome.Failure
     }
   }
@@ -414,20 +419,26 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
 
     "return a single RO Address when there is no PPOOB Address" in new Setup {
       val roAddr = Address("line1", "line2", None, None, Some("postcode"), None)
+
       def model = viewModel(roAddr, None)
+
       service.getPPOBPageAddresses(model) mustBe Map("ro" -> roAddr)
     }
 
     "return a single PPOB Address when the RO Address and PPOB Address are the same" in new Setup {
       val roAddr = Address("line1", "line2", None, None, Some("postcode"), None)
+
       def model = viewModel(roAddr, Some(roAddr))
+
       service.getPPOBPageAddresses(model) mustBe Map("ppob" -> roAddr)
     }
 
     "return an RO Address and PPOB Address when the RO Address and PPOB Address are different" in new Setup {
-      val roAddr   = Address("line1", "line2", None, None, Some("postcode"), None)
+      val roAddr = Address("line1", "line2", None, None, Some("postcode"), None)
       val ppobAddr = Address("lineA", "lineB", None, None, Some("postKode"), None)
+
       def model = viewModel(roAddr, Some(ppobAddr))
+
       service.getPPOBPageAddresses(model) mustBe Map("ro" -> roAddr, "ppob" -> ppobAddr)
     }
   }

@@ -16,18 +16,17 @@
 
 package services
 
-import config.FrontendAppConfig
+import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import models.external._
 import play.api.i18n.MessagesApi
 import play.api.mvc.Call
 
 @Singleton
-class AddressLookupConfigBuilderService @Inject()(frontendAppConfig: FrontendAppConfig
-                                                 )(implicit messagesApi: MessagesApi) {
+class AddressLookupConfigBuilderService @Inject()(implicit messagesApi: MessagesApi, appConfig: AppConfig) {
 
-  lazy val payeRegistrationFrontendURL: String = frontendAppConfig.self
-  lazy val timeoutLength: Int = frontendAppConfig.timeoutInSeconds.toInt
+  lazy val payeRegistrationFrontendURL: String = appConfig.self
+  lazy val timeoutLength: Int = appConfig.timeoutInSeconds.toInt
 
   def buildConfig(handbackLocation: Call, specificJourneyKey: String)(implicit messagesApi: MessagesApi): AlfJourneyConfig = {
 

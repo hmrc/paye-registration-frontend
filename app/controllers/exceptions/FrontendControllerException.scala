@@ -16,6 +16,7 @@
 
 package controllers.exceptions
 
+import config.AppConfig
 import play.api.Logger
 import play.api.i18n.Messages
 import play.api.mvc.{Request, Result}
@@ -24,13 +25,13 @@ import views.html.pages.error.restart
 
 sealed trait FrontendControllerException extends Exception {
   def view: Option[_] = None
-  def recover(implicit request: Request[_], messages: Messages): Result
+  def recover(implicit request: Request[_], messages: Messages, appConfig: AppConfig): Result
   def message: String
 }
 
 sealed trait RestartException extends FrontendControllerException {
   override def view: Option[restart.type] = Some(restart)
-  def recover(implicit request: Request[_], messages: Messages): Result = {
+  def recover(implicit request: Request[_], messages: Messages, appConfig: AppConfig): Result = {
     Logger.error(message)
     view.fold[Result](InternalServerError)(restart => InternalServerError(restart()))
   }

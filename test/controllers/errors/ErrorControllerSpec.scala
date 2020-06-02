@@ -16,24 +16,26 @@
 
 package controllers.errors
 
+import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
 
 class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
   val regId = Fixtures.validCurrentProfile.get.registrationID
-  val ticketId : Long = 123456789
+  val ticketId: Long = 123456789
 
   class Setup {
     val testController = new ErrorController {
-      override val redirectToLogin        = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign     = MockAuthRedirects.redirectToPostSign
-      override val keystoreConnector      = mockKeystoreConnector
-      override val messagesApi            = mockMessagesApi
-      override val authConnector          = mockAuthConnector
-      override val thresholdService       = mockThresholdService
+      override val redirectToLogin = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
+      override val keystoreConnector = mockKeystoreConnector
+      override val messagesApi = mockMessagesApi
+      override val authConnector = mockAuthConnector
+      override val thresholdService = mockThresholdService
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
+      override implicit val appConfig: AppConfig = mockAppConfig
     }
   }
 
@@ -42,9 +44,9 @@ class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
       val fakeRequest = FakeRequest("GET", "/authenticated/ineligible")
 
       AuthHelpers.showAuthorisedWithCP(testController.ineligible, Fixtures.validCurrentProfile, fakeRequest) { result =>
-        status(result)      mustBe OK
+        status(result) mustBe OK
         contentType(result) mustBe Some("text/html")
-        charset(result)     mustBe Some("utf-8")
+        charset(result) mustBe Some("utf-8")
 
       }
     }
@@ -55,9 +57,9 @@ class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
       implicit val fakeRequest = FakeRequest("GET", "/")
 
       AuthHelpers.showAuthorisedWithCP(testController.retrySubmission, Fixtures.validCurrentProfile, fakeRequest) { result =>
-        status(result)      mustBe OK
+        status(result) mustBe OK
         contentType(result) mustBe Some("text/html")
-        charset(result)     mustBe Some("utf-8")
+        charset(result) mustBe Some("utf-8")
       }
     }
   }
@@ -67,10 +69,10 @@ class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
       implicit val fakeRequest = FakeRequest("GET", "/")
 
       AuthHelpers.showAuthorisedWithCP(testController.failedSubmission, Fixtures.validCurrentProfile, fakeRequest) { result =>
-        status(result)      mustBe OK
+        status(result) mustBe OK
         contentType(result) mustBe Some("text/html")
-        charset(result)     mustBe Some("utf-8")
-        val document =  Jsoup.parse(contentAsString(result))
+        charset(result) mustBe Some("utf-8")
+        val document = Jsoup.parse(contentAsString(result))
         document.getElementById("submissionFailedReportAProblem").attr("id") mustBe "submissionFailedReportAProblem"
       }
     }

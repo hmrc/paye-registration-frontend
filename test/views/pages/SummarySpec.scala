@@ -26,7 +26,7 @@ import play.api.test.FakeRequest
 import views.html.pages.summary
 
 class SummarySpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
-
+  implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
   implicit lazy val messagesApi: MessagesApi = mockMessagesApi
 

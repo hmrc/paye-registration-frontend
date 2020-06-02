@@ -17,7 +17,8 @@
 @import helpers.templates.{oneOfManyErrorWrapper, payeErrorSummary, payeInput}
 @import models.DigitalContactDetails
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
-@(contactForm: Form[DigitalContactDetails], companyName: String)(implicit request: Request[_], messages: Messages)
+@import config.AppConfig
+@(contactForm: Form[DigitalContactDetails], companyName: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 
 

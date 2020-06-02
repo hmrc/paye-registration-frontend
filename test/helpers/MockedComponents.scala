@@ -16,7 +16,7 @@
 
 package helpers
 
-import config.{FrontendAppConfig, WSHttp}
+import config.{AppConfig, WSHttp}
 import connectors._
 import connectors.test.{TestBusinessRegConnector, TestIncorpInfoConnector, TestPAYERegConnector}
 import org.scalatest.mockito.MockitoSugar
@@ -31,49 +31,48 @@ import utils.{FeatureManager, PAYEFeatureSwitch, PAYEFeatureSwitches}
 trait MockedComponents {
   self: MockitoSugar =>
 
-  val mockWSHttp           = mock[WSHttp]
-  val mockSessionCache     = mock[SessionCache]
-  val mockFeatureSwitch    = mock[PAYEFeatureSwitch]
-  val mockFeatureSwitches  = mock[PAYEFeatureSwitches]
-  val mockFeatureManager   = mock[FeatureManager]
-  val mockAppConfig = mock[FrontendAppConfig]
+  val mockWSHttp = mock[WSHttp]
+  val mockSessionCache = mock[SessionCache]
+  val mockFeatureSwitch = mock[PAYEFeatureSwitch]
+  val mockFeatureSwitches = mock[PAYEFeatureSwitches]
+  val mockFeatureManager = mock[FeatureManager]
 
   //Connector mocks
-  val mockKeystoreConnector             = mock[KeystoreConnector]
-  val mockPayeRegistrationConnector     = mock[PAYERegistrationConnector]
-  val mockAuthConnector                 = mock[AuthClientConnector]
-  val mockOldAuthConnector              = mock[AuthClientConnector]
+  val mockKeystoreConnector = mock[KeystoreConnector]
+  val mockPayeRegistrationConnector = mock[PAYERegistrationConnector]
+  val mockAuthConnector = mock[AuthClientConnector]
+  val mockOldAuthConnector = mock[AuthClientConnector]
   val mockBusinessRegistrationConnector = mock[BusinessRegistrationConnector]
-  val mockCompRegConnector              = mock[CompanyRegistrationConnector]
-  val mockEmailConnector                = mock[EmailConnector]
-  val mockS4LConnector                  = mock[S4LConnector]
-  val mockPAYERegConnector              = mock[PAYERegistrationConnector]
-  val mockAddressLookupConnector        = mock[AddressLookupConnector]
-  val mockAuditConnector                = mock[AuditConnector]
-  val mockIncorpInfoConnector           = mock[IncorporationInformationConnector]
-  val mockTestBusRegConnector           = mock[TestBusinessRegConnector]
-  val mockTestIncorpInfoConnector       = mock[TestIncorpInfoConnector]
-  val mockTestPayeRegConnector          = mock[TestPAYERegConnector]
-  val mockConfirmationService           = mock[ConfirmationService]
+  val mockCompRegConnector = mock[CompanyRegistrationConnector]
+  val mockEmailConnector = mock[EmailConnector]
+  val mockS4LConnector = mock[S4LConnector]
+  val mockPAYERegConnector = mock[PAYERegistrationConnector]
+  val mockAddressLookupConnector = mock[AddressLookupConnector]
+  val mockAuditConnector = mock[AuditConnector]
+  val mockIncorpInfoConnector = mock[IncorporationInformationConnector]
+  val mockTestBusRegConnector = mock[TestBusinessRegConnector]
+  val mockTestIncorpInfoConnector = mock[TestIncorpInfoConnector]
+  val mockTestPayeRegConnector = mock[TestPAYERegConnector]
+  val mockConfirmationService = mock[ConfirmationService]
 
   //Service mocks
-  val mockIncorpInfoService     = mock[IncorporationInformationService]
+  val mockIncorpInfoService = mock[IncorporationInformationService]
   val mockCompanyDetailsService = mock[CompanyDetailsService]
-  val mockS4LService            = mock[S4LService]
-  val mockEmailService          = mock[EmailService]
-  val mockPrepopulationService  = mock[PrepopulationService]
-  val mockAuditService          = mock[AuditService]
+  val mockS4LService = mock[S4LService]
+  val mockEmailService = mock[EmailService]
+  val mockPrepopulationService = mock[PrepopulationService]
+  val mockAuditService = mock[AuditService]
   val mockCurrentProfileService = mock[CurrentProfileService]
-  val mockPayeRegService        = mock[PAYERegistrationService]
-  val mockAddressLookupService  = mock[AddressLookupService]
-  val mockPAYEContactService    = mock[PAYEContactService]
-  val mockPrepopService         = mock[PrepopulationService]
-  val mockThresholdService      = mock[ThresholdService]
-  val mockEmploymentService   = mock[EmploymentService]
+  val mockPayeRegService = mock[PAYERegistrationService]
+  val mockAddressLookupService = mock[AddressLookupService]
+  val mockPAYEContactService = mock[PAYEContactService]
+  val mockPrepopService = mock[PrepopulationService]
+  val mockThresholdService = mock[ThresholdService]
+  val mockEmploymentService = mock[EmploymentService]
   val mockAddressLookupConfigBuilderServiceMock = mock[AddressLookupConfigBuilderService]
 
-  val mockSessionRepository     = mock[SessionRepository]
-  val mockReactiveMongoRepo     = mock[ReactiveMongoRepository]
+  val mockSessionRepository = mock[SessionRepository]
+  val mockReactiveMongoRepo = mock[ReactiveMongoRepository]
   val mockConfiguration = mock[Configuration]
   val mockEnvironment = mock[Environment]
 }

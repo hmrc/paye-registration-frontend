@@ -16,7 +16,8 @@
 
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
-@()(implicit request: Request[_], messages: Messages)
+@import config.AppConfig
+@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @main_template(title = Messages("pages.applicationDelayed.title")) {
 

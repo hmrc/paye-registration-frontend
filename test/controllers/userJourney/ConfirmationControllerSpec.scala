@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import config.AppConfig
 import connectors.{EmailDifficulties, EmailSent}
 import helpers.auth.AuthHelpers
 import helpers.{PayeComponentSpec, PayeFakedApp}
@@ -32,20 +33,21 @@ import scala.concurrent.Future
 class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup extends AuthHelpers {
-    override val authConnector      = mockAuthConnector
-    override val keystoreConnector  = mockKeystoreConnector
+    override val authConnector = mockAuthConnector
+    override val keystoreConnector = mockKeystoreConnector
 
     val controller = new ConfirmationController {
-      override val redirectToLogin                    = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign                 = MockAuthRedirects.redirectToPostSign
-      override val emailService                       = mockEmailService
-      override val s4LService                         = mockS4LService
-      override val authConnector                      = mockAuthConnector
-      override val keystoreConnector                  = mockKeystoreConnector
-      override val confirmationService                = mockConfirmationService
-      implicit val messagesApi                        = mockMessagesApi
-      override val incorporationInformationConnector  = mockIncorpInfoConnector
-      override val payeRegistrationService            = mockPayeRegService
+      override val redirectToLogin = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
+      override val emailService = mockEmailService
+      override val s4LService = mockS4LService
+      override val authConnector = mockAuthConnector
+      override val keystoreConnector = mockKeystoreConnector
+      override val confirmationService = mockConfirmationService
+      implicit val messagesApi = mockMessagesApi
+      override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val payeRegistrationService = mockPayeRegService
+      override implicit val appConfig: AppConfig = mockAppConfig
     }
   }
 
@@ -66,8 +68,8 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
           status(result) mustBe OK
           val doc = Jsoup.parse(contentAsString(result))
           doc.getElementById("ack-ref").html mustBe "BRPY00000000001"
-          doc.getElementsByAttributeValueContaining("id","standard-content").isEmpty mustBe false
-          doc.getElementsByAttributeValueContaining("id","inclusive-content").isEmpty mustBe true
+          doc.getElementsByAttributeValueContaining("id", "standard-content").isEmpty mustBe false
+          doc.getElementsByAttributeValueContaining("id", "inclusive-content").isEmpty mustBe true
       }
     }
 
@@ -84,8 +86,8 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
         result =>
           val doc = Jsoup.parse(contentAsString(result))
           doc.getElementById("ack-ref").html mustBe "BRPY00000000001"
-          doc.getElementsByAttributeValueContaining("id","standard-content").isEmpty mustBe true
-          doc.getElementsByAttributeValueContaining("id","inclusive-content").isEmpty mustBe false
+          doc.getElementsByAttributeValueContaining("id", "standard-content").isEmpty mustBe true
+          doc.getElementsByAttributeValueContaining("id", "inclusive-content").isEmpty mustBe false
       }
     }
 

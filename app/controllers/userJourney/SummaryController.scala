@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import config.AppConfig
 import javax.inject.Inject
 import connectors._
 import controllers.exceptions.{FrontendControllerException, GeneralException}
@@ -30,8 +31,8 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.pages.error.restart
 import views.html.pages.{summary => SummaryPage}
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SummaryControllerImpl @Inject()(val summaryService: SummaryService,
@@ -46,9 +47,11 @@ class SummaryControllerImpl @Inject()(val summaryService: SummaryService,
                                       val emailService: EmailService,
                                       val messagesApi: MessagesApi,
                                       val incorporationInformationConnector: IncorporationInformationConnector,
-                                      val payeRegistrationService: PAYERegistrationService) extends SummaryController with AuthRedirectUrls
+                                      val payeRegistrationService: PAYERegistrationService
+                                     )(implicit val appConfig: AppConfig) extends SummaryController with AuthRedirectUrls
 
 trait SummaryController extends PayeBaseController {
+  implicit val appConfig: AppConfig
   val summaryService: SummaryService
   val submissionService: SubmissionService
   val payeRegistrationConnector: PAYERegistrationConnector

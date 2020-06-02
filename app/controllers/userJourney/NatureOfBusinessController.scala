@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import config.AppConfig
 import javax.inject.Inject
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
@@ -27,8 +28,8 @@ import play.api.mvc.{Action, AnyContent}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{natureOfBusiness => NatureOfBusinessPage}
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class NatureOfBusinessControllerImpl @Inject()(val messagesApi: MessagesApi,
@@ -40,9 +41,11 @@ class NatureOfBusinessControllerImpl @Inject()(val messagesApi: MessagesApi,
                                                val incorpInfoService: IncorporationInformationService,
                                                val authConnector: AuthConnector,
                                                val incorporationInformationConnector: IncorporationInformationConnector,
-                                               val payeRegistrationService: PAYERegistrationService) extends NatureOfBusinessController with AuthRedirectUrls
+                                               val payeRegistrationService: PAYERegistrationService
+                                              )(implicit val appConfig: AppConfig) extends NatureOfBusinessController with AuthRedirectUrls
 
 trait NatureOfBusinessController extends PayeBaseController {
+  implicit val appConfig: AppConfig
   val authConnector: AuthConnector
   val natureOfBusinessService: NatureOfBusinessService
   val keystoreConnector: KeystoreConnector

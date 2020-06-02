@@ -18,6 +18,7 @@ package controllers.userJourney
 
 import java.io.File
 
+import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import javax.inject.Inject
@@ -38,10 +39,12 @@ class SignInOutControllerImpl @Inject()(val messagesApi: MessagesApi,
                                         val incorpInfoService: IncorporationInformationService,
                                         val keystoreConnector: KeystoreConnector,
                                         val incorporationInformationConnector: IncorporationInformationConnector,
-                                        val payeRegistrationService: PAYERegistrationService) extends SignInOutController with AuthRedirectUrls
+                                        val payeRegistrationService: PAYERegistrationService
+                                       )(implicit val appConfig: AppConfig) extends SignInOutController with AuthRedirectUrls
 
 trait SignInOutController extends PayeBaseController {
 
+  implicit val appConfig: AppConfig
   val compRegFEURL: String
   val compRegFEURI: String
 

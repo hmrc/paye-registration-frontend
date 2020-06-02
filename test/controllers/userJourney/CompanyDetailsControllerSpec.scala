@@ -17,6 +17,7 @@
 package controllers.userJourney
 
 import audit.{PPOBAddressAuditEvent, PPOBAddressAuditEventDetail}
+import config.AppConfig
 import enums.DownstreamOutcome
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.AuditingInformation
@@ -41,7 +42,6 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     val controller = new CompanyDetailsController {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-
       override val s4LService = mockS4LService
       override val keystoreConnector = mockKeystoreConnector
       override val authConnector = mockAuthConnector
@@ -53,9 +53,11 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val auditService = mockAuditService
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
+      override implicit val appConfig: AppConfig = mockAppConfig
     }
   }
-  val companyNameKey:String = "CompanyName"
+
+  val companyNameKey: String = "CompanyName"
 
   val tstTradingNameModel = TradingNameView(differentName = true, tradingName = Some("test trading name"))
 

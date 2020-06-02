@@ -18,7 +18,8 @@
 @import helpers.templates.{payeTextArea, payeErrorSummary}
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
-@(sicForm: Form[NatureOfBusiness])(implicit request: Request[_], messages: Messages)
+@import config.AppConfig
+@(sicForm: Form[NatureOfBusiness])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @main_template(title = messages("pages.natureOfBusiness.description")) {
 

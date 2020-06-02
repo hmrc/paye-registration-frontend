@@ -16,8 +16,9 @@
 
 package services
 
+import config.AppConfig
 import enums.{CacheKeys, DownstreamOutcome}
-import helpers.PayeComponentSpec
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.api.{Director, Name}
 import models.view.{Directors, Ninos, UserEnteredNino}
 import org.mockito.ArgumentMatchers
@@ -29,22 +30,24 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 
 import scala.concurrent.Future
 
-class DirectorDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
+class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
   val returnHttpResponse = HttpResponse(200)
 
   class Setup {
     val service = new DirectorDetailsService {
-      override val payeRegConnector   = mockPAYERegConnector
-      override val incorpInfoService  = mockIncorpInfoService
-      override val s4LService         = mockS4LService
+      override val payeRegConnector = mockPAYERegConnector
+      override val incorpInfoService = mockIncorpInfoService
+      override val s4LService = mockS4LService
+      override implicit val appConfig: AppConfig = mockAppConfig
     }
   }
 
   class NoDirectorDetailsMockedSetup {
     val service = new DirectorDetailsService {
-      override val payeRegConnector   = mockPAYERegConnector
-      override val incorpInfoService  = mockIncorpInfoService
-      override val s4LService         = mockS4LService
+      override val payeRegConnector = mockPAYERegConnector
+      override val incorpInfoService = mockIncorpInfoService
+      override val s4LService = mockS4LService
+      override implicit val appConfig: AppConfig = mockAppConfig
 
       override def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
         Future.successful(Fixtures.validDirectorDetailsViewModel)
@@ -58,9 +61,10 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSu
 
   class DirectorDetailsMockedSetup {
     val service = new DirectorDetailsService {
-      override val payeRegConnector   = mockPAYERegConnector
-      override val incorpInfoService  = mockIncorpInfoService
-      override val s4LService         = mockS4LService
+      override val payeRegConnector = mockPAYERegConnector
+      override val incorpInfoService = mockIncorpInfoService
+      override val s4LService = mockS4LService
+      override implicit val appConfig: AppConfig = mockAppConfig
 
       override def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
         Future.successful(Fixtures.validDirectorDetailsViewModel)
@@ -74,9 +78,10 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSu
 
   class APIConverterMockedSetup {
     val service = new DirectorDetailsService {
-      override val payeRegConnector   = mockPAYERegConnector
-      override val incorpInfoService  = mockIncorpInfoService
-      override val s4LService         = mockS4LService
+      override val payeRegConnector = mockPAYERegConnector
+      override val incorpInfoService = mockIncorpInfoService
+      override val s4LService = mockS4LService
+      override implicit val appConfig: AppConfig = mockAppConfig
 
       override def apiToView(apiModel: Seq[Director]): Directors = {
         Fixtures.validDirectorDetailsViewModel
@@ -182,9 +187,9 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSu
       "correctly produce a map of IDs to names from a completed view model" in new Setup {
 
         val displayMap = Map(
-            "0" -> "Mr Timothy Potterley-Smythe Buttersford",
-            "1" -> "Sir Peter Simpson"
-          )
+          "0" -> "Mr Timothy Potterley-Smythe Buttersford",
+          "1" -> "Sir Peter Simpson"
+        )
 
         service.createDisplayNamesMap(tstDirectors) mustBe displayMap
       }
@@ -194,9 +199,9 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSu
       "correctly produce a mapping of ninos to IDs from a completed view model" in new Setup {
 
         val ninos = Ninos(ninoMapping = List(
-            UserEnteredNino("0", Some("ZZ123456A")),
-            UserEnteredNino("1", None)
-          ))
+          UserEnteredNino("0", Some("ZZ123456A")),
+          UserEnteredNino("1", None)
+        ))
 
 
         service.createDirectorNinos(tstDirectors) mustBe ninos
@@ -241,7 +246,6 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSu
         service.directorsNotChanged(iiDirectors, backendDirectors) mustBe true
       }
     }
-
 
 
     "return false" when {
@@ -365,7 +369,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSu
         )
       )
 
-      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(directorDetails))
 
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
@@ -379,19 +383,19 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSu
 
     "return coho directors when paye reg directors do not match" in new Setup {
 
-      def dir(nino:Option[String],title:Option[String]) = Director(
+      def dir(nino: Option[String], title: Option[String]) = Director(
         name = Name(Some("test2"), Some("test22"), "testb", title),
         nino = nino)
 
       val cohoDirectors = Directors(
         directorMapping = Map(
-          "0" -> dir(nino = Some("foo"),title = Some("title1"))
+          "0" -> dir(nino = Some("foo"), title = Some("title1"))
         )
       )
       val payeregDirectors = Seq(dir(nino = None, title = Some("Title2"))
 
       )
-      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(cohoDirectors))
 
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
@@ -408,21 +412,21 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSu
     }
 
     "return coho directors when s4l directors do not match" in new Setup {
-      def dir(nino:Option[String],title:Option[String]) = Director(
+      def dir(nino: Option[String], title: Option[String]) = Director(
         name = Name(Some("test2"), Some("test22"), "testb", title),
         nino = nino)
 
       val cohoDirectors = Directors(
         directorMapping = Map(
-          "0" -> dir(nino = Some("foo"),title = Some("title1"))
+          "0" -> dir(nino = Some("foo"), title = Some("title1"))
         )
       )
       val s4lDirectors = Directors(
         directorMapping = Map(
-          "0" -> dir(nino = None,title = Some("Title2"))
+          "0" -> dir(nino = None, title = Some("Title2"))
         )
       )
-      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(cohoDirectors))
 
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
@@ -447,7 +451,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSu
         )
       )
 
-      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(directorDetails))
 
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
@@ -478,7 +482,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSu
       when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Nil))
 
-      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(directorDetails))
 
       when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
@@ -497,7 +501,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with GuiceOneAppPerSu
         )
       )
 
-      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(directorDetails))
 
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))

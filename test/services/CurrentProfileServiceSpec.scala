@@ -16,29 +16,29 @@
 
 package services
 
-import connectors.IncorporationInformationConnector
+import config.AppConfig
 import enums.{IncorporationStatus, PAYEStatus}
-import helpers.PayeComponentSpec
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.api.SessionMap
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, NotFoundException}
 
 import scala.concurrent.Future
 
-class CurrentProfileServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
+class CurrentProfileServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup {
     val service = new CurrentProfileService {
-      override val businessRegistrationConnector        = mockBusinessRegistrationConnector
-      override val companyRegistrationConnector         = mockCompRegConnector
-      override val payeRegistrationConnector            = mockPAYERegConnector
-      override val keystoreConnector                    = mockKeystoreConnector
-      override val incorporationInformationConnector    = mockIncorpInfoConnector
+      override val businessRegistrationConnector = mockBusinessRegistrationConnector
+      override val companyRegistrationConnector = mockCompRegConnector
+      override val payeRegistrationConnector = mockPAYERegConnector
+      override val keystoreConnector = mockKeystoreConnector
+      override val incorporationInformationConnector = mockIncorpInfoConnector
+      override implicit val appConfig: AppConfig = mockAppConfig
     }
   }
 
@@ -65,8 +65,8 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
       when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(SessionMap("", "", "", Map.empty[String, JsValue])))
 
-      when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(),ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-          .thenReturn(Future.successful(Some(IncorporationStatus.accepted)))
+      when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(IncorporationStatus.accepted)))
 
       when(mockPAYERegConnector.getStatus(ArgumentMatchers.contains(validBusinessProfile.registrationID))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Some(PAYEStatus.draft)))
@@ -84,7 +84,7 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
       when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(SessionMap("", "", "", Map.empty[String, JsValue])))
 
-      when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(),ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
       when(mockPAYERegConnector.getStatus(ArgumentMatchers.contains(validBusinessProfile.registrationID))(ArgumentMatchers.any[HeaderCarrier]()))
@@ -141,10 +141,10 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with GuiceOneAppPerSui
     "return some regId" in new Setup {
 
       val testSessionMap = SessionMap(
-        sessionId      = "testSessionId",
+        sessionId = "testSessionId",
         registrationId = validCurrentProfile.registrationID,
-        transactionId  = validCurrentProfile.companyTaxRegistration.transactionId,
-        data           = Map(
+        transactionId = validCurrentProfile.companyTaxRegistration.transactionId,
+        data = Map(
           "CurrentProfile" -> Json.toJson(validCurrentProfile)
         )
       )

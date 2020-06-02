@@ -16,7 +16,7 @@
 
 package utils
 
-import config.FrontendAppConfig
+import config.AppConfig
 import connectors.{DESResponse, IncorpInfoResponse, IncorpInfoSuccessResponse}
 import models.DigitalContactDetails
 import models.api.{Director, CompanyDetails => CompanyDetailsAPI}
@@ -27,33 +27,33 @@ import scala.concurrent.Future
 import scala.language.implicitConversions
 
 trait RegistrationWhitelist {
-  val applicationConfig = FrontendAppConfig
+  val appConfig: AppConfig
 
   implicit def getDefaultCompanyDetailsAPI(regId: String): Option[CompanyDetailsAPI] = Some(CompanyDetailsAPI(
-    applicationConfig.defaultCompanyName,
+    appConfig.defaultCompanyName,
     None,
-    applicationConfig.defaultCHROAddress,
-    applicationConfig.defaultCHROAddress,
+    appConfig.defaultCHROAddress,
+    appConfig.defaultCHROAddress,
     DigitalContactDetails(Some("email@email.com"),
       None,
       None
     )
   ))
-  implicit def getDefaultSeqDirector(regId: String): Seq[Director] = applicationConfig.defaultSeqDirector
+  implicit def getDefaultSeqDirector(regId: String): Seq[Director] = appConfig.defaultSeqDirector
   implicit def getDefaultCompanyProfile(regId: String): CompanyRegistrationProfile =
-    CompanyRegistrationProfile(applicationConfig.defaultCTStatus, s"fakeTxId-$regId", None)
+    CompanyRegistrationProfile(appConfig.defaultCTStatus, s"fakeTxId-$regId", None)
   implicit def getDefaultCoHoCompanyDetails(regId: String): IncorpInfoResponse = IncorpInfoSuccessResponse(
     CoHoCompanyDetailsModel(
-      applicationConfig.defaultCompanyName,
-      applicationConfig.defaultCHROAddress
+      appConfig.defaultCompanyName,
+      appConfig.defaultCHROAddress
     )
   )
   implicit def cancelSubmission(regId: String): DESResponse = throw new Exception(s"Registration ID $regId is in whitelist, no submission allowed")
 
-  implicit def getDefaultOfficerList(regId:String):OfficerList = applicationConfig.defaultOfficerList
+  implicit def getDefaultOfficerList(regId:String):OfficerList = appConfig.defaultOfficerList
 
   def ifRegIdNotWhitelisted[T](regId: String)(f: => Future[T])(implicit default: String => T): Future[T] = {
-    if( applicationConfig.regIdWhitelist.contains(regId) ) {
+    if (appConfig.regIdWhitelist.contains(regId)) {
       Logger.info(s"Registration ID $regId is in the whitelist")
       Future.successful(default(regId))
     } else {

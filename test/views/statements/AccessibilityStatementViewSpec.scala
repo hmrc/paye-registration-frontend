@@ -80,7 +80,8 @@ class AccessibilityStatementViewSpec extends PayeComponentSpec with PayeFakedApp
 
   lazy val page: Html = accessibility_statement(testAccessibilityReportUrl, testServiceStartUrl)(
     request,
-    messagesApi.preferred(request)
+    messagesApi.preferred(request),
+    mockAppConfig
   )
 
 

@@ -16,9 +16,10 @@
 
 package services
 
-import javax.inject.Inject
+import config.AppConfig
 import connectors._
 import enums.{CacheKeys, IncorporationStatus}
+import javax.inject.Inject
 import models.external.CurrentProfile
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -28,7 +29,8 @@ import scala.concurrent.Future
 
 class SubmissionServiceImpl @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,
                                       val keystoreConnector: KeystoreConnector,
-                                      val iiConnector: IncorporationInformationConnector) extends SubmissionService
+                                      val iiConnector: IncorporationInformationConnector
+                                     )(implicit val appConfig: AppConfig) extends SubmissionService
 
 trait SubmissionService extends RegistrationWhitelist {
   val payeRegistrationConnector: PAYERegistrationConnector
@@ -39,10 +41,10 @@ trait SubmissionService extends RegistrationWhitelist {
     ifRegIdNotWhitelisted(profile.registrationID) {
       payeRegistrationConnector.submitRegistration(profile.registrationID).flatMap {
         case status@(Success | Cancelled) =>
-          val cp: CurrentProfile = if(status == Success) profile.copy(payeRegistrationSubmitted = true) else profile.copy(incorpStatus = Some(IncorporationStatus.rejected))
+          val cp: CurrentProfile = if (status == Success) profile.copy(payeRegistrationSubmitted = true) else profile.copy(incorpStatus = Some(IncorporationStatus.rejected))
 
           keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, profile.registrationID, profile.companyTaxRegistration.transactionId, cp).flatMap {
-            sessionMap => iiConnector.cancelSubscription(sessionMap.transactionId, sessionMap.registrationId).map{_ => status}
+            sessionMap => iiConnector.cancelSubscription(sessionMap.transactionId, sessionMap.registrationId).map { _ => status }
           }
         case other => Future.successful(other)
       }

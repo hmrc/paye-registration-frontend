@@ -17,6 +17,7 @@
 package controllers.userJourney
 
 import common.exceptions.DownstreamExceptions.S4LFetchException
+import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
@@ -47,9 +48,11 @@ class CompanyDetailsControllerImpl @Inject()(val s4LService: S4LService,
                                              val config: Configuration,
                                              val auditService: AuditService,
                                              val incorporationInformationConnector: IncorporationInformationConnector,
-                                             val payeRegistrationService: PAYERegistrationService) extends CompanyDetailsController with AuthRedirectUrls
+                                             val payeRegistrationService: PAYERegistrationService
+                                            )(implicit val appConfig: AppConfig) extends CompanyDetailsController with AuthRedirectUrls
 
 trait CompanyDetailsController extends PayeBaseController {
+  implicit val appConfig: AppConfig
   val s4LService: S4LService
   val companyDetailsService: CompanyDetailsService
   val incorpInfoService: IncorporationInformationService

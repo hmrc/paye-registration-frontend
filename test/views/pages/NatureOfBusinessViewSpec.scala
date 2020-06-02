@@ -24,7 +24,7 @@ import play.api.test.FakeRequest
 import views.html.pages.natureOfBusiness
 
 class NatureOfBusinessViewSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
-
+  implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
   implicit lazy val messagesApi : MessagesApi = mockMessagesApi
 

@@ -16,10 +16,10 @@
 
 package services
 
-import javax.inject.Inject
-
+import config.AppConfig
 import connectors.PAYERegistrationConnector
 import enums.{CacheKeys, DownstreamOutcome}
+import javax.inject.Inject
 import models.api.Director
 import models.view.{Directors, Ninos, UserEnteredNino}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -29,10 +29,12 @@ import utils.RegistrationWhitelist
 import scala.concurrent.Future
 
 class DirectorDetailsServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
-                                       val incorpInfoService: IncorporationInformationService,
-                                       val s4LService: S4LService) extends DirectorDetailsService
+                                           val incorpInfoService: IncorporationInformationService,
+                                           val s4LService: S4LService
+                                          )(implicit val appConfig: AppConfig) extends DirectorDetailsService
 
 trait DirectorDetailsService extends RegistrationWhitelist {
+  implicit val appConfig: AppConfig
   val payeRegConnector: PAYERegistrationConnector
   val s4LService: S4LService
   val incorpInfoService: IncorporationInformationService
@@ -50,7 +52,7 @@ trait DirectorDetailsService extends RegistrationWhitelist {
 
   private[services] def viewToAPI(viewData: Directors): Either[Directors, Seq[Director]] = viewData match {
     case Directors(map) if map.nonEmpty => Right(map.values.toList)
-    case _                              => Left(viewData)
+    case _ => Left(viewData)
   }
 
 
@@ -60,8 +62,8 @@ trait DirectorDetailsService extends RegistrationWhitelist {
 
   def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
     for {
-      iiDirectors       <- incorpInfoService.getDirectorDetails(txId = transactionId,regId)
-      backendDirectors  <- s4LService.fetchAndGet(CacheKeys.DirectorDetails.toString, regId) flatMap {
+      iiDirectors <- incorpInfoService.getDirectorDetails(txId = transactionId, regId)
+      backendDirectors <- s4LService.fetchAndGet(CacheKeys.DirectorDetails.toString, regId) flatMap {
         case Some(dirs) => Future.successful(dirs)
         case None => for {
           regResponse <- ifRegIdNotWhitelisted(regId) {
@@ -71,7 +73,7 @@ trait DirectorDetailsService extends RegistrationWhitelist {
           apiToView(regResponse)
         }
       }
-      directors = if(directorsNotChanged(iiDirectors, backendDirectors)) backendDirectors else iiDirectors
+      directors = if (directorsNotChanged(iiDirectors, backendDirectors)) backendDirectors else iiDirectors
       _ <- saveToS4L(directors, regId)
     } yield {
       directors
@@ -81,20 +83,19 @@ trait DirectorDetailsService extends RegistrationWhitelist {
   private[services] def saveDirectorDetails(viewModel: Directors, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     viewToAPI(viewModel) fold(
       incompleteView =>
-        saveToS4L(incompleteView, regId) map {_ => DownstreamOutcome.Success},
+        saveToS4L(incompleteView, regId) map { _ => DownstreamOutcome.Success },
       completeAPI =>
         for {
-          details   <- payeRegConnector.upsertDirectors(regId, completeAPI)
+          details <- payeRegConnector.upsertDirectors(regId, completeAPI)
           clearData <- s4LService.clear(regId)
         } yield DownstreamOutcome.Success
     )
   }
 
 
-
   def createDisplayNamesMap(directors: Directors): Map[String, String] = {
     directors.directorMapping.map {
-      case(k, v) => (k, List(v.name.title,v.name.forename,v.name.otherForenames, Some(v.name.surname)).flatten.mkString(" "))
+      case (k, v) => (k, List(v.name.title, v.name.forename, v.name.otherForenames, Some(v.name.surname)).flatten.mkString(" "))
     }
   }
 
@@ -102,22 +103,25 @@ trait DirectorDetailsService extends RegistrationWhitelist {
   def directorsNotChanged(iiDirectors: Directors, backendDirectors: Directors): Boolean = {
     val numberOfDirectorsAreTheSame = iiDirectors.directorMapping.seq.size == backendDirectors.directorMapping.seq.size
 
-    !{if(numberOfDirectorsAreTheSame) {
-      iiDirectors.directorMapping.values.map{ ii =>
-        backendDirectors.directorMapping.values.exists(_.name == ii.name)
-      }.toList
-    } else {
-      List(false)
-    }}.contains(false)
-    }
+    ! {
+      if (numberOfDirectorsAreTheSame) {
+        iiDirectors.directorMapping.values.map { ii =>
+          backendDirectors.directorMapping.values.exists(_.name == ii.name)
+        }.toList
+      } else {
+        List(false)
+      }
+    }.contains(false)
+  }
 
 
   def createDirectorNinos(directors: Directors): Ninos = {
     Ninos((0 until directors.directorMapping.size).map {
-      index => UserEnteredNino(
-        index.toString,
-        directors.directorMapping.get(index.toString).flatMap(_.nino)
-      )
+      index =>
+        UserEnteredNino(
+          index.toString,
+          directors.directorMapping.get(index.toString).flatMap(_.nino)
+        )
     }.toList)
   }
 

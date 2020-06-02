@@ -27,6 +27,7 @@ import views.html.pages.companyDetails.{ppobAddress => PPOBAddressPage}
 import views.html.pages.payeContact.{correspondenceAddress => CorrespondenceAddressPage}
 
 class chooseAddressSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
+  implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
   implicit lazy val messagesApi : MessagesApi = mockMessagesApi
 

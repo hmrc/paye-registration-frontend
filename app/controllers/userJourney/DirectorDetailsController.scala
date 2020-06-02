@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import config.AppConfig
 import javax.inject.Inject
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
@@ -26,6 +27,7 @@ import play.api.mvc.{Action, AnyContent}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{directorDetails => DirectorDetailsPage}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class DirectorDetailsControllerImpl @Inject()(val messagesApi: MessagesApi,
@@ -37,9 +39,11 @@ class DirectorDetailsControllerImpl @Inject()(val messagesApi: MessagesApi,
                                               val incorpInfoService: IncorporationInformationService,
                                               val authConnector: AuthConnector,
                                               val incorporationInformationConnector: IncorporationInformationConnector,
-                                              val payeRegistrationService: PAYERegistrationService) extends DirectorDetailsController with AuthRedirectUrls
+                                              val payeRegistrationService: PAYERegistrationService
+                                             )(implicit val appConfig: AppConfig) extends DirectorDetailsController with AuthRedirectUrls
 
 trait DirectorDetailsController extends PayeBaseController {
+  implicit val appConfig: AppConfig
   val directorDetailsService : DirectorDetailsService
 
   def directorDetails: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>

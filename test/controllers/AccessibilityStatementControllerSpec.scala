@@ -20,17 +20,17 @@ import helpers.{PayeComponentSpec, PayeFakedApp}
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 
-class AccessibilityStatementControllerSpec extends PayeComponentSpec with PayeFakedApp  {
+class AccessibilityStatementControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
-  object TestAccessibilityStatementController extends AccessibilityStatementController(
-    fakeApplication.injector.instanceOf[MessagesApi],
+  val testAccessibilityStatementController = new AccessibilityStatementController(
+    fakeApplication.injector.instanceOf[MessagesApi])(
     mockAppConfig
   )
 
   "show" should {
     "return OK" in {
 
-      val result = TestAccessibilityStatementController.show("test")(FakeRequest("GET", "/"))
+      val result = testAccessibilityStatementController.show("test")(FakeRequest("GET", "/"))
 
       status(result) mustBe OK
       contentType(result) mustBe Some("text/html")

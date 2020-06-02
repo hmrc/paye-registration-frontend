@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import config.AppConfig
 import javax.inject.Inject
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
@@ -26,8 +27,8 @@ import play.api.mvc.{Action, AnyContent}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{completionCapacity => CompletionCapacityView}
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class CompletionCapacityControllerImpl @Inject()(val messagesApi: MessagesApi,
@@ -39,9 +40,11 @@ class CompletionCapacityControllerImpl @Inject()(val messagesApi: MessagesApi,
                                                  val incorpInfoService: IncorporationInformationService,
                                                  val authConnector: AuthConnector,
                                                  val incorporationInformationConnector: IncorporationInformationConnector,
-                                                 val payeRegistrationService: PAYERegistrationService) extends CompletionCapacityController with AuthRedirectUrls
+                                                 val payeRegistrationService: PAYERegistrationService
+                                                )(implicit val appConfig: AppConfig) extends CompletionCapacityController with AuthRedirectUrls
 
 trait CompletionCapacityController extends PayeBaseController {
+  implicit val appConfig: AppConfig
   val completionCapacityService: CompletionCapacityService
 
   def completionCapacity: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>

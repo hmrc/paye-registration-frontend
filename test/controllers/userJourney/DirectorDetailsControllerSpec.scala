@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import config.AppConfig
 import enums.DownstreamOutcome
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.api.{Director, Name}
@@ -37,15 +38,15 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
 
   class Setup {
     val testController = new DirectorDetailsController {
-      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
-
+      override val redirectToLogin = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val directorDetailsService = mockDirectorDetailService
       override val messagesApi = mockMessagesApi
       override val authConnector = mockAuthConnector
       override val keystoreConnector = mockKeystoreConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
+      override implicit val appConfig: AppConfig = mockAppConfig
     }
   }
 
@@ -91,7 +92,7 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
         .thenReturn(directorMap)
 
       AuthHelpers.showAuthorisedWithCP(testController.directorDetails, Fixtures.validCurrentProfile, FakeRequest()) {
-        (result: Future[Result])  =>
+        (result: Future[Result]) =>
           status(result) mustBe OK
       }
     }

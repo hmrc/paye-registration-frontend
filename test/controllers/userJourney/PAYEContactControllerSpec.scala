@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import config.AppConfig
 import enums.DownstreamOutcome
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.Address
@@ -39,7 +40,6 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
     val testController = new PAYEContactController {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-
       override val companyDetailsService = mockCompanyDetailsService
       override val payeContactService = mockPAYEContactService
       override val addressLookupService = mockAddressLookupService
@@ -50,6 +50,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val auditService = mockAuditService
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
+      override implicit val appConfig: AppConfig = mockAppConfig
     }
   }
 

@@ -17,6 +17,7 @@
 package services
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlMatching}
+import config.AppConfig
 import connectors._
 import enums.IncorporationStatus
 import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
@@ -33,10 +34,12 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase with CachingStub {
   val mockUrl = s"http://$mockHost:$mockPort"
 
   lazy val businessRegistrationConnector = app.injector.instanceOf[BusinessRegistrationConnector]
-  lazy val keystoreConnector             = app.injector.instanceOf[KeystoreConnector]
-  lazy val companyRegistrationConnector  = app.injector.instanceOf[CompanyRegistrationConnector]
-  lazy val payeRegistrationConnector     = app.injector.instanceOf[PAYERegistrationConnector]
-  lazy val incorpInfoConnector           = app.injector.instanceOf[IncorporationInformationConnector]
+  lazy val keystoreConnector = app.injector.instanceOf[KeystoreConnector]
+  lazy val companyRegistrationConnector = app.injector.instanceOf[CompanyRegistrationConnector]
+  lazy val payeRegistrationConnector = app.injector.instanceOf[PAYERegistrationConnector]
+  lazy val incorpInfoConnector = app.injector.instanceOf[IncorporationInformationConnector]
+  implicit lazy val appConfig = app.injector.instanceOf[AppConfig]
+
 
   val additionalConfiguration = Map(
     "auditing.consumer.baseUri.host" -> s"$mockHost",
@@ -63,11 +66,11 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase with CachingStub {
 
   def backendStatus(status: String) = {
     s"""{
-     |   "status": "$status",
-     |   "lastUpdate": "2017-05-01T12:00:00Z",
-     |   "ackRef": "testAckRef",
-     |   "empref": "testEmpRef"
-     |}""".stripMargin
+       |   "status": "$status",
+       |   "lastUpdate": "2017-05-01T12:00:00Z",
+       |   "ackRef": "testAckRef",
+       |   "empref": "testEmpRef"
+       |}""".stripMargin
   }
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
