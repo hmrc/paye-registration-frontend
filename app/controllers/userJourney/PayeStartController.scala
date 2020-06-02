@@ -17,6 +17,7 @@
 package controllers.userJourney
 
 import common.exceptions.DownstreamExceptions.ConfirmationRefsNotFoundException
+import config.AppConfig
 import connectors._
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.{CacheKeys, DownstreamOutcome, RegistrationDeletion}
@@ -28,6 +29,7 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.PAYEFeatureSwitches
 
@@ -45,9 +47,11 @@ class PayeStartControllerImpl @Inject()(val currentProfileService: CurrentProfil
                                         val companyRegistrationConnector: CompanyRegistrationConnector,
                                         val featureSwitches: PAYEFeatureSwitches,
                                         val messagesApi: MessagesApi,
-                                        val incorporationInformationConnector: IncorporationInformationConnector) extends PayeStartController with AuthRedirectUrls
+                                        val incorporationInformationConnector: IncorporationInformationConnector
+                                       )(implicit val appConfig: AppConfig) extends PayeStartController with AuthRedirectUrls
 
 trait PayeStartController extends PayeBaseController {
+  implicit val appConfig: AppConfig
   val currentProfileService: CurrentProfileService
   val payeRegistrationService: PAYERegistrationService
   val businessRegistrationConnector: BusinessRegistrationConnector

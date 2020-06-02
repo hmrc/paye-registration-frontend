@@ -17,10 +17,10 @@
 package connectors
 
 import common.exceptions.DownstreamExceptions.{IncorporationInformationResponseException, OfficerListNotFoundException}
-import config.WSHttp
+import config.{AppConfig, WSHttp}
 import controllers.exceptions.GeneralException
 import enums.IncorporationStatus
-import helpers.PayeComponentSpec
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import helpers.mocks.MockMetrics
 import models.api.Name
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
@@ -30,7 +30,7 @@ import uk.gov.hmrc.http.{BadRequestException, HttpResponse, InternalServerExcept
 
 import scala.concurrent.Future
 
-class IncorporationInformationConnectorSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
+class IncorporationInformationConnectorSpec extends PayeComponentSpec with PayeFakedApp {
 
   val testUrl = "testIIUrl"
   val testUri = "testIIUri"
@@ -38,74 +38,78 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with Guice
   val testStubUri = "testIIStubUri"
   val testPayeRegFeUrl = "http://paye-fe"
 
-  class Setup(unStubbed: Boolean =  true) extends CodeMocks {
+  class Setup(unStubbed: Boolean = true) extends CodeMocks {
     val connector = new IncorporationInformationConnector {
-      val stubUrl                 = testStubUrl
-      val stubUri                 = testStubUri
-      val incorpInfoUrl           = testUrl
-      val incorpInfoUri           = testUri
-      val payeRegFeUrl            = testPayeRegFeUrl
-      override val http : WSHttp  = mockWSHttp
+      val stubUrl = testStubUrl
+      val stubUri = testStubUri
+      val incorpInfoUrl = testUrl
+      val incorpInfoUri = testUri
+      val payeRegFeUrl = testPayeRegFeUrl
+      override val http: WSHttp = mockWSHttp
       override val metricsService = new MockMetrics
       override val successCounter = metricsService.companyDetailsSuccessResponseCounter
-      override val failedCounter  = metricsService.companyDetailsFailedResponseCounter
-      override def timer          = metricsService.incorpInfoResponseTimer.time()
+      override val failedCounter = metricsService.companyDetailsFailedResponseCounter
+
+      override def timer = metricsService.incorpInfoResponseTimer.time()
+
+      override implicit val appConfig: AppConfig = mockAppConfig
     }
   }
+
   "setupSubscription" should {
     val responseJson = Json.parse(
       s"""
-        |{
-        | "SCRSIncorpStatus": {
-        |   "IncorpSubscriptionKey" : {
-        |     "transactionId" : "fooTxID",
-        |     "subscriber"    : "SCRS",
-        |     "discriminator" : "paye-fe"
-        |   },
-        |   "IncorpStatusEvent": {
-        |     "status" : "accepted",
-        |     "crn" : "12345678",
-        |     "description" : "test desc"
-        |   }
-        | }
-        |}
+         |{
+         | "SCRSIncorpStatus": {
+         |   "IncorpSubscriptionKey" : {
+         |     "transactionId" : "fooTxID",
+         |     "subscriber"    : "SCRS",
+         |     "discriminator" : "paye-fe"
+         |   },
+         |   "IncorpStatusEvent": {
+         |     "status" : "accepted",
+         |     "crn" : "12345678",
+         |     "description" : "test desc"
+         |   }
+         | }
+         |}
       """.stripMargin)
     "return Some(IncorporationStatus.Value) when II returns a 200" in new Setup {
       val httpResponse = HttpResponse(200, Some(responseJson))
       mockHttpPOST[JsObject, HttpResponse]("", httpResponse)
 
-      await(connector.setupSubscription("fooTxID","barSubscriber")) mustBe Some(IncorporationStatus.accepted)
+      await(connector.setupSubscription("fooTxID", "barSubscriber")) mustBe Some(IncorporationStatus.accepted)
     }
     "return JsResultException when subscriber does not match with the one returned from II" in new Setup {
       val httpResponse = HttpResponse(200, Some(responseJson))
       mockHttpPOST[JsObject, HttpResponse]("", httpResponse)
 
-      intercept[JsResultException](await(connector.setupSubscription("fooTxID","bar",subscriber = "fooBarWillNotMatch")))
+      intercept[JsResultException](await(connector.setupSubscription("fooTxID", "bar", subscriber = "fooBarWillNotMatch")))
     }
 
     "return None when II returns a 202" in new Setup {
       val httpResponse = HttpResponse(202, Some(responseJson))
       mockHttpPOST[JsObject, HttpResponse]("", httpResponse)
 
-      await(connector.setupSubscription("foo","bar")) mustBe None
+      await(connector.setupSubscription("foo", "bar")) mustBe None
     }
 
     "return IncorporationInformationResponseException when II returns any other status than 200 / 202 but still a success response" in new Setup {
       val httpResponse = HttpResponse(203, Some(responseJson))
       mockHttpPOST[JsObject, HttpResponse]("", httpResponse)
 
-      intercept[IncorporationInformationResponseException](await(connector.setupSubscription("foo","bar")))
+      intercept[IncorporationInformationResponseException](await(connector.setupSubscription("foo", "bar")))
     }
     "return an JsResultException when json cannot be parsed for a 200 from II" in new Setup {
       val httpResponse = HttpResponse(200, Some(Json.obj("foo" -> "bar")))
       mockHttpPOST[JsObject, HttpResponse]("", httpResponse)
 
-      intercept[JsResultException](await(connector.setupSubscription("fooTxID","barSubscriber")))
+      intercept[JsResultException](await(connector.setupSubscription("fooTxID", "barSubscriber")))
     }
     "return an Exception when something goes wrong whilst calling ii" in new Setup {
-      mockHttpFailedPOST[JsObject, HttpResponse]("",new BadRequestException("foo"))
+      mockHttpFailedPOST[JsObject, HttpResponse]("", new BadRequestException("foo"))
 
-      intercept[BadRequestException](await(connector.setupSubscription("foo","bar")))
+      intercept[BadRequestException](await(connector.setupSubscription("foo", "bar")))
     }
   }
 
@@ -154,7 +158,7 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with Guice
   "getIncorporationData" should {
 
     val testTransId = "testTransId"
-    val testRegId   = "regId"
+    val testRegId = "regId"
 
     val testJsonWithDate = Json.parse(
       """
@@ -234,33 +238,33 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with Guice
     "return a successful CoHo api response object for valid data" in new Setup(true) {
       mockHttpGet[JsObject](connector.incorpInfoUrl, Future.successful(tstOfficerListObject))
 
-      await(connector.getOfficerList(testTransId,testRegId)) mustBe tstOfficerList
+      await(connector.getOfficerList(testTransId, testRegId)) mustBe tstOfficerList
     }
 
     "return an OfficerListNotFound exception when CoHo api response object returns an empty list" in new Setup(true) {
       val emptyOfficersListJson = JsObject(Seq("officers" -> Json.arr()))
       mockHttpGet[JsObject](connector.incorpInfoUrl, Future.successful(emptyOfficersListJson))
 
-      intercept[OfficerListNotFoundException](await(connector.getOfficerList(testTransId,testRegId)))
+      intercept[OfficerListNotFoundException](await(connector.getOfficerList(testTransId, testRegId)))
     }
 
     "return an OfficerListNotFound exception for a downstream not found error" in new Setup(true) {
       mockHttpGet[JsObject](connector.incorpInfoUrl, Future.failed(new NotFoundException("tstException")))
 
-      intercept[OfficerListNotFoundException](await(connector.getOfficerList(testTransId,testRegId)))
+      intercept[OfficerListNotFoundException](await(connector.getOfficerList(testTransId, testRegId)))
     }
 
     "return a CoHo Bad Request api response object for a bad request" in new Setup(true) {
       mockHttpGet[JsObject](connector.incorpInfoUrl, Future.failed(new BadRequestException("tstException")))
 
-      intercept[BadRequestException](await(connector.getOfficerList(testTransId,testRegId)))
+      intercept[BadRequestException](await(connector.getOfficerList(testTransId, testRegId)))
     }
 
     "return a CoHo error api response object for a downstream error" in new Setup(true) {
       val ex = new RuntimeException("tstException")
       mockHttpGet[JsObject](connector.incorpInfoUrl, Future.failed(ex))
 
-      intercept[RuntimeException](await(connector.getOfficerList(testTransId,testRegId)) )
+      intercept[RuntimeException](await(connector.getOfficerList(testTransId, testRegId)))
     }
   }
 }

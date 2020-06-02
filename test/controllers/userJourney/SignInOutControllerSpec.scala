@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
@@ -26,9 +27,8 @@ class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup {
     val controller = new SignInOutController {
-      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
-
+      override val redirectToLogin = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val keystoreConnector = mockKeystoreConnector
       override val authConnector = mockAuthConnector
       implicit val messagesApi: MessagesApi = mockMessagesApi
@@ -36,6 +36,7 @@ class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val compRegFEURI: String = "/testUri"
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
+      override implicit val appConfig: AppConfig = mockAppConfig
     }
   }
 
@@ -69,7 +70,7 @@ class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "renewSession" should {
     "return 200 when hit with Authorised User" in new Setup {
-      AuthHelpers.showAuthorised(controller.renewSession(),FakeRequest()){a =>
+      AuthHelpers.showAuthorised(controller.renewSession(), FakeRequest()) { a =>
         status(a) mustBe 200
         contentType(a) mustBe Some("image/jpeg")
         await(a).header.headers("Content-Disposition") mustBe """inline; filename="renewSession.jpg"; filename*=utf-8''renewSession.jpg"""
@@ -81,7 +82,7 @@ class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
   "destroySession" should {
     "return redirect to timeout show and get rid of headers" in new Setup {
 
-      val fr = FakeRequest().withHeaders(("playFoo","no more"))
+      val fr = FakeRequest().withHeaders(("playFoo", "no more"))
 
       val res = controller.destroySession()(fr)
       status(res) mustBe 303

@@ -31,8 +31,8 @@ import play.api.{Configuration, Environment, Play}
 import uk.gov.hmrc.play.config.ServicesConfig
 
 @Singleton
-class FrontendAppConfig @Inject()(val environment: Environment,
-                                  val runModeConfiguration: Configuration) extends ServicesConfig {
+class AppConfig @Inject()(val environment: Environment,
+                          val runModeConfiguration: Configuration) extends ServicesConfig {
 
   override protected def mode: Mode = environment.mode
 
@@ -84,78 +84,6 @@ class FrontendAppConfig @Inject()(val environment: Environment,
   def accessibilityStatementUrl(pageUri: String) = controllers.routes.AccessibilityStatementController.show(pageUri).url
 
   def accessibilityReportUrl(userAction: String): String =
-    s"$contactHost/contact/accessibility-unauthenticated?service=paye-registration-frontend&userAction=${encodeUrl(userAction)}"
-}
-
-trait AppConfig {
-  val analyticsToken: String
-  val analyticsHost: String
-  val reportAProblemPartialUrl: String
-  val reportAProblemNonJSUrl: String
-
-  val contactFrontendPartialBaseUrl: String
-  val contactHost: String
-
-  val timeoutInSeconds: String
-  val timeoutDisplayLength: String
-  def encodeUrl(url: String): String
-  def accessibilityStatementUrl(pageUri: String): String
-  def accessibilityReportUrl(userAction: String): String
-
-}
-
-object FrontendAppConfig extends AppConfig with ServicesConfig { //TODO Inject the appconfig class above where it's needed and phase out this object
-  private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
-
-  val contactFormServiceIdentifier = "SCRS"
-
-  override lazy val contactFrontendPartialBaseUrl = baseUrl("contact-frontend")
-  override lazy val contactHost: String = loadConfig("contact-frontend.host")
-
-  override lazy val analyticsToken = loadConfig("google-analytics.token")
-  override lazy val analyticsHost = loadConfig("google-analytics.host")
-  override lazy val reportAProblemPartialUrl = loadConfig("reportAProblemPartialUrl")
-  override lazy val reportAProblemNonJSUrl = loadConfig("reportAProblemNonJSUrl")
-
-  override lazy val timeoutInSeconds: String = loadConfig("timeoutInSeconds")
-  override lazy val timeoutDisplayLength: String = loadConfig("timeoutDisplayLength")
-
-  private def whiteListConfig(key: String): Seq[String] = {
-    Some(new String(Base64.getDecoder
-      .decode(configuration.getString(key).getOrElse("")), "UTF-8"))
-      .map(_.split(",")).getOrElse(Array.empty).toSeq
-  }
-
-  private def loadStringConfigBase64(key: String): String = {
-    new String(Base64.getDecoder.decode(configuration.getString(key).getOrElse("")), Charset.forName("UTF-8"))
-  }
-
-  private def loadJsonConfigBase64[T](key: String)(implicit reads: Reads[T]): T = {
-    val json = Json.parse(Base64.getDecoder.decode(configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))))
-    json.validate[T].fold(
-      errors => throw new Exception(s"Incorrect data for the key: $key and ##  $errors"),
-      valid => valid
-    )
-  }
-
-  lazy val regIdWhitelist = whiteListConfig("regIdWhitelist")
-  lazy val defaultCompanyName = loadStringConfigBase64("defaultCompanyName")
-  lazy val defaultCHROAddress = loadJsonConfigBase64[Address]("defaultCHROAddress")
-  lazy val defaultSeqDirector = loadJsonConfigBase64[Seq[Director]]("defaultSeqDirector")(Director.seqReads)
-  lazy val defaultCTStatus = loadStringConfigBase64("defaultCTStatus")
-  lazy val defaultOfficerList = loadJsonConfigBase64[OfficerList]("defaultOfficerList")(OfficerList.formatModel)
-  lazy val uriWhiteList = configuration.getStringSeq("csrfexceptions.whitelist").getOrElse(Seq.empty).toSet
-  lazy val csrfBypassValue = loadStringConfigBase64("Csrf-Bypass-value")
-
-  override protected def mode: Mode = Play.current.mode
-
-  override protected def runModeConfiguration: Configuration = Play.current.configuration
-
-  override def encodeUrl(url: String): String = URLEncoder.encode(url, "UTF-8")
-
-  override def accessibilityStatementUrl(pageUri: String): String = controllers.routes.AccessibilityStatementController.show(pageUri).url
-
-  override def accessibilityReportUrl(userAction: String): String =
     s"$contactHost/contact/accessibility-unauthenticated?service=paye-registration-frontend&userAction=${encodeUrl(userAction)}"
 
 }

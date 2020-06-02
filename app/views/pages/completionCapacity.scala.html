@@ -18,7 +18,8 @@
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers.templates.{inputRadioGroupHidden, payeErrorSummary, payeInput}
 
-@(completionCapacityForm: Form[CompletionCapacity])(implicit request: Request[_], messages: Messages)
+@import config.AppConfig
+@(completionCapacityForm: Form[CompletionCapacity])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @otherHidden = {
     @payeInput(

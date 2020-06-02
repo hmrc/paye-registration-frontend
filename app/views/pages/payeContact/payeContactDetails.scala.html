@@ -17,7 +17,8 @@
 @import helpers.templates.{oneOfManyErrorWrapper, payeErrorSummary, payeInput}
 @import models.view.PAYEContactDetails
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
-@(contactForm: Form[PAYEContactDetails])(implicit request: Request[_], messages: Messages)
+@import config.AppConfig
+@(contactForm: Form[PAYEContactDetails])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @formContent = {
     <fieldset>

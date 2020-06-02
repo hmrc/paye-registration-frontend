@@ -17,8 +17,9 @@
 package controllers.userJourney
 
 import java.time.LocalDate
-import javax.inject.Inject
 
+import config.AppConfig
+import javax.inject.Inject
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.exceptions.{FrontendControllerException, GeneralException, MissingViewElementException}
 import controllers.{AuthRedirectUrls, PayeBaseController}
@@ -45,12 +46,13 @@ class EmploymentControllerImpl @Inject()(val employmentService: EmploymentServic
                                          val s4LService: S4LService,
                                          val companyDetailsService: CompanyDetailsService,
                                          val incorpInfoService: IncorporationInformationService,
-                                         implicit val messagesApi: MessagesApi,
                                          val incorporationInformationConnector: IncorporationInformationConnector,
-                                         val payeRegistrationService: PAYERegistrationService) extends EmploymentController with AuthRedirectUrls
+                                         val payeRegistrationService: PAYERegistrationService
+                                        )(implicit val messagesApi: MessagesApi, val appConfig: AppConfig) extends EmploymentController with AuthRedirectUrls
 
 
 trait EmploymentController extends PayeBaseController {
+  implicit val appConfig: AppConfig
   val employmentService: EmploymentService
   val thresholdService: ThresholdService
   val incorpInfoService: IncorporationInformationService

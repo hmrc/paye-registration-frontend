@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import config.AppConfig
 import enums.{DownstreamOutcome, UserCapacity}
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.CompletionCapacity
@@ -33,17 +34,18 @@ class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedA
 
   class Setup {
     val testController = new CompletionCapacityController {
-      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
-
-      override val authConnector             = mockAuthConnector
-      override val messagesApi               = mockMessagesApi
+      override val redirectToLogin = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
+      override val authConnector = mockAuthConnector
+      override val messagesApi = mockMessagesApi
       override val completionCapacityService = mockCompletionCapacityService
-      override val keystoreConnector         = mockKeystoreConnector
+      override val keystoreConnector = mockKeystoreConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService   = mockPayeRegService
+      override val payeRegistrationService = mockPayeRegService
+      override implicit val appConfig: AppConfig = mockAppConfig
     }
   }
+
   "completionCapacity" should {
     "return an OK if a capacity has been found" in new Setup {
       val capacity = CompletionCapacity(UserCapacity.director, "")

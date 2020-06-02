@@ -25,28 +25,36 @@ import play.api.http.DefaultHttpFilters
 import play.api.i18n.MessagesApi
 import play.api.mvc.Request
 import play.api.{Configuration, Play}
+import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.filters.{FrontendFilters, LoggingFilter}
 import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
 import uk.gov.hmrc.play.config.ControllerConfig
 
 
-class MyErrorHandler @Inject()(
-                                val messagesApi: MessagesApi, val configuration: Configuration) extends FrontendErrorHandler {
-  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]) =  views.html.error_template(pageTitle, heading, message)
+class MyErrorHandler @Inject()(val messagesApi: MessagesApi, val configuration: Configuration)(implicit appConfig: AppConfig) extends FrontendErrorHandler {
+  override def standardErrorTemplate(pageTitle: String,
+                                     heading: String,
+                                     message: String
+                                    )(implicit request: Request[_]): Html =
+    views.html.error_template(pageTitle, heading, message)
 }
 
 object ControllerConfiguration extends ControllerConfig {
-  lazy val controllerConfigs = Play.current.configuration.underlying.as[Config]("controllers")
+  lazy val controllerConfigs: Config = Play.current.configuration.underlying.as[Config]("controllers")
 }
+
 class PAYEFilters @Inject()(defaultFilters: FrontendFilters,
                             loggingFilterCustom: LoggingFilterCustom,
                             sessionIdFilter: PAYESessionIDFilter,
-                            csrfeFilterCustom: PAYECSRFExceptionsFilter) extends DefaultHttpFilters(
+                            csrfeFilterCustom: PAYECSRFExceptionsFilter
+                           ) extends DefaultHttpFilters(
   Seq(csrfeFilterCustom) ++ defaultFilters.filters
     :+ loggingFilterCustom
     :+ sessionIdFilter: _*)
 
 class  LoggingFilterImpl @Inject()(val mat: Materializer)  extends LoggingFilterCustom {
-  override def controllerNeedsLogging(controllerName: String) = ControllerConfiguration.paramsForController(controllerName).needsLogging
+  override def controllerNeedsLogging(controllerName: String): Boolean =
+    ControllerConfiguration.paramsForController(controllerName).needsLogging
 }
+
 trait LoggingFilterCustom extends LoggingFilter

@@ -14,7 +14,8 @@
  * limitations under the License.
  *@
 
-@()(implicit request: Request[_], lang: Lang, messages: Messages)
+@import config.AppConfig
+@()(implicit request: Request[_], lang: Lang, messages: Messages, appConfig: AppConfig)
 @main_template(title = Messages("page.timeout.description"), backButton = false){
 
     <header class="page-header">

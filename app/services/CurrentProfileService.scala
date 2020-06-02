@@ -16,6 +16,7 @@
 
 package services
 
+import config.AppConfig
 import javax.inject.Inject
 import connectors._
 import enums.{CacheKeys, IncorporationStatus, PAYEStatus}
@@ -32,27 +33,28 @@ class CurrentProfileServiceImpl @Inject()(val businessRegistrationConnector: Bus
                                           val payeRegistrationConnector: PAYERegistrationConnector,
                                           val keystoreConnector: KeystoreConnector,
                                           val companyRegistrationConnector: CompanyRegistrationConnector,
-                                          val incorporationInformationConnector: IncorporationInformationConnector) extends CurrentProfileService
+                                          val incorporationInformationConnector: IncorporationInformationConnector
+                                         )(implicit val appConfig: AppConfig) extends CurrentProfileService
 
 trait CurrentProfileService extends RegistrationWhitelist {
-
+  implicit val appConfig: AppConfig
   val businessRegistrationConnector: BusinessRegistrationConnector
   val payeRegistrationConnector: PAYERegistrationConnector
   val companyRegistrationConnector: CompanyRegistrationConnector
   val keystoreConnector: KeystoreConnector
   val incorporationInformationConnector: IncorporationInformationConnector
 
-  def fetchAndStoreCurrentProfile(implicit hc: HeaderCarrier) : Future[CurrentProfile] = {
+  def fetchAndStoreCurrentProfile(implicit hc: HeaderCarrier): Future[CurrentProfile] = {
     for {
       businessProfile <- businessRegistrationConnector.retrieveCurrentProfile
-      companyProfile  <- ifRegIdNotWhitelisted(businessProfile.registrationID) {
+      companyProfile <- ifRegIdNotWhitelisted(businessProfile.registrationID) {
         companyRegistrationConnector.getCompanyRegistrationDetails(businessProfile.registrationID)
       }
-      oRegStatus      <- payeRegistrationConnector.getStatus(businessProfile.registrationID)
-      submitted       =  regSubmitted(oRegStatus)
-      incorpStatus    <- incorporationInformationConnector.setupSubscription(companyProfile.transactionId,businessProfile.registrationID)
-      currentProfile  =  CurrentProfile(businessProfile.registrationID, companyProfile, businessProfile.language, submitted, incorpStatus)
-      _               <- keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, businessProfile.registrationID, companyProfile.transactionId, currentProfile)
+      oRegStatus <- payeRegistrationConnector.getStatus(businessProfile.registrationID)
+      submitted = regSubmitted(oRegStatus)
+      incorpStatus <- incorporationInformationConnector.setupSubscription(companyProfile.transactionId, businessProfile.registrationID)
+      currentProfile = CurrentProfile(businessProfile.registrationID, companyProfile, businessProfile.language, submitted, incorpStatus)
+      _ <- keystoreConnector.cache[CurrentProfile](CacheKeys.CurrentProfile.toString, businessProfile.registrationID, companyProfile.transactionId, currentProfile)
     } yield {
       currentProfile
     }
@@ -64,16 +66,16 @@ trait CurrentProfileService extends RegistrationWhitelist {
       session.copy(data = Map(CacheKeys.CurrentProfile.toString -> Json.toJson(updatedCp)))
   }
 
-  def updateCurrentProfileWithIncorpStatus(txId: String, status: IncorporationStatus.Value)(implicit hc: HeaderCarrier):Future[Option[String]] =  for {
+  def updateCurrentProfileWithIncorpStatus(txId: String, status: IncorporationStatus.Value)(implicit hc: HeaderCarrier): Future[Option[String]] = for {
     updatedSessionMap <- keystoreConnector.fetchByTransactionId(txId).map(updateSessionMap(_, status))
-    _                 = updatedSessionMap.map(sessionMap => keystoreConnector.cacheSessionMap(sessionMap))
-    regId             = updatedSessionMap.flatMap(_.getEntry[CurrentProfile](CacheKeys.CurrentProfile.toString).map(_.registrationID))
+    _ = updatedSessionMap.map(sessionMap => keystoreConnector.cacheSessionMap(sessionMap))
+    regId = updatedSessionMap.flatMap(_.getEntry[CurrentProfile](CacheKeys.CurrentProfile.toString).map(_.registrationID))
   } yield regId
 
   private[services] def regSubmitted(oRegStatus: Option[PAYEStatus.Value]): Boolean = {
     oRegStatus.exists {
       case PAYEStatus.draft | PAYEStatus.invalid => false
-      case _                                     => true
+      case _ => true
     }
   }
 }

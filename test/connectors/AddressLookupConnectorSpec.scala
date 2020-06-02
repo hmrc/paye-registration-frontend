@@ -33,8 +33,7 @@ class AddressLookupConnectorSpec extends PayeComponentSpec with PayeFakedApp {
   class Setup extends CodeMocks {
     val testConnector: AddressLookupConnector = new AddressLookupConnector(
       mockMetrics,
-      mockWSHttp,
-      mockAppConfig
+      mockWSHttp
     ) {
       override lazy val addressLookupFrontendUrl = "testBusinessRegUrl"
       override val successCounter: Counter = mockMetrics.addressLookupSuccessResponseCounter

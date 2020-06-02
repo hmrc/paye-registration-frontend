@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import config.AppConfig
 import enums.DownstreamOutcome
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.NatureOfBusiness
@@ -35,15 +36,15 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
 
   class Setup {
     val testController = new NatureOfBusinessController {
-      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
-
+      override val redirectToLogin = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val authConnector = mockAuthConnector
       override val natureOfBusinessService = mockNatureOfBusinessService
       override val keystoreConnector = mockKeystoreConnector
       implicit val messagesApi: MessagesApi = mockMessagesApi
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
+      override implicit val appConfig: AppConfig = mockAppConfig
     }
   }
 
@@ -65,7 +66,7 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
         .thenReturn(Future.successful(Some(testNOB)))
 
       AuthHelpers.showAuthorisedWithCP(testController.natureOfBusiness, Fixtures.validCurrentProfile, request) {
-        (result: Future[Result])  =>
+        (result: Future[Result]) =>
           status(result) mustBe OK
       }
     }
@@ -75,7 +76,7 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
         .thenReturn(Future.successful(None))
 
       AuthHelpers.showAuthorisedWithCP(testController.natureOfBusiness, Fixtures.validCurrentProfile, request) {
-        (result: Future[Result])  =>
+        (result: Future[Result]) =>
           status(result) mustBe OK
       }
     }

@@ -21,14 +21,14 @@ import helpers.auth.AuthHelpers
 import helpers.fixtures._
 import helpers.mocks.internal.BusinessRegistrationConnectorMock
 import helpers.mocks.{KeystoreMock, SaveForLaterMock, WSHTTPMock}
-import models.external.{AuditingInformation, CompanyRegistrationProfile, CurrentProfile}
+import models.external.{AuditingInformation, CurrentProfile}
 import org.mockito.Mockito.reset
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatestplus.play.PlaySpec
 import play.api.http.{HeaderNames, HttpProtocol, MimeTypes, Status}
-import play.api.mvc.{Call, Result}
 import play.api.mvc.Results.Redirect
+import play.api.mvc.{Call, Result}
 import play.api.test._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
@@ -55,6 +55,7 @@ trait PayeComponentSpec
     with JsonFormValidation {
 
   override implicit def defaultAwaitTimeout: Timeout = 5.seconds
+
   implicit val cp: CurrentProfile = Fixtures.validCurrentProfile.get
   implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId("testSessionId")))
 
@@ -113,7 +114,7 @@ trait PayeComponentSpec
   }
 
   object AuthHelpers extends AuthHelpers {
-    override val authConnector     = mockAuthConnector
+    override val authConnector = mockAuthConnector
     override val keystoreConnector = mockKeystoreConnector
   }
 
@@ -134,9 +135,13 @@ trait PayeComponentSpec
       with MockitoSugar
 
   object MockAuthRedirects {
-    def redirectToLogin: Result    = Redirect(Call("GET", "/test/login"))
+    def redirectToLogin: Result = Redirect(Call("GET", "/test/login"))
+
     def redirectToPostSign: Result = Redirect(Call("GET", "/test/post-sign-in"))
-    def payeRegElFEUrl             = "/prefe"
-    def payeRegElFEUri             = "/test/"
+
+    def payeRegElFEUrl = "/prefe"
+
+    def payeRegElFEUri = "/test/"
   }
+
 }

@@ -19,7 +19,8 @@
 @import models.view.{ChosenAddress, PrepopAddress}
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 
-@(chooseAddressForm: Form[ChosenAddress], roAddress: Option[Address], ppobAddress: Option[Address], prepopAddresses: Map[Int, Address])(implicit request: Request[_], messages: Messages)
+@import config.AppConfig
+@(chooseAddressForm: Form[ChosenAddress], roAddress: Option[Address], ppobAddress: Option[Address], prepopAddresses: Map[Int, Address])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @hiddenContent = {
         @messages("pages.ppobAddress.help.content")

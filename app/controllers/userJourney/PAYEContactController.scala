@@ -18,6 +18,7 @@ package controllers.userJourney
 
 import javax.inject.Inject
 import common.exceptions.DownstreamExceptions.{PPOBAddressNotFoundException, S4LFetchException}
+import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
@@ -31,8 +32,8 @@ import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.pages.payeContact.{correspondenceAddress => PAYECorrespondenceAddressPage, payeContactDetails => PAYEContactDetailsPage}
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class PAYEContactControllerImpl @Inject()(val companyDetailsService: CompanyDetailsService,
@@ -47,10 +48,11 @@ class PAYEContactControllerImpl @Inject()(val companyDetailsService: CompanyDeta
                                           val incorpInfoService: IncorporationInformationService,
                                           val auditService: AuditService,
                                           val incorporationInformationConnector: IncorporationInformationConnector,
-                                          val payeRegistrationService: PAYERegistrationService) extends PAYEContactController with AuthRedirectUrls
+                                          val payeRegistrationService: PAYERegistrationService
+                                         )(implicit val appConfig: AppConfig) extends PAYEContactController with AuthRedirectUrls
 
 trait PAYEContactController extends PayeBaseController {
-
+  implicit val appConfig: AppConfig
   val companyDetailsService: CompanyDetailsService
   val payeContactService: PAYEContactService
   val addressLookupService: AddressLookupService

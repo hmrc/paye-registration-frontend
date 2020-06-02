@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import config.AppConfig
 import connectors._
 import enums.PAYEStatus
 import helpers.auth.AuthHelpers
@@ -35,7 +36,7 @@ import scala.concurrent.Future
 
 class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
-  val mockSummaryService    = mock[SummaryService]
+  val mockSummaryService = mock[SummaryService]
   val mockSubmissionService = mock[SubmissionService]
 
   class Setup extends AuthHelpers {
@@ -43,17 +44,18 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
     override val keystoreConnector = mockKeystoreConnector
 
     val controller = new SummaryController {
-      override val redirectToLogin            = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign         = MockAuthRedirects.redirectToPostSign
-      override val emailService               = mockEmailService
-      override val summaryService             = mockSummaryService
-      override val authConnector              = mockAuthConnector
-      override val keystoreConnector          = mockKeystoreConnector
-      override val payeRegistrationConnector  = mockPayeRegistrationConnector
-      override val submissionService          = mockSubmissionService
-      implicit val messagesApi: MessagesApi   = mockMessagesApi
+      override val redirectToLogin = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
+      override val emailService = mockEmailService
+      override val summaryService = mockSummaryService
+      override val authConnector = mockAuthConnector
+      override val keystoreConnector = mockKeystoreConnector
+      override val payeRegistrationConnector = mockPayeRegistrationConnector
+      override val submissionService = mockSubmissionService
+      implicit val messagesApi: MessagesApi = mockMessagesApi
       override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService    = mockPayeRegService
+      override val payeRegistrationService = mockPayeRegService
+      override implicit val appConfig: AppConfig = mockAppConfig
     }
   }
 
@@ -65,7 +67,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockEmailService.primeEmailData(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future(Fixtures.blankCacheMap))
 
-      when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
+      when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
         .thenReturn(Future.successful(Fixtures.validSummaryView))
 
       showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
@@ -84,7 +86,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockEmailService.primeEmailData(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future(Fixtures.blankCacheMap))
 
-      when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
+      when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
         .thenReturn(Future.failed(new InternalError()))
 
       intercept[Exception](showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
@@ -98,7 +100,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.held)))
 
-        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
+        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
           .thenReturn(Future.failed(new InternalError()))
 
         showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
@@ -112,7 +114,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.submitted)))
 
-        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
+        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
           .thenReturn(Future.failed(new InternalError()))
 
         showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
@@ -126,7 +128,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.invalid)))
 
-        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
+        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
           .thenReturn(Future.failed(new InternalError()))
 
         showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
@@ -140,7 +142,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.rejected)))
 
-        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
+        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
           .thenReturn(Future.failed(new InternalError()))
 
         showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {

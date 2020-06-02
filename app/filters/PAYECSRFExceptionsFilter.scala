@@ -17,7 +17,7 @@
 package filters
 
 import akka.stream.Materializer
-import config.FrontendAppConfig
+import config.AppConfig
 import javax.inject.Inject
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.http.HttpVerbs.{DELETE, POST}
@@ -25,11 +25,14 @@ import play.api.mvc.{Filter, RequestHeader, Result}
 
 import scala.concurrent.Future
 
-class PAYECSRFExceptionsFilterImpl @Inject()(val mat: Materializer) extends PAYECSRFExceptionsFilter
+class PAYECSRFExceptionsFilterImpl @Inject()(val mat: Materializer
+                                            )(implicit val appConfig: AppConfig) extends PAYECSRFExceptionsFilter
 
 trait PAYECSRFExceptionsFilter extends Filter {
 
-   lazy val whitelist: Set[String] = FrontendAppConfig.uriWhiteList
+  val appConfig: AppConfig
+
+  lazy val whitelist: Set[String] = appConfig.uriWhiteList
 
   override def apply(f: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
     f(deleteFilteredHeaders(rh))
@@ -37,7 +40,7 @@ trait PAYECSRFExceptionsFilter extends Filter {
 
   private[filters] def deleteFilteredHeaders(rh: RequestHeader, now: () => DateTime = () => DateTime.now.withZone(DateTimeZone.UTC)) = {
     if ((rh.method == DELETE || rh.method == POST) && whitelist.exists(uri => rh.path.matches(uri))) {
-      rh.copy(headers = rh.headers.add("Csrf-Bypass" -> FrontendAppConfig.csrfBypassValue))
+      rh.copy(headers = rh.headers.add("Csrf-Bypass" -> appConfig.csrfBypassValue))
     } else {
       rh.copy(headers = rh.headers.remove("Csrf-Bypass"))
     }

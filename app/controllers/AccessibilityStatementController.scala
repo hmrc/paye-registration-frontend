@@ -16,9 +16,9 @@
 
 package controllers
 
-import config.FrontendAppConfig
+import config.AppConfig
 import javax.inject.{Inject, Singleton}
-import play.api.i18n.{I18nSupport, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import views.html.statements.accessibility_statement
@@ -26,7 +26,8 @@ import views.html.statements.accessibility_statement
 import scala.concurrent.Future
 
 @Singleton
-class AccessibilityStatementController @Inject()(val messagesApi: MessagesApi, appConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
+class AccessibilityStatementController @Inject()(val messagesApi: MessagesApi
+                                                )(implicit appConfig: AppConfig) extends FrontendController with I18nSupport {
 
   def show(pageUri: String): Action[AnyContent] = Action.async {
     implicit request =>

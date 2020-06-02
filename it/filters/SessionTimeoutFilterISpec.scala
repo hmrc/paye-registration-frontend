@@ -75,7 +75,7 @@ class SessionTimeoutFilterISpec extends IntegrationSpecBase
         stubSessionCacheMetadata(SessionId, regId)
 
         val companyProfileDoc =
-          """
+          s"""
             |{
             |  "company_name":"$companyName",
             |  "registered_office_address":{

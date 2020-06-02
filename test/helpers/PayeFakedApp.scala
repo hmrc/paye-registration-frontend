@@ -16,11 +16,13 @@
 
 package helpers
 
-import org.scalatestplus.play.guice.GuiceOneAppPerTest
+import config.AppConfig
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.MessagesApi
 
-trait PayeFakedApp extends GuiceOneAppPerTest {
+trait PayeFakedApp extends GuiceOneAppPerSuite {
   self: PayeComponentSpec =>
 
-  implicit lazy val mockMessagesApi = app.injector.instanceOf(classOf[MessagesApi])
+  implicit lazy val mockMessagesApi = app.injector.instanceOf[MessagesApi]
+  implicit lazy val mockAppConfig = app.injector.instanceOf[AppConfig]
 }

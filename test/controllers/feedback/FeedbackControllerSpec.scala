@@ -16,9 +16,8 @@
 
 package controllers.feedback
 
+import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.mvc.{RequestHeader, Result}
 import play.api.test.FakeRequest
@@ -33,6 +32,7 @@ class FeedbackControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup extends CodeMocks {
     val controller = new FeedbackController {
+      override implicit val appConfig: AppConfig = mockAppConfig
 
       override def messagesApi = mockMessagesApi
 

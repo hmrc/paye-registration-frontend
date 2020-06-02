@@ -22,9 +22,7 @@ import play.api.mvc.Call
 
 class AddressLookupConfigBuilderServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
-  object TestService extends AddressLookupConfigBuilderService(
-    frontendAppConfig = mockAppConfig
-  ) {
+  object TestService extends AddressLookupConfigBuilderService {
     override lazy val payeRegistrationFrontendURL = "testPayeRegUrl"
     override lazy val timeoutLength = 22666
   }

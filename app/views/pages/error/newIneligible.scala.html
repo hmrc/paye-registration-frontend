@@ -14,7 +14,8 @@
  * limitations under the License.
  *@
 
-@(threshold : Int)(implicit request: Request[_], messages: Messages)
+@import config.AppConfig
+@(threshold : Int)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 

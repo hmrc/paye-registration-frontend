@@ -18,7 +18,7 @@ package connectors
 
 import com.codahale.metrics.{Counter, Timer}
 import common.Logging
-import config.{FrontendAppConfig, WSHttp}
+import config.{AppConfig, WSHttp}
 import javax.inject.{Inject, Singleton}
 import models.Address
 import models.external._
@@ -33,12 +33,11 @@ import scala.util.control.NoStackTrace
 
 @Singleton
 class AddressLookupConnector @Inject()(metricsService: MetricsService,
-                                       http: WSHttp,
-                                       frontendAppConfig: FrontendAppConfig
-                                      )(implicit messagesApi: MessagesApi)
-  extends Logging {
+                                       http: WSHttp
+                                      )(implicit messagesApi: MessagesApi,
+                                       appConfig: AppConfig) extends Logging {
 
-  lazy val addressLookupFrontendUrl: String = frontendAppConfig.baseUrl("address-lookup-frontend")
+  lazy val addressLookupFrontendUrl: String = appConfig.baseUrl("address-lookup-frontend")
   val successCounter: Counter = metricsService.addressLookupSuccessResponseCounter
   val failedCounter: Counter = metricsService.addressLookupFailedResponseCounter
 
