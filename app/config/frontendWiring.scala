@@ -17,9 +17,12 @@
 package config
 
 import akka.actor.ActorSystem
+import akka.stream.Materializer
 import com.typesafe.config.Config
-import javax.inject.Inject
-import play.api.{Configuration, Environment, Play}
+import javax.inject.{Inject, Singleton}
+import play.api.inject.ApplicationLifecycle
+import play.api.libs.ws.WSClient
+import play.api.{Configuration, Play}
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.http._
@@ -27,10 +30,15 @@ import uk.gov.hmrc.http.cache.client.{SessionCache, ShortLivedCache, ShortLivedH
 import uk.gov.hmrc.http.hooks.{HttpHook, HttpHooks}
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.bootstrap.config.{AuditingConfigProvider, RunMode}
 import uk.gov.hmrc.play.http.ws._
 
-class FrontendAuditConnector @Inject()(env: Environment, runModeConfiguration: Configuration) extends AuditConnector {
-  override lazy val auditingConfig = LoadAuditingConfig(runModeConfiguration, env.mode, s"auditing")
+@Singleton
+class FrontendAuditConnector @Inject()(configuration: Configuration,
+                                       runMode: RunMode,
+                                       val materializer: Materializer,
+                                       val lifecycle: ApplicationLifecycle) extends AuditConnector {
+  override lazy val auditingConfig = new AuditingConfigProvider(configuration, runMode, "auditing").get
 }
 
 trait Hooks extends HttpHooks with HttpAuditing {
@@ -44,30 +52,28 @@ trait WSHttp extends
   HttpPost with WSPost with
   HttpDelete with WSDelete with Hooks
 
-class WSHttpImpl @Inject()(override val runModeConfiguration: Configuration, environment: Environment, frontendAuditCon: FrontendAuditConnector, val actorSystem: ActorSystem) extends WSHttp with ServicesConfig {
-  override val appName = getString("appName")
+class WSHttpImpl @Inject()(appConfig: AppConfig,
+                           frontendAuditConnector: FrontendAuditConnector,
+                           val actorSystem: ActorSystem,
+                           val wsClient: WSClient) extends WSHttp {
+
+  override val appName = appConfig.servicesConfig.getString("appName")
   override val hooks = NoneRequired
 
-  override def auditConnector = frontendAuditCon
-
-  override protected def mode = environment.mode
+  override def auditConnector = frontendAuditConnector
 
   override protected def configuration: Option[Config] = Option(Play.current.configuration.underlying)
 }
 
-class AuthClientConnectorImpl @Inject()(val http: WSHttp, override val runModeConfiguration: Configuration, environment: Environment) extends PlayAuthConnector with ServicesConfig {
-  override val serviceUrl = baseUrl("auth")
-
-  override protected def mode = environment.mode
+class AuthClientConnectorImpl @Inject()(val http: WSHttp, appConfig: AppConfig) extends PlayAuthConnector {
+  override val serviceUrl = appConfig.servicesConfig.baseUrl("auth")
 }
 
-class PAYEShortLivedHttpCaching @Inject()(val http: WSHttp, override val runModeConfiguration: Configuration, environment: Environment) extends ShortLivedHttpCaching with ServicesConfig {
-  override lazy val defaultSource = getString("appName")
-  override lazy val baseUri = baseUrl("cachable.short-lived-cache")
-  override lazy val domain = getConfString("cachable.short-lived-cache.domain",
+class PAYEShortLivedHttpCaching @Inject()(val http: WSHttp, appConfig: AppConfig) extends ShortLivedHttpCaching {
+  override lazy val defaultSource = appConfig.servicesConfig.getString("appName")
+  override lazy val baseUri = appConfig.servicesConfig.baseUrl("cachable.short-lived-cache")
+  override lazy val domain = appConfig.servicesConfig.getConfString("cachable.short-lived-cache.domain",
     throw new Exception(s"Could not find config 'cachable.short-lived-cache.domain'"))
-
-  override protected def mode = environment.mode
 }
 
 class PAYEShortLivedCache @Inject()(val shortLiveCache: ShortLivedHttpCaching,
@@ -75,11 +81,9 @@ class PAYEShortLivedCache @Inject()(val shortLiveCache: ShortLivedHttpCaching,
   override implicit lazy val crypto = cryptoDi.JsonCrypto
 }
 
-class PAYESessionCache @Inject()(val http: WSHttp, override val runModeConfiguration: Configuration, environment: Environment) extends SessionCache with ServicesConfig {
-  override lazy val defaultSource = getString("appName")
-  override lazy val baseUri = baseUrl("cachable.session-cache")
-  override lazy val domain = getConfString("cachable.session-cache.domain",
+class PAYESessionCache @Inject()(val http: WSHttp, appConfig: AppConfig) extends SessionCache {
+  override lazy val defaultSource = appConfig.servicesConfig.getString("appName")
+  override lazy val baseUri = appConfig.servicesConfig.baseUrl("cachable.session-cache")
+  override lazy val domain = appConfig.servicesConfig.getConfString("cachable.session-cache.domain",
     throw new Exception(s"Could not find config 'cachable.session-cache.domain'"))
-
-  override protected def mode = environment.mode
 }

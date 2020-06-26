@@ -16,11 +16,13 @@
 
 package views.pages
 
+import java.util.Locale
+
 import forms.directorDetails.DirectorDetailsForm
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.{Ninos, UserEnteredNino}
 import org.jsoup.Jsoup
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Lang, Messages, MessagesApi}
 import play.api.test.FakeRequest
 import views.html.pages.directorDetails
 
@@ -29,6 +31,7 @@ class DirectorDetailsViewSpec extends PayeComponentSpec with PayeFakedApp with I
   implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
   implicit lazy val messagesApi: MessagesApi = mockMessagesApi
+  implicit val mockMessages = mockMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
 
   val d1 = "Toto Tata (id 0)"
   val d2 = "Bib Bloup (id 1)"
@@ -63,7 +66,7 @@ class DirectorDetailsViewSpec extends PayeComponentSpec with PayeFakedApp with I
     lazy val document = Jsoup.parse(view.body)
 
     "have the title for a single director" in {
-      document.getElementById("pageHeading").text mustBe messagesApi("pages.directorDetails.description")
+      document.getElementById("pageHeading").text mustBe mockMessages("pages.directorDetails.description")
     }
 
     "display the directors name and prepopped Nino" in {
@@ -81,7 +84,7 @@ class DirectorDetailsViewSpec extends PayeComponentSpec with PayeFakedApp with I
     lazy val document = Jsoup.parse(view.body)
 
     "have the title for many directors" in {
-      document.getElementById("pageHeading").text mustBe messagesApi("pages.directorDetails.description")
+      document.getElementById("pageHeading").text mustBe mockMessages("pages.directorDetails.description")
     }
 
     "have all directors shown" in {

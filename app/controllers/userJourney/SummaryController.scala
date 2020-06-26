@@ -23,9 +23,8 @@ import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.PAYEStatus
 import javax.inject.Inject
 import models.external.CurrentProfile
-import play.api.Configuration
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.i18n.{Messages, MessagesApi}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
@@ -38,18 +37,17 @@ class SummaryControllerImpl @Inject()(val summaryService: SummaryService,
                                       val submissionService: SubmissionService,
                                       val keystoreConnector: KeystoreConnector,
                                       val authConnector: AuthConnector,
-                                      val config: Configuration,
                                       val s4LService: S4LService,
                                       val companyDetailsService: CompanyDetailsService,
                                       val incorpInfoService: IncorporationInformationService,
                                       val payeRegistrationConnector: PAYERegistrationConnector,
                                       val emailService: EmailService,
-                                      val messagesApi: MessagesApi,
                                       val incorporationInformationConnector: IncorporationInformationConnector,
-                                      val payeRegistrationService: PAYERegistrationService
-                                     )(implicit val appConfig: AppConfig) extends SummaryController with AuthRedirectUrls
+                                      val payeRegistrationService: PAYERegistrationService,
+                                      mcc: MessagesControllerComponents
+                                     )(implicit val appConfig: AppConfig) extends SummaryController(mcc) with AuthRedirectUrls
 
-trait SummaryController extends PayeBaseController {
+abstract class SummaryController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
   val summaryService: SummaryService
   val submissionService: SubmissionService

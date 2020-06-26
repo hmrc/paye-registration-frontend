@@ -17,7 +17,6 @@
 package config
 
 import com.google.inject.AbstractModule
-import com.typesafe.config.{Config, ConfigFactory}
 import connectors._
 import connectors.test._
 import controllers.errors.{ErrorController, ErrorControllerImpl}
@@ -28,6 +27,7 @@ import controllers.userJourney._
 import filters.{PAYECSRFExceptionsFilter, PAYECSRFExceptionsFilterImpl, PAYESessionIDFilter, PAYESessionIDFilterImpl}
 import services._
 import uk.gov.hmrc.http.cache.client.{SessionCache, ShortLivedCache, ShortLivedHttpCaching}
+import uk.gov.hmrc.play.bootstrap.filters.DefaultLoggingFilter
 import utils.{FeatureManager, FeatureSwitchManager, PAYEFeatureSwitch, PAYEFeatureSwitches}
 
 class Module extends AbstractModule {
@@ -43,13 +43,11 @@ class Module extends AbstractModule {
 
   private def bindFilters(): Unit = {
     bind(classOf[PAYESessionIDFilter]).to(classOf[PAYESessionIDFilterImpl]).asEagerSingleton()
-    bind(classOf[LoggingFilterCustom]).to(classOf[LoggingFilterImpl]).asEagerSingleton()
+    bind(classOf[DefaultLoggingFilter]).to(classOf[LoggingFilterImpl]).asEagerSingleton()
     bind(classOf[PAYECSRFExceptionsFilter]).to(classOf[PAYECSRFExceptionsFilterImpl]).asEagerSingleton()
   }
 
   private def bindHmrcDependencies(): Unit = {
-    bind(classOf[Config]).toInstance(ConfigFactory.load())
-
     bind(classOf[MetricsService]).to(classOf[MetricsServiceImpl]).asEagerSingleton()
     bind(classOf[WSHttp]).to(classOf[WSHttpImpl]).asEagerSingleton()
     bind(classOf[ShortLivedHttpCaching]).to(classOf[PAYEShortLivedHttpCaching]).asEagerSingleton()
@@ -107,7 +105,6 @@ class Module extends AbstractModule {
     bind(classOf[TestCoHoController]).to(classOf[TestCoHoControllerImpl]).asEagerSingleton()
     bind(classOf[TestRegSetupController]).to(classOf[TestRegSetupControllerImpl]).asEagerSingleton()
     bind(classOf[TestSetupController]).to(classOf[TestSetupControllerImpl]).asEagerSingleton()
-    bind(classOf[EditSessionController]).to(classOf[EditSessionControllerImpl]).asEagerSingleton()
   }
 
   private def bindUserJourneyControllers(): Unit = {

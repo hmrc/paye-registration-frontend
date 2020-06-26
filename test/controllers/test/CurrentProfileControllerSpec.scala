@@ -16,12 +16,14 @@
 
 package controllers.test
 
+import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.{BusinessProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, NotFoundException}
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.Future
 
@@ -30,7 +32,8 @@ class CurrentProfileControllerSpec extends PayeComponentSpec with PayeFakedApp {
   val testProfile = BusinessProfile("testRegId", "testLang")
 
   class Setup {
-    val controller = new BusinessProfileController {
+    val controller = new BusinessProfileController(stubMessagesControllerComponents()) {
+      override val appConfig: AppConfig = mockAppConfig
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
 

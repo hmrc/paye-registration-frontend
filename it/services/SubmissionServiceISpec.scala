@@ -23,7 +23,7 @@ import connectors._
 import enums.{CacheKeys, IncorporationStatus}
 import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
-import play.api.Application
+import play.api.{Application, Environment, Mode}
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
@@ -33,13 +33,7 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  lazy val payeRegistrationConnector = app.injector.instanceOf[PAYERegistrationConnector]
-  lazy val keystoreConnector = app.injector.instanceOf[KeystoreConnector]
-  lazy val incorpInfoConnector = app.injector.instanceOf[IncorporationInformationConnector]
-  implicit lazy val appConfig = app.injector.instanceOf[AppConfig]
-
-
-  val additionalConfiguration = Map(
+  val config = Map(
     "microservice.services.paye-registration.host" -> s"$mockHost",
     "microservice.services.paye-registration.port" -> s"$mockPort",
     "microservice.services.incorporation-information.host" -> s"$mockHost",
@@ -51,9 +45,14 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
     "mongodb.uri" -> s"$mongoUri"
   )
 
-  override implicit lazy val app: Application = new GuiceApplicationBuilder()
-    .configure(additionalConfiguration)
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
     .build
+
+  lazy val payeRegistrationConnector = app.injector.instanceOf[PAYERegistrationConnector]
+  lazy val keystoreConnector = app.injector.instanceOf[KeystoreConnector]
+  lazy val incorpInfoConnector = app.injector.instanceOf[IncorporationInformationConnector]
+  implicit lazy val appConfig = app.injector.instanceOf[AppConfig]
 
   val sId = UUID.randomUUID().toString
   implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sId)))

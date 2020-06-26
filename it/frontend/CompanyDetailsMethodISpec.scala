@@ -25,7 +25,10 @@ import models.DigitalContactDetails
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.json._
+import play.api.{Application, Environment, Mode}
 
 
 class CompanyDetailsMethodISpec extends IntegrationSpecBase
@@ -38,7 +41,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  override implicit lazy val app = FakeApplication(additionalConfiguration = Map(
+  lazy val config = Map(
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
     "auditing.consumer.baseUri.host" -> s"$mockHost",
@@ -67,7 +70,13 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
     "defaultCHROAddress" -> "eyJsaW5lMSI6IjE0IFRlc3QgRGVmYXVsdCBTdHJlZXQiLCJsaW5lMiI6IlRlc3RsZXkiLCJsaW5lMyI6IlRlc3Rmb3JkIiwibGluZTQiOiJUZXN0c2hpcmUiLCJwb3N0Q29kZSI6IlRFMSAzU1QifQ==",
     "defaultSeqDirector" -> "W3siZGlyZWN0b3IiOnsiZm9yZW5hbWUiOiJmYXVsdHkiLCJzdXJuYW1lIjoiZGVmYXVsdCJ9fV0=",
     "mongodb.uri" -> s"$mongoUri"
-  ))
+  )
+
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
+    .build
+
+  lazy val defaultCookieSigner: DefaultCookieSigner = app.injector.instanceOf[DefaultCookieSigner]
 
   override def beforeEach() {
     resetWiremock()
@@ -121,7 +130,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
 
       val fResponse = buildClient("/trading-name").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)
@@ -174,7 +183,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
 
       val fResponse = buildClient("/trading-name").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)
@@ -208,7 +217,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubPut(s"/save4later/paye-registration-frontend/$regIdWhitelisted/data/CompanyDetails", 200, dummyS4LResponse)
       stubGet(s"/business-registration/$regIdWhitelisted/trading-name", 200, tradingNameFromPrePop)
       val fResponse = buildClient("/trading-name").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)
@@ -283,7 +292,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
 
       val fResponse = buildClient("/trading-name").
-        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
+        withHttpHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
           "differentName" -> Seq("true"),
@@ -324,7 +333,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubPut(s"/save4later/paye-registration-frontend/${regIdWhitelisted}/data/CompanyDetails", 200, dummyS4LResponse)
 
       val fResponse = buildClient("/confirm-registered-office-address").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)
@@ -358,7 +367,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubS4LGet(regId, "CompanyDetails", payeDoc)
 
       val fResponse = buildClient("/where-company-carries-out-business-activities").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)
@@ -397,7 +406,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubS4LGet(regId, "CompanyDetails", payeDoc)
 
       val fResponse = buildClient("/where-company-carries-out-business-activities").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)
@@ -437,7 +446,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubS4LGet(regId, "CompanyDetails", payeDoc)
 
       val fResponse = buildClient("/where-company-carries-out-business-activities").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)
@@ -475,7 +484,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubS4LGet(regId, "CompanyDetails", payeDoc)
 
       val fResponse = buildClient("/where-company-carries-out-business-activities").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)
@@ -530,7 +539,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubS4LGet(regId, "CompanyDetails", payeDoc)
 
       val fResponse = buildClient("/where-company-carries-out-business-activities").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)
@@ -587,7 +596,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubS4LGet(regId, "CompanyDetails", payeDoc)
 
       val fResponse = buildClient("/where-company-carries-out-business-activities").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)
@@ -655,7 +664,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
 
       val fResponse = buildClient("/where-company-carries-out-business-activities").
-        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
+        withHttpHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
           "chosenAddress" -> Seq("roAddress")
@@ -726,7 +735,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
 
       val fResponse = buildClient("/where-company-carries-out-business-activities").
-        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
+        withHttpHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
           "chosenAddress" -> Seq("roAddress")
@@ -802,7 +811,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
       val fResponse = buildClient("/where-company-carries-out-business-activities").
-        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
+        withHttpHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
           "chosenAddress" -> Seq("prepopAddress13")
@@ -842,7 +851,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken))
       val fResponse = buildClient("/where-company-carries-out-business-activities").
-        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
+        withHttpHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
           "chosenAddress" -> Seq("prepopAddress13")
@@ -918,7 +927,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubGet(s"/api/confirmed\\?id\\=$addressLookupID", 200, addressFromALF)
 
       val response = await(buildClient(s"/return-from-address-for-ppob?id=$addressLookupID")
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
       response.status mustBe 303
@@ -972,7 +981,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
 
       val response = await(buildClient("/business-contact-details")
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
       response.status mustBe 200
@@ -1012,7 +1021,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
 
       val response = await(buildClient("/business-contact-details")
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
       response.status mustBe 200
@@ -1043,7 +1052,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubS4LGet(regId, "CompanyDetails", payeDoc)
 
       val response = await(buildClient("/business-contact-details")
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
       response.status mustBe 200
@@ -1074,7 +1083,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubS4LGet(regId, "CompanyDetails", payeDoc)
 
       val response = await(buildClient("/business-contact-details")
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
       response.status mustBe 200
@@ -1117,7 +1126,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubS4LGet(regId, "CompanyDetails", payeDoc)
 
       val response = await(buildClient("/business-contact-details")
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get())
 
       response.status mustBe 200
@@ -1177,7 +1186,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken, "CompanyName" -> "CompName"))
       val fResponse = buildClient("/business-contact-details").
-        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
+        withHttpHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
           "businessEmail" -> Seq(s"$newEmail"),
@@ -1267,7 +1276,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val sessionCookie = getSessionCookie(Map("csrfToken" -> csrfToken, "CompanyName" -> "CompName"))
       val fResponse = buildClient("/business-contact-details").
-        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
+        withHttpHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
           "businessEmail" -> Seq(s"$newEmail"),

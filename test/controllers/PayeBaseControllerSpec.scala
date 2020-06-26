@@ -25,13 +25,14 @@ import play.api.mvc.Results.Ok
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core.{AffinityGroup, InsufficientConfidenceLevel}
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.Future
 
 class PayeBaseControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup {
-    val testBaseController = new PayeBaseController {
+    val testBaseController = new PayeBaseController(stubMessagesControllerComponents()) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val messagesApi = mockMessagesApi

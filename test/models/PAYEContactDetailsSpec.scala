@@ -19,7 +19,7 @@ package models
 import helpers.PayeComponentSpec
 import models.view.PAYEContactDetails
 import play.api.data.validation.ValidationError
-import play.api.libs.json.{JsPath, JsSuccess, Json}
+import play.api.libs.json.{JsPath, JsSuccess, Json, JsonValidationError}
 
 class PAYEContactDetailsSpec extends PayeComponentSpec {
 
@@ -250,7 +250,7 @@ class PAYEContactDetailsSpec extends PayeComponentSpec {
 
     "return an error when read from Json" in {
       val result = Json.fromJson[PAYEContactDetails](targetJsonMax)(PAYEContactDetails.prepopReads)
-      shouldHaveErrors(result, JsPath(), Seq(ValidationError(err)))
+      shouldHaveErrors(result, JsPath(), Seq(JsonValidationError(err)))
     }
   }
 }

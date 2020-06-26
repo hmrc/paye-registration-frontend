@@ -20,6 +20,9 @@ import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.crypto.DefaultCookieSigner
+import play.api.{Application, Environment, Mode}
 
 class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStub with BeforeAndAfterEach with WiremockHelper {
 
@@ -27,7 +30,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  override implicit lazy val app = FakeApplication(additionalConfiguration = Map(
+  lazy val config = Map(
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
@@ -48,7 +51,13 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
     "microservice.services.incorporation-information.host" -> s"$mockHost",
     "microservice.services.incorporation-information.port" -> s"$mockPort",
     "mongodb.uri" -> s"$mongoUri"
-  ))
+  )
+
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
+    .build
+
+  lazy val defaultCookieSigner: DefaultCookieSigner = app.injector.instanceOf[DefaultCookieSigner]
 
   def setSystemDate() = {
     stubGet(s"/paye-registration/test-only/feature-flag/system-date/2018-07-12T00:00:00Z", 200, "")
@@ -114,7 +123,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       stubGet(s"/incorporation-information/$txId/incorporation-update", 200, incorpUpdateSuccessResponse)
 
       val fResponse = buildClient("/employ-anyone")
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get()
 
       val response = await(fResponse)
@@ -131,7 +140,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       stubGet(s"/incorporation-information/$txId/incorporation-update", 200, incorpUpdateSuccessResponse)
 
       val fResponse = buildClient("/employ-anyone")
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get()
 
       val response = await(fResponse)
@@ -154,7 +163,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       stubGet(s"/incorporation-information/$txId/incorporation-update", 204, "")
 
       val fResponse = buildClient("/employ-anyone")
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get()
 
       val response = await(fResponse)
@@ -173,7 +182,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       stubGet(s"/incorporation-information/$txId/incorporation-update", 200, incorpUpdateSuccessResponse)
 
       val fResponse = buildClient("/employ-anyone").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck").
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
           "alreadyPaying" -> Seq("true"),
@@ -197,7 +206,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       stubGet(s"/incorporation-information/$txId/incorporation-update", 204, "")
 
       val fResponse = buildClient("/employ-anyone").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck").
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
           "alreadyPaying" -> Seq("true"),
@@ -218,7 +227,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       stubGet(s"/incorporation-information/$txId/incorporation-update", 200, incorpUpdateSuccessResponse)
 
       val fResponse = buildClient("/employ-anyone").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck").
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
           "alreadyPaying" -> Seq("true"),
@@ -246,7 +255,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       await(setSystemDate())
 
       val fResponse = buildClient("/will-employ-anyone")
-        .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+        .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie())
         .get()
 
       val response = await(fResponse)
@@ -270,7 +279,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       await(setSystemDate())
 
       val fResponse = buildClient("/will-employ-anyone").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck").
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
           "willBePaying" -> Seq("false")
@@ -293,7 +302,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       await(setSystemDate())
 
       val fResponse = buildClient("/will-employ-anyone").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck").
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx")
         ))
@@ -321,7 +330,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       await(setSystemDate())
 
       val fResponse = buildClient("/pension-payments").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck").
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
           "paysPension" -> Seq("false")

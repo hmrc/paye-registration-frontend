@@ -16,6 +16,7 @@
 
 package controllers.internal
 
+import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector, PAYERegistrationConnector}
 import enums.RegistrationDeletion
 import helpers.{PayeComponentSpec, PayeFakedApp}
@@ -27,13 +28,15 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import services.PAYERegistrationService
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.Future
 
 class RegistrationControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   trait Setup {
-    val controller = new RegistrationController {
+    val controller = new RegistrationController(stubMessagesControllerComponents()) {
+      override val appConfig: AppConfig = mockAppConfig
       override val payeRegistrationConnector: PAYERegistrationConnector = mockPayeRegistrationConnector
       override val payeRegistrationService: PAYERegistrationService = mockPayeRegService
 

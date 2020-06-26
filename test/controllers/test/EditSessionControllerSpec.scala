@@ -16,7 +16,7 @@
 
 package controllers.test
 
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -28,7 +28,7 @@ class EditSessionControllerSpec extends PlaySpec with MockitoSugar with OneAppPe
   val newSessionId = "new-session-id"
 
   class Setup {
-    val controller = new EditSessionController {}
+    val controller = new EditSessionController(stubControllerComponents())
   }
 
   "editSession" should {

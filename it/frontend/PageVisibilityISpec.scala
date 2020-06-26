@@ -20,7 +20,10 @@ import controllers.userJourney.routes
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.json.Json
+import play.api.{Application, Environment, Mode}
 
 class PageVisibilityISpec extends IntegrationSpecBase
   with LoginStub
@@ -32,7 +35,7 @@ class PageVisibilityISpec extends IntegrationSpecBase
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  override implicit lazy val app = FakeApplication(additionalConfiguration = Map(
+  lazy val config = Map(
     "microservice.services.auth.host" -> s"$mockHost",
     "microservice.services.auth.port" -> s"$mockPort",
     "auditing.consumer.baseUri.host" -> s"$mockHost",
@@ -46,7 +49,13 @@ class PageVisibilityISpec extends IntegrationSpecBase
     "microservice.services.cachable.short-lived-cache.port" -> s"$mockPort",
     "microservice.services.cachable.short-lived-cache.domain" -> "save4later",
     "mongodb.uri" -> s"$mongoUri"
-  ))
+  )
+
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
+    .build
+
+  lazy val defaultCookieSigner: DefaultCookieSigner = app.injector.instanceOf[DefaultCookieSigner]
 
   override def beforeEach() {
     resetWiremock()
@@ -102,7 +111,7 @@ class PageVisibilityISpec extends IntegrationSpecBase
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
 
       val fResponse = buildClient("/what-company-does").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie(sessionID = SessionId)).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(sessionID = SessionId)).
         get()
 
       val response = await(fResponse)
@@ -129,7 +138,7 @@ class PageVisibilityISpec extends IntegrationSpecBase
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
 
       val fResponse = buildClient("/what-company-does").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)
@@ -155,7 +164,7 @@ class PageVisibilityISpec extends IntegrationSpecBase
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
 
       val fResponse = buildClient("/what-company-does").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)
@@ -182,7 +191,7 @@ class PageVisibilityISpec extends IntegrationSpecBase
       stubDelete(s"/save4later/paye-registration-frontend/$regId", 200, "")
 
       val fResponse = buildClient("/application-submitted").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)

@@ -16,11 +16,13 @@
 
 package views.pages
 
+import java.util.Locale
+
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.{Summary, SummaryChangeLink, SummaryRow, SummarySection}
 import org.jsoup.Jsoup
 import org.jsoup.parser.Tag
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Lang, Messages, MessagesApi}
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import views.html.pages.summary
@@ -29,6 +31,7 @@ class SummarySpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
   implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
   implicit lazy val messagesApi: MessagesApi = mockMessagesApi
+  implicit val mockMessages = mockMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
 
   val suffixIdSectionHeading = "SectionHeading"
   val suffixIdSectionTable = "Table"
@@ -120,7 +123,7 @@ class SummarySpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct title" in {
-      document.getElementById("pageHeading").text mustBe messagesApi("pages.summary.heading")
+      document.getElementById("pageHeading").text mustBe mockMessages("pages.summary.heading")
     }
 
     for {summarySection <- testSummaryModel.sections} {

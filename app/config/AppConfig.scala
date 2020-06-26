@@ -24,21 +24,20 @@ import javax.inject.{Inject, Singleton}
 import models.Address
 import models.api.Director
 import models.external.OfficerList
-import play.api.Mode.Mode
+import play.api.Configuration
 import play.api.libs.json.{Json, Reads}
-import play.api.{Configuration, Environment}
+import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
 @Singleton
-class AppConfig @Inject()(val environment: Environment,
-                          val runModeConfiguration: Configuration) extends ServicesConfig {
+class AppConfig @Inject()(configuration: Configuration, runMode: RunMode) {
 
-  override protected def mode: Mode = environment.mode
+  val servicesConfig = new ServicesConfig(configuration, runMode)
 
-  private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
+  private def loadConfig(key: String) = servicesConfig.getString(key)
 
   val contactFormServiceIdentifier = "SCRS"
 
-  lazy val contactFrontendPartialBaseUrl: String = baseUrl("contact-frontend")
+  lazy val contactFrontendPartialBaseUrl: String = servicesConfig.baseUrl("contact-frontend")
   lazy val contactHost: String = loadConfig("contact-frontend.host")
 
   lazy val analyticsToken: String = loadConfig("google-analytics.token")
@@ -51,30 +50,31 @@ class AppConfig @Inject()(val environment: Environment,
 
   private def whiteListConfig(key: String): Seq[String] = {
     Some(new String(Base64.getDecoder
-      .decode(configuration.getString(key).getOrElse("")), "UTF-8"))
+      .decode(configuration.getOptional[String](key).getOrElse("")), "UTF-8"))
       .map(_.split(",")).getOrElse(Array.empty).toSeq
   }
 
   private def loadStringConfigBase64(key: String): String = {
-    new String(Base64.getDecoder.decode(configuration.getString(key).getOrElse("")), Charset.forName("UTF-8"))
+    new String(Base64.getDecoder.decode(servicesConfig.getString(key)), Charset.forName("UTF-8"))
   }
 
   private def loadJsonConfigBase64[T](key: String)(implicit reads: Reads[T]): T = {
-    val json = Json.parse(Base64.getDecoder.decode(configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))))
+    val json = Json.parse(Base64.getDecoder.decode(servicesConfig.getString(key)))
+
     json.validate[T].fold(
       errors => throw new Exception(s"Incorrect data for the key: $key and ##  $errors"),
       valid => valid
     )
   }
 
-  lazy val self: String = getConfString("paye-registration-frontend.www.url", "")
+  lazy val self: String = servicesConfig.getConfString("paye-registration-frontend.www.url", "")
   lazy val regIdWhitelist: Seq[String] = whiteListConfig("regIdWhitelist")
   lazy val defaultCompanyName: String = loadStringConfigBase64("defaultCompanyName")
   lazy val defaultCHROAddress: Address = loadJsonConfigBase64[Address]("defaultCHROAddress")
   lazy val defaultSeqDirector: Seq[Director] = loadJsonConfigBase64[Seq[Director]]("defaultSeqDirector")(Director.seqReads)
   lazy val defaultCTStatus: String = loadStringConfigBase64("defaultCTStatus")
   lazy val defaultOfficerList: OfficerList = loadJsonConfigBase64[OfficerList]("defaultOfficerList")(OfficerList.formatModel)
-  lazy val uriWhiteList: Set[String] = configuration.getStringSeq("csrfexceptions.whitelist").getOrElse(Seq.empty).toSet
+  lazy val uriWhiteList: Set[String] = configuration.getOptional[Seq[String]]("csrfexceptions.whitelist").getOrElse(Seq.empty).toSet
   lazy val csrfBypassValue: String = loadStringConfigBase64("Csrf-Bypass-value")
 
   private def encodeUrl(url: String): String = URLEncoder.encode(url, "UTF-8")

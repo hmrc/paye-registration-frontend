@@ -16,6 +16,7 @@
 
 package controllers.test
 
+import config.AppConfig
 import enums.DownstreamOutcome
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.BusinessProfile
@@ -24,13 +25,15 @@ import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.mvc.{AnyContent, Request}
 import play.api.test.FakeRequest
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.Future
 
 class TestSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup extends CodeMocks {
-    val controller = new TestSetupController {
+    val controller = new TestSetupController(stubMessagesControllerComponents()) {
+      override val appConfig: AppConfig = mockAppConfig
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
 

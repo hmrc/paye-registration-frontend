@@ -18,7 +18,7 @@ package controllers.test
 
 import connectors.PAYERegistrationConnector
 import javax.inject.Inject
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils._
 
@@ -27,9 +27,10 @@ import scala.concurrent.Future
 
 class FeatureSwitchControllerImpl @Inject()(val featureManager: FeatureManager,
                                             val payeFeatureSwitch: PAYEFeatureSwitches,
-                                            val payeRegConnector: PAYERegistrationConnector) extends FeatureSwitchController
+                                            val payeRegConnector: PAYERegistrationConnector,
+                                            mcc: MessagesControllerComponents) extends FeatureSwitchController(mcc)
 
-trait FeatureSwitchController extends FrontendController {
+abstract class FeatureSwitchController(mcc: MessagesControllerComponents) extends FrontendController(mcc) {
 
   val featureManager: FeatureManager
   val payeFeatureSwitch: PAYEFeatureSwitches

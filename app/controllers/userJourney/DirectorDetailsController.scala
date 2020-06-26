@@ -21,28 +21,25 @@ import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.directorDetails.DirectorDetailsForm
 import javax.inject.Inject
-import play.api.Configuration
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{directorDetails => DirectorDetailsPage}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class DirectorDetailsControllerImpl @Inject()(val messagesApi: MessagesApi,
-                                              val directorDetailsService: DirectorDetailsService,
+class DirectorDetailsControllerImpl @Inject()(val directorDetailsService: DirectorDetailsService,
                                               val keystoreConnector: KeystoreConnector,
-                                              val config: Configuration,
                                               val s4LService: S4LService,
                                               val companyDetailsService: CompanyDetailsService,
                                               val incorpInfoService: IncorporationInformationService,
                                               val authConnector: AuthConnector,
                                               val incorporationInformationConnector: IncorporationInformationConnector,
-                                              val payeRegistrationService: PAYERegistrationService
-                                             )(implicit val appConfig: AppConfig) extends DirectorDetailsController with AuthRedirectUrls
+                                              val payeRegistrationService: PAYERegistrationService,
+                                              mcc: MessagesControllerComponents
+                                             )(implicit val appConfig: AppConfig) extends DirectorDetailsController(mcc) with AuthRedirectUrls
 
-trait DirectorDetailsController extends PayeBaseController {
+abstract class DirectorDetailsController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
   val directorDetailsService: DirectorDetailsService
 

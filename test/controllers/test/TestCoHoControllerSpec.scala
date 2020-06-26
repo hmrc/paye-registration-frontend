@@ -16,6 +16,9 @@
 
 package controllers.test
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import config.AppConfig
 import helpers.auth.AuthHelpers
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.BusinessProfile
@@ -23,22 +26,22 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TestCoHoControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
-  val testHttpResponse = new HttpResponse {
-    override def status = OK
-  }
+  val testHttpResponse = HttpResponse(status = OK, body = "")
 
   class Setup extends CodeMocks with AuthHelpers {
     override val authConnector = mockAuthConnector
     override val keystoreConnector = mockKeystoreConnector
 
 
-    val controller = new TestCoHoController {
+    val controller = new TestCoHoController(stubMessagesControllerComponents()) {
+      override val appConfig: AppConfig = mockAppConfig
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
 

@@ -37,7 +37,7 @@ class AddressLookupConnector @Inject()(metricsService: MetricsService,
                                       )(implicit messagesApi: MessagesApi,
                                         appConfig: AppConfig) extends Logging {
 
-  lazy val addressLookupFrontendUrl: String = appConfig.baseUrl("address-lookup-frontend")
+  lazy val addressLookupFrontendUrl: String = appConfig.servicesConfig.baseUrl("address-lookup-frontend")
   val successCounter: Counter = metricsService.addressLookupSuccessResponseCounter
   val failedCounter: Counter = metricsService.addressLookupFailedResponseCounter
 

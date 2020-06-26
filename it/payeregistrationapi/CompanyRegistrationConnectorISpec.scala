@@ -17,12 +17,12 @@
 package payeregistrationapi
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import config.WSHttpImpl
+import config.{AppConfig, WSHttpImpl}
 import connectors.CompanyRegistrationConnectorImpl
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
-import play.api.{Application, Configuration, Environment}
+import play.api.{Application, Environment, Mode}
 import services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.PAYEFeatureSwitch
@@ -33,7 +33,7 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  val additionalConfiguration = Map(
+  val config = Map(
     "microservice.services.company-registration.host" -> s"$mockHost",
     "microservice.services.company-registration.port" -> s"$mockPort",
     "microservice.services.incorporation-frontend-stubs.host" -> s"$mockHost",
@@ -43,8 +43,8 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes"
   )
 
-  override implicit lazy val app: Application = new GuiceApplicationBuilder()
-    .configure(additionalConfiguration)
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
     .build
 
   val regId = "12345"
@@ -83,16 +83,14 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
         lazy val metrics = app.injector.instanceOf[MetricsService]
         lazy val featureSwitch = app.injector.instanceOf[PAYEFeatureSwitch]
         lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
-        lazy val env = app.injector.instanceOf(classOf[Environment])
-        lazy val config = app.injector.instanceOf(classOf[Configuration])
+        lazy val appConfig = app.injector.instanceOf[AppConfig]
 
 
         val companyRegistrationConnector = new CompanyRegistrationConnectorImpl(
           featureSwitch,
           http,
           metrics,
-          config,
-          env
+          appConfig
         )
 
         def getResponse = companyRegistrationConnector.getCompanyRegistrationDetails(regId)
@@ -123,16 +121,14 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
         lazy val metrics = app.injector.instanceOf[MetricsService]
         lazy val featureSwitch = app.injector.instanceOf[PAYEFeatureSwitch]
         lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
-        lazy val env = app.injector.instanceOf(classOf[Environment])
-        lazy val config = app.injector.instanceOf(classOf[Configuration])
+        lazy val appConfig = app.injector.instanceOf[AppConfig]
 
 
         val companyRegistrationConnector = new CompanyRegistrationConnectorImpl(
           featureSwitch,
           http,
           metrics,
-          config,
-          env
+          appConfig
         )
 
         await(buildClient("/test-only/feature-flag/companyRegistration/true").get())

@@ -16,14 +16,14 @@
 
 package controllers.internal
 
+import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector, PAYERegistrationConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.{IncorporationStatus, RegistrationDeletion}
 import javax.inject.Inject
-import play.api.i18n.MessagesApi
+import play.api.Logger
 import play.api.libs.json.{JsObject, JsSuccess, JsValue}
-import play.api.mvc.{Action, AnyContent}
-import play.api.{Configuration, Logger}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
@@ -35,15 +35,16 @@ import scala.concurrent.Future
 class RegistrationControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
                                            val payeRegistrationConnector: PAYERegistrationConnector,
                                            val authConnector: AuthConnector,
-                                           val messagesApi: MessagesApi,
                                            val companyDetailsService: CompanyDetailsService,
                                            val s4LService: S4LService,
-                                           val config: Configuration,
                                            val incorpInfoService: IncorporationInformationService,
                                            val payeRegistrationService: PAYERegistrationService,
-                                           val incorporationInformationConnector: IncorporationInformationConnector) extends RegistrationController with AuthRedirectUrls
+                                           val incorporationInformationConnector: IncorporationInformationConnector,
+                                           mcc: MessagesControllerComponents
+                                          )(val appConfig: AppConfig) extends RegistrationController(mcc) with AuthRedirectUrls
 
-trait RegistrationController extends PayeBaseController {
+abstract class RegistrationController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
+  val appConfig: AppConfig
   val payeRegistrationConnector: PAYERegistrationConnector
   val payeRegistrationService: PAYERegistrationService
 

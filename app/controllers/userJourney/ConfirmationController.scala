@@ -20,29 +20,26 @@ import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import javax.inject.Inject
-import play.api.Configuration
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{confirmation => ConfirmationPage}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ConfirmationControllerImpl @Inject()(val messagesApi: MessagesApi,
-                                           val keystoreConnector: KeystoreConnector,
+class ConfirmationControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
                                            val confirmationService: ConfirmationService,
-                                           val config: Configuration,
                                            val s4LService: S4LService,
                                            val companyDetailsService: CompanyDetailsService,
                                            val incorpInfoService: IncorporationInformationService,
                                            val emailService: EmailService,
                                            val authConnector: AuthConnector,
                                            val incorporationInformationConnector: IncorporationInformationConnector,
-                                           val payeRegistrationService: PAYERegistrationService
-                                          )(implicit val appConfig: AppConfig) extends ConfirmationController with AuthRedirectUrls
+                                           val payeRegistrationService: PAYERegistrationService,
+                                           mcc: MessagesControllerComponents
+                                          )(implicit val appConfig: AppConfig) extends ConfirmationController(mcc) with AuthRedirectUrls
 
-trait ConfirmationController extends PayeBaseController {
+abstract class ConfirmationController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
   val confirmationService: ConfirmationService
   val emailService: EmailService

@@ -59,7 +59,7 @@ object Formatters {
       }.toSeq: _*)
   }
 
-  def phoneNoReads(errMsg: String) = new Reads[String] {
+  def phoneNoReads(errMsg: String): Reads[String] = new Reads[String] {
     override def reads(json: JsValue): JsResult[String] = {
       normalizeTrimmedReads.reads(json) flatMap { input =>
         Validators.isValidPhoneNo(input) match {
@@ -70,7 +70,7 @@ object Formatters {
     }
   }
 
-  lazy val emailReads = Reads.StringReads.filter(ValidationError("Invalid email")) {
+  lazy val emailReads = Reads.StringReads.filter(JsonValidationError("Invalid email")) {
     email =>
       Validators.emailValidation(normaliseString(email)) match {
         case e: Invalid => false

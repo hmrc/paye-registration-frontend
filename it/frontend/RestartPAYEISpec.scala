@@ -21,6 +21,9 @@ import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import models.external.CurrentProfile
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.crypto.DefaultCookieSigner
+import play.api.{Application, Environment, Mode}
 import play.mvc.Http.Status
 
 class RestartPAYEISpec extends IntegrationSpecBase
@@ -33,7 +36,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  override implicit lazy val app = FakeApplication(additionalConfiguration = Map(
+  lazy val config = Map(
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
     "auditing.consumer.baseUri.host" -> s"$mockHost",
@@ -51,7 +54,13 @@ class RestartPAYEISpec extends IntegrationSpecBase
     "microservice.services.business-registration.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
     "mongodb.uri" -> s"$mongoUri"
-  ))
+  )
+
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
+    .build
+
+  lazy val defaultCookieSigner: DefaultCookieSigner = app.injector.instanceOf[DefaultCookieSigner]
 
   override def beforeEach() {
     resetWiremock()
@@ -99,7 +108,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
         await(enableCompanyRegistrationFeature())
 
         val fResponse = buildClient("/re-register-as-an-employer").
-          withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+          withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
           get()
 
         val response = await(fResponse)
@@ -125,7 +134,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
         )
 
         val fResponse = buildClient("/re-register-as-an-employer").
-          withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+          withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
           get()
 
         val response = await(fResponse)
@@ -151,7 +160,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
         )
 
         val fResponse = buildClient("/re-register-as-an-employer").
-          withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+          withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
           get()
 
         val response = await(fResponse)
@@ -176,7 +185,7 @@ class RestartPAYEISpec extends IntegrationSpecBase
         )
 
         val fResponse = buildClient("/re-register-as-an-employer").
-          withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+          withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
           get()
 
         val response = await(fResponse)

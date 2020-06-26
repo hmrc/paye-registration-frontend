@@ -24,8 +24,8 @@ import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.Address
 import models.api.Name
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
-import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.{Application, Environment, Mode}
 import services.MetricsService
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import utils.PAYEFeatureSwitch
@@ -36,15 +36,10 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  lazy val metrics = app.injector.instanceOf[MetricsService]
-  lazy val featureSwitch = app.injector.instanceOf[PAYEFeatureSwitch]
-  lazy val http = app.injector.instanceOf[WSHttpImpl]
-  implicit lazy val appConfig = app.injector.instanceOf[AppConfig]
-
   val incorpInfoUri = "/incorpInfoUri"
   val stubbedUri = "/stubbedUri"
 
-  val additionalConfiguration = Map(
+  val config = Map(
     "microservice.services.incorporation-information.host" -> s"$mockHost",
     "microservice.services.incorporation-information.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
@@ -56,11 +51,17 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
     "microservice.services.incorporation-information.uri" -> incorpInfoUri
   )
 
-  override implicit lazy val app: Application = new GuiceApplicationBuilder()
-    .configure(additionalConfiguration)
-    .build()
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
+    .build
+
 
   class Setup {
+    lazy val metrics = app.injector.instanceOf[MetricsService]
+    lazy val featureSwitch = app.injector.instanceOf[PAYEFeatureSwitch]
+    lazy val http = app.injector.instanceOf[WSHttpImpl]
+    implicit lazy val appConfig = app.injector.instanceOf[AppConfig]
+
     val incorpInfoConnector = new IncorporationInformationConnectorImpl(
       metrics,
       http

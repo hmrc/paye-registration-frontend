@@ -18,11 +18,10 @@ package connectors
 
 import common.exceptions
 import common.exceptions.DownstreamExceptions
-import config.WSHttp
+import config.{AppConfig, WSHttp}
 import javax.inject.Inject
 import models.external.CompanyRegistrationProfile
 import play.api.libs.json._
-import play.api.{Configuration, Environment}
 import services.MetricsService
 import uk.gov.hmrc.http.{BadRequestException, CoreGet, HeaderCarrier, HttpException}
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -33,14 +32,11 @@ import scala.concurrent.Future
 class CompanyRegistrationConnectorImpl @Inject()(val featureSwitch: PAYEFeatureSwitch,
                                                  val http: WSHttp,
                                                  val metricsService: MetricsService,
-                                                 override val runModeConfiguration: Configuration,
-                                                 environment: Environment) extends CompanyRegistrationConnector with ServicesConfig {
-  lazy val companyRegistrationUrl: String = baseUrl("company-registration")
-  lazy val companyRegistrationUri: String = getConfString("company-registration.uri", "")
-  lazy val stubUrl: String = baseUrl("incorporation-frontend-stubs")
-  lazy val stubUri: String = getConfString("incorporation-frontend-stubs.uri", "")
-
-  override protected def mode = environment.mode
+                                                 appConfig: AppConfig) extends CompanyRegistrationConnector {
+  lazy val companyRegistrationUrl: String = appConfig.servicesConfig.baseUrl("company-registration")
+  lazy val companyRegistrationUri: String = appConfig.servicesConfig.getConfString("company-registration.uri", "")
+  lazy val stubUrl: String = appConfig.servicesConfig.baseUrl("incorporation-frontend-stubs")
+  lazy val stubUri: String = appConfig.servicesConfig.getConfString("incorporation-frontend-stubs.uri", "")
 }
 
 trait CompanyRegistrationConnector {

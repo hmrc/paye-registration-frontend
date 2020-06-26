@@ -16,11 +16,13 @@
 
 package views.pages.companyDetails
 
+import java.util.Locale
+
 import forms.companyDetails.BusinessContactDetailsForm
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.DigitalContactDetails
 import org.jsoup.Jsoup
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Lang, Messages, MessagesApi}
 import play.api.test.FakeRequest
 import views.html.pages.companyDetails.businessContactDetails
 
@@ -28,6 +30,7 @@ class BusinessContactDetailsSpec extends PayeComponentSpec with PayeFakedApp wit
   implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
   implicit lazy val messagesApi: MessagesApi = mockMessagesApi
+  implicit val mockMessages = mockMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
 
   val testCompanyName = "Test company limited"
 
@@ -44,7 +47,7 @@ class BusinessContactDetailsSpec extends PayeComponentSpec with PayeFakedApp wit
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct title" in {
-      document.getElementById("pageHeading").text mustBe messagesApi("pages.businessContact.description", testCompanyName)
+      document.getElementById("pageHeading").text mustBe mockMessages("pages.businessContact.description", testCompanyName)
     }
   }
 }

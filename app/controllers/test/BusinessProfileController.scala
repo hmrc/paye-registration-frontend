@@ -16,23 +16,20 @@
 
 package controllers.test
 
+import config.AppConfig
 import connectors._
 import connectors.test.TestBusinessRegConnector
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import javax.inject.Inject
 import models.external.BusinessProfile
-import play.api.Configuration
-import play.api.i18n.MessagesApi
-import play.api.mvc.{AnyContent, Request}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class BusinessProfileControllerImpl @Inject()(val messagesApi: MessagesApi,
-                                              val config: Configuration,
-                                              val keystoreConnector: KeystoreConnector,
+class BusinessProfileControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
                                               val businessRegConnector: BusinessRegistrationConnector,
                                               val authConnector: AuthConnector,
                                               val s4LService: S4LService,
@@ -40,9 +37,12 @@ class BusinessProfileControllerImpl @Inject()(val messagesApi: MessagesApi,
                                               val incorpInfoService: IncorporationInformationService,
                                               val testBusinessRegConnector: TestBusinessRegConnector,
                                               val incorporationInformationConnector: IncorporationInformationConnector,
-                                              val payeRegistrationService: PAYERegistrationService) extends BusinessProfileController with AuthRedirectUrls
+                                              val payeRegistrationService: PAYERegistrationService,
+                                              mcc: MessagesControllerComponents
+                                             )(val appConfig: AppConfig) extends BusinessProfileController(mcc) with AuthRedirectUrls
 
-trait BusinessProfileController extends PayeBaseController {
+abstract class BusinessProfileController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
+  val appConfig: AppConfig
   val businessRegConnector: BusinessRegistrationConnector
   val testBusinessRegConnector: TestBusinessRegConnector
 

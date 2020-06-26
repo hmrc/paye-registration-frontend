@@ -17,7 +17,6 @@
 package models
 
 import helpers.PayeComponentSpec
-import play.api.data.validation.ValidationError
 import play.api.libs.json._
 
 class AddressSpec extends PayeComponentSpec {
@@ -413,7 +412,7 @@ class AddressSpec extends PayeComponentSpec {
             |}""".stripMargin)
 
         val result = Json.fromJson[Address](tstJson)(Address.addressLookupReads)
-        shouldHaveErrors(result, JsPath(), Seq(ValidationError("No postcode and no country to default to")))
+        shouldHaveErrors(result, JsPath(), Seq(JsonValidationError("No postcode and no country to default to")))
       }
       "only one address line is completed" in {
         val tstJson = Json.parse(
@@ -427,7 +426,7 @@ class AddressSpec extends PayeComponentSpec {
             |}""".stripMargin)
 
         val result = Json.fromJson[Address](tstJson)(Address.addressLookupReads)
-        shouldHaveErrors(result, JsPath(), Seq(ValidationError("only 1 lines provided from address-lookup-frontend")))
+        shouldHaveErrors(result, JsPath(), Seq(JsonValidationError("only 1 lines provided from address-lookup-frontend")))
       }
       "postcode is invalid and country is not completed" in {
         val tstJson = Json.parse(
@@ -442,7 +441,7 @@ class AddressSpec extends PayeComponentSpec {
             |}""".stripMargin)
 
         val result = Json.fromJson[Address](tstJson)(Address.addressLookupReads)
-        shouldHaveErrors(result, JsPath(), Seq(ValidationError("Invalid postcode and no country to default to")))
+        shouldHaveErrors(result, JsPath(), Seq(JsonValidationError("Invalid postcode and no country to default to")))
       }
     }
   }
@@ -673,7 +672,7 @@ class AddressSpec extends PayeComponentSpec {
           "locality: false\n" +
           "postcode: true\n" +
           "country: true\n"
-        shouldHaveErrors(res, JsPath(), Seq(ValidationError(err)))
+        shouldHaveErrors(res, JsPath(), Seq(JsonValidationError(err)))
       }
       "there are not enough lines defined 2" in {
         val tstCHROAddressJson = Json.parse(
@@ -691,7 +690,7 @@ class AddressSpec extends PayeComponentSpec {
           "locality: false\n" +
           "postcode: true\n" +
           "country: true\n"
-        shouldHaveErrors(res, JsPath(), Seq(ValidationError(err)))
+        shouldHaveErrors(res, JsPath(), Seq(JsonValidationError(err)))
       }
       "there are not enough lines defined 3" in {
         val tstCHROAddressJson = Json.parse(
@@ -710,7 +709,7 @@ class AddressSpec extends PayeComponentSpec {
           "locality: false\n" +
           "postcode: true\n" +
           "country: true\n"
-        shouldHaveErrors(res, JsPath(), Seq(ValidationError(err)))
+        shouldHaveErrors(res, JsPath(), Seq(JsonValidationError(err)))
       }
       "there are not enough lines defined 4" in {
         val tstCHROAddressJson = Json.parse(
@@ -729,7 +728,7 @@ class AddressSpec extends PayeComponentSpec {
           "locality: false\n" +
           "postcode: true\n" +
           "country: true\n"
-        shouldHaveErrors(res, JsPath(), Seq(ValidationError(err)))
+        shouldHaveErrors(res, JsPath(), Seq(JsonValidationError(err)))
       }
       "there are not enough lines defined 5" in {
         val tstCHROAddressJson = Json.parse(
@@ -748,7 +747,7 @@ class AddressSpec extends PayeComponentSpec {
           "locality: true\n" +
           "postcode: true\n" +
           "country: true\n"
-        shouldHaveErrors(res, JsPath(), Seq(ValidationError(err)))
+        shouldHaveErrors(res, JsPath(), Seq(JsonValidationError(err)))
       }
       "there is neither postcode nor country defined" in {
         val tstCHROAddressJson = Json.parse(
@@ -768,7 +767,7 @@ class AddressSpec extends PayeComponentSpec {
           "locality: true\n" +
           "postcode: false\n" +
           "country: false\n"
-        shouldHaveErrors(res, JsPath(), Seq(ValidationError(err)))
+        shouldHaveErrors(res, JsPath(), Seq(JsonValidationError(err)))
       }
     }
 
@@ -862,7 +861,7 @@ class AddressSpec extends PayeComponentSpec {
           """.stripMargin
         )
         val res = readPrePopAddress(json)
-        shouldHaveErrors(res, JsPath(), Seq(ValidationError("Neither country nor valid postcode defined in PrePop Address")))
+        shouldHaveErrors(res, JsPath(), Seq(JsonValidationError("Neither country nor valid postcode defined in PrePop Address")))
       }
       "Postcode is invalid and no country defined" in {
         val json = Json.parse(
@@ -874,7 +873,7 @@ class AddressSpec extends PayeComponentSpec {
           """.stripMargin
         )
         val res = readPrePopAddress(json)
-        shouldHaveErrors(res, JsPath(), Seq(ValidationError("Neither country nor valid postcode defined in PrePop Address")))
+        shouldHaveErrors(res, JsPath(), Seq(JsonValidationError("Neither country nor valid postcode defined in PrePop Address")))
       }
     }
 

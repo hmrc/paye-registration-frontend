@@ -16,12 +16,14 @@
 
 package views.pages.companyDetails
 
+import java.util.Locale
+
 import forms.companyDetails.PPOBForm
 import forms.payeContactDetails.CorrespondenceAddressForm
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.Address
 import org.jsoup.Jsoup
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Lang, Messages, MessagesApi}
 import play.api.test.FakeRequest
 import views.html.pages.companyDetails.{ppobAddress => PPOBAddressPage}
 import views.html.pages.payeContact.{correspondenceAddress => CorrespondenceAddressPage}
@@ -30,6 +32,7 @@ class chooseAddressSpec extends PayeComponentSpec with PayeFakedApp with I18nSup
   implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
   implicit lazy val messagesApi: MessagesApi = mockMessagesApi
+  implicit val mockMessages = mockMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
 
   val testROAddress =
     Address(
@@ -85,7 +88,7 @@ class chooseAddressSpec extends PayeComponentSpec with PayeFakedApp with I18nSup
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct title" in {
-      document.getElementById("pageHeading").text mustBe messagesApi("pages.ppobAddress.description")
+      document.getElementById("pageHeading").text mustBe mockMessages("pages.ppobAddress.description")
     }
 
     "have the correct name for radio button roAddress" in {
@@ -164,7 +167,7 @@ class chooseAddressSpec extends PayeComponentSpec with PayeFakedApp with I18nSup
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct title" in {
-      document.getElementById("pageHeading").text mustBe messagesApi("pages.correspondenceAddress.description")
+      document.getElementById("pageHeading").text mustBe mockMessages("pages.correspondenceAddress.description")
     }
 
     "have the correct name for radio button roAddress" in {

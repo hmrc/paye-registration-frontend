@@ -16,15 +16,14 @@
 
 package controllers.test
 
+import config.AppConfig
 import connectors._
 import connectors.test.{TestBusinessRegConnector, TestPAYERegConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
 import forms.test.{TestPAYEContactForm, TestPAYERegCompanyDetailsSetupForm, TestPAYERegEmploymentInfoSetupForm, TestPAYERegSetupForm}
 import javax.inject.Inject
-import play.api.Configuration
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
@@ -36,15 +35,16 @@ class TestRegSetupControllerImpl @Inject()(val payeRegService: PAYERegistrationS
                                            val keystoreConnector: KeystoreConnector,
                                            val testBusinessRegConnector: TestBusinessRegConnector,
                                            val authConnector: AuthConnector,
-                                           val config: Configuration,
                                            val s4LService: S4LService,
                                            val companyDetailsService: CompanyDetailsService,
                                            val incorpInfoService: IncorporationInformationService,
-                                           val messagesApi: MessagesApi,
                                            val incorporationInformationConnector: IncorporationInformationConnector,
-                                           val payeRegistrationService: PAYERegistrationService) extends TestRegSetupController with AuthRedirectUrls
+                                           val payeRegistrationService: PAYERegistrationService,
+                                           mcc: MessagesControllerComponents
+                                          )(val appConfig: AppConfig) extends TestRegSetupController(mcc) with AuthRedirectUrls
 
-trait TestRegSetupController extends PayeBaseController {
+abstract class TestRegSetupController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
+  val appConfig: AppConfig
   val payeRegService: PAYERegistrationService
   val testPAYERegConnector: TestPAYERegConnector
   val testBusinessRegConnector: TestBusinessRegConnector

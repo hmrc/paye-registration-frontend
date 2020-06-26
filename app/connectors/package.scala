@@ -34,14 +34,12 @@ import uk.gov.hmrc.http.{BadRequestException, NotFoundException, Upstream4xxResp
  */
 
 package object connectors extends Logging {
+  def logResponse(e: Throwable, m: String, regId: Option[String] = None): Throwable = {
+    val optRegId = regId.map(r => s" and regId: $regId").getOrElse("")
 
-  def logResponse(exception: Throwable, message: String, regId: Option[String] = None): Throwable = {
+    def log(s: String) = logger.error(s"received $s when $m$optRegId")
 
-    val optRegId = regId.map(_ => s" and regId: $regId").getOrElse("")
-
-    def log(string: String) = logger.error(s"received $string when $message$optRegId")
-
-    exception match {
+    e match {
       case _: NotFoundException => log("NOT FOUND")
       case _: BadRequestException => log("BAD REQUEST")
       case e: Upstream4xxResponse => e.upstreamResponseCode match {
@@ -51,8 +49,6 @@ package object connectors extends Logging {
       case e: Upstream5xxResponse => log(s"Upstream 5xx: ${e.upstreamResponseCode}")
       case e: Exception => log(s"ERROR: ${e.getMessage}")
     }
-
-    exception
+    e
   }
-
 }

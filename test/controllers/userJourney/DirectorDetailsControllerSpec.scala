@@ -27,6 +27,7 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import services.DirectorDetailsService
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.Future
 
@@ -37,7 +38,7 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
   val fakeRequest = FakeRequest()
 
   class Setup {
-    val testController = new DirectorDetailsController {
+    val testController = new DirectorDetailsController(stubMessagesControllerComponents()) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val directorDetailsService = mockDirectorDetailService

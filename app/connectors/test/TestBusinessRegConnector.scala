@@ -16,22 +16,18 @@
 
 package connectors.test
 
-import config.WSHttp
+import config.{AppConfig, WSHttp}
 import javax.inject.Inject
 import models.external.{BusinessProfile, BusinessRegistrationRequest}
 import play.api.libs.json.{JsValue, Json}
-import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.{CorePost, HeaderCarrier}
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
 class TestBusinessRegConnectorImpl @Inject()(val http: WSHttp,
-                                             override val runModeConfiguration: Configuration,
-                                             environment: Environment) extends TestBusinessRegConnector with ServicesConfig {
-  val businessRegUrl = baseUrl("business-registration")
-
-  override protected def mode = environment.mode
+                                             appConfig: AppConfig) extends TestBusinessRegConnector {
+  val businessRegUrl = appConfig.servicesConfig.baseUrl("business-registration")
 }
 
 trait TestBusinessRegConnector {

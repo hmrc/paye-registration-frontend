@@ -25,9 +25,8 @@ import forms.payeContactDetails.{CorrespondenceAddressForm, PAYEContactDetailsFo
 import javax.inject.Inject
 import models.external.AuditingInformation
 import models.view._
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request}
-import play.api.{Configuration, Logger}
+import play.api.Logger
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
@@ -40,18 +39,17 @@ class PAYEContactControllerImpl @Inject()(val companyDetailsService: CompanyDeta
                                           val payeContactService: PAYEContactService,
                                           val addressLookupService: AddressLookupService,
                                           val keystoreConnector: KeystoreConnector,
-                                          val messagesApi: MessagesApi,
                                           val authConnector: AuthConnector,
-                                          val config: Configuration,
                                           val prepopService: PrepopulationService,
                                           val s4LService: S4LService,
                                           val incorpInfoService: IncorporationInformationService,
                                           val auditService: AuditService,
                                           val incorporationInformationConnector: IncorporationInformationConnector,
-                                          val payeRegistrationService: PAYERegistrationService
-                                         )(implicit val appConfig: AppConfig) extends PAYEContactController with AuthRedirectUrls
+                                          val payeRegistrationService: PAYERegistrationService,
+                                          mcc: MessagesControllerComponents
+                                         )(implicit val appConfig: AppConfig) extends PAYEContactController(mcc) with AuthRedirectUrls
 
-trait PAYEContactController extends PayeBaseController {
+abstract class PAYEContactController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
   val companyDetailsService: CompanyDetailsService
   val payeContactService: PAYEContactService

@@ -20,28 +20,25 @@ import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import javax.inject.Inject
-import play.api.Configuration
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.error.{ineligible => Ineligible, newIneligible => IneligiblePage, _}
 
 import scala.concurrent.Future
 
-class ErrorControllerImpl @Inject()(val messagesApi: MessagesApi,
-                                    val config: Configuration,
-                                    val thresholdService: ThresholdService,
+class ErrorControllerImpl @Inject()(val thresholdService: ThresholdService,
                                     val keystoreConnector: KeystoreConnector,
                                     val companyDetailsService: CompanyDetailsService,
                                     val s4LService: S4LService,
                                     val incorpInfoService: IncorporationInformationService,
                                     val authConnector: AuthConnector,
                                     val incorporationInformationConnector: IncorporationInformationConnector,
-                                    val payeRegistrationService: PAYERegistrationService
-                                   )(implicit val appConfig: AppConfig) extends ErrorController with AuthRedirectUrls
+                                    val payeRegistrationService: PAYERegistrationService,
+                                    mcc: MessagesControllerComponents
+                                   )(implicit val appConfig: AppConfig) extends ErrorController(mcc) with AuthRedirectUrls
 
-trait ErrorController extends PayeBaseController {
+abstract class ErrorController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
 
   implicit val appConfig: AppConfig
   val thresholdService: ThresholdService

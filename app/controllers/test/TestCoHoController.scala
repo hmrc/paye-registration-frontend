@@ -16,14 +16,13 @@
 
 package controllers.test
 
+import config.AppConfig
 import connectors.test.TestIncorpInfoConnector
 import connectors.{BusinessRegistrationConnector, IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.test.TestCoHoCompanyDetailsForm
 import javax.inject.Inject
-import play.api.Configuration
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
@@ -36,14 +35,15 @@ class TestCoHoControllerImpl @Inject()(val testIncorpInfoConnector: TestIncorpIn
                                        val businessRegConnector: BusinessRegistrationConnector,
                                        val authConnector: AuthConnector,
                                        val s4LService: S4LService,
-                                       val config: Configuration,
                                        val companyDetailsService: CompanyDetailsService,
                                        val incorpInfoService: IncorporationInformationService,
-                                       val messagesApi: MessagesApi,
                                        val incorporationInformationConnector: IncorporationInformationConnector,
-                                       val payeRegistrationService: PAYERegistrationService) extends TestCoHoController with AuthRedirectUrls
+                                       val payeRegistrationService: PAYERegistrationService,
+                                       mcc: MessagesControllerComponents
+                                      )(val appConfig: AppConfig) extends TestCoHoController(mcc) with AuthRedirectUrls
 
-trait TestCoHoController extends PayeBaseController {
+abstract class TestCoHoController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
+  val appConfig: AppConfig
   val testIncorpInfoConnector: TestIncorpInfoConnector
   val businessRegConnector: BusinessRegistrationConnector
   val keystoreConnector: KeystoreConnector

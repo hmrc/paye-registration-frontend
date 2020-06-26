@@ -16,22 +16,18 @@
 
 package connectors.test
 
-import config.WSHttp
+import config.{AppConfig, WSHttp}
 import javax.inject.Inject
 import play.api.libs.json.{JsValue, Json}
-import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
 class TestIncorpInfoConnectorImpl @Inject()(val http: WSHttp,
-                                            override val runModeConfiguration: Configuration,
-                                            environment: Environment) extends TestIncorpInfoConnector with ServicesConfig {
-  val incorpFEStubsUrl = baseUrl("incorporation-frontend-stubs")
-  val incorpInfoUrl = baseUrl("incorporation-information")
-
-  override protected def mode = environment.mode
+                                            appConfig: AppConfig) extends TestIncorpInfoConnector {
+  val incorpFEStubsUrl = appConfig.servicesConfig.baseUrl("incorporation-frontend-stubs")
+  val incorpInfoUrl = appConfig.servicesConfig.baseUrl("incorporation-information")
 }
 
 trait TestIncorpInfoConnector {

@@ -21,6 +21,7 @@ import java.util.UUID
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.libs.Crypto
+import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.ws.WSCookie
 import uk.gov.hmrc.crypto.{CompositeSymmetricCrypto, Crypted, PlainText}
 import uk.gov.hmrc.http.SessionKeys
@@ -179,6 +180,7 @@ trait LoginStub extends SessionCookieBaker {
 }
 
 trait SessionCookieBaker {
+  val defaultCookieSigner: DefaultCookieSigner
   val cookieKey = "gvBoGdgzqG1AarzF1LY0zQ=="
 
   def cookieValue(sessionData: Map[String, String]) = {
@@ -186,8 +188,8 @@ trait SessionCookieBaker {
       val encoded = data.map {
         case (k, v) => URLEncoder.encode(k, "UTF-8") + "=" + URLEncoder.encode(v, "UTF-8")
       }.mkString("&")
-      val key = "fqpLDZ4sumDsekHkeEBlCA==".getBytes
-      PlainText(Crypto.sign(encoded, key) + "-" + encoded)
+      val key = "yNhI04vHs9<_HWbC`]20u`37=NGLGYY5:0Tg5?y`W<NoJnXWqmjcgZBec@rOxb^G".getBytes
+      PlainText(defaultCookieSigner.sign(encoded, key) + "-" + encoded)
     }
 
     val encodedCookie = encode(sessionData)
@@ -197,7 +199,7 @@ trait SessionCookieBaker {
   }
 
   def getCookieData(cookie: WSCookie): Map[String, String] = {
-    getCookieData(cookie.value.get)
+    getCookieData(cookie.value)
   }
 
   def getCookieData(cookieData: String): Map[String, String] = {

@@ -27,19 +27,22 @@ import org.jsoup._
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
-import play.api.i18n.MessagesApi
-import play.api.mvc.{AnyContent, Call, Request, Result}
+import play.api.i18n.Messages
+import play.api.mvc.{AnyContent, Call, MessagesControllerComponents, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.Future
 
 class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
+
   class Setup {
-    val controller = new CompanyDetailsController {
+    val controller = new CompanyDetailsController(mockMcc) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val s4LService = mockS4LService
@@ -47,7 +50,6 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val authConnector = mockAuthConnector
       override val companyDetailsService = mockCompanyDetailsService
       override val incorpInfoService = mockIncorpInfoService
-      implicit val messagesApi: MessagesApi = mockMessagesApi
       override val addressLookupService = mockAddressLookupService
       override val prepopService = mockPrepopulationService
       override val auditService = mockAuditService
@@ -459,7 +461,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "chosenAddress" -> "other"
       )
 
-      when(mockAddressLookupService.buildAddressLookupUrl(ArgumentMatchers.any[String](), ArgumentMatchers.any[Call]())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockAddressLookupService.buildAddressLookupUrl(ArgumentMatchers.any[String](), ArgumentMatchers.any[Call]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Messages]))
         .thenReturn(Future.successful("testUrl"))
 
       AuthHelpers.submitAuthorisedWithCPAndAudit(controller.submitPPOBAddress, Fixtures.validCurrentProfile, request) { result =>

@@ -17,14 +17,13 @@
 package connectors.test
 
 import common.Logging
-import config.WSHttp
+import config.{AppConfig, WSHttp}
 import connectors._
 import enums.DownstreamOutcome
 import javax.inject.Inject
 import models.api.{Employment, CompanyDetails => CompanyDetailsAPI, PAYEContact => PAYEContactAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
-import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
@@ -32,11 +31,8 @@ import scala.concurrent.Future
 
 class TestPAYERegConnectorImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
                                          val http: WSHttp,
-                                         override val runModeConfiguration: Configuration,
-                                         environment: Environment) extends TestPAYERegConnector with ServicesConfig {
-  val payeRegUrl = baseUrl("paye-registration")
-
-  override protected def mode = environment.mode
+                                         appConfig: AppConfig) extends TestPAYERegConnector {
+  val payeRegUrl = appConfig.servicesConfig.baseUrl("paye-registration")
 }
 
 trait TestPAYERegConnector extends Logging {

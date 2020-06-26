@@ -20,7 +20,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.{deleteRequestedFor, find
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.external.CurrentProfile
-import play.api.Application
+import play.api.{Application, Environment, Mode}
 import play.api.http.HeaderNames
 import play.api.http.Status.{OK, SEE_OTHER}
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -39,7 +39,7 @@ class SessionProfileISpec extends IntegrationSpecBase with CachingStub {
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  val additionalConfiguration = Map(
+  val config = Map(
     "auditing.consumer.baseUri.host" -> s"$mockHost",
     "auditing.consumer.baseUri.port" -> s"$mockPort",
     "microservice.services.cachable.session-cache.host" -> s"$mockHost",
@@ -64,8 +64,8 @@ class SessionProfileISpec extends IntegrationSpecBase with CachingStub {
     "mongodb.uri" -> s"$mongoUri"
   )
 
-  override implicit lazy val app: Application = new GuiceApplicationBuilder()
-    .configure(additionalConfiguration)
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
     .build
 
   val sessionId = "session-123"

@@ -18,8 +18,10 @@ package filters
 
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.scalatest.BeforeAndAfterEach
+import play.api.Application
 import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.crypto.DefaultCookieSigner
 
 class SessionTimeoutFilterISpec extends IntegrationSpecBase
   with LoginStub
@@ -31,7 +33,7 @@ class SessionTimeoutFilterISpec extends IntegrationSpecBase
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  val additionalConfiguration = Map(
+  lazy val config = Map(
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
     "auditing.consumer.baseUri.host" -> s"$mockHost",
@@ -53,9 +55,11 @@ class SessionTimeoutFilterISpec extends IntegrationSpecBase
     "session.timeoutSeconds" -> "10"
   )
 
-  override implicit lazy val app = new GuiceApplicationBuilder()
-    .configure(additionalConfiguration)
-    .build()
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
+    .build
+
+  lazy val defaultCookieSigner: DefaultCookieSigner = app.injector.instanceOf[DefaultCookieSigner]
 
   override def beforeEach() {
     resetWiremock()
@@ -104,7 +108,7 @@ class SessionTimeoutFilterISpec extends IntegrationSpecBase
         stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
 
         val fResponse = buildClient("/trading-name").
-          withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+          withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
           get()
 
         val response = await(fResponse)
@@ -112,7 +116,7 @@ class SessionTimeoutFilterISpec extends IntegrationSpecBase
         response.status mustBe 200
 
         val fResponse2 = buildClient("/relationship-to-company").
-          withHeaders(HeaderNames.COOKIE -> getSessionCookie(timeStampRollback = 70000)).get()
+          withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(timeStampRollback = 70000)).get()
 
         val responseWithRollback = await(fResponse2)
         responseWithRollback.status mustBe 303

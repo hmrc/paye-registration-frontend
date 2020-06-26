@@ -20,7 +20,7 @@ import java.util.UUID
 
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.api.SessionMap
-import play.api.Application
+import play.api.{Application, Environment, Mode}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 
@@ -31,7 +31,7 @@ class SessionRepositoryISpec extends IntegrationSpecBase {
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  val additionalConfiguration = Map(
+  val config = Map(
     "microservice.services.paye-registration.host" -> s"$mockHost",
     "microservice.services.paye-registration.port" -> s"$mockPort",
     "microservice.services.cachable.session-cache.host" -> s"$mockHost",
@@ -43,8 +43,8 @@ class SessionRepositoryISpec extends IntegrationSpecBase {
     "mongodb.uri" -> s"$mongoUri"
   )
 
-  override implicit lazy val app: Application = new GuiceApplicationBuilder()
-    .configure(additionalConfiguration)
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
     .build
 
   val sId = UUID.randomUUID().toString

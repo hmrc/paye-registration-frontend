@@ -22,9 +22,7 @@ import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
 import forms.natureOfBuinessDetails.NatureOfBusinessForm
 import javax.inject.Inject
-import play.api.Configuration
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{natureOfBusiness => NatureOfBusinessPage}
@@ -32,19 +30,18 @@ import views.html.pages.{natureOfBusiness => NatureOfBusinessPage}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class NatureOfBusinessControllerImpl @Inject()(val messagesApi: MessagesApi,
-                                               val natureOfBusinessService: NatureOfBusinessService,
+class NatureOfBusinessControllerImpl @Inject()(val natureOfBusinessService: NatureOfBusinessService,
                                                val keystoreConnector: KeystoreConnector,
-                                               val config: Configuration,
                                                val s4LService: S4LService,
                                                val companyDetailsService: CompanyDetailsService,
                                                val incorpInfoService: IncorporationInformationService,
                                                val authConnector: AuthConnector,
                                                val incorporationInformationConnector: IncorporationInformationConnector,
-                                               val payeRegistrationService: PAYERegistrationService
-                                              )(implicit val appConfig: AppConfig) extends NatureOfBusinessController with AuthRedirectUrls
+                                               val payeRegistrationService: PAYERegistrationService,
+                                               mcc: MessagesControllerComponents
+                                              )(implicit val appConfig: AppConfig) extends NatureOfBusinessController(mcc) with AuthRedirectUrls
 
-trait NatureOfBusinessController extends PayeBaseController {
+abstract class NatureOfBusinessController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
   val authConnector: AuthConnector
   val natureOfBusinessService: NatureOfBusinessService

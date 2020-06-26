@@ -17,7 +17,7 @@
 package payeregistrationapi
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import config.WSHttpImpl
+import config.{AppConfig, WSHttpImpl}
 import connectors.PAYERegistrationConnectorImpl
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.api._
@@ -25,7 +25,7 @@ import models.view.PAYEContactDetails
 import models.{Address, DigitalContactDetails}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.{Application, Configuration, Environment}
+import play.api.{Application, Environment, Mode}
 import services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -35,28 +35,27 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  lazy val metrics = app.injector.instanceOf[MetricsService]
-
-  val additionalConfiguration = Map(
+  val config = Map(
     "microservice.services.paye-registration.host" -> s"$mockHost",
     "microservice.services.paye-registration.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes"
   )
 
-  override implicit lazy val app: Application = new GuiceApplicationBuilder()
-    .configure(additionalConfiguration)
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
     .build
 
+
   class Setup {
+    lazy val metrics = app.injector.instanceOf[MetricsService]
     lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
     lazy val env = app.injector.instanceOf(classOf[Environment])
-    lazy val config = app.injector.instanceOf(classOf[Configuration])
+    lazy val appConfig = app.injector.instanceOf[AppConfig]
 
     val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
       metrics,
       http,
-      config,
-      env
+      appConfig
     )
   }
 

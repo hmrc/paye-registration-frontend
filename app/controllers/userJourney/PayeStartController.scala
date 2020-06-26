@@ -23,9 +23,7 @@ import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.{CacheKeys, DownstreamOutcome, RegistrationDeletion}
 import javax.inject.Inject
 import models.external.CurrentProfile
-import play.api.Configuration
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc._
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
@@ -38,18 +36,17 @@ class PayeStartControllerImpl @Inject()(val currentProfileService: CurrentProfil
                                         val payeRegistrationService: PAYERegistrationService,
                                         val keystoreConnector: KeystoreConnector,
                                         val authConnector: AuthConnector,
-                                        val config: Configuration,
                                         val s4LService: S4LService,
                                         val companyDetailsService: CompanyDetailsService,
                                         val incorpInfoService: IncorporationInformationService,
                                         val businessRegistrationConnector: BusinessRegistrationConnector,
                                         val companyRegistrationConnector: CompanyRegistrationConnector,
                                         val featureSwitches: PAYEFeatureSwitches,
-                                        val messagesApi: MessagesApi,
-                                        val incorporationInformationConnector: IncorporationInformationConnector
-                                       )(implicit val appConfig: AppConfig) extends PayeStartController with AuthRedirectUrls
+                                        val incorporationInformationConnector: IncorporationInformationConnector,
+                                        mcc: MessagesControllerComponents
+                                       )(implicit val appConfig: AppConfig) extends PayeStartController(mcc) with AuthRedirectUrls
 
-trait PayeStartController extends PayeBaseController {
+abstract class PayeStartController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
   val currentProfileService: CurrentProfileService
   val payeRegistrationService: PAYERegistrationService

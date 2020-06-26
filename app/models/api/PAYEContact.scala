@@ -20,7 +20,6 @@ import models.Address
 import models.view.PAYEContactDetails
 import play.api.libs.json.Json
 
-
 case class PAYEContact(contactDetails: PAYEContactDetails,
                        correspondenceAddress: Address)
 

@@ -16,21 +16,21 @@
 
 package controllers.userJourney
 
+import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
-import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 class DashboardControllerSpec extends PayeComponentSpec with PayeFakedApp {
   val fakeRequest = FakeRequest("GET", "/")
 
   class Setup {
-    val controller = new DashboardController {
+    val controller = new DashboardController(stubMessagesControllerComponents()) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-
+      override val appConfig: AppConfig = mockAppConfig
       override val authConnector = mockAuthConnector
       override val keystoreConnector = mockKeystoreConnector
-      implicit val messagesApi: MessagesApi = mockMessagesApi
       override val companyRegUrl = "testUrl"
       override val companyRegUri = "/testUri"
       override val incorporationInformationConnector = mockIncorpInfoConnector

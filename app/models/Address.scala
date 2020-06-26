@@ -16,7 +16,6 @@
 
 package models
 
-import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import utils.{Formatters, Validators}
@@ -62,8 +61,8 @@ object Address {
       val auditRef = json.\("auditRef").asOpt[String]
 
       def buildAddress: JsResult[Address] = (validatedPostcode, countryName, addressLines) match {
-        case (Left(msg), None, _) => JsError(ValidationError(s"$msg and no country to default to"))
-        case (_, _, lines) if lines.length < 2 => JsError(ValidationError(s"only ${lines.length} lines provided from address-lookup-frontend"))
+        case (Left(msg), None, _) => JsError(JsonValidationError(s"$msg and no country to default to"))
+        case (_, _, lines) if lines.length < 2 => JsError(JsonValidationError(s"only ${lines.length} lines provided from address-lookup-frontend"))
         case (Left(_), c@Some(_), lines) => JsSuccess(makeAddress(None, c, lines, auditRef))
         case (Right(pc), _, lines) => JsSuccess(makeAddress(Some(pc), None, lines, auditRef))
       }

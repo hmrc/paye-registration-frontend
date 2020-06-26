@@ -17,23 +17,24 @@
 package controllers
 
 import common.Logging
+import config.AppConfig
 import controllers.userJourney.{routes => userJourneyRoutes}
 import models.external.{AuditingInformation, CurrentProfile}
 import play.api.Configuration
 import play.api.i18n.I18nSupport
 import play.api.mvc.Results._
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc._
 import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.play.bootstrap.controller.{BaseController, FrontendController}
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils.SessionProfile
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait PayeBaseController extends FrontendController with BaseController with AuthorisedFunctions with Logging with SessionProfile with I18nSupport {
+abstract class PayeBaseController(mcc: MessagesControllerComponents) extends FrontendController(mcc) with AuthorisedFunctions with Logging with SessionProfile with I18nSupport {
 
   type AuthorisedActionWithProfile = Request[AnyContent] => CurrentProfile => Future[Result]
   type AuthorisedActionWithProfileAndAuditingInfo = Request[AnyContent] => CurrentProfile => AuditingInformation => Future[Result]
@@ -125,17 +126,17 @@ trait PayeBaseController extends FrontendController with BaseController with Aut
 }
 
 trait AuthRedirectUrls {
-  val config: Configuration
+  val appConfig: AppConfig
 
   private val configRoot = "microservice.services"
 
-  private lazy val appName = config.getString("appName").getOrElse("undefined")
+  private lazy val appName = appConfig.servicesConfig.getString("appName")
 
-  private lazy val loginCallback = config.underlying.getString(s"$configRoot.auth.login-callback.url")
+  private lazy val loginCallback = appConfig.servicesConfig.getString(s"$configRoot.auth.login-callback.url")
 
   private lazy val buildCompanyAuthUrl = {
-    val companyAuthHost = config.underlying.getString(s"$configRoot.auth.company-auth.url")
-    val loginPath = config.underlying.getString(s"$configRoot.auth.login_path")
+    val companyAuthHost = appConfig.servicesConfig.getString(s"$configRoot.auth.company-auth.url")
+    val loginPath = appConfig.servicesConfig.getString(s"$configRoot.auth.login_path")
     s"$companyAuthHost$loginPath"
   }
 
@@ -148,9 +149,9 @@ trait AuthRedirectUrls {
 
   lazy val redirectToPostSign = Redirect(userJourneyRoutes.SignInOutController.postSignIn())
 
-  lazy val compRegFEURL = config.underlying.getString(s"$configRoot.company-registration-frontend.www.url")
-  lazy val compRegFEURI = config.underlying.getString(s"$configRoot.company-registration-frontend.www.uri")
+  lazy val compRegFEURL = appConfig.servicesConfig.getString(s"$configRoot.company-registration-frontend.www.url")
+  lazy val compRegFEURI = appConfig.servicesConfig.getString(s"$configRoot.company-registration-frontend.www.uri")
 
-  lazy val payeRegElFEURL = config.underlying.getString(s"$configRoot.paye-registration-eligibility-frontend.www.url")
-  lazy val payeRegElFEURI = config.underlying.getString(s"$configRoot.paye-registration-eligibility-frontend.www.uri")
+  lazy val payeRegElFEURL = appConfig.servicesConfig.getString(s"$configRoot.paye-registration-eligibility-frontend.www.url")
+  lazy val payeRegElFEURI = appConfig.servicesConfig.getString(s"$configRoot.paye-registration-eligibility-frontend.www.uri")
 }

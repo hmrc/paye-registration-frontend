@@ -16,34 +16,32 @@
 
 package controllers.userJourney
 
+import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import javax.inject.Inject
-import play.api.i18n.MessagesApi
-import play.api.{Configuration, Environment}
+import play.api.mvc.MessagesControllerComponents
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.Future
 
-class DashboardControllerImpl @Inject()(val messagesApi: MessagesApi,
-                                        val keystoreConnector: KeystoreConnector,
+class DashboardControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
                                         val authConnector: AuthConnector,
                                         val s4LService: S4LService,
                                         val companyDetailsService: CompanyDetailsService,
                                         val incorpInfoService: IncorporationInformationService,
                                         val incorporationInformationConnector: IncorporationInformationConnector,
                                         val payeRegistrationService: PAYERegistrationService,
-                                        override val runModeConfiguration: Configuration, environment: Environment) extends DashboardController with AuthRedirectUrls with ServicesConfig {
+                                        mcc: MessagesControllerComponents
+                                       )(val appConfig: AppConfig) extends DashboardController(mcc) with AuthRedirectUrls {
 
-  override lazy val companyRegUrl = getConfString("company-registration-frontend.www.url", "Could not find Company Registration Frontend URL")
-  override lazy val companyRegUri = getConfString("company-registration-frontend.www.uri", "Could not find Company Registration Frontend URI")
-  override val config: Configuration = runModeConfiguration
-
-  override protected def mode = environment.mode
+  override lazy val companyRegUrl = appConfig.servicesConfig.getConfString("company-registration-frontend.www.url", "Could not find Company Registration Frontend URL")
+  override lazy val companyRegUri = appConfig.servicesConfig.getConfString("company-registration-frontend.www.uri", "Could not find Company Registration Frontend URI")
 }
 
-trait DashboardController extends PayeBaseController {
+abstract class DashboardController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
+  val appConfig: AppConfig
   val companyRegUrl: String
   val companyRegUri: String
 

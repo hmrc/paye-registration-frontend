@@ -18,13 +18,13 @@ package connectors
 
 import java.util.NoSuchElementException
 
-import config.WSHttp
+import config.{AppConfig, WSHttp}
 import enums.{DownstreamOutcome, PAYEStatus, RegistrationDeletion}
 import javax.inject.Inject
 import models.api.{Director, Employment, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
+import play.api.Logger
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, Reads}
-import play.api.{Configuration, Environment, Logger}
 import services.MetricsService
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
@@ -43,11 +43,8 @@ object TimedOut extends DESResponse
 
 class PAYERegistrationConnectorImpl @Inject()(val metricsService: MetricsService,
                                               val http: WSHttp,
-                                              override val runModeConfiguration: Configuration,
-                                              environment: Environment) extends PAYERegistrationConnector with ServicesConfig {
-  val payeRegUrl = baseUrl("paye-registration")
-
-  override protected def mode = environment.mode
+                                              appConfig: AppConfig) extends PAYERegistrationConnector {
+  val payeRegUrl = appConfig.servicesConfig.baseUrl("paye-registration")
 }
 
 trait PAYERegistrationConnector {

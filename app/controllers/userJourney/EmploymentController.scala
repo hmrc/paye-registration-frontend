@@ -25,9 +25,7 @@ import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.employmentDetails._
 import javax.inject.Inject
 import models.view._
-import play.api.Configuration
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc._
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
@@ -40,17 +38,15 @@ import scala.concurrent.Future
 class EmploymentControllerImpl @Inject()(val employmentService: EmploymentService,
                                          val thresholdService: ThresholdService,
                                          val keystoreConnector: KeystoreConnector,
-                                         val config: Configuration,
                                          val authConnector: AuthConnector,
-                                         val s4LService: S4LService,
-                                         val companyDetailsService: CompanyDetailsService,
                                          val incorpInfoService: IncorporationInformationService,
                                          val incorporationInformationConnector: IncorporationInformationConnector,
-                                         val payeRegistrationService: PAYERegistrationService
-                                        )(implicit val messagesApi: MessagesApi, val appConfig: AppConfig) extends EmploymentController with AuthRedirectUrls
+                                         val payeRegistrationService: PAYERegistrationService,
+                                         mcc: MessagesControllerComponents
+                                        )(implicit val appConfig: AppConfig) extends EmploymentController(mcc) with AuthRedirectUrls
 
 
-trait EmploymentController extends PayeBaseController {
+abstract class EmploymentController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
   val employmentService: EmploymentService
   val thresholdService: ThresholdService

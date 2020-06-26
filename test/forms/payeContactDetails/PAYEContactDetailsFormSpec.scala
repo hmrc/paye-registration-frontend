@@ -167,7 +167,7 @@ class PAYEContactDetailsFormSpec extends PayeComponentSpec {
     }
 
     "Have the correct error if no fields are completed" in {
-      val data: Map[String,String] = Map(
+      val data: Map[String, String] = Map(
         "name" -> "",
         "digitalContact.contactEmail" -> "",
         "digitalContact.mobileNumber" -> "",
@@ -182,7 +182,7 @@ class PAYEContactDetailsFormSpec extends PayeComponentSpec {
     }
 
     "Have the correct error if name is not completed" in {
-      val data: Map[String,String] = Map(
+      val data: Map[String, String] = Map(
         "name" -> "    ",
         "digitalContact.contactEmail" -> "email@business.com",
         "digitalContact.mobileNumber" -> "",
@@ -196,7 +196,7 @@ class PAYEContactDetailsFormSpec extends PayeComponentSpec {
     }
 
     "Have the correct error if name is invalid" in {
-      val data: Map[String,String] = Map(
+      val data: Map[String, String] = Map(
         "name" -> "<h1>dgdgfd",
         "digitalContact.contactEmail" -> "email@business.com",
         "digitalContact.mobileNumber" -> "",
@@ -210,7 +210,7 @@ class PAYEContactDetailsFormSpec extends PayeComponentSpec {
     }
 
     "Have the correct error if name is more than 100 characters" in {
-      val data: Map[String,String] = Map(
+      val data: Map[String, String] = Map(
         "name" -> "test Mary-Jane84 de l'aurore TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST",
         "digitalContact.contactEmail" -> "email@business.com",
         "digitalContact.mobileNumber" -> "",
@@ -224,7 +224,7 @@ class PAYEContactDetailsFormSpec extends PayeComponentSpec {
     }
 
     "Have the correct error if email is invalid" in {
-      val data: Map[String,String] = Map(
+      val data: Map[String, String] = Map(
         "name" -> "testName",
         "digitalContact.contactEmail" -> "NotAProperEmail",
         "digitalContact.mobileNumber" -> "",
@@ -238,7 +238,7 @@ class PAYEContactDetailsFormSpec extends PayeComponentSpec {
     }
 
     "Have the correct error if email is longer than 70 characters" in {
-      val data: Map[String,String] = Map(
+      val data: Map[String, String] = Map(
         "name" -> "testName",
         "digitalContact.contactEmail" -> "test@emaillllllllllllllllllllllllllllllllllllllllllllllllllllllllll.aaaaaaaaaaa",
         "digitalContact.mobileNumber" -> "",
@@ -252,7 +252,7 @@ class PAYEContactDetailsFormSpec extends PayeComponentSpec {
     }
 
     "Have the correct error if mobile number is invalid" in {
-      val data: Map[String,String] = Map(
+      val data: Map[String, String] = Map(
         "name" -> "testName",
         "digitalContact.contactEmail" -> "",
         "digitalContact.mobileNumber" -> "NotAProperMobNumber!!!!!",
@@ -265,7 +265,7 @@ class PAYEContactDetailsFormSpec extends PayeComponentSpec {
     }
 
     "Have the correct error if phone number is invalid" in {
-      val data: Map[String,String] = Map(
+      val data: Map[String, String] = Map(
         "name" -> "testName",
         "digitalContact.contactEmail" -> "",
         "digitalContact.mobileNumber" -> "",

@@ -18,20 +18,22 @@ package controllers.userJourney
 
 import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
-import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
+
+import scala.concurrent.ExecutionContext
 
 class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val fakeRequest = FakeRequest()
 
   class Setup {
-    val controller = new SignInOutController {
+    val controller = new SignInOutController(stubMessagesControllerComponents()) {
+      override val ec: ExecutionContext = ExecutionContext.global
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val keystoreConnector = mockKeystoreConnector
       override val authConnector = mockAuthConnector
-      implicit val messagesApi: MessagesApi = mockMessagesApi
       override val compRegFEURL: String = "testUrl"
       override val compRegFEURI: String = "/testUri"
       override val incorporationInformationConnector = mockIncorpInfoConnector
@@ -73,7 +75,7 @@ class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showAuthorised(controller.renewSession(), FakeRequest()) { a =>
         status(a) mustBe 200
         contentType(a) mustBe Some("image/jpeg")
-        await(a).header.headers("Content-Disposition") mustBe """inline; filename="renewSession.jpg"; filename*=utf-8''renewSession.jpg"""
+        await(a).header.headers("Content-Disposition") mustBe """inline; filename="renewSession.jpg""""
         await(a).body.toString.isEmpty mustBe false
       }
     }

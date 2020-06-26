@@ -25,10 +25,12 @@ import models.view.PAYEContactDetails
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.http.Status
+import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Call, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -37,7 +39,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
   val regId = "12345"
 
   class Setup {
-    val testController = new PAYEContactController {
+    val testController = new PAYEContactController(stubMessagesControllerComponents()) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val companyDetailsService = mockCompanyDetailsService
@@ -290,7 +292,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "chosenAddress" -> "other"
       )
 
-      when(mockAddressLookupService.buildAddressLookupUrl(ArgumentMatchers.any[String](), ArgumentMatchers.any[Call]())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockAddressLookupService.buildAddressLookupUrl(ArgumentMatchers.any[String](), ArgumentMatchers.any[Call]())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Messages]))
         .thenReturn(Future.successful("testUrl"))
 
       AuthHelpers.submitAuthorisedWithCPAndAudit(testController.submitPAYECorrespondenceAddress, Fixtures.validCurrentProfile, request) { result =>

@@ -23,9 +23,9 @@ import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProf
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
-import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.NotFoundException
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.Future
 
@@ -36,7 +36,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
   }
 
   class Setup {
-    def controller() = new PayeStartController {
+    def controller() = new PayeStartController(stubMessagesControllerComponents()) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val payeRegElFEURL = MockAuthRedirects.payeRegElFEUrl
@@ -44,7 +44,6 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val authConnector = mockAuthConnector
       override val currentProfileService = mockCurrentProfileService
       override val payeRegistrationService = mockPayeRegService
-      implicit val messagesApi: MessagesApi = mockMessagesApi
       override val keystoreConnector = mockKeystoreConnector
       override val businessRegistrationConnector = mockBusinessRegistrationConnector
       override val companyRegistrationConnector = mockCompRegConnector
