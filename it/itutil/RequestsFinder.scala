@@ -6,11 +6,11 @@ import play.api.libs.json.{JsValue, Json}
 
 trait RequestsFinder {
   def getRequestBody(httpMethod: String, url: String): String = httpMethod.toLowerCase match {
-    case "get"    => findAll(getRequestedFor(urlMatching(url))).get(0).getBodyAsString
-    case "post"   => findAll(postRequestedFor(urlMatching(url))).get(0).getBodyAsString
-    case "patch"  => findAll(patchRequestedFor(urlMatching(url))).get(0).getBodyAsString
+    case "get" => findAll(getRequestedFor(urlMatching(url))).get(0).getBodyAsString
+    case "post" => findAll(postRequestedFor(urlMatching(url))).get(0).getBodyAsString
+    case "patch" => findAll(patchRequestedFor(urlMatching(url))).get(0).getBodyAsString
     case "delete" => findAll(deleteRequestedFor(urlMatching(url))).get(0).getBodyAsString
-    case "put"    => findAll(putRequestedFor(urlMatching(url))).get(0).getBodyAsString
+    case "put" => findAll(putRequestedFor(urlMatching(url))).get(0).getBodyAsString
     case _ => throw new IllegalArgumentException("wrong HTTP Method")
   }
 

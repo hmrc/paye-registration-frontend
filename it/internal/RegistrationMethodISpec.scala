@@ -20,16 +20,14 @@ import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import models.api.SessionMap
 import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProfile}
 import org.scalatest.BeforeAndAfterEach
-import play.api.http.HeaderNames
 import play.api.libs.json.Json
 import play.api.test.Helpers._
-import play.api.test.FakeApplication
 
 class RegistrationMethodISpec extends IntegrationSpecBase
-                          with LoginStub
-                          with CachingStub
-                          with BeforeAndAfterEach
-                          with WiremockHelper {
+  with LoginStub
+  with CachingStub
+  with BeforeAndAfterEach
+  with WiremockHelper {
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
@@ -72,7 +70,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
       setupUnauthorised()
 
       val fResponse = buildClientInternal(s"/$regId/delete").
-        withHeaders("X-Session-ID" -> "1112223355556","Authorization" -> authorisationToken).
+        withHeaders("X-Session-ID" -> "1112223355556", "Authorization" -> authorisationToken).
         delete()
 
       val response = await(fResponse)
@@ -101,7 +99,7 @@ class RegistrationMethodISpec extends IntegrationSpecBase
 
       stubSuccessfulLogin()
 
-      stubSessionCacheMetadata(SessionId,regId,false)
+      stubSessionCacheMetadata(SessionId, regId, false)
 
       val businessProfile = BusinessProfile(
         regId,
@@ -265,19 +263,19 @@ class RegistrationMethodISpec extends IntegrationSpecBase
     )
 
     val testSessionMap = SessionMap(
-      sessionId      = "testSessionId",
+      sessionId = "testSessionId",
       registrationId = s"$regId",
-      transactionId  = "testTxId",
-      data           = Map(
+      transactionId = "testTxId",
+      data = Map(
         "CurrentProfile" -> Json.toJson(CurrentProfile(
-          registrationID            = s"$regId",
-          companyTaxRegistration    = CompanyRegistrationProfile(
-            status        = "",
+          registrationID = s"$regId",
+          companyTaxRegistration = CompanyRegistrationProfile(
+            status = "",
             transactionId = "testTxId"
           ),
-          language                  = "en",
+          language = "en",
           payeRegistrationSubmitted = false,
-          incorpStatus              = None
+          incorpStatus = None
         ))
       )
     )

@@ -28,8 +28,8 @@ class FeatureSwitchSpec extends PayeComponentSpec {
     super.beforeEach()
   }
 
-  val featureSwitch        = new FeatureSwitchManager
-  val payeFeatureSwitch    = new PAYEFeatureSwitch(featureSwitch)
+  val featureSwitch = new FeatureSwitchManager
+  val payeFeatureSwitch = new PAYEFeatureSwitch(featureSwitch)
   val booleanFeatureSwitch = BooleanFeatureSwitch("test", false)
 
   "apply" should {
@@ -56,21 +56,21 @@ class FeatureSwitchSpec extends PayeComponentSpec {
     "return an enabled EnabledTimedFeatureSwitch when only the end datetime is specified and is in the future" in {
       System.setProperty("feature.test", "X_9999-05-08T14:30:00")
 
-      featureSwitch("test")         mustBe a[EnabledTimedFeatureSwitch]
+      featureSwitch("test") mustBe a[EnabledTimedFeatureSwitch]
       featureSwitch("test").enabled mustBe true
     }
 
     "return a disabled EnabledTimedFeatureSwitch when only the end datetime is specified and is in the past" in {
       System.setProperty("feature.test", "X_2000-05-08T14:30:00")
 
-      featureSwitch("test")         mustBe a[EnabledTimedFeatureSwitch]
+      featureSwitch("test") mustBe a[EnabledTimedFeatureSwitch]
       featureSwitch("test").enabled mustBe false
     }
 
     "return an enabled EnabledTimedFeatureSwitch when only the start datetime is specified and is in the past" in {
       System.setProperty("feature.test", "2000-05-05T14:30:00_X")
 
-      featureSwitch("test")         mustBe a[EnabledTimedFeatureSwitch]
+      featureSwitch("test") mustBe a[EnabledTimedFeatureSwitch]
       featureSwitch("test").enabled mustBe true
     }
 
@@ -91,21 +91,21 @@ class FeatureSwitchSpec extends PayeComponentSpec {
     "return an enabled DisabledTimedFeatureSwitch when only the end datetime is specified and is in the future" in {
       System.setProperty("feature.test", "!X_9999-05-08T14:30:00")
 
-      featureSwitch("test")         mustBe a[DisabledTimedFeatureSwitch]
+      featureSwitch("test") mustBe a[DisabledTimedFeatureSwitch]
       featureSwitch("test").enabled mustBe false
     }
 
     "return a disabled DisabledTimedFeatureSwitch when only the end datetime is specified and is in the past" in {
       System.setProperty("feature.test", "!X_2000-05-08T14:30:00")
 
-      featureSwitch("test")         mustBe a[DisabledTimedFeatureSwitch]
+      featureSwitch("test") mustBe a[DisabledTimedFeatureSwitch]
       featureSwitch("test").enabled mustBe true
     }
 
     "return an enabled DisabledTimedFeatureSwitch when only the start datetime is specified and is in the past" in {
       System.setProperty("feature.test", "!2000-05-05T14:30:00_X")
 
-      featureSwitch("test")         mustBe a[DisabledTimedFeatureSwitch]
+      featureSwitch("test") mustBe a[DisabledTimedFeatureSwitch]
       featureSwitch("test").enabled mustBe false
     }
 

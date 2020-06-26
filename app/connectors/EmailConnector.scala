@@ -22,14 +22,16 @@ import javax.inject.Inject
 import models.external.EmailRequest
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
 sealed trait EmailResponse
+
 case object EmailSent extends EmailResponse
+
 case object EmailDifficulties extends EmailResponse
+
 case object EmailNotFound extends EmailResponse
 
 class EmailConnectorImpl @Inject()(val http: WSHttp,
@@ -37,6 +39,7 @@ class EmailConnectorImpl @Inject()(val http: WSHttp,
                                    environment: Environment) extends EmailConnector with ServicesConfig {
   val sendEmailURL: String = getConfString("email.sendAnEmailURL",
     throw new Exception("email.sendAnEmailURL not found"))
+
   override protected def mode = environment.mode
 }
 
@@ -44,17 +47,17 @@ trait EmailConnector extends Logging {
   val http: CorePost
   val sendEmailURL: String
 
- def requestEmailToBeSent(emailRequest:EmailRequest)(implicit hc: HeaderCarrier): Future[EmailResponse] = {
-   http.POST[EmailRequest,HttpResponse](sendEmailURL,emailRequest).map{ _ =>
-     logger.info(s"Email has been sent successfully for template ${emailRequest.templateId}")
-     EmailSent
-   }.recover{
-     case b: HttpException =>
-       logger.warn(s"[requestEmailToBeSent] received a Http error when attempting to request an email to be sent via the email service with templateId: ${emailRequest.templateId} with details: ${b.getMessage}")
-       EmailDifficulties
-     case e: Exception =>
-       logger.error(s"[requestEmailToBeSent] an unexpected error has occurred when attemping to request an email to be sent via the email service with templateId: ${emailRequest.templateId} with details: ${e.getMessage}")
-       EmailDifficulties
-   }
- }
+  def requestEmailToBeSent(emailRequest: EmailRequest)(implicit hc: HeaderCarrier): Future[EmailResponse] = {
+    http.POST[EmailRequest, HttpResponse](sendEmailURL, emailRequest).map { _ =>
+      logger.info(s"Email has been sent successfully for template ${emailRequest.templateId}")
+      EmailSent
+    }.recover {
+      case b: HttpException =>
+        logger.warn(s"[requestEmailToBeSent] received a Http error when attempting to request an email to be sent via the email service with templateId: ${emailRequest.templateId} with details: ${b.getMessage}")
+        EmailDifficulties
+      case e: Exception =>
+        logger.error(s"[requestEmailToBeSent] an unexpected error has occurred when attemping to request an email to be sent via the email service with templateId: ${emailRequest.templateId} with details: ${e.getMessage}")
+        EmailDifficulties
+    }
+  }
 }

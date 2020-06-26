@@ -26,13 +26,12 @@ import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
 import play.api.libs.json.{JsObject, JsString, Json}
-import play.api.test.FakeApplication
 
 class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
-                                    with LoginStub
-                                    with CachingStub
-                                    with BeforeAndAfterEach
-                                    with WiremockHelper {
+  with LoginStub
+  with CachingStub
+  with BeforeAndAfterEach
+  with WiremockHelper {
 
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort
@@ -666,17 +665,18 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
     "send a correct Audit Event when roAddress has been chosen" in {
       val roDoc = s"""{"line1":"11", "line2":"22", "postCode":"pc1 1pc"}"""
-      val payeDoc =s"""{
-                      |  "companyName": "$companyName",
-                      |  "tradingNAme": "testName",
-                      |  "roAddress": $roDoc,
-                      |  "ppobAddress": $roDoc,
-                      |  "businessContactDetails": {
-                      |    "email": "email@email.zzz",
-                      |    "mobileNumber": "1234567890",
-                      |    "phoneNumber": "0987654321"
-                      |  }
-                      |}""".stripMargin
+      val payeDoc =
+        s"""{
+           |  "companyName": "$companyName",
+           |  "tradingNAme": "testName",
+           |  "roAddress": $roDoc,
+           |  "ppobAddress": $roDoc,
+           |  "businessContactDetails": {
+           |    "email": "email@email.zzz",
+           |    "mobileNumber": "1234567890",
+           |    "phoneNumber": "0987654321"
+           |  }
+           |}""".stripMargin
 
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
 
@@ -720,17 +720,18 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
     "send a correct Audit Event when ppobAddress has been chosen" in {
       val roDoc = s"""{"line1":"11", "line2":"22", "postCode":"pc1 1pc"}"""
-      val payeDoc =s"""{
-                      |  "companyName": "$companyName",
-                      |  "tradingNAme": "testName",
-                      |  "roAddress": $roDoc,
-                      |  "ppobAddress": $roDoc,
-                      |  "businessContactDetails": {
-                      |    "email": "email@email.zzz",
-                      |    "mobileNumber": "1234567890",
-                      |    "phoneNumber": "0987654321"
-                      |  }
-                      |}""".stripMargin
+      val payeDoc =
+        s"""{
+           |  "companyName": "$companyName",
+           |  "tradingNAme": "testName",
+           |  "roAddress": $roDoc,
+           |  "ppobAddress": $roDoc,
+           |  "businessContactDetails": {
+           |    "email": "email@email.zzz",
+           |    "mobileNumber": "1234567890",
+           |    "phoneNumber": "0987654321"
+           |  }
+           |}""".stripMargin
 
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
 
@@ -802,22 +803,23 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       val addressLine3 = "Testley"
       val addressLine4 = "Testshire"
       val addressPostcode = "TE1 1ST"
-      val addressFromALF = s"""{
-                             |  "auditRef":"$addressAuditRef",
-                             |  "address":{
-                             |    "lines":[
-                             |      "$addressLine1",
-                             |      "$addressLine2",
-                             |      "$addressLine3",
-                             |      "$addressLine4"
-                             |    ],
-                             |    "postcode":"$addressPostcode",
-                             |    "country":{
-                             |      "code":"UK",
-                             |      "name":"United Kingdom"
-                             |    }
-                             |  }
-                             |}""".stripMargin
+      val addressFromALF =
+        s"""{
+           |  "auditRef":"$addressAuditRef",
+           |  "address":{
+           |    "lines":[
+           |      "$addressLine1",
+           |      "$addressLine2",
+           |      "$addressLine3",
+           |      "$addressLine4"
+           |    ],
+           |    "postcode":"$addressPostcode",
+           |    "country":{
+           |      "code":"UK",
+           |      "name":"United Kingdom"
+           |    }
+           |  }
+           |}""".stripMargin
 
       val newAddress2BusReg =
         s"""

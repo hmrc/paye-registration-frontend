@@ -18,7 +18,6 @@ package controllers.test
 
 import play.api.mvc.{Action, AnyContent, Controller}
 import uk.gov.hmrc.http.SessionKeys
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class EditSessionControllerImpl extends EditSessionController
 

@@ -23,7 +23,6 @@ import models.api.SessionMap
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, NotFoundException}
 

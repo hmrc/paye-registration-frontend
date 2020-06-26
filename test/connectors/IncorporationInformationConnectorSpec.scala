@@ -20,11 +20,10 @@ import common.exceptions.DownstreamExceptions.{IncorporationInformationResponseE
 import config.{AppConfig, WSHttp}
 import controllers.exceptions.GeneralException
 import enums.IncorporationStatus
-import helpers.{PayeComponentSpec, PayeFakedApp}
 import helpers.mocks.MockMetrics
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.api.Name
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsObject, JsResultException, JsValue, Json}
 import uk.gov.hmrc.http.{BadRequestException, HttpResponse, InternalServerException, NotFoundException}
 

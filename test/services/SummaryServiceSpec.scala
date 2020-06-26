@@ -28,7 +28,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Messages, MessagesApi}
-import play.api.mvc.{AnyContent, AnyContentAsEmpty}
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{NotFoundException, Upstream4xxResponse}
 

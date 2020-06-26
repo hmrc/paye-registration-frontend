@@ -16,22 +16,22 @@
 
 package controllers.test
 
-import javax.inject.Inject
 import connectors._
 import connectors.test.{TestBusinessRegConnector, TestPAYERegConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
 import forms.test.{TestPAYEContactForm, TestPAYERegCompanyDetailsSetupForm, TestPAYERegEmploymentInfoSetupForm, TestPAYERegSetupForm}
+import javax.inject.Inject
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TestRegSetupControllerImpl @Inject()(val payeRegService:PAYERegistrationService,
+class TestRegSetupControllerImpl @Inject()(val payeRegService: PAYERegistrationService,
                                            val testPAYERegConnector: TestPAYERegConnector,
                                            val keystoreConnector: KeystoreConnector,
                                            val testBusinessRegConnector: TestBusinessRegConnector,
@@ -49,11 +49,12 @@ trait TestRegSetupController extends PayeBaseController {
   val testPAYERegConnector: TestPAYERegConnector
   val testBusinessRegConnector: TestBusinessRegConnector
 
-  def regTeardown: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    testPAYERegConnector.testRegistrationTeardown() map {
-      case DownstreamOutcome.Success => Ok("Registration collection successfully cleared")
-      case DownstreamOutcome.Failure => InternalServerError("Error clearing registration collection")
-    }
+  def regTeardown: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    profile =>
+      testPAYERegConnector.testRegistrationTeardown() map {
+        case DownstreamOutcome.Success => Ok("Registration collection successfully cleared")
+        case DownstreamOutcome.Failure => InternalServerError("Error clearing registration collection")
+      }
   }
 
   protected[controllers] def doIndividualRegTeardown(regId: String)(implicit request: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
@@ -67,66 +68,71 @@ trait TestRegSetupController extends PayeBaseController {
     }
   }
 
-  def regSetup: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    Future.successful(Ok(views.html.pages.test.payeRegistrationSetup(TestPAYERegSetupForm.form, profile.registrationID, profile.companyTaxRegistration.transactionId)))
+  def regSetup: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    profile =>
+      Future.successful(Ok(views.html.pages.test.payeRegistrationSetup(TestPAYERegSetupForm.form, profile.registrationID, profile.companyTaxRegistration.transactionId)))
   }
 
-  def submitRegSetup: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    TestPAYERegSetupForm.form.bindFromRequest.fold(
-      errors =>
-        Future.successful(BadRequest(views.html.pages.test.payeRegistrationSetup(errors, profile.registrationID, profile.companyTaxRegistration.transactionId))),
-      success =>
-        for {
-          setupReg <- testPAYERegConnector.addPAYERegistration(success)
-          _        <- testBusinessRegConnector.updateCompletionCapacity(profile.registrationID, success.completionCapacity)
-        } yield {
-          setupReg match {
-            case DownstreamOutcome.Success => Ok("PAYE Registration set up successfully")
-            case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Registration")
+  def submitRegSetup: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    profile =>
+      TestPAYERegSetupForm.form.bindFromRequest.fold(
+        errors =>
+          Future.successful(BadRequest(views.html.pages.test.payeRegistrationSetup(errors, profile.registrationID, profile.companyTaxRegistration.transactionId))),
+        success =>
+          for {
+            setupReg <- testPAYERegConnector.addPAYERegistration(success)
+            _ <- testBusinessRegConnector.updateCompletionCapacity(profile.registrationID, success.completionCapacity)
+          } yield {
+            setupReg match {
+              case DownstreamOutcome.Success => Ok("PAYE Registration set up successfully")
+              case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Registration")
+            }
           }
-        }
-    )
+      )
   }
 
   def regSetupCompanyDetails: Action[AnyContent] = isAuthorised { implicit request =>
     Future.successful(Ok(views.html.pages.test.payeRegCompanyDetailsSetup(TestPAYERegCompanyDetailsSetupForm.form)))
   }
 
-  def submitRegSetupCompanyDetails: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    TestPAYERegCompanyDetailsSetupForm.form.bindFromRequest.fold(
-      errors  => Future.successful(BadRequest(views.html.pages.test.payeRegCompanyDetailsSetup(errors))),
-      success => testPAYERegConnector.addTestCompanyDetails(success, profile.registrationID) map {
-        case DownstreamOutcome.Success => Ok("Company details successfully set up")
-        case DownstreamOutcome.Failure => InternalServerError("Error setting up Company Details")
-      }
-    )
+  def submitRegSetupCompanyDetails: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    profile =>
+      TestPAYERegCompanyDetailsSetupForm.form.bindFromRequest.fold(
+        errors => Future.successful(BadRequest(views.html.pages.test.payeRegCompanyDetailsSetup(errors))),
+        success => testPAYERegConnector.addTestCompanyDetails(success, profile.registrationID) map {
+          case DownstreamOutcome.Success => Ok("Company details successfully set up")
+          case DownstreamOutcome.Failure => InternalServerError("Error setting up Company Details")
+        }
+      )
   }
 
   def regSetupPAYEContact: Action[AnyContent] = isAuthorised { implicit request =>
     Future.successful(Ok(views.html.pages.test.payeRegPAYEContactSetup(TestPAYEContactForm.form)))
   }
 
-  def submitRegSetupPAYEContact: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    TestPAYEContactForm.form.bindFromRequest.fold(
-      errors  => Future.successful(BadRequest(views.html.pages.test.payeRegPAYEContactSetup(errors))),
-      success => testPAYERegConnector.addTestPAYEContact(success, profile.registrationID) map {
-        case DownstreamOutcome.Success => Ok("PAYE Contact details successfully set up")
-        case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Contact details")
-      }
-    )
+  def submitRegSetupPAYEContact: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    profile =>
+      TestPAYEContactForm.form.bindFromRequest.fold(
+        errors => Future.successful(BadRequest(views.html.pages.test.payeRegPAYEContactSetup(errors))),
+        success => testPAYERegConnector.addTestPAYEContact(success, profile.registrationID) map {
+          case DownstreamOutcome.Success => Ok("PAYE Contact details successfully set up")
+          case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Contact details")
+        }
+      )
   }
 
   def regSetupEmploymentInfo: Action[AnyContent] = isAuthorised { implicit request =>
     Future.successful(Ok(views.html.pages.test.payeRegEmploymentInfoSetup(TestPAYERegEmploymentInfoSetupForm.form)))
   }
 
-  def submitRegSetupEmploymentInfo: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    TestPAYERegEmploymentInfoSetupForm.form.bindFromRequest.fold(
-      errors  => Future.successful(BadRequest(views.html.pages.test.payeRegEmploymentInfoSetup(errors))),
-      success => testPAYERegConnector.addTestEmploymentInfo(success, profile.registrationID) map {
-        case DownstreamOutcome.Success => Ok("Employment info successfully set up")
-        case DownstreamOutcome.Failure => InternalServerError("Error setting up Employment info")
-      }
-    )
+  def submitRegSetupEmploymentInfo: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    profile =>
+      TestPAYERegEmploymentInfoSetupForm.form.bindFromRequest.fold(
+        errors => Future.successful(BadRequest(views.html.pages.test.payeRegEmploymentInfoSetup(errors))),
+        success => testPAYERegConnector.addTestEmploymentInfo(success, profile.registrationID) map {
+          case DownstreamOutcome.Success => Ok("Employment info successfully set up")
+          case DownstreamOutcome.Failure => InternalServerError("Error setting up Employment info")
+        }
+      )
   }
 }

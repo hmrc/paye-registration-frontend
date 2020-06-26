@@ -18,19 +18,11 @@ package frontend
 
 import java.util.UUID
 
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, findAll, get, patchRequestedFor, postRequestedFor, stubFor, urlEqualTo, urlMatching}
-import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper, RequestsFinder}
+import itutil._
 import models.Address
 import models.external._
-import models.view.{ChosenAddress, CompanyDetails, PPOBAddress, PrepopAddress, TradingName}
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
-import play.api.libs.json.{JsObject, JsString, Json}
-import play.api.libs.ws.WSResponse
-import play.api.test.FakeApplication
-import play.api.test.Helpers._
-
-import scala.collection.script.Update
 
 class CompanyDetailsControllerISpec extends IntegrationSpecBase
   with LoginStub

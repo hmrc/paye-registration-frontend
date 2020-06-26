@@ -16,12 +16,9 @@
 
 package config
 
-import akka.stream.Materializer
+import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import javax.inject.Inject
-
-import akka.actor.ActorSystem
-import play.api.mvc.{Call, Filter, RequestHeader, Result}
 import play.api.{Configuration, Environment, Play}
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.crypto.ApplicationCrypto
@@ -30,15 +27,10 @@ import uk.gov.hmrc.http.cache.client.{SessionCache, ShortLivedCache, ShortLivedH
 import uk.gov.hmrc.http.hooks.{HttpHook, HttpHooks}
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.bootstrap.config.LoadAuditingConfig
-import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws._
-import uk.gov.hmrc.whitelist.AkamaiWhitelistFilter
 
-import scala.concurrent.Future
-
-class FrontendAuditConnector @Inject()(env:Environment, runModeConfiguration: Configuration) extends AuditConnector {
-  override lazy val auditingConfig = LoadAuditingConfig(runModeConfiguration,env.mode, s"auditing")
+class FrontendAuditConnector @Inject()(env: Environment, runModeConfiguration: Configuration) extends AuditConnector {
+  override lazy val auditingConfig = LoadAuditingConfig(runModeConfiguration, env.mode, s"auditing")
 }
 
 trait Hooks extends HttpHooks with HttpAuditing {
@@ -52,10 +44,12 @@ trait WSHttp extends
   HttpPost with WSPost with
   HttpDelete with WSDelete with Hooks
 
-class WSHttpImpl @Inject()(override val runModeConfiguration: Configuration, environment: Environment, frontendAuditCon: FrontendAuditConnector,val actorSystem: ActorSystem) extends WSHttp with ServicesConfig {
-  override val appName        = getString("appName")
-  override val hooks          = NoneRequired
+class WSHttpImpl @Inject()(override val runModeConfiguration: Configuration, environment: Environment, frontendAuditCon: FrontendAuditConnector, val actorSystem: ActorSystem) extends WSHttp with ServicesConfig {
+  override val appName = getString("appName")
+  override val hooks = NoneRequired
+
   override def auditConnector = frontendAuditCon
+
   override protected def mode = environment.mode
 
   override protected def configuration: Option[Config] = Option(Play.current.configuration.underlying)
@@ -63,14 +57,16 @@ class WSHttpImpl @Inject()(override val runModeConfiguration: Configuration, env
 
 class AuthClientConnectorImpl @Inject()(val http: WSHttp, override val runModeConfiguration: Configuration, environment: Environment) extends PlayAuthConnector with ServicesConfig {
   override val serviceUrl = baseUrl("auth")
+
   override protected def mode = environment.mode
 }
 
 class PAYEShortLivedHttpCaching @Inject()(val http: WSHttp, override val runModeConfiguration: Configuration, environment: Environment) extends ShortLivedHttpCaching with ServicesConfig {
   override lazy val defaultSource = getString("appName")
-  override lazy val baseUri       = baseUrl("cachable.short-lived-cache")
-  override lazy val domain        = getConfString("cachable.short-lived-cache.domain",
+  override lazy val baseUri = baseUrl("cachable.short-lived-cache")
+  override lazy val domain = getConfString("cachable.short-lived-cache.domain",
     throw new Exception(s"Could not find config 'cachable.short-lived-cache.domain'"))
+
   override protected def mode = environment.mode
 }
 
@@ -81,8 +77,9 @@ class PAYEShortLivedCache @Inject()(val shortLiveCache: ShortLivedHttpCaching,
 
 class PAYESessionCache @Inject()(val http: WSHttp, override val runModeConfiguration: Configuration, environment: Environment) extends SessionCache with ServicesConfig {
   override lazy val defaultSource = getString("appName")
-  override lazy val baseUri       = baseUrl("cachable.session-cache")
-  override lazy val domain        = getConfString("cachable.session-cache.domain",
+  override lazy val baseUri = baseUrl("cachable.session-cache")
+  override lazy val domain = getConfString("cachable.session-cache.domain",
     throw new Exception(s"Could not find config 'cachable.session-cache.domain'"))
+
   override protected def mode = environment.mode
 }

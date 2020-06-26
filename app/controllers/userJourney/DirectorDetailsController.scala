@@ -17,10 +17,10 @@
 package controllers.userJourney
 
 import config.AppConfig
-import javax.inject.Inject
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.directorDetails.DirectorDetailsForm
+import javax.inject.Inject
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
@@ -44,27 +44,29 @@ class DirectorDetailsControllerImpl @Inject()(val messagesApi: MessagesApi,
 
 trait DirectorDetailsController extends PayeBaseController {
   implicit val appConfig: AppConfig
-  val directorDetailsService : DirectorDetailsService
+  val directorDetailsService: DirectorDetailsService
 
-  def directorDetails: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map { directors =>
-      val ninos = directorDetailsService.createDirectorNinos(directors)
-      val names = directorDetailsService.createDisplayNamesMap(directors)
-      Ok(DirectorDetailsPage(DirectorDetailsForm.form.fill(ninos), names))
-    } recover {
-      case _ => InternalServerError(views.html.pages.error.restart())
-    }
+  def directorDetails: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    profile =>
+      directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map { directors =>
+        val ninos = directorDetailsService.createDirectorNinos(directors)
+        val names = directorDetailsService.createDisplayNamesMap(directors)
+        Ok(DirectorDetailsPage(DirectorDetailsForm.form.fill(ninos), names))
+      } recover {
+        case _ => InternalServerError(views.html.pages.error.restart())
+      }
   }
 
-  def submitDirectorDetails: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    DirectorDetailsForm.form.bindFromRequest.fold(
-      errors => directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map { directors =>
-        val names = directorDetailsService.createDisplayNamesMap(directors)
-        BadRequest(DirectorDetailsPage(errors, names))
-      },
-      success => directorDetailsService.submitNinos(success, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
-        _ => Redirect(routes.PAYEContactController.payeContactDetails())
-      }
-    )
+  def submitDirectorDetails: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    profile =>
+      DirectorDetailsForm.form.bindFromRequest.fold(
+        errors => directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map { directors =>
+          val names = directorDetailsService.createDisplayNamesMap(directors)
+          BadRequest(DirectorDetailsPage(errors, names))
+        },
+        success => directorDetailsService.submitNinos(success, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+          _ => Redirect(routes.PAYEContactController.payeContactDetails())
+        }
+      )
   }
 }

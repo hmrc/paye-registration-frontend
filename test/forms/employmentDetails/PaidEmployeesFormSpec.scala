@@ -17,26 +17,28 @@
 package forms.employmentDetails
 
 import java.time.LocalDate
-
-import org.joda.time.{LocalDate => LocalDateJoda}
 import java.time.temporal.ChronoUnit
 
 import forms.employmentDetails.PaidEmployeesForm.{customFormPrefix, dateTimeFormat}
 import helpers.PayeComponentSpec
 import models.view.EmployingAnyone
+import org.joda.time.{LocalDate => LocalDateJoda}
 import play.api.data.FormError
 import uk.gov.hmrc.time.TaxYear
 
 class PaidEmployeesFormSpec extends PayeComponentSpec {
 
-  class Setup(ourDate:LocalDate = LocalDate.now()) {
-    val testForm = new PaidEmployeesFormT {override val now = ourDate}
+  class Setup(ourDate: LocalDate = LocalDate.now()) {
+    val testForm = new PaidEmployeesFormT {
+      override val now = ourDate
+    }
   }
+
   val today = LocalDate.now
   val cty = TaxYear.taxYearFor(LocalDateJoda.now)
 
   val incorpDate2MonthsPrior = today.minusMonths(2)
-  val incorpDateWellInPast = LocalDate.of(2015, 1 , 1)
+  val incorpDateWellInPast = LocalDate.of(2015, 1, 1)
 
   val notPayingAnyone = Map("alreadyPaying" -> "false")
 
@@ -78,7 +80,7 @@ class PaidEmployeesFormSpec extends PayeComponentSpec {
     "earliestDateMonth" -> today.getMonthValue.toString,
     "earliestDateYear" -> today.minusYears(2).getYear.toString
   )
-val futureDate = today.plus(1,ChronoUnit.DAYS)
+  val futureDate = today.plus(1, ChronoUnit.DAYS)
   val payingSomeoneInFuture = Map(
     "alreadyPaying" -> "true",
     "earliestDateDay" -> futureDate.getDayOfMonth.toString,
@@ -99,7 +101,7 @@ val futureDate = today.plus(1,ChronoUnit.DAYS)
     "return a form error when passing in a paying date before date of incorp" in new Setup(LocalDate.now) {
       testForm.form(incorpDate2MonthsPrior).bind(payingSomeone2YearsAgo).errors mustBe Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.dateTooEarly", Seq(incorpDate2MonthsPrior.format(dateTimeFormat))))
     }
-    "return a form error when passing in a paying date on or after incorp date, but more than 2 tax years in the past" in new Setup(LocalDate.of(2018,6,19)) {
+    "return a form error when passing in a paying date on or after incorp date, but more than 2 tax years in the past" in new Setup(LocalDate.of(2018, 6, 19)) {
       testForm.form(incorpDateWellInPast).bind(payingSomeoneMoreThan2TaxYearsAgo).errors mustBe Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.moreThanTwoTaxYears"))
     }
     "return a form error when passing in an invalid date" in new Setup(LocalDate.now) {
@@ -109,14 +111,14 @@ val futureDate = today.plus(1,ChronoUnit.DAYS)
       testForm.form(incorpDateWellInPast).bind(payingSomeoneInFuture).errors mustBe Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.dateInFuture"))
     }
 
-    "return a completed form when paying someone and providing a date which is exactly two tax years ago" in new Setup(LocalDate.of(2020,6,19)) {
-      testForm.form(incorpDateWellInPast).bind(payingSomeoneExactlyTwoTaxYearsAgo).value.get mustBe EmployingAnyone(true, Some(LocalDate.of(2018,4,6)))
+    "return a completed form when paying someone and providing a date which is exactly two tax years ago" in new Setup(LocalDate.of(2020, 6, 19)) {
+      testForm.form(incorpDateWellInPast).bind(payingSomeoneExactlyTwoTaxYearsAgo).value.get mustBe EmployingAnyone(true, Some(LocalDate.of(2018, 4, 6)))
     }
-    "return a completed form when paying someone on the last day of the current tax year and providing a date which is exactly two tax years ago" in new Setup(LocalDate.of(2021,4,5)) {
-      testForm.form(incorpDateWellInPast).bind(payingSomeoneExactlyTwoTaxYearsAgo).value.get mustBe EmployingAnyone(true, Some(LocalDate.of(2018,4,6)))
+    "return a completed form when paying someone on the last day of the current tax year and providing a date which is exactly two tax years ago" in new Setup(LocalDate.of(2021, 4, 5)) {
+      testForm.form(incorpDateWellInPast).bind(payingSomeoneExactlyTwoTaxYearsAgo).value.get mustBe EmployingAnyone(true, Some(LocalDate.of(2018, 4, 6)))
     }
-    "return a completed form when paying someone on the first day of the current tax year and providing a date which is exactly two tax years ago" in new Setup(LocalDate.of(2020,4,6)) {
-      testForm.form(incorpDateWellInPast).bind(payingSomeoneExactlyTwoTaxYearsAgo).value.get mustBe EmployingAnyone(true, Some(LocalDate.of(2018,4,6)))
+    "return a completed form when paying someone on the first day of the current tax year and providing a date which is exactly two tax years ago" in new Setup(LocalDate.of(2020, 4, 6)) {
+      testForm.form(incorpDateWellInPast).bind(payingSomeoneExactlyTwoTaxYearsAgo).value.get mustBe EmployingAnyone(true, Some(LocalDate.of(2018, 4, 6)))
     }
   }
 }

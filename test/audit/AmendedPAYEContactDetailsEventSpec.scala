@@ -26,18 +26,18 @@ class AmendedPAYEContactDetailsEventSpec extends PayeComponentSpec {
       val testAmendedPAYEContactDetailsEvent = AmendedPAYEContactDetailsEventDetail(
         externalUserId = "ext-12354",
         authProviderId = "ap-12345",
-        journeyId      = "12345",
+        journeyId = "12345",
         previousPAYEContactDetails = AuditPAYEContactDetails(
-          contactName   = "TestContact Name",
-          email         = Some("test@email.com"),
-          mobileNumber  = Some("0987654321"),
-          phoneNumber   = Some("0987654321")
+          contactName = "TestContact Name",
+          email = Some("test@email.com"),
+          mobileNumber = Some("0987654321"),
+          phoneNumber = Some("0987654321")
         ),
         newPAYEContactDetails = AuditPAYEContactDetails(
-          contactName   = "TestContact Name",
-          email         = Some("test@email.co.uk"),
-          mobileNumber  = Some("1234567890"),
-          phoneNumber   = Some("1234567890")
+          contactName = "TestContact Name",
+          email = Some("test@email.co.uk"),
+          mobileNumber = Some("1234567890"),
+          phoneNumber = Some("1234567890")
         )
       )
 

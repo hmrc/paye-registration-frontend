@@ -31,14 +31,14 @@ class TestCacheControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup extends CodeMocks {
     val controller = new TestCacheController {
-      override val redirectToLogin        = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign     = MockAuthRedirects.redirectToPostSign
+      override val redirectToLogin = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
 
-      override val keystoreConnector      = mockKeystoreConnector
-      override val s4LService             = mockS4LService
-      override val businessRegConnector   = mockBusinessRegistrationConnector
-      override val messagesApi            = mockMessagesApi
-      override val authConnector          = mockAuthConnector
+      override val keystoreConnector = mockKeystoreConnector
+      override val s4LService = mockS4LService
+      override val businessRegConnector = mockBusinessRegistrationConnector
+      override val messagesApi = mockMessagesApi
+      override val authConnector = mockAuthConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
     }

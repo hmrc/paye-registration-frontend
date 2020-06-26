@@ -28,7 +28,6 @@ import play.api.{Configuration, Play}
 import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.filters.{FrontendFilters, LoggingFilter}
 import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
-import uk.gov.hmrc.play.config.ControllerConfig
 
 
 class MyErrorHandler @Inject()(val messagesApi: MessagesApi, val configuration: Configuration)(implicit appConfig: AppConfig) extends FrontendErrorHandler {
@@ -52,7 +51,7 @@ class PAYEFilters @Inject()(defaultFilters: FrontendFilters,
     :+ loggingFilterCustom
     :+ sessionIdFilter: _*)
 
-class  LoggingFilterImpl @Inject()(val mat: Materializer)  extends LoggingFilterCustom {
+class LoggingFilterImpl @Inject()(val mat: Materializer) extends LoggingFilterCustom {
   override def controllerNeedsLogging(controllerName: String): Boolean =
     ControllerConfiguration.paramsForController(controllerName).needsLogging
 }

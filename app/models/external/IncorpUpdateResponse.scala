@@ -25,9 +25,9 @@ object IncorpUpdateResponse {
     override def reads(json: JsValue): JsResult[IncorporationStatus.Value] = {
       val incorpResponse = (json \ "SCRSIncorpStatus")
       val transactionId = (incorpResponse \ "IncorpSubscriptionKey" \ "transactionId").as[String]
-      val sub           = (incorpResponse \ "IncorpSubscriptionKey" \ "subscriber").as[String]
-      val reg           = (incorpResponse \ "IncorpSubscriptionKey" \ "discriminator").as[String]
-      val status        = (incorpResponse \ "IncorpStatusEvent" \ "status").as[IncorporationStatus.Value]
+      val sub = (incorpResponse \ "IncorpSubscriptionKey" \ "subscriber").as[String]
+      val reg = (incorpResponse \ "IncorpSubscriptionKey" \ "discriminator").as[String]
+      val status = (incorpResponse \ "IncorpStatusEvent" \ "status").as[IncorporationStatus.Value]
 
       if (transactionId == txId && sub == subscriber && reg == regime) {
         JsSuccess(status)

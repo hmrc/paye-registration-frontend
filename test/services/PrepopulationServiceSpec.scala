@@ -33,7 +33,7 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
   class Setup {
     val service = new PrepopulationService {
       override val busRegConnector = mockBusinessRegistrationConnector
-      override val s4LService      = mockS4LService
+      override val s4LService = mockS4LService
     }
   }
 
@@ -148,7 +148,7 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
       when(mockBusinessRegistrationConnector.retrieveAddresses(ArgumentMatchers.contains(regId))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Seq(addr1, addr2)))
       when(mockS4LService.saveIntMap(ArgumentMatchers.contains("PrePopAddresses"), ArgumentMatchers.any(), ArgumentMatchers.contains(regId))
-          (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Address]]()))
+      (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Address]]()))
         .thenReturn(Future.successful(CacheMap("PrePopAddresses", Map.empty)))
 
       await(service.getPrePopAddresses(regId, addr3, None, None)) mustBe Map(0 -> addr1, 1 -> addr2)
@@ -169,7 +169,7 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
     "fetch an address by ID" in new Setup {
       val regId = "9999"
       when(mockS4LService.fetchAndGetIntMap(ArgumentMatchers.contains("PrePopAddresses"), ArgumentMatchers.contains(regId))
-          (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Address]]()))
+      (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Address]]()))
         .thenReturn(Future.successful(Some(Map(0 -> addr1, 1 -> addr2, 2 -> addr3))))
 
       await(service.getAddress(regId, 1)) mustBe addr2
@@ -209,10 +209,10 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
 
   "saveTradingName" should {
     "return String from Business Reg Connector" in new Setup {
-      when(mockBusinessRegistrationConnector.upsertTradingName(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.upsertTradingName(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful("foo"))
 
-      await(service.saveTradingName("1","foo")) mustBe "foo"
+      await(service.saveTradingName("1", "foo")) mustBe "foo"
     }
   }
 }

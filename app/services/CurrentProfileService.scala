@@ -17,9 +17,9 @@
 package services
 
 import config.AppConfig
-import javax.inject.Inject
 import connectors._
 import enums.{CacheKeys, IncorporationStatus, PAYEStatus}
+import javax.inject.Inject
 import models.api.SessionMap
 import models.external.CurrentProfile
 import play.api.libs.json.Json

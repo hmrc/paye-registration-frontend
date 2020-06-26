@@ -20,7 +20,6 @@ import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
-import play.api.test.FakeApplication
 
 class PAYESessionIDFilterISpec extends IntegrationSpecBase
   with LoginStub
@@ -52,7 +51,6 @@ class PAYESessionIDFilterISpec extends IntegrationSpecBase
     "microservice.services.address-lookup-frontend.host" -> s"$mockHost",
     "microservice.services.address-lookup-frontend.port" -> s"$mockPort",
     "mongodb.uri" -> s"$mongoUri"))
-
 
 
   override def beforeEach() {

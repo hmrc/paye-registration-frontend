@@ -16,7 +16,6 @@
 
 package controllers
 
-import connectors.IncorporationInformationConnector
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.CurrentProfile
 import org.mockito.ArgumentMatchers
@@ -26,7 +25,6 @@ import play.api.mvc.Results.Ok
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core.{AffinityGroup, InsufficientConfidenceLevel}
-import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
@@ -34,11 +32,11 @@ class PayeBaseControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup {
     val testBaseController = new PayeBaseController {
-      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
-      override val messagesApi             = mockMessagesApi
-      override val authConnector           = mockAuthConnector
-      override val keystoreConnector       = mockKeystoreConnector
+      override val redirectToLogin = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
+      override val messagesApi = mockMessagesApi
+      override val authConnector = mockAuthConnector
+      override val keystoreConnector = mockKeystoreConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
     }

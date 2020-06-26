@@ -54,7 +54,9 @@ trait IntegrationSpecBase
     super.afterAll()
     stopWiremock()
   }
+
   implicit class ResponseUtils(wsResponse: WSResponse) {
     lazy val redirectLocation: Option[String] = wsResponse.header("Location")
   }
+
 }

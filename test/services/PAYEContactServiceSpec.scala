@@ -36,12 +36,12 @@ class PAYEContactServiceSpec extends PayeComponentSpec {
 
   class Setup {
     val service = new PAYEContactService {
-      val payeRegConnector      = mockPAYERegConnector
-      val s4LService            = mockS4LService
-      val keystoreConnector     = mockKeystoreConnector
+      val payeRegConnector = mockPAYERegConnector
+      val s4LService = mockS4LService
+      val keystoreConnector = mockKeystoreConnector
       val companyDetailsService = mockCompanyDetailsService
-      val prepopService         = mockPrepopulationService
-      val auditService          = mockAuditService
+      val prepopService = mockPrepopulationService
+      val auditService = mockAuditService
     }
   }
 
@@ -222,7 +222,7 @@ class PAYEContactServiceSpec extends PayeComponentSpec {
   "Calling getPAYEContact" should {
     "return the correct View response when PAYE Contact are returned from s4l" in new Setup {
       when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-      .thenReturn(Future.successful(Some(Fixtures.validPAYEContactView)))
+        .thenReturn(Future.successful(Some(Fixtures.validPAYEContactView)))
 
       await(service.getPAYEContact(testRegId)) mustBe Fixtures.validPAYEContactView
     }
@@ -246,14 +246,14 @@ class PAYEContactServiceSpec extends PayeComponentSpec {
         .thenReturn(Future.successful(None))
 
       when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
-      .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
+        .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
 
       an[Upstream4xxResponse] mustBe thrownBy(await(service.getPAYEContact(testRegId)))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
       when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
-      .thenReturn(Future.failed(new RuntimeException))
+        .thenReturn(Future.failed(new RuntimeException))
 
       an[Exception] mustBe thrownBy(await(service.getPAYEContact(testRegId)))
     }
@@ -333,18 +333,18 @@ class PAYEContactServiceSpec extends PayeComponentSpec {
     val viewData = PAYEContactDetails(
       name = "testName",
       digitalContactDetails = DigitalContactDetails(
-        email         = Some("test@email.com"),
-        phoneNumber   = Some("1234567890"),
-        mobileNumber  = Some("1234567890")
+        email = Some("test@email.com"),
+        phoneNumber = Some("1234567890"),
+        mobileNumber = Some("1234567890")
       )
     )
 
     val s4lData = PAYEContactDetails(
       name = "testName",
       digitalContactDetails = DigitalContactDetails(
-        email         = Some("test@email.com"),
-        phoneNumber   = Some("1234567890"),
-        mobileNumber  = Some("1234567890")
+        email = Some("test@email.com"),
+        phoneNumber = Some("1234567890"),
+        mobileNumber = Some("1234567890")
       )
     )
 

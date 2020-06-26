@@ -31,14 +31,14 @@ class CurrentProfileControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup {
     val controller = new BusinessProfileController {
-      override val redirectToLogin          = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign       = MockAuthRedirects.redirectToPostSign
+      override val redirectToLogin = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
 
-      override val messagesApi              = mockMessagesApi
-      override val businessRegConnector     = mockBusinessRegistrationConnector
-      override val keystoreConnector        = mockKeystoreConnector
+      override val messagesApi = mockMessagesApi
+      override val businessRegConnector = mockBusinessRegistrationConnector
+      override val keystoreConnector = mockKeystoreConnector
       override val testBusinessRegConnector = mockTestBusRegConnector
-      override val authConnector            = mockAuthConnector
+      override val authConnector = mockAuthConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
     }

@@ -62,13 +62,13 @@ class RegistrationAuditEventSpec extends PayeComponentSpec {
       val result = Json.toJson[ExtendedDataEvent](event)
 
       val expectedTags: JsObject = Json.obj(
-        "clientIP"        -> clientIP,
-        "clientPort"      -> clientPort,
-        "X-Request-ID"    -> request,
-        "X-Session-ID"    -> session,
+        "clientIP" -> clientIP,
+        "clientPort" -> clientPort,
+        "X-Request-ID" -> request,
+        "X-Session-ID" -> session,
         "transactionName" -> auditType,
-        "deviceID"        -> device,
-        "Authorization"   -> bearer
+        "deviceID" -> device,
+        "Authorization" -> bearer
       )
 
       (result \ "tags").as[JsObject] mustBe expectedTags
@@ -80,13 +80,13 @@ class RegistrationAuditEventSpec extends PayeComponentSpec {
       val result = Json.toJson[ExtendedDataEvent](event)
 
       val expectedTags: JsObject = Json.obj(
-        "clientIP"        -> "-",
-        "clientPort"      -> "-",
-        "X-Request-ID"    -> "-",
-        "X-Session-ID"    -> "-",
+        "clientIP" -> "-",
+        "clientPort" -> "-",
+        "X-Request-ID" -> "-",
+        "X-Session-ID" -> "-",
         "transactionName" -> auditType,
-        "Authorization"   -> "-",
-        "deviceID"        -> "-"
+        "Authorization" -> "-",
+        "deviceID" -> "-"
       )
 
       (result \ "tags").as[JsObject] mustBe expectedTags

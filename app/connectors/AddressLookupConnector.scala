@@ -35,7 +35,7 @@ import scala.util.control.NoStackTrace
 class AddressLookupConnector @Inject()(metricsService: MetricsService,
                                        http: WSHttp
                                       )(implicit messagesApi: MessagesApi,
-                                       appConfig: AppConfig) extends Logging {
+                                        appConfig: AppConfig) extends Logging {
 
   lazy val addressLookupFrontendUrl: String = appConfig.baseUrl("address-lookup-frontend")
   val successCounter: Counter = metricsService.addressLookupSuccessResponseCounter

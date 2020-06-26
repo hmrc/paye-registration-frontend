@@ -31,13 +31,13 @@ object CorrespondenceAddressAuditEventDetail {
 
   implicit val writes = new Writes[CorrespondenceAddressAuditEventDetail] {
     override def writes(detail: CorrespondenceAddressAuditEventDetail): JsValue = Json.obj(
-      EXTERNAL_USER_ID  -> detail.externalUserId,
-      AUTH_PROVIDER_ID  -> detail.authProviderId,
-      JOURNEY_ID        -> detail.regId,
-      ADDRESS_USED      -> detail.addressUsed
+      EXTERNAL_USER_ID -> detail.externalUserId,
+      AUTH_PROVIDER_ID -> detail.authProviderId,
+      JOURNEY_ID -> detail.regId,
+      ADDRESS_USED -> detail.addressUsed
     )
   }
 }
 
-class CorrespondenceAddressAuditEvent(details: CorrespondenceAddressAuditEventDetail)(implicit hc: HeaderCarrier, req:Request[AnyContent])
+class CorrespondenceAddressAuditEvent(details: CorrespondenceAddressAuditEventDetail)(implicit hc: HeaderCarrier, req: Request[AnyContent])
   extends RegistrationAuditEvent("correspondenceAddress", None, Json.toJson(details).as[JsObject])(hc, Some(req))

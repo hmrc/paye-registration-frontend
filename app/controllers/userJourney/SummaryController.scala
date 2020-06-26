@@ -17,11 +17,11 @@
 package controllers.userJourney
 
 import config.AppConfig
-import javax.inject.Inject
 import connectors._
-import controllers.exceptions.{FrontendControllerException, GeneralException}
+import controllers.exceptions.FrontendControllerException
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.PAYEStatus
+import javax.inject.Inject
 import models.external.CurrentProfile
 import play.api.Configuration
 import play.api.i18n.MessagesApi
@@ -29,7 +29,6 @@ import play.api.mvc.{Action, AnyContent, Result}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
-import views.html.pages.error.restart
 import views.html.pages.{summary => SummaryPage}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -57,38 +56,40 @@ trait SummaryController extends PayeBaseController {
   val payeRegistrationConnector: PAYERegistrationConnector
   val emailService: EmailService
 
-  def summary: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    invalidSubmissionGuard(profile) {
-      (for {
-        _       <- emailService.primeEmailData(profile.registrationID)
-        summary <- summaryService.getRegistrationSummary(profile.registrationID, profile.companyTaxRegistration.transactionId)
-      } yield {
-        Ok(SummaryPage(summary))
-      }).recover{
-        case e: FrontendControllerException => e.recover
+  def summary: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    profile =>
+      invalidSubmissionGuard(profile) {
+        (for {
+          _ <- emailService.primeEmailData(profile.registrationID)
+          summary <- summaryService.getRegistrationSummary(profile.registrationID, profile.companyTaxRegistration.transactionId)
+        } yield {
+          Ok(SummaryPage(summary))
+        }).recover {
+          case e: FrontendControllerException => e.recover
+        }
       }
-    }
   }
 
-  def submitRegistration: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    invalidSubmissionGuard(profile) {
-      submissionService.submitRegistration(profile) map {
-        case Success    => Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation())
-        case Cancelled  => Redirect(controllers.userJourney.routes.DashboardController.dashboard())
-        case Failed     => Redirect(controllers.errors.routes.ErrorController.failedSubmission())
-        case TimedOut   => InternalServerError(views.html.pages.error.submissionTimeout())
+  def submitRegistration: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    profile =>
+      invalidSubmissionGuard(profile) {
+        submissionService.submitRegistration(profile) map {
+          case Success => Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation())
+          case Cancelled => Redirect(controllers.userJourney.routes.DashboardController.dashboard())
+          case Failed => Redirect(controllers.errors.routes.ErrorController.failedSubmission())
+          case TimedOut => InternalServerError(views.html.pages.error.submissionTimeout())
+        }
       }
-    }
   }
 
   private[controllers] def invalidSubmissionGuard(profile: CurrentProfile)(f: => Future[Result])(implicit hc: HeaderCarrier) = {
     payeRegistrationConnector.getRegistration(profile.registrationID) flatMap { regDoc =>
       regDoc.status match {
-        case PAYEStatus.draft                       => f
+        case PAYEStatus.draft => f
         case PAYEStatus.held | PAYEStatus.submitted => Future.successful(Redirect(routes.ConfirmationController.showConfirmation()))
-        case PAYEStatus.invalid                     => Future.successful(Redirect(controllers.errors.routes.ErrorController.ineligible()))
-          //TODO: Potentially need a new view to better demonstrate the problem
-        case PAYEStatus.rejected                    => Future.successful(Redirect(controllers.errors.routes.ErrorController.ineligible()))
+        case PAYEStatus.invalid => Future.successful(Redirect(controllers.errors.routes.ErrorController.ineligible()))
+        //TODO: Potentially need a new view to better demonstrate the problem
+        case PAYEStatus.rejected => Future.successful(Redirect(controllers.errors.routes.ErrorController.ineligible()))
       }
     }
   }

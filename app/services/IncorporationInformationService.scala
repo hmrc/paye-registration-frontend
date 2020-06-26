@@ -18,9 +18,9 @@ package services
 
 import java.time.LocalDate
 
-import javax.inject.Inject
 import connectors._
 import controllers.exceptions.GeneralException
+import javax.inject.Inject
 import models.api.Director
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import models.view.Directors
@@ -34,27 +34,27 @@ class IncorporationInformationServiceImpl @Inject()(val keystoreConnector: Keyst
 
 trait IncorporationInformationService {
 
-  val incorpInfoConnector : IncorporationInformationConnector
-  val keystoreConnector : KeystoreConnector
+  val incorpInfoConnector: IncorporationInformationConnector
+  val keystoreConnector: KeystoreConnector
 
   def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CoHoCompanyDetailsModel] = {
     incorpInfoConnector.getCoHoCompanyDetails(regId, txId) map {
       case IncorpInfoSuccessResponse(companyDetails) => companyDetails
-      case IncorpInfoBadRequestResponse              => throw new BadRequestException(s"Received a BadRequest status code when expecting company details for regId: $regId / TX-ID: $txId")
-      case IncorpInfoNotFoundResponse                => throw new NotFoundException(s"Received a NotFound status code when expecting company details for regId: $regId / TX-ID: $txId")
-      case IncorpInfoErrorResponse(ex)               => throw ex
+      case IncorpInfoBadRequestResponse => throw new BadRequestException(s"Received a BadRequest status code when expecting company details for regId: $regId / TX-ID: $txId")
+      case IncorpInfoNotFoundResponse => throw new NotFoundException(s"Received a NotFound status code when expecting company details for regId: $regId / TX-ID: $txId")
+      case IncorpInfoErrorResponse(ex) => throw ex
     }
   }
 
   def getIncorporationDate(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[Option[LocalDate]] = incorpInfoConnector.getIncorporationInfo(regId, txId)
-    .map (js => (js \ "incorporationDate").asOpt[String].map(LocalDate.parse))
+    .map(js => (js \ "incorporationDate").asOpt[String].map(LocalDate.parse))
     .recover {
-    case e: Exception => throw GeneralException(s"[IncorpInfoService][getIncorpDate] an exception occurred for regId: $regId, txId: $txId error - ${e.getMessage}")
-  }
+      case e: Exception => throw GeneralException(s"[IncorpInfoService][getIncorpDate] an exception occurred for regId: $regId, txId: $txId error - ${e.getMessage}")
+    }
 
-  def getDirectorDetails(txId: String,regId:String)(implicit hc: HeaderCarrier): Future[Directors] = {
+  def getDirectorDetails(txId: String, regId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
     for {
-      officerList     <- incorpInfoConnector.getOfficerList(txId,regId)
+      officerList <- incorpInfoConnector.getOfficerList(txId, regId)
       directorDetails <- convertOfficerList2Directors(officerList)
     } yield directorDetails
   }

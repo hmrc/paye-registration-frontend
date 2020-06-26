@@ -24,9 +24,9 @@ object TestCoHoCompanyDetailsForm {
 
   val form = Form(
     mapping(
-      "companyName"   -> nonEmptyText,
-      "sicCodes"      -> list(text),
-      "descriptions"  -> list(text)
+      "companyName" -> nonEmptyText,
+      "sicCodes" -> list(text),
+      "descriptions" -> list(text)
     )(CoHoCompanyDetailsFormModel.apply)(CoHoCompanyDetailsFormModel.unapply)
   )
 

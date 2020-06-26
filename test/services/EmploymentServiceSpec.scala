@@ -30,33 +30,34 @@ import scala.concurrent.Future
 class EmploymentServiceSpec extends PayeComponentSpec {
 
   def testService(date: LocalDate = LocalDate.of(2018, 1, 1)): EmploymentService = new EmploymentService {
-    override def now: LocalDate   = date
-    override val s4LService       = mockS4LService
+    override def now: LocalDate = date
+
+    override val s4LService = mockS4LService
     override val payeRegConnector = mockPayeRegistrationConnector
-    override val iiService        = mockIncorpInfoService
+    override val iiService = mockIncorpInfoService
   }
 
-  val anotherDateEntered                   = LocalDate.of(2016,1,1)
-  val newTaxYearDateInRange                = LocalDate.of(2018, 4, 4)
-  val alreadyEmployingViewModel            = EmployingStaff(Some(EmployingAnyone(true, Some(anotherDateEntered))), None, Some(true), Some(true), Some(true))
-  val alreadyEmployingApiModel             = Employment(Employing.alreadyEmploying, anotherDateEntered, true, true, Some(true))
-  val notEmployingViewModel                = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)), Some(false), None, None)
-  val notEmployingApiModel                 = Employment(Employing.notEmploying, testService().now, false, false, None)
-  val notEmployingApiModelPreIncorpSubs    = Employment(Employing.notEmploying, testService().now, true, true, None)
-  val notEmployingViewModelPreIncorp       = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)), Some(false), None, None)
-  val notEmployingViewModelPreIncorpSubs   = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)), Some(true), Some(true), None)
-  val willEmployThisYearViewModel          = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(true))), Some(false), None, None)
-  val willEmployThisYearViewModelCTY       = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, None)), Some(false), None, None)
+  val anotherDateEntered = LocalDate.of(2016, 1, 1)
+  val newTaxYearDateInRange = LocalDate.of(2018, 4, 4)
+  val alreadyEmployingViewModel = EmployingStaff(Some(EmployingAnyone(true, Some(anotherDateEntered))), None, Some(true), Some(true), Some(true))
+  val alreadyEmployingApiModel = Employment(Employing.alreadyEmploying, anotherDateEntered, true, true, Some(true))
+  val notEmployingViewModel = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)), Some(false), None, None)
+  val notEmployingApiModel = Employment(Employing.notEmploying, testService().now, false, false, None)
+  val notEmployingApiModelPreIncorpSubs = Employment(Employing.notEmploying, testService().now, true, true, None)
+  val notEmployingViewModelPreIncorp = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)), Some(false), None, None)
+  val notEmployingViewModelPreIncorpSubs = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)), Some(true), Some(true), None)
+  val willEmployThisYearViewModel = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(true))), Some(false), None, None)
+  val willEmployThisYearViewModelCTY = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, None)), Some(false), None, None)
   val willEmployThisYearViewModelPreIncorp = EmployingStaff(None, Some(WillBePaying(true, Some(true))), Some(false), None, None)
-  val willEmployThisYearApiModel           = Employment(Employing.willEmployThisYear, testService().now , false, false, None)
-  val willEmployNextYearViewModel          = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(false))), Some(true), Some(false), None)
-  val willEmployNextYearViewModelCTY       = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, None)), Some(true), Some(false), None)
+  val willEmployThisYearApiModel = Employment(Employing.willEmployThisYear, testService().now, false, false, None)
+  val willEmployNextYearViewModel = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, Some(false))), Some(true), Some(false), None)
+  val willEmployNextYearViewModelCTY = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(true, None)), Some(true), Some(false), None)
   val willEmployNextYearViewModelPreIncorp = EmployingStaff(None, Some(WillBePaying(true, Some(false))), Some(true), Some(false), None)
-  val willEmployNextYearApiModel           = Employment(Employing.willEmployNextYear, LocalDate.of(2018, 4, 6), true, false, None)
-  val defaultPensionViewModelPreIncorp     = EmployingStaff(None, Some(WillBePaying(true, Some(false))), Some(true), Some(false), Some(true))
-  val defaultPensionApiModelPreIncorp      = Employment(Employing.willEmployNextYear, LocalDate.of(2018, 4, 6), true, false, None)
-  val defaultPensionViewModel              = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)), Some(false), None, Some(true))
-  val defaultPensionApiModel               = Employment(Employing.notEmploying, testService().now, false, false, None)
+  val willEmployNextYearApiModel = Employment(Employing.willEmployNextYear, LocalDate.of(2018, 4, 6), true, false, None)
+  val defaultPensionViewModelPreIncorp = EmployingStaff(None, Some(WillBePaying(true, Some(false))), Some(true), Some(false), Some(true))
+  val defaultPensionApiModelPreIncorp = Employment(Employing.willEmployNextYear, LocalDate.of(2018, 4, 6), true, false, None)
+  val defaultPensionViewModel = EmployingStaff(Some(EmployingAnyone(false, None)), Some(WillBePaying(false, None)), Some(false), None, Some(true))
+  val defaultPensionApiModel = Employment(Employing.notEmploying, testService().now, false, false, None)
 
 
   "calling viewToAPIV2 with EmployingStaffV2" should {
@@ -108,7 +109,7 @@ class EmploymentServiceSpec extends PayeComponentSpec {
       testService().viewToApi(viewModel) mustBe Left(viewModel)
     }
     "return viewModel if model is not complete pre incorp" in {
-      val viewModel = EmployingStaff(None, Some(WillBePaying(true,Some(false))), None, Some(true), None)
+      val viewModel = EmployingStaff(None, Some(WillBePaying(true, Some(false))), None, Some(true), None)
       testService().viewToApi(viewModel) mustBe Left(viewModel)
     }
   }
@@ -116,37 +117,37 @@ class EmploymentServiceSpec extends PayeComponentSpec {
   "apiToView" should {
     val incorpDate = Some(LocalDate.now)
     "return corresponding converted EmploymentStaff View Model with Employing = alreadyEmploying" in {
-      testService().apiToView(alreadyEmployingApiModel,incorpDate) mustBe alreadyEmployingViewModel
+      testService().apiToView(alreadyEmployingApiModel, incorpDate) mustBe alreadyEmployingViewModel
     }
     "return corresponding converted EmploymentStaff View Model with Employing = notEmploying and default subcontractors to false" in {
-      testService().apiToView(notEmployingApiModel,incorpDate) mustBe notEmployingViewModel
+      testService().apiToView(notEmployingApiModel, incorpDate) mustBe notEmployingViewModel
     }
     "return corresponding converted EmployingStaff View model with Employing = willEmployThisYear" in {
-      testService().apiToView(willEmployThisYearApiModel,incorpDate) mustBe willEmployThisYearViewModelCTY
+      testService().apiToView(willEmployThisYearApiModel, incorpDate) mustBe willEmployThisYearViewModelCTY
     }
     "return corresponding converted EmployingStaff View model with Employing = willEmployThisYear in before next tax year range" in {
-      testService(newTaxYearDateInRange).apiToView(willEmployThisYearApiModel,incorpDate) mustBe willEmployThisYearViewModel
+      testService(newTaxYearDateInRange).apiToView(willEmployThisYearApiModel, incorpDate) mustBe willEmployThisYearViewModel
     }
     "return corresponding converted EmployingStaff View model with Employing = willEmployNextYear and set payment date as 6 4 of this year" in {
-      testService().apiToView(willEmployNextYearApiModel,incorpDate) mustBe willEmployNextYearViewModelCTY
+      testService().apiToView(willEmployNextYearApiModel, incorpDate) mustBe willEmployNextYearViewModelCTY
     }
     "return corresponding converted EmployingStaff View model with Employing = willEmployNextYear and set payment date as 6 4 of this year in before next tax year range" in {
-      testService(newTaxYearDateInRange).apiToView(willEmployNextYearApiModel,incorpDate) mustBe willEmployNextYearViewModel
+      testService(newTaxYearDateInRange).apiToView(willEmployNextYearApiModel, incorpDate) mustBe willEmployNextYearViewModel
     }
     "return corresponding EmploymentStaff View model with Employing = notEmploying and default subcontractors to false (AND default Employing to None) for pre incorp" in {
-      testService().apiToView(notEmployingApiModel,None) mustBe notEmployingViewModel.copy(employingAnyone = None, companyPension = None)
+      testService().apiToView(notEmployingApiModel, None) mustBe notEmployingViewModel.copy(employingAnyone = None, companyPension = None)
     }
     "return corresponding EmploymentStaff View model with Employing = willEmployThisYear and pension is None (AND default Employing to None) for pre incorp" in {
-      testService().apiToView(willEmployThisYearApiModel,None) mustBe willEmployThisYearViewModelCTY.copy(employingAnyone = None, companyPension = None)
+      testService().apiToView(willEmployThisYearApiModel, None) mustBe willEmployThisYearViewModelCTY.copy(employingAnyone = None, companyPension = None)
     }
     "return corresponding EmploymentStaff View model with Employing = willEmployThisYear and pension is None (AND default Employing to None) for pre incorp in before tax year range" in {
-      testService(newTaxYearDateInRange).apiToView(willEmployThisYearApiModel,None) mustBe willEmployThisYearViewModel.copy(employingAnyone = None, companyPension = None)
+      testService(newTaxYearDateInRange).apiToView(willEmployThisYearApiModel, None) mustBe willEmployThisYearViewModel.copy(employingAnyone = None, companyPension = None)
     }
     "return corresponding EmploymentStaff View model with Employing = willEmployNextYear (AND default Employing to None) for pre incorp" in {
-      testService().apiToView(willEmployNextYearApiModel,None) mustBe willEmployNextYearViewModelCTY.copy(employingAnyone = None, companyPension = None)
+      testService().apiToView(willEmployNextYearApiModel, None) mustBe willEmployNextYearViewModelCTY.copy(employingAnyone = None, companyPension = None)
     }
     "return corresponding EmploymentStaff View model with Employing = willEmployNextYear (AND default Employing to None) for pre incorp in before next tax year range" in {
-      testService(newTaxYearDateInRange).apiToView(willEmployNextYearApiModel,None) mustBe willEmployNextYearViewModel.copy(employingAnyone = None, companyPension = None)
+      testService(newTaxYearDateInRange).apiToView(willEmployNextYearApiModel, None) mustBe willEmployNextYearViewModel.copy(employingAnyone = None, companyPension = None)
     }
   }
 
@@ -157,7 +158,7 @@ class EmploymentServiceSpec extends PayeComponentSpec {
       when(mockS4LService.fetchAndGet[EmployingStaff](any(), any())(any(), any()))
         .thenReturn(Future(Some(partialView)))
 
-      when(mockIncorpInfoService.getIncorporationDate(any(),any())(any()))
+      when(mockIncorpInfoService.getIncorporationDate(any(), any())(any()))
         .thenReturn(Future.successful(Some(LocalDate.now)))
 
       val result = await(testService().fetchEmployingStaff)
@@ -171,7 +172,7 @@ class EmploymentServiceSpec extends PayeComponentSpec {
       when(mockPayeRegistrationConnector.getEmployment(any())(any(), any()))
         .thenReturn(Future(Some(willEmployNextYearApiModel)))
 
-      when(mockIncorpInfoService.getIncorporationDate(any(),any())(any()))
+      when(mockIncorpInfoService.getIncorporationDate(any(), any())(any()))
         .thenReturn(Future.successful(Some(LocalDate.now)))
 
       val result = await(testService(newTaxYearDateInRange).fetchEmployingStaff)
@@ -185,7 +186,7 @@ class EmploymentServiceSpec extends PayeComponentSpec {
       when(mockPayeRegistrationConnector.getEmployment(any())(any(), any()))
         .thenReturn(Future(None))
 
-      when(mockIncorpInfoService.getIncorporationDate(any(),any())(any()))
+      when(mockIncorpInfoService.getIncorporationDate(any(), any())(any()))
         .thenReturn(Future.successful(Some(LocalDate.now)))
 
       val result = await(testService().fetchEmployingStaff)
@@ -234,26 +235,26 @@ class EmploymentServiceSpec extends PayeComponentSpec {
   val partialView = EmployingStaff(None, None, None, None, None)
 
   Seq((
-      "saveEmployingAnyone",
-      () => testService().saveEmployingAnyone(EmployingAnyone(true, Some(anotherDateEntered))),
-      partialView.copy(employingAnyone = Some(EmployingAnyone(true, Some(anotherDateEntered))))
-    ),(
-      "saveWillEmployAnyone",
-      () => testService().saveWillEmployAnyone(WillBePaying(false, None)),
-      partialView.copy(willBePaying = Some(WillBePaying(false, None)))
-    ),(
-      "saveConstructionIndustry",
-      () => testService().saveConstructionIndustry(construction = true),
-      partialView.copy(construction = Some(true))
-    ),(
-      "saveSubcontractors",
-      () => testService().saveSubcontractors(subcontractors = true),
-      partialView.copy(subcontractors = Some(true))
-    ),(
-      "savePensionPayment",
-      () => testService().savePensionPayment(companyPension = true),
-      partialView.copy(companyPension = Some(true))
-    )
+    "saveEmployingAnyone",
+    () => testService().saveEmployingAnyone(EmployingAnyone(true, Some(anotherDateEntered))),
+    partialView.copy(employingAnyone = Some(EmployingAnyone(true, Some(anotherDateEntered))))
+  ), (
+    "saveWillEmployAnyone",
+    () => testService().saveWillEmployAnyone(WillBePaying(false, None)),
+    partialView.copy(willBePaying = Some(WillBePaying(false, None)))
+  ), (
+    "saveConstructionIndustry",
+    () => testService().saveConstructionIndustry(construction = true),
+    partialView.copy(construction = Some(true))
+  ), (
+    "saveSubcontractors",
+    () => testService().saveSubcontractors(subcontractors = true),
+    partialView.copy(subcontractors = Some(true))
+  ), (
+    "savePensionPayment",
+    () => testService().savePensionPayment(companyPension = true),
+    partialView.copy(companyPension = Some(true))
+  )
   ) foreach {
     case (functionName, function, expected) =>
       s"$functionName" should {
@@ -268,8 +269,8 @@ class EmploymentServiceSpec extends PayeComponentSpec {
           when(mockS4LService.saveForm[EmployingStaff](any(), any(), any())(any(), any()))
             .thenReturn(Future(Fixtures.blankCacheMap))
 
-          when(mockIncorpInfoService.getIncorporationDate(any(),any())(any()))
-              .thenReturn(Future.successful(Some(LocalDate.now)))
+          when(mockIncorpInfoService.getIncorporationDate(any(), any())(any()))
+            .thenReturn(Future.successful(Some(LocalDate.now)))
 
           await(function()) mustBe expected
         }

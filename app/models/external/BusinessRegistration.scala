@@ -52,11 +52,11 @@ object CurrentProfile {
 
   val reads = (
     (__ \ "registrationID").read[String] and
-    (__ \ "companyTaxRegistration").read[CompanyRegistrationProfile] and
-    (__ \ "language").read[String] and
-    ((__ \ "payeRegistrationSubmitted").read[Boolean] or Reads.pure(false)) and
-    (__ \ "incorpStatus").readNullable[IncorporationStatus.Value]
-  )(CurrentProfile.apply _)
+      (__ \ "companyTaxRegistration").read[CompanyRegistrationProfile] and
+      (__ \ "language").read[String] and
+      ((__ \ "payeRegistrationSubmitted").read[Boolean] or Reads.pure(false)) and
+      (__ \ "incorpStatus").readNullable[IncorporationStatus.Value]
+    ) (CurrentProfile.apply _)
 
   val writes = Json.writes[CurrentProfile]
 

@@ -20,9 +20,9 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import config.WSHttpImpl
 import connectors.CompanyRegistrationConnectorImpl
 import itutil.{IntegrationSpecBase, WiremockHelper}
-import play.api.{Application, Configuration, Environment}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
+import play.api.{Application, Configuration, Environment}
 import services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.PAYEFeatureSwitch
@@ -57,14 +57,15 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
     def responseBody(transId: String) =
       Json.parse(
         s"""
-          |{
-          |    "status" : "testStatus",
-          |    "confirmationReferences" : {
-          |      "transaction-id" : "$transId",
-          |      "payment-reference" : "paidcashmoney"
-          |    }
-          |}
+           |{
+           |    "status" : "testStatus",
+           |    "confirmationReferences" : {
+           |      "transaction-id" : "$transId",
+           |      "payment-reference" : "paidcashmoney"
+           |    }
+           |}
         """.stripMargin).as[JsObject]
+
     def responseBodyUnpaid(transId: String) =
       Json.parse(
         s"""

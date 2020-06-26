@@ -16,7 +16,7 @@
 
 package utils
 
-import com.github.tomakehurst.wiremock.client.WireMock.{findAll, urlMatching, deleteRequestedFor}
+import com.github.tomakehurst.wiremock.client.WireMock.{deleteRequestedFor, findAll, urlMatching}
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.external.CurrentProfile
@@ -71,9 +71,9 @@ class SessionProfileISpec extends IntegrationSpecBase with CachingStub {
   val sessionId = "session-123"
   implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sessionId)))
 
-  lazy val mockKeystoreConnector                 = app.injector.instanceOf[KeystoreConnector]
+  lazy val mockKeystoreConnector = app.injector.instanceOf[KeystoreConnector]
   lazy val mockIncorporationInformationConnector = app.injector.instanceOf[IncorporationInformationConnector]
-  lazy val mockPayeRegistrationService           = app.injector.instanceOf[PAYERegistrationService]
+  lazy val mockPayeRegistrationService = app.injector.instanceOf[PAYERegistrationService]
 
   implicit val fakeRequest = FakeRequest("GET", "/")
   val testFunc: CurrentProfile => Future[Result] = _ => Future.successful(Ok)
@@ -81,9 +81,9 @@ class SessionProfileISpec extends IntegrationSpecBase with CachingStub {
 
   trait Setup {
     val sessionProfile = new SessionProfile {
-      override val keystoreConnector: KeystoreConnector                                 = mockKeystoreConnector
+      override val keystoreConnector: KeystoreConnector = mockKeystoreConnector
       override val incorporationInformationConnector: IncorporationInformationConnector = mockIncorporationInformationConnector
-      override val payeRegistrationService: PAYERegistrationService                     = mockPayeRegistrationService
+      override val payeRegistrationService: PAYERegistrationService = mockPayeRegistrationService
     }
   }
 
@@ -101,20 +101,20 @@ class SessionProfileISpec extends IntegrationSpecBase with CachingStub {
 
         val currentProfile = Json.parse(
           s"""
-            |{
-            | "id" : "xxx",
-            | "data" : {
-            | "CurrentProfile" : {
-            |  "registrationID": "$regId",
-            |  "companyTaxRegistration": {
-            |     "status": "submitted",
-            |     "transactionId": "12345"
-            |  },
-            |  "language": "ENG",
-            |  "payeRegistrationSubmitted": false
-            |  }
-            | }
-            |}""".stripMargin).toString()
+             |{
+             | "id" : "xxx",
+             | "data" : {
+             | "CurrentProfile" : {
+             |  "registrationID": "$regId",
+             |  "companyTaxRegistration": {
+             |     "status": "submitted",
+             |     "transactionId": "12345"
+             |  },
+             |  "language": "ENG",
+             |  "payeRegistrationSubmitted": false
+             |  }
+             | }
+             |}""".stripMargin).toString()
         stubGet(s"/keystore/paye-registration-frontend/$sessionId", 200, currentProfile)
         stubPost(s"/incorporation-information/subscribe/$regId/regime/paye-fe/subscriber/SCRS", 202, "")
         val res = await(sessionProfile.withCurrentProfile(testFunc))

@@ -25,16 +25,16 @@ class DashboardControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup {
     val controller = new DashboardController {
-      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
+      override val redirectToLogin = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
 
-      override val authConnector            = mockAuthConnector
-      override val keystoreConnector        = mockKeystoreConnector
+      override val authConnector = mockAuthConnector
+      override val keystoreConnector = mockKeystoreConnector
       implicit val messagesApi: MessagesApi = mockMessagesApi
-      override val companyRegUrl            = "testUrl"
-      override val companyRegUri            = "/testUri"
+      override val companyRegUrl = "testUrl"
+      override val companyRegUri = "/testUri"
       override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService  = mockPayeRegService
+      override val payeRegistrationService = mockPayeRegService
     }
   }
 

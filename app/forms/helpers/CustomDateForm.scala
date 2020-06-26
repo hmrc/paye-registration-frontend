@@ -18,8 +18,8 @@ package forms.helpers
 
 import java.time.LocalDate
 
-import play.api.data.{FormError, Forms, Mapping}
 import play.api.data.format.Formatter
+import play.api.data.{FormError, Forms, Mapping}
 import utils.DateUtil
 
 import scala.util.Try
@@ -32,19 +32,19 @@ trait CustomDateForm extends DateUtil {
   def dateFormatter(date: LocalDate) = new Formatter[LocalDate] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
       (data.get(s"${customFormPrefix}Day"), data.get(s"${customFormPrefix}Month"), data.get(s"${customFormPrefix}Year")) match {
-        case (a,b,c) if (a :: b :: c :: Nil).collect{case Some("") | None => false}.contains(false) => Left(Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.empty")))
+        case (a, b, c) if (a :: b :: c :: Nil).collect { case Some("") | None => false }.contains(false) => Left(Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.empty")))
         case (Some(day), Some(month), Some(year)) =>
           Try(toDate(year, month, day)).toOption match {
             case Some(dt) => validation(dt, date)
-            case None     => Left(Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.invalid")))
+            case None => Left(Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.invalid")))
           }
       }
     }
 
     override def unbind(key: String, value: LocalDate): Map[String, String] = Map(
-      s"${customFormPrefix}Day"   -> value.getDayOfMonth.toString,
+      s"${customFormPrefix}Day" -> value.getDayOfMonth.toString,
       s"${customFormPrefix}Month" -> value.getMonthValue.toString,
-      s"${customFormPrefix}Year"  -> value.getYear.toString
+      s"${customFormPrefix}Year" -> value.getYear.toString
     )
   }
 

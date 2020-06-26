@@ -25,22 +25,27 @@ import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
+import services.PAYERegistrationService
 import uk.gov.hmrc.auth.core.AuthConnector
 
 import scala.concurrent.Future
 
 class RegistrationControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
-  trait Setup{
+  trait Setup {
     val controller = new RegistrationController {
       override val payeRegistrationConnector: PAYERegistrationConnector = mockPayeRegistrationConnector
       override val payeRegistrationService: PAYERegistrationService = mockPayeRegService
+
       override def redirectToLogin: Result = MockAuthRedirects.redirectToLogin
+
       override def redirectToPostSign: Result = MockAuthRedirects.redirectToPostSign
+
       override val keystoreConnector: KeystoreConnector = mockKeystoreConnector
       override val incorporationInformationConnector: IncorporationInformationConnector = mockIncorpInfoConnector
+
       override def authConnector: AuthConnector = mockAuthConnector
+
       override def messagesApi: MessagesApi = mockMessagesApi
     }
   }
@@ -65,11 +70,11 @@ class RegistrationControllerSpec extends PayeComponentSpec with PayeFakedApp {
            |}
       """.stripMargin)
 
-      "all data is passed in and data is deleted" in new Setup{
+      "all data is passed in and data is deleted" in new Setup {
         when(mockPayeRegService.handleIIResponse(ArgumentMatchers.eq("fooTxID"), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(RegistrationDeletion.success))
 
-        AuthHelpers.submitUnauthorisedT[JsValue](controller.companyIncorporation, FakeRequest().withBody(responseJson)){
+        AuthHelpers.submitUnauthorisedT[JsValue](controller.companyIncorporation, FakeRequest().withBody(responseJson)) {
           res => status(res) mustBe OK
         }
       }
@@ -95,7 +100,7 @@ class RegistrationControllerSpec extends PayeComponentSpec with PayeFakedApp {
              |}
       """.stripMargin)
 
-        AuthHelpers.submitUnauthorisedT[JsValue](controller.companyIncorporation, FakeRequest().withBody(responseJson)){
+        AuthHelpers.submitUnauthorisedT[JsValue](controller.companyIncorporation, FakeRequest().withBody(responseJson)) {
           res => status(res) mustBe 500
         }
       }
@@ -121,7 +126,7 @@ class RegistrationControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPayeRegService.handleIIResponse(ArgumentMatchers.eq("fooTxID"), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.failed(new Exception("ouch it hurts")))
 
-        AuthHelpers.submitUnauthorisedT[JsValue](controller.companyIncorporation, FakeRequest().withBody(responseJson)){
+        AuthHelpers.submitUnauthorisedT[JsValue](controller.companyIncorporation, FakeRequest().withBody(responseJson)) {
           res => status(res) mustBe 500
         }
       }
@@ -147,7 +152,7 @@ class RegistrationControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPayeRegService.handleIIResponse(ArgumentMatchers.eq("fooTxID"), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(RegistrationDeletion.notfound))
 
-        AuthHelpers.submitUnauthorisedT[JsValue](controller.companyIncorporation, FakeRequest().withBody(responseJson)){
+        AuthHelpers.submitUnauthorisedT[JsValue](controller.companyIncorporation, FakeRequest().withBody(responseJson)) {
           res => status(res) mustBe 200
         }
       }

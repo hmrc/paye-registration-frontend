@@ -16,9 +16,8 @@
 
 package services
 
-import javax.inject.Inject
-
 import connectors.S4LConnector
+import javax.inject.Inject
 import play.api.libs.json._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -48,7 +47,7 @@ trait S4LService {
 
   def fetchAndGet[T](formId: String, regId: String)(implicit hc: HeaderCarrier, format: Format[T]): Future[Option[T]] = {
     for {
-      data  <- s4LConnector.fetchAndGet[T](regId, formId)
+      data <- s4LConnector.fetchAndGet[T](regId, formId)
     } yield data
   }
 

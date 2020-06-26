@@ -34,7 +34,7 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
 
 
   lazy val payeRegistrationConnector = app.injector.instanceOf[PAYERegistrationConnector]
-  lazy val busRegConnector           = app.injector.instanceOf[BusinessRegistrationConnector]
+  lazy val busRegConnector = app.injector.instanceOf[BusinessRegistrationConnector]
 
   val additionalConfiguration = Map(
     "microservice.services.paye-registration.host" -> s"$mockHost",

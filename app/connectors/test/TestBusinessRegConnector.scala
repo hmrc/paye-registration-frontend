@@ -16,13 +16,12 @@
 
 package connectors.test
 
-import javax.inject.Inject
 import config.WSHttp
+import javax.inject.Inject
 import models.external.{BusinessProfile, BusinessRegistrationRequest}
-import play.api.{Configuration, Environment}
 import play.api.libs.json.{JsValue, Json}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.{CorePost, HeaderCarrier}
-import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
@@ -30,7 +29,8 @@ import scala.concurrent.Future
 class TestBusinessRegConnectorImpl @Inject()(val http: WSHttp,
                                              override val runModeConfiguration: Configuration,
                                              environment: Environment) extends TestBusinessRegConnector with ServicesConfig {
-  val businessRegUrl  = baseUrl("business-registration")
+  val businessRegUrl = baseUrl("business-registration")
+
   override protected def mode = environment.mode
 }
 
@@ -45,6 +45,6 @@ trait TestBusinessRegConnector {
 
   def updateCompletionCapacity(regId: String, completionCapacity: String)(implicit hc: HeaderCarrier): Future[String] = {
     val json = Json.parse(s"""{"completionCapacity" : "$completionCapacity"}""".stripMargin)
-    http.POST[JsValue, JsValue](s"$businessRegUrl/business-registration/test-only/update-cc/$regId", json) map(_.toString)
+    http.POST[JsValue, JsValue](s"$businessRegUrl/business-registration/test-only/update-cc/$regId", json) map (_.toString)
   }
 }

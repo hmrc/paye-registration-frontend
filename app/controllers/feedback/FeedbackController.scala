@@ -27,7 +27,7 @@ import play.api.mvc.{Action, AnyContent, Request, RequestHeader}
 import play.twirl.api.Html
 import uk.gov.hmrc.crypto.PlainText
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.bootstrap.controller.{FrontendController, UnauthorisedAction}
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import uk.gov.hmrc.play.bootstrap.filters.frontend.crypto.SessionCookieCrypto
 import uk.gov.hmrc.play.partials._
 import views.html.feedback_thankyou

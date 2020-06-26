@@ -31,28 +31,28 @@ case class TagSet(clientIP: Boolean,
                   path: Boolean)
 
 object TagSet {
-  val ALL_TAGS      = TagSet(true, true, true, true, true, true, true)
-  val NO_TAGS       = TagSet(false, false, false, false, false, false, false)
-  val REQUEST_ONLY  = TagSet(false, false, true, false, false, false, false)
+  val ALL_TAGS = TagSet(true, true, true, true, true, true, true)
+  val NO_TAGS = TagSet(false, false, false, false, false, false, false)
+  val REQUEST_ONLY = TagSet(false, false, true, false, false, false, false)
 }
 
 import audit.TagSet.ALL_TAGS
 
-abstract class RegistrationAuditEvent(auditType: String, transactionName : Option[String], detail: JsObject, tagSet: TagSet = ALL_TAGS)
+abstract class RegistrationAuditEvent(auditType: String, transactionName: Option[String], detail: JsObject, tagSet: TagSet = ALL_TAGS)
                                      (implicit hc: HeaderCarrier, optReq: Option[Request[AnyContent]] = None)
   extends ExtendedDataEvent(
     auditSource = "paye-registration-frontend",
-    auditType   = auditType,
-    detail      = detail,
-    tags        = buildTags(transactionName.getOrElse(auditType), tagSet)
+    auditType = auditType,
+    detail = detail,
+    tags = buildTags(transactionName.getOrElse(auditType), tagSet)
   )
 
 object RegistrationAuditEvent {
 
-  val EXTERNAL_USER_ID  = "externalUserId"
-  val AUTH_PROVIDER_ID  = "authProviderId"
-  val JOURNEY_ID        = "journeyId"
-  val PATH              = "path"
+  val EXTERNAL_USER_ID = "externalUserId"
+  val AUTH_PROVIDER_ID = "authProviderId"
+  val JOURNEY_ID = "journeyId"
+  val PATH = "path"
 
 
   def buildTags(transactionName: String, tagSet: TagSet)(implicit hc: HeaderCarrier, optReq: Option[Request[AnyContent]]) = {
@@ -67,22 +67,22 @@ object RegistrationAuditEvent {
   }
 
   private def buildClientIP(tagSet: TagSet)(implicit hc: HeaderCarrier) =
-    if(tagSet.clientIP) Map("clientIP" -> hc.trueClientIp.getOrElse("-")) else Map()
+    if (tagSet.clientIP) Map("clientIP" -> hc.trueClientIp.getOrElse("-")) else Map()
 
   private def buildClientPort(tagSet: TagSet)(implicit hc: HeaderCarrier) =
-    if(tagSet.clientPort) Map("clientPort" -> hc.trueClientPort.getOrElse("-")) else Map()
+    if (tagSet.clientPort) Map("clientPort" -> hc.trueClientPort.getOrElse("-")) else Map()
 
   private def buildRequestId(tagSet: TagSet)(implicit hc: HeaderCarrier) =
-    if(tagSet.requestId) Map(hc.names.xRequestId -> hc.requestId.map(_.value).getOrElse("-")) else Map()
+    if (tagSet.requestId) Map(hc.names.xRequestId -> hc.requestId.map(_.value).getOrElse("-")) else Map()
 
   private def buildSessionId(tagSet: TagSet)(implicit hc: HeaderCarrier) =
-    if(tagSet.sessionId) Map(hc.names.xSessionId -> hc.sessionId.map(_.value).getOrElse("-")) else Map()
+    if (tagSet.sessionId) Map(hc.names.xSessionId -> hc.sessionId.map(_.value).getOrElse("-")) else Map()
 
   private def buildAuthorization(tagSet: TagSet)(implicit hc: HeaderCarrier) =
-    if(tagSet.authorisation) Map(hc.names.authorisation -> hc.authorization.map(_.value).getOrElse("-")) else Map()
+    if (tagSet.authorisation) Map(hc.names.authorisation -> hc.authorization.map(_.value).getOrElse("-")) else Map()
 
   private def buildDeviceId(tagSet: TagSet)(implicit hc: HeaderCarrier) =
-    if(tagSet.deviceId) Map(hc.names.deviceID -> hc.deviceID.getOrElse("-")) else Map()
+    if (tagSet.deviceId) Map(hc.names.deviceID -> hc.deviceID.getOrElse("-")) else Map()
 
   private def buildPath(tagSet: TagSet)(implicit optReq: Option[Request[AnyContent]]) = {
     if (tagSet.path) optReq.fold(Map[String, String]())(req => Map(PATH -> req.path)) else Map()

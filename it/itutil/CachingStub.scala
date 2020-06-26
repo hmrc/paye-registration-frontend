@@ -17,23 +17,20 @@
 package itutil
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import com.typesafe.config.ConfigFactory
 import models.api.SessionMap
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.scalatest.BeforeAndAfterEach
-import play.api.Play
 import play.api.libs.json._
 import repositories.ReactiveMongoRepository
 import uk.gov.hmrc.crypto.json.JsonEncryptor
 import uk.gov.hmrc.crypto.{ApplicationCrypto, Protected}
-import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.mongo.MongoSpecSupport
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
-trait CachingStub extends MongoSpecSupport with BeforeAndAfterEach{
+trait CachingStub extends MongoSpecSupport with BeforeAndAfterEach {
   self: IntegrationSpecBase =>
   implicit lazy val jsonCrypto = new ApplicationCrypto(app.configuration.underlying).JsonCrypto
   implicit lazy val encryptionFormat = new JsonEncryptor[JsObject]()
@@ -41,6 +38,7 @@ trait CachingStub extends MongoSpecSupport with BeforeAndAfterEach{
   lazy val repo = new ReactiveMongoRepository(app.configuration, mongo)
 
   def customAwait[A](future: Future[A])(implicit timeout: Duration): A = Await.result(future, timeout)
+
   val defaultTimeout: FiniteDuration = 5 seconds
 
   override def beforeEach(): Unit = {
@@ -56,22 +54,22 @@ trait CachingStub extends MongoSpecSupport with BeforeAndAfterEach{
 
     val preawait = customAwait(repo.count)(defaultTimeout)
     val cp = CurrentProfile(
-      registrationID            = regId,
-      companyTaxRegistration    =
+      registrationID = regId,
+      companyTaxRegistration =
         CompanyRegistrationProfile(
           status = "submitted",
           transactionId = "12345"),
-      language                  = "ENG",
+      language = "ENG",
       payeRegistrationSubmitted = submitted,
       incorpStatus = None
     )
     val currentProfileMapping: Map[String, JsValue] = Map("CurrentProfile" -> Json.toJson(cp))
     val res = customAwait(repo.upsertSessionMap(SessionMap(session, regId, "12345", currentProfileMapping)))(defaultTimeout)
-    if(customAwait(repo.count)(defaultTimeout) != preawait + 1) throw new Exception("Error adding data to database")
+    if (customAwait(repo.count)(defaultTimeout) != preawait + 1) throw new Exception("Error adding data to database")
     res
   }
 
-  def verifySessionCacheData[T](id: String, key: String, data: Option[T])(implicit format: Format[T]): Unit ={
+  def verifySessionCacheData[T](id: String, key: String, data: Option[T])(implicit format: Format[T]): Unit = {
     val dataFromDb = customAwait(repo.getSessionMap(id))(defaultTimeout).flatMap(_.getEntry(key))
     if (data != dataFromDb) throw new Exception(s"Data in database doesn't match expected data:\n expected data $data was not equal to actual data $dataFromDb")
   }

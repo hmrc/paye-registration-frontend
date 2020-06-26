@@ -17,11 +17,11 @@
 package controllers.userJourney
 
 import config.AppConfig
-import javax.inject.Inject
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
 import forms.natureOfBuinessDetails.NatureOfBusinessForm
+import javax.inject.Inject
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
@@ -50,20 +50,22 @@ trait NatureOfBusinessController extends PayeBaseController {
   val natureOfBusinessService: NatureOfBusinessService
   val keystoreConnector: KeystoreConnector
 
-  def natureOfBusiness: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    natureOfBusinessService.getNatureOfBusiness(profile.registrationID) map {
-      case Some(model) => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form.fill(model)))
-      case None        => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form))
-    }
+  def natureOfBusiness: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    profile =>
+      natureOfBusinessService.getNatureOfBusiness(profile.registrationID) map {
+        case Some(model) => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form.fill(model)))
+        case None => Ok(NatureOfBusinessPage(NatureOfBusinessForm.form))
+      }
   }
 
-  def submitNatureOfBusiness: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    NatureOfBusinessForm.form.bindFromRequest.fold(
-      errors  => Future.successful(BadRequest(NatureOfBusinessPage(errors))),
-      success => natureOfBusinessService.saveNatureOfBusiness(success, profile.registrationID) map {
-        case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.DirectorDetailsController.directorDetails())
-        case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
-      }
-    )
+  def submitNatureOfBusiness: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    profile =>
+      NatureOfBusinessForm.form.bindFromRequest.fold(
+        errors => Future.successful(BadRequest(NatureOfBusinessPage(errors))),
+        success => natureOfBusinessService.saveNatureOfBusiness(success, profile.registrationID) map {
+          case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.DirectorDetailsController.directorDetails())
+          case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+        }
+      )
   }
 }

@@ -26,7 +26,7 @@ import views.html.pages.companyDetails.confirmROAddress
 class ConfirmROAddressViewSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
   implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
-  implicit lazy val messagesApi : MessagesApi = mockMessagesApi
+  implicit lazy val messagesApi: MessagesApi = mockMessagesApi
 
   val testCompanyName = "Test company limited"
   val testAddress =

@@ -20,10 +20,10 @@ import connectors.{IncorporationInformationConnector, KeystoreConnector, PAYEReg
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.{IncorporationStatus, RegistrationDeletion}
 import javax.inject.Inject
-import play.api.{Configuration, Logger}
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsObject, JsSuccess, JsValue}
 import play.api.mvc.{Action, AnyContent}
+import play.api.{Configuration, Logger}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
@@ -51,9 +51,9 @@ trait RegistrationController extends PayeBaseController {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
     authorised() {
       payeRegistrationService.deletePayeRegistrationInProgress(regId) map {
-        case RegistrationDeletion.success       => Ok
+        case RegistrationDeletion.success => Ok
         case RegistrationDeletion.invalidStatus => PreconditionFailed
-        case RegistrationDeletion.forbidden     =>
+        case RegistrationDeletion.forbidden =>
           logger.warn(s"[RegistrationController] [delete] - Requested document regId $regId to be deleted is not corresponding to the CurrentProfile regId")
           BadRequest
       } recover {
@@ -69,15 +69,15 @@ trait RegistrationController extends PayeBaseController {
   }
 
   def companyIncorporation: Action[JsValue] = Action.async(parse.json) { implicit request =>
-    val jsResp       = request.body.as[JsObject]
-    val txId         = (jsResp \ "SCRSIncorpStatus" \ "IncorpSubscriptionKey" \ "transactionId").validate[String]
+    val jsResp = request.body.as[JsObject]
+    val txId = (jsResp \ "SCRSIncorpStatus" \ "IncorpSubscriptionKey" \ "transactionId").validate[String]
     val incorpStatus = (jsResp \ "SCRSIncorpStatus" \ "IncorpStatusEvent" \ "status").validate[IncorporationStatus.Value]
 
 
     (txId, incorpStatus) match {
       case (JsSuccess(id, _), JsSuccess(status, _)) => payeRegistrationService.handleIIResponse(id, status).map {
         s =>
-          if(s ==  RegistrationDeletion.notfound) {
+          if (s == RegistrationDeletion.notfound) {
             Logger.warn(s"II returned $txId with status $incorpStatus but no paye doc found, returned 200 back to II to clear subscription")
           }
           Ok

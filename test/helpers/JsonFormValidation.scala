@@ -44,7 +44,7 @@ trait JsonFormValidation {
       case JsError(errors) => {
         errors.length mustBe expectedErrors.keySet.toSeq.length
 
-        for( error <- errors ) {
+        for (error <- errors) {
           error match {
             case (path, valErrs) => {
               expectedErrors.keySet must contain(path)

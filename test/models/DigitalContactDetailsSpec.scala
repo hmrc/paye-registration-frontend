@@ -91,7 +91,7 @@ class DigitalContactDetailsSpec extends PayeComponentSpec {
          |  "phoneNumber":"0161385032"
          |}""".stripMargin)
 
-    val tstModel = DigitalContactDetails (
+    val tstModel = DigitalContactDetails(
       email = None,
       mobileNumber = None,
       phoneNumber = Some("0161385032")

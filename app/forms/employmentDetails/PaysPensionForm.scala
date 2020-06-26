@@ -20,7 +20,7 @@ import forms.helpers.RequiredBooleanForm
 import play.api.data.Form
 import play.api.data.Forms.single
 
-object PaysPensionForm extends RequiredBooleanForm{
+object PaysPensionForm extends RequiredBooleanForm {
 
   override val errorMsg = "pages.paysPension.error"
 

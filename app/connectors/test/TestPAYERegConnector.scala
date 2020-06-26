@@ -16,17 +16,16 @@
 
 package connectors.test
 
-import javax.inject.Inject
 import common.Logging
 import config.WSHttp
 import connectors._
 import enums.DownstreamOutcome
+import javax.inject.Inject
 import models.api.{Employment, CompanyDetails => CompanyDetailsAPI, PAYEContact => PAYEContactAPI, PAYERegistration => PAYERegistrationAPI}
-import play.api.{Configuration, Environment}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
@@ -36,6 +35,7 @@ class TestPAYERegConnectorImpl @Inject()(val payeRegConnector: PAYERegistrationC
                                          override val runModeConfiguration: Configuration,
                                          environment: Environment) extends TestPAYERegConnector with ServicesConfig {
   val payeRegUrl = baseUrl("paye-registration")
+
   override protected def mode = environment.mode
 }
 
@@ -49,13 +49,13 @@ trait TestPAYERegConnector extends Logging {
     http.POST[PAYERegistrationAPI, HttpResponse](s"$payeRegUrl/paye-registration/test-only/update-registration/${reg.registrationID}", reg) map {
       _.status match {
         case Status.OK => DownstreamOutcome.Success
-        case _         => DownstreamOutcome.Failure
+        case _ => DownstreamOutcome.Failure
       }
     }
   }
 
   def addTestCompanyDetails(details: CompanyDetailsAPI, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    payeRegConnector.upsertCompanyDetails(regId,  details) map {
+    payeRegConnector.upsertCompanyDetails(regId, details) map {
       _ => DownstreamOutcome.Success
     } recover {
       case _ => DownstreamOutcome.Failure
@@ -63,7 +63,7 @@ trait TestPAYERegConnector extends Logging {
   }
 
   def addTestPAYEContact(details: PAYEContactAPI, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    payeRegConnector.upsertPAYEContact(regId,  details) map {
+    payeRegConnector.upsertPAYEContact(regId, details) map {
       _ => DownstreamOutcome.Success
     } recover {
       case _ => DownstreamOutcome.Failure
@@ -71,7 +71,7 @@ trait TestPAYERegConnector extends Logging {
   }
 
   def addTestEmploymentInfo(details: Employment, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    payeRegConnector.upsertEmployment(regId,  details) map {
+    payeRegConnector.upsertEmployment(regId, details) map {
       _ => DownstreamOutcome.Success
     } recover {
       case _ => DownstreamOutcome.Failure

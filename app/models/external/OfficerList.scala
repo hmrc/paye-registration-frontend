@@ -29,10 +29,10 @@ case class Officer(name: Name,
 object Officer {
   implicit val formatModel: Reads[Officer] = (
     (__ \ "name_elements").read[Name](Name.normalizeNameReads) and
-    (__ \ "officer_role").read[String] and
-    (__ \ "resigned_on").readNullable[DateTime] and
-    (__ \ "appointment_link").readNullable[String]
-  )(Officer.apply _)
+      (__ \ "officer_role").read[String] and
+      (__ \ "resigned_on").readNullable[DateTime] and
+      (__ \ "appointment_link").readNullable[String]
+    ) (Officer.apply _)
 
   val seqReads: Reads[Seq[Officer]] = new Reads[Seq[Officer]] {
     override def reads(json: JsValue): JsResult[Seq[Officer]] = Json.fromJson[Seq[Officer]](json)

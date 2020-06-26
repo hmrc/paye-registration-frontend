@@ -25,8 +25,6 @@ import play.api.mvc.{Action, AnyContent}
 import play.api.{Configuration, Environment}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.play.config.ServicesConfig
-import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
@@ -48,7 +46,8 @@ trait EligibilityController extends PayeBaseController {
   val compRegFEURL: String
   val compRegFEURI: String
 
-  def questionnaire: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
-    Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/questionnaire"))
+  def questionnaire: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    _ =>
+      Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/questionnaire"))
   }
 }

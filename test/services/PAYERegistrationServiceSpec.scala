@@ -29,10 +29,10 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
 
   class Setup {
     val service = new PAYERegistrationService {
-      override val payeRegistrationConnector  = mockPAYERegConnector
-      override val keyStoreConnector          = mockKeystoreConnector
-      override val currentProfileService      = mockCurrentProfileService
-      override val s4LService                 = mockS4LService
+      override val payeRegistrationConnector = mockPAYERegConnector
+      override val keyStoreConnector = mockKeystoreConnector
+      override val currentProfileService = mockCurrentProfileService
+      override val s4LService = mockS4LService
     }
   }
 

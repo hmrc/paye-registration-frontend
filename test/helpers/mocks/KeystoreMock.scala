@@ -52,12 +52,12 @@ trait KeystoreMock {
 
   def mockFetchCurrentProfile(regID: String = "12345"): OngoingStubbing[Future[Option[CurrentProfile]]] = {
     when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CurrentProfile]]()))
-        .thenReturn(Future.successful(Some(CurrentProfile(
-          regID,
-          CompanyRegistrationProfile("held", "txId", None, None),
-          "ENG",
-          payeRegistrationSubmitted = false,
-          incorpStatus = None
-        ))))
+      .thenReturn(Future.successful(Some(CurrentProfile(
+        regID,
+        CompanyRegistrationProfile("held", "txId", None, None),
+        "ENG",
+        payeRegistrationSubmitted = false,
+        incorpStatus = None
+      ))))
   }
 }

@@ -32,17 +32,18 @@ class SessionProfileSpec extends PayeComponentSpec {
 
   class Setup extends CodeMocks {
     val testSession = new SessionProfile {
-      override val keystoreConnector                  = mockKeystoreConnector
-      override val incorporationInformationConnector  = mockIncorpInfoConnector
-      override val payeRegistrationService            = mockPayeRegService
+      override val keystoreConnector = mockKeystoreConnector
+      override val incorporationInformationConnector = mockIncorpInfoConnector
+      override val payeRegistrationService = mockPayeRegService
     }
   }
 
-  def testFunc : Future[Result] = Future.successful(Ok)
+  def testFunc: Future[Result] = Future.successful(Ok)
+
   implicit val request = FakeRequest()
 
-  def validProfile(regSubmitted: Boolean, ackRefStatus : Option[String] = None)
-    = CurrentProfile("regId", CompanyRegistrationProfile("submitted", "txId", ackRefStatus), "", regSubmitted, None)
+  def validProfile(regSubmitted: Boolean, ackRefStatus: Option[String] = None)
+  = CurrentProfile("regId", CompanyRegistrationProfile("submitted", "txId", ackRefStatus), "", regSubmitted, None)
 
   "calling withCurrentProfile" should {
     "carry out the passed function when it is in the Session Repository" when {
@@ -65,7 +66,7 @@ class SessionProfileSpec extends PayeComponentSpec {
 
         mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, Some(validProfile(true)))
 
-        val result = testSession.withCurrentProfile ({ _ => testFunc }, checkSubmissionStatus = false)
+        val result = testSession.withCurrentProfile({ _ => testFunc }, checkSubmissionStatus = false)
         status(result) mustBe OK
       }
     }
@@ -76,7 +77,7 @@ class SessionProfileSpec extends PayeComponentSpec {
         when(mockKeystoreConnector.fetchAndGetFromKeystore(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(cp))
 
-        when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(None))
 
         val result = testSession.withCurrentProfile { _ => testFunc }
@@ -89,7 +90,7 @@ class SessionProfileSpec extends PayeComponentSpec {
         when(mockKeystoreConnector.fetchAndGetFromKeystore(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(cp))
 
-        when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(IncorporationStatus.accepted)))
 
         val result = testSession.withCurrentProfile { _ => testFunc }
@@ -102,10 +103,10 @@ class SessionProfileSpec extends PayeComponentSpec {
         when(mockKeystoreConnector.fetchAndGetFromKeystore(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(cp))
 
-        when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(IncorporationStatus.rejected)))
 
-        when(mockPayeRegService.handleIIResponse(ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPayeRegService.handleIIResponse(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(RegistrationDeletion.success))
 
         val result = testSession.withCurrentProfile { _ => testFunc }
@@ -162,7 +163,7 @@ class SessionProfileSpec extends PayeComponentSpec {
   "currentProfileChecks" should {
     "execute the wrapped function" when {
       "CR document has a held status and incorporatoin has been paid" in new Setup {
-        val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("held","bar",None, Some("paid")))
+        val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("held", "bar", None, Some("paid")))
 
         val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
         status(res) mustBe 200
@@ -174,19 +175,19 @@ class SessionProfileSpec extends PayeComponentSpec {
     }
     s"redirect user to ${controllers.userJourney.routes.SignInOutController.postSignIn().url}" when {
       "the corporation tax was rejected by the head of duty" in new Setup {
-        val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("foo","bar",Some("6")))
+        val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("foo", "bar", Some("6")))
 
         val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
         redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
       }
       "CR document has a locked status" in new Setup {
-        val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("locked","bar",None))
+        val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("locked", "bar", None))
 
         val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
         redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
       }
       "CR document has a held status and incorporation is unpaid" in new Setup {
-        val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("held","bar",None, paidIncorporation = None))
+        val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("held", "bar", None, paidIncorporation = None))
 
         val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
         redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
@@ -209,7 +210,7 @@ class SessionProfileSpec extends PayeComponentSpec {
       }
     }
     s"redirect user to ${controllers.userJourney.routes.SignInOutController.incorporationRejected().url}" when {
-      "the company incorporation has been rejected" in new Setup{
+      "the company incorporation has been rejected" in new Setup {
         val cp = validProfile(regSubmitted = false).copy(incorpStatus = Some(IncorporationStatus.rejected))
 
         val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))

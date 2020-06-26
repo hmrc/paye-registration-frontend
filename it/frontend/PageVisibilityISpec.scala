@@ -21,13 +21,12 @@ import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
 import play.api.libs.json.Json
-import play.api.test.FakeApplication
 
 class PageVisibilityISpec extends IntegrationSpecBase
-with LoginStub
-with CachingStub
-with BeforeAndAfterEach
-with WiremockHelper {
+  with LoginStub
+  with CachingStub
+  with BeforeAndAfterEach
+  with WiremockHelper {
 
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort
@@ -90,7 +89,7 @@ with WiremockHelper {
 
       stubSuccessfulLogin()
 
-//      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(false), regId = regId))
+      //      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(false), regId = regId))
       stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
@@ -118,7 +117,7 @@ with WiremockHelper {
 
 
       stubSessionCacheMetadata(SessionId, regId)
-//      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = None, regId = regId))
+      //      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = None, regId = regId))
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
@@ -144,7 +143,7 @@ with WiremockHelper {
       stubSuccessfulLogin()
 
       stubSessionCacheMetadata(SessionId, regId, true)
-//      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(true), regId = regId))
+      //      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(true), regId = regId))
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
@@ -174,7 +173,7 @@ with WiremockHelper {
       stubSuccessfulLogin()
 
       stubSessionCacheMetadata(SessionId, regId, true)
-//      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(true), regId = regId))
+      //      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(true), regId = regId))
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 

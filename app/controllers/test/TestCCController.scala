@@ -16,19 +16,19 @@
 
 package controllers.test
 
-import javax.inject.Inject
 import connectors.test.TestBusinessRegConnector
 import connectors.{IncorporationInformationConnector, KeystoreConnector, PAYERegistrationConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.test.TestCCUpdateForm
+import javax.inject.Inject
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.test.updateCCPage
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TestCCControllerImpl @Inject()(val messagesApi: MessagesApi,
@@ -50,10 +50,11 @@ trait TestCCController extends PayeBaseController {
     Future.successful(Ok(updateCCPage(TestCCUpdateForm.form)))
   }
 
-  def submitUpdateCC: Action[AnyContent] = isAuthorisedWithProfile { implicit user => profile =>
-    TestCCUpdateForm.form.bindFromRequest.fold(
-      errors  => Future.successful(BadRequest(updateCCPage(errors))),
-      valid   => testBusRegConnector.updateCompletionCapacity(profile.registrationID, valid.cc) map(_ => Ok(valid.cc))
-    )
+  def submitUpdateCC: Action[AnyContent] = isAuthorisedWithProfile { implicit user =>
+    profile =>
+      TestCCUpdateForm.form.bindFromRequest.fold(
+        errors => Future.successful(BadRequest(updateCCPage(errors))),
+        valid => testBusRegConnector.updateCompletionCapacity(profile.registrationID, valid.cc) map (_ => Ok(valid.cc))
+      )
   }
 }

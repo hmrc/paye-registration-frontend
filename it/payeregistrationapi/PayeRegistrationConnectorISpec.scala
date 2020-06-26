@@ -16,8 +16,6 @@
 
 package payeregistrationapi
 
-import java.time.LocalDate
-
 import com.github.tomakehurst.wiremock.client.WireMock._
 import config.WSHttpImpl
 import connectors.PAYERegistrationConnectorImpl
@@ -25,9 +23,9 @@ import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.api._
 import models.view.PAYEContactDetails
 import models.{Address, DigitalContactDetails}
-import play.api.{Application, Configuration, Environment}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
+import play.api.{Application, Configuration, Environment}
 import services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -76,22 +74,22 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       )
 
     val validCompanyDetails = CompanyDetails(companyName = "Test Company",
-                                             tradingName = Some("Test Company Trading Name"),
-                                             roAddress = Address(
-                                               "14 St Test Walk",
-                                               "Testley",
-                                               Some("Testford"),
-                                               Some("Testshire"),
-                                               Some("TE1 1ST"), Some("UK")
-                                             ),
-                                             ppobAddress = Address(
-                                               "15 St Test Avenue",
-                                               "Testpool",
-                                               Some("TestUponAvon"),
-                                               Some("Nowhereshire"),
-                                               Some("LE1 1ST"),
-                                               Some("UK")),
-                                             businessContactDetails = validBusinessContactDetails
+      tradingName = Some("Test Company Trading Name"),
+      roAddress = Address(
+        "14 St Test Walk",
+        "Testley",
+        Some("Testford"),
+        Some("Testshire"),
+        Some("TE1 1ST"), Some("UK")
+      ),
+      ppobAddress = Address(
+        "15 St Test Avenue",
+        "Testpool",
+        Some("TestUponAvon"),
+        Some("Nowhereshire"),
+        Some("LE1 1ST"),
+        Some("UK")),
+      businessContactDetails = validBusinessContactDetails
     )
 
     "get a model" in new Setup {
@@ -233,7 +231,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       await(getResponse) mustBe sicCodes
     }
 
-    "get an empty list if no sic codes" in new Setup{
+    "get an empty list if no sic codes" in new Setup {
 
       def getResponse = payeRegistrationConnector.getSICCodes(regId)
 
@@ -247,7 +245,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       await(getResponse) mustBe List.empty
     }
 
-    "upsert a model" in  new Setup{
+    "upsert a model" in new Setup {
       def patchResponse = payeRegistrationConnector.upsertSICCodes(regId, sicCodes)
 
       stubFor(patch(urlMatching(url("/sic-codes")))
@@ -282,7 +280,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       )
     )
 
-    "get a model" in new Setup{
+    "get a model" in new Setup {
       def getResponse = payeRegistrationConnector.getPAYEContact(regId)
 
       stubFor(get(urlMatching(url("/contact-correspond-paye")))
@@ -296,7 +294,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       await(getResponse) mustBe Some(validPAYEContact)
     }
 
-    "get a None" in  new Setup {
+    "get a None" in new Setup {
 
       def getResponse = payeRegistrationConnector.getPAYEContact(regId)
 
@@ -359,9 +357,10 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       await(getResponse) mustBe None
     }
 
-    "upsert a model" in new Setup{
+    "upsert a model" in new Setup {
 
       val jobTitle = "High Priestess"
+
       def patchResponse = payeRegistrationConnector.upsertCompletionCapacity(regId, jobTitle)
 
       stubFor(patch(urlMatching(url("/capacity")))

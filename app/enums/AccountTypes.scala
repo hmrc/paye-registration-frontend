@@ -17,6 +17,6 @@
 package enums
 
 object AccountTypes extends Enumeration {
-  val Organisation        = Value
-  val InvalidAccountType  = Value
+  val Organisation = Value
+  val InvalidAccountType = Value
 }

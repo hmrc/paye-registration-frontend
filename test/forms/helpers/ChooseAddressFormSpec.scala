@@ -21,6 +21,7 @@ import models.view._
 import play.api.data.FormError
 
 class ChooseAddressFormSpec extends PayeComponentSpec {
+
   object testForm extends ChooseAddressForm {
     override val errMessage = "tstErrorMessage"
   }
@@ -112,7 +113,7 @@ class ChooseAddressFormSpec extends PayeComponentSpec {
       )
 
       "Fail to bind with the correct errors" in {
-        testForm.addressChoiceFormatter.bind("chosenAddress", data) mustBe Left(List(FormError("chosenAddress",List("tstErrorMessage"),Nil)))
+        testForm.addressChoiceFormatter.bind("chosenAddress", data) mustBe Left(List(FormError("chosenAddress", List("tstErrorMessage"), Nil)))
       }
     }
 
@@ -123,7 +124,7 @@ class ChooseAddressFormSpec extends PayeComponentSpec {
       )
 
       "Fail to bind with the correct errors" in {
-        testForm.addressChoiceFormatter.bind("chosenAddress", data) mustBe Left(List(FormError("chosenAddress",List("tstErrorMessage"),Nil)))
+        testForm.addressChoiceFormatter.bind("chosenAddress", data) mustBe Left(List(FormError("chosenAddress", List("tstErrorMessage"), Nil)))
       }
     }
 
@@ -133,7 +134,7 @@ class ChooseAddressFormSpec extends PayeComponentSpec {
       )
 
       "Fail to bind with the correct errors" in {
-        testForm.addressChoiceFormatter.bind("chosenAddress", data) mustBe Left(List(FormError("chosenAddress",List("tstErrorMessage"),Nil)))
+        testForm.addressChoiceFormatter.bind("chosenAddress", data) mustBe Left(List(FormError("chosenAddress", List("tstErrorMessage"), Nil)))
       }
     }
   }

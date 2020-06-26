@@ -20,7 +20,7 @@ import play.api.libs.json.Json
 
 case class EmailRequest(to: Seq[String],
                         templateId: String,
-                        parameters: Map[String,String],
+                        parameters: Map[String, String],
                         force: Boolean)
 
 object EmailRequest {

@@ -30,18 +30,18 @@ case class Employment(employees: Employing.Value,
 object Employment {
   implicit val format: Format[Employment] = (
     (__ \ "employees").format[Employing.Value](Employing.format) and
-    (__ \ "firstPaymentDate").format[LocalDate] and
-    (__ \ "construction").format[Boolean] and
-    (__ \ "subcontractors").format[Boolean] and
-    (__ \ "companyPension").formatNullable[Boolean]
-  )(Employment.apply, unlift(Employment.unapply))
+      (__ \ "firstPaymentDate").format[LocalDate] and
+      (__ \ "construction").format[Boolean] and
+      (__ \ "subcontractors").format[Boolean] and
+      (__ \ "companyPension").formatNullable[Boolean]
+    ) (Employment.apply, unlift(Employment.unapply))
 }
 
 object Employing extends Enumeration {
-  val alreadyEmploying    = Value
-  val notEmploying        = Value
-  val willEmployThisYear  = Value
-  val willEmployNextYear  = Value
+  val alreadyEmploying = Value
+  val notEmploying = Value
+  val willEmployThisYear = Value
+  val willEmployNextYear = Value
 
   implicit val format = Format(Reads.enumNameReads(Employing), Writes.enumNameWrites)
 }

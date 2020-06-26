@@ -34,14 +34,14 @@ case class PAYERegistration(registrationID: String,
 object PAYERegistration {
   implicit val format: OFormat[PAYERegistration] = (
     (__ \ "registrationID").format[String] and
-    (__ \ "transactionID").format[String] and
-    (__ \ "formCreationTimestamp").format[String] and
-    (__ \ "status").format[PAYEStatus.Value] and
-    (__ \ "completionCapacity").format[String] and
-    (__ \ "companyDetails").format[CompanyDetails] and
-    (__ \ "employmentInfo").format[Employment] and
-    (__ \ "sicCodes").format[List[SICCode]] and
-    (__ \ "directors").format[List[Director]] and
-    (__ \ "payeContact").format[PAYEContact]
-  )(PAYERegistration.apply, unlift(PAYERegistration.unapply))
+      (__ \ "transactionID").format[String] and
+      (__ \ "formCreationTimestamp").format[String] and
+      (__ \ "status").format[PAYEStatus.Value] and
+      (__ \ "completionCapacity").format[String] and
+      (__ \ "companyDetails").format[CompanyDetails] and
+      (__ \ "employmentInfo").format[Employment] and
+      (__ \ "sicCodes").format[List[SICCode]] and
+      (__ \ "directors").format[List[Director]] and
+      (__ \ "payeContact").format[PAYEContact]
+    ) (PAYERegistration.apply, unlift(PAYERegistration.unapply))
 }

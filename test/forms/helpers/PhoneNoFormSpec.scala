@@ -20,6 +20,7 @@ import helpers.PayeComponentSpec
 import play.api.data.FormError
 
 class PhoneNoFormSpec extends PayeComponentSpec {
+
   object TestForm extends PhoneNoForm
 
   "Binding a form extending PhoneNoForm" should {

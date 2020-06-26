@@ -16,18 +16,18 @@
 
 package controllers.test
 
-import javax.inject.Inject
 import connectors._
 import connectors.test.TestBusinessRegConnector
 import controllers.{AuthRedirectUrls, PayeBaseController}
+import javax.inject.Inject
 import models.external.BusinessProfile
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{AnyContent, Request}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class BusinessProfileControllerImpl @Inject()(val messagesApi: MessagesApi,

@@ -16,10 +16,8 @@
 
 package services
 
-import javax.inject.Inject
-
 import audit._
-import config.FrontendAuditConnector
+import javax.inject.Inject
 import models.DigitalContactDetails
 import models.external.AuditingInformation
 import models.view.PAYEContactDetails
@@ -30,7 +28,7 @@ import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
-class AuditServiceImpl @Inject()(val auditConnector:AuditConnector) extends AuditService {
+class AuditServiceImpl @Inject()(val auditConnector: AuditConnector) extends AuditService {
 }
 
 trait AuditService {
@@ -53,19 +51,19 @@ trait AuditService {
                              (implicit auditInfo: AuditingInformation, headerCarrier: HeaderCarrier, req: Request[AnyContent]): Future[AuditResult] = {
 
     def convertPAYEContactViewToAudit(viewData: PAYEContactDetails) = AuditPAYEContactDetails(
-      contactName   = viewData.name,
-      email         = viewData.digitalContactDetails.email,
-      mobileNumber  = viewData.digitalContactDetails.mobileNumber,
-      phoneNumber   = viewData.digitalContactDetails.phoneNumber
+      contactName = viewData.name,
+      email = viewData.digitalContactDetails.email,
+      mobileNumber = viewData.digitalContactDetails.mobileNumber,
+      phoneNumber = viewData.digitalContactDetails.phoneNumber
     )
 
-    if(previousData.nonEmpty) {
+    if (previousData.nonEmpty) {
       val eventDetail = AmendedPAYEContactDetailsEventDetail(
-        externalUserId              = auditInfo.externalId,
-        authProviderId              = auditInfo.providerId,
-        journeyId                   = regId,
-        previousPAYEContactDetails  = convertPAYEContactViewToAudit(previousData.get),
-        newPAYEContactDetails       = convertPAYEContactViewToAudit(newData)
+        externalUserId = auditInfo.externalId,
+        authProviderId = auditInfo.providerId,
+        journeyId = regId,
+        previousPAYEContactDetails = convertPAYEContactViewToAudit(previousData.get),
+        newPAYEContactDetails = convertPAYEContactViewToAudit(newData)
       )
       auditConnector.sendExtendedEvent(new AmendedPAYEContactDetailsEvent(eventDetail))
     } else {

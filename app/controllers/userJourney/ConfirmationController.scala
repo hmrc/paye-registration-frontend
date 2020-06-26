@@ -17,9 +17,9 @@
 package controllers.userJourney
 
 import config.AppConfig
-import javax.inject.Inject
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
+import javax.inject.Inject
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
@@ -48,15 +48,16 @@ trait ConfirmationController extends PayeBaseController {
   val emailService: EmailService
   val s4LService: S4LService
 
-  def showConfirmation: Action[AnyContent] = isAuthorisedWithProfileNoSubmissionCheck { implicit request => profile =>
-    (for {
-      refs <- confirmationService.getAcknowledgementReference(profile.registrationID)
-      _    <- emailService.sendAcknowledgementEmail(profile, refs.get)
-      _    <- s4LService.clear(profile.registrationID)
-    } yield refs.fold(InternalServerError(views.html.pages.error.restart())) {
-      ref => Ok(ConfirmationPage(ref, confirmationService.determineIfInclusiveContentIsShown))
-    }).recover {
-      case _ => InternalServerError(views.html.pages.error.restart())
-    }
+  def showConfirmation: Action[AnyContent] = isAuthorisedWithProfileNoSubmissionCheck { implicit request =>
+    profile =>
+      (for {
+        refs <- confirmationService.getAcknowledgementReference(profile.registrationID)
+        _ <- emailService.sendAcknowledgementEmail(profile, refs.get)
+        _ <- s4LService.clear(profile.registrationID)
+      } yield refs.fold(InternalServerError(views.html.pages.error.restart())) {
+        ref => Ok(ConfirmationPage(ref, confirmationService.determineIfInclusiveContentIsShown))
+      }).recover {
+        case _ => InternalServerError(views.html.pages.error.restart())
+      }
   }
 }

@@ -23,6 +23,7 @@ class ChosenAddressSpec extends PayeComponentSpec {
   val tstChosenAddressROAddress = ChosenAddress(chosenAddress = ROAddress)
   val tstChosenAddressPPOBAddress = ChosenAddress(chosenAddress = PPOBAddress)
   val tstChosenAddressCorrespondenceAddress = ChosenAddress(chosenAddress = CorrespondenceAddress)
+
   def tstChosenAddressPrepopAddress(index: Int) = ChosenAddress(chosenAddress = PrepopAddress(index))
 
   "AddressChoice fromString" should {

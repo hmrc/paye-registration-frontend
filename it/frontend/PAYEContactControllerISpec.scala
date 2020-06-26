@@ -23,7 +23,6 @@ import models.Address
 import models.external._
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
-import play.api.test.FakeApplication
 
 class PAYEContactControllerISpec extends IntegrationSpecBase
   with LoginStub

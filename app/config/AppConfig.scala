@@ -25,10 +25,8 @@ import models.Address
 import models.api.Director
 import models.external.OfficerList
 import play.api.Mode.Mode
-import play.api.Play.{configuration, current}
 import play.api.libs.json.{Json, Reads}
-import play.api.{Configuration, Environment, Play}
-import uk.gov.hmrc.play.config.ServicesConfig
+import play.api.{Configuration, Environment}
 
 @Singleton
 class AppConfig @Inject()(val environment: Environment,

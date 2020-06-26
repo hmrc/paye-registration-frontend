@@ -18,17 +18,18 @@ package services
 
 import java.time.LocalDate
 
-import javax.inject.Inject
 import connectors.PAYERegistrationConnector
+import javax.inject.Inject
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{NewTaxYear, SystemDate}
 
 import scala.concurrent.Future
 
 class ConfirmationServiceImpl @Inject()(val payeRegistrationConnector: PAYERegistrationConnector) extends ConfirmationService {
-  def now: LocalDate  = SystemDate.getSystemDate.toLocalDate
-  val startDate       = NewTaxYear.startPeriod
-  val endDate         = NewTaxYear.endPeriod
+  def now: LocalDate = SystemDate.getSystemDate.toLocalDate
+
+  val startDate = NewTaxYear.startPeriod
+  val endDate = NewTaxYear.endPeriod
 }
 
 trait ConfirmationService {

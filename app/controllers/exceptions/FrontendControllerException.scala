@@ -19,18 +19,21 @@ package controllers.exceptions
 import config.AppConfig
 import play.api.Logger
 import play.api.i18n.Messages
-import play.api.mvc.{Request, Result}
 import play.api.mvc.Results._
+import play.api.mvc.{Request, Result}
 import views.html.pages.error.restart
 
 sealed trait FrontendControllerException extends Exception {
   def view: Option[_] = None
+
   def recover(implicit request: Request[_], messages: Messages, appConfig: AppConfig): Result
+
   def message: String
 }
 
 sealed trait RestartException extends FrontendControllerException {
   override def view: Option[restart.type] = Some(restart)
+
   def recover(implicit request: Request[_], messages: Messages, appConfig: AppConfig): Result = {
     Logger.error(message)
     view.fold[Result](InternalServerError)(restart => InternalServerError(restart()))
@@ -38,13 +41,17 @@ sealed trait RestartException extends FrontendControllerException {
 }
 
 case class GeneralException(message: String) extends RestartException
+
 case class MissingViewElementException(message: String) extends RestartException
-case class IncompleteSummaryBlockException(block: String, regId: String) extends  RestartException {
+
+case class IncompleteSummaryBlockException(block: String, regId: String) extends RestartException {
   val message = s"$block block is incomplete when trying to load the summary page for regId: $regId"
 }
+
 case class MissingSummaryBlockException(block: String, regId: String) extends RestartException {
   val message = s"$block block missing while building summary for regId: $regId"
 }
+
 case class MissingSummaryBlockItemException(block: String, item: String, regId: String) extends RestartException {
   val message = s"element $item was missing from $block while building summary for regId: $regId"
 }

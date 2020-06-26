@@ -25,18 +25,18 @@ case class CoHoCompanyDetailsModel(companyName: String, roAddress: Address)
 object CoHoCompanyDetailsModel {
   val r =
     (__ \ "company_name").read[String] and
-    (__ \ "registered_office_address").read[Address]
+      (__ \ "registered_office_address").read[Address]
 
   val w =
     (__ \ "company_name").write[String] and
-    (__ \ "registered_office_address").write[Address]
+      (__ \ "registered_office_address").write[Address]
 
-  val apiReads: Reads[CoHoCompanyDetailsModel]    = r (CoHoCompanyDetailsModel.apply _)
-  val apiWrites: Writes[CoHoCompanyDetailsModel]  = w (unlift(CoHoCompanyDetailsModel.unapply))
+  val apiReads: Reads[CoHoCompanyDetailsModel] = r(CoHoCompanyDetailsModel.apply _)
+  val apiWrites: Writes[CoHoCompanyDetailsModel] = w(unlift(CoHoCompanyDetailsModel.unapply))
   val incorpInfoReads = (
     (__ \ "company_name").read[String] and
-    (__ \ "registered_office_address").read[Address](Address.incorpInfoReads)
-  )(CoHoCompanyDetailsModel.apply _)
+      (__ \ "registered_office_address").read[Address](Address.incorpInfoReads)
+    ) (CoHoCompanyDetailsModel.apply _)
 
   implicit val format = Format(apiReads, apiWrites)
 }

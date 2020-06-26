@@ -29,16 +29,17 @@ import uk.gov.hmrc.auth.core.retrieve.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.play.bootstrap.controller.{BaseController, FrontendController}
 import utils.SessionProfile
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait PayeBaseController extends FrontendController with BaseController with AuthorisedFunctions with Logging with SessionProfile with I18nSupport {
 
-  type AuthorisedActionWithProfile                = Request[AnyContent] => CurrentProfile => Future[Result]
+  type AuthorisedActionWithProfile = Request[AnyContent] => CurrentProfile => Future[Result]
   type AuthorisedActionWithProfileAndAuditingInfo = Request[AnyContent] => CurrentProfile => AuditingInformation => Future[Result]
 
   def redirectToLogin: Result
+
   def redirectToPostSign: Result
 
   def isAuthorised(f: => (Request[AnyContent] => Future[Result])): Action[AnyContent] = Action.async { implicit request =>
@@ -85,7 +86,7 @@ trait PayeBaseController extends FrontendController with BaseController with Aut
 
   def isAuthorisedAndIsOrg(f: => (Request[AnyContent] => Future[Result])): Action[AnyContent] = Action.async { implicit request =>
     authorised(ConfidenceLevel.L50).retrieve(affinityGroup) { aG =>
-      if(aG.contains(Organisation)) {
+      if (aG.contains(Organisation)) {
         f(request)
       } else {
         logger.warn(s"User attempting to access ${request.path} doesn't have org affinity redirecting to OTRS")
@@ -134,7 +135,7 @@ trait AuthRedirectUrls {
 
   private lazy val buildCompanyAuthUrl = {
     val companyAuthHost = config.underlying.getString(s"$configRoot.auth.company-auth.url")
-    val loginPath       = config.underlying.getString(s"$configRoot.auth.login_path")
+    val loginPath = config.underlying.getString(s"$configRoot.auth.login_path")
     s"$companyAuthHost$loginPath"
   }
 
@@ -142,7 +143,7 @@ trait AuthRedirectUrls {
 
   lazy val redirectToLogin: Result = Redirect(buildCompanyAuthUrl, Map(
     "continue" -> Seq(continueUrl),
-    "origin"   -> Seq(appName)
+    "origin" -> Seq(appName)
   ))
 
   lazy val redirectToPostSign = Redirect(userJourneyRoutes.SignInOutController.postSignIn())

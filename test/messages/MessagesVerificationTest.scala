@@ -25,7 +25,8 @@ class MessagesVerificationTest extends PayeComponentSpec {
   val lines = Source.fromFile("conf/messages").getLines().toList
 
   private def key(line: String): String = line.takeWhile(_ != '=')
-  def findErrors(regex: String) = lines.map(line => if(line.matches(regex)) key(line.trim) else "").distinct.filterNot(_.eq(""))
+
+  def findErrors(regex: String) = lines.map(line => if (line.matches(regex)) key(line.trim) else "").distinct.filterNot(_.eq(""))
 
   "Messages file" should {
     "not contain unescaped single quotes" in {
@@ -33,7 +34,7 @@ class MessagesVerificationTest extends PayeComponentSpec {
 
       val errorList = findErrors(testRegex)
 
-      if(errorList.nonEmpty) {
+      if (errorList.nonEmpty) {
         fail(s"Found an unescaped single quotes in messages file under keys 👇 ${"\n"} ${errorList.mkString("\n")}")
       }
     }
@@ -43,7 +44,7 @@ class MessagesVerificationTest extends PayeComponentSpec {
 
       val errorList = findErrors(testRegex)
 
-      if(errorList.nonEmpty) {
+      if (errorList.nonEmpty) {
         fail(s"Found an open brace not preceded by double quotes, but preceded by an equals sign for keys 👇 ${"\n"}  ${errorList.mkString("\n")}")
       }
     }

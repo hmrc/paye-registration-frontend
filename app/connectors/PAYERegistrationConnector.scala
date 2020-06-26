@@ -22,20 +22,23 @@ import config.WSHttp
 import enums.{DownstreamOutcome, PAYEStatus, RegistrationDeletion}
 import javax.inject.Inject
 import models.api.{Director, Employment, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
-import play.api.{Configuration, Environment, Logger}
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, Reads}
+import play.api.{Configuration, Environment, Logger}
 import services.MetricsService
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
 sealed trait DESResponse
+
 object Success extends DESResponse
+
 object Cancelled extends DESResponse
+
 object Failed extends DESResponse
+
 object TimedOut extends DESResponse
 
 class PAYERegistrationConnectorImpl @Inject()(val metricsService: MetricsService,
@@ -43,6 +46,7 @@ class PAYERegistrationConnectorImpl @Inject()(val metricsService: MetricsService
                                               override val runModeConfiguration: Configuration,
                                               environment: Environment) extends PAYERegistrationConnector with ServicesConfig {
   val payeRegUrl = baseUrl("paye-registration")
+
   override protected def mode = environment.mode
 }
 
@@ -95,7 +99,7 @@ trait PAYERegistrationConnector {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
     http.PUT[String, HttpResponse](s"$payeRegUrl/paye-registration/$regId/submit-registration", "") map {
       _.status match {
-        case OK         =>
+        case OK =>
           payeRegTimer.stop()
           Success
         case NO_CONTENT =>
@@ -105,8 +109,8 @@ trait PAYERegistrationConnector {
     } recover {
       case e: Exception =>
         logResponse(e, "submitRegistration", "submitting PAYE Registration to DES", regId) match {
-          case _ : Upstream5xxResponse  => TimedOut
-          case _                        => Failed
+          case _: Upstream5xxResponse => TimedOut
+          case _ => Failed
         }
     }
   }
@@ -143,8 +147,8 @@ trait PAYERegistrationConnector {
     val url = s"$payeRegUrl/paye-registration/$regID/employment-info"
     http.GET[HttpResponse](url) map { employment =>
       payeRegTimer.stop()
-      if(employment.status == 204) None else employment.json.validate[Employment] fold(
-        _   => throw new NoSuchElementException(s"Call to $url returned a ${employment.status} but no Employment could be created"),
+      if (employment.status == 204) None else employment.json.validate[Employment] fold(
+        _ => throw new NoSuchElementException(s"Call to $url returned a ${employment.status} but no Employment could be created"),
         Some(_)
       )
     } recover {
@@ -154,7 +158,7 @@ trait PAYERegistrationConnector {
     }
   }
 
-  def upsertEmployment (regID: String, employment: Employment)(implicit hc: HeaderCarrier): Future[Employment] = {
+  def upsertEmployment(regID: String, employment: Employment)(implicit hc: HeaderCarrier): Future[Employment] = {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
     http.PATCH[Employment, Employment](s"$payeRegUrl/paye-registration/$regID/employment-info", employment) map { resp =>
       payeRegTimer.stop()
@@ -300,13 +304,14 @@ trait PAYERegistrationConnector {
         payeRegTimer.stop()
         logger.info(s"[PAYERegistrationConnector] [getStatus] received NotFound when checking status for regId $regId")
         None
-      case e : Throwable =>
+      case e: Throwable =>
         payeRegTimer.stop()
         logResponse(e, "getStatus", "getting PAYE registration document status", regId)
         None
     }
   }
-// Test Endpoint
+
+  // Test Endpoint
   def setBackendDate(date: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val newDate = if (date.isEmpty) "time-clear" else s"${date}Z"
     http.GET[HttpResponse](s"$payeRegUrl/paye-registration/test-only/feature-flag/system-date/$newDate") map {
@@ -363,16 +368,18 @@ trait PAYERegistrationConnector {
 
   private[connectors] def logResponse(e: Throwable, f: String, m: String, regId: String, txId: Option[String] = None): Throwable = {
     val optTxId = txId.map(t => s" and txId: $t").getOrElse("")
+
     def log(s: String) = logger.warn(s"[PAYERegistrationConnector] [$f] received $s when $m for regId: $regId$optTxId")
+
     e match {
-      case e: NotFoundException   => log("NOT FOUND")
+      case e: NotFoundException => log("NOT FOUND")
       case e: BadRequestException => log("BAD REQUEST")
       case e: Upstream4xxResponse => e.upstreamResponseCode match {
-        case 403  => log("FORBIDDEN")
-        case _    => log(s"Upstream 4xx: ${e.upstreamResponseCode} ${e.message}")
+        case 403 => log("FORBIDDEN")
+        case _ => log(s"Upstream 4xx: ${e.upstreamResponseCode} ${e.message}")
       }
       case e: Upstream5xxResponse => log(s"Upstream 5xx: ${e.upstreamResponseCode}")
-      case e: Exception           => log(s"ERROR: ${e.getMessage}")
+      case e: Exception => log(s"ERROR: ${e.getMessage}")
     }
     e
   }

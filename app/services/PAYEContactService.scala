@@ -16,10 +16,9 @@
 
 package services
 
-import javax.inject.Inject
-
 import connectors.PAYERegistrationConnector
 import enums.{CacheKeys, DownstreamOutcome}
+import javax.inject.Inject
 import models.Address
 import models.api.{PAYEContact => PAYEContactAPI}
 import models.external.AuditingInformation
@@ -37,7 +36,7 @@ class PAYEContactServiceImpl @Inject()(val payeRegConnector: PAYERegistrationCon
                                        val prepopService: PrepopulationService,
                                        val auditService: AuditService) extends PAYEContactService
 
-trait PAYEContactService  {
+trait PAYEContactService {
   val payeRegConnector: PAYERegistrationConnector
   val s4LService: S4LService
   val companyDetailsService: CompanyDetailsService
@@ -65,7 +64,7 @@ trait PAYEContactService  {
       case addr: Address if companyDetails.ppobAddress.contains(addr) => Map("ro" -> companyDetails.roAddress, "correspondence" -> addr)
       case addr: Address => Map("ro" -> companyDetails.roAddress, "correspondence" -> addr) ++ companyDetails.ppobAddress.map(("ppob", _)).toMap
     } getOrElse {
-      if( companyDetails.ppobAddress.contains(companyDetails.roAddress) ) {
+      if (companyDetails.ppobAddress.contains(companyDetails.roAddress)) {
         Map("ro" -> companyDetails.roAddress)
       } else {
         Map("ro" -> companyDetails.roAddress) ++ companyDetails.ppobAddress.map(("ppob", _)).toMap
@@ -96,10 +95,10 @@ trait PAYEContactService  {
   def submitPAYEContact(viewModel: PAYEContactView, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     viewToAPI(viewModel).fold(
       incompleteView =>
-        saveToS4L(regId, incompleteView) map {_ => DownstreamOutcome.Success},
+        saveToS4L(regId, incompleteView) map { _ => DownstreamOutcome.Success },
       completeAPI =>
         for {
-          details   <- payeRegConnector.upsertPAYEContact(regId, completeAPI)
+          details <- payeRegConnector.upsertPAYEContact(regId, completeAPI)
           clearData <- s4LService.clear(regId)
         } yield DownstreamOutcome.Success
     )
@@ -132,8 +131,8 @@ trait PAYEContactService  {
   }
 
   private[services] def flattenData(data: PAYEContactDetails) = data.copy(name = data.name.trim.replace(" ", "").toLowerCase, digitalContactDetails = data.digitalContactDetails.copy(
-    email         = data.digitalContactDetails.email map(_.trim.replace(" ", "").toLowerCase),
-    phoneNumber   = data.digitalContactDetails.phoneNumber map(_.trim.replace(" ", "").toLowerCase),
-    mobileNumber  = data.digitalContactDetails.mobileNumber map(_.trim.replace(" ", "").toLowerCase))
+    email = data.digitalContactDetails.email map (_.trim.replace(" ", "").toLowerCase),
+    phoneNumber = data.digitalContactDetails.phoneNumber map (_.trim.replace(" ", "").toLowerCase),
+    mobileNumber = data.digitalContactDetails.mobileNumber map (_.trim.replace(" ", "").toLowerCase))
   )
 }

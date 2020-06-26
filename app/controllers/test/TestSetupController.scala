@@ -16,20 +16,18 @@
 
 package controllers.test
 
-import java.time.LocalDate
-
-import javax.inject.Inject
 import connectors._
 import connectors.test._
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
+import javax.inject.Inject
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Configuration, Logger}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestSetupControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
@@ -64,7 +62,7 @@ trait TestSetupController
   val s4LService: S4LService
 
   private def log[T](f: String, res: Future[T])(implicit ec: ExecutionContext): Future[T] = {
-    res.flatMap (msg => {
+    res.flatMap(msg => {
       Logger.info(s"[TestSetupController] [$f] - ${msg.toString}")
       res
     })
@@ -73,11 +71,11 @@ trait TestSetupController
   def testSetup(companyName: String) = isAuthorised { implicit request =>
     for {
       bp <- log("CurrentProfileSetup", doBusinessProfileSetup)
-      _  <- log("CoHoCompanyDetailsTeardown", doCoHoCompanyDetailsTearDown(bp.registrationID))
-      _  <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(bp.registrationID, companyName))
-      _  <- log("RegTeardown", doIndividualRegTeardown(bp.registrationID))
-      _  <- log("S4LTeardown", doTearDownS4L(bp.registrationID))
-      _  <- log("CCUpdate", testBusinessRegConnector.updateCompletionCapacity(bp.registrationID, "director"))
+      _ <- log("CoHoCompanyDetailsTeardown", doCoHoCompanyDetailsTearDown(bp.registrationID))
+      _ <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(bp.registrationID, companyName))
+      _ <- log("RegTeardown", doIndividualRegTeardown(bp.registrationID))
+      _ <- log("S4LTeardown", doTearDownS4L(bp.registrationID))
+      _ <- log("CCUpdate", testBusinessRegConnector.updateCompletionCapacity(bp.registrationID, "director"))
     } yield Redirect(controllers.userJourney.routes.PayeStartController.steppingStone())
   }
 
@@ -93,7 +91,7 @@ trait TestSetupController
   def addIncorpUpdate(success: Boolean, incorpDate: Option[String], crn: Option[String]): Action[AnyContent] = isAuthorised { implicit request =>
     (for {
       profile <- businessRegConnector.retrieveCurrentProfile
-      resp    <- testIncorpInfoConnector.addIncorpUpdate(profile.registrationID, success, incorpDate, crn)
+      resp <- testIncorpInfoConnector.addIncorpUpdate(profile.registrationID, success, incorpDate, crn)
     } yield {
       Ok(s"Incorp Update added for regId: ${profile.registrationID} and success: $success")
     }).recover {

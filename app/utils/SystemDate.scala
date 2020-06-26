@@ -24,7 +24,7 @@ import uk.gov.hmrc.time.CurrentTaxYear
 
 object SystemDate extends SystemDateT
 
-  trait SystemDateT extends CurrentTaxYear {
+trait SystemDateT extends CurrentTaxYear {
   def getSystemDate: LocalDateTime = Option(System.getProperty("feature.system-date")).fold(LocalDateTime.now()) {
     case "" => LocalDateTime.now()
     case date => LocalDateTime.parse(date)

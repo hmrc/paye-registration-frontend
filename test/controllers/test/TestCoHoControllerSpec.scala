@@ -39,15 +39,15 @@ class TestCoHoControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
 
     val controller = new TestCoHoController {
-      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
+      override val redirectToLogin = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
 
       override val testIncorpInfoConnector = mockTestIncorpInfoConnector
-      override val keystoreConnector       = mockKeystoreConnector
-      override val businessRegConnector    = mockBusinessRegistrationConnector
-      override val coHoAPIService          = mockIncorpInfoService
-      override val messagesApi             = mockMessagesApi
-      override val authConnector           = mockAuthConnector
+      override val keystoreConnector = mockKeystoreConnector
+      override val businessRegConnector = mockBusinessRegistrationConnector
+      override val coHoAPIService = mockIncorpInfoService
+      override val messagesApi = mockMessagesApi
+      override val authConnector = mockAuthConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
     }

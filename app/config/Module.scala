@@ -46,6 +46,7 @@ class Module extends AbstractModule {
     bind(classOf[LoggingFilterCustom]).to(classOf[LoggingFilterImpl]).asEagerSingleton()
     bind(classOf[PAYECSRFExceptionsFilter]).to(classOf[PAYECSRFExceptionsFilterImpl]).asEagerSingleton()
   }
+
   private def bindHmrcDependencies(): Unit = {
     bind(classOf[Config]).toInstance(ConfigFactory.load())
 

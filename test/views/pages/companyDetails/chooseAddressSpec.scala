@@ -29,7 +29,7 @@ import views.html.pages.payeContact.{correspondenceAddress => CorrespondenceAddr
 class chooseAddressSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
   implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
-  implicit lazy val messagesApi : MessagesApi = mockMessagesApi
+  implicit lazy val messagesApi: MessagesApi = mockMessagesApi
 
   val testROAddress =
     Address(

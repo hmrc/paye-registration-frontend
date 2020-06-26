@@ -37,9 +37,9 @@ class PAYEContactDetailsSpec extends PayeComponentSpec {
     val maxModel = PAYEContactDetails(
       "tstName",
       DigitalContactDetails(
-      email = Some("test@email.com"),
-      mobileNumber = Some("07943000111"),
-      phoneNumber = Some("0161385032")
+        email = Some("test@email.com"),
+        mobileNumber = Some("07943000111"),
+        phoneNumber = Some("0161385032")
       )
     )
 

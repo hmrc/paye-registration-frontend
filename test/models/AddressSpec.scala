@@ -53,34 +53,35 @@ class AddressSpec extends PayeComponentSpec {
                        country: Option[String] = None,
                        postcode: Option[String] = None,
                        auditRef: Option[String] = None
-                        ) = Address(
-                          "14 St Test Walker",
-                          "Testford",
-                          line3,
-                          line4,
-                          postcode,
-                          country,
-                          auditRef
-                        )
+                      ) = Address(
+      "14 St Test Walker",
+      "Testford",
+      line3,
+      line4,
+      postcode,
+      country,
+      auditRef
+    )
+
     "succeed" when {
       "all lines are defined" in {
         val tstJson = Json.parse(
-        """{
-          |  "auditRef":"tstAuditRef",
-          |  "address":{
-          |    "lines":[
-          |      "14 St Test Walker",
-          |      "Testford",
-          |      "Testley",
-          |      "Testshire"
-          |    ],
-          |    "postcode":"TE1 1ST",
-          |    "country":{
-          |      "code":"UK",
-          |      "name":"United Kingdom"
-          |    }
-          |  }
-          |}""".stripMargin)
+          """{
+            |  "auditRef":"tstAuditRef",
+            |  "address":{
+            |    "lines":[
+            |      "14 St Test Walker",
+            |      "Testford",
+            |      "Testley",
+            |      "Testshire"
+            |    ],
+            |    "postcode":"TE1 1ST",
+            |    "country":{
+            |      "code":"UK",
+            |      "name":"United Kingdom"
+            |    }
+            |  }
+            |}""".stripMargin)
 
         val res = outcomeAddress(line3 = Some("Testley"), line4 = Some("Testshire"), postcode = Some("TE1 1ST"), auditRef = Some("tstAuditRef"))
 
@@ -449,30 +450,31 @@ class AddressSpec extends PayeComponentSpec {
 
   "Reading Address from CoHo Json format" should {
     def readCoHoAddress(json: JsValue) = Json.fromJson[Address](json)(Address.incorpInfoReads)
+
     "succeed" when {
 
       "removes characters that would normally split out into 2 (e.g. Æ -> AE)" in {
-          val tstCHROAddressJson = Json.parse(
-            """{
-              |  "premises":"Unit 14234æ",
-              |  "address_line_1":"ReallyÆ Long Street Name",
-              |  "address_line_2":"TØesœtley",
-              |  "locality":"TestŒford",
-              |  "country":"UKß",
-              |  "postal_code":"TE1 ø1ST"
-              |}""".stripMargin)
+        val tstCHROAddressJson = Json.parse(
+          """{
+            |  "premises":"Unit 14234æ",
+            |  "address_line_1":"ReallyÆ Long Street Name",
+            |  "address_line_2":"TØesœtley",
+            |  "locality":"TestŒford",
+            |  "country":"UKß",
+            |  "postal_code":"TE1 ø1ST"
+            |}""".stripMargin)
 
-          val testAddress = Address(
-            line1 = "Unit 14234",
-            line2 = "Really Long Street Name",
-            line3 = Some("Testley"),
-            line4 = Some("Testford"),
-            country = None,
-            postCode = Some("TE1 1ST")
-          )
+        val testAddress = Address(
+          line1 = "Unit 14234",
+          line2 = "Really Long Street Name",
+          line3 = Some("Testley"),
+          line4 = Some("Testford"),
+          country = None,
+          postCode = Some("TE1 1ST")
+        )
 
-          readCoHoAddress(tstCHROAddressJson) mustBe JsSuccess(testAddress)
-        }
+        readCoHoAddress(tstCHROAddressJson) mustBe JsSuccess(testAddress)
+      }
 
       "there is a long first line" in {
         val tstCHROAddressJson = Json.parse(
@@ -772,18 +774,19 @@ class AddressSpec extends PayeComponentSpec {
 
     "Reading Address from PrePop Json format" should {
       def readPrePopAddress(json: JsValue) = Json.fromJson[Address](json)(Address.prePopFormat)
+
       "succeed" when {
         "All lines are defined" in {
           val json = Json.parse(
-          """{
-            |  "addressLine1":"Line 1",
-            |  "addressLine2":"Line 2",
-            |  "addressLine3":"Line 3",
-            |  "addressLine4":"Line 4",
-            |  "country":"UK",
-            |  "postcode":"TE1 1ST",
-            |  "auditRef":"tstAuditRef"
-            |}
+            """{
+              |  "addressLine1":"Line 1",
+              |  "addressLine2":"Line 2",
+              |  "addressLine3":"Line 3",
+              |  "addressLine4":"Line 4",
+              |  "country":"UK",
+              |  "postcode":"TE1 1ST",
+              |  "auditRef":"tstAuditRef"
+              |}
           """.stripMargin
           )
           val addr = Address(
@@ -877,6 +880,7 @@ class AddressSpec extends PayeComponentSpec {
 
     "Writing Address to PrePop Json format" should {
       def writePrePopAddress(addr: Address) = Json.toJson[Address](addr)(Address.prePopWrites)
+
       "succeed" when {
         "All lines are defined" in {
           val json = Json.parse(

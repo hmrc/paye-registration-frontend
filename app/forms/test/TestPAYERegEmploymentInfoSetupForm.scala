@@ -19,7 +19,7 @@ package forms.test
 import java.time.LocalDate
 
 import forms.helpers.CustomDateForm
-import forms.test.TestPAYERegSetupForm.{requiredBoolean, threePartDateWithComparison}
+import forms.test.TestPAYERegSetupForm.requiredBoolean
 import models.api.{Employing, Employment}
 import play.api.data.Forms.{mapping, _}
 import play.api.data.format.Formatter
@@ -28,19 +28,22 @@ import utils.SystemDate
 
 object TestPAYERegEmploymentInfoSetupForm extends CustomDateForm {
   override val customFormPrefix = "earliestDate"
+
   override def validation(dt: LocalDate, cdt: LocalDate) = Right(dt)
+
   def now: LocalDate = SystemDate.getSystemDate.toLocalDate
 
   implicit def employingStatusFormatter: Formatter[Employing.Value] = new Formatter[Employing.Value] {
     def bind(key: String, data: Map[String, String]) = {
-      Right(data.getOrElse(key,"")).right.flatMap {
-        case "alreadyEmploying"   => Right(Employing.alreadyEmploying)
+      Right(data.getOrElse(key, "")).right.flatMap {
+        case "alreadyEmploying" => Right(Employing.alreadyEmploying)
         case "willEmployNextYear" => Right(Employing.willEmployNextYear)
         case "willEmployThisYear" => Right(Employing.willEmployThisYear)
-        case "notEmploying"       => Right(Employing.notEmploying)
-        case _                    => Left(Seq(FormError(key, "error.required", Nil)))
+        case "notEmploying" => Right(Employing.notEmploying)
+        case _ => Left(Seq(FormError(key, "error.required", Nil)))
       }
     }
+
     def unbind(key: String, value: Employing.Value) = Map(key -> value.toString)
   }
 
@@ -48,11 +51,11 @@ object TestPAYERegEmploymentInfoSetupForm extends CustomDateForm {
 
   val form = Form(
     mapping(
-      "employees"      -> employingStatus,
-      "earliestDate"   -> threePartDateWithComparison(now),
-      "cis"            -> requiredBoolean,
+      "employees" -> employingStatus,
+      "earliestDate" -> threePartDateWithComparison(now),
+      "cis" -> requiredBoolean,
       "subcontractors" -> requiredBoolean,
-      "pensions"       -> optional(requiredBoolean)
+      "pensions" -> optional(requiredBoolean)
     )(Employment.apply)(Employment.unapply)
   )
 }

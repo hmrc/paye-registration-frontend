@@ -16,15 +16,13 @@
 
 package controllers.userJourney
 
-import javax.inject.Inject
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
-import play.api.{Configuration, Environment}
+import javax.inject.Inject
 import play.api.i18n.MessagesApi
+import play.api.{Configuration, Environment}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.play.config.ServicesConfig
-import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
@@ -41,6 +39,7 @@ class DashboardControllerImpl @Inject()(val messagesApi: MessagesApi,
   override lazy val companyRegUrl = getConfString("company-registration-frontend.www.url", "Could not find Company Registration Frontend URL")
   override lazy val companyRegUri = getConfString("company-registration-frontend.www.uri", "Could not find Company Registration Frontend URI")
   override val config: Configuration = runModeConfiguration
+
   override protected def mode = environment.mode
 }
 

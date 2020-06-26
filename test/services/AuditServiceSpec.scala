@@ -25,6 +25,7 @@ import uk.gov.hmrc.http.logging.SessionId
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 class AuditServiceSpec extends PayeComponentSpec {
+
   class Setup {
     val service = new AuditService {
       override val auditConnector = mockAuditConnector

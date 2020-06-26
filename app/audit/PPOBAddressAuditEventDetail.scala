@@ -30,9 +30,9 @@ object PPOBAddressAuditEventDetail {
 
   implicit val writes = new Writes[PPOBAddressAuditEventDetail] {
     override def writes(detail: PPOBAddressAuditEventDetail): JsValue = Json.obj(
-      EXTERNAL_USER_ID          -> detail.externalUserId,
-      AUTH_PROVIDER_ID          -> detail.authProviderId,
-      JOURNEY_ID                -> detail.regId,
+      EXTERNAL_USER_ID -> detail.externalUserId,
+      AUTH_PROVIDER_ID -> detail.authProviderId,
+      JOURNEY_ID -> detail.regId,
       REGISTERED_OFFICE_ADDRESS -> "true"
     )
   }

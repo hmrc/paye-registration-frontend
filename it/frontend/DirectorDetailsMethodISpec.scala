@@ -23,12 +23,12 @@ import play.api.http.HeaderNames
 import play.api.test.FakeApplication
 
 class DirectorDetailsMethodISpec extends IntegrationSpecBase
-                                    with LoginStub
-                                    with CachingStub
-                                    with BeforeAndAfterEach
-                                    with WiremockHelper {
+  with LoginStub
+  with CachingStub
+  with BeforeAndAfterEach
+  with WiremockHelper {
 
-  val mockHost = WiremockHelper.wiremockHost
+  val mockHost = WiremockHelper.wiremockHostø
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
@@ -59,7 +59,6 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
     "defaultOfficerList" -> "WwogICAgewogICAgICAibmFtZSIgOiAidGVzdCIsCiAgICAgICJuYW1lX2VsZW1lbnRzIiA6IHsKICAgICAgICAiZm9yZW5hbWUiIDogInRlLHN0MSIsCiAgICAgICAgIm90aGVyX2ZvcmVuYW1lcyIgOiAidGUsc3QxMSIsCiAgICAgICAgInN1cm5hbWUiIDogInRlc3QsYSIsCiAgICAgICAgInRpdGxlIiA6ICJNLC5yIgogICAgICB9LAogICAgICAib2ZmaWNlcl9yb2xlIiA6ICJkaXJlY3RvciIKICAgIH0sIHsKICAgICAgIm5hbWUiIDogInRlc3QiLAogICAgICAibmFtZV9lbGVtZW50cyIgOiB7CiAgICAgICAgImZvcmVuYW1lIiA6ICJ0ZXN0MiIsCiAgICAgICAgIm90aGVyX2ZvcmVuYW1lcyIgOiAidGVzdDIyIiwKICAgICAgICAic3VybmFtZSIgOiAidGVzdGIiLAogICAgICAgICJ0aXRsZSIgOiAiTXIiCiAgICAgIH0sCiAgICAgICJvZmZpY2VyX3JvbGUiIDogImRpcmVjdG9yIgogICAgfSwgewogICAgICAibmFtZSIgOiAidGVzdCIsCiAgICAgICJuYW1lX2VsZW1lbnRzIiA6IHsKICAgICAgICAiZm9yZW5hbWUiIDogInRlc3QzIiwKICAgICAgICAib3RoZXJfZm9yZW5hbWVzIiA6ICJ0ZXN0MzMiLAogICAgICAgICJzdXJuYW1lIiA6ICJ0ZXN0YyIsCiAgICAgICAgInRpdGxlIiA6ICJUZXN0IFRpdGxlIFRoYXQgSXMgTW9yZSBUaGFuIFR3ZW50eSBDaGFycyIKICAgICAgfSwKICAgICAgIm9mZmljZXJfcm9sZSIgOiAiZGlyZWN0b3IiCiAgICB9CiAgXQ==",
     "mongodb.uri" -> s"$mongoUri"
   ))
-
 
 
   override def beforeEach() {

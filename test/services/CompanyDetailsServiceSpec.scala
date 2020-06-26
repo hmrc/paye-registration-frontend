@@ -25,7 +25,6 @@ import models.view.{CompanyDetails => CompanyDetailsView, TradingName => Trading
 import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{Format, Json}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.cache.client.CacheMap

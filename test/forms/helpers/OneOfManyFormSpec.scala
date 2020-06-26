@@ -31,7 +31,7 @@ class OneOfManyFormSpec extends PayeComponentSpec {
       val data = Map[String, String](
         "test1" -> "test",
         "test2" -> ""
-        )
+      )
       TestForm.multiPartFormatter.bind("test1", data) mustBe Right(Some("test"))
       TestForm.multiPartFormatter.bind("test2", data) mustBe Right(None)
       TestForm.multiPartFormatter.bind("test3", data) mustBe Right(None)
@@ -40,7 +40,7 @@ class OneOfManyFormSpec extends PayeComponentSpec {
     "bind with another field completed" in {
       val data = Map[String, String](
         "test2" -> "test"
-        )
+      )
       TestForm.multiPartFormatter.bind("test1", data) mustBe Right(None)
       TestForm.multiPartFormatter.bind("test2", data) mustBe Right(Some("test"))
       TestForm.multiPartFormatter.bind("test3", data) mustBe Right(None)
@@ -48,32 +48,32 @@ class OneOfManyFormSpec extends PayeComponentSpec {
 
     "fail to bind with no fields completed" in {
       val data = Map[String, String](
-        )
+      )
       TestForm.multiPartFormatter.bind("test1", data) mustBe Left(Seq(FormError("noFieldsCompleted-test1", "noFieldsErrMsg")))
     }
 
     "fail to bind with all fields blank" in {
       val data = Map[String, String](
-          "test1" -> "",
-          "test2" -> "",
-          "test3" -> ""
-        )
+        "test1" -> "",
+        "test2" -> "",
+        "test3" -> ""
+      )
       TestForm.multiPartFormatter.bind("test1", data) mustBe Left(Seq(FormError("noFieldsCompleted-test1", "noFieldsErrMsg")))
     }
 
     "fail to bind with other, non included fields completed" in {
       val data = Map[String, String](
-          "unIncludedField" -> "string",
-          "nextUnIncludedField" -> "string"
-        )
+        "unIncludedField" -> "string",
+        "nextUnIncludedField" -> "string"
+      )
       TestForm.multiPartFormatter.bind("test1", data) mustBe Left(Seq(FormError("noFieldsCompleted-test1", "noFieldsErrMsg")))
     }
 
     "bind with multiple fields completed" in {
       val data = Map[String, String](
-          "test1" -> "string",
-          "test2" -> "otherString"
-        )
+        "test1" -> "string",
+        "test2" -> "otherString"
+      )
       TestForm.multiPartFormatter.bind("test1", data) mustBe Right(Some("string"))
       TestForm.multiPartFormatter.bind("test2", data) mustBe Right(Some("otherString"))
       TestForm.multiPartFormatter.bind("test3", data) mustBe Right(None)

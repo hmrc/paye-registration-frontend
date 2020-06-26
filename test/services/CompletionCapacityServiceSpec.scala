@@ -29,7 +29,7 @@ class CompletionCapacityServiceSpec extends PayeComponentSpec {
 
   class Setup {
     val service = new CompletionCapacityService {
-      override val payeRegConnector              = mockPAYERegConnector
+      override val payeRegConnector = mockPAYERegConnector
       override val businessRegistrationConnector = mockBusinessRegistrationConnector
     }
   }

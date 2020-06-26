@@ -20,7 +20,6 @@ import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
-import play.api.test.FakeApplication
 
 class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStub with BeforeAndAfterEach with WiremockHelper {
 
@@ -59,8 +58,9 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
   override def beforeEach() {
     resetWiremock()
   }
+
   val regId = "3"
-  val txId  = "12345"
+  val txId = "12345"
 
   val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
   val incorpUpdateSuccessResponse =
@@ -172,14 +172,14 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/EmploymentV2", 200, dummyS4LResponse)
       stubGet(s"/incorporation-information/$txId/incorporation-update", 200, incorpUpdateSuccessResponse)
 
-     val fResponse = buildClient("/employ-anyone").
+      val fResponse = buildClient("/employ-anyone").
         withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck").
         post(Map(
-          "csrfToken"->Seq("xxx-ignored-xxx"),
+          "csrfToken" -> Seq("xxx-ignored-xxx"),
           "alreadyPaying" -> Seq("true"),
           "earliestDateDay" -> Seq("21"),
           "earliestDateMonth" -> Seq("05"),
-          "earliestDateYear"  -> Seq("2018")
+          "earliestDateYear" -> Seq("2018")
         ))
       val response = await(fResponse)
       response.status mustBe 303
@@ -199,11 +199,11 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       val fResponse = buildClient("/employ-anyone").
         withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck").
         post(Map(
-          "csrfToken"->Seq("xxx-ignored-xxx"),
+          "csrfToken" -> Seq("xxx-ignored-xxx"),
           "alreadyPaying" -> Seq("true"),
           "earliestDateDay" -> Seq("21"),
           "earliestDateMonth" -> Seq("05"),
-          "earliestDateYear"  -> Seq("2017")
+          "earliestDateYear" -> Seq("2017")
         ))
       val response = await(fResponse)
       response.status mustBe 303
@@ -220,11 +220,11 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
       val fResponse = buildClient("/employ-anyone").
         withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck").
         post(Map(
-          "csrfToken"->Seq("xxx-ignored-xxx"),
+          "csrfToken" -> Seq("xxx-ignored-xxx"),
           "alreadyPaying" -> Seq("true"),
           "earliestDateDay" -> Seq(""),
           "earliestDateMonth" -> Seq("05"),
-          "earliestDateYear"  -> Seq("2017")
+          "earliestDateYear" -> Seq("2017")
         ))
       val response = await(fResponse)
       response.status mustBe 400
@@ -305,31 +305,31 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
     }
   }
 
-    "submitCompanyPensions" should {
-      "redirect to completion capacity page on successful submit" in {
-        setupSimpleAuthMocks()
-        stubSuccessfulLogin()
-        stubPayeRegDocumentStatus(regId)
-        stubSessionCacheMetadata(SessionId, regId)
-        stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
-        stubPut(s"/save4later/paye-registration-frontend/$regId/data/EmploymentV2", 200, dummyS4LResponse)
-        stubGet(s"/incorporation-information/$txId/incorporation-update", 200, incorpUpdateSuccessResponse)
-        stubGet(s"/paye-registration/$regId/employment-info", 200, employmentInfoAlreadyEmploying)
-        stubPatch(s"/paye-registration/$regId/employment-info", 200, employmentInfoAlreadyEmployingNoPension)
-        stubDelete(s"/save4later/paye-registration-frontend/$regId", 200, dummyS4LResponse)
+  "submitCompanyPensions" should {
+    "redirect to completion capacity page on successful submit" in {
+      setupSimpleAuthMocks()
+      stubSuccessfulLogin()
+      stubPayeRegDocumentStatus(regId)
+      stubSessionCacheMetadata(SessionId, regId)
+      stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
+      stubPut(s"/save4later/paye-registration-frontend/$regId/data/EmploymentV2", 200, dummyS4LResponse)
+      stubGet(s"/incorporation-information/$txId/incorporation-update", 200, incorpUpdateSuccessResponse)
+      stubGet(s"/paye-registration/$regId/employment-info", 200, employmentInfoAlreadyEmploying)
+      stubPatch(s"/paye-registration/$regId/employment-info", 200, employmentInfoAlreadyEmployingNoPension)
+      stubDelete(s"/save4later/paye-registration-frontend/$regId", 200, dummyS4LResponse)
 
-        await(setSystemDate())
+      await(setSystemDate())
 
-        val fResponse = buildClient("/pension-payments").
-          withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck").
-          post(Map(
-            "csrfToken"->Seq("xxx-ignored-xxx"),
-            "paysPension" -> Seq("false")
-          ))
+      val fResponse = buildClient("/pension-payments").
+        withHeaders(HeaderNames.COOKIE -> getSessionCookie(), "Csrf-Token" -> "nocheck").
+        post(Map(
+          "csrfToken" -> Seq("xxx-ignored-xxx"),
+          "paysPension" -> Seq("false")
+        ))
 
-        val response = await(fResponse)
-        response.status mustBe 303
-        response.header(HeaderNames.LOCATION) mustBe Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity().url)
-      }
+      val response = await(fResponse)
+      response.status mustBe 303
+      response.header(HeaderNames.LOCATION) mustBe Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity().url)
     }
+  }
 }

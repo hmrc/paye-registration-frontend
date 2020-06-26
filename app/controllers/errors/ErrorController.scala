@@ -17,9 +17,9 @@
 package controllers.errors
 
 import config.AppConfig
-import javax.inject.Inject
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
+import javax.inject.Inject
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
@@ -46,20 +46,24 @@ trait ErrorController extends PayeBaseController {
   implicit val appConfig: AppConfig
   val thresholdService: ThresholdService
 
-  def ineligible: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
-    Future.successful(Ok(Ineligible()))
+  def ineligible: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    _ =>
+      Future.successful(Ok(Ineligible()))
   }
 
-  def newIneligible: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
-    Future.successful(Ok(IneligiblePage(thresholdService.getCurrentThresholds.getOrElse("weekly", 116))))
+  def newIneligible: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    _ =>
+      Future.successful(Ok(IneligiblePage(thresholdService.getCurrentThresholds.getOrElse("weekly", 116))))
   }
 
-  def retrySubmission: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
-    Future.successful(Ok(submissionTimeout()))
+  def retrySubmission: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    _ =>
+      Future.successful(Ok(submissionTimeout()))
   }
 
   def failedSubmission: Action[AnyContent] =
-    isAuthorisedWithProfile { implicit request => _ =>
-    Future.successful(Ok(submissionFailed()))
-  }
+    isAuthorisedWithProfile { implicit request =>
+      _ =>
+        Future.successful(Ok(submissionFailed()))
+    }
 }

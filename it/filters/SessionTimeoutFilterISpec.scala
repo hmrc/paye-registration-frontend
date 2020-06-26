@@ -22,10 +22,10 @@ import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
 
 class SessionTimeoutFilterISpec extends IntegrationSpecBase
-                                with LoginStub
-                                with CachingStub
-                                with BeforeAndAfterEach
-                                with WiremockHelper {
+  with LoginStub
+  with CachingStub
+  with BeforeAndAfterEach
+  with WiremockHelper {
 
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort
@@ -76,16 +76,16 @@ class SessionTimeoutFilterISpec extends IntegrationSpecBase
 
         val companyProfileDoc =
           s"""
-            |{
-            |  "company_name":"$companyName",
-            |  "registered_office_address":{
-            |    "premises":"1",
-            |    "address_line_1":"test street",
-            |    "locality":"Testford",
-            |    "country":"UK",
-            |    "postal_code":"TE2 2ST"
-            |  }
-            |}
+             |{
+             |  "company_name":"$companyName",
+             |  "registered_office_address":{
+             |    "premises":"1",
+             |    "address_line_1":"test street",
+             |    "locality":"Testford",
+             |    "country":"UK",
+             |    "postal_code":"TE2 2ST"
+             |  }
+             |}
           """.stripMargin
         stubGet(s"/incorporation-information/$txId/company-profile", 200, companyProfileDoc)
         stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")

@@ -18,17 +18,16 @@ package frontend
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
-import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import models.external.CurrentProfile
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
-import play.api.test.FakeApplication
 import play.mvc.Http.Status
 
 class RestartPAYEISpec extends IntegrationSpecBase
-                          with LoginStub
-                          with CachingStub
-                          with BeforeAndAfterEach
-                          with WiremockHelper {
+  with LoginStub
+  with CachingStub
+  with BeforeAndAfterEach
+  with WiremockHelper {
 
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort

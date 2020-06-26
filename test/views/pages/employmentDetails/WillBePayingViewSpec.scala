@@ -29,7 +29,7 @@ import views.html.pages.employmentDetails.willBePaying
 class WillBePayingViewSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
   implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
-  implicit lazy val messagesApi : MessagesApi = mockMessagesApi
+  implicit lazy val messagesApi: MessagesApi = mockMessagesApi
 
   "The Will Be Paying screen" should {
     "display the dynamic radio button 'beforeNewTaxYear' when 'willBePaying' is Yes" when {

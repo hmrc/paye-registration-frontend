@@ -24,7 +24,8 @@ import utils.SystemDate
 class ThresholdServiceSpec extends PayeComponentSpec {
 
   val testService = new ThresholdService {
-    override def now: LocalDate   = SystemDate.getSystemDate.toLocalDate
+    override def now: LocalDate = SystemDate.getSystemDate.toLocalDate
+
     override val nextTaxYearStart = LocalDate.of(2020, 4, 6)
   }
 

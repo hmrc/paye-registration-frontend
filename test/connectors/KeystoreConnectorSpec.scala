@@ -29,16 +29,18 @@ import scala.concurrent.Future
 class KeystoreConnectorSpec extends PayeComponentSpec {
 
   val connector = new KeystoreConnector {
-    override val metricsService       = new MockMetrics
-    override val sessionCache         = mockSessionCache
-    override val sessionRepository    = mockSessionRepository
-    override val successCounter       = metricsService.keystoreSuccessResponseCounter
-    override val failedCounter        = metricsService.keystoreFailedResponseCounter
+    override val metricsService = new MockMetrics
+    override val sessionCache = mockSessionCache
+    override val sessionRepository = mockSessionRepository
+    override val successCounter = metricsService.keystoreSuccessResponseCounter
+    override val failedCounter = metricsService.keystoreFailedResponseCounter
     override val emptyResponseCounter = metricsService.keystoreFailedResponseCounter
-    override def timer   = metricsService.keystoreResponseTimer.time()
+
+    override def timer = metricsService.keystoreResponseTimer.time()
   }
 
   case class TestModel(test: String)
+
   object TestModel {
     implicit val formats = Json.format[TestModel]
   }

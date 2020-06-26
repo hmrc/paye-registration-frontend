@@ -20,13 +20,8 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import org.scalatestplus.play.{OneServerPerSuite, PlaySpec}
-import play.api.libs.json.{JsValue, Json}
+import org.scalatestplus.play.OneServerPerSuite
 import play.api.libs.ws.WSClient
-import repositories.ReactiveMongoRepository
-import uk.gov.hmrc.http.cache.client.CacheMap
-
-import scala.concurrent.{Await, Future}
 
 object WiremockHelper {
   val wiremockPort = 11111
@@ -54,6 +49,7 @@ trait WiremockHelper {
   lazy val ws = app.injector.instanceOf(classOf[WSClient])
 
   def buildClient(path: String) = ws.url(s"http://localhost:$port/register-for-paye$path").withFollowRedirects(false)
+
   def buildClientInternal(path: String) = ws.url(s"http://localhost:$port/internal$path").withFollowRedirects(false)
 
 

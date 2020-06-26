@@ -36,7 +36,7 @@ trait KeystoreFixture {
     data = Map.empty[String, JsValue]
   )
 
-  val blankCacheMap = CacheMap (
+  val blankCacheMap = CacheMap(
     id = "tstID",
     data = Map.empty[String, JsValue]
   )

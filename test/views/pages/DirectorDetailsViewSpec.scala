@@ -28,7 +28,7 @@ class DirectorDetailsViewSpec extends PayeComponentSpec with PayeFakedApp with I
 
   implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
-  implicit lazy val messagesApi : MessagesApi = mockMessagesApi
+  implicit lazy val messagesApi: MessagesApi = mockMessagesApi
 
   val d1 = "Toto Tata (id 0)"
   val d2 = "Bib Bloup (id 1)"
@@ -86,7 +86,9 @@ class DirectorDetailsViewSpec extends PayeComponentSpec with PayeFakedApp with I
 
     "have all directors shown" in {
       val list = document.getElementsByClass("form-field")
+
       def get(n: Int) = list.get(n).text
+
       get(0) mustBe s"$d1's National Insurance number For example, QQ 12 34 56 C"
       get(1) mustBe s"$d2's National Insurance number"
       get(2) mustBe s"$d3's National Insurance number"

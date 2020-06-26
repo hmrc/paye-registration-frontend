@@ -20,7 +20,6 @@ import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
 import play.api.libs.ws.WSResponse
-import play.api.test.FakeApplication
 
 class SignOutISpec extends IntegrationSpecBase with LoginStub with CachingStub with BeforeAndAfterEach with WiremockHelper {
 

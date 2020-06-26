@@ -16,16 +16,16 @@
 
 package controllers.test
 
-import javax.inject.Inject
 import connectors.{BusinessRegistrationConnector, IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
+import javax.inject.Inject
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TestCacheControllerImpl @Inject()(val businessRegConnector: BusinessRegistrationConnector,
@@ -46,7 +46,7 @@ trait TestCacheController extends PayeBaseController {
   def tearDownS4L: Action[AnyContent] = isAuthorised { implicit request =>
     for {
       profile <- businessRegConnector.retrieveCurrentProfile
-      res     <- doTearDownS4L(profile.registrationID)
+      res <- doTearDownS4L(profile.registrationID)
     } yield Ok(res)
   }
 

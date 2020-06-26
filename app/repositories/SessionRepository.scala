@@ -40,7 +40,7 @@ case class DatedSessionMap(sessionId: String,
 
 object DatedSessionMap {
   implicit val dateFormat = ReactiveMongoFormats.dateTimeFormats
-  implicit val formats    = Json.format[DatedSessionMap]
+  implicit val formats = Json.format[DatedSessionMap]
 
   def apply(sessionMap: SessionMap): DatedSessionMap = DatedSessionMap(sessionMap.sessionId, sessionMap.registrationId, sessionMap.transactionId, sessionMap.data)
 }
@@ -48,7 +48,7 @@ object DatedSessionMap {
 class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
   extends ReactiveRepository[DatedSessionMap, BSONObjectID](config.getString("appName").get, mongo, DatedSessionMap.formats) {
 
-  val fieldName        = "lastUpdated"
+  val fieldName = "lastUpdated"
   val sessionRegistrationIndexIndex = "sessionRegistrationIndex"
 
   val expireAfterSeconds = "expireAfterSeconds"
@@ -73,9 +73,9 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
     upsertSessionMapByKey("sessionId", sm.sessionId, sm)
 
   private def upsertSessionMapByKey(key: String, id: String, sm: SessionMap): Future[Boolean] = {
-    val selector   = Json.obj(key -> id)
+    val selector = Json.obj(key -> id)
     val cmDocument = Json.toJson(DatedSessionMap(sm))
-    val modifier   = BSONDocument("$set" -> cmDocument)
+    val modifier = BSONDocument("$set" -> cmDocument)
 
     collection.update(selector, modifier, upsert = true).map(_.ok)
   }

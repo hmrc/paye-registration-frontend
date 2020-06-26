@@ -18,9 +18,9 @@ package connectors
 
 import helpers.PayeComponentSpec
 import models.external.EmailRequest
-import uk.gov.hmrc.http.{CorePost, HttpException, HttpResponse}
 import org.mockito.ArgumentMatchers.{any, same}
 import org.mockito.Mockito.{times, verify, when}
+import uk.gov.hmrc.http.{CorePost, HttpException, HttpResponse}
 
 import scala.concurrent.Future
 
@@ -42,25 +42,25 @@ class EmailConnectorSpec extends PayeComponentSpec {
   "requestEmailToBeSent" should {
     "return an EmailSent" when {
       "call to email service returns a non success code" in new Setup {
-        when(mockWSHttp.POST[EmailRequest,HttpResponse](same("FOOBARWIZZ"),same(validEmailRequest),any())(any(),any(),any(),any()))
+        when(mockWSHttp.POST[EmailRequest, HttpResponse](same("FOOBARWIZZ"), same(validEmailRequest), any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(HttpResponse(200, None, Map.empty, None)))
 
-        val res  = await(emailConn.requestEmailToBeSent(validEmailRequest))
+        val res = await(emailConn.requestEmailToBeSent(validEmailRequest))
         res mustBe EmailSent
 
-        verify(mockWSHttp, times(1)).POST[EmailRequest,HttpResponse](any(),any(),any())(any(),any(),any(),any())
+        verify(mockWSHttp, times(1)).POST[EmailRequest, HttpResponse](any(), any(), any())(any(), any(), any(), any())
       }
     }
 
     "return an EmailDifficulties" when {
       "call to email service returns a non success code" in new Setup {
-        when(mockWSHttp.POST[EmailRequest,HttpResponse](same("FOOBARWIZZ"),same(validEmailRequest),any())(any(),any(),any(),any()))
+        when(mockWSHttp.POST[EmailRequest, HttpResponse](same("FOOBARWIZZ"), same(validEmailRequest), any())(any(), any(), any(), any()))
           .thenReturn(Future.failed(new HttpException("", 502)))
 
-        val res  = await(emailConn.requestEmailToBeSent(validEmailRequest))
+        val res = await(emailConn.requestEmailToBeSent(validEmailRequest))
         res mustBe EmailDifficulties
 
-        verify(mockWSHttp, times(1)).POST[EmailRequest,HttpResponse](any(),any(),any())(any(),any(),any(),any())
+        verify(mockWSHttp, times(1)).POST[EmailRequest, HttpResponse](any(), any(), any())(any(), any(), any(), any())
       }
     }
   }

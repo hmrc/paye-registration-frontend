@@ -18,7 +18,6 @@ package utils
 
 import java.time.LocalDate
 import java.time.format.{DateTimeFormatter, ResolverStyle}
-import java.time.temporal.ChronoUnit
 
 trait DateUtil {
   def toDate(year: String, month: String, day: String): LocalDate = {

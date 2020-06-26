@@ -64,11 +64,11 @@ class SessionRepositoryISpec extends IntegrationSpecBase {
     val sessionMap = SessionMap(sId, "regId", "txId", Map("test" -> Json.obj()))
 
     "cache" when {
-      "given a new session map" in new Setup(){
+      "given a new session map" in new Setup() {
         await(repository.upsertSessionMap(sessionMap))
         count mustBe 1
       }
-      "given an updated session map" in new Setup(){
+      "given an updated session map" in new Setup() {
         await(repository.upsertSessionMap(sessionMap))
         count mustBe 1
 
@@ -79,7 +79,7 @@ class SessionRepositoryISpec extends IntegrationSpecBase {
       }
     }
     "fetch" when {
-      "given a session map exists" in new Setup(){
+      "given a session map exists" in new Setup() {
         await(repository.upsertSessionMap(sessionMap))
         count mustBe 1
 
