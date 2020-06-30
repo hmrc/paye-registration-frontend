@@ -38,7 +38,7 @@ object CompletionCapacityForm {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], UserCapacity.Value] = {
       Try(UserCapacity.fromString(data.getOrElse(key, ""))) match {
         case Success(capacity) => Right(capacity)
-        case _                 => Left(Seq(FormError(key, "pages.completionCapacity.error")))
+        case _ => Left(Seq(FormError(key, "pages.completionCapacity.error")))
       }
     }
 
@@ -49,23 +49,23 @@ object CompletionCapacityForm {
 
   val otherValidation: Mapping[String] = {
     val otherConstraint: Constraint[String] = Constraint("constraint.other")({ other =>
-      val errors = if(other.trim.matches(ccRegex)) {
+      val errors = if (other.trim.matches(ccRegex)) {
         Nil
       } else {
         other.trim match {
-          case ""                         => Seq(ValidationError("pages.completionCapacity.other.label"))
+          case "" => Seq(ValidationError("pages.completionCapacity.other.label"))
           case long if long.length >= 100 => Seq(ValidationError("pages.completionCapacity.other.error"))
-          case _                          => Seq(ValidationError("pages.completionCapacity.error.invalidChars"))
+          case _ => Seq(ValidationError("pages.completionCapacity.error.invalidChars"))
         }
       }
-      if(errors.isEmpty) Valid else Invalid(errors)
+      if (errors.isEmpty) Valid else Invalid(errors)
     })
     text.verifying(otherConstraint)
   }
 
   val form = Form(
     mapping(
-      "completionCapacity"      -> completionCapacity,
+      "completionCapacity" -> completionCapacity,
       "completionCapacityOther" -> ifOther(otherValidation)
     )(CompletionCapacityView.apply)(CompletionCapacityView.unapply)
   )

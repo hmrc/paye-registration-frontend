@@ -22,37 +22,38 @@ import play.api.data.validation.{ValidationError, _}
 
 object Validators extends DateUtil {
 
-  private val emailRegex            = """^(?!.{71,})([-0-9a-zA-Z.+_]+@[-0-9a-zA-Z.+_]+\.[a-zA-Z]{1,11})$"""
-  private val phoneNoTypeRegex      = """^[0-9]{1,20}$""".r
-  private val nonEmptyRegex         = """^(?=\s*\S).*$""".r
-  private val validNinoFormat       = "[[a-zA-Z]&&[^DFIQUVdfiquv]][[a-zA-Z]&&[^DFIQUVOdfiquvo]] ?\\d{2} ?\\d{2} ?\\d{2} ?[a-dA-D]{1}"
-  private val invalidPrefixes       = List("BG", "GB", "NK", "KN", "TN", "NT", "ZZ")
+  private val emailRegex = """^(?!.{71,})([-0-9a-zA-Z.+_]+@[-0-9a-zA-Z.+_]+\.[a-zA-Z]{1,11})$"""
+  private val phoneNoTypeRegex = """^[0-9]{1,20}$""".r
+  private val nonEmptyRegex = """^(?=\s*\S).*$""".r
+  private val validNinoFormat = "[[a-zA-Z]&&[^DFIQUVdfiquv]][[a-zA-Z]&&[^DFIQUVOdfiquvo]] ?\\d{2} ?\\d{2} ?\\d{2} ?[a-dA-D]{1}"
+  private val invalidPrefixes = List("BG", "GB", "NK", "KN", "TN", "NT", "ZZ")
   private val natureOfBusinessRegex = """^(?![\r\n|\r|\n|\t])[A-Za-z 0-9\-,/&']{1,100}$"""
-  val postcodeRegex                 = """^[A-Z]{1,2}[0-9][0-9A-Z]? [0-9][A-Z]{2}$"""
-  private val nameRegex             = """^[A-Za-z 0-9\'-]{1,100}$""".r
-  val minDate                       = LocalDate.of(1900,1,1)
-  val desSessionRegex               = "^[A-Za-z0-9-]{0,60}$"
+  val postcodeRegex = """^[A-Z]{1,2}[0-9][0-9A-Z]? [0-9][A-Z]{2}$"""
+  private val nameRegex = """^[A-Za-z 0-9\'-]{1,100}$""".r
+  val minDate = LocalDate.of(1900, 1, 1)
+  val desSessionRegex = "^[A-Za-z0-9-]{0,60}$"
 
-  val datePatternRegex              = """(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})"""
+  val datePatternRegex = """(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})"""
 
   private def hasValidPrefix(nino: String) = !invalidPrefixes.exists(nino.toUpperCase.startsWith)
 
   def isValidNino(nino: String): Boolean = nino.nonEmpty && hasValidPrefix(nino) && nino.matches(validNinoFormat)
 
-  def optionalValidation(constraint : Constraint[String]): Constraint[Option[String]] = Constraint("constraints.optional")({
-    case Some(text: String)  if text != ""  => constraint(text)
-    case _                                  => Valid
+  def optionalValidation(constraint: Constraint[String]): Constraint[Option[String]] = Constraint("constraints.optional")({
+    case Some(text: String) if text != "" => constraint(text)
+    case _ => Valid
   })
 
   def isValidPhoneNo(phone: String): Either[String, String] = {
     def isValidNumber(s: String) = s.replaceAll(" ", "").matches("[0-9]+")
+
     val digitCount = phone.trim.replaceAll(" ", "").length
 
-    if(isValidNumber(phone) && digitCount > 20) {
+    if (isValidNumber(phone) && digitCount > 20) {
       Left("errors.invalid.contactNum.tooLong")
-    } else if(isValidNumber(phone) && digitCount < 10) {
+    } else if (isValidNumber(phone) && digitCount < 10) {
       Left("errors.invalid.contactNum.tooShort")
-    } else if(isValidNumber(phone)) {
+    } else if (isValidNumber(phone)) {
       Right(phone.trim.replace(" ", ""))
     } else {
       Left("errors.invalid.contactNum")
@@ -60,23 +61,23 @@ object Validators extends DateUtil {
   }
 
   val emailValidation: Constraint[String] = Constraint("constraints.emailCheck")({ text =>
-    val errors = if(text.trim.matches(emailRegex)) {
+    val errors = if (text.trim.matches(emailRegex)) {
       Nil
     } else {
       text.trim match {
-        case ""                    => Seq(ValidationError("errors.invalid.email.noEntry"))
+        case "" => Seq(ValidationError("errors.invalid.email.noEntry"))
         case _ if text.length > 70 => Seq(ValidationError("errors.invalid.email.tooLong"))
-        case _                     => Seq(ValidationError("errors.invalid.email"))
+        case _ => Seq(ValidationError("errors.invalid.email"))
       }
     }
-    if(errors.isEmpty) Valid else Invalid(errors)
+    if (errors.isEmpty) Valid else Invalid(errors)
   })
 
   val nameValidation: Constraint[String] = Constraint("constraints.nameCheck")({ text =>
     val errors = text.trim match {
       case name if name.length <= 0 => Seq(ValidationError("pages.payeContact.nameMandatory"))
-      case nameRegex()              => Nil
-      case _                        => Seq(ValidationError("errors.invalid.name.invalidChars"))
+      case nameRegex() => Nil
+      case _ => Seq(ValidationError("errors.invalid.name.invalidChars"))
     }
     if (errors.isEmpty) Valid else Invalid(errors)
   })

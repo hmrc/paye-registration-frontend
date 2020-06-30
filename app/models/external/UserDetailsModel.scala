@@ -28,12 +28,12 @@ case class UserDetailsModel(name: String,
                             authProviderId: String,
                             authProviderType: String)
 
-object UserDetailsModel{
+object UserDetailsModel {
   implicit val format = Json.format[UserDetailsModel]
 }
 
-case class UserIds(internalId : String,
-                   externalId : String)
+case class UserIds(internalId: String,
+                   externalId: String)
 
 object UserIds {
   implicit val format = Json.format[UserIds]

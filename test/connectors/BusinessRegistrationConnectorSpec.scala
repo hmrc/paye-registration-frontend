@@ -33,7 +33,7 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
   class Setup {
     val testConnector = new BusinessRegistrationConnector {
       override val businessRegUrl = "testBusinessRegUrl"
-      override val http           = mockWSHttp
+      override val http = mockWSHttp
       override val metricsService = new MockMetrics
     }
   }
@@ -159,7 +159,7 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
         (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(204)))
 
-      await(testConnector.upsertTradingName(regId,tradingName)) mustBe tradingName
+      await(testConnector.upsertTradingName(regId, tradingName)) mustBe tradingName
 
     }
     "return the trading name on a non success response from Business-Registration" in new Setup {
@@ -167,7 +167,7 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
         (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new Exception("foo bar wizz bang")))
 
-      await(testConnector.upsertTradingName(regId,tradingName)) mustBe tradingName
+      await(testConnector.upsertTradingName(regId, tradingName)) mustBe tradingName
     }
   }
 
@@ -268,24 +268,24 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
         None
       ),
       Address(
-      "line one",
-      "line two",
-      Some("line three"),
-      Some("line four"),
-      None,
-      Some("UK"),
-      None
+        "line one",
+        "line two",
+        Some("line three"),
+        Some("line four"),
+        None,
+        Some("UK"),
+        None
       )
     )
 
-    "return a list of addresses" in new Setup{
+    "return a list of addresses" in new Setup {
       when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(addressJson))
 
       await(testConnector.retrieveAddresses(regId)) mustBe addresses
     }
 
-    "return an empty list of addresses in the case of an error" in new Setup{
+    "return an empty list of addresses in the case of an error" in new Setup {
       when(mockWSHttp.GET[JsValue](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(Upstream4xxResponse("badRequest", 400, 400)))
 

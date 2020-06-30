@@ -17,46 +17,44 @@
 package controllers.userJourney
 
 import config.AppConfig
-import javax.inject.Inject
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
-import play.api.Configuration
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
+import javax.inject.Inject
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{confirmation => ConfirmationPage}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ConfirmationControllerImpl @Inject()(val messagesApi: MessagesApi,
-                                           val keystoreConnector: KeystoreConnector,
+class ConfirmationControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
                                            val confirmationService: ConfirmationService,
-                                           val config: Configuration,
                                            val s4LService: S4LService,
                                            val companyDetailsService: CompanyDetailsService,
                                            val incorpInfoService: IncorporationInformationService,
                                            val emailService: EmailService,
                                            val authConnector: AuthConnector,
                                            val incorporationInformationConnector: IncorporationInformationConnector,
-                                           val payeRegistrationService: PAYERegistrationService
-                                          )(implicit val appConfig: AppConfig) extends ConfirmationController with AuthRedirectUrls
+                                           val payeRegistrationService: PAYERegistrationService,
+                                           mcc: MessagesControllerComponents
+                                          )(implicit val appConfig: AppConfig) extends ConfirmationController(mcc) with AuthRedirectUrls
 
-trait ConfirmationController extends PayeBaseController {
+abstract class ConfirmationController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
   val confirmationService: ConfirmationService
   val emailService: EmailService
   val s4LService: S4LService
 
-  def showConfirmation: Action[AnyContent] = isAuthorisedWithProfileNoSubmissionCheck { implicit request => profile =>
-    (for {
-      refs <- confirmationService.getAcknowledgementReference(profile.registrationID)
-      _    <- emailService.sendAcknowledgementEmail(profile, refs.get)
-      _    <- s4LService.clear(profile.registrationID)
-    } yield refs.fold(InternalServerError(views.html.pages.error.restart())) {
-      ref => Ok(ConfirmationPage(ref, confirmationService.determineIfInclusiveContentIsShown))
-    }).recover {
-      case _ => InternalServerError(views.html.pages.error.restart())
-    }
+  def showConfirmation: Action[AnyContent] = isAuthorisedWithProfileNoSubmissionCheck { implicit request =>
+    profile =>
+      (for {
+        refs <- confirmationService.getAcknowledgementReference(profile.registrationID)
+        _ <- emailService.sendAcknowledgementEmail(profile, refs.get)
+        _ <- s4LService.clear(profile.registrationID)
+      } yield refs.fold(InternalServerError(views.html.pages.error.restart())) {
+        ref => Ok(ConfirmationPage(ref, confirmationService.determineIfInclusiveContentIsShown))
+      }).recover {
+        case _ => InternalServerError(views.html.pages.error.restart())
+      }
   }
 }

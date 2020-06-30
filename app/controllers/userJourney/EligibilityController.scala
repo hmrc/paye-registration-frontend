@@ -16,39 +16,36 @@
 
 package controllers.userJourney
 
+import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import javax.inject.Inject
-import play.api.Mode.Mode
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
-import play.api.{Configuration, Environment}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.play.config.ServicesConfig
-import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
-class EligibilityControllerImpl @Inject()(val messagesApi: MessagesApi,
-                                          val keystoreConnector: KeystoreConnector,
+class EligibilityControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
                                           val authConnector: AuthConnector,
-                                          val config: Configuration,
                                           val s4LService: S4LService,
                                           val companyDetailsService: CompanyDetailsService,
                                           val incorpInfoService: IncorporationInformationService,
-                                          override val runModeConfiguration: Configuration, environment: Environment,
                                           val incorporationInformationConnector: IncorporationInformationConnector,
-                                          val payeRegistrationService: PAYERegistrationService) extends EligibilityController with AuthRedirectUrls with ServicesConfig {
-  override protected def mode: Mode = environment.mode
+                                          val payeRegistrationService: PAYERegistrationService,
+                                          mcc: MessagesControllerComponents
+                                         )(val appConfig: AppConfig) extends EligibilityController(mcc) with AuthRedirectUrls {
 }
 
-trait EligibilityController extends PayeBaseController {
+abstract class EligibilityController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
+  val appConfig: AppConfig
+  val config = appConfig.servicesConfig
 
   val compRegFEURL: String
   val compRegFEURI: String
 
-  def questionnaire: Action[AnyContent] = isAuthorisedWithProfile { implicit request => _ =>
-    Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/questionnaire"))
+  def questionnaire: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    _ =>
+      Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/questionnaire"))
   }
 }

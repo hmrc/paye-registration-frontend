@@ -19,8 +19,10 @@ package filters
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
+import play.api.Application
 import play.api.http.HeaderNames
-import play.api.test.FakeApplication
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.crypto.DefaultCookieSigner
 
 class PAYESessionIDFilterISpec extends IntegrationSpecBase
   with LoginStub
@@ -32,7 +34,7 @@ class PAYESessionIDFilterISpec extends IntegrationSpecBase
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  override implicit lazy val app = FakeApplication(additionalConfiguration = Map(
+  lazy val config = Map(
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
     "auditing.consumer.baseUri.host" -> s"$mockHost",
@@ -51,9 +53,14 @@ class PAYESessionIDFilterISpec extends IntegrationSpecBase
     "microservice.services.business-registration.port" -> s"$mockPort",
     "microservice.services.address-lookup-frontend.host" -> s"$mockHost",
     "microservice.services.address-lookup-frontend.port" -> s"$mockPort",
-    "mongodb.uri" -> s"$mongoUri"))
+    "mongodb.uri" -> s"$mongoUri"
+  )
 
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
+    .build
 
+  lazy val defaultCookieSigner: DefaultCookieSigner = app.injector.instanceOf[DefaultCookieSigner]
 
   override def beforeEach() {
     resetWiremock()
@@ -77,7 +84,7 @@ class PAYESessionIDFilterISpec extends IntegrationSpecBase
         stubPut(s"/save4later/paye-registration-frontend/$regId/data/PAYEContact", 200, dummyS4LResponse)
 
         val response = await(buildClient("/who-should-we-contact")
-          .withHeaders(HeaderNames.COOKIE -> getSessionCookie(sessionID = invalidSessionId))
+          .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(sessionID = invalidSessionId))
           .get())
 
         response.status mustBe 303
@@ -87,7 +94,7 @@ class PAYESessionIDFilterISpec extends IntegrationSpecBase
         setupUnauthorised()
 
         val response = await(buildClient("/who-should-we-contact")
-          .withHeaders(HeaderNames.COOKIE -> getSessionCookie(sessionID = invalidSessionId))
+          .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(sessionID = invalidSessionId))
           .get())
 
         response.status mustBe 303
@@ -109,7 +116,7 @@ class PAYESessionIDFilterISpec extends IntegrationSpecBase
         stubPut(s"/save4later/paye-registration-frontend/$regId/data/PAYEContact", 200, dummyS4LResponse)
 
         val response = await(buildClient("/who-should-we-contact")
-          .withHeaders(HeaderNames.COOKIE -> getSessionCookie())
+          .withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie())
           .get())
 
         response.status mustBe 200

@@ -29,10 +29,11 @@ import uk.gov.hmrc.http.BadRequestException
 import scala.concurrent.Future
 
 class IncorporationInformationServiceSpec extends PayeComponentSpec {
+
   class Setup {
     val service = new IncorporationInformationService {
       override val incorpInfoConnector = mockIncorpInfoConnector
-      override val keystoreConnector   = mockKeystoreConnector
+      override val keystoreConnector = mockKeystoreConnector
     }
   }
 
@@ -111,14 +112,14 @@ class IncorporationInformationServiceSpec extends PayeComponentSpec {
 
   "Calling getDirectorDetails" should {
     "return the nothing when there are no directors details in the Officer list in CoHo API" in new Setup {
-      when(mockIncorpInfoConnector.getOfficerList(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(Fixtures.invalidOfficerList))
+      when(mockIncorpInfoConnector.getOfficerList(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(Fixtures.invalidOfficerList))
 
-      await(service.getDirectorDetails("testTransactionId","testRegId")) mustBe Directors(Map())
+      await(service.getDirectorDetails("testTransactionId", "testRegId")) mustBe Directors(Map())
     }
     "return the directors details when there is Officer list in CoHo API" in new Setup {
-      when(mockIncorpInfoConnector.getOfficerList(ArgumentMatchers.anyString(),ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(Fixtures.validOfficerList))
+      when(mockIncorpInfoConnector.getOfficerList(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(Fixtures.validOfficerList))
 
-      await(service.getDirectorDetails("testTransactionId","testRegId")) mustBe Fixtures.validDirectorDetails
+      await(service.getDirectorDetails("testTransactionId", "testRegId")) mustBe Fixtures.validDirectorDetails
     }
   }
 }

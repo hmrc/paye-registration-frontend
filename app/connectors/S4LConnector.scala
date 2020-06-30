@@ -16,9 +16,8 @@
 
 package connectors
 
-import javax.inject.Inject
-
 import com.codahale.metrics.{Counter, Timer}
+import javax.inject.Inject
 import play.api.libs.json.Format
 import services.MetricsService
 import uk.gov.hmrc.http.cache.client.{CacheMap, ShortLivedCache}
@@ -29,10 +28,11 @@ import scala.concurrent.Future
 
 class S4LConnectorImpl @Inject()(val shortCache: ShortLivedCache,
                                  val metricsService: MetricsService) extends S4LConnector {
-  val successCounter        = metricsService.s4lSuccessResponseCounter
-  val emptyResponseCounter  = metricsService.s4lEmptyResponseCounter
-  val failedCounter         = metricsService.s4lFailedResponseCounter
-  def timer                 = metricsService.s4lResponseTimer.time()
+  val successCounter = metricsService.s4lSuccessResponseCounter
+  val emptyResponseCounter = metricsService.s4lEmptyResponseCounter
+  val failedCounter = metricsService.s4lFailedResponseCounter
+
+  def timer = metricsService.s4lResponseTimer.time()
 }
 
 trait S4LConnector {
@@ -42,6 +42,7 @@ trait S4LConnector {
   val successCounter: Counter
   val emptyResponseCounter: Counter
   val failedCounter: Counter
+
   def timer: Timer.Context
 
   def saveForm[T](userId: String, formId: String, data: T)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {

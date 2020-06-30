@@ -19,23 +19,28 @@ package controllers.userJourney
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, LocalDateTime}
 
+import akka.actor.ActorSystem
+import akka.stream.{ActorMaterializer, Materializer}
 import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
+import models.external.CurrentProfile
 import models.view.{EmployingAnyone, EmployingStaff, WillBePaying}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import play.api.i18n.MessagesApi
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.api.test.FakeRequest
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 import utils.SystemDate
 
 import scala.concurrent.Future
 
 class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
   val request = FakeRequest()
 
-  val testController = new EmploymentController {
+  val testController = new EmploymentController(mockMcc) {
     override val redirectToLogin = MockAuthRedirects.redirectToLogin
     override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
     override val thresholdService = mockThresholdService
@@ -43,7 +48,6 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     override val authConnector = mockAuthConnector
     override val keystoreConnector = mockKeystoreConnector
     override val employmentService = mockEmploymentService
-    implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
     override val incorporationInformationConnector = mockIncorpInfoConnector
     override val payeRegistrationService = mockPayeRegService
     override implicit val appConfig: AppConfig = mockAppConfig

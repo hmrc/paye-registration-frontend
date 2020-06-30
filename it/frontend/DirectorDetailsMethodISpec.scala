@@ -20,19 +20,21 @@ import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
-import play.api.test.FakeApplication
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.crypto.DefaultCookieSigner
+import play.api.{Application, Environment, Mode}
 
 class DirectorDetailsMethodISpec extends IntegrationSpecBase
-                                    with LoginStub
-                                    with CachingStub
-                                    with BeforeAndAfterEach
-                                    with WiremockHelper {
+  with LoginStub
+  with CachingStub
+  with BeforeAndAfterEach
+  with WiremockHelper {
 
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  override implicit lazy val app = FakeApplication(additionalConfiguration = Map(
+  lazy val config = Map(
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
     "auditing.consumer.baseUri.host" -> s"$mockHost",
@@ -58,9 +60,13 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
     "defaultSeqDirector" -> "W3siZGlyZWN0b3IiOnsiZm9yZW5hbWUiOiJmYXVsdHkiLCJzdXJuYW1lIjoiZGVmYXVsdCJ9fSx7ImRpcmVjdG9yIjp7ImZvcmVuYW1lIjoiVGVzdCIsInN1cm5hbWUiOiJSZWdJZFdoaXRlbGlzdCIsInRpdGxlIjoiTXJzIn19XQ==",
     "defaultOfficerList" -> "WwogICAgewogICAgICAibmFtZSIgOiAidGVzdCIsCiAgICAgICJuYW1lX2VsZW1lbnRzIiA6IHsKICAgICAgICAiZm9yZW5hbWUiIDogInRlLHN0MSIsCiAgICAgICAgIm90aGVyX2ZvcmVuYW1lcyIgOiAidGUsc3QxMSIsCiAgICAgICAgInN1cm5hbWUiIDogInRlc3QsYSIsCiAgICAgICAgInRpdGxlIiA6ICJNLC5yIgogICAgICB9LAogICAgICAib2ZmaWNlcl9yb2xlIiA6ICJkaXJlY3RvciIKICAgIH0sIHsKICAgICAgIm5hbWUiIDogInRlc3QiLAogICAgICAibmFtZV9lbGVtZW50cyIgOiB7CiAgICAgICAgImZvcmVuYW1lIiA6ICJ0ZXN0MiIsCiAgICAgICAgIm90aGVyX2ZvcmVuYW1lcyIgOiAidGVzdDIyIiwKICAgICAgICAic3VybmFtZSIgOiAidGVzdGIiLAogICAgICAgICJ0aXRsZSIgOiAiTXIiCiAgICAgIH0sCiAgICAgICJvZmZpY2VyX3JvbGUiIDogImRpcmVjdG9yIgogICAgfSwgewogICAgICAibmFtZSIgOiAidGVzdCIsCiAgICAgICJuYW1lX2VsZW1lbnRzIiA6IHsKICAgICAgICAiZm9yZW5hbWUiIDogInRlc3QzIiwKICAgICAgICAib3RoZXJfZm9yZW5hbWVzIiA6ICJ0ZXN0MzMiLAogICAgICAgICJzdXJuYW1lIiA6ICJ0ZXN0YyIsCiAgICAgICAgInRpdGxlIiA6ICJUZXN0IFRpdGxlIFRoYXQgSXMgTW9yZSBUaGFuIFR3ZW50eSBDaGFycyIKICAgICAgfSwKICAgICAgIm9mZmljZXJfcm9sZSIgOiAiZGlyZWN0b3IiCiAgICB9CiAgXQ==",
     "mongodb.uri" -> s"$mongoUri"
-  ))
+  )
 
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
+    .build
 
+  lazy val defaultCookieSigner: DefaultCookieSigner = app.injector.instanceOf[DefaultCookieSigner]
 
   override def beforeEach() {
     resetWiremock()
@@ -83,7 +89,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
       stubPut(s"/save4later/paye-registration-frontend/$regIdWhitelisted/data/DirectorDetails", 200, dummyS4LResponse)
       val fResponse = buildClient("/director-national-insurance-number").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)
@@ -149,7 +155,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
       stubGet(s"/incorporation-information/12345/officer-list", 200, tstOfficerListJson)
 
       val fResponse = buildClient("/director-national-insurance-number").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)
@@ -229,7 +235,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
       stubGet(s"/incorporation-information/12345/officer-list", 200, tstOfficerListJson)
 
       val fResponse = buildClient("/director-national-insurance-number").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)
@@ -267,7 +273,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
       stubGet(s"/incorporation-information/12345/officer-list", 404, "")
 
       val fResponse = buildClient("/director-national-insurance-number").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)

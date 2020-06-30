@@ -26,8 +26,8 @@ trait ChooseAddressForm {
 
   implicit def addressChoiceFormatter: Formatter[AddressChoice] = new Formatter[AddressChoice] {
     def bind(key: String, data: Map[String, String]): Either[Seq[FormError], AddressChoice] = {
-      Right(data.getOrElse(key,"")).right.flatMap {
-        case ""     => Left(Seq(FormError(key, errMessage, Nil)))
+      Right(data.getOrElse(key, "")).right.flatMap {
+        case "" => Left(Seq(FormError(key, errMessage, Nil)))
         case choice => Right(AddressChoice.fromString(choice))
       }
     }

@@ -16,10 +16,10 @@
 
 package helpers
 
-import config.{AppConfig, WSHttp}
+import config.WSHttp
 import connectors._
 import connectors.test.{TestBusinessRegConnector, TestIncorpInfoConnector, TestPAYERegConnector}
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.{Configuration, Environment}
 import repositories.{ReactiveMongoRepository, SessionRepository}
 import services._

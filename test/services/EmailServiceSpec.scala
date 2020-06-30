@@ -20,10 +20,8 @@ import java.time.LocalDate
 
 import connectors._
 import helpers.PayeComponentSpec
-import models.external.CurrentProfile
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
 
@@ -31,10 +29,10 @@ class EmailServiceSpec extends PayeComponentSpec {
 
   def service() = new EmailService {
     override val incorporationInformationConnector = mockIncorpInfoConnector
-    override val payeRegistrationConnector         = mockPayeRegistrationConnector
-    override val s4LConnector                      = mockS4LConnector
-    override val companyRegistrationConnector      = mockCompRegConnector
-    override val emailConnector                    = mockEmailConnector
+    override val payeRegistrationConnector = mockPayeRegistrationConnector
+    override val s4LConnector = mockS4LConnector
+    override val companyRegistrationConnector = mockCompRegConnector
+    override val emailConnector = mockEmailConnector
   }
 
   "primeEmailData" should {

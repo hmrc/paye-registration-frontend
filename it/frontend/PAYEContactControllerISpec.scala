@@ -23,7 +23,9 @@ import models.Address
 import models.external._
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
-import play.api.test.FakeApplication
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.crypto.DefaultCookieSigner
+import play.api.{Application, Environment, Mode}
 
 class PAYEContactControllerISpec extends IntegrationSpecBase
   with LoginStub
@@ -36,7 +38,7 @@ class PAYEContactControllerISpec extends IntegrationSpecBase
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  override implicit lazy val app = FakeApplication(additionalConfiguration = Map(
+  lazy val config = Map(
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
     "auditing.consumer.baseUri.host" -> s"$mockHost",
@@ -65,7 +67,13 @@ class PAYEContactControllerISpec extends IntegrationSpecBase
     "defaultCHROAddress" -> "eyJsaW5lMSI6IjE0IFRlc3QgRGVmYXVsdCBTdHJlZXQiLCJsaW5lMiI6IlRlc3RsZXkiLCJsaW5lMyI6IlRlc3Rmb3JkIiwibGluZTQiOiJUZXN0c2hpcmUiLCJwb3N0Q29kZSI6IlRFMSAzU1QifQ==",
     "defaultSeqDirector" -> "W3siZGlyZWN0b3IiOnsiZm9yZW5hbWUiOiJmYXVsdHkiLCJzdXJuYW1lIjoiZGVmYXVsdCJ9fV0=",
     "mongodb.uri" -> s"$mongoUri"
-  ))
+  )
+
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
+    .build
+
+  lazy val defaultCookieSigner: DefaultCookieSigner = app.injector.instanceOf[DefaultCookieSigner]
 
   override def beforeEach() {
     resetWiremock()
@@ -122,7 +130,7 @@ class PAYEContactControllerISpec extends IntegrationSpecBase
       )
 
       val fResponse = buildClient("/where-company-carries-out-business-activities").
-        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
+        withHttpHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
           "chosenAddress" -> Seq("other")

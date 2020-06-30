@@ -20,12 +20,11 @@ import models.Address
 import models.view.PAYEContactDetails
 import play.api.libs.json.Json
 
-
 case class PAYEContact(contactDetails: PAYEContactDetails,
                        correspondenceAddress: Address)
 
 object PAYEContact {
-  implicit val payeContactFormat  = PAYEContactDetails.format
-  implicit val addressFormat      = Address.format
-  implicit val format             = Json.format[PAYEContact]
+  implicit val payeContactFormat = PAYEContactDetails.format
+  implicit val addressFormat = Address.format
+  implicit val format = Json.format[PAYEContact]
 }

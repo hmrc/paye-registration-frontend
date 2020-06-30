@@ -17,13 +17,11 @@
 package controllers.userJourney
 
 import config.AppConfig
-import javax.inject.Inject
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.completionCapacity.CompletionCapacityForm
-import play.api.Configuration
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
+import javax.inject.Inject
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{completionCapacity => CompletionCapacityView}
@@ -31,37 +29,38 @@ import views.html.pages.{completionCapacity => CompletionCapacityView}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class CompletionCapacityControllerImpl @Inject()(val messagesApi: MessagesApi,
-                                                 val completionCapacityService: CompletionCapacityService,
+class CompletionCapacityControllerImpl @Inject()(val completionCapacityService: CompletionCapacityService,
                                                  val keystoreConnector: KeystoreConnector,
-                                                 val config: Configuration,
                                                  val s4LService: S4LService,
                                                  val companyDetailsService: CompanyDetailsService,
                                                  val incorpInfoService: IncorporationInformationService,
                                                  val authConnector: AuthConnector,
                                                  val incorporationInformationConnector: IncorporationInformationConnector,
-                                                 val payeRegistrationService: PAYERegistrationService
-                                                )(implicit val appConfig: AppConfig) extends CompletionCapacityController with AuthRedirectUrls
+                                                 val payeRegistrationService: PAYERegistrationService,
+                                                 mcc: MessagesControllerComponents
+                                                )(implicit val appConfig: AppConfig) extends CompletionCapacityController(mcc) with AuthRedirectUrls
 
-trait CompletionCapacityController extends PayeBaseController {
+abstract class CompletionCapacityController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
   val completionCapacityService: CompletionCapacityService
 
-  def completionCapacity: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    completionCapacityService.getCompletionCapacity(profile.registrationID) map {
-      case Some(capacity) => Ok(CompletionCapacityView(CompletionCapacityForm.form.fill(capacity)))
-      case None           => Ok(CompletionCapacityView(CompletionCapacityForm.form))
-    }
+  def completionCapacity: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    profile =>
+      completionCapacityService.getCompletionCapacity(profile.registrationID) map {
+        case Some(capacity) => Ok(CompletionCapacityView(CompletionCapacityForm.form.fill(capacity)))
+        case None => Ok(CompletionCapacityView(CompletionCapacityForm.form))
+      }
   }
 
-  def submitCompletionCapacity: Action[AnyContent] = isAuthorisedWithProfile { implicit request => profile =>
-    CompletionCapacityForm.form.bindFromRequest.fold(
-      errors => Future.successful(BadRequest(CompletionCapacityView(errors))),
-      success => {
-        completionCapacityService.saveCompletionCapacity(profile.registrationID, success) map {
-          _ => Redirect(routes.CompanyDetailsController.tradingName())
+  def submitCompletionCapacity: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+    profile =>
+      CompletionCapacityForm.form.bindFromRequest.fold(
+        errors => Future.successful(BadRequest(CompletionCapacityView(errors))),
+        success => {
+          completionCapacityService.saveCompletionCapacity(profile.registrationID, success) map {
+            _ => Redirect(routes.CompanyDetailsController.tradingName())
+          }
         }
-      }
-    )
+      )
   }
 }

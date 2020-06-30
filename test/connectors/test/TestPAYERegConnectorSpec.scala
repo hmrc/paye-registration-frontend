@@ -31,8 +31,8 @@ class TestPAYERegConnectorSpec extends PayeComponentSpec {
 
   class Setup extends CodeMocks {
     val connector = new TestPAYERegConnector {
-      override val payeRegConnector   = mockPAYERegConnector
-      override val http: WSHttp       = mockWSHttp
+      override val payeRegConnector = mockPAYERegConnector
+      override val http: WSHttp = mockWSHttp
       override val payeRegUrl: String = "tst-url"
     }
   }

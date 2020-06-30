@@ -22,9 +22,9 @@ import connectors._
 import enums.IncorporationStatus
 import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProfile}
-import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
+import play.api.{Application, Environment, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
 
@@ -33,15 +33,7 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase with CachingStub {
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  lazy val businessRegistrationConnector = app.injector.instanceOf[BusinessRegistrationConnector]
-  lazy val keystoreConnector = app.injector.instanceOf[KeystoreConnector]
-  lazy val companyRegistrationConnector = app.injector.instanceOf[CompanyRegistrationConnector]
-  lazy val payeRegistrationConnector = app.injector.instanceOf[PAYERegistrationConnector]
-  lazy val incorpInfoConnector = app.injector.instanceOf[IncorporationInformationConnector]
-  implicit lazy val appConfig = app.injector.instanceOf[AppConfig]
-
-
-  val additionalConfiguration = Map(
+  val config = Map(
     "auditing.consumer.baseUri.host" -> s"$mockHost",
     "auditing.consumer.baseUri.port" -> s"$mockPort",
     "microservice.services.cachable.session-cache.host" -> s"$mockHost",
@@ -73,9 +65,16 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase with CachingStub {
        |}""".stripMargin
   }
 
-  override implicit lazy val app: Application = new GuiceApplicationBuilder()
-    .configure(additionalConfiguration)
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
     .build
+
+  lazy val businessRegistrationConnector = app.injector.instanceOf[BusinessRegistrationConnector]
+  lazy val keystoreConnector = app.injector.instanceOf[KeystoreConnector]
+  lazy val companyRegistrationConnector = app.injector.instanceOf[CompanyRegistrationConnector]
+  lazy val payeRegistrationConnector = app.injector.instanceOf[PAYERegistrationConnector]
+  lazy val incorpInfoConnector = app.injector.instanceOf[IncorporationInformationConnector]
+  implicit lazy val appConfig = app.injector.instanceOf[AppConfig]
 
   val sessionId = "session-123"
   implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sessionId)))

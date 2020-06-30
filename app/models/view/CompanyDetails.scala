@@ -17,7 +17,6 @@
 package models.view
 
 import models.{Address, DigitalContactDetails}
-import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
 case class CompanyDetails(companyName: String,
@@ -26,8 +25,8 @@ case class CompanyDetails(companyName: String,
                           ppobAddress: Option[Address],
                           businessContactDetails: Option[DigitalContactDetails])
 
-case class TradingName (differentName: Boolean,
-                        tradingName:Option[String])
+case class TradingName(differentName: Boolean,
+                       tradingName: Option[String])
 
 object TradingName {
   implicit val format = Json.format[TradingName]

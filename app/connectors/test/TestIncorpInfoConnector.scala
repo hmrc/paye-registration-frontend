@@ -16,22 +16,18 @@
 
 package connectors.test
 
-import config.WSHttp
+import config.{AppConfig, WSHttp}
 import javax.inject.Inject
-import play.api.{Configuration, Environment}
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{CoreGet, CorePost, CorePut, HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 
 class TestIncorpInfoConnectorImpl @Inject()(val http: WSHttp,
-                                            override val runModeConfiguration: Configuration,
-                                            environment: Environment) extends TestIncorpInfoConnector with ServicesConfig {
-  val incorpFEStubsUrl  = baseUrl("incorporation-frontend-stubs")
-  val incorpInfoUrl     = baseUrl("incorporation-information")
-  override protected def mode = environment.mode
+                                            appConfig: AppConfig) extends TestIncorpInfoConnector {
+  val incorpFEStubsUrl = appConfig.servicesConfig.baseUrl("incorporation-frontend-stubs")
+  val incorpInfoUrl = appConfig.servicesConfig.baseUrl("incorporation-information")
 }
 
 trait TestIncorpInfoConnector {
@@ -40,7 +36,7 @@ trait TestIncorpInfoConnector {
   val incorpInfoUrl: String
   val http: CorePost with CorePut with CoreGet
 
-  private def txId(regId: String):String = s"000-434-$regId"
+  private def txId(regId: String): String = s"000-434-$regId"
 
   def setupCoHoCompanyDetails(regId: String, companyName: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val officers = Json.parse(

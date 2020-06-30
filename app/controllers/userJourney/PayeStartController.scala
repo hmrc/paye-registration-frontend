@@ -23,34 +23,30 @@ import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.{CacheKeys, DownstreamOutcome, RegistrationDeletion}
 import javax.inject.Inject
 import models.external.CurrentProfile
-import play.api.Configuration
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc._
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import utils.PAYEFeatureSwitches
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class PayeStartControllerImpl @Inject()(val currentProfileService: CurrentProfileService,
                                         val payeRegistrationService: PAYERegistrationService,
                                         val keystoreConnector: KeystoreConnector,
                                         val authConnector: AuthConnector,
-                                        val config: Configuration,
                                         val s4LService: S4LService,
                                         val companyDetailsService: CompanyDetailsService,
                                         val incorpInfoService: IncorporationInformationService,
                                         val businessRegistrationConnector: BusinessRegistrationConnector,
                                         val companyRegistrationConnector: CompanyRegistrationConnector,
                                         val featureSwitches: PAYEFeatureSwitches,
-                                        val messagesApi: MessagesApi,
-                                        val incorporationInformationConnector: IncorporationInformationConnector
-                                       )(implicit val appConfig: AppConfig) extends PayeStartController with AuthRedirectUrls
+                                        val incorporationInformationConnector: IncorporationInformationConnector,
+                                        mcc: MessagesControllerComponents
+                                       )(implicit val appConfig: AppConfig) extends PayeStartController(mcc) with AuthRedirectUrls
 
-trait PayeStartController extends PayeBaseController {
+abstract class PayeStartController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
   val currentProfileService: CurrentProfileService
   val payeRegistrationService: PAYERegistrationService
@@ -61,13 +57,13 @@ trait PayeStartController extends PayeBaseController {
   val payeRegElFEURI: String
 
   def steppingStone(): Action[AnyContent] = Action { implicit request =>
-      Redirect(s"$payeRegElFEURL$payeRegElFEURI")
+    Redirect(s"$payeRegElFEURL$payeRegElFEURI")
   }
 
   val startPaye = isAuthorisedAndIsOrg { implicit request =>
     checkAndStoreCurrentProfile { profile =>
       assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId) {
-            Redirect(routes.EmploymentController.paidEmployees())
+        Redirect(routes.EmploymentController.paidEmployees())
       }
     }
   }
@@ -75,9 +71,9 @@ trait PayeStartController extends PayeBaseController {
   def restartPaye: Action[AnyContent] = isAuthorised { implicit request =>
     for {
       (regId, txId) <- getRegIdAndTxId
-      deleted       <- payeRegistrationService.deleteRejectedRegistration(regId, txId)
+      deleted <- payeRegistrationService.deleteRejectedRegistration(regId, txId)
     } yield deleted match {
-      case RegistrationDeletion.success       => Redirect(routes.PayeStartController.startPaye())
+      case RegistrationDeletion.success => Redirect(routes.PayeStartController.startPaye())
       case RegistrationDeletion.invalidStatus => Redirect(controllers.userJourney.routes.DashboardController.dashboard())
     }
   }
@@ -87,7 +83,7 @@ trait PayeStartController extends PayeBaseController {
       case Some(profile) => Future.successful((profile.registrationID, profile.companyTaxRegistration.transactionId))
       case None => for {
         businessProfile <- businessRegistrationConnector.retrieveCurrentProfile
-        companyProfile  <- companyRegistrationConnector.getCompanyRegistrationDetails(businessProfile.registrationID)
+        companyProfile <- companyRegistrationConnector.getCompanyRegistrationDetails(businessProfile.registrationID)
       } yield {
         (businessProfile.registrationID, companyProfile.transactionId)
       }
@@ -98,9 +94,9 @@ trait PayeStartController extends PayeBaseController {
     currentProfileService.fetchAndStoreCurrentProfile flatMap { currentProfile: CurrentProfile =>
       currentProfileChecks(currentProfile)(f)
     } recover {
-      case _: NotFoundException                 => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
+      case _: NotFoundException => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
       case _: ConfirmationRefsNotFoundException => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
-      case _                                    => InternalServerError(views.html.pages.error.restart())
+      case _ => InternalServerError(views.html.pages.error.restart())
     }
   }
 

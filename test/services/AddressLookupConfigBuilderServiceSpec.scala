@@ -16,11 +16,16 @@
 
 package services
 
+import java.util.Locale
+
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external._
+import play.api.i18n.{Lang, Messages}
 import play.api.mvc.Call
 
 class AddressLookupConfigBuilderServiceSpec extends PayeComponentSpec with PayeFakedApp {
+
+  implicit val mockMessages = mockMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
 
   object TestService extends AddressLookupConfigBuilderService {
     override lazy val payeRegistrationFrontendURL = "testPayeRegUrl"

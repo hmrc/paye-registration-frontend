@@ -16,6 +16,7 @@
 
 package controllers.test
 
+import config.AppConfig
 import javax.inject.Inject
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
@@ -23,14 +24,13 @@ import enums.DownstreamOutcome
 import models.Address
 import play.api.Configuration
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class TestAddressLookupControllerImpl @Inject()(val messagesApi: MessagesApi,
-                                                val config: Configuration,
-                                                val companyDetailsService: CompanyDetailsService,
+class TestAddressLookupControllerImpl @Inject()(val companyDetailsService: CompanyDetailsService,
                                                 val keystoreConnector: KeystoreConnector,
                                                 val payeContactService: PAYEContactService,
                                                 val authConnector: AuthConnector,
@@ -38,9 +38,12 @@ class TestAddressLookupControllerImpl @Inject()(val messagesApi: MessagesApi,
                                                 val incorpInfoService: IncorporationInformationService,
                                                 val prepopService: PrepopulationService,
                                                 val incorporationInformationConnector: IncorporationInformationConnector,
-                                                val payeRegistrationService: PAYERegistrationService) extends TestAddressLookupController with AuthRedirectUrls
+                                                val payeRegistrationService: PAYERegistrationService,
+                                                mcc: MessagesControllerComponents
+                                               )(val appConfig: AppConfig) extends TestAddressLookupController(mcc) with AuthRedirectUrls
 
-trait TestAddressLookupController extends PayeBaseController {
+abstract class TestAddressLookupController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
+  val appConfig: AppConfig
   val companyDetailsService: CompanyDetailsService
   val payeContactService: PAYEContactService
   val prepopService: PrepopulationService

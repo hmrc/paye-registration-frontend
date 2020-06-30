@@ -16,7 +16,6 @@
 
 package utils
 
-import java.text.Normalizer
 import java.text.Normalizer.{Form, normalize}
 
 import play.api.data.validation._
@@ -27,21 +26,23 @@ import scala.util.matching.Regex
 
 object Formatters {
   val specialCharacterConverts = Map('æ' -> "ae", 'Æ' -> "AE", 'œ' -> "oe", 'Œ' -> "OE", 'ß' -> "ss", 'ø' -> "o", 'Ø' -> "O")
-  def normaliseString(string: String, charFilter: Option[Regex] = None, extraSpecialCharacters: Map[Char,String] = Map()): String = {
+
+  def normaliseString(string: String, charFilter: Option[Regex] = None, extraSpecialCharacters: Map[Char, String] = Map()): String = {
     normalize(string, Form.NFKD)
       .replaceAll("\\p{M}", "")
       .map(char => extraSpecialCharacters.getOrElse(char, char))
       .mkString
-      .replaceAll(charFilter.fold("")(_.toString),"")
+      .replaceAll(charFilter.fold("")(_.toString), "")
       .trim
   }
 
-  lazy val normalizeTrimmedReads: Reads[String]            = Reads.StringReads.map(s => normaliseString(s,extraSpecialCharacters = specialCharacterConverts))
-  lazy val normalizeTrimmedListReads: Reads[List[String]]  = Reads.list[String](normalizeTrimmedReads)
-  lazy val normalizeTrimmedHMRCReads: Reads[String]        = Reads.StringReads.map(s => normaliseString(s,Some("[^A-Za-z 0-9\\-']".r)))
-  lazy val normalizeTrimmedHMRCAddressReads: Reads[String] = Reads.StringReads.map(s => normaliseString(s,Some("""[^a-zA-Z0-9, .\(\)/&'\"\-\\]""".r)))
+  lazy val normalizeTrimmedReads: Reads[String] = Reads.StringReads.map(s => normaliseString(s, extraSpecialCharacters = specialCharacterConverts))
+  lazy val normalizeTrimmedListReads: Reads[List[String]] = Reads.list[String](normalizeTrimmedReads)
+  lazy val normalizeTrimmedHMRCReads: Reads[String] = Reads.StringReads.map(s => normaliseString(s, Some("[^A-Za-z 0-9\\-']".r)))
+  lazy val normalizeTrimmedHMRCAddressReads: Reads[String] = Reads.StringReads.map(s => normaliseString(s, Some("""[^a-zA-Z0-9, .\(\)/&'\"\-\\]""".r)))
 
   def ninoFormatter(nino: String): String = nino.grouped(2).mkString(" ")
+
   def intMapReads[V]()(implicit formatV: Format[V]): Reads[Map[Int, V]] = new Reads[Map[Int, V]] {
     def reads(jv: JsValue): JsResult[Map[Int, V]] = {
       JsSuccess(jv.as[Map[String, JsValue]].map { case (k, v) =>
@@ -52,27 +53,28 @@ object Formatters {
 
   def intMapWrites[V]()(implicit formatV: Format[V]): Writes[Map[Int, V]] = new Writes[Map[Int, V]] {
     def writes(map: Map[Int, V]): JsValue =
-      Json.obj(map.map{case (s, o) =>
+      Json.obj(map.map { case (s, o) =>
         val ret: (String, JsValueWrapper) = s.toString -> Json.toJson[V](o)
         ret
-      }.toSeq:_*)
+      }.toSeq: _*)
   }
 
-  def phoneNoReads(errMsg: String) = new Reads[String] {
+  def phoneNoReads(errMsg: String): Reads[String] = new Reads[String] {
     override def reads(json: JsValue): JsResult[String] = {
       normalizeTrimmedReads.reads(json) flatMap { input =>
         Validators.isValidPhoneNo(input) match {
           case Right(phone) => JsSuccess(phone)
-          case Left(err)    => JsError(err)
+          case Left(err) => JsError(err)
         }
       }
     }
   }
 
-  lazy val emailReads = Reads.StringReads.filter(ValidationError("Invalid email")) {
-    email => Validators.emailValidation(normaliseString(email)) match {
-      case e: Invalid => false
-      case _          => true
-    }
+  lazy val emailReads = Reads.StringReads.filter(JsonValidationError("Invalid email")) {
+    email =>
+      Validators.emailValidation(normaliseString(email)) match {
+        case e: Invalid => false
+        case _ => true
+      }
   }
 }

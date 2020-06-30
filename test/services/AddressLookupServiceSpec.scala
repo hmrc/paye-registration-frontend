@@ -16,23 +16,25 @@
 
 package services
 
-import helpers.PayeComponentSpec
+import java.util.Locale
+
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import helpers.mocks.MockMetrics
 import models.Address
 import models.external.AlfJourneyConfig
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, Messages, MessagesApi}
 import play.api.mvc.Call
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
 
-class AddressLookupServiceSpec extends PayeComponentSpec {
+class AddressLookupServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
+  implicit val mockMessages = mockMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
   val metricsMock = new MockMetrics
-  implicit val messagesApi: MessagesApi = mock[MessagesApi]
 
   class Setup {
     val service = new AddressLookupService(

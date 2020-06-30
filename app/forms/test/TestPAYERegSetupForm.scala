@@ -32,21 +32,24 @@ import scala.util.Try
 
 object TestPAYERegSetupForm extends RequiredBooleanForm with CustomDateForm {
   override val customFormPrefix = "employmentInfo.earliestDate"
+
   override def validation(dt: LocalDate, cdt: LocalDate) = Right(dt)
+
   def now: LocalDate = SystemDate.getSystemDate.toLocalDate
 
   implicit def payeStatusFormatter: Formatter[PAYEStatus.Value] = new Formatter[PAYEStatus.Value] {
     def bind(key: String, data: Map[String, String]) = {
-      Right(data.getOrElse(key,"")).right.flatMap {
-        case "draft"      => Right(PAYEStatus.draft)
-        case ""           => Right(PAYEStatus.draft)
-        case "held"       => Right(PAYEStatus.held)
-        case "submitted"  => Right(PAYEStatus.submitted)
-        case "invalid"    => Right(PAYEStatus.invalid)
-        case "rejected"   => Right(PAYEStatus.rejected)
-        case _            => Left(Seq(FormError(key, "error.required", Nil)))
+      Right(data.getOrElse(key, "")).right.flatMap {
+        case "draft" => Right(PAYEStatus.draft)
+        case "" => Right(PAYEStatus.draft)
+        case "held" => Right(PAYEStatus.held)
+        case "submitted" => Right(PAYEStatus.submitted)
+        case "invalid" => Right(PAYEStatus.invalid)
+        case "rejected" => Right(PAYEStatus.rejected)
+        case _ => Left(Seq(FormError(key, "error.required", Nil)))
       }
     }
+
     def unbind(key: String, value: PAYEStatus.Value) = Map(key -> value.toString)
   }
 
@@ -54,10 +57,13 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with CustomDateForm {
 
   implicit def employingStatusFormatter: Formatter[Employing.Value] = new Formatter[Employing.Value] {
     def bind(key: String, data: Map[String, String]) = {
-     Try { Right(data.getOrElse(key,"")).right.map(Employing.withName(_))
-     } recover {
-       case _ => Left(Seq(FormError(key, "error.required", Nil)))}
+      Try {
+        Right(data.getOrElse(key, "")).right.map(Employing.withName(_))
+      } recover {
+        case _ => Left(Seq(FormError(key, "error.required", Nil)))
+      }
     }.get
+
     def unbind(key: String, value: Employing.Value) = Map(key -> value.toString)
   }
 
@@ -73,41 +79,41 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with CustomDateForm {
 
   val form = Form(
     mapping(
-      "registrationID"        -> text,
-      "transactionID"         -> text,
+      "registrationID" -> text,
+      "transactionID" -> text,
       "formCreationTimestamp" -> text,
-      "status"                -> payeStatus,
-      "completionCapacity"    -> text,
-      "companyDetails"        -> mapping(
+      "status" -> payeStatus,
+      "completionCapacity" -> text,
+      "companyDetails" -> mapping(
         "companyName" -> text,
         "tradingName" -> optional(text),
-        "roAddress"   -> mapping(
-          "line1"     -> text,
-          "line2"     -> text,
-          "line3"     -> optional(text),
-          "line4"     -> optional(text),
-          "postCode"  -> optional(text),
-          "country"   -> optional(text),
-          "auditRef"  -> optional(text)
+        "roAddress" -> mapping(
+          "line1" -> text,
+          "line2" -> text,
+          "line3" -> optional(text),
+          "line4" -> optional(text),
+          "postCode" -> optional(text),
+          "country" -> optional(text),
+          "auditRef" -> optional(text)
         )(Address.apply)(Address.unapply),
         "ppobAddress" -> mapping(
-          "line1"     -> text,
-          "line2"     -> text,
-          "line3"     -> optional(text),
-          "line4"     -> optional(text),
-          "postCode"  -> optional(text),
-          "country"   -> optional(text),
-          "auditRef"  -> optional(text)
+          "line1" -> text,
+          "line2" -> text,
+          "line3" -> optional(text),
+          "line4" -> optional(text),
+          "postCode" -> optional(text),
+          "country" -> optional(text),
+          "auditRef" -> optional(text)
         )(Address.apply)(Address.unapply),
         "businessContactDetails" -> mapping(
           "businessEmail" -> optional(text),
-          "mobileNumber"  -> optional(text),
-          "phoneNumber"   -> optional(text)
+          "mobileNumber" -> optional(text),
+          "phoneNumber" -> optional(text)
         )(DigitalContactDetails.apply)(DigitalContactDetails.unapply)
       )(CompanyDetails.apply)(CompanyDetails.unapply),
       "employmentInfo" -> employmentInfoMapping,
       "sicCodes" -> list(mapping(
-        "code"        -> optional(text),
+        "code" -> optional(text),
         "description" -> optional(text)
       )(SICCode.apply)(SICCode.unapply)),
       "directors" -> list(mapping(

@@ -22,28 +22,24 @@ import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import javax.inject.Inject
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
-import play.api.{Configuration, Environment}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class SignInOutControllerImpl @Inject()(val messagesApi: MessagesApi,
-                                        val authConnector: AuthConnector,
-                                        val env: Environment,
-                                        val config: Configuration,
+class SignInOutControllerImpl @Inject()(val authConnector: AuthConnector,
                                         val s4LService: S4LService,
                                         val companyDetailsService: CompanyDetailsService,
                                         val incorpInfoService: IncorporationInformationService,
                                         val keystoreConnector: KeystoreConnector,
                                         val incorporationInformationConnector: IncorporationInformationConnector,
-                                        val payeRegistrationService: PAYERegistrationService
-                                       )(implicit val appConfig: AppConfig) extends SignInOutController with AuthRedirectUrls
+                                        val payeRegistrationService: PAYERegistrationService,
+                                        mcc: MessagesControllerComponents
+                                       )(implicit val appConfig: AppConfig, val ec: ExecutionContext) extends SignInOutController(mcc) with AuthRedirectUrls
 
-trait SignInOutController extends PayeBaseController {
-
+abstract class SignInOutController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
+  implicit val ec: ExecutionContext
   implicit val appConfig: AppConfig
   val compRegFEURL: String
   val compRegFEURI: String

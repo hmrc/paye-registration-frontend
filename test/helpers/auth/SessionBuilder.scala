@@ -22,7 +22,7 @@ import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.SessionKeys
 
-object SessionBuilder extends SessionBuilder{}
+object SessionBuilder extends SessionBuilder
 
 trait SessionBuilder {
 

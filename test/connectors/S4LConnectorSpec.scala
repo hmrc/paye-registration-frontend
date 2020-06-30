@@ -33,12 +33,13 @@ class S4LConnectorSpec extends PayeComponentSpec {
   val mockShortLivedCache = mock[PAYEShortLivedCache]
 
   val S4LConnectorTest = new S4LConnector {
-    override val metricsService       = new MockMetrics
-    override val shortCache           = mockShortLivedCache
-    override val successCounter       = metricsService.s4lSuccessResponseCounter
-    override val failedCounter        = metricsService.s4lFailedResponseCounter
+    override val metricsService = new MockMetrics
+    override val shortCache = mockShortLivedCache
+    override val successCounter = metricsService.s4lSuccessResponseCounter
+    override val failedCounter = metricsService.s4lFailedResponseCounter
     override val emptyResponseCounter = metricsService.s4lEmptyResponseCounter
-    override def timer                = metricsService.s4lResponseTimer.time()
+
+    override def timer = metricsService.s4lResponseTimer.time()
   }
 
   val tNameModel = TradingNameView(differentName = true, Some("Tradez R Us"))

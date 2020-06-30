@@ -39,7 +39,7 @@ class TradingNameFormSpec extends PayeComponentSpec {
 
   val invalidDataTooLong = Map(
     "differentName" -> "true",
-    "tradingName"   -> "A trading name that appears to be far too long for the box that it will go into"
+    "tradingName" -> "A trading name that appears to be far too long for the box that it will go into"
   )
 
   val noValidationNeedData = Map(
@@ -48,7 +48,7 @@ class TradingNameFormSpec extends PayeComponentSpec {
 
   "Validating the trading name form" should {
     "throw the correct exception for an incorrect form" in {
-      a[ExpectedFormFieldNotPopulatedException] should be thrownBy  TradingNameForm.validateForm(testForm)
+      a[ExpectedFormFieldNotPopulatedException] should be thrownBy TradingNameForm.validateForm(testForm)
     }
 
     "return the original form if no validation is needed" in {
@@ -80,7 +80,7 @@ class TradingNameFormSpec extends PayeComponentSpec {
       val prePopName = Some("foo bar wizz pre pop")
       val tradingNameModel = None
 
-      val res = TradingNameForm.fillWithPrePop(prePopName,tradingNameModel)
+      val res = TradingNameForm.fillWithPrePop(prePopName, tradingNameModel)
       res.errors mustBe Seq.empty
       res mustBe testForm.bind(mappingOfForm).discardingErrors
     }
@@ -90,9 +90,9 @@ class TradingNameFormSpec extends PayeComponentSpec {
         "tradingName" -> "foo"
       )
       val prePopName = Some("foo bar wizz pre pop")
-      val tradingNameModel = Some(TradingName(true,Some("foo")))
+      val tradingNameModel = Some(TradingName(true, Some("foo")))
 
-      val res = TradingNameForm.fillWithPrePop(prePopName,tradingNameModel)
+      val res = TradingNameForm.fillWithPrePop(prePopName, tradingNameModel)
       res.errors mustBe Seq.empty
       res mustBe testForm.bind(mappingOfForm).discardingErrors
     }
@@ -102,9 +102,9 @@ class TradingNameFormSpec extends PayeComponentSpec {
         "tradingName" -> "foo bar wizz pre pop"
       )
       val prePopName = Some("foo bar wizz pre pop")
-      val tradingNameModel = Some(TradingName(false,None))
+      val tradingNameModel = Some(TradingName(false, None))
 
-      val res = TradingNameForm.fillWithPrePop(prePopName,tradingNameModel)
+      val res = TradingNameForm.fillWithPrePop(prePopName, tradingNameModel)
       res.errors mustBe Seq.empty
       res mustBe testForm.bind(mappingOfForm).discardingErrors
     }
@@ -113,7 +113,7 @@ class TradingNameFormSpec extends PayeComponentSpec {
         "differentName" -> "",
         "tradingName" -> "")
 
-      val res = TradingNameForm.fillWithPrePop(None,None)
+      val res = TradingNameForm.fillWithPrePop(None, None)
       res.errors mustBe Seq.empty
       res mustBe testForm.bind(mappingOfForm).discardingErrors
     }

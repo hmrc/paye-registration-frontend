@@ -17,15 +17,12 @@
 package controllers
 
 import helpers.{PayeComponentSpec, PayeFakedApp}
-import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 class AccessibilityStatementControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
-  val testAccessibilityStatementController = new AccessibilityStatementController(
-    fakeApplication.injector.instanceOf[MessagesApi])(
-    mockAppConfig
-  )
+  val testAccessibilityStatementController = new AccessibilityStatementController(stubMessagesControllerComponents())(mockAppConfig)
 
   "show" should {
     "return OK" in {

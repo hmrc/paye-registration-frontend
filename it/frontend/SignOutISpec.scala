@@ -19,8 +19,10 @@ package frontend
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.ws.WSResponse
-import play.api.test.FakeApplication
+import play.api.{Application, Environment, Mode}
 
 class SignOutISpec extends IntegrationSpecBase with LoginStub with CachingStub with BeforeAndAfterEach with WiremockHelper {
 
@@ -29,7 +31,7 @@ class SignOutISpec extends IntegrationSpecBase with LoginStub with CachingStub w
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  override implicit lazy val app = FakeApplication(additionalConfiguration = Map(
+  lazy val config = Map(
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
     "auditing.consumer.baseUri.host" -> s"$mockHost",
@@ -49,7 +51,13 @@ class SignOutISpec extends IntegrationSpecBase with LoginStub with CachingStub w
     "microservice.services.business-registration.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
     "mongodb.uri" -> s"$mongoUri"
-  ))
+  )
+
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
+    .build
+
+  lazy val defaultCookieSigner: DefaultCookieSigner = app.injector.instanceOf[DefaultCookieSigner]
 
   override def beforeEach() {
     resetWiremock()
@@ -63,9 +71,9 @@ class SignOutISpec extends IntegrationSpecBase with LoginStub with CachingStub w
         setupSimpleAuthMocks()
         stubSuccessfulLogin()
 
-        await(buildClient("/").withHeaders(HeaderNames.COOKIE -> getSessionCookie()).get())
+        await(buildClient("/").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).get())
 
-        val signOutResponse = await(buildClient("/sign-out").withHeaders(HeaderNames.COOKIE -> getSessionCookie()).get())
+        val signOutResponse = await(buildClient("/sign-out").withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).get())
         signOutResponse.header("location") mustBe Some(s"$mockUrl/register-your-company/questionnaire")
         getMDTPSessionCookie(signOutResponse) mustBe None
       }

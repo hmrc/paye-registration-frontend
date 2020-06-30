@@ -22,11 +22,11 @@ import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.NatureOfBusiness
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import services.NatureOfBusinessService
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.Future
 
@@ -35,13 +35,12 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
   val mockNatureOfBusinessService = mock[NatureOfBusinessService]
 
   class Setup {
-    val testController = new NatureOfBusinessController {
+    val testController = new NatureOfBusinessController(stubMessagesControllerComponents()) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val authConnector = mockAuthConnector
       override val natureOfBusinessService = mockNatureOfBusinessService
       override val keystoreConnector = mockKeystoreConnector
-      implicit val messagesApi: MessagesApi = mockMessagesApi
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
       override implicit val appConfig: AppConfig = mockAppConfig

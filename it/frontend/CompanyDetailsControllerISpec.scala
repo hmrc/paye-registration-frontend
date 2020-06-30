@@ -18,19 +18,14 @@ package frontend
 
 import java.util.UUID
 
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, findAll, get, patchRequestedFor, postRequestedFor, stubFor, urlEqualTo, urlMatching}
-import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper, RequestsFinder}
+import itutil._
 import models.Address
 import models.external._
-import models.view.{ChosenAddress, CompanyDetails, PPOBAddress, PrepopAddress, TradingName}
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
-import play.api.libs.json.{JsObject, JsString, Json}
-import play.api.libs.ws.WSResponse
-import play.api.test.FakeApplication
-import play.api.test.Helpers._
-
-import scala.collection.script.Update
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.crypto.DefaultCookieSigner
+import play.api.{Application, Environment, Mode}
 
 class CompanyDetailsControllerISpec extends IntegrationSpecBase
   with LoginStub
@@ -43,7 +38,7 @@ class CompanyDetailsControllerISpec extends IntegrationSpecBase
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  override implicit lazy val app = FakeApplication(additionalConfiguration = Map(
+  lazy val config = Map(
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
     "auditing.consumer.baseUri.host" -> s"$mockHost",
@@ -72,7 +67,13 @@ class CompanyDetailsControllerISpec extends IntegrationSpecBase
     "defaultCHROAddress" -> "eyJsaW5lMSI6IjE0IFRlc3QgRGVmYXVsdCBTdHJlZXQiLCJsaW5lMiI6IlRlc3RsZXkiLCJsaW5lMyI6IlRlc3Rmb3JkIiwibGluZTQiOiJUZXN0c2hpcmUiLCJwb3N0Q29kZSI6IlRFMSAzU1QifQ==",
     "defaultSeqDirector" -> "W3siZGlyZWN0b3IiOnsiZm9yZW5hbWUiOiJmYXVsdHkiLCJzdXJuYW1lIjoiZGVmYXVsdCJ9fV0=",
     "mongodb.uri" -> s"$mongoUri"
-  ))
+  )
+
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
+    .build
+
+  lazy val defaultCookieSigner: DefaultCookieSigner = app.injector.instanceOf[DefaultCookieSigner]
 
   override def beforeEach() {
     resetWiremock()
@@ -129,7 +130,7 @@ class CompanyDetailsControllerISpec extends IntegrationSpecBase
       )
 
       val fResponse = buildClient("/where-company-carries-out-business-activities").
-        withHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
+        withHttpHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
           "chosenAddress" -> Seq("other")

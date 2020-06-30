@@ -20,13 +20,14 @@ import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.jsoup.Jsoup
 import play.api.test.FakeRequest
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
   val regId = Fixtures.validCurrentProfile.get.registrationID
   val ticketId: Long = 123456789
 
   class Setup {
-    val testController = new ErrorController {
+    val testController = new ErrorController(stubMessagesControllerComponents()) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val keystoreConnector = mockKeystoreConnector

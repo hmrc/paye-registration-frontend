@@ -19,7 +19,7 @@ package services
 import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import models.external._
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.Call
 
 @Singleton
@@ -28,13 +28,13 @@ class AddressLookupConfigBuilderService @Inject()(implicit messagesApi: Messages
   lazy val payeRegistrationFrontendURL: String = appConfig.self
   lazy val timeoutLength: Int = appConfig.timeoutInSeconds.toInt
 
-  def buildConfig(handbackLocation: Call, specificJourneyKey: String)(implicit messagesApi: MessagesApi): AlfJourneyConfig = {
+  def buildConfig(handbackLocation: Call, specificJourneyKey: String)(implicit messages: Messages): AlfJourneyConfig = {
 
     val messageKeyWithSpecKey: String => String = (key: String) => {
       val journeySpecificAlfMessageKey = s"pages.alf.$specificJourneyKey.$key"
       val addressLookupMessageKey = s"pages.alf.common.$key"
 
-      if (messagesApi.isDefinedAt(journeySpecificAlfMessageKey)) journeySpecificAlfMessageKey else addressLookupMessageKey
+      if (messages.isDefinedAt(journeySpecificAlfMessageKey)) journeySpecificAlfMessageKey else addressLookupMessageKey
     }
 
     val selectPageConfig = SelectPageConfig(
@@ -57,44 +57,44 @@ class AddressLookupConfigBuilderService @Inject()(implicit messagesApi: Messages
       alphaPhase = false,
       includeHMRCBranding = false,
       showBackButtons = true,
-      deskProServiceName = messagesApi(messageKeyWithSpecKey("deskProServiceName")),
+      deskProServiceName = messages(messageKeyWithSpecKey("deskProServiceName")),
       selectPageConfig = selectPageConfig,
       confirmPageConfig = confirmPageConfig,
       timeoutConfig = timeoutConfig
     )
     val appLevelLabels = AppLevelLabels(
-      navTitle = messagesApi(messageKeyWithSpecKey("navTitle")),
-      phaseBannerHtml = messagesApi(messageKeyWithSpecKey("phaseBannerHtml"))
+      navTitle = messages(messageKeyWithSpecKey("navTitle")),
+      phaseBannerHtml = messages(messageKeyWithSpecKey("phaseBannerHtml"))
     )
 
     val lookupPageLabels = LookupPageLabels(
-      title = messagesApi(messageKeyWithSpecKey("lookupPage.title")),
-      heading = messagesApi(messageKeyWithSpecKey("lookupPage.heading")),
-      filterLabel = messagesApi(messageKeyWithSpecKey("lookupPage.filterLabel")),
-      submitLabel = messagesApi(messageKeyWithSpecKey("lookupPage.submitLabel")),
-      manualAddressLinkText = messagesApi(messageKeyWithSpecKey("lookupPage.manual"))
+      title = messages(messageKeyWithSpecKey("lookupPage.title")),
+      heading = messages(messageKeyWithSpecKey("lookupPage.heading")),
+      filterLabel = messages(messageKeyWithSpecKey("lookupPage.filterLabel")),
+      submitLabel = messages(messageKeyWithSpecKey("lookupPage.submitLabel")),
+      manualAddressLinkText = messages(messageKeyWithSpecKey("lookupPage.manual"))
     )
 
     val selectPageLabels = SelectPageLabels(
-      title = messagesApi(messageKeyWithSpecKey("selectPage.description")),
-      heading = messagesApi(messageKeyWithSpecKey("selectPage.description")),
-      searchAgainLinkText = messagesApi(messageKeyWithSpecKey("selectPage.searchAgain")),
-      editAddressLinkText = messagesApi(messageKeyWithSpecKey("selectPage.editAddress"))
+      title = messages(messageKeyWithSpecKey("selectPage.description")),
+      heading = messages(messageKeyWithSpecKey("selectPage.description")),
+      searchAgainLinkText = messages(messageKeyWithSpecKey("selectPage.searchAgain")),
+      editAddressLinkText = messages(messageKeyWithSpecKey("selectPage.editAddress"))
     )
 
     val editPageLabels = EditPageLabels(
-      title = messagesApi(messageKeyWithSpecKey("editPage.description")),
-      heading = messagesApi(messageKeyWithSpecKey("editPage.description")),
-      line1Label = messagesApi(messageKeyWithSpecKey("editPage.line1Label")),
-      line2Label = messagesApi(messageKeyWithSpecKey("editPage.line2Label")),
-      line3Label = messagesApi(messageKeyWithSpecKey("editPage.line3Label"))
+      title = messages(messageKeyWithSpecKey("editPage.description")),
+      heading = messages(messageKeyWithSpecKey("editPage.description")),
+      line1Label = messages(messageKeyWithSpecKey("editPage.line1Label")),
+      line2Label = messages(messageKeyWithSpecKey("editPage.line2Label")),
+      line3Label = messages(messageKeyWithSpecKey("editPage.line3Label"))
     )
 
     val confirmPageLabels = ConfirmPageLabels(
-      title = messagesApi(messageKeyWithSpecKey("confirmPage.title")),
-      heading = messagesApi(messageKeyWithSpecKey("confirmPage.heading")),
-      submitLabel = messagesApi(messageKeyWithSpecKey("confirmPage.submitLabel")),
-      changeLinkText = messagesApi(messageKeyWithSpecKey("confirmPage.changeLinkText"))
+      title = messages(messageKeyWithSpecKey("confirmPage.title")),
+      heading = messages(messageKeyWithSpecKey("confirmPage.heading")),
+      submitLabel = messages(messageKeyWithSpecKey("confirmPage.submitLabel")),
+      changeLinkText = messages(messageKeyWithSpecKey("confirmPage.changeLinkText"))
     )
 
     val journeyLabels = JourneyLabels(

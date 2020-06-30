@@ -18,14 +18,12 @@ package connectors
 
 import common.exceptions
 import common.exceptions.DownstreamExceptions
-import config.WSHttp
+import config.{AppConfig, WSHttp}
 import javax.inject.Inject
 import models.external.CompanyRegistrationProfile
-import play.api.{Configuration, Environment}
 import play.api.libs.json._
 import services.MetricsService
 import uk.gov.hmrc.http.{BadRequestException, CoreGet, HeaderCarrier, HttpException}
-import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.{PAYEFeatureSwitch, PAYEFeatureSwitches}
 
@@ -34,13 +32,11 @@ import scala.concurrent.Future
 class CompanyRegistrationConnectorImpl @Inject()(val featureSwitch: PAYEFeatureSwitch,
                                                  val http: WSHttp,
                                                  val metricsService: MetricsService,
-                                                 override val runModeConfiguration: Configuration,
-                                                 environment: Environment) extends CompanyRegistrationConnector with ServicesConfig {
-  lazy val companyRegistrationUrl: String = baseUrl("company-registration")
-  lazy val companyRegistrationUri: String = getConfString("company-registration.uri","")
-  lazy val stubUrl: String                = baseUrl("incorporation-frontend-stubs")
-  lazy val stubUri: String                = getConfString("incorporation-frontend-stubs.uri","")
-  override protected def mode = environment.mode
+                                                 appConfig: AppConfig) extends CompanyRegistrationConnector {
+  lazy val companyRegistrationUrl: String = appConfig.servicesConfig.baseUrl("company-registration")
+  lazy val companyRegistrationUri: String = appConfig.servicesConfig.getConfString("company-registration.uri", "")
+  lazy val stubUrl: String = appConfig.servicesConfig.baseUrl("incorporation-frontend-stubs")
+  lazy val stubUri: String = appConfig.servicesConfig.getConfString("incorporation-frontend-stubs.uri", "")
 }
 
 trait CompanyRegistrationConnector {
@@ -52,15 +48,15 @@ trait CompanyRegistrationConnector {
   val metricsService: MetricsService
   val featureSwitch: PAYEFeatureSwitches
 
-  def getCompanyRegistrationDetails(regId: String)(implicit hc : HeaderCarrier) : Future[CompanyRegistrationProfile] = {
+  def getCompanyRegistrationDetails(regId: String)(implicit hc: HeaderCarrier): Future[CompanyRegistrationProfile] = {
     val companyRegTimer = metricsService.companyRegistrationResponseTimer.time()
 
     val url = if (useCompanyRegistration) s"$companyRegistrationUrl$companyRegistrationUri/corporation-tax-registration" else s"$stubUrl$stubUri"
 
     http.GET[JsObject](s"$url/$regId/corporation-tax-registration") map { response =>
       companyRegTimer.stop()
-      val status    = (response \ "status").as[String]
-      val txId      = (response \ "confirmationReferences"    \ "transaction-id").validate[String].fold(
+      val status = (response \ "status").as[String]
+      val txId = (response \ "confirmationReferences" \ "transaction-id").validate[String].fold(
         _ => throw new exceptions.DownstreamExceptions.ConfirmationRefsNotFoundException,
         identity
       )
@@ -87,7 +83,7 @@ trait CompanyRegistrationConnector {
     val emailRetrieveURL = s"$companyRegistrationUrl$companyRegistrationUri/corporation-tax-registration/$regId/retrieve-email"
 
     http.GET[JsObject](emailRetrieveURL).map(js => Some((js \ "address").as[String]))
-      .recover{
+      .recover {
         case e: HttpException =>
           logger.warn(s"[getVerifiedEmail] - A call was made to company reg and an unsuccessful response was returned for regId: $regId and message: ${e.getMessage}")
           None

@@ -18,7 +18,7 @@ package enums
 
 object DownstreamOutcome extends Enumeration {
 
-  val Success   = Value
-  val Failure   = Value
-  val Redirect  = Value
+  val Success = Value
+  val Failure = Value
+  val Redirect = Value
 }

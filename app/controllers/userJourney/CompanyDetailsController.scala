@@ -25,10 +25,9 @@ import forms.companyDetails.{BusinessContactDetailsForm, PPOBForm, TradingNameFo
 import javax.inject.Inject
 import models.external.AuditingInformation
 import models.view._
+import play.api.Logger
 import play.api.data.Form
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request, Result}
-import play.api.{Configuration, Logger}
+import play.api.mvc._
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
@@ -41,17 +40,16 @@ class CompanyDetailsControllerImpl @Inject()(val s4LService: S4LService,
                                              val keystoreConnector: KeystoreConnector,
                                              val companyDetailsService: CompanyDetailsService,
                                              val incorpInfoService: IncorporationInformationService,
-                                             val messagesApi: MessagesApi,
                                              val authConnector: AuthConnector,
                                              val addressLookupService: AddressLookupService,
                                              val prepopService: PrepopulationService,
-                                             val config: Configuration,
                                              val auditService: AuditService,
                                              val incorporationInformationConnector: IncorporationInformationConnector,
-                                             val payeRegistrationService: PAYERegistrationService
-                                            )(implicit val appConfig: AppConfig) extends CompanyDetailsController with AuthRedirectUrls
+                                             val payeRegistrationService: PAYERegistrationService,
+                                             mcc: MessagesControllerComponents
+                                            )(implicit val appConfig: AppConfig) extends CompanyDetailsController(mcc) with AuthRedirectUrls
 
-trait CompanyDetailsController extends PayeBaseController {
+abstract class CompanyDetailsController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
   val s4LService: S4LService
   val companyDetailsService: CompanyDetailsService
@@ -127,7 +125,7 @@ trait CompanyDetailsController extends PayeBaseController {
       implicit audit =>
         optCompanyName match {
           case Some(companyName) => BusinessContactDetailsForm.form.bindFromRequest.fold(
-            errs => Future.successful(BadRequest(BusinessContactDetailsPage(errs,companyName))),
+            errs => Future.successful(BadRequest(BusinessContactDetailsPage(errs, companyName))),
             success => {
               val trimmed = success.copy(email = success.email map (_.trim), phoneNumber = success.phoneNumber map (_.trim), mobileNumber = success.mobileNumber map (_.trim))
               companyDetailsService.submitBusinessContact(trimmed, profile.registrationID, profile.companyTaxRegistration.transactionId) map {

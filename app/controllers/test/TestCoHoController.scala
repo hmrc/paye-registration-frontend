@@ -16,18 +16,17 @@
 
 package controllers.test
 
-import javax.inject.Inject
+import config.AppConfig
 import connectors.test.TestIncorpInfoConnector
 import connectors.{BusinessRegistrationConnector, IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.test.TestCoHoCompanyDetailsForm
-import play.api.Configuration
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request}
+import javax.inject.Inject
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TestCoHoControllerImpl @Inject()(val testIncorpInfoConnector: TestIncorpInfoConnector,
@@ -36,14 +35,15 @@ class TestCoHoControllerImpl @Inject()(val testIncorpInfoConnector: TestIncorpIn
                                        val businessRegConnector: BusinessRegistrationConnector,
                                        val authConnector: AuthConnector,
                                        val s4LService: S4LService,
-                                       val config: Configuration,
                                        val companyDetailsService: CompanyDetailsService,
                                        val incorpInfoService: IncorporationInformationService,
-                                       val messagesApi: MessagesApi,
                                        val incorporationInformationConnector: IncorporationInformationConnector,
-                                       val payeRegistrationService: PAYERegistrationService) extends TestCoHoController with AuthRedirectUrls
+                                       val payeRegistrationService: PAYERegistrationService,
+                                       mcc: MessagesControllerComponents
+                                      )(val appConfig: AppConfig) extends TestCoHoController(mcc) with AuthRedirectUrls
 
-trait TestCoHoController extends PayeBaseController {
+abstract class TestCoHoController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
+  val appConfig: AppConfig
   val testIncorpInfoConnector: TestIncorpInfoConnector
   val businessRegConnector: BusinessRegistrationConnector
   val keystoreConnector: KeystoreConnector
@@ -55,10 +55,10 @@ trait TestCoHoController extends PayeBaseController {
 
   def submitCoHoCompanyDetailsSetup: Action[AnyContent] = isAuthorised { implicit request =>
     TestCoHoCompanyDetailsForm.form.bindFromRequest.fold(
-      errors  => Future.successful(BadRequest(views.html.pages.test.coHoCompanyDetailsSetup(errors))),
+      errors => Future.successful(BadRequest(views.html.pages.test.coHoCompanyDetailsSetup(errors))),
       success => for {
         profile <- businessRegConnector.retrieveCurrentProfile
-        res     <- doAddCoHoCompanyDetails(profile.registrationID, success.companyName)
+        res <- doAddCoHoCompanyDetails(profile.registrationID, success.companyName)
       } yield Ok(res)
     )
   }
@@ -66,12 +66,12 @@ trait TestCoHoController extends PayeBaseController {
   def coHoCompanyDetailsTearDown: Action[AnyContent] = isAuthorised { implicit request =>
     for {
       profile <- businessRegConnector.retrieveCurrentProfile
-      res     <- doCoHoCompanyDetailsTearDown(profile.registrationID)
+      res <- doCoHoCompanyDetailsTearDown(profile.registrationID)
     } yield Ok(res)
   }
 
   protected[controllers] def doCoHoCompanyDetailsTearDown(regId: String)(implicit request: Request[AnyContent]): Future[String] = {
-    testIncorpInfoConnector.teardownIndividualCoHoCompanyDetails(regId).map (_ =>"Company details collection removed")
+    testIncorpInfoConnector.teardownIndividualCoHoCompanyDetails(regId).map(_ => "Company details collection removed")
   }
 
   protected[controllers] def doAddCoHoCompanyDetails(regId: String, companyName: String)(implicit request: Request[AnyContent]): Future[String] = {

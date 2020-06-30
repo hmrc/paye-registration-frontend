@@ -18,18 +18,19 @@ package controllers.test
 
 import connectors.PAYERegistrationConnector
 import javax.inject.Inject
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import utils._
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class FeatureSwitchControllerImpl @Inject()(val featureManager: FeatureManager,
                                             val payeFeatureSwitch: PAYEFeatureSwitches,
-                                            val payeRegConnector: PAYERegistrationConnector) extends FeatureSwitchController
+                                            val payeRegConnector: PAYERegistrationConnector,
+                                            mcc: MessagesControllerComponents) extends FeatureSwitchController(mcc)
 
-trait FeatureSwitchController extends FrontendController {
+abstract class FeatureSwitchController(mcc: MessagesControllerComponents) extends FrontendController(mcc) {
 
   val featureManager: FeatureManager
   val payeFeatureSwitch: PAYEFeatureSwitches
@@ -38,20 +39,20 @@ trait FeatureSwitchController extends FrontendController {
   def switcher(featureName: String, featureState: String): Action[AnyContent] = Action.async {
     implicit request =>
       def updateFeature: FeatureSwitch = featureState match {
-        case "true"                                      => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
+        case "true" => featureManager.enable(BooleanFeatureSwitch(featureName, enabled = true))
         case x if x.matches(Validators.datePatternRegex) => featureManager.setSystemDate(ValueSetFeatureSwitch(featureName, featureState))
-        case x@"time-clear"                              => featureManager.clearSystemDate(ValueSetFeatureSwitch(featureName, x))
-        case _                                           => featureManager.disable(BooleanFeatureSwitch(featureName, enabled = false))
+        case x@"time-clear" => featureManager.clearSystemDate(ValueSetFeatureSwitch(featureName, x))
+        case _ => featureManager.disable(BooleanFeatureSwitch(featureName, enabled = false))
       }
 
       payeFeatureSwitch(featureName) match {
         case Some(f) if f.name == "system-date" =>
           val feature = updateFeature
           payeRegConnector.setBackendDate(feature.value) map {
-            if(_) Ok(s"${feature.toString} set in frontend and back end") else Ok(s"${feature.toString} not set in backend something went wrong")
+            if (_) Ok(s"${feature.toString} set in frontend and back end") else Ok(s"${feature.toString} not set in backend something went wrong")
           }
-        case Some(_)                            => Future.successful(Ok(updateFeature.toString))
-        case None                               => Future.successful(BadRequest)
+        case Some(_) => Future.successful(Ok(updateFeature.toString))
+        case None => Future.successful(BadRequest)
       }
   }
 

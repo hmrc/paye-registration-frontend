@@ -16,10 +16,9 @@
 
 package services
 
-import javax.inject.Inject
-
 import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
+import javax.inject.Inject
 import models.api.SICCode
 import models.view.NatureOfBusiness
 import uk.gov.hmrc.http.HeaderCarrier
@@ -46,7 +45,7 @@ trait NatureOfBusinessService {
 
   def saveNatureOfBusiness(nob: NatureOfBusiness, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     for {
-      details   <- payeRegConnector.upsertSICCodes(regId, natureOfBusiness2SICCodes(nob))
+      details <- payeRegConnector.upsertSICCodes(regId, natureOfBusiness2SICCodes(nob))
     } yield DownstreamOutcome.Success
   }
 }

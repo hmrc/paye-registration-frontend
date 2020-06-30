@@ -16,30 +16,32 @@
 
 package controllers.test
 
+import config.AppConfig
 import javax.inject.Inject
 import connectors.{BusinessRegistrationConnector, IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import play.api.Configuration
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TestCacheControllerImpl @Inject()(val businessRegConnector: BusinessRegistrationConnector,
                                         val s4LService: S4LService,
                                         val authConnector: AuthConnector,
-                                        val config: Configuration,
                                         val keystoreConnector: KeystoreConnector,
                                         val companyDetailsService: CompanyDetailsService,
                                         val incorpInfoService: IncorporationInformationService,
-                                        val messagesApi: MessagesApi,
                                         val incorporationInformationConnector: IncorporationInformationConnector,
-                                        val payeRegistrationService: PAYERegistrationService) extends TestCacheController with AuthRedirectUrls
+                                        val payeRegistrationService: PAYERegistrationService,
+                                        mcc: MessagesControllerComponents
+                                       )(val appConfig: AppConfig) extends TestCacheController(mcc) with AuthRedirectUrls
 
-trait TestCacheController extends PayeBaseController {
+abstract class TestCacheController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
+  val appConfig: AppConfig
   val businessRegConnector: BusinessRegistrationConnector
   val s4LService: S4LService
 

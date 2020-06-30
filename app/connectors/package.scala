@@ -36,16 +36,18 @@ import uk.gov.hmrc.http.{BadRequestException, NotFoundException, Upstream4xxResp
 package object connectors extends Logging {
   def logResponse(e: Throwable, m: String, regId: Option[String] = None): Throwable = {
     val optRegId = regId.map(r => s" and regId: $regId").getOrElse("")
+
     def log(s: String) = logger.error(s"received $s when $m$optRegId")
+
     e match {
-      case e: NotFoundException   => log("NOT FOUND")
-      case e: BadRequestException => log("BAD REQUEST")
+      case _: NotFoundException => log("NOT FOUND")
+      case _: BadRequestException => log("BAD REQUEST")
       case e: Upstream4xxResponse => e.upstreamResponseCode match {
-        case 403  => log("FORBIDDEN")
-        case _    => log(s"Upstream 4xx: ${e.upstreamResponseCode} ${e.message}")
+        case 403 => log("FORBIDDEN")
+        case _ => log(s"Upstream 4xx: ${e.upstreamResponseCode} ${e.message}")
       }
       case e: Upstream5xxResponse => log(s"Upstream 5xx: ${e.upstreamResponseCode}")
-      case e: Exception           => log(s"ERROR: ${e.getMessage}")
+      case e: Exception => log(s"ERROR: ${e.getMessage}")
     }
     e
   }

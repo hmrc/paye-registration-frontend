@@ -16,6 +16,8 @@
 
 package controllers.userJourney
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import config.AppConfig
 import connectors.{EmailDifficulties, EmailSent}
 import helpers.auth.AuthHelpers
@@ -27,6 +29,7 @@ import org.mockito.Mockito.when
 import play.api.http.Status
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.Future
 
@@ -36,7 +39,7 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
     override val authConnector = mockAuthConnector
     override val keystoreConnector = mockKeystoreConnector
 
-    val controller = new ConfirmationController {
+    val controller = new ConfirmationController(stubMessagesControllerComponents()) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val emailService = mockEmailService
@@ -44,14 +47,13 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val authConnector = mockAuthConnector
       override val keystoreConnector = mockKeystoreConnector
       override val confirmationService = mockConfirmationService
-      implicit val messagesApi = mockMessagesApi
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
       override implicit val appConfig: AppConfig = mockAppConfig
     }
   }
 
-  val successHttpResponse = HttpResponse(200, None, Map.empty, None)
+  val successHttpResponse = HttpResponse(status = 200, body = "")
 
   "showConfirmation" should {
     "display the confirmation page with an acknowledgement reference retrieved from backend with Inclusive content not shown" in new Setup {

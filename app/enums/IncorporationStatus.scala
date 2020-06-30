@@ -16,7 +16,7 @@
 
 package enums
 
-import play.api.libs.json.{Format, Reads, Writes}
+import play.api.libs.json._
 
 object IncorporationStatus extends Enumeration {
   val accepted = Value

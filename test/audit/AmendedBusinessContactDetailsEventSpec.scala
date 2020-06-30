@@ -42,7 +42,7 @@ class AmendedBusinessContactDetailsEventSpec extends PayeComponentSpec {
 
       val expectedJson = Json.parse(
         """
-         |{
+          |{
           | "externalUserId" : "testExternalUserId",
           | "authProviderId" : "testAuthProviderId",
           | "journeyId" : "testRegId",
@@ -53,8 +53,8 @@ class AmendedBusinessContactDetailsEventSpec extends PayeComponentSpec {
           | },
           | "newContactDetails" : {
           |  "email" : "sample@googlemail.com",
-         |   "mobileNumber" : "7890564320",
-         |   "phoneNumber" :  "1234567892"
+          |   "mobileNumber" : "7890564320",
+          |   "phoneNumber" :  "1234567892"
           |}
           |}
         """.stripMargin

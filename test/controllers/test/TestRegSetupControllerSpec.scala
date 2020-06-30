@@ -16,6 +16,7 @@
 
 package controllers.test
 
+import config.AppConfig
 import enums.DownstreamOutcome
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
@@ -24,6 +25,7 @@ import org.mockito.Mockito.when
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.Future
 
@@ -32,16 +34,17 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
   val request = FakeRequest()
 
   class Setup {
-    val controller = new TestRegSetupController {
-      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
+    val controller = new TestRegSetupController(stubMessagesControllerComponents()) {
+      override val appConfig: AppConfig = mockAppConfig
+      override val redirectToLogin = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
 
-      override val testPAYERegConnector       = mockTestPayeRegConnector
-      override val payeRegService             = mockPayeRegService
-      override val messagesApi                = mockMessagesApi
-      override val authConnector              = mockAuthConnector
-      override val keystoreConnector          = mockKeystoreConnector
-      override val testBusinessRegConnector   = mockTestBusRegConnector
+      override val testPAYERegConnector = mockTestPayeRegConnector
+      override val payeRegService = mockPayeRegService
+      override val messagesApi = mockMessagesApi
+      override val authConnector = mockAuthConnector
+      override val keystoreConnector = mockKeystoreConnector
+      override val testBusinessRegConnector = mockTestBusRegConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
 

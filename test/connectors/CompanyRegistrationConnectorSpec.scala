@@ -20,7 +20,7 @@ import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics
 import models.external.CompanyRegistrationProfile
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{when,times,verify}
+import org.mockito.Mockito.{times, verify, when}
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 
@@ -33,13 +33,14 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
 
   class Setup(stubbed: Boolean) {
     val testConnector = new CompanyRegistrationConnector {
-      val companyRegistrationUri          = testUri
-      val companyRegistrationUrl          = testUrl
-      val stubUri                         = testUri
-      val stubUrl                         = testUrl
-      val http                            = mockWSHttp
-      override val metricsService         = new MockMetrics
-      override val featureSwitch          = mockFeatureSwitch
+      val companyRegistrationUri = testUri
+      val companyRegistrationUrl = testUrl
+      val stubUri = testUri
+      val stubUrl = testUrl
+      val http = mockWSHttp
+      override val metricsService = new MockMetrics
+      override val featureSwitch = mockFeatureSwitch
+
       override def useCompanyRegistration = stubbed
     }
   }
@@ -52,26 +53,26 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
   val profileJson =
     Json.parse(
       s"""
-        |{
-        |    "registration-id" : "testRegId",
-        |    "status" : "$status",
-        |    "confirmationReferences" : {
-        |       "acknowledgement-reference" : "BRCT-0123456789",
-        |       "transaction-id" : "$transactionId"
-        |    },
-        |    "acknowledgementReferences" : {
-        |       "status" : "$ackRefStatus"
-        |    }
-        |}
+         |{
+         |    "registration-id" : "testRegId",
+         |    "status" : "$status",
+         |    "confirmationReferences" : {
+         |       "acknowledgement-reference" : "BRCT-0123456789",
+         |       "transaction-id" : "$transactionId"
+         |    },
+         |    "acknowledgementReferences" : {
+         |       "status" : "$ackRefStatus"
+         |    }
+         |}
       """.stripMargin).as[JsObject]
 
   val profileJsonMin =
     Json.parse(
       s"""
-        |{
-        |    "registration-id" : "testRegId",
-        |    "status" : "$status"
-        |}
+         |{
+         |    "registration-id" : "testRegId",
+         |    "status" : "$status"
+         |}
       """.stripMargin).as[JsObject]
 
   "getCompanyRegistrationDetails" should {
@@ -137,7 +138,7 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
 
       val res = await(testConnector.getVerifiedEmail("fooBarAndWizz"))
       res mustBe Some("foo@foo.com")
-      verify(mockWSHttp,times(1)).GET[JsObject](any())(any(),any(),any())
+      verify(mockWSHttp, times(1)).GET[JsObject](any())(any(), any(), any())
     }
     "return a None when company reg call fails" in new Setup(stubbed = false) {
       when(mockWSHttp.GET[JsObject](any())(any(), any[HeaderCarrier](), any()))

@@ -16,6 +16,7 @@
 
 package controllers.test
 
+import config.AppConfig
 import enums.DownstreamOutcome
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.BusinessProfile
@@ -24,36 +25,43 @@ import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.mvc.{AnyContent, Request}
 import play.api.test.FakeRequest
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.Future
 
 class TestSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
-  class Setup extends CodeMocks {
-    val controller = new TestSetupController {
-      override val redirectToLogin         = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign      = MockAuthRedirects.redirectToPostSign
 
-      override val businessRegConnector     = mockBusinessRegistrationConnector
-      override val keystoreConnector        = mockKeystoreConnector
+  class Setup extends CodeMocks {
+    val controller = new TestSetupController(stubMessagesControllerComponents()) {
+      override val appConfig: AppConfig = mockAppConfig
+      override val redirectToLogin = MockAuthRedirects.redirectToLogin
+      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
+
+      override val businessRegConnector = mockBusinessRegistrationConnector
+      override val keystoreConnector = mockKeystoreConnector
       override val testBusinessRegConnector = mockTestBusRegConnector
-      override val authConnector            = mockAuthConnector
-      override val testIncorpInfoConnector  = mockTestIncorpInfoConnector
-      override val coHoAPIService           = mockIncorpInfoService
-      override val messagesApi              = mockMessagesApi
-      override val payeRegService           = mockPayeRegService
-      override val testPAYERegConnector     = mockTestPayeRegConnector
-      override val s4LService               = mockS4LService
+      override val authConnector = mockAuthConnector
+      override val testIncorpInfoConnector = mockTestIncorpInfoConnector
+      override val coHoAPIService = mockIncorpInfoService
+      override val messagesApi = mockMessagesApi
+      override val payeRegService = mockPayeRegService
+      override val testPAYERegConnector = mockTestPayeRegConnector
+      override val s4LService = mockS4LService
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
 
       override def doBusinessProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = Future.successful(BusinessProfile("regId", "en"))
+
       override def doCoHoCompanyDetailsTearDown(regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
+
       override def doAddCoHoCompanyDetails(regId: String, companyName: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
-      override def doIndividualRegTeardown(regId: String) (implicit request: Request[AnyContent]): Future[DownstreamOutcome.Value] = Future.successful(DownstreamOutcome.Success)
+
+      override def doIndividualRegTeardown(regId: String)(implicit request: Request[AnyContent]): Future[DownstreamOutcome.Value] = Future.successful(DownstreamOutcome.Success)
+
       override def doTearDownS4L(regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
     }
   }
-  
+
   "setup" should {
     "redirect to post sign in" in new Setup {
       mockFetchCurrentProfile()

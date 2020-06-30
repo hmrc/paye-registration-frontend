@@ -37,4 +37,5 @@ trait InternalExceptions {
   class MissingDocumentStatus(msg: String) extends Exception(msg)
 
   class NoCurrentSessionException(msg: String) extends Exception(msg)
+
 }

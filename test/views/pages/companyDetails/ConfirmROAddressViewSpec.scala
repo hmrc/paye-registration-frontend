@@ -16,17 +16,20 @@
 
 package views.pages.companyDetails
 
+import java.util.Locale
+
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.Address
 import org.jsoup.Jsoup
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.{I18nSupport, Lang, Messages, MessagesApi}
 import play.api.test.FakeRequest
 import views.html.pages.companyDetails.confirmROAddress
 
 class ConfirmROAddressViewSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
   implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
-  implicit lazy val messagesApi : MessagesApi = mockMessagesApi
+  implicit lazy val messagesApi: MessagesApi = mockMessagesApi
+  implicit val mockMessages = mockMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
 
   val testCompanyName = "Test company limited"
   val testAddress =
@@ -44,24 +47,24 @@ class ConfirmROAddressViewSpec extends PayeComponentSpec with PayeFakedApp with 
     lazy val document = Jsoup.parse(view.body)
 
     "have the correct title" in {
-      document.getElementById("pageHeading").text mustBe messagesApi("pages.confirmRO.description", testCompanyName)
+      document.getElementById("pageHeading").text mustBe mockMessages("pages.confirmRO.description", testCompanyName)
     }
 
     "have the correct lede paragraph" in {
-      document.getElementById("lead-paragraph").text mustBe messagesApi("pages.confirmRO.lede", testCompanyName)
+      document.getElementById("lead-paragraph").text mustBe mockMessages("pages.confirmRO.lede", testCompanyName)
     }
 
     "have the correct drop down text" in {
-      document.getElementById("incorrect-address-Summary").text mustBe messagesApi("pages.confirmRO.help.link")
+      document.getElementById("incorrect-address-Summary").text mustBe mockMessages("pages.confirmRO.help.link")
     }
 
     "have the correct drop down body text" in {
-      document.getElementById("incorrect-address-Details").text.contains(messagesApi("pages.confirmRO.hiddenIntro.label")) mustBe true
-      document.getElementById("incorrect-address-Details").text.contains(messagesApi("pages.common.companiesHouse.hiddenIntro.2")) mustBe true
+      document.getElementById("incorrect-address-Details").text.contains(mockMessages("pages.confirmRO.hiddenIntro.label")) mustBe true
+      document.getElementById("incorrect-address-Details").text.contains(mockMessages("pages.common.companiesHouse.hiddenIntro.2")) mustBe true
     }
 
     "have the correct drop down body link text" in {
-      document.getElementById("companies-house-link").text mustBe s"${messagesApi("pages.confirmRO.hiddenIntro.label")} ${messagesApi("app.common.linkHelperText")}"
+      document.getElementById("companies-house-link").text mustBe s"${mockMessages("pages.confirmRO.hiddenIntro.label")} ${mockMessages("app.common.linkHelperText")}"
     }
   }
 }

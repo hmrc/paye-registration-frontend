@@ -21,14 +21,15 @@ import java.util.UUID
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.libs.Crypto
+import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.ws.WSCookie
 import uk.gov.hmrc.crypto.{CompositeSymmetricCrypto, Crypted, PlainText}
 import uk.gov.hmrc.http.SessionKeys
 
 trait LoginStub extends SessionCookieBaker {
 
-  val SessionId         = s"stubbed-${UUID.randomUUID}"
-  val invalidSessionId  = s"FAKE_PRF::NON-COMPSDOJ OMSDDf"
+  val SessionId = s"stubbed-${UUID.randomUUID}"
+  val invalidSessionId = s"FAKE_PRF::NON-COMPSDOJ OMSDDf"
 
   private def cookieData(additionalData: Map[String, String], timeStampRollback: Long, sessionID: String): Map[String, String] = {
 
@@ -45,7 +46,7 @@ trait LoginStub extends SessionCookieBaker {
   }
 
   def getSessionCookie(additionalData: Map[String, String] = Map(), timeStampRollback: Long = 0, sessionID: String = SessionId) = {
- cookieValue(cookieData(additionalData, timeStampRollback, sessionID))
+    cookieValue(cookieData(additionalData, timeStampRollback, sessionID))
   }
 
   def stubSuccessfulLogin(withSignIn: Boolean = false) = {
@@ -77,13 +78,14 @@ trait LoginStub extends SessionCookieBaker {
       .willReturn(
         aResponse().
           withStatus(200).
-          withBody(s"""{
-                      |  "name": "testUserName",
-                      |  "email": "testUserEmail",
-                      |  "affinityGroup": "testAffinityGroup",
-                      |  "authProviderId": "testAuthProviderId",
-                      |  "authProviderType": "testAuthProviderType"
-                      |}""".stripMargin)
+          withBody(
+            s"""{
+               |  "name": "testUserName",
+               |  "email": "testUserEmail",
+               |  "affinityGroup": "testAffinityGroup",
+               |  "authProviderId": "testAuthProviderId",
+               |  "authProviderType": "testAuthProviderType"
+               |}""".stripMargin)
       )
     )
 
@@ -97,6 +99,7 @@ trait LoginStub extends SessionCookieBaker {
   }
 
   val userId = "/auth/oid/1234567890"
+
   def setupSimpleAuthMocks() = {
     stubFor(post(urlMatching("/write/audit"))
       .willReturn(
@@ -177,14 +180,16 @@ trait LoginStub extends SessionCookieBaker {
 }
 
 trait SessionCookieBaker {
+  val defaultCookieSigner: DefaultCookieSigner
   val cookieKey = "gvBoGdgzqG1AarzF1LY0zQ=="
-  def cookieValue(sessionData: Map[String,String]) = {
+
+  def cookieValue(sessionData: Map[String, String]) = {
     def encode(data: Map[String, String]): PlainText = {
       val encoded = data.map {
         case (k, v) => URLEncoder.encode(k, "UTF-8") + "=" + URLEncoder.encode(v, "UTF-8")
       }.mkString("&")
-      val key = "fqpLDZ4sumDsekHkeEBlCA==".getBytes
-      PlainText(Crypto.sign(encoded, key) + "-" + encoded)
+      val key = "yNhI04vHs9<_HWbC`]20u`37=NGLGYY5:0Tg5?y`W<NoJnXWqmjcgZBec@rOxb^G".getBytes
+      PlainText(defaultCookieSigner.sign(encoded, key) + "-" + encoded)
     }
 
     val encodedCookie = encode(sessionData)
@@ -194,7 +199,7 @@ trait SessionCookieBaker {
   }
 
   def getCookieData(cookie: WSCookie): Map[String, String] = {
-    getCookieData(cookie.value.get)
+    getCookieData(cookie.value)
   }
 
   def getCookieData(cookieData: String): Map[String, String] = {
@@ -202,7 +207,7 @@ trait SessionCookieBaker {
     val decrypted = CompositeSymmetricCrypto.aesGCM(cookieKey, Seq()).decrypt(Crypted(cookieData)).value
     val result = decrypted.split("&")
       .map(_.split("="))
-      .map { case Array(k, v) => (k, URLDecoder.decode(v))}
+      .map { case Array(k, v) => (k, URLDecoder.decode(v)) }
       .toMap
 
     result

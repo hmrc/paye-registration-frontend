@@ -16,11 +16,10 @@
 
 package services
 
-import javax.inject.Inject
-
 import common.exceptions.DownstreamExceptions.S4LFetchException
 import connectors.BusinessRegistrationConnector
 import enums.CacheKeys
+import javax.inject.Inject
 import models.view.PAYEContactDetails
 import models.{Address, DigitalContactDetails}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -38,8 +37,8 @@ trait PrepopulationService {
   def getBusinessContactDetails(regId: String)(implicit hc: HeaderCarrier): Future[Option[DigitalContactDetails]] = {
     busRegConnector.retrieveContactDetails(regId) map {
       case Some(contactDetails) => Some(DigitalContactDetails(contactDetails.digitalContactDetails.email,
-                                                              contactDetails.digitalContactDetails.mobileNumber,
-                                                              contactDetails.digitalContactDetails.phoneNumber))
+        contactDetails.digitalContactDetails.mobileNumber,
+        contactDetails.digitalContactDetails.phoneNumber))
       case None => None
     }
   }
@@ -49,23 +48,24 @@ trait PrepopulationService {
   }
 
   def saveContactDetails(regId: String, contactDetails: PAYEContactDetails)(implicit hc: HeaderCarrier): Future[PAYEContactDetails] = {
-    busRegConnector.upsertContactDetails(regId, contactDetails) map(_ => contactDetails)
+    busRegConnector.upsertContactDetails(regId, contactDetails) map (_ => contactDetails)
   }
 
   def getTradingName(regId: String)(implicit hc: HeaderCarrier): Future[Option[String]] = {
     busRegConnector.retrieveTradingName(regId)
   }
-  def saveTradingName(regId:String, tradingName:String)(implicit hc: HeaderCarrier): Future[String] = {
-    busRegConnector.upsertTradingName(regId,tradingName)
+
+  def saveTradingName(regId: String, tradingName: String)(implicit hc: HeaderCarrier): Future[String] = {
+    busRegConnector.upsertTradingName(regId, tradingName)
   }
 
-  def getPrePopAddresses(regId: String, roAddress: Address, ppobAddress: Option[Address], otherAddress: Option[Address])(implicit hc: HeaderCarrier): Future[Map[Int,Address]] = {
+  def getPrePopAddresses(regId: String, roAddress: Address, ppobAddress: Option[Address], otherAddress: Option[Address])(implicit hc: HeaderCarrier): Future[Map[Int, Address]] = {
     busRegConnector.retrieveAddresses(regId) flatMap {
       addresses =>
         val filteredAddresses = filterAddresses(addresses, Seq(Some(roAddress), ppobAddress, otherAddress).flatten)
         s4LService.saveIntMap[Address](CacheKeys.PrePopAddresses.toString, filteredAddresses, regId) map {
-        _ => filteredAddresses
-      }
+          _ => filteredAddresses
+        }
     }
   }
 
@@ -73,7 +73,9 @@ trait PrepopulationService {
     addresses
       .distinct
       .filterNot(addr => addressesToExclude.contains(addr))
-      .zipWithIndex.map{_.swap}.toMap
+      .zipWithIndex.map {
+      _.swap
+    }.toMap
   }
 
   def saveAddress(regId: String, address: Address)(implicit hc: HeaderCarrier): Future[Address] = {
@@ -84,9 +86,12 @@ trait PrepopulationService {
 
   def getAddress(regId: String, addressId: Int)(implicit hc: HeaderCarrier): Future[Address] = {
     s4LService.fetchAndGetIntMap[Address](CacheKeys.PrePopAddresses.toString, regId) map {
-      oAddresses => oAddresses.map {
-        _.getOrElse(addressId, {throw new S4LFetchException(s"[PrepopulationService] - [getAddress] No address stored with address ID $addressId for reg ID $regId")})
-      }.getOrElse(throw new S4LFetchException(s"[PrepopulationService] - [getAddress] No address map returned from S4L for reg ID $regId"))
+      oAddresses =>
+        oAddresses.map {
+          _.getOrElse(addressId, {
+            throw new S4LFetchException(s"[PrepopulationService] - [getAddress] No address stored with address ID $addressId for reg ID $regId")
+          })
+        }.getOrElse(throw new S4LFetchException(s"[PrepopulationService] - [getAddress] No address map returned from S4L for reg ID $regId"))
     }
   }
 }

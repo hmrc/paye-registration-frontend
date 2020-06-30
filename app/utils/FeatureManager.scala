@@ -23,30 +23,36 @@ import org.joda.time.format.ISODateTimeFormat
 
 sealed trait FeatureSwitch {
   def name: String
+
   def value: String
+
   def enabled: Boolean
 }
 
 trait TimedFeatureSwitch extends FeatureSwitch {
 
   def start: Option[LocalDateTime]
+
   def end: Option[LocalDateTime]
+
   def target: LocalDateTime
 
   override def enabled: Boolean = (start, end) match {
     case (Some(s), Some(e)) => !target.isBefore(s) && !target.isAfter(e)
-    case (None, Some(e))    => !target.isAfter(e)
-    case (Some(s), None)    => !target.isBefore(s)
-    case (None, None)       => false
+    case (None, Some(e)) => !target.isAfter(e)
+    case (Some(s), None) => !target.isBefore(s)
+    case (None, None) => false
   }
 }
 
 case class EnabledTimedFeatureSwitch(name: String, start: Option[LocalDateTime], end: Option[LocalDateTime], target: LocalDateTime) extends TimedFeatureSwitch {
   override def value = ""
 }
+
 case class DisabledTimedFeatureSwitch(name: String, start: Option[LocalDateTime], end: Option[LocalDateTime], target: LocalDateTime) extends TimedFeatureSwitch {
   override def enabled: Boolean = !super.enabled
-  override def value            = ""
+
+  override def value = ""
 }
 
 case class BooleanFeatureSwitch(name: String, enabled: Boolean) extends FeatureSwitch {
@@ -55,7 +61,8 @@ case class BooleanFeatureSwitch(name: String, enabled: Boolean) extends FeatureS
 
 case class ValueSetFeatureSwitch(name: String, setValue: String) extends FeatureSwitch {
   override def enabled = true
-  override def value   = setValue
+
+  override def value = setValue
 }
 
 class FeatureSwitchManager @Inject extends FeatureManager
@@ -63,14 +70,14 @@ class FeatureSwitchManager @Inject extends FeatureManager
 trait FeatureManager {
 
   val DisabledIntervalExtractor = """!(\S+)_(\S+)""".r
-  val EnabledIntervalExtractor  = """(\S+)_(\S+)""".r
-  val UNSPECIFIED               = "X"
-  val dateFormat                = ISODateTimeFormat.dateTimeNoMillis()
+  val EnabledIntervalExtractor = """(\S+)_(\S+)""".r
+  val UNSPECIFIED = "X"
+  val dateFormat = ISODateTimeFormat.dateTimeNoMillis()
 
-  private[utils] def toDate(text: String) : Option[LocalDateTime] = {
+  private[utils] def toDate(text: String): Option[LocalDateTime] = {
     text match {
       case UNSPECIFIED => None
-      case _           => Some(LocalDateTime.parse(text))
+      case _ => Some(LocalDateTime.parse(text))
     }
   }
 
@@ -80,12 +87,12 @@ trait FeatureManager {
     val value = sys.props.get(systemPropertyName(name))
 
     value match {
-      case Some("true")                                            => BooleanFeatureSwitch(name, enabled = true)
-      case Some(DisabledIntervalExtractor(start, end))             => DisabledTimedFeatureSwitch(name, toDate(start), toDate(end), SystemDate.getSystemDate)
-      case Some(EnabledIntervalExtractor(start, end))              => EnabledTimedFeatureSwitch(name, toDate(start), toDate(end), SystemDate.getSystemDate)
-      case Some("time-clear")                                      => ValueSetFeatureSwitch(name, "time-clear")
+      case Some("true") => BooleanFeatureSwitch(name, enabled = true)
+      case Some(DisabledIntervalExtractor(start, end)) => DisabledTimedFeatureSwitch(name, toDate(start), toDate(end), SystemDate.getSystemDate)
+      case Some(EnabledIntervalExtractor(start, end)) => EnabledTimedFeatureSwitch(name, toDate(start), toDate(end), SystemDate.getSystemDate)
+      case Some("time-clear") => ValueSetFeatureSwitch(name, "time-clear")
       case Some(date) if date.matches(Validators.datePatternRegex) => ValueSetFeatureSwitch(name, date)
-      case _                                                       => BooleanFeatureSwitch(name, enabled = false)
+      case _ => BooleanFeatureSwitch(name, enabled = false)
     }
   }
 
@@ -94,19 +101,22 @@ trait FeatureManager {
     getProperty(name)
   }
 
-  def enable(fs: FeatureSwitch): FeatureSwitch  = setProperty(fs.name, "true")
+  def enable(fs: FeatureSwitch): FeatureSwitch = setProperty(fs.name, "true")
+
   def disable(fs: FeatureSwitch): FeatureSwitch = setProperty(fs.name, "false")
 
-  def setSystemDate(fs: FeatureSwitch): FeatureSwitch   = setProperty(fs.name, fs.value)
+  def setSystemDate(fs: FeatureSwitch): FeatureSwitch = setProperty(fs.name, fs.value)
+
   def clearSystemDate(fs: FeatureSwitch): FeatureSwitch = setProperty(fs.name, "")
 
   def apply(name: String, enabled: Boolean = false): FeatureSwitch = getProperty(name)
-  def unapply(fs: FeatureSwitch): Option[(String, Boolean)]        = Some(fs.name -> fs.enabled)
+
+  def unapply(fs: FeatureSwitch): Option[(String, Boolean)] = Some(fs.name -> fs.enabled)
 }
 
 class PAYEFeatureSwitch @Inject()(val manager: FeatureManager) extends PAYEFeatureSwitches {
-  val companyRegistration      = "companyRegistration"
-  val setSystemDate            = "system-date"
+  val companyRegistration = "companyRegistration"
+  val setSystemDate = "system-date"
 }
 
 trait PAYEFeatureSwitches {
@@ -115,16 +125,17 @@ trait PAYEFeatureSwitches {
   protected val setSystemDate: String
   protected val manager: FeatureManager
 
-  def companyReg            = manager.getProperty(companyRegistration)
-  def systemDate            = manager.getProperty(setSystemDate)
+  def companyReg = manager.getProperty(companyRegistration)
+
+  def systemDate = manager.getProperty(setSystemDate)
 
   def apply(name: String): Option[FeatureSwitch] = name match {
-    case "companyRegistration"  => Some(companyReg)
-    case "system-date"          => Some(systemDate)
-    case _                      => None
+    case "companyRegistration" => Some(companyReg)
+    case "system-date" => Some(systemDate)
+    case _ => None
   }
 
   def all: Seq[FeatureSwitch] = {
-    Seq(companyReg, systemDate )
+    Seq(companyReg, systemDate)
   }
 }

@@ -118,7 +118,6 @@ class DirectorsSpec extends PayeComponentSpec {
     }
 
 
-
     val tstEmptyJson = Json.parse(
       s"""{
          |  "director":{"surname":""}

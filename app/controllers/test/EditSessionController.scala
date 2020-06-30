@@ -16,13 +16,12 @@
 
 package controllers.test
 
-import play.api.mvc.{Action, AnyContent, Controller}
+import javax.inject.{Inject, Singleton}
+import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.SessionKeys
-import scala.concurrent.ExecutionContext.Implicits.global
 
-class EditSessionControllerImpl extends EditSessionController
-
-trait EditSessionController extends Controller {
+@Singleton
+class EditSessionController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
 
   def setSessionId(sessionId: String): Action[AnyContent] = Action {
     implicit request =>

@@ -159,7 +159,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
     }
 
     "Have the correct error if no fields are completed" in {
-      val data: Map[String,String] = Map()
+      val data: Map[String, String] = Map()
       val boundForm = testForm.bind(data)
       val formError = FormError("noFieldsCompleted-businessEmail", BusinessContactDetailsForm.noFieldsCompletedMessage)
 
@@ -167,7 +167,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
     }
 
     "Have the correct error if email is invalid" in {
-      val data: Map[String,String] = Map(
+      val data: Map[String, String] = Map(
         "businessEmail" -> "NotAProperEmail",
         "mobileNumber" -> "",
         "phoneNumber" -> ""
@@ -180,7 +180,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
           "mobileNumber" -> "",
           "phoneNumber" -> ""
         ),
-        List(FormError("businessEmail",List("errors.invalid.email"),List())),
+        List(FormError("businessEmail", List("errors.invalid.email"), List())),
         None
       )
 
@@ -188,7 +188,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
     }
 
     "Have the correct error if mobile number is invalid" in {
-      val data: Map[String,String] = Map(
+      val data: Map[String, String] = Map(
         "businessEmail" -> "",
         "mobileNumber" -> "NotAProperMobNumber!!!!!",
         "phoneNumber" -> ""
@@ -201,7 +201,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
           "mobileNumber" -> "NotAProperMobNumber!!!!!",
           "phoneNumber" -> ""
         ),
-        List(FormError("mobileNumber",List("errors.invalid.contactNum"),List())),
+        List(FormError("mobileNumber", List("errors.invalid.contactNum"), List())),
         None
       )
 
@@ -209,7 +209,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
     }
 
     "Have the correct error if phone number is invalid" in {
-      val data: Map[String,String] = Map(
+      val data: Map[String, String] = Map(
         "businessEmail" -> "",
         "mobileNumber" -> "",
         "phoneNumber" -> "NotAProperNumber!!!!!"
@@ -223,7 +223,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
           "mobileNumber" -> "",
           "phoneNumber" -> "NotAProperNumber!!!!!"
         ),
-        List(FormError("phoneNumber",List("errors.invalid.contactNum"),List())),
+        List(FormError("phoneNumber", List("errors.invalid.contactNum"), List())),
         None
       )
 
@@ -231,7 +231,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
     }
 
     "Have the correct error if the email is of a valid structure but too long" in {
-      val data: Map[String,String] = Map(
+      val data: Map[String, String] = Map(
         "businessEmail" -> "test-email-address@test-email-address-that-is-just-far-far-too-long-to-be-valid.aaaaaaaaaaa",
         "mobileNumber" -> "",
         "phoneNumber" -> ""
@@ -245,7 +245,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
           "mobileNumber" -> "",
           "phoneNumber" -> ""
         ),
-        List(FormError("businessEmail",List("errors.invalid.email.tooLong"),List())),
+        List(FormError("businessEmail", List("errors.invalid.email.tooLong"), List())),
         None
       )
 
@@ -253,7 +253,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
     }
 
     "Have the correct error if the mobile number is just a space" in {
-      val data: Map[String,String] = Map(
+      val data: Map[String, String] = Map(
         "businessEmail" -> "test@email.com",
         "mobileNumber" -> " ",
         "phoneNumber" -> ""
@@ -267,7 +267,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
           "mobileNumber" -> " ",
           "phoneNumber" -> ""
         ),
-        List(FormError("mobileNumber",List("errors.invalid.contactNum"),List())),
+        List(FormError("mobileNumber", List("errors.invalid.contactNum"), List())),
         None
       )
 
@@ -275,7 +275,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
     }
 
     "Have the correct error if the phone number is just a space" in {
-      val data: Map[String,String] = Map(
+      val data: Map[String, String] = Map(
         "businessEmail" -> "test@email.com",
         "mobileNumber" -> "",
         "phoneNumber" -> " "
@@ -289,7 +289,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
           "mobileNumber" -> "",
           "phoneNumber" -> " "
         ),
-        List(FormError("phoneNumber",List("errors.invalid.contactNum"),List())),
+        List(FormError("phoneNumber", List("errors.invalid.contactNum"), List())),
         None
       )
 

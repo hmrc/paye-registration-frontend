@@ -16,29 +16,25 @@
 
 package controllers.test
 
-import java.time.LocalDate
-
-import javax.inject.Inject
+import config.AppConfig
 import connectors._
 import connectors.test._
-import controllers.{AuthRedirectUrls, PayeBaseController}
+import controllers.AuthRedirectUrls
 import enums.DownstreamOutcome
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent}
-import play.api.{Configuration, Logger}
+import javax.inject.Inject
+import play.api.Logger
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestSetupControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
-                                        val config: Configuration,
                                         val businessRegConnector: BusinessRegistrationConnector,
                                         val testBusinessRegConnector: TestBusinessRegConnector,
                                         val testIncorpInfoConnector: TestIncorpInfoConnector,
                                         val coHoAPIService: IncorporationInformationService,
-                                        val messagesApi: MessagesApi,
                                         val companyDetailsService: CompanyDetailsService,
                                         val incorpInfoService: IncorporationInformationService,
                                         val testPAYERegConnector: TestPAYERegConnector,
@@ -46,14 +42,12 @@ class TestSetupControllerImpl @Inject()(val keystoreConnector: KeystoreConnector
                                         val authConnector: AuthConnector,
                                         val s4LService: S4LService,
                                         val incorporationInformationConnector: IncorporationInformationConnector,
-                                        val payeRegistrationService: PAYERegistrationService) extends TestSetupController with AuthRedirectUrls
+                                        val payeRegistrationService: PAYERegistrationService,
+                                        mcc: MessagesControllerComponents
+                                       )(val appConfig: AppConfig) extends TestSetupController(mcc) with AuthRedirectUrls
 
-trait TestSetupController
-  extends BusinessProfileController
-    with TestCoHoController
-    with TestRegSetupController
-    with TestCacheController
-    with PayeBaseController {
+abstract class TestSetupController(mcc: MessagesControllerComponents) extends BusinessProfileController(mcc) {
+  val appConfig: AppConfig
 
   val businessRegConnector: BusinessRegistrationConnector
   val testBusinessRegConnector: TestBusinessRegConnector
@@ -99,5 +93,23 @@ trait TestSetupController
     }).recover {
       case _ => InternalServerError(s"Unable to add Incorp Update")
     }
+  }
+
+  protected[controllers] def doCoHoCompanyDetailsTearDown(regId: String)(implicit request: Request[AnyContent]): Future[String] = {
+    testIncorpInfoConnector.teardownIndividualCoHoCompanyDetails(regId).map(_ => "Company details collection removed")
+  }
+
+  protected[controllers] def doAddCoHoCompanyDetails(regId: String, companyName: String)(implicit request: Request[AnyContent]): Future[String] = {
+    for {
+      resp <- testIncorpInfoConnector.setupCoHoCompanyDetails(regId, companyName)
+    } yield s"Company Name: $companyName, registration ID: $regId. Response status: ${resp.status}"
+  }
+
+  protected[controllers] def doIndividualRegTeardown(regId: String)(implicit request: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
+    testPAYERegConnector.tearDownIndividualRegistration(regId)
+  }
+
+  protected[controllers] def doTearDownS4L(regId: String)(implicit request: Request[AnyContent]): Future[String] = {
+    s4LService.clear(regId: String) map (_ => "Save4Later cleared")
   }
 }

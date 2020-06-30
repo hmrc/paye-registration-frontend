@@ -25,7 +25,7 @@ class SICCodeSpec extends PayeComponentSpec {
   val testModel2 = SICCode(Some("23456"), Some("testDesc"))
   val testModel3 = SICCode(Some("34567"), Some("testDesc"))
   val testModel4 = SICCode(Some("45678"), Some("testDesc"))
-  
+
   "A test model" should {
     "be formatted as json in the correct way" in {
       val result = Json.toJson(testModel1)

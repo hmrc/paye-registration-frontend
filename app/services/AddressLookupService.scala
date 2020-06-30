@@ -19,7 +19,7 @@ package services
 import connectors.AddressLookupConnector
 import javax.inject.{Inject, Singleton}
 import models.Address
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.Call
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -30,7 +30,7 @@ class AddressLookupService @Inject()(addressLookupConnector: AddressLookupConnec
                                      addressLookupConfigBuilderService: AddressLookupConfigBuilderService
                                     )(implicit messagesApi: MessagesApi) {
 
-  def buildAddressLookupUrl(key: String, call: Call)(implicit hc: HeaderCarrier): Future[String] = {
+  def buildAddressLookupUrl(key: String, call: Call)(implicit hc: HeaderCarrier, messages: Messages): Future[String] = {
     val alfJourneyConfig = addressLookupConfigBuilderService.buildConfig(call, key)
 
     addressLookupConnector.getOnRampUrl(alfJourneyConfig)

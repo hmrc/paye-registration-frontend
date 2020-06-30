@@ -30,7 +30,7 @@ class TestBusinessRegConnectorSpec extends PayeComponentSpec {
   class Setup extends CodeMocks {
     val testConnector = new TestBusinessRegConnector {
       override val businessRegUrl = "testBusinessRegUrl"
-      override val http           = mockWSHttp
+      override val http = mockWSHttp
     }
   }
 

@@ -17,12 +17,13 @@
 package services
 
 import java.time.LocalDate
-import javax.inject.Inject
 
+import javax.inject.Inject
 import utils.SystemDate
 
 class ThresholdServiceImpl @Inject()() extends ThresholdService {
-  override def now: LocalDate   = SystemDate.getSystemDate.toLocalDate
+  override def now: LocalDate = SystemDate.getSystemDate.toLocalDate
+
   override val nextTaxYearStart = LocalDate.of(2020, 4, 6)
 }
 
@@ -33,7 +34,7 @@ trait ThresholdService {
 
   //TODO: Raise another story to make this more robust
   def getCurrentThresholds: Map[String, Int] = {
-    if(now.isEqual(nextTaxYearStart) | now.isAfter(nextTaxYearStart)) {
+    if (now.isEqual(nextTaxYearStart) | now.isAfter(nextTaxYearStart)) {
       buildThresholdMap(120, 520, 6240)
     } else {
       buildThresholdMap(118, 512, 6136)

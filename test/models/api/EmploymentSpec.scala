@@ -37,11 +37,11 @@ class EmploymentSpec extends PlaySpec {
         """.stripMargin).as[JsObject]
 
       val expectedModel = Employment(
-        employees         = Employing.alreadyEmploying,
-        firstPaymentDate  = LocalDate.of(2017, 12, 29),
-        construction      = true,
-        subcontractors    = true,
-        companyPension    = Some(true)
+        employees = Employing.alreadyEmploying,
+        firstPaymentDate = LocalDate.of(2017, 12, 29),
+        construction = true,
+        subcontractors = true,
+        companyPension = Some(true)
       )
 
       json.as[Employment] mustBe expectedModel

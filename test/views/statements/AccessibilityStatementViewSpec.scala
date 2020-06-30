@@ -31,7 +31,9 @@ class AccessibilityStatementViewSpec extends PayeComponentSpec with PayeFakedApp
     val heading = "Accessibility statement for registering an employee for PAYE"
     val introP1 = "This accessibility statement explains how accessible this service is, what to do if you have difficulty using it, and how to report accessibility problems with the service."
     val introP2 = "This service is part of the wider GOV.UK website. There is a separate accessibility statement for the main GOV.UK website."
+
     def introP3(serviceStartUrl: String) = s"This page only contains information about the registering an employee for PAYE service, available at $serviceStartUrl"
+
     val serviceH2 = "Using this service"
     val serviceP1 = "This service enables businesses to register their employees for PAYE."
     val serviceP2 = "This service is run by HM Revenue and Customs (HMRC). We want as many people as possible to be able to use this service. This means you should be able to:"

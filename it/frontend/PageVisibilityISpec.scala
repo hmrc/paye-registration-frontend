@@ -20,20 +20,22 @@ import controllers.userJourney.routes
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.json.Json
-import play.api.test.FakeApplication
+import play.api.{Application, Environment, Mode}
 
 class PageVisibilityISpec extends IntegrationSpecBase
-with LoginStub
-with CachingStub
-with BeforeAndAfterEach
-with WiremockHelper {
+  with LoginStub
+  with CachingStub
+  with BeforeAndAfterEach
+  with WiremockHelper {
 
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-  override implicit lazy val app = FakeApplication(additionalConfiguration = Map(
+  lazy val config = Map(
     "microservice.services.auth.host" -> s"$mockHost",
     "microservice.services.auth.port" -> s"$mockPort",
     "auditing.consumer.baseUri.host" -> s"$mockHost",
@@ -47,7 +49,13 @@ with WiremockHelper {
     "microservice.services.cachable.short-lived-cache.port" -> s"$mockPort",
     "microservice.services.cachable.short-lived-cache.domain" -> "save4later",
     "mongodb.uri" -> s"$mongoUri"
-  ))
+  )
+
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
+    .build
+
+  lazy val defaultCookieSigner: DefaultCookieSigner = app.injector.instanceOf[DefaultCookieSigner]
 
   override def beforeEach() {
     resetWiremock()
@@ -90,7 +98,7 @@ with WiremockHelper {
 
       stubSuccessfulLogin()
 
-//      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(false), regId = regId))
+      //      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(false), regId = regId))
       stubSessionCacheMetadata(SessionId, regId)
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
@@ -103,7 +111,7 @@ with WiremockHelper {
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
 
       val fResponse = buildClient("/what-company-does").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie(sessionID = SessionId)).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie(sessionID = SessionId)).
         get()
 
       val response = await(fResponse)
@@ -118,7 +126,7 @@ with WiremockHelper {
 
 
       stubSessionCacheMetadata(SessionId, regId)
-//      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = None, regId = regId))
+      //      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = None, regId = regId))
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
@@ -130,7 +138,7 @@ with WiremockHelper {
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
 
       val fResponse = buildClient("/what-company-does").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)
@@ -144,7 +152,7 @@ with WiremockHelper {
       stubSuccessfulLogin()
 
       stubSessionCacheMetadata(SessionId, regId, true)
-//      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(true), regId = regId))
+      //      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(true), regId = regId))
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
@@ -156,7 +164,7 @@ with WiremockHelper {
       stubPut(s"/save4later/paye-registration-frontend/$regId/data/CompanyDetails", 200, dummyS4LResponse)
 
       val fResponse = buildClient("/what-company-does").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)
@@ -174,7 +182,7 @@ with WiremockHelper {
       stubSuccessfulLogin()
 
       stubSessionCacheMetadata(SessionId, regId, true)
-//      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(true), regId = regId))
+      //      stubKeystoreGet(SessionId, currentProfileJsonString(regSubmitted = Some(true), regId = regId))
 
       stubGet(s"/save4later/paye-registration-frontend/$regId", 404, "")
 
@@ -183,7 +191,7 @@ with WiremockHelper {
       stubDelete(s"/save4later/paye-registration-frontend/$regId", 200, "")
 
       val fResponse = buildClient("/application-submitted").
-        withHeaders(HeaderNames.COOKIE -> getSessionCookie()).
+        withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
 
       val response = await(fResponse)

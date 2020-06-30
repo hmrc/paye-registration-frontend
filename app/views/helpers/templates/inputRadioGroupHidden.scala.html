@@ -17,12 +17,12 @@
 @(field: Field,
   radioOptions: Seq[(String, String)],
   hiddenElem: Seq[(String, Html)],
-  args: (Symbol, Any)*)(implicit lang: Messages)
+  args: (Symbol, Any)*)(implicit messages: Messages)
 
 @import play.api.i18n._
 @import views.html.helper._
 
-@elements = @{new FieldElements(field.id, field, null, args.toMap, lang) }
+@elements = @{new FieldElements(field.id, field, null, args.toMap, messages) }
 @fieldsetClass = {@elements.args.get('_groupClass)@if(elements.hasErrors){ form-group-error}}
 @labelAfter = @{ elements.args.get('_labelAfter).getOrElse(false).asInstanceOf[Boolean] }
 @idHidden = @{ elements.args.get('_idHidden).getOrElse("")}

@@ -31,12 +31,12 @@ object TradingNameForm extends RequiredBooleanForm {
   }
 
   def validateForm(vForm: Form[TradingName]): Form[TradingName] = {
-    if(!validationNeeded(vForm)) vForm else {
-      if(tradingNameFieldNotCompleted(vForm)) {
+    if (!validationNeeded(vForm)) vForm else {
+      if (tradingNameFieldNotCompleted(vForm)) {
         vForm.withError("tradingName", "pages.tradingName.errorQuestion")
-      } else if(tradingNameFieldLess(vForm)) {
+      } else if (tradingNameFieldLess(vForm)) {
         vForm.withError("tradingName", "pages.tradingName.error.length")
-      } else if(!validateTradingName(vForm)){
+      } else if (!validateTradingName(vForm)) {
         vForm.withError("tradingName", "pages.tradingName.error.invalidChars")
       } else {
         vForm
@@ -45,14 +45,14 @@ object TradingNameForm extends RequiredBooleanForm {
   }
 
   private def validationNeeded(data: Form[TradingName]): Boolean = {
-    data("differentName").value.getOrElse{
+    data("differentName").value.getOrElse {
       throw new InternalExceptions.ExpectedFormFieldNotPopulatedException("TradingNameForm", "differentName")
     } == "true"
   }
 
   private def tradingNameFieldNotCompleted(data: Form[TradingName]) = data("tradingName").value.isEmpty
 
-  private def tradingNameFieldLess(vForm: Form[TradingName])= vForm.data("tradingName").length() > 35
+  private def tradingNameFieldLess(vForm: Form[TradingName]) = vForm.data("tradingName").length() > 35
 
 
   override val errorMsg = "pages.tradingName.error"
@@ -64,13 +64,13 @@ object TradingNameForm extends RequiredBooleanForm {
     )(TradingName.apply)(TradingName.unapply)
   )
 
-  def fillWithPrePop(prePopTradingName:Option[String], tradingName: Option[TradingName]): Form[TradingName] = {
+  def fillWithPrePop(prePopTradingName: Option[String], tradingName: Option[TradingName]): Form[TradingName] = {
     if (tradingName.exists(_.differentName)) {
       form.fill(tradingName.get)
     } else {
       val diffName = tradingName.map(_.differentName.toString).getOrElse("")
       val tradeName = prePopTradingName.getOrElse("")
-      form.bind(Map("differentName" -> diffName,"tradingName" -> tradeName)).discardingErrors
+      form.bind(Map("differentName" -> diffName, "tradingName" -> tradeName)).discardingErrors
     }
   }
 }

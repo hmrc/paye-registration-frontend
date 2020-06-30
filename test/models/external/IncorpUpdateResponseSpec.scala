@@ -18,7 +18,7 @@ package models.external
 
 import enums.IncorporationStatus
 import helpers.PayeComponentSpec
-import play.api.libs.json.{JsError, JsSuccess, Json}
+import play.api.libs.json.{JsSuccess, Json}
 
 class IncorpUpdateResponseSpec extends PayeComponentSpec {
   "reads" should {

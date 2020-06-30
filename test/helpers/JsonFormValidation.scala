@@ -17,8 +17,7 @@
 package helpers
 
 import org.scalatestplus.play.PlaySpec
-import play.api.data.validation.ValidationError
-import play.api.libs.json.{JsError, JsPath, JsResult, JsSuccess}
+import play.api.libs.json._
 
 trait JsonFormValidation {
   this: PlaySpec =>
@@ -30,21 +29,21 @@ trait JsonFormValidation {
     }
   }
 
-  def shouldHaveErrors[T](result: JsResult[T], errorPath: JsPath, expectedError: ValidationError): Unit = {
+  def shouldHaveErrors[T](result: JsResult[T], errorPath: JsPath, expectedError: JsonValidationError): Unit = {
     shouldHaveErrors[T](result, Map(errorPath -> Seq(expectedError)))
   }
 
-  def shouldHaveErrors[T](result: JsResult[T], errorPath: JsPath, expectedErrors: Seq[ValidationError]): Unit = {
+  def shouldHaveErrors[T](result: JsResult[T], errorPath: JsPath, expectedErrors: Seq[JsonValidationError]): Unit = {
     shouldHaveErrors[T](result, Map(errorPath -> expectedErrors))
   }
 
-  def shouldHaveErrors[T](result: JsResult[T], expectedErrors: Map[JsPath, Seq[ValidationError]]): Unit = {
+  def shouldHaveErrors[T](result: JsResult[T], expectedErrors: Map[JsPath, Seq[JsonValidationError]]): Unit = {
     result match {
       case JsSuccess(value, path) => fail(s"read should have failed and didn't - produced ${value}")
       case JsError(errors) => {
         errors.length mustBe expectedErrors.keySet.toSeq.length
 
-        for( error <- errors ) {
+        for (error <- errors) {
           error match {
             case (path, valErrs) => {
               expectedErrors.keySet must contain(path)
@@ -56,7 +55,7 @@ trait JsonFormValidation {
     }
   }
 
-  def shouldHaveErrors2[T](result: JsResult[T], errorPath: JsPath, expectedError: ValidationError) = {
+  def shouldHaveErrors2[T](result: JsResult[T], errorPath: JsPath, expectedError: JsonValidationError) = {
     result match {
       case JsSuccess(value, path) => fail(s"read should have failed and didn't - produced ${value}")
       case JsError(errors) => {

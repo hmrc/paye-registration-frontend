@@ -16,10 +16,13 @@
 
 package helpers.auth
 
+import java.util.Locale
+
 import connectors.KeystoreConnector
 import models.external.CurrentProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
+import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.mvc._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
@@ -105,7 +108,7 @@ trait AuthHelpers {
 
   def submitAuthorisedWithCPAndAudit(action: Action[AnyContent], currentProfile: Option[CurrentProfile], request: FakeRequest[AnyContentAsFormUrlEncoded])(test: Future[Result] => Any) {
     when(authConnector.authorise[~[Option[String], Credentials]](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-      .thenReturn(Future(new ~(Some("testId"), Credentials("testProviderId","testProvideType"))))
+      .thenReturn(Future(new ~(Some("testId"), Credentials("testProviderId", "testProvideType"))))
 
     when(keystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future(currentProfile))

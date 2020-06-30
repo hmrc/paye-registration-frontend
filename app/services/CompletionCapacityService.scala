@@ -16,10 +16,9 @@
 
 package services
 
-import javax.inject.Inject
-
 import connectors._
 import enums.{DownstreamOutcome, UserCapacity}
+import javax.inject.Inject
 import models.view.CompletionCapacity
 import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
@@ -44,12 +43,12 @@ trait CompletionCapacityService {
   def getCompletionCapacity(regId: String)(implicit hc: HeaderCarrier): Future[Option[CompletionCapacity]] = {
     payeRegConnector.getCompletionCapacity(regId) flatMap {
       case Some(prCC) => Future.successful(Some(apiToView(prCC)))
-      case None       => businessRegistrationConnector.retrieveCompletionCapacity flatMap {
+      case None => businessRegistrationConnector.retrieveCompletionCapacity flatMap {
         case Some(brCC) =>
           payeRegConnector.upsertCompletionCapacity(regId, brCC) flatMap {
             _ => Future.successful(Some(apiToView(brCC)))
           }
-        case None     =>
+        case None =>
           Logger.info(s"[CompletionCapacityService] - [getCompletionCapacity] - BR document was found for regId $regId but it contained no completion capacity")
           Future.successful(None)
       } recover {
@@ -62,19 +61,19 @@ trait CompletionCapacityService {
 
   private[services] def viewToAPI(completionCapacity: CompletionCapacity): String = {
     completionCapacity.completionCapacity match {
-      case UserCapacity.director  => UserCapacity.director.toString
-      case UserCapacity.agent     => UserCapacity.agent.toString
+      case UserCapacity.director => UserCapacity.director.toString
+      case UserCapacity.agent => UserCapacity.agent.toString
       case UserCapacity.secretary => UserCapacity.secretary.toString
-      case UserCapacity.other     => completionCapacity.completionCapacityOther
+      case UserCapacity.other => completionCapacity.completionCapacityOther
     }
   }
 
   private[services] def apiToView(completionCapacity: String): CompletionCapacity = {
     completionCapacity.toLowerCase match {
-      case "director"           => CompletionCapacity(UserCapacity.director, "")
-      case "agent"              => CompletionCapacity(UserCapacity.agent, "")
-      case "company secretary"  => CompletionCapacity(UserCapacity.secretary, "")
-      case _                    => CompletionCapacity(UserCapacity.other, completionCapacity)
+      case "director" => CompletionCapacity(UserCapacity.director, "")
+      case "agent" => CompletionCapacity(UserCapacity.agent, "")
+      case "company secretary" => CompletionCapacity(UserCapacity.secretary, "")
+      case _ => CompletionCapacity(UserCapacity.other, completionCapacity)
     }
   }
 }

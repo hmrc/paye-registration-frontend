@@ -37,9 +37,9 @@ class IncorporationInformationConnectorImpl @Inject()(val metricsService: Metric
                                                       val http: WSHttp
                                                      )(implicit val appConfig: AppConfig) extends IncorporationInformationConnector {
 
-  lazy val incorpInfoUrl = appConfig.baseUrl("incorporation-information")
-  lazy val incorpInfoUri = appConfig.getConfString("incorporation-information.uri", "")
-  lazy val payeRegFeUrl = appConfig.getConfString("paye-registration-frontend.ii-callback.url",
+  lazy val incorpInfoUrl = appConfig.servicesConfig.baseUrl("incorporation-information")
+  lazy val incorpInfoUri = appConfig.servicesConfig.getConfString("incorporation-information.uri", "")
+  lazy val payeRegFeUrl = appConfig.servicesConfig.getConfString("paye-registration-frontend.ii-callback.url",
     throw new IllegalArgumentException("[IncorporationInformationConnector] config value payeRegFeUrl cannot be found"))
   val successCounter = metricsService.companyDetailsSuccessResponseCounter
   val failedCounter = metricsService.companyDetailsFailedResponseCounter
@@ -105,12 +105,15 @@ trait IncorporationInformationConnector extends RegistrationWhitelist {
 
   def getCoHoCompanyDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[IncorpInfoResponse] = {
     ifRegIdNotWhitelisted(regId) {
-      implicit val rds = CoHoCompanyDetailsModel.incorpInfoReads
-      val incorpInfoTimer = timer
-      http.GET[CoHoCompanyDetailsModel](s"$incorpInfoUrl$incorpInfoUri/$transactionId/company-profile") map { res =>
-        incorpInfoTimer.stop()
-        successCounter.inc(1)
-        IncorpInfoSuccessResponse(res)
+      implicit val rds: Reads[CoHoCompanyDetailsModel] = CoHoCompanyDetailsModel.incorpInfoReads
+
+      val incorpInfoTimer: Timer.Context = timer
+
+      http.GET[CoHoCompanyDetailsModel](s"$incorpInfoUrl$incorpInfoUri/$transactionId/company-profile") map {
+        res =>
+          incorpInfoTimer.stop()
+          successCounter.inc(1)
+          IncorpInfoSuccessResponse(res)
       } recover {
         case _: BadRequestException =>
           logger.error(s"[IncorporationInformationConnector] [getCoHoCompanyDetails] - Received a BadRequest status code when expecting company details for regId: $regId / TX-ID: $transactionId")

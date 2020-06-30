@@ -16,6 +16,8 @@
 
 package controllers.userJourney
 
+import java.util.Locale
+
 import config.AppConfig
 import connectors._
 import enums.PAYEStatus
@@ -26,8 +28,8 @@ import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
-import play.api.i18n.MessagesApi
-import play.api.mvc.{AnyContent, Request, Result}
+import play.api.i18n.{I18nSupport, Lang}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.api.test.FakeRequest
 import services.{SubmissionService, SummaryService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -38,12 +40,13 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val mockSummaryService = mock[SummaryService]
   val mockSubmissionService = mock[SubmissionService]
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
 
   class Setup extends AuthHelpers {
     override val authConnector = mockAuthConnector
     override val keystoreConnector = mockKeystoreConnector
 
-    val controller = new SummaryController {
+    val controller = new SummaryController(mockMcc) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val emailService = mockEmailService
@@ -52,7 +55,6 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val keystoreConnector = mockKeystoreConnector
       override val payeRegistrationConnector = mockPayeRegistrationConnector
       override val submissionService = mockSubmissionService
-      implicit val messagesApi: MessagesApi = mockMessagesApi
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
       override implicit val appConfig: AppConfig = mockAppConfig
@@ -74,7 +76,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
         (response: Future[Result]) =>
           status(response) mustBe Status.OK
           val result = Jsoup.parse(contentAsString(response))
-          result.body().getElementById("pageHeading").text() mustBe "Check and confirm your answers"
+          result.body.getElementById("pageHeading").text() mustBe "Check and confirm your answers"
           result.body.getElementById("tradingNameAnswer").text() mustBe "tstTrade"
       }
     }

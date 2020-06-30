@@ -21,13 +21,14 @@ import play.api.Logger
 class ConvertToPrepopAddressException(msg: String) extends Exception(msg)
 
 sealed trait AddressChoice
+
 object AddressChoice {
   def fromString(s: String): AddressChoice = s match {
-    case "roAddress"              => ROAddress
-    case "ppobAddress"            => PPOBAddress
-    case "correspondenceAddress"  => CorrespondenceAddress
-    case "other"                  => Other
-    case prepop                   => PrepopAddress.fromString(prepop)
+    case "roAddress" => ROAddress
+    case "ppobAddress" => PPOBAddress
+    case "correspondenceAddress" => CorrespondenceAddress
+    case "other" => Other
+    case prepop => PrepopAddress.fromString(prepop)
   }
 }
 
@@ -50,12 +51,13 @@ case object Other extends AddressChoice {
 case class PrepopAddress(index: Int) extends AddressChoice {
   override def toString: String = s"${PrepopAddress.prefix}$index"
 }
+
 object PrepopAddress {
-  val prefix      = "prepopAddress"
+  val prefix = "prepopAddress"
   val prepopRegex = s"${PrepopAddress.prefix}[0-9]+"
 
   def fromString(s: String): PrepopAddress = {
-    if(s.matches(prepopRegex)) {
+    if (s.matches(prepopRegex)) {
       val index = s.substring(prefix.length).toInt
       PrepopAddress(index)
     } else {
@@ -66,4 +68,4 @@ object PrepopAddress {
   }
 }
 
-case class ChosenAddress (chosenAddress: AddressChoice)
+case class ChosenAddress(chosenAddress: AddressChoice)

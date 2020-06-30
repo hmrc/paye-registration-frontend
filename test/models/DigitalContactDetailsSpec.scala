@@ -17,8 +17,7 @@
 package models
 
 import helpers.PayeComponentSpec
-import play.api.data.validation.ValidationError
-import play.api.libs.json.{JsPath, JsSuccess, Json}
+import play.api.libs.json.{JsPath, JsSuccess, Json, JsonValidationError}
 
 class DigitalContactDetailsSpec extends PayeComponentSpec {
 
@@ -91,7 +90,7 @@ class DigitalContactDetailsSpec extends PayeComponentSpec {
          |  "phoneNumber":"0161385032"
          |}""".stripMargin)
 
-    val tstModel = DigitalContactDetails (
+    val tstModel = DigitalContactDetails(
       email = None,
       mobileNumber = None,
       phoneNumber = Some("0161385032")
@@ -207,7 +206,7 @@ class DigitalContactDetailsSpec extends PayeComponentSpec {
       val json = Json.parse(s"""{}""".stripMargin)
 
       val result = Json.fromJson[DigitalContactDetails](json)(DigitalContactDetails.prepopReads)
-      shouldHaveErrors(result, JsPath(), Seq(ValidationError(err)))
+      shouldHaveErrors(result, JsPath(), Seq(JsonValidationError(err)))
     }
 
     "return an error when read from Json with no valid phone number with less than 10 digits" in {
@@ -217,7 +216,7 @@ class DigitalContactDetailsSpec extends PayeComponentSpec {
            |}""".stripMargin)
 
       val result = Json.fromJson[DigitalContactDetails](json)(DigitalContactDetails.prepopReads)
-      shouldHaveErrors(result, JsPath(), Seq(ValidationError(err)))
+      shouldHaveErrors(result, JsPath(), Seq(JsonValidationError(err)))
     }
 
     "return an error when read from Json with no valid phone number with more than 20 digits" in {
@@ -227,7 +226,7 @@ class DigitalContactDetailsSpec extends PayeComponentSpec {
            |}""".stripMargin)
 
       val result = Json.fromJson[DigitalContactDetails](json)(DigitalContactDetails.prepopReads)
-      shouldHaveErrors(result, JsPath(), Seq(ValidationError(err)))
+      shouldHaveErrors(result, JsPath(), Seq(JsonValidationError(err)))
     }
   }
 }

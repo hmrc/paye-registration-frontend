@@ -25,6 +25,7 @@ import org.mockito.Mockito._
 import play.api.test.FakeRequest
 import services.CompletionCapacityService
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.Future
 
@@ -33,7 +34,7 @@ class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedA
   val mockCompletionCapacityService = mock[CompletionCapacityService]
 
   class Setup {
-    val testController = new CompletionCapacityController {
+    val testController = new CompletionCapacityController(stubMessagesControllerComponents()) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val authConnector = mockAuthConnector

@@ -17,15 +17,14 @@
 package services
 
 import config.AppConfig
-import javax.inject.Inject
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
+import javax.inject.Inject
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import models.external.AuditingInformation
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
 import models.{Address, DigitalContactDetails}
-import play.api.data.Form
-import play.api.mvc.{AnyContent, Request, Result}
+import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.RegistrationWhitelist
@@ -35,7 +34,7 @@ import scala.concurrent.Future
 class CompanyDetailsServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
                                           val incorpInfoService: IncorporationInformationService,
                                           val s4LService: S4LService,
-                                          val compRegConnector : CompanyRegistrationConnector,
+                                          val compRegConnector: CompanyRegistrationConnector,
                                           val prepopService: PrepopulationService,
                                           val auditService: AuditService
                                          )(implicit val appConfig: AppConfig) extends CompanyDetailsService
@@ -54,33 +53,34 @@ trait CompanyDetailsService extends RegistrationWhitelist {
     s4LService.fetchAndGet[CompanyDetailsView](CacheKeys.CompanyDetails.toString, regId) flatMap {
       case Some(companyDetails) => Future.successful(companyDetails)
       case None => for {
-        oDetails    <- ifRegIdNotWhitelisted(regId) {
+        oDetails <- ifRegIdNotWhitelisted(regId) {
           payeRegConnector.getCompanyDetails(regId)
         }
-        details     <- convertOrCreateCompanyDetailsView(regId, txId, oDetails)
+        details <- convertOrCreateCompanyDetailsView(regId, txId, oDetails)
         viewDetails <- saveToS4L(details, regId)
       } yield viewDetails
     }
   }
+
   def withLatestCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
     for {
-      oCoHoCompanyDetails <- incorpInfoService.getCompanyDetails(regId, txId) map(Some(_)) recover {case _ => None}
-      companyDetails      <- getCompanyDetails(regId, txId)
-      details             =  oCoHoCompanyDetails.map(ch => companyDetails.copy(companyName = ch.companyName, roAddress = ch.roAddress)).getOrElse(companyDetails)
-      _                   <- s4LService.saveForm[CompanyDetailsView](CacheKeys.CompanyDetails.toString, details, regId)
+      oCoHoCompanyDetails <- incorpInfoService.getCompanyDetails(regId, txId) map (Some(_)) recover { case _ => None }
+      companyDetails <- getCompanyDetails(regId, txId)
+      details = oCoHoCompanyDetails.map(ch => companyDetails.copy(companyName = ch.companyName, roAddress = ch.roAddress)).getOrElse(companyDetails)
+      _ <- s4LService.saveForm[CompanyDetailsView](CacheKeys.CompanyDetails.toString, details, regId)
     } yield details
   }
 
   def getTradingNamePrepop(regId: String, tradingName: Option[TradingNameView])(implicit hc: HeaderCarrier): Future[Option[String]] = {
-    if(tradingName.exists(_.differentName)) Future.successful(None) else prepopService.getTradingName(regId)
+    if (tradingName.exists(_.differentName)) Future.successful(None) else prepopService.getTradingName(regId)
   }
 
   private[services] def convertOrCreateCompanyDetailsView(regId: String, txId: String, oAPI: Option[CompanyDetailsAPI])(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
     oAPI match {
       case Some(detailsAPI) => Future.successful(apiToView(detailsAPI))
       case None => for {
-        details     <- incorpInfoService.getCompanyDetails(regId, txId)
-        oPrepopBCD  <- prepopService.getBusinessContactDetails(regId)
+        details <- incorpInfoService.getCompanyDetails(regId, txId)
+        oPrepopBCD <- prepopService.getBusinessContactDetails(regId)
       } yield CompanyDetailsView(details.companyName, None, details.roAddress, None, oPrepopBCD)
     }
   }
@@ -92,13 +92,13 @@ trait CompanyDetailsService extends RegistrationWhitelist {
   private[services] def saveCompanyDetails(viewModel: CompanyDetailsView, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     viewToAPI(viewModel) fold(
       incompleteView =>
-        saveToS4L(incompleteView, regId) map {_ => DownstreamOutcome.Success},
+        saveToS4L(incompleteView, regId) map { _ => DownstreamOutcome.Success },
       completeAPI =>
         for {
-          details       <- payeRegConnector.upsertCompanyDetails(regId, completeAPI)
-          clearData     <- s4LService.clear(regId)
+          details <- payeRegConnector.upsertCompanyDetails(regId, completeAPI)
+          clearData <- s4LService.clear(regId)
         } yield DownstreamOutcome.Success
-      )
+    )
   }
 
   def submitTradingName(tradingNameView: TradingNameView, regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
@@ -114,8 +114,8 @@ trait CompanyDetailsService extends RegistrationWhitelist {
   def getPPOBPageAddresses(companyDetailsView: CompanyDetailsView): (Map[String, Address]) = {
     companyDetailsView.ppobAddress.map {
       case companyDetailsView.roAddress => Map("ppob" -> companyDetailsView.roAddress)
-      case addr: Address                => Map("ro" -> companyDetailsView.roAddress, "ppob" -> addr)
-      }.getOrElse(Map("ro" -> companyDetailsView.roAddress))
+      case addr: Address => Map("ro" -> companyDetailsView.roAddress, "ppob" -> addr)
+    }.getOrElse(Map("ro" -> companyDetailsView.roAddress))
   }
 
   def copyROAddrToPPOBAddr(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
@@ -133,7 +133,7 @@ trait CompanyDetailsService extends RegistrationWhitelist {
   }
 
   def submitBusinessContact(businessContact: DigitalContactDetails, regId: String, txId: String)
-                           (implicit hc: HeaderCarrier, auditInfo: AuditingInformation, req:Request[AnyContent]): Future[DownstreamOutcome.Value] = {
+                           (implicit hc: HeaderCarrier, auditInfo: AuditingInformation, req: Request[AnyContent]): Future[DownstreamOutcome.Value] = {
     for {
       details <- getCompanyDetails(regId, txId) flatMap {
         case currentDetails if dataHasChanged(businessContact, currentDetails.businessContactDetails) =>
@@ -149,9 +149,9 @@ trait CompanyDetailsService extends RegistrationWhitelist {
   private[services] def dataHasChanged(viewData: DigitalContactDetails, s4lData: Option[DigitalContactDetails]): Boolean = s4lData.exists(flattenData(viewData) != flattenData(_))
 
   private[services] def flattenData(details: DigitalContactDetails): DigitalContactDetails = details.copy(
-    email         = details.email map(_.trim.replace(" ", "").toLowerCase),
-    mobileNumber  = details.mobileNumber map(_.trim.replace(" ", "").toLowerCase),
-    phoneNumber   = details.phoneNumber map(_.trim.replace(" ","").toLowerCase)
+    email = details.email map (_.trim.replace(" ", "").toLowerCase),
+    mobileNumber = details.mobileNumber map (_.trim.replace(" ", "").toLowerCase),
+    phoneNumber = details.phoneNumber map (_.trim.replace(" ", "").toLowerCase)
   )
 
   private[services] def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {

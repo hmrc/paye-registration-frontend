@@ -24,6 +24,7 @@ import play.api.test.FakeRequest
 import play.twirl.api.Html
 import uk.gov.hmrc.http.{CoreGet, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.filters.frontend.crypto.SessionCookieCrypto
+import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 
 import scala.concurrent.Future
@@ -31,7 +32,7 @@ import scala.concurrent.Future
 class FeedbackControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup extends CodeMocks {
-    val controller = new FeedbackController {
+    val controller = new FeedbackController(stubMessagesControllerComponents()) {
       override implicit val appConfig: AppConfig = mockAppConfig
 
       override def messagesApi = mockMessagesApi

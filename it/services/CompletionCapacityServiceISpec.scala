@@ -23,8 +23,8 @@ import connectors.{BusinessRegistrationConnector, PAYERegistrationConnector}
 import enums.UserCapacity
 import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.view.CompletionCapacity
-import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.{Application, Environment, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 
 class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStub {
@@ -32,11 +32,7 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
 
-
-  lazy val payeRegistrationConnector = app.injector.instanceOf[PAYERegistrationConnector]
-  lazy val busRegConnector           = app.injector.instanceOf[BusinessRegistrationConnector]
-
-  val additionalConfiguration = Map(
+  val config = Map(
     "microservice.services.paye-registration.host" -> s"$mockHost",
     "microservice.services.paye-registration.port" -> s"$mockPort",
     "microservice.services.business-registration.port" -> s"$mockHost",
@@ -45,9 +41,12 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
     "microservice.services.cachable.session-cache.port" -> s"$mockPort"
   )
 
-  override implicit lazy val app: Application = new GuiceApplicationBuilder()
-    .configure(additionalConfiguration)
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(config)
     .build
+
+  lazy val payeRegistrationConnector = app.injector.instanceOf[PAYERegistrationConnector]
+  lazy val busRegConnector = app.injector.instanceOf[BusinessRegistrationConnector]
 
   implicit val hc = HeaderCarrier()
 

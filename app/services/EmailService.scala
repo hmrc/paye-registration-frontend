@@ -48,7 +48,7 @@ trait EmailService {
   private val endDateBoolean: Boolean = SystemDate.getSystemDate.toLocalDate.isEqual(NewTaxYear.endPeriod) | SystemDate.getSystemDate.toLocalDate.isBefore(NewTaxYear.endPeriod)
   private val fpdEqualOrAfterNTY: LocalDate => Boolean = fpd => fpd.isEqual(NewTaxYear.taxYearStart) | fpd.isAfter(NewTaxYear.taxYearStart)
 
-  private val templateId: LocalDate => String = fpd => if((startDateBoolean & endDateBoolean) & fpdEqualOrAfterNTY(fpd)) {
+  private val templateId: LocalDate => String = fpd => if ((startDateBoolean & endDateBoolean) & fpdEqualOrAfterNTY(fpd)) {
     "register_your_company_register_paye_confirmation_new_tax_year"
   } else {
     "register_your_company_register_paye_confirmation_current_tax_year"
@@ -58,17 +58,17 @@ trait EmailService {
     to = Seq(verifiedEmail),
     templateId = templateId(firstPaymentDate),
     parameters = Map(
-      "companyName"     -> companyName,
+      "companyName" -> companyName,
       "referenceNumber" -> ackRef
     ),
     force = false
   )
 
   def primeEmailData(regId: String)(implicit hc: HeaderCarrier): Future[CacheMap] = {
-      for {
-        Some(employment) <- payeRegistrationConnector.getEmployment(regId)
-        stashed          <- s4LConnector.saveForm[LocalDate](regId, FIRST_PAYMENT_DATE, employment.firstPaymentDate)
-      } yield stashed
+    for {
+      Some(employment) <- payeRegistrationConnector.getEmployment(regId)
+      stashed <- s4LConnector.saveForm[LocalDate](regId, FIRST_PAYMENT_DATE, employment.firstPaymentDate)
+    } yield stashed
   }
 
   def sendAcknowledgementEmail(profile: CurrentProfile, ackRef: String)(implicit hc: HeaderCarrier): Future[EmailResponse] = {
@@ -76,13 +76,13 @@ trait EmailService {
       _.fold[Future[EmailResponse]](Future(EmailNotFound)) { verifiedEmail =>
         (for {
           Some(firstPaymentDate) <- s4LConnector.fetchAndGet[LocalDate](profile.registrationID, FIRST_PAYMENT_DATE)
-          iiResponse             <- incorporationInformationConnector.getCoHoCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+          iiResponse <- incorporationInformationConnector.getCoHoCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map {
             case IncorpInfoSuccessResponse(resp) => resp
           }
-          emailResponse          <- emailConnector.requestEmailToBeSent(emailRequest(
-            verifiedEmail    = verifiedEmail,
-            companyName      = iiResponse.companyName,
-            ackRef           = ackRef,
+          emailResponse <- emailConnector.requestEmailToBeSent(emailRequest(
+            verifiedEmail = verifiedEmail,
+            companyName = iiResponse.companyName,
+            ackRef = ackRef,
             firstPaymentDate = firstPaymentDate
           ))
         } yield emailResponse).recover {

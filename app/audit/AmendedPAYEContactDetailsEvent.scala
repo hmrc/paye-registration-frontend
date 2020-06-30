@@ -29,10 +29,10 @@ case class AuditPAYEContactDetails(contactName: String,
 object AuditPAYEContactDetails {
   implicit val auditPAYEContactDetailsFormat: Format[AuditPAYEContactDetails] = (
     (__ \ "contactName").format[String] and
-    (__ \ "email").formatNullable[String] and
-    (__ \ "mobileNumber").formatNullable[String] and
-    (__ \ "phoneNumber").formatNullable[String]
-  )(AuditPAYEContactDetails.apply, unlift(AuditPAYEContactDetails.unapply))
+      (__ \ "email").formatNullable[String] and
+      (__ \ "mobileNumber").formatNullable[String] and
+      (__ \ "phoneNumber").formatNullable[String]
+    ) (AuditPAYEContactDetails.apply, unlift(AuditPAYEContactDetails.unapply))
 }
 
 case class AmendedPAYEContactDetailsEventDetail(externalUserId: String,
@@ -44,11 +44,11 @@ case class AmendedPAYEContactDetailsEventDetail(externalUserId: String,
 object AmendedPAYEContactDetailsEventDetail {
   implicit val amendedPAYEContactDetailsEventFormat: Format[AmendedPAYEContactDetailsEventDetail] = (
     (__ \ "externalUserId").format[String] and
-    (__ \ "authProviderId").format[String] and
-    (__ \ "journeyId").format[String] and
-    (__ \ "previousPAYEContactDetails").format[AuditPAYEContactDetails] and
-    (__ \ "newPAYEContactDetails").format[AuditPAYEContactDetails]
-  )(AmendedPAYEContactDetailsEventDetail.apply, unlift(AmendedPAYEContactDetailsEventDetail.unapply))
+      (__ \ "authProviderId").format[String] and
+      (__ \ "journeyId").format[String] and
+      (__ \ "previousPAYEContactDetails").format[AuditPAYEContactDetails] and
+      (__ \ "newPAYEContactDetails").format[AuditPAYEContactDetails]
+    ) (AmendedPAYEContactDetailsEventDetail.apply, unlift(AmendedPAYEContactDetailsEventDetail.unapply))
 }
 
 class AmendedPAYEContactDetailsEvent(detail: AmendedPAYEContactDetailsEventDetail)(implicit hc: HeaderCarrier, req: Request[AnyContent])
