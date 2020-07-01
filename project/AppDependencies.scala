@@ -52,7 +52,6 @@ object MainDependencies {
 
 trait TestDependencies {
   val scalaTestPlusVersion = "3.1.3"
-  val hmrcTestVersion = "3.9.0-play-26"
   val scalaTestVersion = "3.0.8"
   val pegdownVersion = "1.6.0"
   val mockitoCoreVersion = "2.13.0"
