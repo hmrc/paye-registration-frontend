@@ -22,10 +22,10 @@ import itutil._
 import models.Address
 import models.external._
 import org.scalatest.BeforeAndAfterEach
-import play.api.Application
 import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.DefaultCookieSigner
+import play.api.{Application, Environment, Mode}
 
 class PAYEContactControllerISpec extends IntegrationSpecBase
   with LoginStub
@@ -154,6 +154,7 @@ class PAYEContactControllerISpec extends IntegrationSpecBase
           alphaPhase = false,
           showBackButtons = true,
           includeHMRCBranding = false,
+          disableTranslations = true,
 
           selectPageConfig = SelectPageConfig(
             proposalListLimit = 30,

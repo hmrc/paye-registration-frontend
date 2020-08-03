@@ -20,7 +20,7 @@ import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import models.external._
 import play.api.i18n.{Messages, MessagesApi}
-import play.api.mvc.Call
+import play.api.mvc.{Call,Request}
 
 @Singleton
 class AddressLookupConfigBuilderService @Inject()(implicit messagesApi: MessagesApi, appConfig: AppConfig) {
@@ -29,7 +29,7 @@ class AddressLookupConfigBuilderService @Inject()(implicit messagesApi: Messages
   lazy val timeoutLength: Int = appConfig.timeoutInSeconds.toInt
   lazy val accessibilityFooterUrl: String = appConfig.accessibilityStatementUrl
 
-  def buildConfig(handbackLocation: Call, specificJourneyKey: String)(implicit messages: Messages): AlfJourneyConfig = {
+  def buildConfig(handbackLocation: Call, specificJourneyKey: String )(implicit messages: Messages): AlfJourneyConfig = {
 
     val messageKeyWithSpecKey: String => String = (key: String) => {
       val journeySpecificAlfMessageKey = s"pages.alf.$specificJourneyKey.$key"
@@ -62,10 +62,9 @@ class AddressLookupConfigBuilderService @Inject()(implicit messagesApi: Messages
       deskProServiceName = messages(messageKeyWithSpecKey("deskProServiceName")),
       selectPageConfig = selectPageConfig,
       confirmPageConfig = confirmPageConfig,
-      timeoutConfig = timeoutConfig
-
+      timeoutConfig = timeoutConfig,
+      disableTranslations = true
     )
-
     val appLevelLabels = AppLevelLabels(
       navTitle = messages(messageKeyWithSpecKey("navTitle")),
       phaseBannerHtml = messages(messageKeyWithSpecKey("phaseBannerHtml"))

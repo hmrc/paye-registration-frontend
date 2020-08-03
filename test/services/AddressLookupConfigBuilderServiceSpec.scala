@@ -53,6 +53,7 @@ class AddressLookupConfigBuilderServiceSpec extends PayeComponentSpec with PayeF
           alphaPhase = false,
           showBackButtons = true,
           includeHMRCBranding = false,
+          disableTranslations = true,
 
           selectPageConfig = SelectPageConfig(
             proposalListLimit = 30,

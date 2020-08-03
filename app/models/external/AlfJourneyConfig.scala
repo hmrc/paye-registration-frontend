@@ -33,7 +33,8 @@ case class JourneyOptions(continueUrl: String,
                           includeHMRCBranding: Boolean,
                           selectPageConfig: SelectPageConfig,
                           confirmPageConfig: ConfirmPageConfig,
-                          timeoutConfig: TimeoutConfig
+                          timeoutConfig: TimeoutConfig,
+                          disableTranslations: Boolean
                          )
 
 case class SelectPageConfig(proposalListLimit: Int,

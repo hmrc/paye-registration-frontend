@@ -154,8 +154,10 @@ class CompanyDetailsControllerISpec extends IntegrationSpecBase
           alphaPhase = false,
           showBackButtons = true,
           includeHMRCBranding = false,
+          disableTranslations = true,
 
-          selectPageConfig = SelectPageConfig(
+
+            selectPageConfig = SelectPageConfig(
             proposalListLimit = 30,
             showSearchAgainLink = true
           ),
