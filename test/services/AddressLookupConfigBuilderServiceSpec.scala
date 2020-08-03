@@ -20,7 +20,7 @@ import java.util.Locale
 
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external._
-import play.api.i18n.{Lang, Messages}
+import play.api.i18n.Lang
 import play.api.mvc.Call
 
 class AddressLookupConfigBuilderServiceSpec extends PayeComponentSpec with PayeFakedApp {
@@ -30,6 +30,8 @@ class AddressLookupConfigBuilderServiceSpec extends PayeComponentSpec with PayeF
   object TestService extends AddressLookupConfigBuilderService {
     override lazy val payeRegistrationFrontendURL = "testPayeRegUrl"
     override lazy val timeoutLength = 22666
+    override lazy val accessibilityFooterUrl = "http://localhost:9870/register-for-paye/accessibility-statement?pageUri=%2Fregister-for-paye%2F"
+
   }
 
   "buildConfig" should {
@@ -45,11 +47,13 @@ class AddressLookupConfigBuilderServiceSpec extends PayeComponentSpec with PayeF
         options = JourneyOptions(
           continueUrl = "testPayeRegUrl/foo",
           homeNavHref = "http://www.hmrc.gov.uk/",
+          accessibilityFooterUrl = "http://localhost:9870/register-for-paye/accessibility-statement?pageUri=%2Fregister-for-paye%2F",
           deskProServiceName = "SCRS",
           showPhaseBanner = true,
           alphaPhase = false,
           showBackButtons = true,
           includeHMRCBranding = false,
+          disableTranslations = true,
 
           selectPageConfig = SelectPageConfig(
             proposalListLimit = 30,

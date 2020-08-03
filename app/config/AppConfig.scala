@@ -81,6 +81,8 @@ class AppConfig @Inject()(configuration: Configuration, runMode: RunMode) {
 
   def accessibilityStatementUrl(pageUri: String) = controllers.routes.AccessibilityStatementController.show(pageUri).url
 
+  lazy val accessibilityStatementUrl = self + "/register-for-paye" + "/accessibility-statement" + "?pageUri=%2Fregister-for-paye%2F"
+
   def accessibilityReportUrl(userAction: String): String =
     s"$contactHost/contact/accessibility-unauthenticated?service=paye-registration-frontend&userAction=${encodeUrl(userAction)}"
 

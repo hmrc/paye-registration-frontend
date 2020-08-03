@@ -25,6 +25,7 @@ case class AlfJourneyConfig(version: Int = AlfJourneyConfig.defaultConfigVersion
 
 case class JourneyOptions(continueUrl: String,
                           homeNavHref: String,
+                          accessibilityFooterUrl: String,
                           deskProServiceName: String,
                           showPhaseBanner: Boolean,
                           alphaPhase: Boolean,
@@ -32,7 +33,8 @@ case class JourneyOptions(continueUrl: String,
                           includeHMRCBranding: Boolean,
                           selectPageConfig: SelectPageConfig,
                           confirmPageConfig: ConfirmPageConfig,
-                          timeoutConfig: TimeoutConfig
+                          timeoutConfig: TimeoutConfig,
+                          disableTranslations: Boolean
                          )
 
 case class SelectPageConfig(proposalListLimit: Int,
