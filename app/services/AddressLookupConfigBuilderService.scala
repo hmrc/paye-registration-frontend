@@ -27,6 +27,7 @@ class AddressLookupConfigBuilderService @Inject()(implicit messagesApi: Messages
 
   lazy val payeRegistrationFrontendURL: String = appConfig.self
   lazy val timeoutLength: Int = appConfig.timeoutInSeconds.toInt
+  lazy val accessibilityFooterUrl: String = appConfig.accessibilityStatementUrl
 
   def buildConfig(handbackLocation: Call, specificJourneyKey: String)(implicit messages: Messages): AlfJourneyConfig = {
 
@@ -53,6 +54,7 @@ class AddressLookupConfigBuilderService @Inject()(implicit messagesApi: Messages
     val journeyOptions = JourneyOptions(
       continueUrl = s"$payeRegistrationFrontendURL${handbackLocation.url}",
       homeNavHref = "http://www.hmrc.gov.uk/",
+      accessibilityFooterUrl = accessibilityFooterUrl,
       showPhaseBanner = true,
       alphaPhase = false,
       includeHMRCBranding = false,
@@ -61,7 +63,9 @@ class AddressLookupConfigBuilderService @Inject()(implicit messagesApi: Messages
       selectPageConfig = selectPageConfig,
       confirmPageConfig = confirmPageConfig,
       timeoutConfig = timeoutConfig
+
     )
+
     val appLevelLabels = AppLevelLabels(
       navTitle = messages(messageKeyWithSpecKey("navTitle")),
       phaseBannerHtml = messages(messageKeyWithSpecKey("phaseBannerHtml"))

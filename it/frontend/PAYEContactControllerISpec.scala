@@ -22,10 +22,10 @@ import itutil._
 import models.Address
 import models.external._
 import org.scalatest.BeforeAndAfterEach
+import play.api.Application
 import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.DefaultCookieSigner
-import play.api.{Application, Environment, Mode}
 
 class PAYEContactControllerISpec extends IntegrationSpecBase
   with LoginStub
@@ -148,6 +148,7 @@ class PAYEContactControllerISpec extends IntegrationSpecBase
         options = JourneyOptions(
           continueUrl = "http://localhost:9870/register-for-paye/return-from-address-for-ppob",
           homeNavHref = "http://www.hmrc.gov.uk/",
+          accessibilityFooterUrl = "http://localhost:9870/register-for-paye/accessibility-statement?pageUri=%2Fregister-for-paye%2F",
           deskProServiceName = "SCRS",
           showPhaseBanner = true,
           alphaPhase = false,

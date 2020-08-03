@@ -25,6 +25,7 @@ case class AlfJourneyConfig(version: Int = AlfJourneyConfig.defaultConfigVersion
 
 case class JourneyOptions(continueUrl: String,
                           homeNavHref: String,
+                          accessibilityFooterUrl: String,
                           deskProServiceName: String,
                           showPhaseBanner: Boolean,
                           alphaPhase: Boolean,
