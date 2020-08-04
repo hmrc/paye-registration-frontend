@@ -83,7 +83,7 @@ class AddressLookupConfigBuilderServiceSpec extends PayeComponentSpec with PayeF
             editAddressLinkText = "Edit address manually"
           ),
           LookupPageLabels(
-            title = "Company address",
+            title = "Search for your address",
             heading = "Search for your address",
             filterLabel = "House name or number (optional)",
             submitLabel = "Search address",
@@ -97,7 +97,7 @@ class AddressLookupConfigBuilderServiceSpec extends PayeComponentSpec with PayeF
             line3Label = "Address line 3"
           ),
           ConfirmPageLabels(
-            title = "Confirm address",
+            title = "Confirm where you'll carry out most of your business activities",
             heading = "Confirm where you'll carry out most of your business activities",
             submitLabel = "Save and continue",
             changeLinkText = "Change"

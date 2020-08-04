@@ -20,7 +20,7 @@ import config.AppConfig
 import javax.inject.{Inject, Singleton}
 import models.external._
 import play.api.i18n.{Messages, MessagesApi}
-import play.api.mvc.{Call,Request}
+import play.api.mvc.Call
 
 @Singleton
 class AddressLookupConfigBuilderService @Inject()(implicit messagesApi: MessagesApi, appConfig: AppConfig) {
@@ -29,7 +29,7 @@ class AddressLookupConfigBuilderService @Inject()(implicit messagesApi: Messages
   lazy val timeoutLength: Int = appConfig.timeoutInSeconds.toInt
   lazy val accessibilityFooterUrl: String = appConfig.accessibilityStatementUrl
 
-  def buildConfig(handbackLocation: Call, specificJourneyKey: String )(implicit messages: Messages): AlfJourneyConfig = {
+  def buildConfig(handbackLocation: Call, specificJourneyKey: String)(implicit messages: Messages): AlfJourneyConfig = {
 
     val messageKeyWithSpecKey: String => String = (key: String) => {
       val journeySpecificAlfMessageKey = s"pages.alf.$specificJourneyKey.$key"
@@ -71,7 +71,7 @@ class AddressLookupConfigBuilderService @Inject()(implicit messagesApi: Messages
     )
 
     val lookupPageLabels = LookupPageLabels(
-      title = messages(messageKeyWithSpecKey("lookupPage.title")),
+      title = messages(messageKeyWithSpecKey("lookupPage.heading")),
       heading = messages(messageKeyWithSpecKey("lookupPage.heading")),
       filterLabel = messages(messageKeyWithSpecKey("lookupPage.filterLabel")),
       submitLabel = messages(messageKeyWithSpecKey("lookupPage.submitLabel")),
@@ -94,7 +94,7 @@ class AddressLookupConfigBuilderService @Inject()(implicit messagesApi: Messages
     )
 
     val confirmPageLabels = ConfirmPageLabels(
-      title = messages(messageKeyWithSpecKey("confirmPage.title")),
+      title = messages(messageKeyWithSpecKey("confirmPage.heading")),
       heading = messages(messageKeyWithSpecKey("confirmPage.heading")),
       submitLabel = messages(messageKeyWithSpecKey("confirmPage.submitLabel")),
       changeLinkText = messages(messageKeyWithSpecKey("confirmPage.changeLinkText"))
