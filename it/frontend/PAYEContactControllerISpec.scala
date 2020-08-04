@@ -22,10 +22,10 @@ import itutil._
 import models.Address
 import models.external._
 import org.scalatest.BeforeAndAfterEach
+import play.api.Application
 import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.DefaultCookieSigner
-import play.api.{Application, Environment, Mode}
 
 class PAYEContactControllerISpec extends IntegrationSpecBase
   with LoginStub
@@ -184,7 +184,7 @@ class PAYEContactControllerISpec extends IntegrationSpecBase
             editAddressLinkText = "Edit address manually"
           ),
           LookupPageLabels(
-            title = "Company address",
+            title = "Search for your address",
             heading = "Search for your address",
             filterLabel = "House name or number (optional)",
             submitLabel = "Search address",
@@ -198,7 +198,7 @@ class PAYEContactControllerISpec extends IntegrationSpecBase
             line3Label = "Address line 3"
           ),
           ConfirmPageLabels(
-            title = "Confirm address",
+            title = "Confirm where you'll carry out most of your business activities",
             heading = "Confirm where you'll carry out most of your business activities",
             submitLabel = "Save and continue",
             changeLinkText = "Change"
