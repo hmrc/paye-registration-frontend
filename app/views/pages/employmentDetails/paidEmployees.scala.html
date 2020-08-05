@@ -17,6 +17,7 @@
 @import helpers.templates.{hiddenDetails, inlineDateInput, payeInputRadioGroup, payeErrorSummary, formHiddenYesNoRadio}
 @import models.view.EmployingAnyone
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import views.helpers.TitleHelper.title
 
 @import config.AppConfig
 @(paidEmployeesForm: Form[EmployingAnyone], weeklyThreshold: Int)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
@@ -31,7 +32,7 @@
     )
 }
 
-@main_template(title = Messages("pages.paidEmployees.title")) {
+@main_template(title = title(Messages("pages.paidEmployees.title"), paidEmployeesForm)) {
     @payeErrorSummary(
         Messages("app.common.errorSummaryLabel"), paidEmployeesForm, dataJourney=Some("PaidEmployees")
     )

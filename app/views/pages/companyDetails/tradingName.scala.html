@@ -17,6 +17,7 @@
 @import helpers.templates.{formHiddenYesNoRadio, hiddenDetails, payeErrorSummary, payeInput}
 @import models.view.TradingName
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import views.helpers.TitleHelper.title
 
 @import config.AppConfig
 @(tradingNameForm: Form[TradingName], companyName: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
@@ -35,7 +36,7 @@
     <p>@Messages("pages.tradingName.nameRulesIntro1")</p>
 }
 
-@main_template(title = Messages("pages.tradingName.description")) {
+@main_template(title = title(Messages("pages.tradingName.description"), tradingNameForm)) {
 
     @payeErrorSummary(
         Messages("app.common.errorSummaryLabel"), tradingNameForm, dataJourney=Some("TradingName")

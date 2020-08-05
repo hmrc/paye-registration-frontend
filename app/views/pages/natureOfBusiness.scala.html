@@ -17,11 +17,12 @@
 @import models.view.NatureOfBusiness
 @import helpers.templates.{payeTextArea, payeErrorSummary}
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import views.helpers.TitleHelper.title
 
 @import config.AppConfig
 @(sicForm: Form[NatureOfBusiness])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = messages("pages.natureOfBusiness.description")) {
+@main_template(title = title(messages("pages.natureOfBusiness.description"), sicForm)) {
 
     @payeErrorSummary(
         messages("app.common.errorSummaryLabel"), sicForm, dataJourney=Some("NatureOfBusiness")
