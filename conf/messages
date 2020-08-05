@@ -8,6 +8,7 @@ app.common.next                                                 = Next
 app.common.back                                                 = Back
 app.common.submitYourApplication                                = Confirm and send application
 app.common.errorSummaryLabel                                    = This page has errors
+app.common.titleError                                           = Error:
 app.common.change                                               = Change
 app.common.year                                                 = Year
 app.common.month                                                = Month
@@ -56,6 +57,7 @@ errors.invalid.sic.noEntry                                      = Tell us what t
 errors.invalid.sic.overCharLimit                                = Enter a business description using 100 characters or less
 errors.invalid.sic.invalidChars                                 = Enter a business description using only letters, numbers and - , / & ''
 errors.invalid.name.invalidChars                                = Tell us the contact name using only letters (without accents), hyphens and apostrophes
+
 
 ## Completion Capacity page
 pages.completionCapacity.description                            = What is your relationship to the company?

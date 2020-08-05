@@ -18,9 +18,9 @@
 @import models.DigitalContactDetails
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import config.AppConfig
+@import views.helpers.TitleHelper.title
+
 @(contactForm: Form[DigitalContactDetails], companyName: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
-
-
 
 @formContent = {
     <fieldset>
@@ -56,7 +56,7 @@
     </fieldset>
 }
 
-@main_template(title = messages("pages.businessContact.description", companyName)) {
+@main_template(title = title(messages("pages.businessContact.description", companyName), contactForm)) {
 
     @payeErrorSummary(
         messages("app.common.errorSummaryLabel"), contactForm, dataJourney = Some("DigitalContactDetails")

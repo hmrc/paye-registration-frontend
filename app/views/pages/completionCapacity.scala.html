@@ -17,6 +17,7 @@
 @import models.view.CompletionCapacity
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.html.helpers.templates.{inputRadioGroupHidden, payeErrorSummary, payeInput}
+@import views.helpers.TitleHelper.title
 
 @import config.AppConfig
 @(completionCapacityForm: Form[CompletionCapacity])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
@@ -30,7 +31,7 @@
     )
 }
 
-@main_template(title = messages("pages.completionCapacity.description")) {
+@main_template(title = title(messages("pages.completionCapacity.description"), completionCapacityForm)) {
 
     @payeErrorSummary(
         messages("app.common.errorSummaryLabel"), completionCapacityForm, dataJourney=Some("CompletionCapacity")

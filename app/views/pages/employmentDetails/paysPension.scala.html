@@ -16,11 +16,12 @@
 
 @import helpers.templates.{payeInputRadioGroup, payeErrorSummary}
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import views.helpers.TitleHelper.title
 
 @import config.AppConfig
 @(pensionsForm: Form[Boolean])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = Messages("pages.paysPension.title")) {
+@main_template(title = title(Messages("pages.paysPension.title"), pensionsForm)) {
     @payeErrorSummary(
         Messages("app.common.errorSummaryLabel"), pensionsForm, dataJourney=Some("CompanyPension")
     )

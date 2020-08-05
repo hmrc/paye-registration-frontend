@@ -18,6 +18,8 @@
 @import models.view.PAYEContactDetails
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import config.AppConfig
+@import views.helpers.TitleHelper.title
+
 @(contactForm: Form[PAYEContactDetails])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @formContent = {
@@ -54,7 +56,7 @@
     </fieldset>
 }
 
-@main_template(title = messages("pages.payeContact.description")) {
+@main_template(title = title(messages("pages.payeContact.description"), contactForm)) {
 
     @payeErrorSummary(
         messages("app.common.errorSummaryLabel"), contactForm, dataJourney=Some("PAYEContactDetails")

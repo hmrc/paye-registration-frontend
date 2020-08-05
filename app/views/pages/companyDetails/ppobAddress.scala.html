@@ -18,6 +18,7 @@
 @import models.Address
 @import models.view.{ChosenAddress, PrepopAddress}
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import views.helpers.TitleHelper.title
 
 @import config.AppConfig
 @(chooseAddressForm: Form[ChosenAddress], roAddress: Option[Address], ppobAddress: Option[Address], prepopAddresses: Map[Int, Address])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
@@ -26,7 +27,7 @@
         @messages("pages.ppobAddress.help.content")
 }
 
-@main_template(title = messages("pages.ppobAddress.description")) {
+@main_template(title = title(messages("pages.ppobAddress.description"), chooseAddressForm)) {
     @payeErrorSummary(
         messages("app.common.errorSummaryLabel"), chooseAddressForm, dataJourney=Some("PPOBAddress")
     )

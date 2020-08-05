@@ -19,6 +19,7 @@
 @import models.view.WillBePaying
 @import forms.employmentDetails.EmployingStaffForm
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import views.helpers.TitleHelper.title
 
 @import config.AppConfig
 @(willBePayingForm: Form[WillBePaying], weeklyThreshold: Int, now: LocalDate)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
@@ -40,7 +41,7 @@
     )
 }
 
-@main_template(title = Messages("pages.willBePaying.title")) {
+@main_template(title = title(Messages("pages.willBePaying.title"), willBePayingForm)) {
     @payeErrorSummary(
         Messages("app.common.errorSummaryLabel"), willBePayingForm, dataJourney=Some("Employing")
     )
