@@ -122,7 +122,7 @@ class PAYESessionIDFilterISpec extends IntegrationSpecBase
         response.status mustBe 200
 
         val document = Jsoup.parse(response.body)
-        document.title() mustBe "Who should we contact about the company's PAYE?"
+        document.title() must include("Who should we contact about the company's PAYE?")
         document.getElementById("name").data() mustBe ""
         document.getElementById("digitalContact.contactEmail").attr("value") mustBe ""
         document.getElementById("digitalContact.mobileNumber").attr("value") mustBe ""

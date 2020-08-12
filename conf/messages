@@ -2,6 +2,7 @@
 app.title                                                       = Register an employer for PAYE
 app.common.yes                                                  = Yes
 app.common.no                                                   = No
+app.common.govuk.label                                          = GOV.UK
 app.common.continue                                             = Continue
 app.common.saveAndContinue                                      = Save and continue
 app.common.next                                                 = Next
