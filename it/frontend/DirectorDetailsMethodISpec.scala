@@ -19,10 +19,10 @@ package frontend
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
+import play.api.Application
 import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.DefaultCookieSigner
-import play.api.{Application, Environment, Mode}
 
 class DirectorDetailsMethodISpec extends IntegrationSpecBase
   with LoginStub
@@ -97,7 +97,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "What is the National Insurance number of at least one company director?"
+      document.title() must include("What is the National Insurance number of at least one company director?")
       document.getElementsByClass("form-field").size mustBe 3
 
       val list = document.getElementsByClass("form-label")

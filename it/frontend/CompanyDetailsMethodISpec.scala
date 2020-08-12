@@ -24,11 +24,11 @@ import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import models.DigitalContactDetails
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
+import play.api.Application
 import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.json._
-import play.api.{Application, Environment, Mode}
 
 
 class CompanyDetailsMethodISpec extends IntegrationSpecBase
@@ -143,7 +143,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val document = Jsoup.parse(response.body)
 
-      document.title() mustBe "Does or will the company trade using a different name?"
+      document.title() must include("Does or will the company trade using a different name?")
       document.getElementById("pageHeading").text mustBe "Does or will the company trade using a different name?"
       document.getElementById("differentName-true").attr("checked") mustBe "checked"
       document.getElementById("differentName-false").attr("checked") mustBe ""
@@ -195,7 +195,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "Does or will the company trade using a different name?"
+      document.title() must include("Does or will the company trade using a different name?")
       document.getElementById("pageHeading").text mustBe "Does or will the company trade using a different name?"
       document.getElementById("differentName-true").attr("checked") mustBe ""
       document.getElementById("differentName-false").attr("checked") mustBe ""
@@ -224,7 +224,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       response.status mustBe 200
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "Does or will the company trade using a different name?"
+      document.title() must include("Does or will the company trade using a different name?")
       document.getElementById("pageHeading").text mustBe "Does or will the company trade using a different name?"
       document.getElementById("differentName-true").attr("checked") mustBe ""
       document.getElementById("differentName-false").attr("checked") mustBe "checked"
@@ -341,7 +341,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe s"Confirm $defaultCompanyName's registered office address"
+      document.title() must include(s"Confirm $defaultCompanyName's registered office address")
       document.getElementById("ro-address-address-line-1").text mustBe "14 Test Default Street"
     }
   }
@@ -379,7 +379,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "What is the company's 'principal place of business'?"
+      document.title() must include("What is the company's 'principal place of business'?")
       document.getElementById("ro-address-line-1").text mustBe "11"
       document.getElementsByAttributeValue("id", "ppob-address-line-1").size() mustBe 0
     }
@@ -418,7 +418,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "What is the company's 'principal place of business'?"
+      document.title() must include("What is the company's 'principal place of business'?")
       document.getElementById("ppob-address-line-1").text mustBe "11"
       document.getElementsByAttributeValue("id", "ro-address-line-1").size() mustBe 0
 
@@ -458,7 +458,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "What is the company's 'principal place of business'?"
+      document.title() must include("What is the company's 'principal place of business'?")
       document.getElementById("ro-address-line-1").text mustBe "11"
       document.getElementById("ppob-address-line-1").text mustBe "22"
 
@@ -496,7 +496,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "What is the company's 'principal place of business'?"
+      document.title() must include("What is the company's 'principal place of business'?")
       document.getElementById("ro-address-line-1").text mustBe "11"
       document.getElementsByAttributeValue("id", "ppob-address-line-1").size() mustBe 0
       an[Exception] mustBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
@@ -551,7 +551,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "What is the company's 'principal place of business'?"
+      document.title() must include("What is the company's 'principal place of business'?")
       document.getElementById("ro-address-line-1").text mustBe "11"
       document.getElementsByAttributeValue("id", "ppob-address-line-1").size() mustBe 0
       an[Exception] mustBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
@@ -608,7 +608,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "What is the company's 'principal place of business'?"
+      document.title() must include("What is the company's 'principal place of business'?")
       document.getElementById("ro-address-line-1").text mustBe "11"
       document.getElementById("ppob-address-line-1").text mustBe "22"
 
@@ -991,7 +991,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe s"Give us one or more ways to contact $companyName"
+      document.title() must include(s"Give us one or more ways to contact $companyName")
       document.getElementById("businessEmail").attr("value") mustBe "email@email.zzz"
       document.getElementById("mobileNumber").attr("value") mustBe "1234567890"
       document.getElementById("phoneNumber").attr("value") mustBe "0987654321"
@@ -1027,7 +1027,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe s"Give us one or more ways to contact $companyName"
+      document.title() must include(s"Give us one or more ways to contact $companyName")
       document.getElementById("businessEmail").attr("value") mustBe "email@email.zzz"
       document.getElementById("mobileNumber").attr("value") mustBe "1234567890"
       document.getElementById("phoneNumber").attr("value") mustBe "0987654321"
@@ -1058,7 +1058,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe s"Give us one or more ways to contact $companyName"
+      document.title() must include(s"Give us one or more ways to contact $companyName")
       document.getElementById("businessEmail").attr("value") mustBe ""
       document.getElementById("mobileNumber").attr("value") mustBe ""
       document.getElementById("phoneNumber").attr("value") mustBe ""
@@ -1089,7 +1089,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe s"Give us one or more ways to contact $companyName"
+      document.title() must include(s"Give us one or more ways to contact $companyName")
       document.getElementById("businessEmail").attr("value") mustBe ""
       document.getElementById("mobileNumber").attr("value") mustBe ""
       document.getElementById("phoneNumber").attr("value") mustBe ""
@@ -1132,7 +1132,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe s"Give us one or more ways to contact $companyName"
+      document.title() must include(s"Give us one or more ways to contact $companyName")
       document.getElementById("businessEmail").attr("value") mustBe ""
       document.getElementById("mobileNumber").attr("value") mustBe ""
       document.getElementById("phoneNumber").attr("value") mustBe ""

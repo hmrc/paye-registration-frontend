@@ -96,7 +96,7 @@ class AccessibilityStatementViewSpec extends PayeComponentSpec with PayeFakedApp
     }
 
     "have a title" in {
-      parsePage.title mustBe Messages.title
+      parsePage.title must include(Messages.title)
     }
 
     "have multiple h2" in {

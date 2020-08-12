@@ -24,11 +24,11 @@ import enums.CacheKeys
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
+import play.api.Application
 import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.json.{JsObject, JsString, Json}
-import play.api.{Application, Environment, Mode}
 
 class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
   with LoginStub
@@ -97,7 +97,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "Who should we contact about the company's PAYE?"
+      document.title() must include("Who should we contact about the company's PAYE?")
       document.getElementById("name").data() mustBe ""
       document.getElementById("digitalContact.contactEmail").attr("value") mustBe ""
       document.getElementById("digitalContact.mobileNumber").attr("value") mustBe ""
@@ -135,7 +135,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "Who should we contact about the company's PAYE?"
+      document.title() must include("Who should we contact about the company's PAYE?")
       document.getElementById("name").attr("value") mustBe ""
       document.getElementById("digitalContact.contactEmail").attr("value") mustBe ""
       document.getElementById("digitalContact.mobileNumber").attr("value") mustBe ""
@@ -176,7 +176,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "Who should we contact about the company's PAYE?"
+      document.title() must include("Who should we contact about the company's PAYE?")
       document.getElementById("name").attr("value") mustBe "fName mName1 mName2 sName"
       document.getElementById("digitalContact.contactEmail").attr("value") mustBe "email1@email.co.uk"
       document.getElementById("digitalContact.mobileNumber").attr("value") mustBe "543210543210"
@@ -213,7 +213,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "Who should we contact about the company's PAYE?"
+      document.title() must include("Who should we contact about the company's PAYE?")
       document.getElementById("name").attr("value") mustBe ""
       document.getElementById("digitalContact.contactEmail").attr("value") mustBe "email1@email.co.uk"
       document.getElementById("digitalContact.mobileNumber").attr("value") mustBe "543210543210"
@@ -463,7 +463,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "Where should we send post about the company's PAYE?"
+      document.title() must include("Where should we send post about the company's PAYE?")
       document.getElementById("chosenAddress-roaddress").attr("value") mustBe "roAddress"
       document.getElementById("ro-address-line-1").text mustBe "1"
       document.getElementById("ro-address-line-2").text mustBe ", 2"
@@ -555,7 +555,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() mustBe "Where should we send post about the company's PAYE?"
+      document.title() must include("Where should we send post about the company's PAYE?")
       document.getElementById("chosenAddress-roaddress").attr("value") mustBe "roAddress"
       document.getElementById("chosenAddress-roaddress").attr("name") mustBe "chosenAddress"
       document.getElementById("ro-address-line-1").text mustBe "1"
