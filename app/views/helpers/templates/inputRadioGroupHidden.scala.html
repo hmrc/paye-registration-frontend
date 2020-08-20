@@ -15,9 +15,10 @@
  *@
 
 @(field: Field,
-  radioOptions: Seq[(String, String)],
-  hiddenElem: Seq[(String, Html)],
-  args: (Symbol, Any)*)(implicit messages: Messages)
+        radioOptions: Seq[(String, String)],
+        hiddenElem: Seq[(String, Html)],
+        isHeading: Boolean,
+        args: (Symbol, Any)*)(implicit messages: Messages)
 
 @import play.api.i18n._
 @import views.html.helper._
@@ -32,9 +33,14 @@
 @if(elements.args.get('_fieldsetAttributes).isDefined) {@elements.args.get('_fieldsetAttributes)}>
 @if(elements.args.get('_legend).isDefined) {
     <legend @if(elements.args.get('_legendClass).isDefined) {class="@elements.args.get('_legendClass)"}>
-        @elements.args.get('_legend)
+    @if(isHeading) {
+            <h1 class="form-title heading-large">@elements.args.get('_legend)</h1>
+        } else {
+            @elements.args.get('_legend)
+        }
     </legend>
 }
+
 @elements.errors.map{error => <span class="error-notification">@Messages(error)</span>}
 
 @radioOptions.map { case (value, label) =>

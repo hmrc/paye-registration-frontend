@@ -20,41 +20,41 @@
 @import views.helpers.TitleHelper.title
 
 @import config.AppConfig
+@import views.html.helpers.templates.payeInputRadioGroup
 @(completionCapacityForm: Form[CompletionCapacity])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @otherHidden = {
-    @payeInput(
-        completionCapacityForm("completionCapacityOther"),
-        '_inputClass -> "form-control-1-2",
-        '_labelClass -> "form-label cascading",
-        '_label -> Messages("pages.completionCapacity.other.label")
-    )
+@payeInput(
+    completionCapacityForm("completionCapacityOther"),
+    '_inputClass -> "form-control-1-2",
+    '_labelClass -> "form-label cascading",
+    '_label -> Messages("pages.completionCapacity.other.label")
+)
 }
 
 @main_template(title = title(messages("pages.completionCapacity.description"), completionCapacityForm)) {
 
     @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), completionCapacityForm, dataJourney=Some("CompletionCapacity")
+        messages("app.common.errorSummaryLabel"), completionCapacityForm, dataJourney = Some("CompletionCapacity")
     )
-
-    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.completionCapacity.description")</h1>
 
     @govHelpers.form(action = controllers.userJourney.routes.CompletionCapacityController.submitCompletionCapacity()) {
 
         <div class="form-group">
-            @inputRadioGroupHidden(
-                completionCapacityForm("completionCapacity"),
-                Seq("director"  -> messages("pages.completionCapacity.director"),
-                    "company secretary" -> messages("pages.completionCapacity.secretary"),
-                    "agent"     -> messages("pages.completionCapacity.agent"),
-                    "other"     -> messages("pages.completionCapacity.other")),
-                Seq("other" -> otherHidden),
-                '_idHidden -> "other",
-                '_classHidden -> "panel panel-indent",
-                '_labelClass -> "block-label radio-label",
-                '_legend -> Messages("pages.completionCapacity.description"),
-                '_legendClass -> "visually-hidden"
-            )
+        @inputRadioGroupHidden(
+            completionCapacityForm("completionCapacity"),
+            Seq("director" -> messages("pages.completionCapacity.director"),
+                "company secretary" -> messages("pages.completionCapacity.secretary"),
+                "agent" -> messages("pages.completionCapacity.agent"),
+                "other" -> messages("pages.completionCapacity.other")),
+            Seq("other" -> otherHidden),
+            isHeading = true,
+            '_idHidden -> "other",
+            '_classHidden -> "panel panel-indent",
+            '_labelClass -> "block-label radio-label",
+            '_legend -> Messages("pages.completionCapacity.description")
+
+        )
         </div>
 
         <div class="form-group">
