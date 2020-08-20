@@ -23,27 +23,26 @@
 
 @main_template(title = title(Messages("pages.paysPension.title"), pensionsForm)) {
     @payeErrorSummary(
-        Messages("app.common.errorSummaryLabel"), pensionsForm, dataJourney=Some("CompanyPension")
+        Messages("app.common.errorSummaryLabel"), pensionsForm, dataJourney = Some("CompanyPension")
     )
-
-    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.paysPension.description")</h1>
 
     @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitPensions) {
 
         <div class="inline form-group">
-            @payeInputRadioGroup(
-                pensionsForm("paysPension"),
-                Seq(
-                    "true"->Messages("app.common.yes"),
-                    "false"->Messages("app.common.no")
-                ),
-                '_legend -> Messages("pages.paysPension.description"),
-                '_legendID -> "paysPension",
-                '_helpText -> None,
-                '_labelAfter -> true,
-                '_labelClass -> "block-label",
-                '_groupClass -> "inline"
-            )
+        @payeInputRadioGroup(
+            pensionsForm("paysPension"),
+            Seq(
+                "true" -> Messages("app.common.yes"),
+                "false" -> Messages("app.common.no")
+            ),
+            isHeading = true,
+            '_legend -> Messages("pages.paysPension.description"),
+            '_legendID -> "paysPension",
+            '_helpText -> None,
+            '_labelAfter -> true,
+            '_labelClass -> "block-label",
+            '_groupClass -> "inline"
+        )
         </div>
 
         <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>

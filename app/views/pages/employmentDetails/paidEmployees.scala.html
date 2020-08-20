@@ -23,36 +23,40 @@
 @(paidEmployeesForm: Form[EmployingAnyone], weeklyThreshold: Int)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @hiddenYesNoContent = {
-    @inlineDateInput(
-        paidEmployeesForm,
-        "earliestDate",
-        Some(Html(Messages("pages.paidEmployees.input.hint-text"))),
-        '_legend -> messages("pages.paidEmployees.paidEmployeesLabel"),
-        '_title -> messages("pages.paidEmployees.hiddenLabel")
-    )
+@inlineDateInput(
+    paidEmployeesForm,
+    "earliestDate",
+    Some(Html(Messages("pages.paidEmployees.input.hint-text"))),
+    '_legend -> messages("pages.paidEmployees.paidEmployeesLabel"),
+    '_title -> messages("pages.paidEmployees.hiddenLabel")
+)
 }
 
 @main_template(title = title(Messages("pages.paidEmployees.title"), paidEmployeesForm)) {
     @payeErrorSummary(
-        Messages("app.common.errorSummaryLabel"), paidEmployeesForm, dataJourney=Some("PaidEmployees")
+        Messages("app.common.errorSummaryLabel"), paidEmployeesForm, dataJourney = Some("PaidEmployees")
     )
+
     <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.paidEmployees.description")</h1>
+
     @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitPaidEmployees) {
         <p>@Messages("pages.paidEmployees.para")</p>
-    <ul class="list list-bullet">
-        <li>@Messages("pages.paidEmployees.bullet1", weeklyThreshold)</li>
-        <li>@Messages("pages.paidEmployees.bullet2")</li>
-        <li>@Messages("pages.paidEmployees.bullet3")</li>
+        <ul class="list list-bullet">
+            <li>@Messages("pages.paidEmployees.bullet1", weeklyThreshold)</li>
+            <li>@Messages("pages.paidEmployees.bullet2")</li>
+            <li>@Messages("pages.paidEmployees.bullet3")</li>
 
-    </ul>
+        </ul>
 
         <div class="inline form-group">
-            @formHiddenYesNoRadio(
-                paidEmployeesForm,
-                "alreadyPaying",
-                Messages("pages.paidEmployees.description"),
-                hiddenYesNoContent
-            )
+        @formHiddenYesNoRadio(
+            paidEmployeesForm,
+            "alreadyPaying",
+            Messages("pages.paidEmployees.description"),
+            isHeading = true,
+            hiddenYesNoContent
+
+        )
         </div>
         <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
     }

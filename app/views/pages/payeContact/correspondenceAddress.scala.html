@@ -25,29 +25,30 @@
 
 @main_template(title = title(messages("pages.correspondenceAddress.description"), chooseAddressForm)) {
     @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), chooseAddressForm, dataJourney=Some("CorrespondenceAddress")
+        messages("app.common.errorSummaryLabel"), chooseAddressForm, dataJourney = Some("CorrespondenceAddress")
     )
 
     <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.correspondenceAddress.description")</h1>
 
     @govHelpers.form(action = controllers.userJourney.routes.PAYEContactController.submitPAYECorrespondenceAddress) {
         <div class="form-group">
-            @payeInputRadioGroup(
-                field = chooseAddressForm("chosenAddress"),
-                Seq(
-                    correspondenceAddress.map("correspondenceAddress" -> addressDisplay(_, "correspondence").toString),
-                    roAddress.map("roAddress" -> addressDisplay(_, "ro").toString),
-                    ppobAddress.map("ppobAddress" -> addressDisplay(_, "ppob").toString)
-                ).flatten.++(
-                    prepopAddresses.map {case (k, v) => s"${PrepopAddress.prefix}$k" -> addressDisplay(v, s"${PrepopAddress.prefix.toLowerCase}$k").toString}.toList
-                ).:+("other" -> messages("pages.correspondenceAddress.other")),
-                '_legend -> messages("pages.correspondenceAddress.description"),
-                '_legendID -> "chosenAddress",
-                '_helpText -> None,
-                '_labelAfter -> true,
-                '_labelClass -> "block-label",
-                '_groupClass -> "block"
-            )
+        @payeInputRadioGroup(
+            field = chooseAddressForm("chosenAddress"),
+            Seq(
+                correspondenceAddress.map("correspondenceAddress" -> addressDisplay(_, "correspondence").toString),
+                roAddress.map("roAddress" -> addressDisplay(_, "ro").toString),
+                ppobAddress.map("ppobAddress" -> addressDisplay(_, "ppob").toString)
+            ).flatten.++(
+                prepopAddresses.map { case (k, v) => s"${PrepopAddress.prefix}$k" -> addressDisplay(v, s"${PrepopAddress.prefix.toLowerCase}$k").toString }.toList
+            ).:+("other" -> messages("pages.correspondenceAddress.other")),
+            isHeading = false,
+            '_legend -> messages("pages.correspondenceAddress.description"),
+            '_legendID -> "chosenAddress",
+            '_helpText -> None,
+            '_labelAfter -> true,
+            '_labelClass -> "block-label",
+            '_groupClass -> "block"
+        )
         </div>
 
         <div class="form-group">

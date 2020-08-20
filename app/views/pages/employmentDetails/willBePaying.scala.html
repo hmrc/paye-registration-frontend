@@ -25,28 +25,30 @@
 @(willBePayingForm: Form[WillBePaying], weeklyThreshold: Int, now: LocalDate)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @hiddenYesNoContent = {
-    @payeInputRadioGroup(
-        willBePayingForm("beforeNewTaxYear"),
-        Seq(
-            "true"->messages("app.common.yes"),
-            "false"->messages("app.common.no")
-        ),
-        '_legend -> messages("pages.willBePaying.beforeNextTaxYear.label"),
-        '_legendID -> "beforeNewTaxYear",
-        '_helpText -> None,
-        '_labelAfter -> true,
-        '_labelClass -> "block-label",
-        '_groupClass -> "inline",
-        '_title -> messages("pages.willBePaying.beforeNextTaxYear.label")
-    )
+@payeInputRadioGroup(
+    willBePayingForm("beforeNewTaxYear"),
+    Seq(
+        "true" -> messages("app.common.yes"),
+        "false" -> messages("app.common.no")
+    ),
+    isHeading = true,
+    '_legend -> messages("pages.willBePaying.beforeNextTaxYear.label"),
+    '_legendID -> "beforeNewTaxYear",
+    '_helpText -> None,
+    '_labelAfter -> true,
+    '_labelClass -> "block-label",
+    '_groupClass -> "inline",
+    '_title -> messages("pages.willBePaying.beforeNextTaxYear.label")
+)
 }
 
 @main_template(title = title(Messages("pages.willBePaying.title"), willBePayingForm)) {
     @payeErrorSummary(
-        Messages("app.common.errorSummaryLabel"), willBePayingForm, dataJourney=Some("Employing")
+        Messages("app.common.errorSummaryLabel"), willBePayingForm, dataJourney = Some("Employing")
     )
-    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.willBePaying.description")</h1>
+
     @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitEmployingStaff) {
+        <h1>@Messages("pages.willBePaying.description")</h1>
         <p>@Messages("pages.willBePaying.para")</p>
         <ul class="list list-bullet">
             <li>@Messages("pages.willBePaying.bullet1", weeklyThreshold)</li>
@@ -56,28 +58,30 @@
         </ul>
 
         <div class="inline form-group">
-            @if(EmployingStaffForm.isRequiredBeforeNewTaxYear(now)) {
-                @formHiddenYesNoRadio(
-                    willBePayingForm,
-                    "willBePaying",
-                    Messages("pages.willBePaying.description"),
-                    hiddenYesNoContent
-                )
-            } else {
-                @payeInputRadioGroup(
-                    willBePayingForm("willBePaying"),
-                    Seq(
-                        "true"->messages("app.common.yes"),
-                        "false"->messages("app.common.no")
-                    ),
-                    '_legend -> messages("pages.willBePaying.description"),
-                    '_legendID -> "willBePaying",
-                    '_helpText -> None,
-                    '_labelAfter -> true,
-                    '_labelClass -> "block-label",
-                    '_groupClass -> "inline"
-                )
-            }
+        @if(EmployingStaffForm.isRequiredBeforeNewTaxYear(now)) {
+            @formHiddenYesNoRadio(
+                willBePayingForm,
+                "willBePaying",
+                Messages("pages.willBePaying.description"),
+                isHeading = true,
+                hiddenYesNoContent
+            )
+        } else {
+            @payeInputRadioGroup(
+                willBePayingForm("willBePaying"),
+                Seq(
+                    "true" -> messages("app.common.yes"),
+                    "false" -> messages("app.common.no")
+                ),
+                isHeading = false,
+                '_legend -> messages("pages.willBePaying.description"),
+                '_legendID -> "willBePaying",
+                '_helpText -> None,
+                '_labelAfter -> true,
+                '_labelClass -> "block-label",
+                '_groupClass -> "inline"
+            )
+        }
         </div>
         <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
     }

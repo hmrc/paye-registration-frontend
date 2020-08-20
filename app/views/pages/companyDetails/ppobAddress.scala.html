@@ -14,49 +14,47 @@
  * limitations under the License.
  *@
 
-@import helpers.templates.{addressDisplay, payeInputRadioGroup, payeErrorSummary, hiddenDetails}
+@import config.AppConfig
+@import helpers.templates.{addressDisplay, hiddenDetails, payeErrorSummary, payeInputRadioGroup}
 @import models.Address
 @import models.view.{ChosenAddress, PrepopAddress}
 @import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
 @import views.helpers.TitleHelper.title
-
-@import config.AppConfig
 @(chooseAddressForm: Form[ChosenAddress], roAddress: Option[Address], ppobAddress: Option[Address], prepopAddresses: Map[Int, Address])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @hiddenContent = {
-        @messages("pages.ppobAddress.help.content")
+@messages("pages.ppobAddress.help.content")
 }
 
 @main_template(title = title(messages("pages.ppobAddress.description"), chooseAddressForm)) {
     @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), chooseAddressForm, dataJourney=Some("PPOBAddress")
+        messages("app.common.errorSummaryLabel"), chooseAddressForm, dataJourney = Some("PPOBAddress")
     )
 
     <h1 class="form-title heading-large" id="pageHeading">@messages("pages.ppobAddress.description")</h1>
+
+    @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.submitPPOBAddress) {
         <p>@messages("pages.ppobAddress.peopleIntro1")</p>
         <p>@messages("pages.ppobAddress.peopleIntro2")</p>
         <div class="panel panel-border-wide">@messages("pages.ppobAddress.hint")</div>
+        <div class="form-group">@hiddenDetails("unknown-ppob-", messages("pages.ppobAddress.help.link"), hiddenContent)</div>
         <div class="form-group">
-            @hiddenDetails("unknown-ppob-", messages("pages.ppobAddress.help.link"), hiddenContent)
-        </div>
-
-    @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.submitPPOBAddress) {
-        <div class="form-group">
-            @payeInputRadioGroup(
-                field = chooseAddressForm("chosenAddress"),
-                Seq(
-                    ppobAddress.map("ppobAddress" -> addressDisplay(_, "ppob").toString),
-                    roAddress.map("roAddress" -> addressDisplay(_, "ro").toString)
-                ).flatten.++(
-                    prepopAddresses.map {case (k, v) => s"${PrepopAddress.prefix}$k" -> addressDisplay(v, s"${PrepopAddress.prefix.toLowerCase}$k").toString}.toList
-                ).:+("other" -> messages("pages.ppobAddress.other")),
-                '_legend -> messages("pages.ppobAddress.description"),
-                '_legendID -> "chosenAddress",
-                '_helpText -> None,
-                '_labelAfter -> true,
-                '_labelClass -> "block-label",
-                '_groupClass -> "block"
-            )
+        @payeInputRadioGroup(
+            field = chooseAddressForm("chosenAddress"),
+            Seq(
+                ppobAddress.map("ppobAddress" -> addressDisplay(_, "ppob").toString),
+                roAddress.map("roAddress" -> addressDisplay(_, "ro").toString)
+            ).flatten.++(
+                prepopAddresses.map { case (k, v) => s"${PrepopAddress.prefix}$k" -> addressDisplay(v, s"${PrepopAddress.prefix.toLowerCase}$k").toString }.toList
+            ).:+("other" -> messages("pages.ppobAddress.other")),
+            isHeading = false,
+            '_legend -> messages("pages.ppobAddress.description"),
+            '_legendID -> "chosenAddress",
+            '_helpText -> None,
+            '_labelAfter -> true,
+            '_labelClass -> "block-label",
+            '_groupClass -> "block"
+        )
         </div>
 
         <div class="form-group">
