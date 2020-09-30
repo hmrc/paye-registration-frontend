@@ -25,7 +25,7 @@
     @payeErrorSummary(
         Messages("app.common.errorSummaryLabel"), pensionsForm, dataJourney = Some("CompanyPension")
     )
-
+    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.paysPension.description")</h1>
     @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitPensions) {
 
         <div class="inline form-group">
@@ -35,7 +35,7 @@
                 "true" -> Messages("app.common.yes"),
                 "false" -> Messages("app.common.no")
             ),
-            isHeading = true,
+            isHeading = false,
             '_legend -> Messages("pages.paysPension.description"),
             '_legendID -> "paysPension",
             '_helpText -> None,
