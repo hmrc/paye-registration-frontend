@@ -27,7 +27,7 @@ import models.{Address, DigitalContactDetails}
 import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import utils.RegistrationWhitelist
+import utils.RegistrationAllowlist
 
 import scala.concurrent.Future
 
@@ -39,7 +39,7 @@ class CompanyDetailsServiceImpl @Inject()(val payeRegConnector: PAYERegistration
                                           val auditService: AuditService
                                          )(implicit val appConfig: AppConfig) extends CompanyDetailsService
 
-trait CompanyDetailsService extends RegistrationWhitelist {
+trait CompanyDetailsService extends RegistrationAllowlist {
 
   implicit val appConfig: AppConfig
   val payeRegConnector: PAYERegistrationConnector
@@ -53,7 +53,7 @@ trait CompanyDetailsService extends RegistrationWhitelist {
     s4LService.fetchAndGet[CompanyDetailsView](CacheKeys.CompanyDetails.toString, regId) flatMap {
       case Some(companyDetails) => Future.successful(companyDetails)
       case None => for {
-        oDetails <- ifRegIdNotWhitelisted(regId) {
+        oDetails <- ifRegIdNotAllowlisted(regId) {
           payeRegConnector.getCompanyDetails(regId)
         }
         details <- convertOrCreateCompanyDetailsView(regId, txId, oDetails)

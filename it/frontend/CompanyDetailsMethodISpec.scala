@@ -64,7 +64,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
     "microservice.services.business-registration.port" -> s"$mockPort",
     "microservice.services.address-lookup-frontend.host" -> s"$mockHost",
     "microservice.services.address-lookup-frontend.port" -> s"$mockPort",
-    "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng==",
+    "regIdAllowlist" -> "cmVnQWxsb3dsaXN0MTIzLHJlZ0FsbG93bGlzdDQ1Ng==",
     "defaultCTStatus" -> "aGVsZA==",
     "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ==",
     "defaultCHROAddress" -> "eyJsaW5lMSI6IjE0IFRlc3QgRGVmYXVsdCBTdHJlZXQiLCJsaW5lMiI6IlRlc3RsZXkiLCJsaW5lMyI6IlRlc3Rmb3JkIiwibGluZTQiOiJUZXN0c2hpcmUiLCJwb3N0Q29kZSI6IlRFMSAzU1QifQ==",
@@ -203,19 +203,19 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
     }
 
-    "Return a populated page with a default Company Name if the regId is part of the whitelist with trading name pre populated" in {
-      val regIdWhitelisted = "regWhitelist123"
+    "Return a populated page with a default Company Name if the regId is part of the allow-list with trading name pre populated" in {
+      val regIdAllowlisted = "regAllowlist123"
 
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubPayeRegDocumentStatus(regIdWhitelisted)
-      stubSessionCacheMetadata(SessionId, regIdWhitelisted)
+      stubPayeRegDocumentStatus(regIdAllowlisted)
+      stubSessionCacheMetadata(SessionId, regIdAllowlisted)
 
 
-      stubGet(s"/save4later/paye-registration-frontend/$regIdWhitelisted", 404, "")
+      stubGet(s"/save4later/paye-registration-frontend/$regIdAllowlisted", 404, "")
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/save4later/paye-registration-frontend/$regIdWhitelisted/data/CompanyDetails", 200, dummyS4LResponse)
-      stubGet(s"/business-registration/$regIdWhitelisted/trading-name", 200, tradingNameFromPrePop)
+      stubPut(s"/save4later/paye-registration-frontend/$regIdAllowlisted/data/CompanyDetails", 200, dummyS4LResponse)
+      stubGet(s"/business-registration/$regIdAllowlisted/trading-name", 200, tradingNameFromPrePop)
       val fResponse = buildClient("/trading-name").
         withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()
@@ -315,22 +315,22 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
   }
 
   "GET RO Address page" should {
-    "show the page with a default RO Address if the regId is part of the whitelist" in {
-      val regIdWhitelisted = "regWhitelist123"
+    "show the page with a default RO Address if the regId is part of the allow-list" in {
+      val regIdAllowlisted = "regAllowlist123"
       val defaultCompanyName = "TEST-DEFAULT-COMPANY-NAME"
 
       setupSimpleAuthMocks()
 
       stubSuccessfulLogin()
 
-      stubSessionCacheMetadata(SessionId, regIdWhitelisted)
+      stubSessionCacheMetadata(SessionId, regIdAllowlisted)
 
-      stubPayeRegDocumentStatus(regIdWhitelisted)
+      stubPayeRegDocumentStatus(regIdAllowlisted)
 
-      stubGet(s"/save4later/paye-registration-frontend/${regIdWhitelisted}", 404, "")
+      stubGet(s"/save4later/paye-registration-frontend/${regIdAllowlisted}", 404, "")
 
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/save4later/paye-registration-frontend/${regIdWhitelisted}/data/CompanyDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/${regIdAllowlisted}/data/CompanyDetails", 200, dummyS4LResponse)
 
       val fResponse = buildClient("/confirm-registered-office-address").
         withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).

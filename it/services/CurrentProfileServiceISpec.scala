@@ -50,7 +50,7 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase with CachingStub {
     "microservice.services.incorporation-information.host" -> s"$mockHost",
     "microservice.services.incorporation-information.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
-    "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng==",
+    "regIdAllowlist" -> "cmVnQWxsb3dsaXN0MTIzLHJlZ0FsbG93bGlzdDQ1Ng==",
     "defaultCTStatus" -> "aGVsZA==",
     "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ==",
     "mongodb.uri" -> s"$mongoUri"
@@ -80,22 +80,22 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase with CachingStub {
   implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sessionId)))
 
   "fetchAndStoreCurrentProfile" should {
-    "get a default Current Profile when the regId is part of the whitelist" in {
-      val regIdWhitelisted = "regWhitelist123"
-      val businessProfileWithRegIdWhitelisted = BusinessProfile(
-        regIdWhitelisted,
+    "get a default Current Profile when the regId is part of the allow-list" in {
+      val regIdAllowlisted = "regAllowlist123"
+      val businessProfileWithRegIdAllowlisted = BusinessProfile(
+        regIdAllowlisted,
         "ENG"
       )
 
-      val expectedCurrentProfile = CurrentProfile(regIdWhitelisted,
-        CompanyRegistrationProfile("held", s"fakeTxId-$regIdWhitelisted"),
+      val expectedCurrentProfile = CurrentProfile(regIdAllowlisted,
+        CompanyRegistrationProfile("held", s"fakeTxId-$regIdAllowlisted"),
         "ENG",
         payeRegistrationSubmitted = false,
         incorpStatus = None)
 
-      stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfileWithRegIdWhitelisted).toString)
-      stubGet(s"/paye-registration/$regIdWhitelisted/status", 200, backendStatus("draft"))
-      stubPost(s"/incorporation-information/subscribe/fakeTxId-$regIdWhitelisted/regime/paye-fe/subscriber/SCRS", 202, "")
+      stubGet(s"/business-registration/business-tax-registration", 200, Json.toJson(businessProfileWithRegIdAllowlisted).toString)
+      stubGet(s"/paye-registration/$regIdAllowlisted/status", 200, backendStatus("draft"))
+      stubPost(s"/incorporation-information/subscribe/fakeTxId-$regIdAllowlisted/regime/paye-fe/subscriber/SCRS", 202, "")
 
       val currentProfileService = new CurrentProfileServiceImpl(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector, incorpInfoConnector)
 

@@ -26,7 +26,7 @@ import play.api.Logger
 import scala.concurrent.Future
 import scala.language.implicitConversions
 
-trait RegistrationWhitelist {
+trait RegistrationAllowlist {
   val appConfig: AppConfig
 
   implicit def getDefaultCompanyDetailsAPI(regId: String): Option[CompanyDetailsAPI] = Some(CompanyDetailsAPI(
@@ -52,13 +52,13 @@ trait RegistrationWhitelist {
     )
   )
 
-  implicit def cancelSubmission(regId: String): DESResponse = throw new Exception(s"Registration ID $regId is in whitelist, no submission allowed")
+  implicit def cancelSubmission(regId: String): DESResponse = throw new Exception(s"Registration ID $regId is in allow-list, no submission allowed")
 
   implicit def getDefaultOfficerList(regId: String): OfficerList = appConfig.defaultOfficerList
 
-  def ifRegIdNotWhitelisted[T](regId: String)(f: => Future[T])(implicit default: String => T): Future[T] = {
-    if (appConfig.regIdWhitelist.contains(regId)) {
-      Logger.info(s"Registration ID $regId is in the whitelist")
+  def ifRegIdNotAllowlisted[T](regId: String)(f: => Future[T])(implicit default: String => T): Future[T] = {
+    if (appConfig.regIdAllowlist.contains(regId)) {
+      Logger.info(s"Registration ID $regId is in the allow-list")
       Future.successful(default(regId))
     } else {
       f

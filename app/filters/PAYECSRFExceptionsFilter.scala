@@ -32,14 +32,14 @@ trait PAYECSRFExceptionsFilter extends Filter {
 
   val appConfig: AppConfig
 
-  lazy val whitelist: Set[String] = appConfig.uriWhiteList
+  lazy val allowlist: Set[String] = appConfig.uriAllowList
 
   override def apply(f: RequestHeader => Future[Result])(rh: RequestHeader): Future[Result] = {
     f(deleteFilteredHeaders(rh))
   }
 
   private[filters] def deleteFilteredHeaders(rh: RequestHeader) = {
-    if ((rh.method == DELETE || rh.method == POST) && whitelist.exists(uri => rh.path.matches(uri))) {
+    if ((rh.method == DELETE || rh.method == POST) && allowlist.exists(uri => rh.path.matches(uri))) {
       rh.copy(headers = rh.headers.add("Csrf-Bypass" -> appConfig.csrfBypassValue))
     } else {
       rh.copy(headers = rh.headers.remove("Csrf-Bypass"))

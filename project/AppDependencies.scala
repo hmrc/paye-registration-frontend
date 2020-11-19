@@ -18,11 +18,11 @@ import sbt._
 
 object AppDependencies {
 
-  private val bootstrapVersion = "1.14.0"
+  private val bootstrapVersion = "2.0.0"
   private val authClientVersion = "3.0.0-play-26"
   private val playPartialsVersion = "6.11.0-play-26"
   private val httpCachingVersion = "9.1.0-play-26"
-  private val playWhitelistVersion = "3.4.0-play-26"
+  private val playAllowlistVersion = "0.1.0-play-26"
   private val playConditionalMappingVersion = "1.2.0-play-26"
   private val commonsValidatorVersion = "1.6"
   private val reactiveMongoVersion = "7.30.0-play-26"
@@ -43,7 +43,7 @@ object AppDependencies {
     "uk.gov.hmrc" %% "auth-client" % authClientVersion,
     "uk.gov.hmrc" %% "play-partials" % playPartialsVersion,
     "uk.gov.hmrc" %% "http-caching-client" % httpCachingVersion,
-    "uk.gov.hmrc" %% "play-whitelist-filter" % playWhitelistVersion,
+    "uk.gov.hmrc" %% "play-allowlist-filter" % playAllowlistVersion,
     "uk.gov.hmrc" %% "play-conditional-form-mapping" % playConditionalMappingVersion,
     "uk.gov.hmrc" %% "simple-reactivemongo" % reactiveMongoVersion,
     "commons-validator" % "commons-validator" % commonsValidatorVersion,

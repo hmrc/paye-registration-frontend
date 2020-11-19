@@ -43,7 +43,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
     "microservice.services.incorporation-information.host" -> s"$mockHost",
     "microservice.services.incorporation-information.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
-    "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng==",
+    "regIdAllowlist" -> "cmVnQWxsb3dsaXN0MTIzLHJlZ0FsbG93bGlzdDQ1Ng==",
     "defaultCTStatus" -> "aGVsZA==",
     "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ==",
     "defaultCHROAddress" -> "eyJsaW5lMSI6IjMwIFRlc3QgUm9hZCIsImxpbmUyIjoiVGVzdGxleSIsImxpbmUzIjoiVGVzdGZvcmQiLCJsaW5lNCI6IlRlc3RzaGlyZSIsInBvc3RDb2RlIjoiVEUxIDNTVCJ9",
@@ -121,8 +121,8 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
       await(getResponse) mustBe IncorpInfoSuccessResponse(deetsModel)
     }
 
-    "get a default CoHo Company Details when the regId is part of the whitelist" in new Setup {
-      val regIdWhitelisted = "regWhitelist123"
+    "get a default CoHo Company Details when the regId is part of the allow-list" in new Setup {
+      val regIdAllowlisted = "regAllowlist123"
       val defaultCompanyName = "TEST-DEFAULT-COMPANY-NAME"
       val defaultROAddress = Address(
         "30 Test Road",
@@ -139,7 +139,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
       )
 
 
-      def getResponse = incorpInfoConnector.getCoHoCompanyDetails(regIdWhitelisted, "txID")
+      def getResponse = incorpInfoConnector.getCoHoCompanyDetails(regIdAllowlisted, "txID")
 
       await(getResponse) mustBe incorpInfoSuccessCoHoCompanyDetails
     }
@@ -262,9 +262,9 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
       await(getResponse) mustBe tstOfficerListModel
     }
 
-    "get an officer list from config if the regId is whitelisted and every other service returns none" in new Setup {
+    "get an officer list from config if the regId is allow-list and every other service returns none" in new Setup {
 
-      def getResponse = incorpInfoConnector.getOfficerList(testTransId, "regWhitelist456")
+      def getResponse = incorpInfoConnector.getOfficerList(testTransId, "regAllowlist456")
 
       setupWiremockResult(404, "")
       await(getResponse) mustBe tstOfficerListModel

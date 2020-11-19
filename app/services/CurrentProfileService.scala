@@ -25,7 +25,7 @@ import models.external.CurrentProfile
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import utils.RegistrationWhitelist
+import utils.RegistrationAllowlist
 
 import scala.concurrent.Future
 
@@ -36,7 +36,7 @@ class CurrentProfileServiceImpl @Inject()(val businessRegistrationConnector: Bus
                                           val incorporationInformationConnector: IncorporationInformationConnector
                                          )(implicit val appConfig: AppConfig) extends CurrentProfileService
 
-trait CurrentProfileService extends RegistrationWhitelist {
+trait CurrentProfileService extends RegistrationAllowlist {
   implicit val appConfig: AppConfig
   val businessRegistrationConnector: BusinessRegistrationConnector
   val payeRegistrationConnector: PAYERegistrationConnector
@@ -47,7 +47,7 @@ trait CurrentProfileService extends RegistrationWhitelist {
   def fetchAndStoreCurrentProfile(implicit hc: HeaderCarrier): Future[CurrentProfile] = {
     for {
       businessProfile <- businessRegistrationConnector.retrieveCurrentProfile
-      companyProfile <- ifRegIdNotWhitelisted(businessProfile.registrationID) {
+      companyProfile <- ifRegIdNotAllowlisted(businessProfile.registrationID) {
         companyRegistrationConnector.getCompanyRegistrationDetails(businessProfile.registrationID)
       }
       oRegStatus <- payeRegistrationConnector.getStatus(businessProfile.registrationID)

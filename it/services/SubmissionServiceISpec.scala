@@ -41,7 +41,7 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
     "microservice.services.cachable.session-cache.host" -> s"$mockHost",
     "microservice.services.cachable.session-cache.port" -> s"$mockPort",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
-    "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng==",
+    "regIdAllowlist" -> "cmVnQWxsb3dsaXN0MTIzLHJlZ0FsbG93bGlzdDQ1Ng==",
     "mongodb.uri" -> s"$mongoUri"
   )
 
@@ -69,17 +69,17 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
   )
 
   "submitRegistration" should {
-    "NOT send the submission if the regId is in whitelist" in {
-      val regIdWhitelisted = "regWhitelist123"
+    "NOT send the submission if the regId is in allow-list" in {
+      val regIdAllowlisted = "regAllowlist123"
 
       val submissionService = new SubmissionServiceImpl(payeRegistrationConnector, keystoreConnector, incorpInfoConnector)
 
-      def getResponse = submissionService.submitRegistration(currentProfile(regIdWhitelisted))
+      def getResponse = submissionService.submitRegistration(currentProfile(regIdAllowlisted))
 
       an[Exception] mustBe thrownBy(await(getResponse))
     }
 
-    "send the submission and update keystore if the regId is not in whitelist" in {
+    "send the submission and update keystore if the regId is not in allow-list" in {
       val regId = "12345"
       val transactionId = "40-123456"
 
@@ -105,7 +105,7 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
         )))
     }
 
-    "send the submission, update keystore and cancel subscription if the regId is not in whitelist" in {
+    "send the submission, update keystore and cancel subscription if the regId is not in allow-list" in {
       val regId = "12345"
       val transactionId = "40-123456"
 
