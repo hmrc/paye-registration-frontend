@@ -23,7 +23,7 @@ import javax.inject.Inject
 import models.external.CurrentProfile
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import utils.RegistrationWhitelist
+import utils.RegistrationAllowlist
 
 import scala.concurrent.Future
 
@@ -32,13 +32,13 @@ class SubmissionServiceImpl @Inject()(val payeRegistrationConnector: PAYERegistr
                                       val iiConnector: IncorporationInformationConnector
                                      )(implicit val appConfig: AppConfig) extends SubmissionService
 
-trait SubmissionService extends RegistrationWhitelist {
+trait SubmissionService extends RegistrationAllowlist {
   val payeRegistrationConnector: PAYERegistrationConnector
   val keystoreConnector: KeystoreConnector
   val iiConnector: IncorporationInformationConnector
 
   def submitRegistration(profile: CurrentProfile)(implicit hc: HeaderCarrier): Future[DESResponse] = {
-    ifRegIdNotWhitelisted(profile.registrationID) {
+    ifRegIdNotAllowlisted(profile.registrationID) {
       payeRegistrationConnector.submitRegistration(profile.registrationID).flatMap {
         case status@(Success | Cancelled) =>
           val cp: CurrentProfile = if (status == Success) profile.copy(payeRegistrationSubmitted = true) else profile.copy(incorpStatus = Some(IncorporationStatus.rejected))

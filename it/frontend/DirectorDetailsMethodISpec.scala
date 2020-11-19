@@ -53,7 +53,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
     "microservice.services.company-registration.port" -> s"$mockPort",
     "microservice.services.incorporation-information.host" -> s"$mockHost",
     "microservice.services.incorporation-information.port" -> s"$mockPort",
-    "regIdWhitelist" -> "cmVnV2hpdGVsaXN0MTIzLHJlZ1doaXRlbGlzdDQ1Ng==",
+    "regIdAllowlist" -> "cmVnQWxsb3dsaXN0MTIzLHJlZ0FsbG93bGlzdDQ1Ng==",
     "defaultCTStatus" -> "aGVsZA==",
     "defaultCompanyName" -> "VEVTVC1ERUZBVUxULUNPTVBBTlktTkFNRQ==",
     "defaultCHROAddress" -> "eyJwcmVtaXNlcyI6IjE0IiwiYWRkcmVzc19saW5lXzEiOiJUZXN0IERlZmF1bHQgU3RyZWV0IiwiYWRkcmVzc19saW5lXzIiOiJUZXN0bGV5IiwibG9jYWxpdHkiOiJUZXN0Zm9yZCIsImNvdW50cnkiOiJVSyIsInBvc3RhbF9jb2RlIjoiVEUxIDFTVCJ9",
@@ -76,18 +76,18 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
   val companyName = "Foo Ltd"
 
   "GET Director Details" should {
-    "show the page with a default list of Directors if the regId is part of the whitelist" in {
-      val regIdWhitelisted = "regWhitelist123"
+    "show the page with a default list of Directors if the regId is part of the allow-list" in {
+      val regIdAllowlisted = "regAllowlist123"
 
       setupSimpleAuthMocks()
       stubSuccessfulLogin()
-      stubPayeRegDocumentStatus(regIdWhitelisted)
-      stubSessionCacheMetadata(SessionId, regIdWhitelisted)
+      stubPayeRegDocumentStatus(regIdAllowlisted)
+      stubSessionCacheMetadata(SessionId, regIdAllowlisted)
 
-      stubGet(s"/save4later/paye-registration-frontend/$regIdWhitelisted", 404, "")
+      stubGet(s"/save4later/paye-registration-frontend/$regIdAllowlisted", 404, "")
 
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
-      stubPut(s"/save4later/paye-registration-frontend/$regIdWhitelisted/data/DirectorDetails", 200, dummyS4LResponse)
+      stubPut(s"/save4later/paye-registration-frontend/$regIdAllowlisted/data/DirectorDetails", 200, dummyS4LResponse)
       val fResponse = buildClient("/director-national-insurance-number").
         withHttpHeaders(HeaderNames.COOKIE -> getSessionCookie()).
         get()

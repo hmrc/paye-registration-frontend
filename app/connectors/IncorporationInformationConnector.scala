@@ -29,7 +29,7 @@ import play.api.libs.json._
 import services.MetricsService
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import utils.RegistrationWhitelist
+import utils.RegistrationAllowlist
 
 import scala.concurrent.Future
 
@@ -58,7 +58,7 @@ case object IncorpInfoNotFoundResponse extends IncorpInfoResponse
 
 case class IncorpInfoErrorResponse(ex: Exception) extends IncorpInfoResponse
 
-trait IncorporationInformationConnector extends RegistrationWhitelist {
+trait IncorporationInformationConnector extends RegistrationAllowlist {
   implicit val appConfig: AppConfig
   val incorpInfoUrl: String
   val incorpInfoUri: String
@@ -104,7 +104,7 @@ trait IncorporationInformationConnector extends RegistrationWhitelist {
   }
 
   def getCoHoCompanyDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[IncorpInfoResponse] = {
-    ifRegIdNotWhitelisted(regId) {
+    ifRegIdNotAllowlisted(regId) {
       implicit val rds: Reads[CoHoCompanyDetailsModel] = CoHoCompanyDetailsModel.incorpInfoReads
 
       val incorpInfoTimer: Timer.Context = timer
@@ -150,7 +150,7 @@ trait IncorporationInformationConnector extends RegistrationWhitelist {
   }
 
   def getOfficerList(transactionId: String, regId: String)(implicit hc: HeaderCarrier): Future[OfficerList] = {
-    ifRegIdNotWhitelisted(regId) {
+    ifRegIdNotAllowlisted(regId) {
       val incorpInfoTimer = metricsService.incorpInfoResponseTimer.time()
       http.GET[JsObject](s"$incorpInfoUrl$incorpInfoUri/$transactionId/officer-list") map { obj =>
         incorpInfoTimer.stop()

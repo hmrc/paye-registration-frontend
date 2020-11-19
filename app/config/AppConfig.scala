@@ -48,7 +48,7 @@ class AppConfig @Inject()(configuration: Configuration, runMode: RunMode) {
   lazy val timeoutInSeconds: String = loadConfig("timeoutInSeconds")
   lazy val timeoutDisplayLength: String = loadConfig("timeoutDisplayLength")
 
-  private def whiteListConfig(key: String): Seq[String] = {
+  private def allowListConfig(key: String): Seq[String] = {
     Some(new String(Base64.getDecoder
       .decode(configuration.getOptional[String](key).getOrElse("")), "UTF-8"))
       .map(_.split(",")).getOrElse(Array.empty).toSeq
@@ -68,13 +68,13 @@ class AppConfig @Inject()(configuration: Configuration, runMode: RunMode) {
   }
 
   lazy val self: String = servicesConfig.getConfString("paye-registration-frontend.www.url", "")
-  lazy val regIdWhitelist: Seq[String] = whiteListConfig("regIdWhitelist")
+  lazy val regIdAllowlist: Seq[String] = allowListConfig("regIdAllowlist")
   lazy val defaultCompanyName: String = loadStringConfigBase64("defaultCompanyName")
   lazy val defaultCHROAddress: Address = loadJsonConfigBase64[Address]("defaultCHROAddress")
   lazy val defaultSeqDirector: Seq[Director] = loadJsonConfigBase64[Seq[Director]]("defaultSeqDirector")(Director.seqReads)
   lazy val defaultCTStatus: String = loadStringConfigBase64("defaultCTStatus")
   lazy val defaultOfficerList: OfficerList = loadJsonConfigBase64[OfficerList]("defaultOfficerList")(OfficerList.formatModel)
-  lazy val uriWhiteList: Set[String] = configuration.getOptional[Seq[String]]("csrfexceptions.whitelist").getOrElse(Seq.empty).toSet
+  lazy val uriAllowList: Set[String] = configuration.getOptional[Seq[String]]("bootstrap.csrfexceptions.allowlist").getOrElse(Seq.empty).toSet
   lazy val csrfBypassValue: String = loadStringConfigBase64("Csrf-Bypass-value")
 
   private def encodeUrl(url: String): String = URLEncoder.encode(url, "UTF-8")

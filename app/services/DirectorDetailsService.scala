@@ -24,7 +24,7 @@ import models.api.Director
 import models.view.{Directors, Ninos, UserEnteredNino}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import utils.RegistrationWhitelist
+import utils.RegistrationAllowlist
 
 import scala.concurrent.Future
 
@@ -33,7 +33,7 @@ class DirectorDetailsServiceImpl @Inject()(val payeRegConnector: PAYERegistratio
                                            val s4LService: S4LService
                                           )(implicit val appConfig: AppConfig) extends DirectorDetailsService
 
-trait DirectorDetailsService extends RegistrationWhitelist {
+trait DirectorDetailsService extends RegistrationAllowlist {
   implicit val appConfig: AppConfig
   val payeRegConnector: PAYERegistrationConnector
   val s4LService: S4LService
@@ -66,7 +66,7 @@ trait DirectorDetailsService extends RegistrationWhitelist {
       backendDirectors <- s4LService.fetchAndGet(CacheKeys.DirectorDetails.toString, regId) flatMap {
         case Some(dirs) => Future.successful(dirs)
         case None => for {
-          regResponse <- ifRegIdNotWhitelisted(regId) {
+          regResponse <- ifRegIdNotAllowlisted(regId) {
             payeRegConnector.getDirectors(regId)
           }
         } yield {
