@@ -20,7 +20,6 @@ import java.net.{URLDecoder, URLEncoder}
 import java.util.UUID
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import play.api.libs.Crypto
 import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.ws.WSCookie
 import uk.gov.hmrc.crypto.{CompositeSymmetricCrypto, Crypted, PlainText}
@@ -38,9 +37,6 @@ trait LoginStub extends SessionCookieBaker {
 
     Map(
       SessionKeys.sessionId -> sessionID,
-      SessionKeys.userId -> "/auth/oid/1234567890",
-      SessionKeys.token -> "token",
-      SessionKeys.authProvider -> "GGW",
       SessionKeys.lastRequestTimestamp -> rollbackTimestamp
     ) ++ additionalData
   }
