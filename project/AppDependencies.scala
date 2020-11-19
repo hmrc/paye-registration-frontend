@@ -20,7 +20,7 @@ object AppDependencies {
 
   private val bootstrapVersion = "2.0.0"
   private val authClientVersion = "3.0.0-play-26"
-  private val playPartialsVersion = "6.11.0-play-26"
+  private val playPartialsVersion = "7.0.0-play-26"
   private val httpCachingVersion = "9.1.0-play-26"
   private val playAllowlistVersion = "0.1.0-play-26"
   private val playConditionalMappingVersion = "1.2.0-play-26"

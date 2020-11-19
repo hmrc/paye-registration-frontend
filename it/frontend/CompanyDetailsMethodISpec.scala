@@ -138,8 +138,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
       mdtpCookieData("csrfToken") mustNot be("")
-      mdtpCookieData("sessionId") mustBe SessionId
-      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
 
@@ -191,8 +189,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
       mdtpCookieData("csrfToken") mustNot be("")
-      mdtpCookieData("sessionId") mustBe SessionId
-      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
       document.title() must include("Does or will the company trade using a different name?")
@@ -375,8 +371,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
       mdtpCookieData("csrfToken") mustNot be("")
-      mdtpCookieData("sessionId") mustBe SessionId
-      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
       document.title() must include("What is the company's 'principal place of business'?")
@@ -414,8 +408,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
       mdtpCookieData("csrfToken") mustNot be("")
-      mdtpCookieData("sessionId") mustBe SessionId
-      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
       document.title() must include("What is the company's 'principal place of business'?")
@@ -454,8 +446,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
       mdtpCookieData("csrfToken") mustNot be("")
-      mdtpCookieData("sessionId") mustBe SessionId
-      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
       document.title() must include("What is the company's 'principal place of business'?")
@@ -492,8 +482,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
       mdtpCookieData("csrfToken") mustNot be("")
-      mdtpCookieData("sessionId") mustBe SessionId
-      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
       document.title() must include("What is the company's 'principal place of business'?")
@@ -547,8 +535,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
       mdtpCookieData("csrfToken") mustNot be("")
-      mdtpCookieData("sessionId") mustBe SessionId
-      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
       document.title() must include("What is the company's 'principal place of business'?")
@@ -604,8 +590,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
       mdtpCookieData("csrfToken") mustNot be("")
-      mdtpCookieData("sessionId") mustBe SessionId
-      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
       document.title() must include("What is the company's 'principal place of business'?")
@@ -987,8 +971,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
       mdtpCookieData("csrfToken") mustNot be("")
-      mdtpCookieData("sessionId") mustBe SessionId
-      mdtpCookieData("userId") mustBe userId
 
       val document = Jsoup.parse(response.body)
       document.title() must include(s"Give us one or more ways to contact $companyName")
