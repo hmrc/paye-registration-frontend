@@ -135,15 +135,15 @@ trait AuthRedirectUrls {
   private lazy val loginCallback = appConfig.servicesConfig.getString(s"$configRoot.auth.login-callback.url")
 
   private lazy val buildCompanyAuthUrl = {
-    val companyAuthHost = appConfig.servicesConfig.getString(s"$configRoot.auth.company-auth.url")
+    val basGatewayHost = appConfig.servicesConfig.getString(s"$configRoot.auth.bas-gateway.url")
     val loginPath = appConfig.servicesConfig.getString(s"$configRoot.auth.login_path")
-    s"$companyAuthHost$loginPath"
+    s"$basGatewayHost$loginPath"
   }
 
   private lazy val continueUrl = s"$loginCallback${userJourneyRoutes.PayeStartController.startPaye()}"
 
   lazy val redirectToLogin: Result = Redirect(buildCompanyAuthUrl, Map(
-    "continue" -> Seq(continueUrl),
+    "continue_url" -> Seq(continueUrl),
     "origin" -> Seq(appName)
   ))
 
