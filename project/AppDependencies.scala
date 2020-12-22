@@ -28,7 +28,7 @@ object AppDependencies {
   private val reactiveMongoVersion = "7.30.0-play-26"
   private val taxYearVersion = "1.1.0"
   private val govukTemplateVersion = "5.55.0-play-26"
-  private val playUiVersion = "8.11.0-play-26"
+  private val playUiVersion = "8.19.0-play-26"
   private val jsonJodaVersion = "2.7.4"
   private val scalaTestPlusVersion = "3.1.3"
   private val pegdownVersion = "1.6.0"
