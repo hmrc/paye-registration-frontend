@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import play.api.test.FakeRequest
 import views.html.pages.companyDetails.{ppobAddress => PPOBAddressPage}
 import views.html.pages.payeContact.{correspondenceAddress => CorrespondenceAddressPage}
 
-class chooseAddressSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
+class ChooseAddressSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
   implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
   implicit lazy val messagesApi: MessagesApi = mockMessagesApi
