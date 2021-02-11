@@ -92,17 +92,6 @@ $(document).ready($(function() {
         }
     });
 
-    $('[data-metrics]').each(function () {
-        var metrics = $(this).attr('data-metrics');
-        var parts = metrics.split(':');
-        ga('send', 'event', parts[0], parts[1], parts[2]);
-    });
-
-    $('[data-external-link]').on('click auxclick contextmenu', function (e) {
-        var metrics = $(this).attr('data-external-link');
-        var parts = metrics.split('|');
-        ga('send', 'event', parts[0], parts[1], parts[2]);
-    });
     // For submissionFailed page
     $("#submissionFailedReportAProblem").each(function(){
         $(".report-error__toggle").click();
