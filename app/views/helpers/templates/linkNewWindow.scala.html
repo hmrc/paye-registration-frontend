@@ -16,4 +16,4 @@
 
 @(href: String, text: String, dataJourney: String, htmlId: Option[String] = None, withFullStop: Boolean = false)(implicit messages: Messages)
 
-<a href="@{href}" @{htmlId.map(id => s"id=$id")} data-external-link="externalLink|@{dataJourney}|@{href}" target="_blank">@text @Messages("app.common.linkHelperText")</a>@if(withFullStop){.}
+<a href="@{href}" @{htmlId.map(id => s"id=$id")} target="_blank">@text @Messages("app.common.linkHelperText")</a>@if(withFullStop){.}
