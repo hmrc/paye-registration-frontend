@@ -40,8 +40,6 @@ class AppConfig @Inject()(configuration: Configuration, runMode: RunMode) {
   lazy val contactFrontendPartialBaseUrl: String = servicesConfig.baseUrl("contact-frontend")
   lazy val contactHost: String = loadConfig("contact-frontend.host")
 
-  lazy val analyticsToken: String = loadConfig("google-analytics.token")
-  lazy val analyticsHost: String = loadConfig("google-analytics.host")
   lazy val reportAProblemPartialUrl: String = loadConfig("reportAProblemPartialUrl")
   lazy val reportAProblemNonJSUrl: String = loadConfig("reportAProblemNonJSUrl")
 
