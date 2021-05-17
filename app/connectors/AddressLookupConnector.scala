@@ -26,16 +26,15 @@ import play.api.i18n.MessagesApi
 import play.api.libs.json.Reads
 import services.MetricsService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NoStackTrace
 
 @Singleton
 class AddressLookupConnector @Inject()(metricsService: MetricsService,
                                        http: WSHttp
                                       )(implicit messagesApi: MessagesApi,
-                                        appConfig: AppConfig) extends Logging {
+                                        appConfig: AppConfig, implicit val ec: ExecutionContext) extends Logging {
 
   lazy val addressLookupFrontendUrl: String = appConfig.servicesConfig.baseUrl("address-lookup-frontend")
   val successCounter: Counter = metricsService.addressLookupSuccessResponseCounter

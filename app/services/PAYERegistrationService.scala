@@ -21,15 +21,14 @@ import enums.{CacheKeys, DownstreamOutcome, IncorporationStatus, RegistrationDel
 import javax.inject.Inject
 import models.external.CurrentProfile
 import play.api.http.Status._
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class PAYERegistrationServiceImpl @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,
                                             val keyStoreConnector: KeystoreConnector,
                                             val currentProfileService: CurrentProfileService,
-                                            val s4LService: S4LService) extends PAYERegistrationService
+                                            val s4LService: S4LService)(implicit val ec: ExecutionContext) extends PAYERegistrationService
 
 trait PAYERegistrationService {
 
@@ -37,6 +36,7 @@ trait PAYERegistrationService {
   val keyStoreConnector: KeystoreConnector
   val currentProfileService: CurrentProfileService
   val s4LService: S4LService
+  implicit val ec: ExecutionContext
 
   def assertRegistrationFootprint(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     payeRegistrationConnector.createNewRegistration(regId, txId)
@@ -58,6 +58,7 @@ trait PAYERegistrationService {
           tearDownUserData(regId, txId)
         } recoverWith {
           case e: NotFoundException => Future.successful(RegistrationDeletion.notfound)
+          case e: UpstreamErrorResponse if e.statusCode == NOT_FOUND => Future.successful(RegistrationDeletion.notfound)
         }
       }
       else {

@@ -33,8 +33,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.pages.companyDetails.{confirmROAddress, businessContactDetails => BusinessContactDetailsPage, ppobAddress => PPOBAddressPage, tradingName => TradingNamePage}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyDetailsControllerImpl @Inject()(val s4LService: S4LService,
                                              val keystoreConnector: KeystoreConnector,
@@ -47,10 +46,11 @@ class CompanyDetailsControllerImpl @Inject()(val s4LService: S4LService,
                                              val incorporationInformationConnector: IncorporationInformationConnector,
                                              val payeRegistrationService: PAYERegistrationService,
                                              mcc: MessagesControllerComponents
-                                            )(implicit val appConfig: AppConfig) extends CompanyDetailsController(mcc) with AuthRedirectUrls
+                                            )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends CompanyDetailsController(mcc) with AuthRedirectUrls
 
 abstract class CompanyDetailsController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val s4LService: S4LService
   val companyDetailsService: CompanyDetailsService
   val incorpInfoService: IncorporationInformationService

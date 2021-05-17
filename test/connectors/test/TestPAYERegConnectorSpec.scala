@@ -25,7 +25,7 @@ import org.mockito.Mockito.when
 import play.api.libs.json.JsObject
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class TestPAYERegConnectorSpec extends PayeComponentSpec {
 
@@ -34,6 +34,8 @@ class TestPAYERegConnectorSpec extends PayeComponentSpec {
       override val payeRegConnector = mockPAYERegConnector
       override val http: WSHttp = mockWSHttp
       override val payeRegUrl: String = "tst-url"
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 
@@ -95,14 +97,14 @@ class TestPAYERegConnectorSpec extends PayeComponentSpec {
 
   "Calling testRegistrationTeardown" should {
     "return a successful outcome for a successful teardown" in new Setup {
-      when(mockWSHttp.GET[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockWSHttp.GET[HttpResponse](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
 
       await(connector.testRegistrationTeardown()) mustBe DownstreamOutcome.Success
     }
 
     "return a failed outcome for an unsuccessful teardown" in new Setup {
-      when(mockWSHttp.GET[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockWSHttp.GET[HttpResponse](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new RuntimeException))
 
       await(connector.testRegistrationTeardown()) mustBe DownstreamOutcome.Failure
@@ -111,14 +113,14 @@ class TestPAYERegConnectorSpec extends PayeComponentSpec {
 
   "Calling tearDownIndividualRegistration" should {
     "return a successful outcome for a successful teardown" in new Setup {
-      when(mockWSHttp.GET[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockWSHttp.GET[HttpResponse](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
 
       await(connector.tearDownIndividualRegistration("regId")) mustBe DownstreamOutcome.Success
     }
 
     "return a failed outcome for an unsuccessful teardown" in new Setup {
-      when(mockWSHttp.GET[HttpResponse](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockWSHttp.GET[HttpResponse](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new RuntimeException))
 
       await(connector.tearDownIndividualRegistration("regId")) mustBe DownstreamOutcome.Failure

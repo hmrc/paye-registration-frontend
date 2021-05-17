@@ -22,19 +22,18 @@ import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import play.api.mvc.{Request, Result}
+import play.api.mvc.{MessagesControllerComponents, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
-
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val request = FakeRequest()
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
 
   class Setup {
-    val controller = new TestRegSetupController(stubMessagesControllerComponents()) {
+    val controller = new TestRegSetupController(mockMcc) {
       override val appConfig: AppConfig = mockAppConfig
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
@@ -47,6 +46,8 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val testBusinessRegConnector = mockTestBusRegConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
 
       override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(CurrentProfile(

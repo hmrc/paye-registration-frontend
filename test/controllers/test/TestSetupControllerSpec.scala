@@ -23,16 +23,14 @@ import models.external.BusinessProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
-import play.api.mvc.{AnyContent, Request}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
-
 import scala.concurrent.Future
 
 class TestSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
-
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
   class Setup extends CodeMocks {
-    val controller = new TestSetupController(stubMessagesControllerComponents()) {
+    val controller = new TestSetupController(mockMcc) {
       override val appConfig: AppConfig = mockAppConfig
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign

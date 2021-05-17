@@ -27,14 +27,13 @@ import models.api.{Employing, Employment}
 import models.external.CurrentProfile
 import models.view.{EmployingAnyone, EmployingStaff, WillBePaying}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.SystemDate
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class EmploymentServiceImpl @Inject()(val s4LService: S4LService,
                                       val payeRegConnector: PAYERegistrationConnector,
-                                      val iiService: IncorporationInformationService) extends EmploymentService {
+                                      val iiService: IncorporationInformationService)(implicit val ec: ExecutionContext) extends EmploymentService {
   override def now: LocalDate = SystemDate.getSystemDate.toLocalDate
 }
 
@@ -42,6 +41,7 @@ trait EmploymentService {
 
   def now: LocalDate
 
+  implicit val ec: ExecutionContext
   val iiService: IncorporationInformationService
   val s4LService: S4LService
   val payeRegConnector: PAYERegistrationConnector

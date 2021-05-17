@@ -26,17 +26,17 @@ import models.view.{PAYEContactDetails, CompanyDetails => CompanyDetailsView, PA
 import play.api.Logger
 import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class PAYEContactServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
                                        val s4LService: S4LService,
                                        val companyDetailsService: CompanyDetailsService,
                                        val prepopService: PrepopulationService,
-                                       val auditService: AuditService) extends PAYEContactService
+                                       val auditService: AuditService)(implicit val ec: ExecutionContext) extends PAYEContactService
 
 trait PAYEContactService {
+  implicit val ec: ExecutionContext
   val payeRegConnector: PAYERegistrationConnector
   val s4LService: S4LService
   val companyDetailsService: CompanyDetailsService

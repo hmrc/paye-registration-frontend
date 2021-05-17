@@ -20,6 +20,8 @@ import helpers.PayeComponentSpec
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HttpResponse
 
+import scala.concurrent.ExecutionContext
+
 class TestCoHoAPIConnectorSpec extends PayeComponentSpec {
 
   val testUrl = "testIncorpInfoUrl"
@@ -29,6 +31,8 @@ class TestCoHoAPIConnectorSpec extends PayeComponentSpec {
       override val incorpFEStubsUrl = testUrl
       override val incorpInfoUrl = testUrl
       override val http = mockWSHttp
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

@@ -24,13 +24,12 @@ import models.view.{CompanyDetails, PAYEContactDetails}
 import play.api.libs.json.JsValue
 import services.MetricsService
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class BusinessRegistrationConnectorImpl @Inject()(val metricsService: MetricsService,
                                                   val http: WSHttp,
-                                                  appConfig: AppConfig) extends BusinessRegistrationConnector {
+                                                  appConfig: AppConfig)(implicit val ec: ExecutionContext) extends BusinessRegistrationConnector {
   val businessRegUrl = appConfig.servicesConfig.baseUrl("business-registration")
 }
 
@@ -38,6 +37,7 @@ trait BusinessRegistrationConnector {
   val businessRegUrl: String
   val http: CoreGet with CorePost
   val metricsService: MetricsService
+  implicit val ec: ExecutionContext
 
   def retrieveCurrentProfile(implicit hc: HeaderCarrier, rds: HttpReads[BusinessProfile]): Future[BusinessProfile] = {
     val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()

@@ -27,19 +27,18 @@ import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.http.Status
+import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
-
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
-
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
   class Setup extends AuthHelpers {
     override val authConnector = mockAuthConnector
     override val keystoreConnector = mockKeystoreConnector
 
-    val controller = new ConfirmationController(stubMessagesControllerComponents()) {
+    val controller = new ConfirmationController(mockMcc) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val emailService = mockEmailService
@@ -50,6 +49,8 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
       override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

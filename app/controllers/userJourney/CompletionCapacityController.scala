@@ -26,8 +26,7 @@ import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{completionCapacity => CompletionCapacityView}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class CompletionCapacityControllerImpl @Inject()(val completionCapacityService: CompletionCapacityService,
                                                  val keystoreConnector: KeystoreConnector,
@@ -38,10 +37,11 @@ class CompletionCapacityControllerImpl @Inject()(val completionCapacityService: 
                                                  val incorporationInformationConnector: IncorporationInformationConnector,
                                                  val payeRegistrationService: PAYERegistrationService,
                                                  mcc: MessagesControllerComponents
-                                                )(implicit val appConfig: AppConfig) extends CompletionCapacityController(mcc) with AuthRedirectUrls
+                                                )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends CompletionCapacityController(mcc) with AuthRedirectUrls
 
 abstract class CompletionCapacityController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val completionCapacityService: CompletionCapacityService
 
   def completionCapacity: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>

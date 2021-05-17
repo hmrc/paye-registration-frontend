@@ -25,15 +25,15 @@ import models.api.Director
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import models.view.Directors
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class IncorporationInformationServiceImpl @Inject()(val keystoreConnector: KeystoreConnector,
-                                                    val incorpInfoConnector: IncorporationInformationConnector) extends IncorporationInformationService
+                                                    val incorpInfoConnector: IncorporationInformationConnector)(implicit val ec: ExecutionContext) extends IncorporationInformationService
 
 trait IncorporationInformationService {
 
+  implicit val ec: ExecutionContext
   val incorpInfoConnector: IncorporationInformationConnector
   val keystoreConnector: KeystoreConnector
 

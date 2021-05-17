@@ -23,18 +23,18 @@ import javax.inject.Inject
 import models.api.Director
 import models.view.{Directors, Ninos, UserEnteredNino}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.RegistrationAllowlist
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class DirectorDetailsServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
                                            val incorpInfoService: IncorporationInformationService,
                                            val s4LService: S4LService
-                                          )(implicit val appConfig: AppConfig) extends DirectorDetailsService
+                                          )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends DirectorDetailsService
 
 trait DirectorDetailsService extends RegistrationAllowlist {
   implicit val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val payeRegConnector: PAYERegistrationConnector
   val s4LService: S4LService
   val incorpInfoService: IncorporationInformationService

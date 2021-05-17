@@ -23,20 +23,20 @@ import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProf
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
+import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.NotFoundException
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
   }
-
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
   class Setup {
-    def controller() = new PayeStartController(stubMessagesControllerComponents()) {
+    def controller() = new PayeStartController(mockMcc) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val payeRegElFEURL = MockAuthRedirects.payeRegElFEUrl
@@ -49,6 +49,8 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val companyRegistrationConnector = mockCompRegConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

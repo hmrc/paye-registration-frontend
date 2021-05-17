@@ -24,7 +24,7 @@ import play.api.mvc.MessagesControllerComponents
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class DashboardControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
                                         val authConnector: AuthConnector,
@@ -34,7 +34,7 @@ class DashboardControllerImpl @Inject()(val keystoreConnector: KeystoreConnector
                                         val incorporationInformationConnector: IncorporationInformationConnector,
                                         val payeRegistrationService: PAYERegistrationService,
                                         mcc: MessagesControllerComponents
-                                       )(val appConfig: AppConfig) extends DashboardController(mcc) with AuthRedirectUrls {
+                                       )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends DashboardController(mcc) with AuthRedirectUrls {
 
   override lazy val companyRegUrl = appConfig.servicesConfig.getConfString("company-registration-frontend.www.url", "Could not find Company Registration Frontend URL")
   override lazy val companyRegUri = appConfig.servicesConfig.getConfString("company-registration-frontend.www.uri", "Could not find Company Registration Frontend URI")
@@ -42,6 +42,7 @@ class DashboardControllerImpl @Inject()(val keystoreConnector: KeystoreConnector
 
 abstract class DashboardController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val companyRegUrl: String
   val companyRegUri: String
 

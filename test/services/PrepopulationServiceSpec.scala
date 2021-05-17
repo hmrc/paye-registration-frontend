@@ -26,7 +26,7 @@ import play.api.libs.json.Format
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class PrepopulationServiceSpec extends PayeComponentSpec {
 
@@ -34,6 +34,8 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
     val service = new PrepopulationService {
       override val busRegConnector = mockBusinessRegistrationConnector
       override val s4LService = mockS4LService
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

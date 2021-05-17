@@ -19,20 +19,19 @@ package controllers.feedback
 import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import play.api.http.Status
-import play.api.mvc.{RequestHeader, Result}
+import play.api.mvc.{MessagesControllerComponents, RequestHeader, Result}
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 import uk.gov.hmrc.http.{CoreGet, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.filters.frontend.crypto.SessionCookieCrypto
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 import uk.gov.hmrc.play.partials.{CachedStaticHtmlPartialRetriever, FormPartialRetriever}
 
 import scala.concurrent.Future
 
 class FeedbackControllerSpec extends PayeComponentSpec with PayeFakedApp {
-
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
   class Setup extends CodeMocks {
-    val controller = new FeedbackController(stubMessagesControllerComponents()) {
+    val controller = new FeedbackController(mockMcc) {
       override implicit val appConfig: AppConfig = mockAppConfig
 
       override def messagesApi = mockMessagesApi

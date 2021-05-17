@@ -24,6 +24,8 @@ import models.api.{Director, Employment, PAYEContact, SICCode, CompanyDetails =>
 import play.api.libs.json.Json
 import uk.gov.hmrc.http._
 
+import scala.concurrent.ExecutionContext
+
 class PAYERegistrationConnectorSpec extends PayeComponentSpec {
 
   class Setup extends CodeMocks {
@@ -31,6 +33,8 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
       override val payeRegUrl: String = "tst-url"
       override val http: WSHttp = mockWSHttp
       override val metricsService = new MockMetrics
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

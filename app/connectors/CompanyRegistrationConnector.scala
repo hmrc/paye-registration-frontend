@@ -24,15 +24,14 @@ import models.external.CompanyRegistrationProfile
 import play.api.libs.json._
 import services.MetricsService
 import uk.gov.hmrc.http.{BadRequestException, CoreGet, HeaderCarrier, HttpException}
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.{PAYEFeatureSwitch, PAYEFeatureSwitches}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyRegistrationConnectorImpl @Inject()(val featureSwitch: PAYEFeatureSwitch,
                                                  val http: WSHttp,
                                                  val metricsService: MetricsService,
-                                                 appConfig: AppConfig) extends CompanyRegistrationConnector {
+                                                 appConfig: AppConfig)(implicit val ec: ExecutionContext) extends CompanyRegistrationConnector {
   lazy val companyRegistrationUrl: String = appConfig.servicesConfig.baseUrl("company-registration")
   lazy val companyRegistrationUri: String = appConfig.servicesConfig.getConfString("company-registration.uri", "")
   lazy val stubUrl: String = appConfig.servicesConfig.baseUrl("incorporation-frontend-stubs")
@@ -47,6 +46,7 @@ trait CompanyRegistrationConnector {
   val http: CoreGet
   val metricsService: MetricsService
   val featureSwitch: PAYEFeatureSwitches
+  implicit val ec: ExecutionContext
 
   def getCompanyRegistrationDetails(regId: String)(implicit hc: HeaderCarrier): Future[CompanyRegistrationProfile] = {
     val companyRegTimer = metricsService.companyRegistrationResponseTimer.time()

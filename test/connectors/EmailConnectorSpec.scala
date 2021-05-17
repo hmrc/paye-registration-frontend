@@ -22,7 +22,7 @@ import org.mockito.ArgumentMatchers.{any, same}
 import org.mockito.Mockito.{times, verify, when}
 import uk.gov.hmrc.http.{CorePost, HttpException, HttpResponse}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class EmailConnectorSpec extends PayeComponentSpec {
 
@@ -30,6 +30,8 @@ class EmailConnectorSpec extends PayeComponentSpec {
     val emailConn = new EmailConnector {
       override val http: CorePost = mockWSHttp
       override val sendEmailURL: String = "FOOBARWIZZ"
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
     val validEmailRequest = EmailRequest(
       to = "foo@foo.com" :: Nil,

@@ -26,7 +26,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HttpResponse, Upstream4xxResponse}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class S4LConnectorSpec extends PayeComponentSpec {
 
@@ -40,6 +40,8 @@ class S4LConnectorSpec extends PayeComponentSpec {
     override val emptyResponseCounter = metricsService.s4lEmptyResponseCounter
 
     override def timer = metricsService.s4lResponseTimer.time()
+    override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
   }
 
   val tNameModel = TradingNameView(differentName = true, Some("Tradez R Us"))

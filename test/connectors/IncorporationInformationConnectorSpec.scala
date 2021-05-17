@@ -27,7 +27,7 @@ import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import play.api.libs.json.{JsObject, JsResultException, JsValue, Json}
 import uk.gov.hmrc.http.{BadRequestException, HttpResponse, InternalServerException, NotFoundException}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class IncorporationInformationConnectorSpec extends PayeComponentSpec with PayeFakedApp {
 
@@ -52,6 +52,8 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with PayeF
       override def timer = metricsService.incorpInfoResponseTimer.time()
 
       override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

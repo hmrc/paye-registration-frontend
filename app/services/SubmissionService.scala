@@ -22,20 +22,20 @@ import enums.{CacheKeys, IncorporationStatus}
 import javax.inject.Inject
 import models.external.CurrentProfile
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.RegistrationAllowlist
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class SubmissionServiceImpl @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,
                                       val keystoreConnector: KeystoreConnector,
                                       val iiConnector: IncorporationInformationConnector
-                                     )(implicit val appConfig: AppConfig) extends SubmissionService
+                                     )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends SubmissionService
 
 trait SubmissionService extends RegistrationAllowlist {
   val payeRegistrationConnector: PAYERegistrationConnector
   val keystoreConnector: KeystoreConnector
   val iiConnector: IncorporationInformationConnector
+  implicit val ec: ExecutionContext
 
   def submitRegistration(profile: CurrentProfile)(implicit hc: HeaderCarrier): Future[DESResponse] = {
     ifRegIdNotAllowlisted(profile.registrationID) {

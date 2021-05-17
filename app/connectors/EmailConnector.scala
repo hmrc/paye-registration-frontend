@@ -21,9 +21,8 @@ import config.{AppConfig, WSHttp}
 import javax.inject.Inject
 import models.external.EmailRequest
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 sealed trait EmailResponse
 
@@ -33,7 +32,7 @@ case object EmailDifficulties extends EmailResponse
 
 case object EmailNotFound extends EmailResponse
 
-class EmailConnectorImpl @Inject()(val http: WSHttp, appConfig: AppConfig) extends EmailConnector {
+class EmailConnectorImpl @Inject()(val http: WSHttp, appConfig: AppConfig)(implicit val ec: ExecutionContext) extends EmailConnector {
   val sendEmailURL: String = appConfig.servicesConfig.getConfString("email.sendAnEmailURL",
     throw new Exception("email.sendAnEmailURL not found"))
 }
@@ -41,6 +40,7 @@ class EmailConnectorImpl @Inject()(val http: WSHttp, appConfig: AppConfig) exten
 trait EmailConnector extends Logging {
   val http: CorePost
   val sendEmailURL: String
+  implicit val ec: ExecutionContext
 
   def requestEmailToBeSent(emailRequest: EmailRequest)(implicit hc: HeaderCarrier): Future[EmailResponse] = {
     http.POST[EmailRequest, HttpResponse](sendEmailURL, emailRequest).map { _ =>

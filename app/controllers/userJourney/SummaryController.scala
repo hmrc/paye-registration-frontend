@@ -23,15 +23,13 @@ import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.PAYEStatus
 import javax.inject.Inject
 import models.external.CurrentProfile
-import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.pages.{summary => SummaryPage}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class SummaryControllerImpl @Inject()(val summaryService: SummaryService,
                                       val submissionService: SubmissionService,
@@ -45,10 +43,11 @@ class SummaryControllerImpl @Inject()(val summaryService: SummaryService,
                                       val incorporationInformationConnector: IncorporationInformationConnector,
                                       val payeRegistrationService: PAYERegistrationService,
                                       mcc: MessagesControllerComponents
-                                     )(implicit val appConfig: AppConfig) extends SummaryController(mcc) with AuthRedirectUrls
+                                     )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends SummaryController(mcc) with AuthRedirectUrls
 
 abstract class SummaryController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val summaryService: SummaryService
   val submissionService: SubmissionService
   val payeRegistrationConnector: PAYERegistrationConnector

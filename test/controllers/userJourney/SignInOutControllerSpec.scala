@@ -18,17 +18,18 @@ package controllers.userJourney
 
 import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
+import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
 import scala.concurrent.ExecutionContext
 
 class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val fakeRequest = FakeRequest()
-
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
   class Setup {
-    val controller = new SignInOutController(stubMessagesControllerComponents()) {
+
+    val controller = new SignInOutController(mockMcc) {
       override val ec: ExecutionContext = ExecutionContext.global
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign

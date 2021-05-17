@@ -22,12 +22,11 @@ import play.api.libs.json.Format
 import services.MetricsService
 import uk.gov.hmrc.http.cache.client.{CacheMap, ShortLivedCache}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class S4LConnectorImpl @Inject()(val shortCache: ShortLivedCache,
-                                 val metricsService: MetricsService) extends S4LConnector {
+                                 val metricsService: MetricsService)(implicit val ec: ExecutionContext) extends S4LConnector {
   val successCounter = metricsService.s4lSuccessResponseCounter
   val emptyResponseCounter = metricsService.s4lEmptyResponseCounter
   val failedCounter = metricsService.s4lFailedResponseCounter
@@ -42,6 +41,7 @@ trait S4LConnector {
   val successCounter: Counter
   val emptyResponseCounter: Counter
   val failedCounter: Counter
+  implicit val ec: ExecutionContext
 
   def timer: Timer.Context
 

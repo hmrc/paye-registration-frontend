@@ -26,8 +26,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class TestCoHoControllerImpl @Inject()(val testIncorpInfoConnector: TestIncorpInfoConnector,
                                        val coHoAPIService: IncorporationInformationService,
@@ -40,10 +39,11 @@ class TestCoHoControllerImpl @Inject()(val testIncorpInfoConnector: TestIncorpIn
                                        val incorporationInformationConnector: IncorporationInformationConnector,
                                        val payeRegistrationService: PAYERegistrationService,
                                        mcc: MessagesControllerComponents
-                                      )(val appConfig: AppConfig) extends TestCoHoController(mcc) with AuthRedirectUrls
+                                      )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends TestCoHoController(mcc) with AuthRedirectUrls
 
 abstract class TestCoHoController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val testIncorpInfoConnector: TestIncorpInfoConnector
   val businessRegConnector: BusinessRegistrationConnector
   val keystoreConnector: KeystoreConnector

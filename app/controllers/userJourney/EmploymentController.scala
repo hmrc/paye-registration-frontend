@@ -32,8 +32,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import utils.{SystemDate, SystemDateT}
 import views.html.pages.employmentDetails.{applicationDelayed => ApplicationDelayedPage, constructionIndustry => ConstructionIndustryPage, employsSubcontractors => SubcontractorsPage, paidEmployees => PaidEmployeesPage, paysPension => PaysPensionPage, willBePaying => willBePayingPage}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class EmploymentControllerImpl @Inject()(val employmentService: EmploymentService,
                                          val thresholdService: ThresholdService,
@@ -43,11 +42,12 @@ class EmploymentControllerImpl @Inject()(val employmentService: EmploymentServic
                                          val incorporationInformationConnector: IncorporationInformationConnector,
                                          val payeRegistrationService: PAYERegistrationService,
                                          mcc: MessagesControllerComponents
-                                        )(implicit val appConfig: AppConfig) extends EmploymentController(mcc) with AuthRedirectUrls
+                                        )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends EmploymentController(mcc) with AuthRedirectUrls
 
 
 abstract class EmploymentController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val employmentService: EmploymentService
   val thresholdService: ThresholdService
   val incorpInfoService: IncorporationInformationService

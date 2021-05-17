@@ -30,13 +30,13 @@ trait WSHTTPMock {
   this: MockedComponents =>
 
   def mockHttpGet[T](url: String, thenReturn: T): OngoingStubbing[Future[T]] = {
-    when(mockWSHttp.GET[T](ArgumentMatchers.any())
+    when(mockWSHttp.GET[T](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())
       (ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
       .thenReturn(Future.successful(thenReturn))
   }
 
   def mockHttpGet[T](url: String, thenReturn: Future[T]): OngoingStubbing[Future[T]] = {
-    when(mockWSHttp.GET[T](ArgumentMatchers.any())
+    when(mockWSHttp.GET[T](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())
       (ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
       .thenReturn(thenReturn)
   }
@@ -67,7 +67,7 @@ trait WSHTTPMock {
 
 
   def mockHttpFailedGET[T](url: String, exception: Exception): OngoingStubbing[Future[T]] = {
-    when(mockWSHttp.GET[T](ArgumentMatchers.anyString()
+    when(mockWSHttp.GET[T](ArgumentMatchers.anyString(),ArgumentMatchers.any(),ArgumentMatchers.any()
     )(ArgumentMatchers.any[HttpReads[T]](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
       .thenReturn(Future.failed(exception))
   }

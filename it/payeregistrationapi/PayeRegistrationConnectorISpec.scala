@@ -29,6 +29,8 @@ import play.api.{Application, Environment, Mode}
 import services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
 
+import scala.concurrent.ExecutionContext
+
 class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
   val mockHost = WiremockHelper.wiremockHost
@@ -51,6 +53,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
     lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
     lazy val env = app.injector.instanceOf(classOf[Environment])
     lazy val appConfig = app.injector.instanceOf[AppConfig]
+    lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
 
     val payeRegistrationConnector = new PAYERegistrationConnectorImpl(
       metrics,

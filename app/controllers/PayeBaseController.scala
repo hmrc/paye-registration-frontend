@@ -20,7 +20,6 @@ import common.Logging
 import config.AppConfig
 import controllers.userJourney.{routes => userJourneyRoutes}
 import models.external.{AuditingInformation, CurrentProfile}
-import play.api.Configuration
 import play.api.i18n.I18nSupport
 import play.api.mvc.Results._
 import play.api.mvc._
@@ -28,10 +27,9 @@ import uk.gov.hmrc.auth.core.AffinityGroup.Organisation
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.Retrievals._
 import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils.SessionProfile
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 abstract class PayeBaseController(mcc: MessagesControllerComponents) extends FrontendController(mcc) with AuthorisedFunctions with Logging with SessionProfile with I18nSupport {

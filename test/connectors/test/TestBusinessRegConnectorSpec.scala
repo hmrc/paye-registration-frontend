@@ -23,7 +23,7 @@ import org.mockito.Mockito.when
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class TestBusinessRegConnectorSpec extends PayeComponentSpec {
 
@@ -31,6 +31,8 @@ class TestBusinessRegConnectorSpec extends PayeComponentSpec {
     val testConnector = new TestBusinessRegConnector {
       override val businessRegUrl = "testBusinessRegUrl"
       override val http = mockWSHttp
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

@@ -31,7 +31,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
@@ -46,6 +46,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val prepopService = mockPrepopulationService
       override val auditService = mockAuditService
       override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
     }
   }
 
@@ -58,6 +59,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val prepopService = mockPrepopulationService
       override val auditService = mockAuditService
       override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
       override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
         Future.successful(CompanyDetailsView("test compay name", None, Fixtures.validROAddress, None, None))
@@ -78,6 +80,8 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val prepopService = mockPrepopulationService
       override val auditService = mockAuditService
       override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
 
       override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
         Future.successful(Fixtures.validCompanyDetailsViewModel)
@@ -98,6 +102,8 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val prepopService = mockPrepopulationService
       override val auditService = mockAuditService
       override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
 
       override def apiToView(apiModel: CompanyDetailsAPI): CompanyDetailsView = {
         Fixtures.validCompanyDetailsViewModel
@@ -464,7 +470,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   "Calling submitBusinessContact" should {
     "return a success response when submit is completed successfully" in new CompanyDetailsMockedSetup {
-      when(mockAuditService.auditBusinessContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockAuditService.auditBusinessContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[ExecutionContext]))
         .thenReturn(Future.successful(AuditResult.Success))
 
       implicit val request = FakeRequest()

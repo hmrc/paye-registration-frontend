@@ -21,16 +21,16 @@ import javax.inject.Inject
 import models.external.{BusinessProfile, BusinessRegistrationRequest}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.{CorePost, HeaderCarrier}
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class TestBusinessRegConnectorImpl @Inject()(val http: WSHttp,
-                                             appConfig: AppConfig) extends TestBusinessRegConnector {
+                                             appConfig: AppConfig)(implicit val ec: ExecutionContext) extends TestBusinessRegConnector {
   val businessRegUrl = appConfig.servicesConfig.baseUrl("business-registration")
 }
 
 trait TestBusinessRegConnector {
+  implicit val ec: ExecutionContext
   val businessRegUrl: String
   val http: CorePost
 

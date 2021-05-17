@@ -26,7 +26,7 @@ import org.mockito.Mockito._
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.BadRequestException
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class IncorporationInformationServiceSpec extends PayeComponentSpec {
 
@@ -34,6 +34,8 @@ class IncorporationInformationServiceSpec extends PayeComponentSpec {
     val service = new IncorporationInformationService {
       override val incorpInfoConnector = mockIncorpInfoConnector
       override val keystoreConnector = mockKeystoreConnector
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

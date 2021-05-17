@@ -17,38 +17,38 @@
 package services
 
 import audit._
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.DigitalContactDetails
 import models.external.AuditingInformation
 import models.view.PAYEContactDetails
 import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class AuditServiceImpl @Inject()(val auditConnector: AuditConnector) extends AuditService {
+@Singleton
+class AuditServiceImpl @Inject()(val auditConnector: AuditConnector)(implicit ec: ExecutionContext) extends AuditService {
 }
 
 trait AuditService {
   val auditConnector: AuditConnector
 
   def auditBusinessContactDetails(regId: String, newData: DigitalContactDetails, previousData: DigitalContactDetails)
-                                 (implicit auditInfo: AuditingInformation, headerCarrier: HeaderCarrier, req: Request[AnyContent]): Future[AuditResult] = {
+                                 (implicit auditInfo: AuditingInformation, headerCarrier: HeaderCarrier, req: Request[AnyContent], ec: ExecutionContext): Future[AuditResult] = {
     auditConnector.sendExtendedEvent(new AmendedBusinessContactDetailsEvent(
       AmendedBusinessContactDetailsEventDetail(auditInfo.externalId, auditInfo.providerId, regId, previousData, newData)
     ))
   }
 
-  def auditPPOBAddress(regId: String)(implicit auditInfo: AuditingInformation, hc: HeaderCarrier, req: Request[AnyContent]): Future[AuditResult] = {
+  def auditPPOBAddress(regId: String)(implicit auditInfo: AuditingInformation, hc: HeaderCarrier, req: Request[AnyContent], ec: ExecutionContext): Future[AuditResult] = {
     auditConnector.sendExtendedEvent(
       new PPOBAddressAuditEvent(PPOBAddressAuditEventDetail(auditInfo.externalId, auditInfo.providerId, regId))
     )
   }
 
   def auditPAYEContactDetails(regId: String, newData: PAYEContactDetails, previousData: Option[PAYEContactDetails])
-                             (implicit auditInfo: AuditingInformation, headerCarrier: HeaderCarrier, req: Request[AnyContent]): Future[AuditResult] = {
+                             (implicit auditInfo: AuditingInformation, headerCarrier: HeaderCarrier, req: Request[AnyContent], ec: ExecutionContext): Future[AuditResult] = {
 
     def convertPAYEContactViewToAudit(viewData: PAYEContactDetails) = AuditPAYEContactDetails(
       contactName = viewData.name,
@@ -71,7 +71,7 @@ trait AuditService {
     }
   }
 
-  def auditCorrespondenceAddress(regId: String, addressUsed: String)(implicit auditInfo: AuditingInformation, hc: HeaderCarrier, req: Request[AnyContent]): Future[AuditResult] = {
+  def auditCorrespondenceAddress(regId: String, addressUsed: String)(implicit auditInfo: AuditingInformation, hc: HeaderCarrier, req: Request[AnyContent], ec: ExecutionContext): Future[AuditResult] = {
     auditConnector.sendExtendedEvent(
       new CorrespondenceAddressAuditEvent(
         CorrespondenceAddressAuditEventDetail(auditInfo.externalId, auditInfo.providerId, regId, addressUsed)

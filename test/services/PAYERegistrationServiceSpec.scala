@@ -23,7 +23,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException, Upstream4xxResponse}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class PAYERegistrationServiceSpec extends PayeComponentSpec {
 
@@ -33,6 +33,8 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
       override val keyStoreConnector = mockKeystoreConnector
       override val currentProfileService = mockCurrentProfileService
       override val s4LService = mockS4LService
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

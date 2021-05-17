@@ -25,7 +25,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import uk.gov.hmrc.http.HttpResponse
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class EmploymentServiceSpec extends PayeComponentSpec {
 
@@ -35,6 +35,8 @@ class EmploymentServiceSpec extends PayeComponentSpec {
     override val s4LService = mockS4LService
     override val payeRegConnector = mockPayeRegistrationConnector
     override val iiService = mockIncorpInfoService
+    override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
   }
 
   val anotherDateEntered = LocalDate.of(2016, 1, 1)

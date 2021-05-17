@@ -27,6 +27,8 @@ import services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.PAYEFeatureSwitch
 
+import scala.concurrent.ExecutionContext
+
 class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
 
   val mockHost = WiremockHelper.wiremockHost
@@ -84,6 +86,7 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
         lazy val featureSwitch = app.injector.instanceOf[PAYEFeatureSwitch]
         lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
         lazy val appConfig = app.injector.instanceOf[AppConfig]
+        lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
 
 
         val companyRegistrationConnector = new CompanyRegistrationConnectorImpl(
@@ -122,6 +125,7 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
         lazy val featureSwitch = app.injector.instanceOf[PAYEFeatureSwitch]
         lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
         lazy val appConfig = app.injector.instanceOf[AppConfig]
+        lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
 
 
         val companyRegistrationConnector = new CompanyRegistrationConnectorImpl(

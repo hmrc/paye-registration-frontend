@@ -27,8 +27,7 @@ import services.{CompanyDetailsService, IncorporationInformationService, PAYEReg
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.test.updateCCPage
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class TestCCControllerImpl @Inject()(val testBusRegConnector: TestBusinessRegConnector,
                                      val keystoreConnector: KeystoreConnector,
@@ -40,10 +39,11 @@ class TestCCControllerImpl @Inject()(val testBusRegConnector: TestBusinessRegCon
                                      val incorporationInformationConnector: IncorporationInformationConnector,
                                      val payeRegistrationService: PAYERegistrationService,
                                      mcc: MessagesControllerComponents
-                                    )(val appConfig: AppConfig) extends TestCCController(mcc) with AuthRedirectUrls
+                                    )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends TestCCController(mcc) with AuthRedirectUrls
 
 abstract class TestCCController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val testBusRegConnector: TestBusinessRegConnector
 
   def showUpdateCC: Action[AnyContent] = isAuthorised { implicit request =>

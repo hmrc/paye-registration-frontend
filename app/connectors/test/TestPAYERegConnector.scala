@@ -25,18 +25,18 @@ import models.api.{Employment, CompanyDetails => CompanyDetailsAPI, PAYEContact 
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class TestPAYERegConnectorImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
                                          val http: WSHttp,
-                                         appConfig: AppConfig) extends TestPAYERegConnector {
+                                         appConfig: AppConfig, implicit val ec: ExecutionContext) extends TestPAYERegConnector {
   val payeRegUrl = appConfig.servicesConfig.baseUrl("paye-registration")
 }
 
 trait TestPAYERegConnector extends Logging {
 
+  implicit val ec: ExecutionContext
   val payeRegUrl: String
   val http: CoreGet with CorePost
   val payeRegConnector: PAYERegistrationConnector

@@ -34,7 +34,7 @@ import play.api.test.FakeRequest
 import services.{SubmissionService, SummaryService}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
@@ -58,6 +58,8 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
       override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

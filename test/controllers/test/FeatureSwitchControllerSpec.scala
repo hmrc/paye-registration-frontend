@@ -19,19 +19,21 @@ package controllers.test
 import helpers.PayeComponentSpec
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 import utils.{BooleanFeatureSwitch, ValueSetFeatureSwitch}
 
 import scala.concurrent.Future
 
-class FeatureSwitchControllerSpec extends PayeComponentSpec {
+class FeatureSwitchControllerSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
 
   val testFeatureSwitch = BooleanFeatureSwitch(name = "companyRegistration", enabled = true)
   val testDisabledSwitch = BooleanFeatureSwitch(name = "companyRegistration", enabled = false)
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
 
   class Setup {
-    val controller = new FeatureSwitchController(stubMessagesControllerComponents()) {
+    val controller = new FeatureSwitchController(mockMcc) {
       override val payeFeatureSwitch = mockFeatureSwitches
       override val featureManager = mockFeatureManager
       override val payeRegConnector = mockPAYERegConnector

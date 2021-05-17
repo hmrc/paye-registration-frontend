@@ -21,17 +21,16 @@ import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.Address
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
+import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
-
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class TestAddressLookupControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val fakeRequest = FakeRequest("GET", "/")
-
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
   class Setup {
-    val controller = new TestAddressLookupController(stubMessagesControllerComponents()) {
+    val controller = new TestAddressLookupController(mockMcc) {
       override val appConfig = mockAppConfig
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
@@ -44,6 +43,8 @@ class TestAddressLookupControllerSpec extends PayeComponentSpec with PayeFakedAp
       override val prepopService = mockPrepopService
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

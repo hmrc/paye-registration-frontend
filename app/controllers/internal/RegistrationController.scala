@@ -29,8 +29,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class RegistrationControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
                                            val payeRegistrationConnector: PAYERegistrationConnector,
@@ -41,10 +40,11 @@ class RegistrationControllerImpl @Inject()(val keystoreConnector: KeystoreConnec
                                            val payeRegistrationService: PAYERegistrationService,
                                            val incorporationInformationConnector: IncorporationInformationConnector,
                                            mcc: MessagesControllerComponents
-                                          )(val appConfig: AppConfig) extends RegistrationController(mcc) with AuthRedirectUrls
+                                          )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends RegistrationController(mcc) with AuthRedirectUrls
 
 abstract class RegistrationController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val payeRegistrationConnector: PAYERegistrationConnector
   val payeRegistrationService: PAYERegistrationService
 
@@ -74,7 +74,6 @@ abstract class RegistrationController(mcc: MessagesControllerComponents) extends
     val txId = (jsResp \ "SCRSIncorpStatus" \ "IncorpSubscriptionKey" \ "transactionId").validate[String]
     val incorpStatus = (jsResp \ "SCRSIncorpStatus" \ "IncorpStatusEvent" \ "status").validate[IncorporationStatus.Value]
 
-
     (txId, incorpStatus) match {
       case (JsSuccess(id, _), JsSuccess(status, _)) => payeRegistrationService.handleIIResponse(id, status).map {
         s =>
@@ -83,7 +82,7 @@ abstract class RegistrationController(mcc: MessagesControllerComponents) extends
           }
           Ok
       } recover {
-        case _: Exception => InternalServerError
+        case e : Exception => InternalServerError
       }
       case _ =>
         logger.error(s"Incorp Status or transaction Id not received or invalid from II for txId $txId")
