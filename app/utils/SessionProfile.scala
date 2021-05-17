@@ -25,15 +25,15 @@ import play.api.mvc.Results.Redirect
 import play.api.mvc.{Call, Request, Result}
 import services.PAYERegistrationService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 trait SessionProfile extends InternalExceptions {
   val keystoreConnector: KeystoreConnector
   val incorporationInformationConnector: IncorporationInformationConnector
   val payeRegistrationService: PAYERegistrationService
+  implicit val ec: ExecutionContext
 
   def withCurrentProfile(f: => CurrentProfile => Future[Result], checkSubmissionStatus: Boolean = true)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
     def ifInflightUserChecksElseRedirectTo(urlCall: Call): Future[Result] = {

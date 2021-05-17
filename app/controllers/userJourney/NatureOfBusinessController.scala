@@ -27,8 +27,7 @@ import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{natureOfBusiness => NatureOfBusinessPage}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class NatureOfBusinessControllerImpl @Inject()(val natureOfBusinessService: NatureOfBusinessService,
                                                val keystoreConnector: KeystoreConnector,
@@ -39,10 +38,11 @@ class NatureOfBusinessControllerImpl @Inject()(val natureOfBusinessService: Natu
                                                val incorporationInformationConnector: IncorporationInformationConnector,
                                                val payeRegistrationService: PAYERegistrationService,
                                                mcc: MessagesControllerComponents
-                                              )(implicit val appConfig: AppConfig) extends NatureOfBusinessController(mcc) with AuthRedirectUrls
+                                              )(implicit val appConfig: AppConfig,implicit val ec: ExecutionContext) extends NatureOfBusinessController(mcc) with AuthRedirectUrls
 
 abstract class NatureOfBusinessController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val authConnector: AuthConnector
   val natureOfBusinessService: NatureOfBusinessService
   val keystoreConnector: KeystoreConnector

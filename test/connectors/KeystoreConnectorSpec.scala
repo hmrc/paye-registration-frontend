@@ -24,7 +24,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class KeystoreConnectorSpec extends PayeComponentSpec {
 
@@ -37,6 +37,8 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
     override val emptyResponseCounter = metricsService.keystoreFailedResponseCounter
 
     override def timer = metricsService.keystoreResponseTimer.time()
+    override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
   }
 
   case class TestModel(test: String)

@@ -21,15 +21,14 @@ import javax.inject.Inject
 import play.api.libs.json._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.Formatters
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class S4LServiceImpl @Inject()(val s4LConnector: S4LConnector) extends S4LService
+class S4LServiceImpl @Inject()(val s4LConnector: S4LConnector)(implicit val ec: ExecutionContext) extends S4LService
 
 trait S4LService {
-
+  implicit val ec: ExecutionContext
   val s4LConnector: S4LConnector
 
   def saveForm[T](formId: String, data: T, regId: String)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {

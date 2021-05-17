@@ -21,18 +21,16 @@ import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.BusinessProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
+import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class TestCacheControllerSpec extends PayeComponentSpec with PayeFakedApp {
   val testHttpResponse = HttpResponse(status = OK, body = "")
-
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
   class Setup extends CodeMocks {
-    val controller = new TestCacheController(stubMessagesControllerComponents()) {
+    val controller = new TestCacheController(mockMcc) {
       override val appConfig: AppConfig = mockAppConfig
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
@@ -44,6 +42,8 @@ class TestCacheControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val authConnector = mockAuthConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

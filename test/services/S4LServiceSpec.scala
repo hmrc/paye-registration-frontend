@@ -23,13 +23,15 @@ import org.mockito.Mockito.when
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class S4LServiceSpec extends PayeComponentSpec {
 
   trait Setup {
     val service = new S4LService {
       override val s4LConnector = mockS4LConnector
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

@@ -25,7 +25,7 @@ import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.error.{ineligible => Ineligible, newIneligible => IneligiblePage, _}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class ErrorControllerImpl @Inject()(val thresholdService: ThresholdService,
                                     val keystoreConnector: KeystoreConnector,
@@ -36,10 +36,11 @@ class ErrorControllerImpl @Inject()(val thresholdService: ThresholdService,
                                     val incorporationInformationConnector: IncorporationInformationConnector,
                                     val payeRegistrationService: PAYERegistrationService,
                                     mcc: MessagesControllerComponents
-                                   )(implicit val appConfig: AppConfig) extends ErrorController(mcc) with AuthRedirectUrls
+                                   )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends ErrorController(mcc) with AuthRedirectUrls
 
 abstract class ErrorController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
 
+  implicit val ec: ExecutionContext
   implicit val appConfig: AppConfig
   val thresholdService: ThresholdService
 

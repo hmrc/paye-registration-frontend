@@ -22,17 +22,17 @@ import javax.inject.Inject
 import models.view.CompletionCapacity
 import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class CompletionCapacityServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
-                                              val businessRegistrationConnector: BusinessRegistrationConnector) extends CompletionCapacityService
+                                              val businessRegistrationConnector: BusinessRegistrationConnector)(implicit val ec: ExecutionContext) extends CompletionCapacityService
 
 trait CompletionCapacityService {
 
   val payeRegConnector: PAYERegistrationConnector
   val businessRegistrationConnector: BusinessRegistrationConnector
+  implicit val ec: ExecutionContext
 
   def saveCompletionCapacity(regId: String, completionCapacity: CompletionCapacity)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     payeRegConnector.upsertCompletionCapacity(regId, viewToAPI(completionCapacity)) map {

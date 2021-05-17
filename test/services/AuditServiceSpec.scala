@@ -20,15 +20,18 @@ import helpers.PayeComponentSpec
 import models.DigitalContactDetails
 import models.view.PAYEContactDetails
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.SessionId
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
+
+
+
 
 class AuditServiceSpec extends PayeComponentSpec {
 
   class Setup {
     val service = new AuditService {
       override val auditConnector = mockAuditConnector
+
     }
   }
 

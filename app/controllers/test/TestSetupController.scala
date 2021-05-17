@@ -21,15 +21,15 @@ import connectors._
 import connectors.test._
 import controllers.AuthRedirectUrls
 import enums.DownstreamOutcome
-import javax.inject.Inject
+import javax.inject.{Inject,Singleton}
 import play.api.Logger
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class TestSetupControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
                                         val businessRegConnector: BusinessRegistrationConnector,
                                         val testBusinessRegConnector: TestBusinessRegConnector,
@@ -56,9 +56,10 @@ abstract class TestSetupController(mcc: MessagesControllerComponents) extends Bu
   val payeRegService: PAYERegistrationService
   val testPAYERegConnector: TestPAYERegConnector
   val s4LService: S4LService
+  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   private def log[T](f: String, res: Future[T])(implicit ec: ExecutionContext): Future[T] = {
-    res.flatMap (msg => {
+    res.flatMap(msg => {
       Logger.info(s"[TestSetupController] [$f] - ${msg.toString}")
       res
     })
@@ -67,11 +68,11 @@ abstract class TestSetupController(mcc: MessagesControllerComponents) extends Bu
   def testSetup(companyName: String) = isAuthorised { implicit request =>
     for {
       bp <- log("CurrentProfileSetup", doBusinessProfileSetup)
-      _  <- log("CoHoCompanyDetailsTeardown", doCoHoCompanyDetailsTearDown(bp.registrationID))
-      _  <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(bp.registrationID, companyName))
-      _  <- log("RegTeardown", doIndividualRegTeardown(bp.registrationID))
-      _  <- log("S4LTeardown", doTearDownS4L(bp.registrationID))
-      _  <- log("CCUpdate", testBusinessRegConnector.updateCompletionCapacity(bp.registrationID, "director"))
+      _ <- log("CoHoCompanyDetailsTeardown", doCoHoCompanyDetailsTearDown(bp.registrationID))
+      _ <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(bp.registrationID, companyName))
+      _ <- log("RegTeardown", doIndividualRegTeardown(bp.registrationID))
+      _ <- log("S4LTeardown", doTearDownS4L(bp.registrationID))
+      _ <- log("CCUpdate", testBusinessRegConnector.updateCompletionCapacity(bp.registrationID, "director"))
     } yield Redirect(controllers.userJourney.routes.PayeStartController.steppingStone())
   }
 
@@ -87,7 +88,7 @@ abstract class TestSetupController(mcc: MessagesControllerComponents) extends Bu
   def addIncorpUpdate(success: Boolean, incorpDate: Option[String], crn: Option[String]): Action[AnyContent] = isAuthorised { implicit request =>
     (for {
       profile <- businessRegConnector.retrieveCurrentProfile
-      resp    <- testIncorpInfoConnector.addIncorpUpdate(profile.registrationID, success, incorpDate, crn)
+      resp <- testIncorpInfoConnector.addIncorpUpdate(profile.registrationID, success, incorpDate, crn)
     } yield {
       Ok(s"Incorp Update added for regId: ${profile.registrationID} and success: $success")
     }).recover {

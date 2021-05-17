@@ -18,27 +18,27 @@ import sbt._
 
 object AppDependencies {
 
-  private val bootstrapVersion = "2.0.0"
+  private val bootstrapVersion = "5.2.0"
   private val authClientVersion = "3.0.0-play-26"
   private val playPartialsVersion = "7.0.0-play-26"
-  private val httpCachingVersion = "9.1.0-play-26"
-  private val playAllowlistVersion = "0.1.0-play-26"
-  private val playConditionalMappingVersion = "1.2.0-play-26"
+  private val httpCachingVersion = "9.4.0-play-26"
+  private val playAllowlistVersion = "1.0.0-play-26"
+  private val playConditionalMappingVersion = "1.9.0-play-26"
   private val commonsValidatorVersion = "1.6"
-  private val reactiveMongoVersion = "7.30.0-play-26"
+  private val reactiveMongoVersion = "8.0.0-play-26"
   private val taxYearVersion = "1.1.0"
-  private val govukTemplateVersion = "5.55.0-play-26"
-  private val playUiVersion = "8.19.0-play-26"
+  private val govukTemplateVersion = "5.66.0-play-26"
+  private val playUiVersion = "9.2.0-play-26"
   private val jsonJodaVersion = "2.7.4"
   private val scalaTestPlusVersion = "3.1.3"
   private val pegdownVersion = "1.6.0"
   private val mockitoCoreVersion = "2.13.0"
   private val jsoupVersion = "1.13.1"
   private val wireMockVersion = "2.26.3"
-  private val playMongoTestVersion = "4.21.0-play-26"
+  private val playMongoTestVersion = "5.0.0-play-26"
 
   private val compile = Seq(
-    "uk.gov.hmrc" %% "bootstrap-play-26" % bootstrapVersion,
+    "uk.gov.hmrc" %% "bootstrap-frontend-play-26" % bootstrapVersion,
     "uk.gov.hmrc" %% "tax-year" % taxYearVersion,
     "uk.gov.hmrc" %% "auth-client" % authClientVersion,
     "uk.gov.hmrc" %% "play-partials" % playPartialsVersion,
@@ -56,8 +56,7 @@ object AppDependencies {
     "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusVersion % Test,
     "org.pegdown" % "pegdown" % pegdownVersion % Test,
     "org.jsoup" % "jsoup" % jsoupVersion % Test,
-    "org.mockito" % "mockito-core" % mockitoCoreVersion % Test,
-    "uk.gov.hmrc" %% "bootstrap-play-26" % bootstrapVersion % Test classifier "tests"
+    "org.mockito" % "mockito-core" % mockitoCoreVersion % Test
   )
 
   private val integrationTestDependencies = Seq(

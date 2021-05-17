@@ -26,12 +26,12 @@ import models.api.Director
 import models.external.OfficerList
 import play.api.Configuration
 import play.api.libs.json.{Json, Reads}
-import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class AppConfig @Inject()(configuration: Configuration, runMode: RunMode) {
+class AppConfig @Inject()(configuration: Configuration) {
 
-  val servicesConfig = new ServicesConfig(configuration, runMode)
+  val servicesConfig = new ServicesConfig(configuration)
 
   private def loadConfig(key: String) = servicesConfig.getString(key)
 

@@ -19,15 +19,16 @@ package controllers.errors
 import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.jsoup.Jsoup
+import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
+import scala.concurrent.ExecutionContext
 
 class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
   val regId = Fixtures.validCurrentProfile.get.registrationID
   val ticketId: Long = 123456789
-
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
   class Setup {
-    val testController = new ErrorController(stubMessagesControllerComponents()) {
+    val testController = new ErrorController(mockMcc) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val keystoreConnector = mockKeystoreConnector
@@ -37,6 +38,8 @@ class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
       override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

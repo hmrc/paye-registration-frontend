@@ -19,8 +19,7 @@ package audit
 import helpers.PayeComponentSpec
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.json._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.{Authorization, ForwardedFor, RequestId, SessionId}
+import uk.gov.hmrc.http.{Authorization, ForwardedFor, HeaderCarrier, RequestId, SessionId}
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
 class RegistrationAuditEventSpec extends PayeComponentSpec {

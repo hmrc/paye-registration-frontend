@@ -20,19 +20,19 @@ import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.CurrentProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import play.api.mvc.Result
+import play.api.mvc.{MessagesControllerComponents, Result}
 import play.api.mvc.Results.Ok
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core.{AffinityGroup, InsufficientConfidenceLevel}
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class PayeBaseControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup {
-    val testBaseController = new PayeBaseController(stubMessagesControllerComponents()) {
+    val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
+    val testBaseController = new PayeBaseController(mockMcc) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val messagesApi = mockMessagesApi
@@ -40,6 +40,8 @@ class PayeBaseControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val keystoreConnector = mockKeystoreConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
 
     def testOkFunction(msg: String): Future[Result] = Future.successful(Ok(msg))

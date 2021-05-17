@@ -27,7 +27,7 @@ import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
   val returnHttpResponse = HttpResponse(200)
@@ -38,6 +38,8 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val incorpInfoService = mockIncorpInfoService
       override val s4LService = mockS4LService
       override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 
@@ -47,6 +49,8 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val incorpInfoService = mockIncorpInfoService
       override val s4LService = mockS4LService
       override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
 
       override def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
         Future.successful(Fixtures.validDirectorDetailsViewModel)
@@ -64,6 +68,8 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val incorpInfoService = mockIncorpInfoService
       override val s4LService = mockS4LService
       override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
 
       override def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
         Future.successful(Fixtures.validDirectorDetailsViewModel)
@@ -81,6 +87,8 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val incorpInfoService = mockIncorpInfoService
       override val s4LService = mockS4LService
       override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
 
       override def apiToView(apiModel: Seq[Director]): Directors = {
         Fixtures.validDirectorDetailsViewModel

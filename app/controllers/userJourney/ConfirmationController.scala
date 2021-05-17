@@ -25,7 +25,7 @@ import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{confirmation => ConfirmationPage}
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 class ConfirmationControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
                                            val confirmationService: ConfirmationService,
@@ -37,10 +37,11 @@ class ConfirmationControllerImpl @Inject()(val keystoreConnector: KeystoreConnec
                                            val incorporationInformationConnector: IncorporationInformationConnector,
                                            val payeRegistrationService: PAYERegistrationService,
                                            mcc: MessagesControllerComponents
-                                          )(implicit val appConfig: AppConfig) extends ConfirmationController(mcc) with AuthRedirectUrls
+                                          )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends ConfirmationController(mcc) with AuthRedirectUrls
 
 abstract class ConfirmationController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val confirmationService: ConfirmationService
   val emailService: EmailService
   val s4LService: S4LService

@@ -25,8 +25,10 @@ import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProf
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.{Application, Environment, Mode}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.SessionId
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
+
+
+import scala.concurrent.ExecutionContext
 
 class CurrentProfileServiceISpec extends IntegrationSpecBase with CachingStub {
   val mockHost = WiremockHelper.wiremockHost
@@ -75,6 +77,7 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase with CachingStub {
   lazy val payeRegistrationConnector = app.injector.instanceOf[PAYERegistrationConnector]
   lazy val incorpInfoConnector = app.injector.instanceOf[IncorporationInformationConnector]
   implicit lazy val appConfig = app.injector.instanceOf[AppConfig]
+  lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
 
   val sessionId = "session-123"
   implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sessionId)))

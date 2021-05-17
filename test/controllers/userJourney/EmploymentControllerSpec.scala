@@ -30,10 +30,9 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 import utils.SystemDate
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
@@ -51,6 +50,8 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     override val incorporationInformationConnector = mockIncorpInfoConnector
     override val payeRegistrationService = mockPayeRegService
     override implicit val appConfig: AppConfig = mockAppConfig
+    override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
   }
 
   val emptyView = EmployingStaff(None, None, None, None, None)
@@ -158,7 +159,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "alreadyPaying" -> "true",
         "earliestDateDay" -> "12",
         "earliestDateMonth" -> "4",
-        "earliestDateYear" -> "2018"
+        "earliestDateYear" -> "2019"
       )
 
       when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))

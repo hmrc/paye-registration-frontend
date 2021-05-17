@@ -23,17 +23,16 @@ import javax.inject.Inject
 import models.external.{CurrentProfile, EmailRequest}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.{NewTaxYear, PAYEFeatureSwitches, SystemDate}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class EmailServiceImpl @Inject()(val companyRegistrationConnector: CompanyRegistrationConnector,
                                  val emailConnector: EmailConnector,
                                  val payeRegistrationConnector: PAYERegistrationConnector,
                                  val incorporationInformationConnector: IncorporationInformationConnector,
                                  val s4LConnector: S4LConnector,
-                                 val pAYEFeatureSwitches: PAYEFeatureSwitches) extends EmailService
+                                 val pAYEFeatureSwitches: PAYEFeatureSwitches)(implicit val ec: ExecutionContext) extends EmailService
 
 trait EmailService {
   val companyRegistrationConnector: CompanyRegistrationConnector
@@ -41,6 +40,7 @@ trait EmailService {
   val emailConnector: EmailConnector
   val s4LConnector: S4LConnector
   val incorporationInformationConnector: IncorporationInformationConnector
+  implicit val ec: ExecutionContext
 
   private val FIRST_PAYMENT_DATE = "firstPaymentDate"
 

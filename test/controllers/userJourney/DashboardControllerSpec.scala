@@ -18,14 +18,16 @@ package controllers.userJourney
 
 import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
+import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
+import scala.concurrent.ExecutionContext
 
 class DashboardControllerSpec extends PayeComponentSpec with PayeFakedApp {
   val fakeRequest = FakeRequest("GET", "/")
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
 
   class Setup {
-    val controller = new DashboardController(stubMessagesControllerComponents()) {
+    val controller = new DashboardController(mockMcc) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val appConfig: AppConfig = mockAppConfig
@@ -35,6 +37,8 @@ class DashboardControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val companyRegUri = "/testUri"
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

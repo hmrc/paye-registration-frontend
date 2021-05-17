@@ -29,8 +29,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import utils.PAYEFeatureSwitches
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class PayeStartControllerImpl @Inject()(val currentProfileService: CurrentProfileService,
                                         val payeRegistrationService: PAYERegistrationService,
@@ -44,10 +43,11 @@ class PayeStartControllerImpl @Inject()(val currentProfileService: CurrentProfil
                                         val featureSwitches: PAYEFeatureSwitches,
                                         val incorporationInformationConnector: IncorporationInformationConnector,
                                         mcc: MessagesControllerComponents
-                                       )(implicit val appConfig: AppConfig) extends PayeStartController(mcc) with AuthRedirectUrls
+                                       )(implicit val appConfig: AppConfig,implicit val ec: ExecutionContext) extends PayeStartController(mcc) with AuthRedirectUrls
 
 abstract class PayeStartController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val currentProfileService: CurrentProfileService
   val payeRegistrationService: PAYERegistrationService
   val businessRegistrationConnector: BusinessRegistrationConnector

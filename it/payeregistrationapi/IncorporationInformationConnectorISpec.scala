@@ -30,6 +30,8 @@ import services.MetricsService
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import utils.PAYEFeatureSwitch
 
+import scala.concurrent.ExecutionContext
+
 class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
 
   val mockHost = WiremockHelper.wiremockHost
@@ -61,6 +63,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
     lazy val featureSwitch = app.injector.instanceOf[PAYEFeatureSwitch]
     lazy val http = app.injector.instanceOf[WSHttpImpl]
     implicit lazy val appConfig = app.injector.instanceOf[AppConfig]
+    lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
 
     val incorpInfoConnector = new IncorporationInformationConnectorImpl(
       metrics,

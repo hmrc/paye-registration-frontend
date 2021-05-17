@@ -27,7 +27,7 @@ import org.mockito.Mockito._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class SubmissionServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
@@ -37,6 +37,8 @@ class SubmissionServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val keystoreConnector = mockKeystoreConnector
       override val iiConnector = mockIncorpInfoConnector
       override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

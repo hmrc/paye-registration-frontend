@@ -20,18 +20,17 @@ import config.{AppConfig, WSHttp}
 import javax.inject.Inject
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class TestIncorpInfoConnectorImpl @Inject()(val http: WSHttp,
-                                            appConfig: AppConfig) extends TestIncorpInfoConnector {
+                                            appConfig: AppConfig, implicit val ec: ExecutionContext) extends TestIncorpInfoConnector {
   val incorpFEStubsUrl = appConfig.servicesConfig.baseUrl("incorporation-frontend-stubs")
   val incorpInfoUrl = appConfig.servicesConfig.baseUrl("incorporation-information")
 }
 
 trait TestIncorpInfoConnector {
-
+  implicit val ec: ExecutionContext
   val incorpFEStubsUrl: String
   val incorpInfoUrl: String
   val http: CorePost with CorePut with CoreGet

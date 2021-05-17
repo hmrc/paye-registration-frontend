@@ -24,18 +24,16 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.Result
+import play.api.mvc.{MessagesControllerComponents, Result}
 import play.api.test.FakeRequest
 import services.PAYERegistrationService
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
-
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class RegistrationControllerSpec extends PayeComponentSpec with PayeFakedApp {
-
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
   trait Setup {
-    val controller = new RegistrationController(stubMessagesControllerComponents()) {
+    val controller = new RegistrationController(mockMcc) {
       override val appConfig: AppConfig = mockAppConfig
       override val payeRegistrationConnector: PAYERegistrationConnector = mockPayeRegistrationConnector
       override val payeRegistrationService: PAYERegistrationService = mockPayeRegService
@@ -50,6 +48,8 @@ class RegistrationControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override def authConnector: AuthConnector = mockAuthConnector
 
       override def messagesApi: MessagesApi = mockMessagesApi
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

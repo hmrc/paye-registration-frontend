@@ -32,10 +32,8 @@ import play.api.http.{HeaderNames, HttpProtocol, MimeTypes, Status}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Call, Result}
 import play.api.test._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.SessionId
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 trait PayeComponentSpec
@@ -63,7 +61,7 @@ trait PayeComponentSpec
 
   implicit val auditInformation: AuditingInformation = AuditingInformation("testExternalId", "testAuthProviderId")
 
-  implicit val ec = global.prepare()
+  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
   private def resetMocks(): Unit = {
     reset(

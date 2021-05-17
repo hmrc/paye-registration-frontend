@@ -23,22 +23,20 @@ import models.api.{Director, Name}
 import models.view.{Directors, Ninos, UserEnteredNino}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.mvc.Result
+import play.api.mvc.{MessagesControllerComponents, Result}
 import play.api.test.FakeRequest
 import services.DirectorDetailsService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
-
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val mockDirectorDetailService = mock[DirectorDetailsService]
 
   val fakeRequest = FakeRequest()
-
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
   class Setup {
-    val testController = new DirectorDetailsController(stubMessagesControllerComponents()) {
+    val testController = new DirectorDetailsController(mockMcc) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val directorDetailsService = mockDirectorDetailService
@@ -48,6 +46,8 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
       override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

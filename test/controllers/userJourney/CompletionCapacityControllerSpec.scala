@@ -22,19 +22,18 @@ import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.CompletionCapacity
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
+import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
 import services.CompletionCapacityService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
-
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val mockCompletionCapacityService = mock[CompletionCapacityService]
-
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
   class Setup {
-    val testController = new CompletionCapacityController(stubMessagesControllerComponents()) {
+    val testController = new CompletionCapacityController(mockMcc) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
       override val authConnector = mockAuthConnector
@@ -44,6 +43,8 @@ class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedA
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService
       override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

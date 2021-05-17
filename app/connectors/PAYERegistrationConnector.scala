@@ -27,9 +27,8 @@ import play.api.http.Status._
 import play.api.libs.json.{JsObject, Reads}
 import services.MetricsService
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 sealed trait DESResponse
 
@@ -43,11 +42,12 @@ object TimedOut extends DESResponse
 
 class PAYERegistrationConnectorImpl @Inject()(val metricsService: MetricsService,
                                               val http: WSHttp,
-                                              appConfig: AppConfig) extends PAYERegistrationConnector {
+                                              appConfig: AppConfig)(implicit val ec: ExecutionContext) extends PAYERegistrationConnector {
   val payeRegUrl = appConfig.servicesConfig.baseUrl("paye-registration")
 }
 
 trait PAYERegistrationConnector {
+  implicit val ec: ExecutionContext
   val payeRegUrl: String
   val http: CorePatch with CoreGet with CorePut with CoreDelete
   val metricsService: MetricsService
@@ -349,13 +349,12 @@ trait PAYERegistrationConnector {
   def deleteRegistrationForRejectedIncorp(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
     http.DELETE[HttpResponse](s"$payeRegUrl/paye-registration/$regId/delete-rejected-incorp") map {
       _.status match {
-        case OK => RegistrationDeletion.success
-      }
+        case OK => RegistrationDeletion.success}
     } recover {
       case fourXX: Upstream4xxResponse if fourXX.upstreamResponseCode == PRECONDITION_FAILED =>
         logger.warn(s"[PAYERegistrationConnector] - [deleteRegistrationForRejectedIncorp] Deleting document for regId $regId and txId $txId failed as document was not draft or invalid")
         RegistrationDeletion.invalidStatus
-      case notFound: Upstream4xxResponse if notFound.upstreamResponseCode == NOT_FOUND =>
+      case notFound: Upstream4xxResponse if notFound.statusCode == NOT_FOUND =>
         Logger.warn(s"s[PAYERegistrationConnector] - deleteRegistrationForRejectedIncorp paye reg returned 404 when expecting to find one for $regId : $txId ")
         RegistrationDeletion.notfound
       case fiveXX: Upstream5xxResponse =>

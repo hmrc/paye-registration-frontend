@@ -22,13 +22,11 @@ import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
 import models.Address
-import play.api.Configuration
-import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 class TestAddressLookupControllerImpl @Inject()(val companyDetailsService: CompanyDetailsService,
                                                 val keystoreConnector: KeystoreConnector,
@@ -40,10 +38,11 @@ class TestAddressLookupControllerImpl @Inject()(val companyDetailsService: Compa
                                                 val incorporationInformationConnector: IncorporationInformationConnector,
                                                 val payeRegistrationService: PAYERegistrationService,
                                                 mcc: MessagesControllerComponents
-                                               )(val appConfig: AppConfig) extends TestAddressLookupController(mcc) with AuthRedirectUrls
+                                               )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends TestAddressLookupController(mcc) with AuthRedirectUrls
 
 abstract class TestAddressLookupController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val companyDetailsService: CompanyDetailsService
   val payeContactService: PAYEContactService
   val prepopService: PrepopulationService

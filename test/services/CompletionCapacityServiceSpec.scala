@@ -22,7 +22,7 @@ import models.view.CompletionCapacity
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 
 class CompletionCapacityServiceSpec extends PayeComponentSpec {
@@ -31,6 +31,8 @@ class CompletionCapacityServiceSpec extends PayeComponentSpec {
     val service = new CompletionCapacityService {
       override val payeRegConnector = mockPAYERegConnector
       override val businessRegistrationConnector = mockBusinessRegistrationConnector
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

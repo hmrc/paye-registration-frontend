@@ -24,20 +24,20 @@ import models.api.SessionMap
 import models.external.CurrentProfile
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.RegistrationAllowlist
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class CurrentProfileServiceImpl @Inject()(val businessRegistrationConnector: BusinessRegistrationConnector,
                                           val payeRegistrationConnector: PAYERegistrationConnector,
                                           val keystoreConnector: KeystoreConnector,
                                           val companyRegistrationConnector: CompanyRegistrationConnector,
                                           val incorporationInformationConnector: IncorporationInformationConnector
-                                         )(implicit val appConfig: AppConfig) extends CurrentProfileService
+                                         )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends CurrentProfileService
 
 trait CurrentProfileService extends RegistrationAllowlist {
   implicit val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val businessRegistrationConnector: BusinessRegistrationConnector
   val payeRegistrationConnector: PAYERegistrationConnector
   val companyRegistrationConnector: CompanyRegistrationConnector

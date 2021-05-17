@@ -23,16 +23,16 @@ import javax.inject.Inject
 import models.view.PAYEContactDetails
 import models.{Address, DigitalContactDetails}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class PrepopulationServiceImpl @Inject()(val busRegConnector: BusinessRegistrationConnector,
-                                         val s4LService: S4LService) extends PrepopulationService
+                                         val s4LService: S4LService)(implicit val ec: ExecutionContext) extends PrepopulationService
 
 trait PrepopulationService {
   val busRegConnector: BusinessRegistrationConnector
   val s4LService: S4LService
+  implicit val ec: ExecutionContext
 
   def getBusinessContactDetails(regId: String)(implicit hc: HeaderCarrier): Future[Option[DigitalContactDetails]] = {
     busRegConnector.retrieveContactDetails(regId) map {

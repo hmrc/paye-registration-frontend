@@ -25,13 +25,12 @@ import repositories.SessionRepository
 import services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.SessionCache
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class KeystoreConnectorImpl @Inject()(val sessionCache: SessionCache,
                                       val metricsService: MetricsService,
-                                      val sessionRepository: SessionRepository) extends KeystoreConnector {
+                                      val sessionRepository: SessionRepository)(implicit val ec: ExecutionContext) extends KeystoreConnector {
   val successCounter = metricsService.keystoreSuccessResponseCounter
   val emptyResponseCounter = metricsService.keystoreEmptyResponseCounter
   val failedCounter = metricsService.keystoreFailedResponseCounter
@@ -40,6 +39,7 @@ class KeystoreConnectorImpl @Inject()(val sessionCache: SessionCache,
 }
 
 trait KeystoreConnector {
+  implicit val ec: ExecutionContext
   val sessionCache: SessionCache
   val metricsService: MetricsService
   val sessionRepository: SessionRepository

@@ -23,7 +23,7 @@ import helpers.PayeComponentSpec
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class EmailServiceSpec extends PayeComponentSpec {
 
@@ -33,6 +33,8 @@ class EmailServiceSpec extends PayeComponentSpec {
     override val s4LConnector = mockS4LConnector
     override val companyRegistrationConnector = mockCompRegConnector
     override val emailConnector = mockEmailConnector
+    override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
   }
 
   "primeEmailData" should {

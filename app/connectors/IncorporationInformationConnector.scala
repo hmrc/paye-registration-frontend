@@ -28,14 +28,13 @@ import play.api.http.Status.{ACCEPTED, OK}
 import play.api.libs.json._
 import services.MetricsService
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.RegistrationAllowlist
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class IncorporationInformationConnectorImpl @Inject()(val metricsService: MetricsService,
                                                       val http: WSHttp
-                                                     )(implicit val appConfig: AppConfig) extends IncorporationInformationConnector {
+                                                     )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends IncorporationInformationConnector {
 
   lazy val incorpInfoUrl = appConfig.servicesConfig.baseUrl("incorporation-information")
   lazy val incorpInfoUri = appConfig.servicesConfig.getConfString("incorporation-information.uri", "")
@@ -60,6 +59,7 @@ case class IncorpInfoErrorResponse(ex: Exception) extends IncorpInfoResponse
 
 trait IncorporationInformationConnector extends RegistrationAllowlist {
   implicit val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val incorpInfoUrl: String
   val incorpInfoUri: String
   val payeRegFeUrl: String

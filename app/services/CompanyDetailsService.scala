@@ -26,10 +26,9 @@ import models.view.{CompanyDetails => CompanyDetailsView, TradingName => Trading
 import models.{Address, DigitalContactDetails}
 import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import utils.RegistrationAllowlist
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyDetailsServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
                                           val incorpInfoService: IncorporationInformationService,
@@ -37,11 +36,12 @@ class CompanyDetailsServiceImpl @Inject()(val payeRegConnector: PAYERegistration
                                           val compRegConnector: CompanyRegistrationConnector,
                                           val prepopService: PrepopulationService,
                                           val auditService: AuditService
-                                         )(implicit val appConfig: AppConfig) extends CompanyDetailsService
+                                         )(implicit val appConfig: AppConfig,implicit val ec: ExecutionContext) extends CompanyDetailsService
 
 trait CompanyDetailsService extends RegistrationAllowlist {
 
   implicit val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val payeRegConnector: PAYERegistrationConnector
   val compRegConnector: CompanyRegistrationConnector
   val incorpInfoService: IncorporationInformationService

@@ -25,8 +25,9 @@ import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import play.api.{Application, Environment, Mode}
 import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.SessionId
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
+
+import scala.concurrent.ExecutionContext
 
 class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
   val mockHost = WiremockHelper.wiremockHost
@@ -53,6 +54,7 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
   lazy val keystoreConnector = app.injector.instanceOf[KeystoreConnector]
   lazy val incorpInfoConnector = app.injector.instanceOf[IncorporationInformationConnector]
   implicit lazy val appConfig = app.injector.instanceOf[AppConfig]
+  lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
 
   val sId = UUID.randomUUID().toString
   implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sId)))

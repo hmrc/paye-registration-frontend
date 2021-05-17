@@ -24,7 +24,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class EligibilityControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
                                           val authConnector: AuthConnector,
@@ -34,11 +34,12 @@ class EligibilityControllerImpl @Inject()(val keystoreConnector: KeystoreConnect
                                           val incorporationInformationConnector: IncorporationInformationConnector,
                                           val payeRegistrationService: PAYERegistrationService,
                                           mcc: MessagesControllerComponents
-                                         )(val appConfig: AppConfig) extends EligibilityController(mcc) with AuthRedirectUrls {
+                                         )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends EligibilityController(mcc) with AuthRedirectUrls {
 }
 
 abstract class EligibilityController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val config = appConfig.servicesConfig
 
   val compRegFEURL: String

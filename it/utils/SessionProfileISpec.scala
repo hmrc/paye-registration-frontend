@@ -29,10 +29,9 @@ import play.api.mvc.Result
 import play.api.mvc.Results.Ok
 import play.api.test.FakeRequest
 import services.PAYERegistrationService
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.SessionId
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class SessionProfileISpec extends IntegrationSpecBase with CachingStub {
   val mockHost = WiremockHelper.wiremockHost
@@ -74,6 +73,7 @@ class SessionProfileISpec extends IntegrationSpecBase with CachingStub {
   lazy val mockKeystoreConnector = app.injector.instanceOf[KeystoreConnector]
   lazy val mockIncorporationInformationConnector = app.injector.instanceOf[IncorporationInformationConnector]
   lazy val mockPayeRegistrationService = app.injector.instanceOf[PAYERegistrationService]
+  lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
 
   implicit val fakeRequest = FakeRequest("GET", "/")
   val testFunc: CurrentProfile => Future[Result] = _ => Future.successful(Ok)
@@ -84,6 +84,7 @@ class SessionProfileISpec extends IntegrationSpecBase with CachingStub {
       override val keystoreConnector: KeystoreConnector = mockKeystoreConnector
       override val incorporationInformationConnector: IncorporationInformationConnector = mockIncorporationInformationConnector
       override val payeRegistrationService: PAYERegistrationService = mockPayeRegistrationService
+      lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
     }
   }
 

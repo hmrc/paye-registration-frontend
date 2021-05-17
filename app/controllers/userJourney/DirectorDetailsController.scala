@@ -26,7 +26,7 @@ import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{directorDetails => DirectorDetailsPage}
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 class DirectorDetailsControllerImpl @Inject()(val directorDetailsService: DirectorDetailsService,
                                               val keystoreConnector: KeystoreConnector,
@@ -37,10 +37,11 @@ class DirectorDetailsControllerImpl @Inject()(val directorDetailsService: Direct
                                               val incorporationInformationConnector: IncorporationInformationConnector,
                                               val payeRegistrationService: PAYERegistrationService,
                                               mcc: MessagesControllerComponents
-                                             )(implicit val appConfig: AppConfig) extends DirectorDetailsController(mcc) with AuthRedirectUrls
+                                             )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends DirectorDetailsController(mcc) with AuthRedirectUrls
 
 abstract class DirectorDetailsController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val directorDetailsService: DirectorDetailsService
 
   def directorDetails: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>

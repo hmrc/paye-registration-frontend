@@ -27,6 +27,8 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Environment, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import scala.concurrent.ExecutionContext
+
 class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStub {
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort
@@ -49,6 +51,7 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
   lazy val busRegConnector = app.injector.instanceOf[BusinessRegistrationConnector]
 
   implicit val hc = HeaderCarrier()
+  lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
 
   val regID = "1234"
   val sId = UUID.randomUUID().toString

@@ -188,7 +188,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
           "alreadyPaying" -> Seq("true"),
           "earliestDateDay" -> Seq("21"),
           "earliestDateMonth" -> Seq("05"),
-          "earliestDateYear" -> Seq("2018")
+          "earliestDateYear" -> Seq("2019")
         ))
       val response = await(fResponse)
       response.status mustBe 303

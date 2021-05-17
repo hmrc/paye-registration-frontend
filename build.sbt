@@ -18,6 +18,7 @@ import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, s
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
+import sbt.Keys.dependencyOverrides
 
 val appName: String = "paye-registration-frontend"
 
@@ -29,7 +30,7 @@ lazy val scoverageSettings = Seq(
 )
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory): _*)
+  .enablePlugins(Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin): _*)
   .settings(PlayKeys.playDefaultPort := 9870)
   .settings(scoverageSettings: _*)
   .settings(scalaSettings: _*)
@@ -39,16 +40,17 @@ lazy val microservice = Project(appName, file("."))
   .settings(majorVersion := 1)
   .configs(IntegrationTest)
   .settings(
-    scalaVersion := "2.11.11",
-    resolvers ++= Seq(Resolver.bintrayRepo("hmrc", "releases"), Resolver.jcenterRepo),
+    scalaVersion := "2.12.12",
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true,
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     addTestReportOption(IntegrationTest, "int-test-reports"),
-    dependencyOverrides ++= Set(
+    dependencyOverrides ++= Seq(
       "com.typesafe.akka" %% "akka-actor" % "2.5.23",
       "com.typesafe.akka" %% "akka-protobuf" % "2.5.23",
       "com.typesafe.akka" %% "akka-slf4j" % "2.5.23",
       "com.typesafe.akka" %% "akka-stream" % "2.5.23"
     )
   )
+
+javaOptions in Test += "-Dlogger.resource=logback-test.xml"

@@ -22,14 +22,14 @@ import javax.inject.Inject
 import models.api.SICCode
 import models.view.NatureOfBusiness
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class NatureOfBusinessServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector) extends NatureOfBusinessService
+class NatureOfBusinessServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector)(implicit val ec: ExecutionContext) extends NatureOfBusinessService
 
 trait NatureOfBusinessService {
   val payeRegConnector: PAYERegistrationConnector
+  implicit val ec: ExecutionContext
 
   private[services] def sicCodes2NatureOfBusiness(sicCodes: Seq[SICCode]): Option[NatureOfBusiness] =
     sicCodes.headOption.flatMap(_.description.map(NatureOfBusiness(_)))

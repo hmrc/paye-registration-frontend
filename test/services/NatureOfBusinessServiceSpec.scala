@@ -24,7 +24,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import uk.gov.hmrc.http.{HttpResponse, Upstream4xxResponse}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class NatureOfBusinessServiceSpec extends PayeComponentSpec {
   val returnHttpResponse = HttpResponse(200)
@@ -32,6 +32,8 @@ class NatureOfBusinessServiceSpec extends PayeComponentSpec {
   class Setup {
     val service = new NatureOfBusinessService {
       override val payeRegConnector = mockPAYERegConnector
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+
     }
   }
 

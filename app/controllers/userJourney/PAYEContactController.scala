@@ -32,8 +32,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.pages.payeContact.{correspondenceAddress => PAYECorrespondenceAddressPage, payeContactDetails => PAYEContactDetailsPage}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class PAYEContactControllerImpl @Inject()(val companyDetailsService: CompanyDetailsService,
                                           val payeContactService: PAYEContactService,
@@ -47,10 +46,11 @@ class PAYEContactControllerImpl @Inject()(val companyDetailsService: CompanyDeta
                                           val incorporationInformationConnector: IncorporationInformationConnector,
                                           val payeRegistrationService: PAYERegistrationService,
                                           mcc: MessagesControllerComponents
-                                         )(implicit val appConfig: AppConfig) extends PAYEContactController(mcc) with AuthRedirectUrls
+                                         )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PAYEContactController(mcc) with AuthRedirectUrls
 
 abstract class PAYEContactController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
   implicit val appConfig: AppConfig
+  implicit val ec: ExecutionContext
   val companyDetailsService: CompanyDetailsService
   val payeContactService: PAYEContactService
   val addressLookupService: AddressLookupService

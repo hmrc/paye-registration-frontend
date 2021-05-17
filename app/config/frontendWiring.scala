@@ -30,19 +30,12 @@ import uk.gov.hmrc.http.cache.client.{SessionCache, ShortLivedCache, ShortLivedH
 import uk.gov.hmrc.http.hooks.{HttpHook, HttpHooks}
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.bootstrap.config.{AuditingConfigProvider, RunMode}
 import uk.gov.hmrc.play.http.ws._
 
-@Singleton
-class FrontendAuditConnector @Inject()(configuration: Configuration,
-                                       runMode: RunMode,
-                                       val materializer: Materializer,
-                                       val lifecycle: ApplicationLifecycle) extends AuditConnector {
-  override lazy val auditingConfig = new AuditingConfigProvider(configuration, runMode, "auditing").get
-}
 
 trait Hooks extends HttpHooks with HttpAuditing {
   override val hooks: Seq[HttpHook] = Seq(AuditingHook)
+
 }
 
 trait WSHttp extends
@@ -53,16 +46,14 @@ trait WSHttp extends
   HttpDelete with WSDelete with Hooks
 
 class WSHttpImpl @Inject()(appConfig: AppConfig,
-                           frontendAuditConnector: FrontendAuditConnector,
+                           val auditConnector: AuditConnector,
                            val actorSystem: ActorSystem,
                            val wsClient: WSClient) extends WSHttp {
 
   override val appName = appConfig.servicesConfig.getString("appName")
   override val hooks = NoneRequired
 
-  override def auditConnector = frontendAuditConnector
-
-  override protected def configuration: Option[Config] = Option(Play.current.configuration.underlying)
+  override protected def configuration: Config = Play.current.configuration.underlying
 }
 
 class AuthClientConnectorImpl @Inject()(val http: WSHttp, appConfig: AppConfig) extends PlayAuthConnector {
