@@ -19,13 +19,13 @@ package enums
 import play.api.libs.json._
 
 object PAYEStatus extends Enumeration {
-  val draft = Value
-  val held = Value
-  val submitted = Value
-  val invalid = Value
-  val acknowledged = Value
-  val rejected = Value
-  val cancelled = Value
+  val draft : Value = Value
+  val held : Value = Value
+  val submitted : Value = Value
+  val invalid : Value = Value
+  val acknowledged : Value = Value
+  val rejected : Value = Value
+  val cancelled : Value = Value
 
-  implicit val format = Format(Reads.enumNameReads(PAYEStatus), Writes.enumNameWrites)
+  implicit val format : Format[PAYEStatus.Value] = Format(Reads.enumNameReads(PAYEStatus), Writes.enumNameWrites)
 }

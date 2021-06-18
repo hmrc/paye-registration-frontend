@@ -20,10 +20,10 @@ import play.api.libs.json._
 
 object UserCapacity extends Enumeration {
 
-  val director = Value
-  val secretary = Value("company secretary")
-  val agent = Value
-  val other = Value
+  val director : Value = Value
+  val secretary : Value = Value("company secretary")
+  val agent : Value = Value
+  val other : Value = Value
 
   def fromString(choice: String): Value = choice.toLowerCase match {
     case "director" => director
@@ -32,5 +32,5 @@ object UserCapacity extends Enumeration {
     case "other" => other
   }
 
-  implicit val format = Format(Reads.enumNameReads(UserCapacity), Writes.enumNameWrites)
+  implicit val format: Format[UserCapacity.Value] = Format(Reads.enumNameReads(UserCapacity), Writes.enumNameWrites)
 }

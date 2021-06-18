@@ -19,9 +19,9 @@ package enums
 import play.api.libs.json._
 
 object IncorporationStatus extends Enumeration {
-  val accepted = Value
-  val rejected = Value
+  val accepted: Value = Value
+  val rejected: Value = Value
 
-  implicit val format = Format(Reads.enumNameReads(IncorporationStatus), Writes.enumNameWrites)
+  implicit val format : Format[IncorporationStatus.Value] = Format(Reads.enumNameReads(IncorporationStatus), Writes.enumNameWrites)
 
 }

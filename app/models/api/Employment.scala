@@ -38,11 +38,11 @@ object Employment {
 }
 
 object Employing extends Enumeration {
-  val alreadyEmploying = Value
-  val notEmploying = Value
-  val willEmployThisYear = Value
-  val willEmployNextYear = Value
+  val alreadyEmploying : Value = Value
+  val notEmploying : Value = Value
+  val willEmployThisYear : Value = Value
+  val willEmployNextYear : Value = Value
 
-  implicit val format = Format(Reads.enumNameReads(Employing), Writes.enumNameWrites)
+  implicit val format: Format[Employing.Value] = Format(Reads.enumNameReads(Employing), Writes.enumNameWrites)
 }
 
