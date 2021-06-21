@@ -340,10 +340,6 @@ errorPages.ineligible.l1                                        = employees
 errorPages.ineligible.l2                                        = subcontractors
 errorPages.ineligible.l3                                        = yourself if you''re a director of a company
 
-## Feedback page
-page.feedback.description                                       = Feedback
-page.feedback.thank-you                                         = Thank you
-
 ## Retry Submission
 errorPages.retrySubmission.description                          = We couldn''t process your application
 errorPages.retrySubmission.p1                                   = Sorry, there is a technical problem and we couldn''t process your application. Any details you entered have been saved.

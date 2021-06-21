@@ -20,7 +20,6 @@ import com.google.inject.AbstractModule
 import connectors._
 import connectors.test._
 import controllers.errors.{ErrorController, ErrorControllerImpl}
-import controllers.feedback.{FeedbackController, FeedbackControllerImpl}
 import controllers.internal.{RegistrationController, RegistrationControllerImpl}
 import controllers.test._
 import controllers.userJourney._
@@ -95,7 +94,6 @@ class Module extends AbstractModule {
 
   private def bindOtherControllers(): Unit = {
     bind(classOf[ErrorController]).to(classOf[ErrorControllerImpl]).asEagerSingleton()
-    bind(classOf[FeedbackController]).to(classOf[FeedbackControllerImpl]).asEagerSingleton()
     bind(classOf[RegistrationController]).to(classOf[RegistrationControllerImpl]).asEagerSingleton()
     bind(classOf[BusinessProfileController]).to(classOf[BusinessProfileControllerImpl]).asEagerSingleton()
     bind(classOf[FeatureSwitchController]).to(classOf[FeatureSwitchControllerImpl]).asEagerSingleton()

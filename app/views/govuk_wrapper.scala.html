@@ -89,9 +89,7 @@
 @serviceInfo = {
 }
 
-@getHelpForm = @{
-        uiHelpers.reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)
-}
+@getHelpForm = {<div class="report-error"><a href="https://www.tax.service.gov.uk/contact/report-technical-problem?service=SCRS">@Messages("report.a.problem.link")</a></div>}
 
 @content = {
     @uiLayouts.main_content(
