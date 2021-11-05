@@ -1,4 +1,6 @@
 # microservice specific internal routes
+
++ nocsrf
 DELETE      /:regID/delete                                    controllers.internal.RegistrationController.delete(regID: String)
 
 POST        /company-incorporation                            controllers.internal.RegistrationController.companyIncorporation

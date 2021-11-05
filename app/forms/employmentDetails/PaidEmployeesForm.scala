@@ -16,9 +16,6 @@
 
 package forms.employmentDetails
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 import forms.helpers.{CustomDateForm, RequiredBooleanForm}
 import models.view.EmployingAnyone
 import play.api.data.Forms.mapping
@@ -26,6 +23,9 @@ import play.api.data.{Form, FormError}
 import uk.gov.hmrc.time.TaxYear
 import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
 import utils.SystemDate
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 object PaidEmployeesForm extends PaidEmployeesFormT
 

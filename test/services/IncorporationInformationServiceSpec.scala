@@ -16,8 +16,6 @@
 
 package services
 
-import java.time.LocalDate
-
 import connectors._
 import helpers.PayeComponentSpec
 import models.view.Directors
@@ -26,6 +24,7 @@ import org.mockito.Mockito._
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.BadRequestException
 
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class IncorporationInformationServiceSpec extends PayeComponentSpec {

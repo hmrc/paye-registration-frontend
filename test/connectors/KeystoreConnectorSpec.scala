@@ -85,7 +85,6 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
   "Fetching and getting from Keystore & saving into SessionRepository" should {
     "return a CurrentProfile" in {
       val cp = CurrentProfile("regId", CompanyRegistrationProfile("held", "txId", None), "", false, None)
-      val returnSessionMap = SessionMap("testSessionId", "testRegId", "testTxId", Map("testKey" -> Json.toJson(cp)))
 
       when(mockSessionCache.fetchAndGetEntry[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(cp)))
@@ -118,10 +117,6 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
 
   "Removing from SessionRepository" should {
     "return a HTTP Response" in {
-
-      val testModel = TestModel("test")
-      val returnSessionMap = SessionMap("testSessionId", "testRegId", "testTxId", Map("testKey" -> Json.toJson(testModel)))
-
       when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
 
       when(mockReactiveMongoRepo.removeDocument(ArgumentMatchers.any()))

@@ -16,9 +16,9 @@
 
 package models.view
 
-import java.time.LocalDate
-
 import play.api.libs.json.Json
+
+import java.time.LocalDate
 
 case class EmployingStaff(employingAnyone: Option[EmployingAnyone],
                           willBePaying: Option[WillBePaying],

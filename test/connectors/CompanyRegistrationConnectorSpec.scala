@@ -37,7 +37,7 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
       val companyRegistrationUrl = testUrl
       val stubUri = testUri
       val stubUrl = testUrl
-      val http = mockWSHttp
+      val http = mockHttpClient
       override val metricsService = new MockMetrics
       override val featureSwitch = mockFeatureSwitch
 
@@ -79,7 +79,7 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
 
   "getCompanyRegistrationDetails" should {
     "return a CompanyProfile" in new Setup(false) {
-      when(mockWSHttp.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
+      when(mockHttpClient.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
         .thenReturn(Future(profileJson))
 
       val result = await(testConnector.getCompanyRegistrationDetails("testRegId"))
@@ -87,14 +87,14 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
     }
 
     "throw a bad request exception" in new Setup(false) {
-      when(mockWSHttp.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
+      when(mockHttpClient.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
         .thenReturn(Future.failed(new BadRequestException("tstException")))
 
       intercept[BadRequestException](await(testConnector.getCompanyRegistrationDetails("testRegId")))
     }
 
     "throw any other exception" in new Setup(false) {
-      when(mockWSHttp.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
+      when(mockHttpClient.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
         .thenReturn(Future.failed(new RuntimeException("tstException")))
 
       intercept[RuntimeException](await(testConnector.getCompanyRegistrationDetails("testRegId")))
@@ -102,7 +102,7 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
 
     "be stubbed" when {
       "returning a CompanyProfile" in new Setup(false) {
-        when(mockWSHttp.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
+        when(mockHttpClient.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
           .thenReturn(Future(profileJson))
 
         val result = await(testConnector.getCompanyRegistrationDetails("testRegId"))
@@ -110,14 +110,14 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
       }
 
       "throwing a bad request exception" in new Setup(false) {
-        when(mockWSHttp.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
+        when(mockHttpClient.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
           .thenReturn(Future.failed(new BadRequestException("tstException")))
 
         intercept[BadRequestException](await(testConnector.getCompanyRegistrationDetails("testRegId")))
       }
 
       "throwing any other exception" in new Setup(false) {
-        when(mockWSHttp.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
+        when(mockHttpClient.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
           .thenReturn(Future.failed(new RuntimeException("tstException")))
 
         intercept[RuntimeException](await(testConnector.getCompanyRegistrationDetails("testRegId")))
@@ -135,15 +135,15 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
         |}
       """.stripMargin).as[JsObject]
     "return future option string" in new Setup(stubbed = false) {
-      when(mockWSHttp.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
+      when(mockHttpClient.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
         .thenReturn(Future.successful(emailResponse))
 
       val res = await(testConnector.getVerifiedEmail("fooBarAndWizz"))
       res mustBe Some("foo@foo.com")
-      verify(mockWSHttp, times(1)).GET[JsObject](any(),any(),any())(any(), any(), any())
+      verify(mockHttpClient, times(1)).GET[JsObject](any(),any(),any())(any(), any(), any())
     }
     "return a None when company reg call fails" in new Setup(stubbed = false) {
-      when(mockWSHttp.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
+      when(mockHttpClient.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
         .thenReturn(Future.failed(new BadRequestException("tstException")))
 
       val res = await(testConnector.getVerifiedEmail("fooBarAndWizz"))

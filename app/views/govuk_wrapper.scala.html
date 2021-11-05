@@ -14,6 +14,20 @@
  * limitations under the License.
  *@
 
+@import layouts.GovUkTemplate
+@import uk.gov.hmrc.http.SessionKeys
+@import uk.gov.hmrc.play.views.html.layouts._
+@import views.html.helpers.mainContentHeader
+
+@this(timeout_script: timeout_script,
+        mainContentHeader: mainContentHeader,
+        headAndTrackingConsent: HeadWithTrackingConsent,
+        headerNav: HeaderNav,
+        footerLayout: Footer,
+        govUkTemplate: GovUkTemplate,
+        mainContentLayout: MainContent,
+        footerLinksLayout: FooterLinks)
+
 @(appConfig: config.AppConfig,
   title: String,
   mainClass: Option[String] = None,
@@ -27,13 +41,8 @@
   backEnabled : Boolean,
   pageCSS: Option[Html] = None)(implicit request: Request[_], messages: Messages)
 
-@import layouts.{govuk_template => hmrcGovUkTemplate}
-@import uk.gov.hmrc.http.SessionKeys
-@import uk.gov.hmrc.play.views.html.{helpers => uiHelpers, layouts => uiLayouts}
-@import views.html.helpers.mainContentHeader
-
 @head = {
-    @uiLayouts.headWithTrackingConsent(linkElem = None, headScripts = None)
+    @headAndTrackingConsent(linkElem = None, headScripts = None)
     <meta name="format-detection" content="telephone=no" />
     <link rel="stylesheet" href="@routes.Assets.at("stylesheets/paye.css")">
     <link rel="stylesheet" href="@routes.Assets.at("stylesheets/timeout-dialog1.css")">
@@ -52,8 +61,8 @@
 }
 
 @insideHeader = {
-    @uiLayouts.header_nav(
-      navTitle = Some(Messages("app.title")),
+    @headerNav(
+      navTitle = Some(messages("app.title")),
       navTitleLink = None,
       showBetaLink = false,
       navLinks = Some(headerNavLinks))
@@ -73,7 +82,7 @@
 }
 
 @bodyEnd = {
-    @uiLayouts.footer(
+    @footerLayout(
       analyticsToken = None,
       analyticsHost = "",
       ssoUrl = None,
@@ -83,16 +92,17 @@
 
 @footerTop = {}
 @footerLinks = {
-    @uiLayouts.footer_links(accessibilityFooterUrl = Some(appConfig.accessibilityStatementUrl(request.uri)))
+    @footerLinksLayout(accessibilityFooterUrl = Some(appConfig.accessibilityStatementUrl(request.uri)))
 }
 
-@serviceInfo = {
-}
+@serviceInfo = {}
 
-@getHelpForm = {<div class="report-error"><a href="https://www.tax.service.gov.uk/contact/report-technical-problem?service=SCRS">@Messages("report.a.problem.link")</a></div>}
+@getHelpForm = {
+    <div class="report-error"><a href="https://www.tax.service.gov.uk/contact/report-technical-problem?service=SCRS">@messages("report.a.problem.link")</a></div>
+}
 
 @content = {
-    @uiLayouts.main_content(
+    @mainContentLayout(
       article = mainContent,
       mainClass = mainClass,
       mainDataAttributes = mainDataAttributes,
@@ -102,4 +112,4 @@
       sidebar = sidebar)
 }
 
-@hmrcGovUkTemplate(Some(title), bodyClasses)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(footerLinks), nav = true)(content)
+@govUkTemplate(Some(title), bodyClasses)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(footerLinks), nav = true)(content)

@@ -19,7 +19,6 @@ package services
 import config.AppConfig
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome}
-import javax.inject.Inject
 import models.api.{CompanyDetails => CompanyDetailsAPI}
 import models.external.AuditingInformation
 import models.view.{CompanyDetails => CompanyDetailsView, TradingName => TradingNameView}
@@ -28,6 +27,7 @@ import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.RegistrationAllowlist
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyDetailsServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,

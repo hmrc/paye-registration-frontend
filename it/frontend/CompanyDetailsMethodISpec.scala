@@ -16,8 +16,6 @@
 
 package frontend
 
-import java.util.UUID
-
 import com.github.tomakehurst.wiremock.client.WireMock._
 import enums.CacheKeys
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
@@ -29,6 +27,8 @@ import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.json._
+
+import java.util.UUID
 
 
 class CompanyDetailsMethodISpec extends IntegrationSpecBase

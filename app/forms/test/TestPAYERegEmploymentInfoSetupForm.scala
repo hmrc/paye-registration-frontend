@@ -16,15 +16,15 @@
 
 package forms.test
 
-import java.time.LocalDate
-
 import forms.helpers.CustomDateForm
 import forms.test.TestPAYERegSetupForm.requiredBoolean
 import models.api.{Employing, Employment}
-import play.api.data.Forms.{mapping, _}
+import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError, Forms, Mapping}
 import utils.SystemDate
+
+import java.time.LocalDate
 
 object TestPAYERegEmploymentInfoSetupForm extends CustomDateForm {
   override val customFormPrefix = "earliestDate"

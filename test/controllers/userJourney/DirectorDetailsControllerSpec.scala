@@ -16,7 +16,6 @@
 
 package controllers.userJourney
 
-import config.AppConfig
 import enums.DownstreamOutcome
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.api.{Director, Name}
@@ -27,28 +26,37 @@ import play.api.mvc.{MessagesControllerComponents, Result}
 import play.api.test.FakeRequest
 import services.DirectorDetailsService
 import uk.gov.hmrc.http.HeaderCarrier
-import scala.concurrent.{ExecutionContext, Future}
+import views.html.pages.directorDetails
+import views.html.pages.error.restart
+
+import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionContext}
+import scala.concurrent.Future
 
 class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val mockDirectorDetailService = mock[DirectorDetailsService]
 
   val fakeRequest = FakeRequest()
-  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
-  class Setup {
-    val testController = new DirectorDetailsController(mockMcc) {
-      override val redirectToLogin = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-      override val directorDetailsService = mockDirectorDetailService
-      override val messagesApi = mockMessagesApi
-      override val authConnector = mockAuthConnector
-      override val keystoreConnector = mockKeystoreConnector
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService = mockPayeRegService
-      override implicit val appConfig: AppConfig = mockAppConfig
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-    }
+  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
+  lazy val mockDirectorDetailsPage = app.injector.instanceOf[directorDetails]
+  lazy val mockRestart = app.injector.instanceOf[restart]
+
+  class Setup {
+    val testController = new DirectorDetailsController(
+      mockDirectorDetailService,
+      mockKeystoreConnector,
+      mockS4LService,
+      mockCompanyDetailsService,
+      mockIncorpInfoService,
+      mockAuthConnector,
+      mockIncorpInfoConnector,
+      mockPayeRegService,
+      mockMcc,
+      mockDirectorDetailsPage,
+      mockRestart
+    )(mockAppConfig,
+      globalExecutionContext)
   }
 
   val testDirectors =
@@ -78,7 +86,7 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
       AuthHelpers.showUnauthorised(testController.directorDetails, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 
@@ -104,7 +112,7 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
       AuthHelpers.showUnauthorised(testController.submitDirectorDetails, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 

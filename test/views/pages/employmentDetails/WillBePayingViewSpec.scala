@@ -16,8 +16,6 @@
 
 package views.pages.employmentDetails
 
-import java.time.LocalDate
-
 import forms.employmentDetails.EmployingStaffForm
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.WillBePaying
@@ -26,33 +24,33 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.test.FakeRequest
 import views.html.pages.employmentDetails.willBePaying
 
+import java.time.LocalDate
+
 class WillBePayingViewSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
   implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
   implicit lazy val messagesApi: MessagesApi = mockMessagesApi
 
   "The Will Be Paying screen" should {
+    lazy val view = app.injector.instanceOf[willBePaying]
     "display the dynamic radio button 'beforeNewTaxYear' when 'willBePaying' is Yes" when {
       val data = WillBePaying(true, None)
 
       "the current date is 6th Feb" in {
         val now = LocalDate.of(2017, 2, 6)
-        lazy val view = willBePaying(EmployingStaffForm.form(now).fill(data), 116, now)
-        lazy val document = Jsoup.parse(view.body)
+        lazy val document = Jsoup.parse(view(EmployingStaffForm.form(now).fill(data), 116, now).body)
 
         document.getElementById("beforeNewTaxYear-true").attr("value") mustBe "true"
       }
       "the current date is 5th Apr" in {
         val now = LocalDate.of(2017, 4, 5)
-        lazy val view = willBePaying(EmployingStaffForm.form(now).fill(data), 116, now)
-        lazy val document = Jsoup.parse(view.body)
+        lazy val document = Jsoup.parse(view(EmployingStaffForm.form(now).fill(data), 116, now).body)
 
         document.getElementById("beforeNewTaxYear-true").attr("value") mustBe "true"
       }
       "the current date is between 6th Feb and 5th Apr" in {
         val now = LocalDate.of(2017, 2, 7)
-        lazy val view = willBePaying(EmployingStaffForm.form(now).fill(data), 116, now)
-        lazy val document = Jsoup.parse(view.body)
+        lazy val document = Jsoup.parse(view(EmployingStaffForm.form(now).fill(data), 116, now).body)
 
         document.getElementById("beforeNewTaxYear-true").attr("value") mustBe "true"
       }
@@ -63,22 +61,19 @@ class WillBePayingViewSpec extends PayeComponentSpec with PayeFakedApp with I18n
 
       "the current date is 5th Feb" in {
         val now = LocalDate.of(2017, 2, 5)
-        lazy val view = willBePaying(EmployingStaffForm.form(now).fill(data), 116, now)
-        lazy val document = Jsoup.parse(view.body)
+        lazy val document = Jsoup.parse(view(EmployingStaffForm.form(now).fill(data), 116, now).body)
 
         a[NullPointerException] mustBe thrownBy(document.getElementById("beforeNewTaxYear-true").attr("value"))
       }
       "the current date is 6th Apr" in {
         val now = LocalDate.of(2017, 4, 6)
-        lazy val view = willBePaying(EmployingStaffForm.form(now).fill(data), 116, now)
-        lazy val document = Jsoup.parse(view.body)
+        lazy val document = Jsoup.parse(view(EmployingStaffForm.form(now).fill(data), 116, now).body)
 
         a[NullPointerException] mustBe thrownBy(document.getElementById("beforeNewTaxYear-true").attr("value"))
       }
       "the current date is not between 6th Feb and 5th Apr" in {
         val now = LocalDate.of(2017, 8, 7)
-        lazy val view = willBePaying(EmployingStaffForm.form(now).fill(data), 116, now)
-        lazy val document = Jsoup.parse(view.body)
+        lazy val document = Jsoup.parse(view(EmployingStaffForm.form(now).fill(data), 116, now).body)
 
         a[NullPointerException] mustBe thrownBy(document.getElementById("beforeNewTaxYear-true").attr("value"))
       }

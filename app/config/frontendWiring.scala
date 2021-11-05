@@ -16,51 +16,13 @@
 
 package config
 
-import akka.actor.ActorSystem
-import akka.stream.Materializer
-import com.typesafe.config.Config
-import javax.inject.{Inject, Singleton}
-import play.api.inject.ApplicationLifecycle
-import play.api.libs.ws.WSClient
-import play.api.{Configuration, Play}
-import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.cache.client.{SessionCache, ShortLivedCache, ShortLivedHttpCaching}
-import uk.gov.hmrc.http.hooks.{HttpHook, HttpHooks}
-import uk.gov.hmrc.play.audit.http.HttpAuditing
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.http.ws._
 
+import javax.inject.Inject
 
-trait Hooks extends HttpHooks with HttpAuditing {
-  override val hooks: Seq[HttpHook] = Seq(AuditingHook)
-
-}
-
-trait WSHttp extends
-  HttpGet with WSGet with
-  HttpPut with WSPut with
-  HttpPatch with WSPatch with
-  HttpPost with WSPost with
-  HttpDelete with WSDelete with Hooks
-
-class WSHttpImpl @Inject()(appConfig: AppConfig,
-                           val auditConnector: AuditConnector,
-                           val actorSystem: ActorSystem,
-                           val wsClient: WSClient) extends WSHttp {
-
-  override val appName = appConfig.servicesConfig.getString("appName")
-  override val hooks = NoneRequired
-
-  override protected def configuration: Config = Play.current.configuration.underlying
-}
-
-class AuthClientConnectorImpl @Inject()(val http: WSHttp, appConfig: AppConfig) extends PlayAuthConnector {
-  override val serviceUrl = appConfig.servicesConfig.baseUrl("auth")
-}
-
-class PAYEShortLivedHttpCaching @Inject()(val http: WSHttp, appConfig: AppConfig) extends ShortLivedHttpCaching {
+class PAYEShortLivedHttpCaching @Inject()(val http: HttpClient, appConfig: AppConfig) extends ShortLivedHttpCaching {
   override lazy val defaultSource = appConfig.servicesConfig.getString("appName")
   override lazy val baseUri = appConfig.servicesConfig.baseUrl("cachable.short-lived-cache")
   override lazy val domain = appConfig.servicesConfig.getConfString("cachable.short-lived-cache.domain",
@@ -72,7 +34,7 @@ class PAYEShortLivedCache @Inject()(val shortLiveCache: ShortLivedHttpCaching,
   override implicit lazy val crypto = cryptoDi.JsonCrypto
 }
 
-class PAYESessionCache @Inject()(val http: WSHttp, appConfig: AppConfig) extends SessionCache {
+class PAYESessionCache @Inject()(val http: HttpClient, appConfig: AppConfig) extends SessionCache {
   override lazy val defaultSource = appConfig.servicesConfig.getString("appName")
   override lazy val baseUri = appConfig.servicesConfig.baseUrl("cachable.session-cache")
   override lazy val domain = appConfig.servicesConfig.getConfString("cachable.session-cache.domain",

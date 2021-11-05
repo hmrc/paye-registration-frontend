@@ -24,6 +24,7 @@ import org.mockito.Mockito.when
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestCacheControllerSpec extends PayeComponentSpec with PayeFakedApp {

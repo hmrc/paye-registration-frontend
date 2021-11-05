@@ -16,16 +16,14 @@
 
 package services
 
-import java.time.LocalDate
-
 import connectors._
-import controllers.exceptions.GeneralException
-import javax.inject.Inject
 import models.api.Director
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import models.view.Directors
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, InternalServerException, NotFoundException}
 
+import java.time.LocalDate
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class IncorporationInformationServiceImpl @Inject()(val keystoreConnector: KeystoreConnector,
@@ -49,7 +47,7 @@ trait IncorporationInformationService {
   def getIncorporationDate(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[Option[LocalDate]] = incorpInfoConnector.getIncorporationInfo(regId, txId)
     .map(js => (js \ "incorporationDate").asOpt[String].map(LocalDate.parse))
     .recover {
-      case e: Exception => throw GeneralException(s"[IncorpInfoService][getIncorpDate] an exception occurred for regId: $regId, txId: $txId error - ${e.getMessage}")
+      case e: Exception => throw new InternalServerException(s"[IncorpInfoService][getIncorpDate] an exception occurred for regId: $regId, txId: $txId error - ${e.getMessage}")
     }
 
   def getDirectorDetails(txId: String, regId: String)(implicit hc: HeaderCarrier): Future[Directors] = {

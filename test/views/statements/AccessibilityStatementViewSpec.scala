@@ -80,11 +80,15 @@ class AccessibilityStatementViewSpec extends PayeComponentSpec with PayeFakedApp
   lazy val messagesApi: MessagesApi = mockMessagesApi
   val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-  lazy val page: Html = accessibility_statement(testAccessibilityReportUrl, testServiceStartUrl)(
-    request,
-    messagesApi.preferred(request),
-    mockAppConfig
-  )
+  lazy val page: Html = {
+   val view = app.injector.instanceOf[accessibility_statement]
+
+    view(testAccessibilityReportUrl, testServiceStartUrl)(
+      request,
+      messagesApi.preferred(request),
+      mockAppConfig
+    )
+  }
 
 
   "The accessibility statement page" should {

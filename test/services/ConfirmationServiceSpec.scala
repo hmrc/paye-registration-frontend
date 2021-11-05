@@ -16,12 +16,11 @@
 
 package services
 
-import java.time.LocalDate
-
 import helpers.PayeComponentSpec
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class ConfirmationServiceSpec extends PayeComponentSpec {

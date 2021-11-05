@@ -14,18 +14,24 @@
  * limitations under the License.
  *@
 
+@import config.AppConfig
 @import helpers.templates.{oneOfManyErrorWrapper, payeErrorSummary, payeInput}
 @import models.view.PAYEContactDetails
-@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
-@import config.AppConfig
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
 @import views.helpers.TitleHelper.title
+
+@this(payeInput: payeInput,
+        main_template: main_template,
+        payeErrorSummary: payeErrorSummary,
+        oneOfManyErrorWrapper: oneOfManyErrorWrapper,
+        formWithCSRF: FormWithCSRF)
 
 @(contactForm: Form[PAYEContactDetails])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @formContent = {
     <fieldset>
         <legend class="visually-hidden">
-            @Messages("pages.payeContact.description")
+            @messages("pages.payeContact.description")
         </legend>
         <div class="form-group">
             @payeInput(
@@ -62,9 +68,9 @@
         messages("app.common.errorSummaryLabel"), contactForm, dataJourney=Some("PAYEContactDetails")
     )
 
-    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.payeContact.description")</h1>
+    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.payeContact.description")</h1>
 
-    @govHelpers.form(action = controllers.userJourney.routes.PAYEContactController.submitPAYEContactDetails()) {
+    @formWithCSRF(action = controllers.userJourney.routes.PAYEContactController.submitPAYEContactDetails()) {
 
         <div class="form-group">
             <fieldset>

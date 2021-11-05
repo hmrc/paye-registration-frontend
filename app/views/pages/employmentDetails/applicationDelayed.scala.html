@@ -14,21 +14,24 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
-
 @import config.AppConfig
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+
+@this(main_template: main_template,
+        form: FormWithCSRF)
+
 @()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = Messages("pages.applicationDelayed.title")) {
+@main_template(title = messages("pages.applicationDelayed.title")) {
 
-    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.applicationDelayed.description")</h1>
+    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.applicationDelayed.description")</h1>
 
-    @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitApplicationDelayed) {
+    @form(action = controllers.userJourney.routes.EmploymentController.submitApplicationDelayed) {
 
-        <p>@Messages("pages.applicationDelayed.para1")</p>
-        <p>@Messages("pages.applicationDelayed.para2")</p>
+        <p>@messages("pages.applicationDelayed.para1")</p>
+        <p>@messages("pages.applicationDelayed.para2")</p>
 
 
-        <button class="button" type="submit" id="continue" >@Messages("app.common.continue")</button>
+        <button class="button" type="submit" id="continue" >@messages("app.common.continue")</button>
     }
 }

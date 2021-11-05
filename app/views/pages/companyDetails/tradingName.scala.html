@@ -14,49 +14,56 @@
  * limitations under the License.
  *@
 
+@import config.AppConfig
 @import helpers.templates.{formHiddenYesNoRadio, hiddenDetails, payeErrorSummary, payeInput}
 @import models.view.TradingName
-@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
 @import views.helpers.TitleHelper.title
 
-@import config.AppConfig
+@this(payeInput: payeInput,
+        main_template: main_template,
+        payeErrorSummary: payeErrorSummary,
+        hiddenDetails: hiddenDetails,
+        formHiddenYesNoRadio: formHiddenYesNoRadio,
+        form: FormWithCSRF)
+
 @(tradingNameForm: Form[TradingName], companyName: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @hiddenYesNoContent = {
 @payeInput(
     tradingNameForm("tradingName"),
     '_labelClass -> "form-label cascading",
-    '_label -> Messages("pages.tradingName.tradingNameLabel"),
+    '_label -> messages("pages.tradingName.tradingNameLabel"),
     '_inputHint -> messages("pages.tradingdetails.input.hint-text")
 )
 }
 
 @hiddenDetailsContent = {
-    <p>@Messages("pages.tradingName.nameRulesIntro")</p>
-    <p>@Messages("pages.tradingName.nameRulesIntro1")</p>
+    <p>@messages("pages.tradingName.nameRulesIntro")</p>
+    <p>@messages("pages.tradingName.nameRulesIntro1")</p>
 }
 
-@main_template(title = title(Messages("pages.tradingName.description"), tradingNameForm)) {
+@main_template(title = title(messages("pages.tradingName.description"), tradingNameForm)) {
 
     @payeErrorSummary(
-        Messages("app.common.errorSummaryLabel"), tradingNameForm, dataJourney = Some("TradingName")
+        messages("app.common.errorSummaryLabel"), tradingNameForm, dataJourney = Some("TradingName")
     )
 
-    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.tradingName.description")</h1>
+    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.tradingName.description")</h1>
 
 
     <p id="lead-paragraph">@messages("pages.tradingName.lede", companyName)</p>
 
-    @hiddenDetails("tradingNameRules", Messages("pages.tradingName.nameRulesSummary"), hiddenDetailsContent)
+    @hiddenDetails("tradingNameRules", messages("pages.tradingName.nameRulesSummary"), hiddenDetailsContent)
 
-    @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.submitTradingName) {
+    @form(action = controllers.userJourney.routes.CompanyDetailsController.submitTradingName) {
 
         <br>
         <div class="inline form-group">
         @formHiddenYesNoRadio(
             tradingNameForm,
             "differentName",
-            Messages("pages.tradingName.description"),
+            messages("pages.tradingName.description"),
             isHeading = false,
             hiddenYesNoContent
         )
@@ -64,7 +71,7 @@
         </div>
 
 
-        <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
+        <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
     }
 
 }

@@ -16,14 +16,13 @@
 
 package connectors.test
 
-import config.WSHttp
 import enums.DownstreamOutcome
 import helpers.PayeComponentSpec
 import models.api.PAYERegistration
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.JsObject
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -32,7 +31,7 @@ class TestPAYERegConnectorSpec extends PayeComponentSpec {
   class Setup extends CodeMocks {
     val connector = new TestPAYERegConnector {
       override val payeRegConnector = mockPAYERegConnector
-      override val http: WSHttp = mockWSHttp
+      override val http: HttpClient = mockHttpClient
       override val payeRegUrl: String = "tst-url"
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
@@ -41,14 +40,14 @@ class TestPAYERegConnectorSpec extends PayeComponentSpec {
 
   "Calling addPAYERegistration" should {
     "return a successful outcome for a successful add of PAYE Registration" in new Setup {
-      when(mockWSHttp.POST[PAYERegistration, HttpResponse](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockHttpClient.POST[PAYERegistration, HttpResponse](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
 
       await(connector.addPAYERegistration(Fixtures.validPAYERegistrationAPI)) mustBe DownstreamOutcome.Success
     }
 
     "return a failed outcome for an unsuccessful add of PAYE Registration" in new Setup {
-      when(mockWSHttp.POST[PAYERegistration, HttpResponse](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockHttpClient.POST[PAYERegistration, HttpResponse](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(BAD_REQUEST)))
 
       await(connector.addPAYERegistration(Fixtures.validPAYERegistrationAPI)) mustBe DownstreamOutcome.Failure
@@ -97,14 +96,14 @@ class TestPAYERegConnectorSpec extends PayeComponentSpec {
 
   "Calling testRegistrationTeardown" should {
     "return a successful outcome for a successful teardown" in new Setup {
-      when(mockWSHttp.GET[HttpResponse](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockHttpClient.GET[HttpResponse](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
 
       await(connector.testRegistrationTeardown()) mustBe DownstreamOutcome.Success
     }
 
     "return a failed outcome for an unsuccessful teardown" in new Setup {
-      when(mockWSHttp.GET[HttpResponse](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockHttpClient.GET[HttpResponse](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new RuntimeException))
 
       await(connector.testRegistrationTeardown()) mustBe DownstreamOutcome.Failure
@@ -113,14 +112,14 @@ class TestPAYERegConnectorSpec extends PayeComponentSpec {
 
   "Calling tearDownIndividualRegistration" should {
     "return a successful outcome for a successful teardown" in new Setup {
-      when(mockWSHttp.GET[HttpResponse](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockHttpClient.GET[HttpResponse](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
 
       await(connector.tearDownIndividualRegistration("regId")) mustBe DownstreamOutcome.Success
     }
 
     "return a failed outcome for an unsuccessful teardown" in new Setup {
-      when(mockWSHttp.GET[HttpResponse](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockHttpClient.GET[HttpResponse](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new RuntimeException))
 
       await(connector.tearDownIndividualRegistration("regId")) mustBe DownstreamOutcome.Failure
@@ -129,14 +128,14 @@ class TestPAYERegConnectorSpec extends PayeComponentSpec {
 
   "Calling update-status" should {
     "return a successful outcome for a successful update" in new Setup {
-      when(mockWSHttp.POST[JsObject, HttpResponse](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockHttpClient.POST[JsObject, HttpResponse](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(OK)))
 
       await(connector.updateStatus("regId", "rejected")) mustBe DownstreamOutcome.Success
     }
 
     "return a failed outcome for an unsuccessful teardown" in new Setup {
-      when(mockWSHttp.POST[JsObject, HttpResponse](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockHttpClient.POST[JsObject, HttpResponse](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new RuntimeException))
 
       await(connector.updateStatus("regId", "submitted")) mustBe DownstreamOutcome.Failure

@@ -19,13 +19,13 @@ package services
 import config.AppConfig
 import connectors._
 import enums.{CacheKeys, IncorporationStatus, PAYEStatus}
-import javax.inject.Inject
 import models.api.SessionMap
 import models.external.CurrentProfile
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.RegistrationAllowlist
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CurrentProfileServiceImpl @Inject()(val businessRegistrationConnector: BusinessRegistrationConnector,

@@ -20,29 +20,27 @@ import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.completionCapacity.CompletionCapacityForm
-import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.{completionCapacity => CompletionCapacityView}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompletionCapacityControllerImpl @Inject()(val completionCapacityService: CompletionCapacityService,
-                                                 val keystoreConnector: KeystoreConnector,
-                                                 val s4LService: S4LService,
-                                                 val companyDetailsService: CompanyDetailsService,
-                                                 val incorpInfoService: IncorporationInformationService,
-                                                 val authConnector: AuthConnector,
-                                                 val incorporationInformationConnector: IncorporationInformationConnector,
-                                                 val payeRegistrationService: PAYERegistrationService,
-                                                 mcc: MessagesControllerComponents
-                                                )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends CompletionCapacityController(mcc) with AuthRedirectUrls
-
-abstract class CompletionCapacityController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-  implicit val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val completionCapacityService: CompletionCapacityService
+@Singleton
+class CompletionCapacityController @Inject()(val completionCapacityService: CompletionCapacityService,
+                                             val keystoreConnector: KeystoreConnector,
+                                             val s4LService: S4LService,
+                                             val companyDetailsService: CompanyDetailsService,
+                                             val incorpInfoService: IncorporationInformationService,
+                                             val authConnector: AuthConnector,
+                                             val incorporationInformationConnector: IncorporationInformationConnector,
+                                             val payeRegistrationService: PAYERegistrationService,
+                                             mcc: MessagesControllerComponents,
+                                             CompletionCapacityView: CompletionCapacityView
+                                            )(implicit val appConfig: AppConfig,
+                                              implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
   def completionCapacity: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     profile =>

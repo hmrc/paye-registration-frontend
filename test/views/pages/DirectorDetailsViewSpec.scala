@@ -16,15 +16,15 @@
 
 package views.pages
 
-import java.util.Locale
-
 import forms.directorDetails.DirectorDetailsForm
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.{Ninos, UserEnteredNino}
 import org.jsoup.Jsoup
-import play.api.i18n.{I18nSupport, Lang, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, Lang, MessagesApi}
 import play.api.test.FakeRequest
 import views.html.pages.directorDetails
+
+import java.util.Locale
 
 class DirectorDetailsViewSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
 
@@ -62,8 +62,8 @@ class DirectorDetailsViewSpec extends PayeComponentSpec with PayeFakedApp with I
 
 
   "The confirm your Director Details screen with one director" should {
-    lazy val view = directorDetails(DirectorDetailsForm.form.fill(userNinos), directorMap)
-    lazy val document = Jsoup.parse(view.body)
+    lazy val view = app.injector.instanceOf[directorDetails]
+    lazy val document = Jsoup.parse(view(DirectorDetailsForm.form.fill(userNinos), directorMap).body)
 
     "have the title for a single director" in {
       document.getElementById("pageHeading").text mustBe mockMessages("pages.directorDetails.description")
@@ -80,8 +80,8 @@ class DirectorDetailsViewSpec extends PayeComponentSpec with PayeFakedApp with I
   }
 
   "The confirm your Director Details screen with many directors" should {
-    lazy val view = directorDetails(DirectorDetailsForm.form.fill(userNinosMany), directorMapMany)
-    lazy val document = Jsoup.parse(view.body)
+    lazy val view = app.injector.instanceOf[directorDetails]
+    lazy val document = Jsoup.parse(view(DirectorDetailsForm.form.fill(userNinosMany), directorMapMany).body)
 
     "have the title for many directors" in {
       document.getElementById("pageHeading").text mustBe mockMessages("pages.directorDetails.description")

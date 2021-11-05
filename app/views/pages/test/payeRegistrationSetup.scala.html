@@ -17,17 +17,23 @@
 @import helpers.templates.{inlineDateInput, payeErrorSummary, payeInput}
 @import models.api.{PAYERegistration => PAYERegistrationAPI}
 @import pages.test.testHelpers.manualPrePopulatedInput
-@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+
+@this(payeErrorSummary: payeErrorSummary,
+        payeInput: payeInput,
+        inlineDateInput: inlineDateInput,
+        manualPrePopulatedInput: manualPrePopulatedInput,
+        formWithCSRF: FormWithCSRF)
 
 @(payeForm: Form[PAYERegistrationAPI], regID: String, txID: String)(implicit request: Request[_], messages: Messages)
 
 @payeErrorSummary(
-    Messages("app.common.errorSummaryLabel"), payeForm
+    messages("app.common.errorSummaryLabel"), payeForm
 )
 
 <h1 class="form-title heading-large" id="pageHeading">Enter PAYE Registration Details</h1>
 
-@govHelpers.form(action = controllers.test.routes.TestRegSetupController.submitRegSetup) {
+@formWithCSRF(action = controllers.test.routes.TestRegSetupController.submitRegSetup) {
 
 
     <div class="inline form-group">

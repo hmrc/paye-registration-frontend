@@ -16,41 +16,35 @@
 
 package controllers.internal
 
-import config.AppConfig
-import connectors.{IncorporationInformationConnector, KeystoreConnector, PAYERegistrationConnector}
 import enums.RegistrationDeletion
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{MessagesControllerComponents, Result}
+import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
-import services.PAYERegistrationService
-import uk.gov.hmrc.auth.core.AuthConnector
-import scala.concurrent.{ExecutionContext, Future}
+
+import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionContext}
+import scala.concurrent.Future
+
 
 class RegistrationControllerSpec extends PayeComponentSpec with PayeFakedApp {
-  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
+  lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+
   trait Setup {
-    val controller = new RegistrationController(mockMcc) {
-      override val appConfig: AppConfig = mockAppConfig
-      override val payeRegistrationConnector: PAYERegistrationConnector = mockPayeRegistrationConnector
-      override val payeRegistrationService: PAYERegistrationService = mockPayeRegService
+    val controller = new RegistrationController(
+      mockKeystoreConnector,
+      mockPayeRegistrationConnector,
+      mockAuthConnector,
+      mockCompanyDetailsService,
+      mockS4LService,
+      mockIncorpInfoService,
+      mockPayeRegService,
+      mockIncorpInfoConnector,
+      mockMcc
+    )(mockAppConfig,
+      globalExecutionContext)
 
-      override def redirectToLogin: Result = MockAuthRedirects.redirectToLogin
-
-      override def redirectToPostSign: Result = MockAuthRedirects.redirectToPostSign
-
-      override val keystoreConnector: KeystoreConnector = mockKeystoreConnector
-      override val incorporationInformationConnector: IncorporationInformationConnector = mockIncorpInfoConnector
-
-      override def authConnector: AuthConnector = mockAuthConnector
-
-      override def messagesApi: MessagesApi = mockMessagesApi
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
-    }
   }
 
   "companyIncorporation" should {

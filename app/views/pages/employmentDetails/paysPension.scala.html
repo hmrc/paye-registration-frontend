@@ -14,29 +14,34 @@
  * limitations under the License.
  *@
 
-@import helpers.templates.{payeInputRadioGroup, payeErrorSummary}
-@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import config.AppConfig
+@import helpers.templates.{payeErrorSummary, payeInputRadioGroup}
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
 @import views.helpers.TitleHelper.title
 
-@import config.AppConfig
+@this(main_template: main_template,
+        payeErrorSummary: payeErrorSummary,
+        payeInputRadioGroup: payeInputRadioGroup,
+        formWithCSRF: FormWithCSRF)
+
 @(pensionsForm: Form[Boolean])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = title(Messages("pages.paysPension.title"), pensionsForm)) {
+@main_template(title = title(messages("pages.paysPension.title"), pensionsForm)) {
     @payeErrorSummary(
-        Messages("app.common.errorSummaryLabel"), pensionsForm, dataJourney = Some("CompanyPension")
+        messages("app.common.errorSummaryLabel"), pensionsForm, dataJourney = Some("CompanyPension")
     )
-    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.paysPension.description")</h1>
-    @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitPensions) {
+    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.paysPension.description")</h1>
+    @formWithCSRF(action = controllers.userJourney.routes.EmploymentController.submitPensions) {
 
         <div class="inline form-group">
         @payeInputRadioGroup(
             pensionsForm("paysPension"),
             Seq(
-                "true" -> Messages("app.common.yes"),
-                "false" -> Messages("app.common.no")
+                "true" -> messages("app.common.yes"),
+                "false" -> messages("app.common.no")
             ),
             isHeading = false,
-            '_legend -> Messages("pages.paysPension.description"),
+            '_legend -> messages("pages.paysPension.description"),
             '_legendID -> "paysPension",
             '_helpText -> None,
             '_labelAfter -> true,
@@ -45,6 +50,6 @@
         )
         </div>
 
-        <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
+        <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
     }
 }

@@ -16,10 +16,10 @@
 
 package services
 
-import java.time.LocalDate
-
-import javax.inject.Inject
 import utils.SystemDate
+
+import java.time.LocalDate
+import javax.inject.Inject
 
 class ThresholdServiceImpl @Inject()() extends ThresholdService {
   override def now: LocalDate = SystemDate.getSystemDate.toLocalDate

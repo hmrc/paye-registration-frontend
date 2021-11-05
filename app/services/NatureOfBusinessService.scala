@@ -18,11 +18,11 @@ package services
 
 import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
-import javax.inject.Inject
 import models.api.SICCode
 import models.view.NatureOfBusiness
 import uk.gov.hmrc.http.HeaderCarrier
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class NatureOfBusinessServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector)(implicit val ec: ExecutionContext) extends NatureOfBusinessService

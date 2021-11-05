@@ -16,11 +16,11 @@
 
 package helpers.auth
 
-import java.util.UUID
-
 import play.api.mvc.{AnyContentAsEmpty, AnyContentAsFormUrlEncoded}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.SessionKeys
+
+import java.util.UUID
 
 object SessionBuilder extends SessionBuilder
 

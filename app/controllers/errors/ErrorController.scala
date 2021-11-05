@@ -19,30 +19,29 @@ package controllers.errors
 import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
-import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
-import views.html.pages.error.{ineligible => Ineligible, newIneligible => IneligiblePage, _}
+import views.html.pages.error._
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class ErrorControllerImpl @Inject()(val thresholdService: ThresholdService,
-                                    val keystoreConnector: KeystoreConnector,
-                                    val companyDetailsService: CompanyDetailsService,
-                                    val s4LService: S4LService,
-                                    val incorpInfoService: IncorporationInformationService,
-                                    val authConnector: AuthConnector,
-                                    val incorporationInformationConnector: IncorporationInformationConnector,
-                                    val payeRegistrationService: PAYERegistrationService,
-                                    mcc: MessagesControllerComponents
-                                   )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends ErrorController(mcc) with AuthRedirectUrls
-
-abstract class ErrorController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-
-  implicit val ec: ExecutionContext
-  implicit val appConfig: AppConfig
-  val thresholdService: ThresholdService
+class ErrorController @Inject()(thresholdService: ThresholdService,
+                                val keystoreConnector: KeystoreConnector,
+                                val companyDetailsService: CompanyDetailsService,
+                                val s4LService: S4LService,
+                                val incorpInfoService: IncorporationInformationService,
+                                val authConnector: AuthConnector,
+                                val incorporationInformationConnector: IncorporationInformationConnector,
+                                val payeRegistrationService: PAYERegistrationService,
+                                mcc: MessagesControllerComponents,
+                                Ineligible: ineligible,
+                                IneligiblePage: newIneligible,
+                                submissionTimeout: submissionTimeout,
+                                submissionFailed: submissionFailed
+                               )(implicit val appConfig: AppConfig,
+                                 val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
   def ineligible: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     _ =>

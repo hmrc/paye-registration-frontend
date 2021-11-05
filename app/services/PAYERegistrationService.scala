@@ -18,11 +18,11 @@ package services
 
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome, IncorporationStatus, RegistrationDeletion}
-import javax.inject.Inject
 import models.external.CurrentProfile
 import play.api.http.Status._
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PAYERegistrationServiceImpl @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,

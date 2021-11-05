@@ -21,30 +21,27 @@ import connectors.test.TestBusinessRegConnector
 import connectors.{IncorporationInformationConnector, KeystoreConnector, PAYERegistrationConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.test.TestCCUpdateForm
-import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.test.updateCCPage
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-class TestCCControllerImpl @Inject()(val testBusRegConnector: TestBusinessRegConnector,
-                                     val keystoreConnector: KeystoreConnector,
-                                     val authConnector: AuthConnector,
-                                     val s4LService: S4LService,
-                                     val companyDetailsService: CompanyDetailsService,
-                                     val incorpInfoService: IncorporationInformationService,
-                                     val payeRegistrationConnector: PAYERegistrationConnector,
-                                     val incorporationInformationConnector: IncorporationInformationConnector,
-                                     val payeRegistrationService: PAYERegistrationService,
-                                     mcc: MessagesControllerComponents
-                                    )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends TestCCController(mcc) with AuthRedirectUrls
-
-abstract class TestCCController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-  val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val testBusRegConnector: TestBusinessRegConnector
+@Singleton
+class TestCCController @Inject()(val testBusRegConnector: TestBusinessRegConnector,
+                                 val keystoreConnector: KeystoreConnector,
+                                 val authConnector: AuthConnector,
+                                 val s4LService: S4LService,
+                                 val companyDetailsService: CompanyDetailsService,
+                                 val incorpInfoService: IncorporationInformationService,
+                                 val payeRegistrationConnector: PAYERegistrationConnector,
+                                 val incorporationInformationConnector: IncorporationInformationConnector,
+                                 val payeRegistrationService: PAYERegistrationService,
+                                 mcc: MessagesControllerComponents,
+                                 updateCCPage: updateCCPage
+                                )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
   def showUpdateCC: Action[AnyContent] = isAuthorised { implicit request =>
     Future.successful(Ok(updateCCPage(TestCCUpdateForm.form)))

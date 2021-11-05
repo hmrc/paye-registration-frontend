@@ -16,8 +16,6 @@
 
 package services
 
-import java.time.LocalDate
-
 import helpers.PayeComponentSpec
 import models.api.{Employing, Employment}
 import models.view.{EmployingAnyone, EmployingStaff, WillBePaying}
@@ -25,6 +23,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import uk.gov.hmrc.http.HttpResponse
 
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class EmploymentServiceSpec extends PayeComponentSpec {
@@ -171,7 +170,7 @@ class EmploymentServiceSpec extends PayeComponentSpec {
       when(mockS4LService.fetchAndGet[EmployingStaff](any(), any())(any(), any()))
         .thenReturn(Future(None))
 
-      when(mockPayeRegistrationConnector.getEmployment(any())(any(), any()))
+      when(mockPayeRegistrationConnector.getEmployment(any())(any()))
         .thenReturn(Future(Some(willEmployNextYearApiModel)))
 
       when(mockIncorpInfoService.getIncorporationDate(any(), any())(any()))
@@ -185,7 +184,7 @@ class EmploymentServiceSpec extends PayeComponentSpec {
       when(mockS4LService.fetchAndGet[EmployingStaff](any(), any())(any(), any()))
         .thenReturn(Future(None))
 
-      when(mockPayeRegistrationConnector.getEmployment(any())(any(), any()))
+      when(mockPayeRegistrationConnector.getEmployment(any())(any()))
         .thenReturn(Future(None))
 
       when(mockIncorpInfoService.getIncorporationDate(any(), any())(any()))
@@ -265,7 +264,7 @@ class EmploymentServiceSpec extends PayeComponentSpec {
           when(mockS4LService.fetchAndGet[EmployingStaff](any(), any())(any(), any()))
             .thenReturn(Future(None))
 
-          when(mockPayeRegistrationConnector.getEmployment(any())(any(), any()))
+          when(mockPayeRegistrationConnector.getEmployment(any())(any()))
             .thenReturn(Future(None))
 
           when(mockS4LService.saveForm[EmployingStaff](any(), any(), any())(any(), any()))

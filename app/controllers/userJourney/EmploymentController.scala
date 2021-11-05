@@ -16,41 +16,39 @@
 
 package controllers.userJourney
 
-import java.time.LocalDate
-
 import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
-import controllers.exceptions.{FrontendControllerException, GeneralException, MissingViewElementException}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.employmentDetails._
-import javax.inject.Inject
 import models.view._
 import play.api.mvc._
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 import utils.{SystemDate, SystemDateT}
-import views.html.pages.employmentDetails.{applicationDelayed => ApplicationDelayedPage, constructionIndustry => ConstructionIndustryPage, employsSubcontractors => SubcontractorsPage, paidEmployees => PaidEmployeesPage, paysPension => PaysPensionPage, willBePaying => willBePayingPage}
+import views.html.pages.employmentDetails._
 
+import java.time.LocalDate
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-class EmploymentControllerImpl @Inject()(val employmentService: EmploymentService,
-                                         val thresholdService: ThresholdService,
-                                         val keystoreConnector: KeystoreConnector,
-                                         val authConnector: AuthConnector,
-                                         val incorpInfoService: IncorporationInformationService,
-                                         val incorporationInformationConnector: IncorporationInformationConnector,
-                                         val payeRegistrationService: PAYERegistrationService,
-                                         mcc: MessagesControllerComponents
-                                        )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends EmploymentController(mcc) with AuthRedirectUrls
+@Singleton
+class EmploymentController @Inject()(val employmentService: EmploymentService,
+                                     val thresholdService: ThresholdService,
+                                     val keystoreConnector: KeystoreConnector,
+                                     val authConnector: AuthConnector,
+                                     val incorpInfoService: IncorporationInformationService,
+                                     val incorporationInformationConnector: IncorporationInformationConnector,
+                                     val payeRegistrationService: PAYERegistrationService,
+                                     mcc: MessagesControllerComponents,
+                                     PaidEmployeesPage: paidEmployees,
+                                     willBePayingPage: willBePaying,
+                                     ConstructionIndustryPage: constructionIndustry,
+                                     ApplicationDelayedPage: applicationDelayed,
+                                     SubcontractorsPage: employsSubcontractors,
+                                     PaysPensionPage: paysPension
+                                    )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
-
-abstract class EmploymentController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-  implicit val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val employmentService: EmploymentService
-  val thresholdService: ThresholdService
-  val incorpInfoService: IncorporationInformationService
   val taxYearObjWithSystemDate: SystemDateT = SystemDate
 
   private val handleJourneyPostConstruction: EmployingStaff => Result = {
@@ -58,16 +56,14 @@ abstract class EmploymentController(mcc: MessagesControllerComponents) extends P
     case EmployingStaff(_, Some(WillBePaying(true, _)), _, _, _) | EmployingStaff(_, Some(WillBePaying(false, _)), Some(true), _, _) =>
       Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
     case EmployingStaff(_, Some(WillBePaying(false, _)), Some(false), _, _) => Redirect(controllers.errors.routes.ErrorController.newIneligible())
-    case _ => throw GeneralException(s"[EmploymentController][handleJourneyPostConstruction] an invalid scenario was met for employment staff")
+    case _ => throw new InternalServerException(s"[EmploymentController][handleJourneyPostConstruction] an invalid scenario was met for employment staff")
   }
 
   def weeklyThreshold: Int = thresholdService.getCurrentThresholds.getOrElse("weekly", 120)
 
-  private def ifIncorpDateExist(regId: String, txId: String)(action: LocalDate => Future[Result])(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] =
+  private def ifIncorpDateExist(regId: String, txId: String)(action: LocalDate => Future[Result])(implicit hc: HeaderCarrier): Future[Result] =
     incorpInfoService.getIncorporationDate(regId, txId) flatMap {
       _.fold(Future.successful(Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())))(action)
-    } recover {
-      case e: FrontendControllerException => e.recover
     }
 
   // PAID EMPLOYEES
@@ -78,8 +74,6 @@ abstract class EmploymentController(mcc: MessagesControllerComponents) extends P
           val form = viewModel.employingAnyone.fold(PaidEmployeesForm.form(incorpDate))(PaidEmployeesForm.form(incorpDate).fill)
           Ok(PaidEmployeesPage(form, weeklyThreshold))
         }
-      } recover {
-        case e: FrontendControllerException => e.recover
       }
   }
 
@@ -91,14 +85,14 @@ abstract class EmploymentController(mcc: MessagesControllerComponents) extends P
           model => {
             employmentService.saveEmployingAnyone(model) map { model =>
               model.employingAnyone match {
-                case Some(EmployingAnyone(false, _)) => Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
-                case Some(EmployingAnyone(true, _)) => Redirect(controllers.userJourney.routes.EmploymentController.constructionIndustry())
+                case Some(EmployingAnyone(false, _)) =>
+                  Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
+                case Some(EmployingAnyone(true, _)) =>
+                  Redirect(controllers.userJourney.routes.EmploymentController.constructionIndustry())
               }
             }
           }
         )
-      } recover {
-        case e: FrontendControllerException => e.recover
       }
   }
 
@@ -108,8 +102,6 @@ abstract class EmploymentController(mcc: MessagesControllerComponents) extends P
         val now = taxYearObjWithSystemDate.getSystemDate.toLocalDate
         val form = viewModel.willBePaying.fold(EmployingStaffForm.form(now))(EmployingStaffForm.form(now).fill)
         Ok(willBePayingPage(form, weeklyThreshold, now))
-      } recover {
-        case e: FrontendControllerException => e.recover
       }
   }
 
@@ -122,13 +114,11 @@ abstract class EmploymentController(mcc: MessagesControllerComponents) extends P
           _.willBePaying match {
             case Some(WillBePaying(true, Some(false))) => Redirect(controllers.userJourney.routes.EmploymentController.applicationDelayed())
             case None =>
-              throw MissingViewElementException(s"[EmploymentController][SubmitEmployingStaff] no WillBePaying block found on save for regId: ${profile.registrationID}")
+              throw new InternalServerException(s"[EmploymentController][SubmitEmployingStaff] no WillBePaying block found on save for regId: ${profile.registrationID}")
             case _ => Redirect(controllers.userJourney.routes.EmploymentController.constructionIndustry())
           }
         }
-      ) recover {
-        case e: FrontendControllerException => e.recover
-      }
+      )
   }
 
   // CONSTRUCTION INDUSTRY
@@ -138,8 +128,6 @@ abstract class EmploymentController(mcc: MessagesControllerComponents) extends P
         viewModel =>
           val form = viewModel.construction.fold(ConstructionIndustryForm.form)(ConstructionIndustryForm.form.fill)
           Ok(ConstructionIndustryPage(form))
-      } recover {
-        case e: FrontendControllerException => e.recover
       }
   }
 
@@ -155,9 +143,7 @@ abstract class EmploymentController(mcc: MessagesControllerComponents) extends P
               handleJourneyPostConstruction(viewModel)
             }
         }
-      ) recover {
-        case e: FrontendControllerException => e.recover
-      }
+      )
   }
 
   // APPLICATION DELAYED
@@ -177,8 +163,6 @@ abstract class EmploymentController(mcc: MessagesControllerComponents) extends P
         viewModel =>
           val form = viewModel.subcontractors.fold(SubcontractorsForm.form)(SubcontractorsForm.form.fill)
           Ok(SubcontractorsPage(form, SystemDate.current.startYear.toString, SystemDate.current.finishYear.toString))
-      } recover {
-        case e: FrontendControllerException => e.recover
       }
   }
 
@@ -187,9 +171,7 @@ abstract class EmploymentController(mcc: MessagesControllerComponents) extends P
       SubcontractorsForm.form.bindFromRequest().fold(
         errors => Future.successful(BadRequest(SubcontractorsPage(errors, SystemDate.current.startYear.toString, SystemDate.current.finishYear.toString))),
         employsSubcontractors => employmentService.saveSubcontractors(employsSubcontractors).map(handleJourneyPostConstruction)
-      ).recover {
-        case e: FrontendControllerException => e.recover
-      }
+      )
   }
 
   // PENSIONS
@@ -199,8 +181,6 @@ abstract class EmploymentController(mcc: MessagesControllerComponents) extends P
         viewModel =>
           val form = viewModel.companyPension.fold(PaysPensionForm.form)(PaysPensionForm.form.fill)
           Ok(PaysPensionPage(form))
-      } recover {
-        case e: FrontendControllerException => e.recover
       }
   }
 
@@ -211,8 +191,6 @@ abstract class EmploymentController(mcc: MessagesControllerComponents) extends P
         paysPension => employmentService.savePensionPayment(paysPension) map {
           _ => Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
         }
-      ) recover {
-        case e: FrontendControllerException => e.recover
-      }
+      )
   }
 }

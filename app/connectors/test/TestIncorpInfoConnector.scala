@@ -16,14 +16,14 @@
 
 package connectors.test
 
-import config.{AppConfig, WSHttp}
-import javax.inject.Inject
+import config.AppConfig
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http._
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TestIncorpInfoConnectorImpl @Inject()(val http: WSHttp,
+class TestIncorpInfoConnectorImpl @Inject()(val http: HttpClient,
                                             appConfig: AppConfig, implicit val ec: ExecutionContext) extends TestIncorpInfoConnector {
   val incorpFEStubsUrl = appConfig.servicesConfig.baseUrl("incorporation-frontend-stubs")
   val incorpInfoUrl = appConfig.servicesConfig.baseUrl("incorporation-information")

@@ -18,42 +18,33 @@ package config
 
 import akka.stream.Materializer
 import com.typesafe.config.Config
-import filters.{PAYECSRFExceptionsFilter, PAYESessionIDFilter}
-import javax.inject.Inject
-import play.api.http.DefaultHttpFilters
+import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.Request
-import play.api.{Configuration, Play}
 import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.config.{ControllerConfig, ControllerConfigs}
-import uk.gov.hmrc.play.bootstrap.filters.{DefaultLoggingFilter, FrontendFilters}
-import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
+import uk.gov.hmrc.play.bootstrap.filters.DefaultLoggingFilter
+import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
+import views.html.error_template
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class MyErrorHandler @Inject()(val messagesApi: MessagesApi,
-                               val configuration: Configuration
+                               val configuration: Configuration,
+                                 error_template: error_template
                               )(implicit appConfig: AppConfig) extends FrontendErrorHandler {
 
   override def standardErrorTemplate(pageTitle: String,
                                      heading: String,
                                      message: String
                                     )(implicit request: Request[_]): Html =
-    views.html.error_template(pageTitle, heading, message)
+    error_template(pageTitle, heading, message)
 }
 
-class PAYEFilters @Inject()(defaultFilters: FrontendFilters,
-                            loggingFilterCustom: DefaultLoggingFilter,
-                            sessionIdFilter: PAYESessionIDFilter,
-                            csrfeFilterCustom: PAYECSRFExceptionsFilter
-                           ) extends DefaultHttpFilters(
-  Seq(csrfeFilterCustom) ++ defaultFilters.filters
-    :+ loggingFilterCustom
-    :+ sessionIdFilter: _*
-)
 
-object ControllerConfiguration extends ControllerConfig {
-  lazy val controllerConfigs: Config = Play.current.configuration.underlying.getConfig("controllers")
+class ControllerConfiguration @Inject()(config: Configuration) extends ControllerConfig {
+  lazy val controllerConfigs: Config = config.underlying.getConfig("controllers")
 }
 
 class LoggingFilterImpl @Inject()(config: ControllerConfigs)

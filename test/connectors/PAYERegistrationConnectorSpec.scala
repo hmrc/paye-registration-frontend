@@ -16,7 +16,6 @@
 
 package connectors
 
-import config.WSHttp
 import enums.{DownstreamOutcome, RegistrationDeletion}
 import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics
@@ -31,7 +30,7 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
   class Setup extends CodeMocks {
     val connector = new PAYERegistrationConnector {
       override val payeRegUrl: String = "tst-url"
-      override val http: WSHttp = mockWSHttp
+      override val http: HttpClient = mockHttpClient
       override val metricsService = new MockMetrics
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 

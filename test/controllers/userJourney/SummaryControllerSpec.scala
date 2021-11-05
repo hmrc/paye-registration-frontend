@@ -16,9 +16,6 @@
 
 package controllers.userJourney
 
-import java.util.Locale
-
-import config.AppConfig
 import connectors._
 import enums.PAYEStatus
 import helpers.auth.AuthHelpers
@@ -28,39 +25,49 @@ import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
-import play.api.i18n.{I18nSupport, Lang}
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.api.test.FakeRequest
 import services.{SubmissionService, SummaryService}
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
+import views.html.pages.error.submissionTimeout
+import views.html.pages.summary
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionContext}
+import scala.concurrent.Future
 
 class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
-  val mockSummaryService = mock[SummaryService]
-  val mockSubmissionService = mock[SubmissionService]
-  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
+  val mockSummaryService: SummaryService = mock[SummaryService]
+  val mockSubmissionService: SubmissionService = mock[SubmissionService]
+
+  lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+  lazy val mockSummaryPage: summary = app.injector.instanceOf[summary]
+  lazy val mockSubmissionTimeout: submissionTimeout = app.injector.instanceOf[submissionTimeout]
 
   class Setup extends AuthHelpers {
-    override val authConnector = mockAuthConnector
-    override val keystoreConnector = mockKeystoreConnector
+    override val authConnector: AuthConnector = mockAuthConnector
+    override val keystoreConnector: KeystoreConnector = mockKeystoreConnector
 
-    val controller = new SummaryController(mockMcc) {
-      override val redirectToLogin = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-      override val emailService = mockEmailService
-      override val summaryService = mockSummaryService
-      override val authConnector = mockAuthConnector
-      override val keystoreConnector = mockKeystoreConnector
-      override val payeRegistrationConnector = mockPayeRegistrationConnector
-      override val submissionService = mockSubmissionService
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService = mockPayeRegService
-      override implicit val appConfig: AppConfig = mockAppConfig
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+    val controller: SummaryController = new SummaryController(
+      mockSummaryService,
+      mockSubmissionService,
+      mockKeystoreConnector,
+      mockAuthConnector,
+      mockS4LService,
+      mockCompanyDetailsService,
+      mockIncorpInfoService,
+      mockPayeRegistrationConnector,
+      mockEmailService,
+      mockIncorpInfoConnector,
+      mockPayeRegService,
+      mockMcc,
+      mockSummaryPage,
+      mockSubmissionTimeout
+    )(mockAppConfig,
+      globalExecutionContext
+    )
 
-    }
   }
 
   "Calling summary to show the summary page" should {
@@ -69,7 +76,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
         .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI))
 
       when(mockEmailService.primeEmailData(ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future(Fixtures.blankCacheMap))
+        .thenReturn(Future.successful(Fixtures.blankCacheMap))
 
       when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
         .thenReturn(Future.successful(Fixtures.validSummaryView))
@@ -88,7 +95,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
         .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI))
 
       when(mockEmailService.primeEmailData(ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future(Fixtures.blankCacheMap))
+        .thenReturn(Future.successful(Fixtures.blankCacheMap))
 
       when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
         .thenReturn(Future.failed(new InternalError()))

@@ -16,61 +16,71 @@
 
 package controllers.userJourney
 
-import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, LocalDateTime}
-
-import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, Materializer}
-import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
-import models.external.CurrentProfile
 import models.view.{EmployingAnyone, EmployingStaff, WillBePaying}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import org.mockito.stubbing.OngoingStubbing
+import play.api.mvc.{AnyContentAsEmpty, MessagesControllerComponents}
 import play.api.test.FakeRequest
+import uk.gov.hmrc.http.InternalServerException
 import utils.SystemDate
+import views.html.pages.employmentDetails._
 
-import scala.concurrent.{ExecutionContext, Future}
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime}
+import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionContext}
+import scala.concurrent.Future
 
 class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
-  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
-  val request = FakeRequest()
+  lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+  lazy val mockPaidEmployeesPage: paidEmployees = app.injector.instanceOf[paidEmployees]
+  lazy val mockWillBePayingPage: willBePaying = app.injector.instanceOf[willBePaying]
+  lazy val mockConstructionIndustryPage: constructionIndustry = app.injector.instanceOf[constructionIndustry]
+  lazy val mockApplicationDelayedPage: applicationDelayed = app.injector.instanceOf[applicationDelayed]
+  lazy val mockSubcontractorsPage: employsSubcontractors = app.injector.instanceOf[employsSubcontractors]
+  lazy val mockPaysPensionPage: paysPension = app.injector.instanceOf[paysPension]
 
-  val testController = new EmploymentController(mockMcc) {
-    override val redirectToLogin = MockAuthRedirects.redirectToLogin
-    override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-    override val thresholdService = mockThresholdService
-    override val incorpInfoService = mockIncorpInfoService
-    override val authConnector = mockAuthConnector
-    override val keystoreConnector = mockKeystoreConnector
-    override val employmentService = mockEmploymentService
-    override val incorporationInformationConnector = mockIncorpInfoConnector
-    override val payeRegistrationService = mockPayeRegService
-    override implicit val appConfig: AppConfig = mockAppConfig
-    override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+  val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-  }
+  val testController = new EmploymentController(
+    mockEmploymentService,
+    mockThresholdService,
+    mockKeystoreConnector,
+    mockAuthConnector,
+    mockIncorpInfoService,
+    mockIncorpInfoConnector,
+    mockPayeRegService,
+    mockMcc,
+    mockPaidEmployeesPage,
+    mockWillBePayingPage,
+    mockConstructionIndustryPage,
+    mockApplicationDelayedPage,
+    mockSubcontractorsPage,
+    mockPaysPensionPage)(
+    mockAppConfig,
+    globalExecutionContext
+  )
 
-  val emptyView = EmployingStaff(None, None, None, None, None)
-  val employingAnyoneView = EmployingStaff(Some(EmployingAnyone(true, Some(LocalDate.now()))), None, None, None, None)
-  val employingAnyoneViewFalse = EmployingStaff(Some(EmployingAnyone(false, None)), None, None, None, None)
-  val willBePayingView = EmployingStaff(None, Some(WillBePaying(true, Some(true))), None, None, None)
-  val willBePayingViewFalse = EmployingStaff(None, Some(WillBePaying(false, None)), None, None, None)
-  val willBePayingViewNewTaxYear = EmployingStaff(None, Some(WillBePaying(true, Some(false))), None, None, None)
-  val constructionIndustryViewFalse = EmployingStaff(None, None, Some(false), None, None)
-  val constructionIndustryView = EmployingStaff(None, None, Some(true), None, None)
-  val pensionsView = EmployingStaff(None, None, None, None, Some(true))
-  val pensionsViewFalse = EmployingStaff(None, None, None, None, Some(false))
+  val emptyView: EmployingStaff = EmployingStaff(None, None, None, None, None)
+  val employingAnyoneView: EmployingStaff = EmployingStaff(Some(EmployingAnyone(employing = true, Some(LocalDate.now()))), None, None, None, None)
+  val employingAnyoneViewFalse: EmployingStaff = EmployingStaff(Some(EmployingAnyone(employing = false, None)), None, None, None, None)
+  val willBePayingView: EmployingStaff = EmployingStaff(None, Some(WillBePaying(willPay = true, Some(true))), None, None, None)
+  val willBePayingViewFalse: EmployingStaff = EmployingStaff(None, Some(WillBePaying(willPay = false, None)), None, None, None)
+  val willBePayingViewNewTaxYear: EmployingStaff = EmployingStaff(None, Some(WillBePaying(willPay = true, Some(false))), None, None, None)
+  val constructionIndustryViewFalse: EmployingStaff = EmployingStaff(None, None, Some(false), None, None)
+  val constructionIndustryView: EmployingStaff = EmployingStaff(None, None, Some(true), None, None)
+  val pensionsView: EmployingStaff = EmployingStaff(None, None, None, None, Some(true))
+  val pensionsViewFalse: EmployingStaff = EmployingStaff(None, None, None, None, Some(false))
 
-  def mockGetThreshold = when(mockThresholdService.getCurrentThresholds).thenReturn(Map("weekly" -> 120))
+  def mockGetThreshold: OngoingStubbing[Map[String, Int]] = when(mockThresholdService.getCurrentThresholds).thenReturn(Map("weekly" -> 120))
 
-  def dynamicViewModel(ea: Boolean = false, wbp: Boolean = false, nty: Boolean = false, cis: Boolean = false, subContractor: Boolean = false) =
+  def dynamicViewModel(ea: Boolean = false, wbp: Boolean = false, nty: Boolean = false, cis: Boolean = false, subContractor: Boolean = false): EmployingStaff =
     EmployingStaff(Some(EmployingAnyone(ea, Some(LocalDate.now()))), Some(WillBePaying(wbp, Some(nty))), Some(cis), Some(subContractor), None)
 
-  def dynamicViewModelNoDate(wbp: Boolean = false, nty: Boolean = false, cis: Boolean = false, subContractor: Boolean = false) =
+  def dynamicViewModelNoDate(wbp: Boolean = false, nty: Boolean = false, cis: Boolean = false, subContractor: Boolean = false): EmployingStaff =
     EmployingStaff(None, Some(WillBePaying(wbp, Some(nty))), Some(cis), Some(subContractor), None)
 
 
@@ -79,7 +89,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showUnauthorised(testController.paidEmployees, request) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
     "render the page if an incorp date exists" in {
@@ -114,13 +124,10 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "submitPaidEmployees" should {
     "redirect if the user is not authorised" in {
-      val formRequest = request.withFormUrlEncodedBody(
-        "alreadyPaying" -> "false"
-      )
       AuthHelpers.submitUnauthorised(testController.submitPaidEmployees, request) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 
@@ -199,7 +206,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showUnauthorised(testController.employingStaff, request) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
     "render page" in {
@@ -216,17 +223,13 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "submitEmployingStaff" should {
     "redirect if the user is not authorised" in {
-      val formRequest = request.withFormUrlEncodedBody(
-        "willBePaying" -> "false"
-      )
-
       when(mockEmploymentService.saveEmployingAnyone(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(employingAnyoneView))
 
       AuthHelpers.submitUnauthorised(testController.submitEmployingStaff, request) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 
@@ -296,7 +299,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showUnauthorised(testController.applicationDelayed, request) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 
@@ -312,7 +315,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitUnauthorised(testController.submitApplicationDelayed, request) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 
@@ -333,7 +336,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showUnauthorised(testController.constructionIndustry, request) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 
@@ -353,7 +356,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitUnauthorised(testController.submitConstructionIndustry, request) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
     "return a 500 testing handlePostJourneyConstruction error scenario" in {
@@ -366,7 +369,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
         result =>
-          status(result) mustBe 500
+          intercept[InternalServerException](await(result))
       }
     }
 
@@ -475,7 +478,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showUnauthorised(testController.subcontractors, request) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 
@@ -509,7 +512,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitUnauthorised(testController.submitSubcontractors, formRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 
@@ -559,7 +562,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showUnauthorised(testController.pensions, request) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 
@@ -582,7 +585,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitUnauthorised(testController.submitPensions, formRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 

@@ -16,14 +16,14 @@
 
 package views.pages
 
-import java.util.Locale
-
 import forms.natureOfBuinessDetails.NatureOfBusinessForm
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.jsoup.Jsoup
-import play.api.i18n.{I18nSupport, Lang, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, Lang, MessagesApi}
 import play.api.test.FakeRequest
 import views.html.pages.natureOfBusiness
+
+import java.util.Locale
 
 class NatureOfBusinessViewSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
   implicit val appConfig = mockAppConfig
@@ -32,8 +32,8 @@ class NatureOfBusinessViewSpec extends PayeComponentSpec with PayeFakedApp with 
   implicit val mockMessages = mockMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
 
   "The nature of business screen" should {
-    lazy val view = natureOfBusiness(NatureOfBusinessForm.form)
-    lazy val document = Jsoup.parse(view.body)
+    lazy val view = app.injector.instanceOf[natureOfBusiness]
+    lazy val document = Jsoup.parse(view(NatureOfBusinessForm.form).body)
 
     "have the correct title" in {
       document.getElementById("pageHeading").text mustBe mockMessages("pages.natureOfBusiness.description")

@@ -25,6 +25,7 @@ import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
 import play.api.test.FakeRequest
+
 import scala.concurrent.Future
 
 class TestSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {

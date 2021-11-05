@@ -16,10 +16,10 @@
 
 package models.api
 
-import java.time.LocalDate
-
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.{JsObject, JsResultException, Json}
+
+import java.time.LocalDate
 
 class EmploymentSpec extends PlaySpec {
 

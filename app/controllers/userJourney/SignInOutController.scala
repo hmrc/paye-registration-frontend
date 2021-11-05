@@ -16,33 +16,29 @@
 
 package controllers.userJourney
 
-import java.io.File
-
 import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
-import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
+import views.html.timeout
 
+import java.io.File
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-class SignInOutControllerImpl @Inject()(val authConnector: AuthConnector,
-                                        val s4LService: S4LService,
-                                        val companyDetailsService: CompanyDetailsService,
-                                        val incorpInfoService: IncorporationInformationService,
-                                        val keystoreConnector: KeystoreConnector,
-                                        val incorporationInformationConnector: IncorporationInformationConnector,
-                                        val payeRegistrationService: PAYERegistrationService,
-                                        mcc: MessagesControllerComponents
-                                       )(implicit val appConfig: AppConfig, val ec: ExecutionContext) extends SignInOutController(mcc) with AuthRedirectUrls
-
-abstract class SignInOutController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-  implicit val ec: ExecutionContext
-  implicit val appConfig: AppConfig
-  val compRegFEURL: String
-  val compRegFEURI: String
+@Singleton
+class SignInOutController @Inject()(val authConnector: AuthConnector,
+                                    val s4LService: S4LService,
+                                    val companyDetailsService: CompanyDetailsService,
+                                    val incorpInfoService: IncorporationInformationService,
+                                    val keystoreConnector: KeystoreConnector,
+                                    val incorporationInformationConnector: IncorporationInformationConnector,
+                                    val payeRegistrationService: PAYERegistrationService,
+                                    mcc: MessagesControllerComponents,
+                                    timeout: timeout
+                                   )(implicit val appConfig: AppConfig, val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
   def postSignIn: Action[AnyContent] = isAuthorised { implicit request =>
     Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/post-sign-in"))
@@ -61,7 +57,7 @@ abstract class SignInOutController(mcc: MessagesControllerComponents) extends Pa
   }
 
   def timeoutShow = Action.async { implicit request =>
-    Future.successful(Ok(views.html.timeout()))
+    Future.successful(Ok(timeout()))
   }
 
   def incorporationRejected: Action[AnyContent] = isAuthorised {

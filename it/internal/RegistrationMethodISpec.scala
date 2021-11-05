@@ -20,11 +20,11 @@ import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import models.api.SessionMap
 import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProfile}
 import org.scalatest.BeforeAndAfterEach
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.json.Json
 import play.api.test.Helpers._
-import play.api.{Application, Environment, Mode}
 
 class RegistrationMethodISpec extends IntegrationSpecBase
   with LoginStub

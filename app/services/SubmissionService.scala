@@ -19,11 +19,11 @@ package services
 import config.AppConfig
 import connectors._
 import enums.{CacheKeys, IncorporationStatus}
-import javax.inject.Inject
 import models.external.CurrentProfile
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.RegistrationAllowlist
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class SubmissionServiceImpl @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,

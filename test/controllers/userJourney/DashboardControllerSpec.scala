@@ -20,6 +20,7 @@ import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
+
 import scala.concurrent.ExecutionContext
 
 class DashboardControllerSpec extends PayeComponentSpec with PayeFakedApp {

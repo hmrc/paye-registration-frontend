@@ -16,8 +16,6 @@
 
 package frontend
 
-import java.util.UUID
-
 import audit.AuditPAYEContactDetails
 import com.github.tomakehurst.wiremock.client.WireMock._
 import enums.CacheKeys
@@ -29,6 +27,8 @@ import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.json.{JsObject, JsString, Json}
+
+import java.util.UUID
 
 class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
   with LoginStub
@@ -195,6 +195,8 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
            |   "mobileNumber": "543210543210"
            |}
          """.stripMargin
+
+
 
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
 

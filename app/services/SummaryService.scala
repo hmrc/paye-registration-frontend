@@ -16,22 +16,20 @@
 
 package services
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 import common.exceptions.InternalExceptions.APIConversionException
 import connectors._
-import controllers.exceptions._
 import enums.UserCapacity
-import javax.inject.Inject
 import models.api.{CompanyDetails, Director, Employment, PAYEContact, SICCode, PAYERegistration => PAYERegistrationAPI}
 import models.view.{Summary, SummaryChangeLink, SummaryRow, SummarySection}
 import models.{Address, DigitalContactDetails}
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.{AnyContent, Call, Request}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 import utils.Formatters
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
 
@@ -47,8 +45,6 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
       regResponse <- payeRegistrationConnector.getRegistration(regId)
       incorporationDate <- iiService.getIncorporationDate(regId, txId)
     } yield registrationToSummary(regResponse, regId, incorporationDate)
-  } recover {
-    case e: FrontendControllerException => throw e
   }
 
   private[services] def registrationToSummary(apiModel: PAYERegistrationAPI, regId: String, incorporationDate: Option[LocalDate])(implicit messages: Messages): Summary =
@@ -207,7 +203,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
   private[services] def buildEmploymentSectionFromView(oEmployment: Employment, regId: String, incorpDate: Option[LocalDate])(implicit messages: Messages): SummarySection = {
     val employmentView = employmentService.apiToView(oEmployment, incorpDate)
 
-    val inConstructionIndustry = employmentView.construction.getOrElse(throw MissingSummaryBlockItemException(block = "EmploymentStaffV2", item = "construction", regId))
+    val inConstructionIndustry = employmentView.construction.getOrElse(throw new InternalServerException(s"Element 'construction' was missing from 'EmploymentStaffV2' while building summary for regId: $regId"))
 
     val employingAnyoneSection = employmentView.employingAnyone.map { paidEmployees =>
       Seq(

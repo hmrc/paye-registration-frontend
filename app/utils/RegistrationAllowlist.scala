@@ -21,7 +21,7 @@ import connectors.{DESResponse, IncorpInfoResponse, IncorpInfoSuccessResponse}
 import models.DigitalContactDetails
 import models.api.{Director, CompanyDetails => CompanyDetailsAPI}
 import models.external.{CoHoCompanyDetailsModel, CompanyRegistrationProfile, OfficerList}
-import play.api.Logger
+import play.api.Logger.logger
 
 import scala.concurrent.Future
 import scala.language.implicitConversions
@@ -58,7 +58,7 @@ trait RegistrationAllowlist {
 
   def ifRegIdNotAllowlisted[T](regId: String)(f: => Future[T])(implicit default: String => T): Future[T] = {
     if (appConfig.regIdAllowlist.contains(regId)) {
-      Logger.info(s"Registration ID $regId is in the allow-list")
+      logger.info(s"Registration ID $regId is in the allow-list")
       Future.successful(default(regId))
     } else {
       f

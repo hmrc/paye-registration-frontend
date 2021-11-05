@@ -17,15 +17,14 @@
 package connectors
 
 import common.exceptions.DownstreamExceptions.{IncorporationInformationResponseException, OfficerListNotFoundException}
-import config.{AppConfig, WSHttp}
-import controllers.exceptions.GeneralException
+import config.AppConfig
 import enums.IncorporationStatus
 import helpers.mocks.MockMetrics
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.api.Name
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import play.api.libs.json.{JsObject, JsResultException, JsValue, Json}
-import uk.gov.hmrc.http.{BadRequestException, HttpResponse, InternalServerException, NotFoundException}
+import uk.gov.hmrc.http.{BadRequestException, HttpClient, HttpResponse, InternalServerException, NotFoundException}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -44,7 +43,7 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with PayeF
       val incorpInfoUrl = testUrl
       val incorpInfoUri = testUri
       val payeRegFeUrl = testPayeRegFeUrl
-      override val http: WSHttp = mockWSHttp
+      override val http: HttpClient = mockHttpClient
       override val metricsService = new MockMetrics
       override val successCounter = metricsService.companyDetailsSuccessResponseCounter
       override val failedCounter = metricsService.companyDetailsFailedResponseCounter
@@ -181,7 +180,7 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with PayeF
 
     "return a BadRequest for a bad request" in new Setup(true) {
       mockHttpGet[JsValue](connector.incorpInfoUrl, Future.failed(new BadRequestException("tstException")))
-      intercept[GeneralException](await(connector.getIncorporationInfo(testRegId, testTransId)))
+      intercept[InternalServerException](await(connector.getIncorporationInfo(testRegId, testTransId)))
     }
   }
 

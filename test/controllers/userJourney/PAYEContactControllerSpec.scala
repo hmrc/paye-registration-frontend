@@ -16,7 +16,6 @@
 
 package controllers.userJourney
 
-import config.AppConfig
 import enums.DownstreamOutcome
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.Address
@@ -26,32 +25,43 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.http.Status
 import play.api.i18n.Messages
-import play.api.mvc.{AnyContent, Call, MessagesControllerComponents, Request, Result}
+import play.api.mvc._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
+import views.html.pages.error.restart
+import views.html.pages.payeContact.{correspondenceAddress, payeContactDetails}
+
+import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionContext}
 import scala.concurrent.{ExecutionContext, Future}
 
 class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
   val regId = "12345"
-  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
+
+  lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+  lazy val mockPayeContactDetails: payeContactDetails = app.injector.instanceOf[payeContactDetails]
+  lazy val mockCorrespondenceAddress: correspondenceAddress = app.injector.instanceOf[correspondenceAddress]
+  lazy val mockRestart: restart = app.injector.instanceOf[restart]
+
   class Setup {
-    val testController = new PAYEContactController(mockMcc) {
-      override val redirectToLogin = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-      override val companyDetailsService = mockCompanyDetailsService
-      override val payeContactService = mockPAYEContactService
-      override val addressLookupService = mockAddressLookupService
-      override val keystoreConnector = mockKeystoreConnector
-      override val messagesApi = mockMessagesApi
-      override val authConnector = mockAuthConnector
-      override val prepopService = mockPrepopService
-      override val auditService = mockAuditService
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService = mockPayeRegService
-      override implicit val appConfig: AppConfig = mockAppConfig
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-    }
+    val testController = new PAYEContactController(
+      mockCompanyDetailsService,
+      mockPAYEContactService,
+      mockAddressLookupService,
+      mockKeystoreConnector,
+      mockAuthConnector,
+      mockPrepopService,
+      mockS4LService,
+      mockIncorpInfoService,
+      mockAuditService,
+      mockIncorpInfoConnector,
+      mockPayeRegService,
+      mockMcc,
+      mockPayeContactDetails,
+      mockCorrespondenceAddress,
+      mockRestart
+    )(mockAppConfig,
+      globalExecutionContext)
   }
 
   val request = FakeRequest()
@@ -59,7 +69,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
   "payeContactDetails" should {
     "return an OK with data from registration" in new Setup {
       when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future(Fixtures.validPAYEContactView))
+        .thenReturn(Future.successful(Fixtures.validPAYEContactView))
 
       AuthHelpers.showAuthorisedWithCP(testController.payeContactDetails, Fixtures.validCurrentProfile, request) {
         (result: Future[Result]) =>
@@ -69,7 +79,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return an OK with data from prepopulation" in new Setup {
       when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future(Fixtures.emptyPAYEContactView))
+        .thenReturn(Future.successful(Fixtures.emptyPAYEContactView))
 
       AuthHelpers.showAuthorisedWithCP(testController.payeContactDetails, Fixtures.validCurrentProfile, request) {
         (result: Future[Result]) =>
@@ -79,10 +89,10 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return an OK without data" in new Setup {
       when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future(Fixtures.emptyPAYEContactView))
+        .thenReturn(Future.successful(Fixtures.emptyPAYEContactView))
 
       when(mockPrepopService.getPAYEContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future(None))
+        .thenReturn(Future.successful(None))
 
       AuthHelpers.showAuthorisedWithCP(testController.payeContactDetails, Fixtures.validCurrentProfile, request) {
         (result: Future[Result]) =>
@@ -192,7 +202,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
       when(mockPrepopService.getPrePopAddresses(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future(Map(1 -> Fixtures.validCompanyDetailsViewModel.roAddress)))
+        .thenReturn(Future.successful(Map(1 -> Fixtures.validCompanyDetailsViewModel.roAddress)))
 
       when(mockPAYEContactService.getCorrespondenceAddresses(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(addressMap)
@@ -325,9 +335,6 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
   }
 
   "savePAYECorrespondenceAddress" should {
-
-    implicit val hc = HeaderCarrier()
-
     "return a DownStreamOutcome SUCCESS" in new Setup {
       val testAlfId = "1234567890"
       val expected =

@@ -19,11 +19,13 @@ package controllers
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
+import views.html.statements.accessibility_statement
 
 
 class AccessibilityStatementControllerSpec extends PayeComponentSpec with PayeFakedApp {
   val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
-  val testAccessibilityStatementController = new AccessibilityStatementController(mockMcc)(mockAppConfig)
+  val mockView = app.injector.instanceOf[accessibility_statement]
+  val testAccessibilityStatementController = new AccessibilityStatementController(mockMcc, mockView)(mockAppConfig)
 
   "show" should {
     "return OK" in {

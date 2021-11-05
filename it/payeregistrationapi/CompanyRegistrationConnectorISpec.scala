@@ -17,14 +17,14 @@
 package payeregistrationapi
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import config.{AppConfig, WSHttpImpl}
+import config.AppConfig
 import connectors.CompanyRegistrationConnectorImpl
 import itutil.{IntegrationSpecBase, WiremockHelper}
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
-import play.api.{Application, Environment, Mode}
 import services.MetricsService
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import utils.PAYEFeatureSwitch
 
 import scala.concurrent.ExecutionContext
@@ -84,7 +84,7 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
       "the feature flag points at the stub" in {
         lazy val metrics = app.injector.instanceOf[MetricsService]
         lazy val featureSwitch = app.injector.instanceOf[PAYEFeatureSwitch]
-        lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+        lazy val http = app.injector.instanceOf(classOf[HttpClient])
         lazy val appConfig = app.injector.instanceOf[AppConfig]
         lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
 
@@ -123,7 +123,7 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
 
         lazy val metrics = app.injector.instanceOf[MetricsService]
         lazy val featureSwitch = app.injector.instanceOf[PAYEFeatureSwitch]
-        lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+        lazy val http = app.injector.instanceOf(classOf[HttpClient])
         lazy val appConfig = app.injector.instanceOf[AppConfig]
         lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
 

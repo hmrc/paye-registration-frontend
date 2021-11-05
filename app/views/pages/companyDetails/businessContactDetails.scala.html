@@ -14,44 +14,51 @@
  * limitations under the License.
  *@
 
+@import config.AppConfig
 @import helpers.templates.{oneOfManyErrorWrapper, payeErrorSummary, payeInput}
 @import models.DigitalContactDetails
-@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
-@import config.AppConfig
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
 @import views.helpers.TitleHelper.title
+
+@this(oneOfManyErrorWrapper: oneOfManyErrorWrapper,
+        payeErrorSummary: payeErrorSummary,
+        payeInput: payeInput,
+        main_template: main_template,
+        form: FormWithCSRF
+)
 
 @(contactForm: Form[DigitalContactDetails], companyName: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @formContent = {
     <fieldset>
         <legend class="visually-hidden">
-            @Messages("pages.businessContact.description", companyName)
+        @messages("pages.businessContact.description", companyName)
         </legend>
         <div class="form-group">
-            @payeInput(
+        @payeInput(
             contactForm("businessEmail"),
             '_inputClass -> "form-control-1-2",
             '_labelClass -> "form-label cascading",
             '_label -> messages("pages.businessContact.email")
-            )
+        )
         </div>
 
         <div class="form-group">
-            @payeInput(
+        @payeInput(
             contactForm("mobileNumber"),
             '_labelClass -> "form-label cascading",
             '_inputClass -> "form-control-1-2",
             '_label -> messages("pages.businessContact.contact")
-            )
+        )
         </div>
 
         <div>
-            @payeInput(
+        @payeInput(
             contactForm("phoneNumber"),
             '_labelClass -> "form-label cascading",
             '_inputClass -> "form-control-1-2",
             '_label -> messages("pages.businessContact.othercontact")
-            )
+        )
         </div>
     </fieldset>
 }
@@ -62,12 +69,12 @@
         messages("app.common.errorSummaryLabel"), contactForm, dataJourney = Some("DigitalContactDetails")
     )
 
-    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.businessContact.description", companyName)</h1>
+    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.businessContact.description", companyName)</h1>
 
-    @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.submitBusinessContactDetails()) {
+    @form(action = controllers.userJourney.routes.CompanyDetailsController.submitBusinessContactDetails()) {
 
         <div class="form-group">
-            @oneOfManyErrorWrapper(contactForm, formContent)
+        @oneOfManyErrorWrapper(contactForm, formContent)
         </div>
 
         <div class="form-group">

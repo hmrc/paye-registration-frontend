@@ -18,11 +18,10 @@ package services
 
 import connectors._
 import enums.{DownstreamOutcome, UserCapacity}
-import javax.inject.Inject
 import models.view.CompletionCapacity
-import play.api.Logger
 import uk.gov.hmrc.http.HeaderCarrier
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CompletionCapacityServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
@@ -49,11 +48,11 @@ trait CompletionCapacityService {
             _ => Future.successful(Some(apiToView(brCC)))
           }
         case None =>
-          Logger.info(s"[CompletionCapacityService] - [getCompletionCapacity] - BR document was found for regId $regId but it contained no completion capacity")
+          logger.info(s"[CompletionCapacityService] - [getCompletionCapacity] - BR document was found for regId $regId but it contained no completion capacity")
           Future.successful(None)
       } recover {
         case e: Throwable =>
-          Logger.warn(s"[CompletionCapacityService] - [getCompletionCapacity] - No document was found in business registration for regId $regId: reason ${e.getMessage}")
+          logger.warn(s"[CompletionCapacityService] - [getCompletionCapacity] - No document was found in business registration for regId $regId: reason ${e.getMessage}")
           None
       }
     }

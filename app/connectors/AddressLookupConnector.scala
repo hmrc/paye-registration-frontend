@@ -18,23 +18,21 @@ package connectors
 
 import com.codahale.metrics.{Counter, Timer}
 import common.Logging
-import config.{AppConfig, WSHttp}
-import javax.inject.{Inject, Singleton}
+import config.AppConfig
 import models.Address
 import models.external._
-import play.api.i18n.MessagesApi
 import play.api.libs.json.Reads
 import services.MetricsService
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NoStackTrace
 
 @Singleton
 class AddressLookupConnector @Inject()(metricsService: MetricsService,
-                                       http: WSHttp
-                                      )(implicit messagesApi: MessagesApi,
-                                        appConfig: AppConfig, implicit val ec: ExecutionContext) extends Logging {
+                                       http: HttpClient
+                                      )(appConfig: AppConfig, implicit val ec: ExecutionContext) extends Logging {
 
   lazy val addressLookupFrontendUrl: String = appConfig.servicesConfig.baseUrl("address-lookup-frontend")
   val successCounter: Counter = metricsService.addressLookupSuccessResponseCounter

@@ -16,18 +16,22 @@
 
 @import helpers.templates.{payeErrorSummary, payeInput}
 @import models.api.{CompanyDetails => CompanyDetailsAPI}
-@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+
+@this(payeErrorSummary: payeErrorSummary,
+        payeInput: payeInput,
+        formWithCSRF: FormWithCSRF)
 
 @(detailsForm: Form[CompanyDetailsAPI])(implicit request: Request[_], messages: Messages)
 
 
 @payeErrorSummary(
-    Messages("app.common.errorSummaryLabel"), detailsForm
+    messages("app.common.errorSummaryLabel"), detailsForm
 )
 
 <h1 class="form-title heading-large" id="pageHeading">Enter test company details</h1>
 
-@govHelpers.form(action = controllers.test.routes.TestRegSetupController.submitRegSetupCompanyDetails) {
+@formWithCSRF(action = controllers.test.routes.TestRegSetupController.submitRegSetupCompanyDetails) {
 
     <div class="inline form-group">
         @payeInput(

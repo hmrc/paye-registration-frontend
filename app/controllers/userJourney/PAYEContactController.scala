@@ -22,41 +22,35 @@ import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
 import forms.payeContactDetails.{CorrespondenceAddressForm, PAYEContactDetailsForm}
-import javax.inject.Inject
 import models.external.AuditingInformation
 import models.view._
-import play.api.Logger
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
+import views.html.pages.error.restart
 import views.html.pages.payeContact.{correspondenceAddress => PAYECorrespondenceAddressPage, payeContactDetails => PAYEContactDetailsPage}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-class PAYEContactControllerImpl @Inject()(val companyDetailsService: CompanyDetailsService,
-                                          val payeContactService: PAYEContactService,
-                                          val addressLookupService: AddressLookupService,
-                                          val keystoreConnector: KeystoreConnector,
-                                          val authConnector: AuthConnector,
-                                          val prepopService: PrepopulationService,
-                                          val s4LService: S4LService,
-                                          val incorpInfoService: IncorporationInformationService,
-                                          val auditService: AuditService,
-                                          val incorporationInformationConnector: IncorporationInformationConnector,
-                                          val payeRegistrationService: PAYERegistrationService,
-                                          mcc: MessagesControllerComponents
-                                         )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PAYEContactController(mcc) with AuthRedirectUrls
-
-abstract class PAYEContactController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-  implicit val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val companyDetailsService: CompanyDetailsService
-  val payeContactService: PAYEContactService
-  val addressLookupService: AddressLookupService
-  val keystoreConnector: KeystoreConnector
-  val prepopService: PrepopulationService
-  val auditService: AuditService
+@Singleton
+class PAYEContactController @Inject()(val companyDetailsService: CompanyDetailsService,
+                                      val payeContactService: PAYEContactService,
+                                      val addressLookupService: AddressLookupService,
+                                      val keystoreConnector: KeystoreConnector,
+                                      val authConnector: AuthConnector,
+                                      val prepopService: PrepopulationService,
+                                      val s4LService: S4LService,
+                                      val incorpInfoService: IncorporationInformationService,
+                                      val auditService: AuditService,
+                                      val incorporationInformationConnector: IncorporationInformationConnector,
+                                      val payeRegistrationService: PAYERegistrationService,
+                                      mcc: MessagesControllerComponents,
+                                      PAYEContactDetailsPage: PAYEContactDetailsPage,
+                                      PAYECorrespondenceAddressPage: PAYECorrespondenceAddressPage,
+                                      restart: restart
+                                     )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
   def payeContactDetails: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     profile =>
@@ -74,7 +68,7 @@ abstract class PAYEContactController(mcc: MessagesControllerComponents) extends 
           success => {
             val trimmed = trimPAYEContactDetails(success)
             payeContactService.submitPayeContactDetails(profile.registrationID, trimmed) map {
-              case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+              case DownstreamOutcome.Failure => InternalServerError(restart())
               case DownstreamOutcome.Success => Redirect(routes.PAYEContactController.payeCorrespondenceAddress())
             }
           }
@@ -114,7 +108,7 @@ abstract class PAYEContactController(mcc: MessagesControllerComponents) extends 
           },
           success => submitCorrespondenceAddress(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
             case DownstreamOutcome.Success => Future.successful(Redirect(controllers.userJourney.routes.SummaryController.summary()))
-            case DownstreamOutcome.Failure => Future.successful(InternalServerError(views.html.pages.error.restart()))
+            case DownstreamOutcome.Failure => Future.successful(InternalServerError(restart()))
             case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("correspondence", controllers.userJourney.routes.PAYEContactController.savePAYECorrespondenceAddress(None)) map {
               Redirect(_)
             }
@@ -149,7 +143,7 @@ abstract class PAYEContactController(mcc: MessagesControllerComponents) extends 
       _ <- auditService.auditCorrespondenceAddress(regId, "PrincipalPlaceOfBusiness")
     } yield res) recover {
       case _: PPOBAddressNotFoundException =>
-        Logger.warn(s"[PAYEContactService] [submitCorrespondenceWithPPOBAddress] - Error while saving Correspondence Address with a PPOBAddress which is missing")
+        logger.warn(s"[PAYEContactService] [submitCorrespondenceWithPPOBAddress] - Error while saving Correspondence Address with a PPOBAddress which is missing")
         DownstreamOutcome.Failure
     }
   }
@@ -160,7 +154,7 @@ abstract class PAYEContactController(mcc: MessagesControllerComponents) extends 
       res <- payeContactService.submitCorrespondence(regId, prepopAddress)
     } yield res) recover {
       case e: S4LFetchException =>
-        Logger.warn(s"[PAYEContactService] [submitCorrespondenceWithPrepopAddress] - Error while saving Correspondence Address with a PrepopAddress: ${e.getMessage}")
+        logger.warn(s"[PAYEContactService] [submitCorrespondenceWithPrepopAddress] - Error while saving Correspondence Address with a PrepopAddress: ${e.getMessage}")
         DownstreamOutcome.Failure
     }
   }
@@ -174,7 +168,7 @@ abstract class PAYEContactController(mcc: MessagesControllerComponents) extends 
           _ <- prepopService.saveAddress(profile.registrationID, address)
         } yield res match {
           case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
-          case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+          case DownstreamOutcome.Failure => InternalServerError(restart())
         }
         case None =>
           throw new Exception("[PAYEContactController] [savePAYECorrespondenceAddress] 'id' query string missing from ALF handback")

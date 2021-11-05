@@ -18,22 +18,20 @@ package connectors
 
 import com.codahale.metrics.{Counter, Timer}
 import common.exceptions.DownstreamExceptions.{IncorporationInformationResponseException, OfficerListNotFoundException}
-import config.{AppConfig, WSHttp}
-import controllers.exceptions.GeneralException
+import config.AppConfig
 import enums.IncorporationStatus
-import javax.inject.Inject
 import models.external.{CoHoCompanyDetailsModel, IncorpUpdateResponse, OfficerList}
-import play.api.Logger
 import play.api.http.Status.{ACCEPTED, OK}
 import play.api.libs.json._
 import services.MetricsService
 import uk.gov.hmrc.http._
 import utils.RegistrationAllowlist
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class IncorporationInformationConnectorImpl @Inject()(val metricsService: MetricsService,
-                                                      val http: WSHttp
+                                                      val http: HttpClient
                                                      )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends IncorporationInformationConnector {
 
   lazy val incorpInfoUrl = appConfig.servicesConfig.baseUrl("incorporation-information")
@@ -82,12 +80,12 @@ trait IncorporationInformationConnector extends RegistrationAllowlist {
         case OK => Some(resp.json.as[IncorporationStatus.Value](IncorpUpdateResponse.reads(transactionId, subscriber, regime)))
         case ACCEPTED => None
         case _ =>
-          Logger.warn(s"[IncorporationInformationConnect] - [setupSubscription] returned a successful response but with an incorrect code of: ${resp.status} for regId: $regId and txId: $transactionId")
+          logger.warn(s"[IncorporationInformationConnect] - [setupSubscription] returned a successful response but with an incorrect code of: ${resp.status} for regId: $regId and txId: $transactionId")
           throw new IncorporationInformationResponseException(s"Calling II on ${constructIncorporationInfoUri(transactionId, regime, subscriber)} returned a ${resp.status}")
       }
     } recover {
       case e =>
-        Logger.warn(s"[IncorporationInformationConnect] - [setupSubscription] an unexpected error ${e.getMessage} occurred when calling II for regId: $regId txId: $transactionId")
+        logger.warn(s"[IncorporationInformationConnect] - [setupSubscription] an unexpected error ${e.getMessage} occurred when calling II for regId: $regId txId: $transactionId")
         throw e
     }
   }
@@ -95,10 +93,10 @@ trait IncorporationInformationConnector extends RegistrationAllowlist {
   def cancelSubscription(transactionId: String, regId: String, regime: String = "paye-fe", subscriber: String = "SCRS")(implicit hc: HeaderCarrier): Future[Boolean] = {
     http.DELETE[HttpResponse](s"$incorpInfoUrl/incorporation-information/subscribe/$transactionId/regime/$regime/subscriber/$subscriber").map(_ => true)
       .recover {
-        case _: NotFoundException => Logger.info(s"[IncorporationInformationConnect] - [cancelSubscription] no subscription found when trying to delete subscription. it might already have been deleted")
+        case _: NotFoundException => logger.info(s"[IncorporationInformationConnect] - [cancelSubscription] no subscription found when trying to delete subscription. it might already have been deleted")
           true
         case e =>
-          Logger.warn(s"[IncorporationInformationConnect] - [cancelSubscription] an unexpected error ${e.getMessage} occurred when calling II for regId: $regId txId: $transactionId")
+          logger.warn(s"[IncorporationInformationConnect] - [cancelSubscription] an unexpected error ${e.getMessage} occurred when calling II for regId: $regId txId: $transactionId")
           false
       }
   }
@@ -144,7 +142,7 @@ trait IncorporationInformationConnector extends RegistrationAllowlist {
     }
   } recover {
     case e: Exception =>
-      throw GeneralException(
+      throw new InternalServerException(
         s"[IncorporationInformationConnector][getIncorporationInfo] an error occurred while getting the incorporation info for regId: $regId and txId: $txId - error: ${e.getMessage}"
       )
   }

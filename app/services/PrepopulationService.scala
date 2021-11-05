@@ -19,11 +19,11 @@ package services
 import common.exceptions.DownstreamExceptions.S4LFetchException
 import connectors.BusinessRegistrationConnector
 import enums.CacheKeys
-import javax.inject.Inject
 import models.view.PAYEContactDetails
 import models.{Address, DigitalContactDetails}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PrepopulationServiceImpl @Inject()(val busRegConnector: BusinessRegistrationConnector,

@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@this()
+
 @(field: Field, radioOptions: Seq[(String, String)], isHeading: Boolean, args: (Symbol, Any)*)(implicit messages: Messages)
 
 @import views.html.helper._
@@ -34,7 +36,7 @@
         </legend>
     }
 
-    @elements.errors.map{error => <span class="error-notification" id='@{field.id+"-error-message"}'>@Messages(error)</span>}
+    @elements.errors.map{error => <span class="error-notification" id='@{field.id+"-error-message"}'>@messages(error.toString)</span>}
 
     @{args.filter(a => a._1.name == "_title").map { a =>
         <strong>{a._2.toString}</strong>

@@ -17,7 +17,7 @@
 package payeregistrationapi
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import config.{AppConfig, WSHttpImpl}
+import config.AppConfig
 import connectors.PAYERegistrationConnectorImpl
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.api._
@@ -25,9 +25,9 @@ import models.view.PAYEContactDetails
 import models.{Address, DigitalContactDetails}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.{Application, Environment, Mode}
+import play.api.{Application, Environment}
 import services.MetricsService
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 
 import scala.concurrent.ExecutionContext
 
@@ -50,7 +50,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
   class Setup {
     lazy val metrics = app.injector.instanceOf[MetricsService]
-    lazy val http = app.injector.instanceOf(classOf[WSHttpImpl])
+    lazy val http = app.injector.instanceOf(classOf[HttpClient])
     lazy val env = app.injector.instanceOf(classOf[Environment])
     lazy val appConfig = app.injector.instanceOf[AppConfig]
     lazy implicit val ec = app.injector.instanceOf[ExecutionContext]

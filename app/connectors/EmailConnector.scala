@@ -17,11 +17,11 @@
 package connectors
 
 import common.Logging
-import config.{AppConfig, WSHttp}
-import javax.inject.Inject
+import config.AppConfig
 import models.external.EmailRequest
 import uk.gov.hmrc.http._
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 sealed trait EmailResponse
@@ -32,7 +32,7 @@ case object EmailDifficulties extends EmailResponse
 
 case object EmailNotFound extends EmailResponse
 
-class EmailConnectorImpl @Inject()(val http: WSHttp, appConfig: AppConfig)(implicit val ec: ExecutionContext) extends EmailConnector {
+class EmailConnectorImpl @Inject()(val http: HttpClient, appConfig: AppConfig)(implicit val ec: ExecutionContext) extends EmailConnector {
   val sendEmailURL: String = appConfig.servicesConfig.getConfString("email.sendAnEmailURL",
     throw new Exception("email.sendAnEmailURL not found"))
 }

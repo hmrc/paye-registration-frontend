@@ -20,29 +20,28 @@ import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.directorDetails.DirectorDetailsForm
-import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
+import views.html.pages.error.restart
 import views.html.pages.{directorDetails => DirectorDetailsPage}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
-class DirectorDetailsControllerImpl @Inject()(val directorDetailsService: DirectorDetailsService,
-                                              val keystoreConnector: KeystoreConnector,
-                                              val s4LService: S4LService,
-                                              val companyDetailsService: CompanyDetailsService,
-                                              val incorpInfoService: IncorporationInformationService,
-                                              val authConnector: AuthConnector,
-                                              val incorporationInformationConnector: IncorporationInformationConnector,
-                                              val payeRegistrationService: PAYERegistrationService,
-                                              mcc: MessagesControllerComponents
-                                             )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends DirectorDetailsController(mcc) with AuthRedirectUrls
-
-abstract class DirectorDetailsController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-  implicit val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val directorDetailsService: DirectorDetailsService
+@Singleton
+class DirectorDetailsController @Inject()(val directorDetailsService: DirectorDetailsService,
+                                          val keystoreConnector: KeystoreConnector,
+                                          val s4LService: S4LService,
+                                          val companyDetailsService: CompanyDetailsService,
+                                          val incorpInfoService: IncorporationInformationService,
+                                          val authConnector: AuthConnector,
+                                          val incorporationInformationConnector: IncorporationInformationConnector,
+                                          val payeRegistrationService: PAYERegistrationService,
+                                          mcc: MessagesControllerComponents,
+                                          DirectorDetailsPage: DirectorDetailsPage,
+                                          restart: restart
+                                         )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
   def directorDetails: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     profile =>
@@ -51,7 +50,7 @@ abstract class DirectorDetailsController(mcc: MessagesControllerComponents) exte
         val names = directorDetailsService.createDisplayNamesMap(directors)
         Ok(DirectorDetailsPage(DirectorDetailsForm.form.fill(ninos), names))
       } recover {
-        case _ => InternalServerError(views.html.pages.error.restart())
+        case _ => InternalServerError(restart())
       }
   }
 

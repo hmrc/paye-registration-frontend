@@ -16,12 +16,12 @@
 
 package helpers.fixtures
 
-import java.time.LocalDate
-
 import enums.PAYEStatus
 import models.api.{PAYEContact => PAYEContactAPI, _}
 import models.view.{EmployingAnyone, EmployingStaff, PAYEContactDetails, Summary, SummaryChangeLink, SummaryRow, SummarySection, WillBePaying, PAYEContact => PAYEContactView}
 import models.{Address, DigitalContactDetails}
+
+import java.time.LocalDate
 
 trait PAYERegistrationFixture {
 

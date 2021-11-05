@@ -16,17 +16,17 @@
 
 package views.pages.companyDetails
 
-import java.util.Locale
-
 import forms.companyDetails.PPOBForm
 import forms.payeContactDetails.CorrespondenceAddressForm
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.Address
 import org.jsoup.Jsoup
-import play.api.i18n.{I18nSupport, Lang, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, Lang, MessagesApi}
 import play.api.test.FakeRequest
-import views.html.pages.companyDetails.{ppobAddress => PPOBAddressPage}
-import views.html.pages.payeContact.{correspondenceAddress => CorrespondenceAddressPage}
+import views.html.pages.companyDetails.ppobAddress
+import views.html.pages.payeContact.correspondenceAddress
+
+import java.util.Locale
 
 class ChooseAddressSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
   implicit val appConfig = mockAppConfig
@@ -84,8 +84,8 @@ class ChooseAddressSpec extends PayeComponentSpec with PayeFakedApp with I18nSup
   )
 
   "The PPOB Address screen without PPOB Address" should {
-    lazy val view = PPOBAddressPage(PPOBForm.form, Some(testROAddress), None, Map.empty[Int, Address])
-    lazy val document = Jsoup.parse(view.body)
+    lazy val view = app.injector.instanceOf[ppobAddress]
+    lazy val document = Jsoup.parse(view(PPOBForm.form, Some(testROAddress), None, Map.empty[Int, Address]).body)
 
     "have the correct title" in {
       document.getElementById("pageHeading").text mustBe mockMessages("pages.ppobAddress.description")
@@ -117,8 +117,8 @@ class ChooseAddressSpec extends PayeComponentSpec with PayeFakedApp with I18nSup
   }
 
   "The PPOB Address screen with PPOB Address" should {
-    lazy val view = PPOBAddressPage(PPOBForm.form, Some(testROAddress), Some(testPPOBAddress), Map.empty[Int, Address])
-    lazy val document = Jsoup.parse(view.body)
+    lazy val view = app.injector.instanceOf[ppobAddress]
+    lazy val document = Jsoup.parse(view(PPOBForm.form, Some(testROAddress), Some(testPPOBAddress), Map.empty[Int, Address]).body)
 
     "have the correct name for radio button ppobAddress" in {
       document.getElementById("chosenAddress-ppobaddress").attr("name") mustBe "chosenAddress"
@@ -134,8 +134,8 @@ class ChooseAddressSpec extends PayeComponentSpec with PayeFakedApp with I18nSup
   }
 
   "The PPOB Address screen with Prepop Addresses" should {
-    lazy val view = PPOBAddressPage(PPOBForm.form, Some(testROAddress), Some(testPPOBAddress), testListPrepopAddresses)
-    lazy val document = Jsoup.parse(view.body)
+    lazy val view = app.injector.instanceOf[ppobAddress]
+    lazy val document = Jsoup.parse(view(PPOBForm.form, Some(testROAddress), Some(testPPOBAddress), testListPrepopAddresses).body)
 
     "have the correct name for radio button prepopaddress0" in {
       document.getElementById("chosenAddress-prepopaddress0").attr("name") mustBe "chosenAddress"
@@ -163,8 +163,8 @@ class ChooseAddressSpec extends PayeComponentSpec with PayeFakedApp with I18nSup
   }
 
   "The Correspondence Address screen without Correspondence Address" should {
-    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), Some(testPPOBAddress), None, Map.empty[Int, Address])
-    lazy val document = Jsoup.parse(view.body)
+    lazy val view = app.injector.instanceOf[correspondenceAddress]
+    lazy val document = Jsoup.parse(view(CorrespondenceAddressForm.form, Some(testROAddress), Some(testPPOBAddress), None, Map.empty[Int, Address]).body)
 
     "have the correct title" in {
       document.getElementById("pageHeading").text mustBe mockMessages("pages.correspondenceAddress.description")
@@ -208,8 +208,8 @@ class ChooseAddressSpec extends PayeComponentSpec with PayeFakedApp with I18nSup
   }
 
   "The Correspondence Address screen with Correspondence Address" should {
-    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), Some(testPPOBAddress), Some(testCorrespondenceAddress), Map.empty[Int, Address])
-    lazy val document = Jsoup.parse(view.body)
+    lazy val view = app.injector.instanceOf[correspondenceAddress]
+    lazy val document = Jsoup.parse(view(CorrespondenceAddressForm.form, Some(testROAddress), Some(testPPOBAddress), Some(testCorrespondenceAddress), Map.empty[Int, Address]).body)
 
     "have the correct name for radio button correspondenceAddress" in {
       document.getElementById("chosenAddress-correspondenceaddress").attr("name") mustBe "chosenAddress"
@@ -225,8 +225,8 @@ class ChooseAddressSpec extends PayeComponentSpec with PayeFakedApp with I18nSup
   }
 
   "The Correspondence Address screen with Prepop Addresses" should {
-    lazy val view = CorrespondenceAddressPage(CorrespondenceAddressForm.form, Some(testROAddress), Some(testPPOBAddress), Some(testCorrespondenceAddress), testListPrepopAddresses)
-    lazy val document = Jsoup.parse(view.body)
+    lazy val view = app.injector.instanceOf[correspondenceAddress]
+    lazy val document = Jsoup.parse(view(CorrespondenceAddressForm.form, Some(testROAddress), Some(testPPOBAddress), Some(testCorrespondenceAddress), testListPrepopAddresses).body)
 
     "have the correct name for radio button prepopaddress0" in {
       document.getElementById("chosenAddress-prepopaddress0").attr("name") mustBe "chosenAddress"

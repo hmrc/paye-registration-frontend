@@ -17,7 +17,6 @@
 package services
 
 import audit._
-import javax.inject.{Inject, Singleton}
 import models.DigitalContactDetails
 import models.external.AuditingInformation
 import models.view.PAYEContactDetails
@@ -25,10 +24,11 @@ import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AuditServiceImpl @Inject()(val auditConnector: AuditConnector)(implicit ec: ExecutionContext) extends AuditService {
+class AuditServiceImpl @Inject()(val auditConnector: AuditConnector) extends AuditService {
 }
 
 trait AuditService {

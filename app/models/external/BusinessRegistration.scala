@@ -18,7 +18,7 @@ package models.external
 
 import enums.IncorporationStatus
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{Json, _}
+import play.api.libs.json._
 
 case class BusinessRegistrationRequest(language: String)
 

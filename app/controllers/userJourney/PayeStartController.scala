@@ -21,46 +21,38 @@ import config.AppConfig
 import connectors._
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.{CacheKeys, DownstreamOutcome, RegistrationDeletion}
-import javax.inject.Inject
 import models.external.CurrentProfile
 import play.api.mvc._
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import utils.PAYEFeatureSwitches
+import views.html.pages.error.restart
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-class PayeStartControllerImpl @Inject()(val currentProfileService: CurrentProfileService,
-                                        val payeRegistrationService: PAYERegistrationService,
-                                        val keystoreConnector: KeystoreConnector,
-                                        val authConnector: AuthConnector,
-                                        val s4LService: S4LService,
-                                        val companyDetailsService: CompanyDetailsService,
-                                        val incorpInfoService: IncorporationInformationService,
-                                        val businessRegistrationConnector: BusinessRegistrationConnector,
-                                        val companyRegistrationConnector: CompanyRegistrationConnector,
-                                        val featureSwitches: PAYEFeatureSwitches,
-                                        val incorporationInformationConnector: IncorporationInformationConnector,
-                                        mcc: MessagesControllerComponents
-                                       )(implicit val appConfig: AppConfig,implicit val ec: ExecutionContext) extends PayeStartController(mcc) with AuthRedirectUrls
-
-abstract class PayeStartController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-  implicit val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val currentProfileService: CurrentProfileService
-  val payeRegistrationService: PAYERegistrationService
-  val businessRegistrationConnector: BusinessRegistrationConnector
-  val companyRegistrationConnector: CompanyRegistrationConnector
-
-  val payeRegElFEURL: String
-  val payeRegElFEURI: String
+@Singleton
+class PayeStartController @Inject()(val currentProfileService: CurrentProfileService,
+                                    val payeRegistrationService: PAYERegistrationService,
+                                    val keystoreConnector: KeystoreConnector,
+                                    val authConnector: AuthConnector,
+                                    val s4LService: S4LService,
+                                    val companyDetailsService: CompanyDetailsService,
+                                    val incorpInfoService: IncorporationInformationService,
+                                    val businessRegistrationConnector: BusinessRegistrationConnector,
+                                    val companyRegistrationConnector: CompanyRegistrationConnector,
+                                    val featureSwitches: PAYEFeatureSwitches,
+                                    val incorporationInformationConnector: IncorporationInformationConnector,
+                                    mcc: MessagesControllerComponents,
+                                    restart: restart
+                                   )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
   def steppingStone(): Action[AnyContent] = Action { implicit request =>
     Redirect(s"$payeRegElFEURL$payeRegElFEURI")
   }
 
-  val startPaye = isAuthorisedAndIsOrg { implicit request =>
+  def startPaye(): Action[AnyContent] = isAuthorisedAndIsOrg { implicit request =>
     checkAndStoreCurrentProfile { profile =>
       assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId) {
         Redirect(routes.EmploymentController.paidEmployees())
@@ -96,14 +88,14 @@ abstract class PayeStartController(mcc: MessagesControllerComponents) extends Pa
     } recover {
       case _: NotFoundException => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
       case _: ConfirmationRefsNotFoundException => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
-      case _ => InternalServerError(views.html.pages.error.restart())
+      case _ => InternalServerError(restart())
     }
   }
 
   private def assertPAYERegistrationFootprint(regId: String, txId: String)(f: => Result)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
     payeRegistrationService.assertRegistrationFootprint(regId, txId) map {
       case DownstreamOutcome.Success => f
-      case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+      case DownstreamOutcome.Failure => InternalServerError(restart())
     }
   }
 }

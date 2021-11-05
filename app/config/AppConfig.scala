@@ -16,17 +16,17 @@
 
 package config
 
-import java.net.URLEncoder
-import java.nio.charset.Charset
-import java.util.Base64
-
-import javax.inject.{Inject, Singleton}
 import models.Address
 import models.api.Director
 import models.external.OfficerList
 import play.api.Configuration
 import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+
+import java.net.URLEncoder
+import java.nio.charset.Charset
+import java.util.Base64
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class AppConfig @Inject()(configuration: Configuration) {

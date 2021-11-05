@@ -16,19 +16,19 @@
 
 package connectors
 
-import config.{AppConfig, WSHttp}
-import javax.inject.Inject
+import config.AppConfig
 import models.Address
 import models.external.BusinessProfile
 import models.view.{CompanyDetails, PAYEContactDetails}
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Reads}
 import services.MetricsService
 import uk.gov.hmrc.http._
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class BusinessRegistrationConnectorImpl @Inject()(val metricsService: MetricsService,
-                                                  val http: WSHttp,
+                                                  val http: HttpClient,
                                                   appConfig: AppConfig)(implicit val ec: ExecutionContext) extends BusinessRegistrationConnector {
   val businessRegUrl = appConfig.servicesConfig.baseUrl("business-registration")
 }
@@ -96,7 +96,7 @@ trait BusinessRegistrationConnector {
 
   def retrieveContactDetails(regId: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYEContactDetails]): Future[Option[PAYEContactDetails]] = {
     val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
-    implicit val rds = PAYEContactDetails.prepopReads
+    implicit val rds: Reads[PAYEContactDetails] = PAYEContactDetails.prepopReads
     http.GET[PAYEContactDetails](s"$businessRegUrl/business-registration/$regId/contact-details") map { details =>
       businessRegistrationTimer.stop()
       Some(details)

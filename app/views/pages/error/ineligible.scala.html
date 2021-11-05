@@ -15,9 +15,10 @@
  *@
 
 @import config.AppConfig
-@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@this(main_template: main_template)
+
+@()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @main_template(title = messages("errorPages.ineligible.description")) {
 

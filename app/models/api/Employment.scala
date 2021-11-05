@@ -16,10 +16,10 @@
 
 package models.api
 
-import java.time.LocalDate
-
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{Format, Reads, Writes, __}
+
+import java.time.LocalDate
 
 case class Employment(employees: Employing.Value,
                       firstPaymentDate: LocalDate,

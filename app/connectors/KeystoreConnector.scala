@@ -17,7 +17,6 @@
 package connectors
 
 import com.codahale.metrics.{Counter, Timer}
-import javax.inject.Inject
 import models.api.SessionMap
 import models.external.CurrentProfile
 import play.api.libs.json.{Format, Json}
@@ -26,6 +25,7 @@ import services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.SessionCache
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class KeystoreConnectorImpl @Inject()(val sessionCache: SessionCache,
@@ -60,7 +60,7 @@ trait KeystoreConnector {
     }
   }
 
-  def cacheSessionMap(map: SessionMap)(implicit hc: HeaderCarrier): Future[SessionMap] = {
+  def cacheSessionMap(map: SessionMap): Future[SessionMap] = {
     metricsService.processDataResponseWithMetrics[SessionMap](successCounter, failedCounter, timer) {
       sessionRepository().upsertSessionMap(map) map (_ => map)
     }
@@ -91,7 +91,7 @@ trait KeystoreConnector {
     }
   }
 
-  def fetchByTransactionId(txId: String)(implicit hc: HeaderCarrier): Future[Option[SessionMap]] = {
+  def fetchByTransactionId(txId: String): Future[Option[SessionMap]] = {
     metricsService.processOptionalDataWithMetrics(successCounter, emptyResponseCounter, timer) {
       sessionRepository().getLatestSessionMapByTransactionId(txId)
     }

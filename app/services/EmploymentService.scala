@@ -16,19 +16,17 @@
 
 package services
 
-import java.time.LocalDate
-
 import com.google.inject.Inject
 import connectors.PAYERegistrationConnector
-import controllers.exceptions.GeneralException
 import enums.CacheKeys
 import forms.employmentDetails.EmployingStaffForm
 import models.api.{Employing, Employment}
 import models.external.CurrentProfile
 import models.view.{EmployingAnyone, EmployingStaff, WillBePaying}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 import utils.SystemDate
 
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class EmploymentServiceImpl @Inject()(val s4LService: S4LService,
@@ -100,7 +98,7 @@ trait EmploymentService {
         }
       }
     } recover {
-      case e: Exception => throw GeneralException(s"[EmploymentService][fetchEmployingStaff] an error occured for regId ${cp.registrationID} with error - ${e.getMessage}")
+      case e: Exception => throw new InternalServerException(s"[EmploymentService][fetchEmployingStaff] an error occured for regId ${cp.registrationID} with error - ${e.getMessage}")
     }
   }
 
@@ -112,7 +110,7 @@ trait EmploymentService {
         _ <- s4LService.clear(regId)
       } yield viewData
     ) recover {
-      case e: Exception => throw GeneralException(s"[EmploymentService][saveEmployingStaff] an error occured for regId $regId with error - ${e.getMessage}")
+      case e: Exception => throw new InternalServerException(s"[EmploymentService][saveEmployingStaff] an error occured for regId $regId with error - ${e.getMessage}")
     }
   }
 

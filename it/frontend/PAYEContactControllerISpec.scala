@@ -16,8 +16,6 @@
 
 package frontend
 
-import java.util.UUID
-
 import itutil._
 import models.Address
 import models.external._
@@ -26,6 +24,8 @@ import play.api.Application
 import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.DefaultCookieSigner
+
+import java.util.UUID
 
 class PAYEContactControllerISpec extends IntegrationSpecBase
   with LoginStub

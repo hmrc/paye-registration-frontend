@@ -16,18 +16,17 @@
 
 package services
 
-import java.util.Locale
-
-import helpers.{PayeComponentSpec, PayeFakedApp}
 import helpers.mocks.MockMetrics
+import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.Address
 import models.external.AlfJourneyConfig
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.i18n.{Lang, Messages, MessagesApi}
+import play.api.i18n.Lang
 import play.api.mvc.Call
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.util.Locale
 import scala.concurrent.Future
 
 

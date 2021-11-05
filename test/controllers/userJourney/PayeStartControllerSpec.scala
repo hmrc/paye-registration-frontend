@@ -16,7 +16,6 @@
 
 package controllers.userJourney
 
-import config.AppConfig
 import enums.{DownstreamOutcome, RegistrationDeletion}
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProfile}
@@ -26,32 +25,37 @@ import play.api.http.Status
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.NotFoundException
+import views.html.pages.error.restart
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionContext}
+import scala.concurrent.Future
 
 class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
   }
-  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
-  class Setup {
-    def controller() = new PayeStartController(mockMcc) {
-      override val redirectToLogin = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-      override val payeRegElFEURL = MockAuthRedirects.payeRegElFEUrl
-      override val payeRegElFEURI = MockAuthRedirects.payeRegElFEUri
-      override val authConnector = mockAuthConnector
-      override val currentProfileService = mockCurrentProfileService
-      override val payeRegistrationService = mockPayeRegService
-      override val keystoreConnector = mockKeystoreConnector
-      override val businessRegistrationConnector = mockBusinessRegistrationConnector
-      override val companyRegistrationConnector = mockCompRegConnector
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override implicit val appConfig: AppConfig = mockAppConfig
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-    }
+  lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+  lazy val mockRestart: restart = app.injector.instanceOf[restart]
+
+  class Setup {
+    def controller() = new PayeStartController(
+      mockCurrentProfileService,
+      mockPayeRegService,
+      mockKeystoreConnector,
+      mockAuthConnector,
+      mockS4LService,
+      mockCompanyDetailsService,
+      mockIncorpInfoService,
+      mockBusinessRegistrationConnector,
+      mockCompRegConnector,
+      mockFeatureSwitches,
+      mockIncorpInfoConnector,
+      mockMcc,
+      mockRestart
+    )(mockAppConfig,
+      globalExecutionContext)
   }
 
   val fakeRequest = FakeRequest()
@@ -63,7 +67,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
     "redirect to PREFE" in new Setup {
       AuthHelpers.showUnauthorised(controller().steppingStone(), fakeRequest) { resp =>
         status(resp) mustBe SEE_OTHER
-        redirectLocation(resp) mustBe Some("/prefe/test/")
+        redirectLocation(resp) mustBe Some("http://localhost:9877/eligibility-for-paye")
       }
     }
   }
@@ -97,10 +101,10 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "show an Error page for an authorised user with a registration ID and CoHo Company Details, with an error response from the microservice" in new Setup {
       when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
-        .thenReturn(Future(Fixtures.validCurrentProfile.get))
+        .thenReturn(Future.successful(Fixtures.validCurrentProfile.get))
 
       when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future(DownstreamOutcome.Failure))
+        .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthHelpers.showAuthorisedOrg(controller().startPaye, FakeRequest()) {
         result =>
@@ -113,7 +117,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         .thenReturn(Future.successful(validCurrentProfile("submitted")))
 
       when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future(DownstreamOutcome.Success))
+        .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
@@ -127,7 +131,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         .thenReturn(Future.successful(validCurrentProfile("acknowledged", Some("04"))))
 
       when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future(DownstreamOutcome.Success))
+        .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
@@ -143,7 +147,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         ))
 
       when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future(DownstreamOutcome.Success))
+        .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
@@ -159,7 +163,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         ))
 
       when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future(DownstreamOutcome.Success))
+        .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
@@ -223,7 +227,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
           .thenReturn(Future.successful(Some(validCurrentProfile("rejected"))))
 
         when(mockPayeRegService.deleteRejectedRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-          .thenReturn(Future(RegistrationDeletion.success))
+          .thenReturn(Future.successful(RegistrationDeletion.success))
 
         AuthHelpers.showAuthorised(controller().restartPaye, fakeRequest) {
           result =>
@@ -250,10 +254,10 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
           .thenReturn(Future.successful(testBusinessProfile))
 
         when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.any())(ArgumentMatchers.any()))
-          .thenReturn(Future(testCompanyProfile))
+          .thenReturn(Future.successful(testCompanyProfile))
 
         when(mockPayeRegService.deleteRejectedRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-          .thenReturn(Future(RegistrationDeletion.success))
+          .thenReturn(Future.successful(RegistrationDeletion.success))
 
         AuthHelpers.showAuthorised(controller().restartPaye, fakeRequest) {
           result =>
@@ -269,7 +273,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
           .thenReturn(Future.successful(Some(validCurrentProfile("rejected"))))
 
         when(mockPayeRegService.deleteRejectedRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-          .thenReturn(Future(RegistrationDeletion.invalidStatus))
+          .thenReturn(Future.successful(RegistrationDeletion.invalidStatus))
 
         AuthHelpers.showAuthorised(controller().restartPaye, fakeRequest) {
           result =>

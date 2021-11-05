@@ -22,41 +22,39 @@ import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
 import forms.companyDetails.{BusinessContactDetailsForm, PPOBForm, TradingNameForm}
-import javax.inject.Inject
 import models.external.AuditingInformation
 import models.view._
-import play.api.Logger
 import play.api.data.Form
 import play.api.mvc._
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.pages.companyDetails.{confirmROAddress, businessContactDetails => BusinessContactDetailsPage, ppobAddress => PPOBAddressPage, tradingName => TradingNamePage}
+import views.html.pages.error.restart
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyDetailsControllerImpl @Inject()(val s4LService: S4LService,
-                                             val keystoreConnector: KeystoreConnector,
-                                             val companyDetailsService: CompanyDetailsService,
-                                             val incorpInfoService: IncorporationInformationService,
-                                             val authConnector: AuthConnector,
-                                             val addressLookupService: AddressLookupService,
-                                             val prepopService: PrepopulationService,
-                                             val auditService: AuditService,
-                                             val incorporationInformationConnector: IncorporationInformationConnector,
-                                             val payeRegistrationService: PAYERegistrationService,
-                                             mcc: MessagesControllerComponents
-                                            )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends CompanyDetailsController(mcc) with AuthRedirectUrls
+@Singleton
+class CompanyDetailsController @Inject()(val s4LService: S4LService,
+                                         val keystoreConnector: KeystoreConnector,
+                                         val companyDetailsService: CompanyDetailsService,
+                                         val incorpInfoService: IncorporationInformationService,
+                                         val authConnector: AuthConnector,
+                                         val addressLookupService: AddressLookupService,
+                                         val prepopService: PrepopulationService,
+                                         val auditService: AuditService,
+                                         val incorporationInformationConnector: IncorporationInformationConnector,
+                                         val payeRegistrationService: PAYERegistrationService,
+                                         mcc: MessagesControllerComponents,
+                                         TradingNamePage: TradingNamePage,
+                                         restart: restart,
+                                         BusinessContactDetailsPage: BusinessContactDetailsPage,
+                                         confirmROAddress: confirmROAddress,
+                                         PPOBAddressPage: PPOBAddressPage
+                                        )(implicit val appConfig: AppConfig,
+                                          implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
-abstract class CompanyDetailsController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-  implicit val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val s4LService: S4LService
-  val companyDetailsService: CompanyDetailsService
-  val incorpInfoService: IncorporationInformationService
-  val addressLookupService: AddressLookupService
-  val prepopService: PrepopulationService
-  val auditService: AuditService
   val companyNameKey: String = "CompanyName"
 
   def tradingName: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
@@ -81,7 +79,7 @@ abstract class CompanyDetailsController(mcc: MessagesControllerComponents) exten
             val trimmedTradingName = success.copy(tradingName = success.tradingName.map(_.trim))
             companyDetailsService.submitTradingName(trimmedTradingName, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
               case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.roAddress())
-              case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+              case DownstreamOutcome.Failure => InternalServerError(restart())
             }
           }
         }
@@ -131,7 +129,7 @@ abstract class CompanyDetailsController(mcc: MessagesControllerComponents) exten
               companyDetailsService.submitBusinessContact(trimmed, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
                 case DownstreamOutcome.Success => Redirect(routes.NatureOfBusinessController.natureOfBusiness())
                   .removingFromSession(companyNameKey)
-                case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+                case DownstreamOutcome.Failure => InternalServerError(restart())
                   .removingFromSession(companyNameKey)
               }
             }
@@ -167,7 +165,7 @@ abstract class CompanyDetailsController(mcc: MessagesControllerComponents) exten
           },
           success => submitPPOBAddressChoice(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
             case DownstreamOutcome.Success => Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
-            case DownstreamOutcome.Failure => Future.successful(InternalServerError(views.html.pages.error.restart()))
+            case DownstreamOutcome.Failure => Future.successful(InternalServerError(restart()))
             case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("ppob", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress(None)) map {
               redirectUrl => Redirect(redirectUrl)
             }
@@ -192,11 +190,11 @@ abstract class CompanyDetailsController(mcc: MessagesControllerComponents) exten
         res <- companyDetailsService.submitPPOBAddr(prepopAddress, regId, txId)
       } yield res) recover {
         case e: S4LFetchException =>
-          Logger.warn(s"[CompanyDetailsController] [submitPPOBAddressChoice] - Error while saving PPOB Address with a PrepopAddress: ${e.getMessage}")
+          logger.warn(s"[CompanyDetailsController] [submitPPOBAddressChoice] - Error while saving PPOB Address with a PrepopAddress: ${e.getMessage}")
           DownstreamOutcome.Failure
       }
       case CorrespondenceAddress =>
-        Logger.warn("[CompanyDetailsController] [submitPPOBAddressChoice] - Correspondence address returned as selected address in PPOB Address page")
+        logger.warn("[CompanyDetailsController] [submitPPOBAddressChoice] - Correspondence address returned as selected address in PPOB Address page")
         Future.successful(DownstreamOutcome.Failure)
     }
   }
@@ -210,7 +208,7 @@ abstract class CompanyDetailsController(mcc: MessagesControllerComponents) exten
           _ <- prepopService.saveAddress(profile.registrationID, address)
         } yield res match {
           case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
-          case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+          case DownstreamOutcome.Failure => InternalServerError(restart())
         }
         case None =>
           throw new Exception("[CompanyDetailsController] [savePPOBAddress] 'id' query string missing from ALF handback")

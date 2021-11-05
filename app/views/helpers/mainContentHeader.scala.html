@@ -14,16 +14,18 @@
  * limitations under the License.
  *@
 
+@this()
+
 @(backButtonEnabled: Boolean)(implicit messages: Messages)
 
 <div id="global-header-bar"></div>
 <div class="phase-banner">
     <p>
         <strong class="phase-tag">BETA</strong>
-        <span>@Messages("app.common.feedbackFirst") <a href="https://www.tax.service.gov.uk/contact/beta-feedback?service=SCRS">@Messages("app.common.feedbackSecond")</a> @Messages("app.common.feedbackThird")</span>
+        <span>@messages("app.common.feedbackFirst") <a href="https://www.tax.service.gov.uk/contact/beta-feedback?service=SCRS">@messages("app.common.feedbackSecond")</a> @messages("app.common.feedbackThird")</span>
     </p>
 </div>
 
 @if(backButtonEnabled) {
-    <a id="back" class="link-back" href="javascript:history.back()">@Messages("app.common.back")</a>
+    <a id="back" class="link-back" href="javascript:history.back()">@messages("app.common.back")</a>
 }

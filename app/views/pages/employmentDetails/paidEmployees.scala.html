@@ -14,37 +14,45 @@
  * limitations under the License.
  *@
 
-@import helpers.templates.{hiddenDetails, inlineDateInput, payeInputRadioGroup, payeErrorSummary, formHiddenYesNoRadio}
+@import config.AppConfig
+@import helpers.templates._
 @import models.view.EmployingAnyone
-@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
 @import views.helpers.TitleHelper.title
 
-@import config.AppConfig
+@this(hiddenDetails: hiddenDetails,
+        inlineDateInput: inlineDateInput,
+        payeInputRadioGroup: payeInputRadioGroup,
+        payeErrorSummary: payeErrorSummary,
+        formHiddenYesNoRadio: formHiddenYesNoRadio,
+        main_template: main_template,
+        formWithCSRF: FormWithCSRF)
+
 @(paidEmployeesForm: Form[EmployingAnyone], weeklyThreshold: Int)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @hiddenYesNoContent = {
 @inlineDateInput(
     paidEmployeesForm,
     "earliestDate",
-    Some(Html(Messages("pages.paidEmployees.input.hint-text"))),
+    Some(Html(messages("pages.paidEmployees.input.hint-text"))),
     '_legend -> messages("pages.paidEmployees.paidEmployeesLabel"),
     '_title -> messages("pages.paidEmployees.hiddenLabel")
 )
 }
 
-@main_template(title = title(Messages("pages.paidEmployees.title"), paidEmployeesForm)) {
+@main_template(title = title(messages("pages.paidEmployees.title"), paidEmployeesForm)) {
     @payeErrorSummary(
-        Messages("app.common.errorSummaryLabel"), paidEmployeesForm, dataJourney = Some("PaidEmployees")
+        messages("app.common.errorSummaryLabel"), paidEmployeesForm, dataJourney = Some("PaidEmployees")
     )
 
-    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.paidEmployees.description")</h1>
+    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.paidEmployees.description")</h1>
 
-    @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitPaidEmployees) {
-        <p>@Messages("pages.paidEmployees.para")</p>
+    @formWithCSRF(action = controllers.userJourney.routes.EmploymentController.submitPaidEmployees) {
+        <p>@messages("pages.paidEmployees.para")</p>
         <ul class="list list-bullet">
-            <li>@Messages("pages.paidEmployees.bullet1", weeklyThreshold)</li>
-            <li>@Messages("pages.paidEmployees.bullet2")</li>
-            <li>@Messages("pages.paidEmployees.bullet3")</li>
+            <li>@messages("pages.paidEmployees.bullet1", weeklyThreshold)</li>
+            <li>@messages("pages.paidEmployees.bullet2")</li>
+            <li>@messages("pages.paidEmployees.bullet3")</li>
 
         </ul>
 
@@ -52,12 +60,12 @@
         @formHiddenYesNoRadio(
             paidEmployeesForm,
             "alreadyPaying",
-            Messages("pages.paidEmployees.description"),
+            messages("pages.paidEmployees.description"),
             isHeading = true,
             hiddenYesNoContent
 
         )
         </div>
-        <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
+        <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
     }
 }

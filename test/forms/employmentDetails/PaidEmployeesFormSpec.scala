@@ -16,15 +16,14 @@
 
 package forms.employmentDetails
 
-import java.time.LocalDate
-import java.time.temporal.ChronoUnit
-
 import forms.employmentDetails.PaidEmployeesForm.{customFormPrefix, dateTimeFormat}
 import helpers.PayeComponentSpec
 import models.view.EmployingAnyone
-import org.joda.time.{LocalDate => LocalDateJoda}
 import play.api.data.FormError
 import uk.gov.hmrc.time.TaxYear
+
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 class PaidEmployeesFormSpec extends PayeComponentSpec {
 
@@ -35,7 +34,7 @@ class PaidEmployeesFormSpec extends PayeComponentSpec {
   }
 
   val today = LocalDate.now
-  val cty = TaxYear.taxYearFor(LocalDateJoda.now)
+  val cty = TaxYear.taxYearFor(LocalDate.now)
 
   val incorpDate2MonthsPrior = today.minusMonths(2)
   val incorpDateWellInPast = LocalDate.of(2015, 1, 1)

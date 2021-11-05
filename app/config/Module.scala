@@ -19,8 +19,6 @@ package config
 import com.google.inject.AbstractModule
 import connectors._
 import connectors.test._
-import controllers.errors.{ErrorController, ErrorControllerImpl}
-import controllers.internal.{RegistrationController, RegistrationControllerImpl}
 import controllers.test._
 import controllers.userJourney._
 import filters.{PAYECSRFExceptionsFilter, PAYECSRFExceptionsFilterImpl, PAYESessionIDFilter, PAYESessionIDFilterImpl}
@@ -48,7 +46,6 @@ class Module extends AbstractModule {
 
   private def bindHmrcDependencies(): Unit = {
     bind(classOf[MetricsService]).to(classOf[MetricsServiceImpl]).asEagerSingleton()
-    bind(classOf[WSHttp]).to(classOf[WSHttpImpl]).asEagerSingleton()
     bind(classOf[ShortLivedHttpCaching]).to(classOf[PAYEShortLivedHttpCaching]).asEagerSingleton()
     bind(classOf[ShortLivedCache]).to(classOf[PAYEShortLivedCache]).asEagerSingleton()
     bind(classOf[SessionCache]).to(classOf[PAYESessionCache]).asEagerSingleton()
@@ -93,30 +90,15 @@ class Module extends AbstractModule {
   }
 
   private def bindOtherControllers(): Unit = {
-    bind(classOf[ErrorController]).to(classOf[ErrorControllerImpl]).asEagerSingleton()
-    bind(classOf[RegistrationController]).to(classOf[RegistrationControllerImpl]).asEagerSingleton()
     bind(classOf[BusinessProfileController]).to(classOf[BusinessProfileControllerImpl]).asEagerSingleton()
     bind(classOf[FeatureSwitchController]).to(classOf[FeatureSwitchControllerImpl]).asEagerSingleton()
     bind(classOf[TestAddressLookupController]).to(classOf[TestAddressLookupControllerImpl]).asEagerSingleton()
     bind(classOf[TestCacheController]).to(classOf[TestCacheControllerImpl]).asEagerSingleton()
-    bind(classOf[TestCCController]).to(classOf[TestCCControllerImpl]).asEagerSingleton()
-    bind(classOf[TestCoHoController]).to(classOf[TestCoHoControllerImpl]).asEagerSingleton()
-    bind(classOf[TestRegSetupController]).to(classOf[TestRegSetupControllerImpl]).asEagerSingleton()
     bind(classOf[TestSetupController]).to(classOf[TestSetupControllerImpl]).asEagerSingleton()
   }
 
   private def bindUserJourneyControllers(): Unit = {
-    bind(classOf[CompanyDetailsController]).to(classOf[CompanyDetailsControllerImpl]).asEagerSingleton()
-    bind(classOf[CompletionCapacityController]).to(classOf[CompletionCapacityControllerImpl]).asEagerSingleton()
-    bind(classOf[ConfirmationController]).to(classOf[ConfirmationControllerImpl]).asEagerSingleton()
     bind(classOf[DashboardController]).to(classOf[DashboardControllerImpl]).asEagerSingleton()
-    bind(classOf[DirectorDetailsController]).to(classOf[DirectorDetailsControllerImpl]).asEagerSingleton()
     bind(classOf[EligibilityController]).to(classOf[EligibilityControllerImpl]).asEagerSingleton()
-    bind(classOf[EmploymentController]).to(classOf[EmploymentControllerImpl]).asEagerSingleton()
-    bind(classOf[NatureOfBusinessController]).to(classOf[NatureOfBusinessControllerImpl]).asEagerSingleton()
-    bind(classOf[PAYEContactController]).to(classOf[PAYEContactControllerImpl]).asEagerSingleton()
-    bind(classOf[PayeStartController]).to(classOf[PayeStartControllerImpl]).asEagerSingleton()
-    bind(classOf[SignInOutController]).to(classOf[SignInOutControllerImpl]).asEagerSingleton()
-    bind(classOf[SummaryController]).to(classOf[SummaryControllerImpl]).asEagerSingleton()
   }
 }

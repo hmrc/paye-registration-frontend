@@ -16,9 +16,9 @@
 
 package utils
 
-import java.time.{LocalDate, LocalDateTime}
-
 import helpers.PayeComponentSpec
+
+import java.time.{LocalDate, LocalDateTime}
 
 class SystemDateSpec extends PayeComponentSpec {
 

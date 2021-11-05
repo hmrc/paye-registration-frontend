@@ -16,12 +16,11 @@
 
 package utils
 
-import java.text.Normalizer.{Form, normalize}
-
 import play.api.data.validation._
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json._
 
+import java.text.Normalizer.{Form, normalize}
 import scala.util.matching.Regex
 
 object Formatters {

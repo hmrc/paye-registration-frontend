@@ -17,18 +17,17 @@
 package services
 
 import connectors.AddressLookupConnector
-import javax.inject.{Inject, Singleton}
 import models.Address
-import play.api.i18n.{Messages, MessagesApi}
+import play.api.i18n.Messages
 import play.api.mvc.Call
 import uk.gov.hmrc.http.HeaderCarrier
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
 @Singleton
 class AddressLookupService @Inject()(addressLookupConnector: AddressLookupConnector,
-                                     addressLookupConfigBuilderService: AddressLookupConfigBuilderService
-                                    )(implicit messagesApi: MessagesApi) {
+                                     addressLookupConfigBuilderService: AddressLookupConfigBuilderService) {
 
   def buildAddressLookupUrl(key: String, call: Call)(implicit hc: HeaderCarrier, messages: Messages): Future[String] = {
     val alfJourneyConfig = addressLookupConfigBuilderService.buildConfig(call, key)

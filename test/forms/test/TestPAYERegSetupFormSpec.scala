@@ -16,14 +16,14 @@
 
 package forms.test
 
-import java.time.LocalDate
-
 import enums.PAYEStatus
 import helpers.PayeComponentSpec
 import models.api._
 import models.view.PAYEContactDetails
 import models.{Address, DigitalContactDetails}
 import play.api.data.FormError
+
+import java.time.LocalDate
 
 class TestPAYERegSetupFormSpec extends PayeComponentSpec {
   val testForm = TestPAYERegSetupForm.form

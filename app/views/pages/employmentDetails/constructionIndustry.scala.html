@@ -14,30 +14,35 @@
  * limitations under the License.
  *@
 
-@import helpers.templates.{payeInputRadioGroup, payeErrorSummary}
-@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import config.AppConfig
+@import helpers.templates.{payeErrorSummary, payeInputRadioGroup}
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
 @import views.helpers.TitleHelper.title
 
-@import config.AppConfig
+@this(main_template: main_template,
+        payeErrorSummary: payeErrorSummary,
+        payeInputRadioGroup: payeInputRadioGroup,
+        formWithCSRF: FormWithCSRF)
+
 @(constructionIndustryForm: Form[Boolean])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = title(Messages("pages.constructionIndustry.title"), constructionIndustryForm)) {
+@main_template(title = title(messages("pages.constructionIndustry.title"), constructionIndustryForm)) {
     @payeErrorSummary(
-        Messages("app.common.errorSummaryLabel"), constructionIndustryForm, dataJourney = Some("ConstructionIndustry")
+        messages("app.common.errorSummaryLabel"), constructionIndustryForm, dataJourney = Some("ConstructionIndustry")
     )
-    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.constructionIndustry.description")</h1>
+    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.constructionIndustry.description")</h1>
     
-    @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitConstructionIndustry) {
+    @formWithCSRF(action = controllers.userJourney.routes.EmploymentController.submitConstructionIndustry) {
 
         <div class="inline form-group">
         @payeInputRadioGroup(
             constructionIndustryForm("inConstructionIndustry"),
             Seq(
-                "true" -> Messages("app.common.yes"),
-                "false" -> Messages("app.common.no")
+                "true" -> messages("app.common.yes"),
+                "false" -> messages("app.common.no")
             ),
             isHeading = false,
-            '_legend -> Messages("pages.constructionIndustry.description"),
+            '_legend -> messages("pages.constructionIndustry.description"),
             '_legendID -> "constructionIndustry",
             '_helpText -> None,
             '_labelAfter -> true,
@@ -45,6 +50,6 @@
             '_groupClass -> "inline"
         )
         </div>
-        <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
+        <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
     }
 }
