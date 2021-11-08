@@ -22,35 +22,33 @@ import connectors.test.{TestBusinessRegConnector, TestPAYERegConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
 import forms.test.{TestPAYEContactForm, TestPAYERegCompanyDetailsSetupForm, TestPAYERegEmploymentInfoSetupForm, TestPAYERegSetupForm}
-import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
+import views.html.pages.test.{payeRegCompanyDetailsSetup, payeRegEmploymentInfoSetup, payeRegPAYEContactSetup, payeRegistrationSetup}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TestRegSetupControllerImpl @Inject()(val payeRegService: PAYERegistrationService,
-                                           val testPAYERegConnector: TestPAYERegConnector,
-                                           val keystoreConnector: KeystoreConnector,
-                                           val testBusinessRegConnector: TestBusinessRegConnector,
-                                           val authConnector: AuthConnector,
-                                           val s4LService: S4LService,
-                                           val companyDetailsService: CompanyDetailsService,
-                                           val incorpInfoService: IncorporationInformationService,
-                                           val incorporationInformationConnector: IncorporationInformationConnector,
-                                           val payeRegistrationService: PAYERegistrationService,
-                                           mcc: MessagesControllerComponents
-                                          )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends TestRegSetupController(mcc) with AuthRedirectUrls
-
-abstract class TestRegSetupController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-  val appConfig: AppConfig
-  val payeRegService: PAYERegistrationService
-  val testPAYERegConnector: TestPAYERegConnector
-  val testBusinessRegConnector: TestBusinessRegConnector
-  implicit val ec: ExecutionContext
+class TestRegSetupController @Inject()(val payeRegService: PAYERegistrationService,
+                                       val testPAYERegConnector: TestPAYERegConnector,
+                                       val keystoreConnector: KeystoreConnector,
+                                       val testBusinessRegConnector: TestBusinessRegConnector,
+                                       val authConnector: AuthConnector,
+                                       val s4LService: S4LService,
+                                       val companyDetailsService: CompanyDetailsService,
+                                       val incorpInfoService: IncorporationInformationService,
+                                       val incorporationInformationConnector: IncorporationInformationConnector,
+                                       val payeRegistrationService: PAYERegistrationService,
+                                       mcc: MessagesControllerComponents,
+                                       payeRegistrationSetup: payeRegistrationSetup,
+                                       payeRegCompanyDetailsSetup: payeRegCompanyDetailsSetup,
+                                       payeRegPAYEContactSetup: payeRegPAYEContactSetup,
+                                       payeRegEmploymentInfoSetup: payeRegEmploymentInfoSetup
+                                      )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
   def regTeardown: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
-    profile =>
+    _ =>
       testPAYERegConnector.testRegistrationTeardown() map {
         case DownstreamOutcome.Success => Ok("Registration collection successfully cleared")
         case DownstreamOutcome.Failure => InternalServerError("Error clearing registration collection")
@@ -70,14 +68,14 @@ abstract class TestRegSetupController(mcc: MessagesControllerComponents) extends
 
   def regSetup: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     profile =>
-      Future.successful(Ok(views.html.pages.test.payeRegistrationSetup(TestPAYERegSetupForm.form, profile.registrationID, profile.companyTaxRegistration.transactionId)))
+      Future.successful(Ok(payeRegistrationSetup(TestPAYERegSetupForm.form, profile.registrationID, profile.companyTaxRegistration.transactionId)))
   }
 
   def submitRegSetup: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     profile =>
       TestPAYERegSetupForm.form.bindFromRequest.fold(
         errors =>
-          Future.successful(BadRequest(views.html.pages.test.payeRegistrationSetup(errors, profile.registrationID, profile.companyTaxRegistration.transactionId))),
+          Future.successful(BadRequest(payeRegistrationSetup(errors, profile.registrationID, profile.companyTaxRegistration.transactionId))),
         success =>
           for {
             setupReg <- testPAYERegConnector.addPAYERegistration(success)
@@ -92,13 +90,13 @@ abstract class TestRegSetupController(mcc: MessagesControllerComponents) extends
   }
 
   def regSetupCompanyDetails: Action[AnyContent] = isAuthorised { implicit request =>
-    Future.successful(Ok(views.html.pages.test.payeRegCompanyDetailsSetup(TestPAYERegCompanyDetailsSetupForm.form)))
+    Future.successful(Ok(payeRegCompanyDetailsSetup(TestPAYERegCompanyDetailsSetupForm.form)))
   }
 
   def submitRegSetupCompanyDetails: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     profile =>
       TestPAYERegCompanyDetailsSetupForm.form.bindFromRequest.fold(
-        errors => Future.successful(BadRequest(views.html.pages.test.payeRegCompanyDetailsSetup(errors))),
+        errors => Future.successful(BadRequest(payeRegCompanyDetailsSetup(errors))),
         success => testPAYERegConnector.addTestCompanyDetails(success, profile.registrationID) map {
           case DownstreamOutcome.Success => Ok("Company details successfully set up")
           case DownstreamOutcome.Failure => InternalServerError("Error setting up Company Details")
@@ -107,13 +105,13 @@ abstract class TestRegSetupController(mcc: MessagesControllerComponents) extends
   }
 
   def regSetupPAYEContact: Action[AnyContent] = isAuthorised { implicit request =>
-    Future.successful(Ok(views.html.pages.test.payeRegPAYEContactSetup(TestPAYEContactForm.form)))
+    Future.successful(Ok(payeRegPAYEContactSetup(TestPAYEContactForm.form)))
   }
 
   def submitRegSetupPAYEContact: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     profile =>
       TestPAYEContactForm.form.bindFromRequest.fold(
-        errors => Future.successful(BadRequest(views.html.pages.test.payeRegPAYEContactSetup(errors))),
+        errors => Future.successful(BadRequest(payeRegPAYEContactSetup(errors))),
         success => testPAYERegConnector.addTestPAYEContact(success, profile.registrationID) map {
           case DownstreamOutcome.Success => Ok("PAYE Contact details successfully set up")
           case DownstreamOutcome.Failure => InternalServerError("Error setting up PAYE Contact details")
@@ -122,13 +120,13 @@ abstract class TestRegSetupController(mcc: MessagesControllerComponents) extends
   }
 
   def regSetupEmploymentInfo: Action[AnyContent] = isAuthorised { implicit request =>
-    Future.successful(Ok(views.html.pages.test.payeRegEmploymentInfoSetup(TestPAYERegEmploymentInfoSetupForm.form)))
+    Future.successful(Ok(payeRegEmploymentInfoSetup(TestPAYERegEmploymentInfoSetupForm.form)))
   }
 
   def submitRegSetupEmploymentInfo: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     profile =>
       TestPAYERegEmploymentInfoSetupForm.form.bindFromRequest.fold(
-        errors => Future.successful(BadRequest(views.html.pages.test.payeRegEmploymentInfoSetup(errors))),
+        errors => Future.successful(BadRequest(payeRegEmploymentInfoSetup(errors))),
         success => testPAYERegConnector.addTestEmploymentInfo(success, profile.registrationID) map {
           case DownstreamOutcome.Success => Ok("Employment info successfully set up")
           case DownstreamOutcome.Failure => InternalServerError("Error setting up Employment info")

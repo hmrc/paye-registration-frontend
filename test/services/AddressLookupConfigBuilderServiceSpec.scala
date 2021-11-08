@@ -16,18 +16,18 @@
 
 package services
 
-import java.util.Locale
-
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external._
 import play.api.i18n.Lang
 import play.api.mvc.Call
 
+import java.util.Locale
+
 class AddressLookupConfigBuilderServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   implicit val mockMessages = mockMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
 
-  object TestService extends AddressLookupConfigBuilderService {
+  object TestService extends AddressLookupConfigBuilderService(mockAppConfig) {
     override lazy val payeRegistrationFrontendURL = "testPayeRegUrl"
     override lazy val timeoutLength = 22666
     override lazy val accessibilityFooterUrl = "http://localhost:9870/register-for-paye/accessibility-statement?pageUri=%2Fregister-for-paye%2F"

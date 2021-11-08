@@ -16,14 +16,14 @@
 
 package views.pages.companyDetails
 
-import java.util.Locale
-
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.Address
 import org.jsoup.Jsoup
-import play.api.i18n.{I18nSupport, Lang, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, Lang, MessagesApi}
 import play.api.test.FakeRequest
 import views.html.pages.companyDetails.confirmROAddress
+
+import java.util.Locale
 
 class ConfirmROAddressViewSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
   implicit val appConfig = mockAppConfig
@@ -43,8 +43,8 @@ class ConfirmROAddressViewSpec extends PayeComponentSpec with PayeFakedApp with 
     )
 
   "The confirm your RO address screen" should {
-    lazy val view = confirmROAddress(testCompanyName, testAddress)
-    lazy val document = Jsoup.parse(view.body)
+    lazy val view = app.injector.instanceOf[confirmROAddress]
+    lazy val document = Jsoup.parse(view(testCompanyName, testAddress).body)
 
     "have the correct title" in {
       document.getElementById("pageHeading").text mustBe mockMessages("pages.confirmRO.description", testCompanyName)

@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@this()
+
 @(href: String, text: String, dataJourney: String, htmlId: Option[String] = None, withFullStop: Boolean = false)(implicit messages: Messages)
 
-<a href="@{href}" @{htmlId.map(id => s"id=$id")} target="_blank">@text @Messages("app.common.linkHelperText")</a>@if(withFullStop){.}
+<a href="@{href}" @{htmlId.map(id => s"id=$id")} target="_blank">@text @messages("app.common.linkHelperText")</a>@if(withFullStop){.}

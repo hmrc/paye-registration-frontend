@@ -16,14 +16,14 @@
 
 package itutil
 
-import java.net.{URLDecoder, URLEncoder}
-import java.util.UUID
-
 import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.ws.WSCookie
 import uk.gov.hmrc.crypto.{CompositeSymmetricCrypto, Crypted, PlainText}
 import uk.gov.hmrc.http.SessionKeys
+
+import java.net.{URLDecoder, URLEncoder}
+import java.util.UUID
 
 trait LoginStub extends SessionCookieBaker {
 
@@ -134,7 +134,7 @@ trait LoginStub extends SessionCookieBaker {
     stubFor(post(urlMatching("/auth/authorise"))
       .willReturn(
         aResponse()
-          .withStatus(404)
+          .withStatus(401)
       )
     )
   }

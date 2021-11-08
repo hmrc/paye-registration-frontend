@@ -17,12 +17,12 @@
 package services
 
 import connectors.S4LConnector
-import javax.inject.Inject
 import play.api.libs.json._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import utils.Formatters
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class S4LServiceImpl @Inject()(val s4LConnector: S4LConnector)(implicit val ec: ExecutionContext) extends S4LService

@@ -18,15 +18,15 @@ package services
 
 import connectors.PAYERegistrationConnector
 import enums.{CacheKeys, DownstreamOutcome}
-import javax.inject.Inject
 import models.Address
 import models.api.{PAYEContact => PAYEContactAPI}
 import models.external.AuditingInformation
 import models.view.{PAYEContactDetails, CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
-import play.api.Logger
+import play.api.Logger.logger
 import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PAYEContactServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
@@ -112,7 +112,7 @@ trait PAYEContactService {
           for {
             _ <- auditService.auditPAYEContactDetails(regId, newViewData, currentView.contactDetails)
             _ <- prepopService.saveContactDetails(regId, newViewData) map {
-              _ => Logger.info(s"[PAYEContactService] [submitPayeContactDetails] Successfully saved Contact Details to Prepopulation for regId: $regId")
+              _ => logger.info(s"[PAYEContactService] [submitPayeContactDetails] Successfully saved Contact Details to Prepopulation for regId: $regId")
             }
           } yield currentView
         case currentView =>

@@ -14,14 +14,21 @@
  * limitations under the License.
  *@
 
-@import java.time.LocalDate
-@import helpers.templates.{payeInputRadioGroup, payeErrorSummary, formHiddenYesNoRadio}
-@import models.view.WillBePaying
+@import config.AppConfig
 @import forms.employmentDetails.EmployingStaffForm
-@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import helpers.templates.{formHiddenYesNoRadio, payeErrorSummary, payeInputRadioGroup}
+@import models.view.WillBePaying
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
 @import views.helpers.TitleHelper.title
 
-@import config.AppConfig
+@import java.time.LocalDate
+
+@this(payeInputRadioGroup: payeInputRadioGroup,
+        main_template: main_template,
+        payeErrorSummary: payeErrorSummary,
+        formHiddenYesNoRadio: formHiddenYesNoRadio,
+        formWithCSRF: FormWithCSRF)
+
 @(willBePayingForm: Form[WillBePaying], weeklyThreshold: Int, now: LocalDate)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @hiddenYesNoContent = {
@@ -42,18 +49,18 @@
 )
 }
 
-@main_template(title = title(Messages("pages.willBePaying.title"), willBePayingForm)) {
+@main_template(title = title(messages("pages.willBePaying.title"), willBePayingForm)) {
     @payeErrorSummary(
-        Messages("app.common.errorSummaryLabel"), willBePayingForm, dataJourney = Some("Employing")
+        messages("app.common.errorSummaryLabel"), willBePayingForm, dataJourney = Some("Employing")
     )
 
-    @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitEmployingStaff) {
-        <h1>@Messages("pages.willBePaying.description")</h1>
-        <p>@Messages("pages.willBePaying.para")</p>
+    @formWithCSRF(action = controllers.userJourney.routes.EmploymentController.submitEmployingStaff) {
+        <h1>@messages("pages.willBePaying.description")</h1>
+        <p>@messages("pages.willBePaying.para")</p>
         <ul class="list list-bullet">
-            <li>@Messages("pages.willBePaying.bullet1", weeklyThreshold)</li>
-            <li>@Messages("pages.willBePaying.bullet2")</li>
-            <li>@Messages("pages.willBePaying.bullet3")</li>
+            <li>@messages("pages.willBePaying.bullet1", weeklyThreshold)</li>
+            <li>@messages("pages.willBePaying.bullet2")</li>
+            <li>@messages("pages.willBePaying.bullet3")</li>
 
         </ul>
 
@@ -62,7 +69,7 @@
             @formHiddenYesNoRadio(
                 willBePayingForm,
                 "willBePaying",
-                Messages("pages.willBePaying.description"),
+                messages("pages.willBePaying.description"),
                 isHeading = true,
                 hiddenYesNoContent
             )
@@ -83,6 +90,6 @@
             )
         }
         </div>
-        <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
+        <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
     }
 }

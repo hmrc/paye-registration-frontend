@@ -28,7 +28,7 @@ class EmailConnectorSpec extends PayeComponentSpec {
 
   class Setup {
     val emailConn = new EmailConnector {
-      override val http: CorePost = mockWSHttp
+      override val http: CorePost = mockHttpClient
       override val sendEmailURL: String = "FOOBARWIZZ"
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
@@ -44,25 +44,25 @@ class EmailConnectorSpec extends PayeComponentSpec {
   "requestEmailToBeSent" should {
     "return an EmailSent" when {
       "call to email service returns a non success code" in new Setup {
-        when(mockWSHttp.POST[EmailRequest, HttpResponse](same("FOOBARWIZZ"), same(validEmailRequest), any())(any(), any(), any(), any()))
+        when(mockHttpClient.POST[EmailRequest, HttpResponse](same("FOOBARWIZZ"), same(validEmailRequest), any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(HttpResponse(200, None, Map.empty, None)))
 
         val res = await(emailConn.requestEmailToBeSent(validEmailRequest))
         res mustBe EmailSent
 
-        verify(mockWSHttp, times(1)).POST[EmailRequest, HttpResponse](any(), any(), any())(any(), any(), any(), any())
+        verify(mockHttpClient, times(1)).POST[EmailRequest, HttpResponse](any(), any(), any())(any(), any(), any(), any())
       }
     }
 
     "return an EmailDifficulties" when {
       "call to email service returns a non success code" in new Setup {
-        when(mockWSHttp.POST[EmailRequest, HttpResponse](same("FOOBARWIZZ"), same(validEmailRequest), any())(any(), any(), any(), any()))
+        when(mockHttpClient.POST[EmailRequest, HttpResponse](same("FOOBARWIZZ"), same(validEmailRequest), any())(any(), any(), any(), any()))
           .thenReturn(Future.failed(new HttpException("", 502)))
 
         val res = await(emailConn.requestEmailToBeSent(validEmailRequest))
         res mustBe EmailDifficulties
 
-        verify(mockWSHttp, times(1)).POST[EmailRequest, HttpResponse](any(), any(), any())(any(), any(), any(), any())
+        verify(mockHttpClient, times(1)).POST[EmailRequest, HttpResponse](any(), any(), any())(any(), any(), any(), any())
       }
     }
   }

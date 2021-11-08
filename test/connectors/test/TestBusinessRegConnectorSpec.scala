@@ -30,7 +30,7 @@ class TestBusinessRegConnectorSpec extends PayeComponentSpec {
   class Setup extends CodeMocks {
     val testConnector = new TestBusinessRegConnector {
       override val businessRegUrl = "testBusinessRegUrl"
-      override val http = mockWSHttp
+      override val http = mockHttpClient
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
     }
@@ -40,7 +40,7 @@ class TestBusinessRegConnectorSpec extends PayeComponentSpec {
     "make a http POST request to business registration micro-service to create a CurrentProfile entry" in new Setup {
       mockHttpPOST[JsValue, BusinessProfile](testConnector.businessRegUrl, Fixtures.validBusinessRegistrationResponse)
 
-      when(mockWSHttp.POST[JsValue, BusinessProfile](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockHttpClient.POST[JsValue, BusinessProfile](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validBusinessRegistrationResponse))
 
       await(testConnector.createBusinessProfileEntry) mustBe Fixtures.validBusinessRegistrationResponse

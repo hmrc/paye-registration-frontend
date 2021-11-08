@@ -16,11 +16,11 @@
 
 package forms.employmentDetails
 
-import java.time.LocalDate
-
 import helpers.PayeComponentSpec
 import models.view.WillBePaying
 import play.api.data.FormError
+
+import java.time.LocalDate
 
 class EmployingStaffFormSpec extends PayeComponentSpec {
 

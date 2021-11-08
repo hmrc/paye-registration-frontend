@@ -20,8 +20,8 @@ import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.CurrentProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import play.api.mvc.{MessagesControllerComponents, Result}
 import play.api.mvc.Results.Ok
+import play.api.mvc.{MessagesControllerComponents, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core.{AffinityGroup, InsufficientConfidenceLevel}

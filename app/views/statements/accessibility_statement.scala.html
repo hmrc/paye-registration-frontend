@@ -15,6 +15,9 @@
  *@
 
 @import config.AppConfig
+
+@this(main_template: main_template)
+
 @(accessibilityReportUrl: String, serviceStartUrl: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @main_template(title = messages("accessibility.pageTitle")) {

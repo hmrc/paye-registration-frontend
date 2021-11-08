@@ -14,9 +14,10 @@
  * limitations under the License.
  *@
 
+@this()
+
 @(field: play.api.data.Field, args: (Symbol,Any)*)(implicit messages: Messages)
 
-@import play.api.i18n._
 @import views.html.helper._
 
 @elements = @{ new FieldElements(field.id, field, null, args.toMap, messages) }
@@ -29,9 +30,9 @@
     <div class="form-group @if(elements.hasErrors || (parentElements.isDefined && parentElements.get.hasErrors)) {form-group-error}">
 
 <label for="@elements.field.name" class="@elements.args.get('_divClass) @if( elements.args.get('_labelClass) ){ @elements.args.get('_labelClass) }" @if( elements.args.get('_dataCharCounter) ){ data-char-counter="@elements.args.get('_dataCharCounter)" }>
-    @elements.errors.map { error => <span class="error-notification">@Messages(error)</span>}
+    @elements.errors.map { error => <span class="error-notification">@messages(error.toString)</span>}
     @if(parentElements.isDefined) {
-        @parentElements.get.errors.map { error => <span class="error-notification">@Messages(error)</span>}
+        @parentElements.get.errors.map { error => <span class="error-notification">@messages(error.toString)</span>}
     }
     @if(!labelAfter && elements.args.contains('_label)) { @elements.label }
     @if( elements.args.get('_info) ) { <p>@elements.args.get('_info)</p> }

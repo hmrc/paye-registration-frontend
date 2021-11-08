@@ -18,18 +18,18 @@ package connectors
 
 import common.exceptions
 import common.exceptions.DownstreamExceptions
-import config.{AppConfig, WSHttp}
-import javax.inject.Inject
+import config.AppConfig
 import models.external.CompanyRegistrationProfile
 import play.api.libs.json._
 import services.MetricsService
-import uk.gov.hmrc.http.{BadRequestException, CoreGet, HeaderCarrier, HttpException}
+import uk.gov.hmrc.http.{BadRequestException, CoreGet, HeaderCarrier, HttpClient, HttpException}
 import utils.{PAYEFeatureSwitch, PAYEFeatureSwitches}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyRegistrationConnectorImpl @Inject()(val featureSwitch: PAYEFeatureSwitch,
-                                                 val http: WSHttp,
+                                                 val http: HttpClient,
                                                  val metricsService: MetricsService,
                                                  appConfig: AppConfig)(implicit val ec: ExecutionContext) extends CompanyRegistrationConnector {
   lazy val companyRegistrationUrl: String = appConfig.servicesConfig.baseUrl("company-registration")

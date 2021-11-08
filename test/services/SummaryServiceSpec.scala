@@ -16,8 +16,6 @@
 
 package services
 
-import java.time.LocalDate
-
 import common.exceptions.InternalExceptions.APIConversionException
 import enums.PAYEStatus
 import helpers.PayeComponentSpec
@@ -32,6 +30,7 @@ import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{NotFoundException, Upstream4xxResponse}
 
+import java.time.LocalDate
 import scala.concurrent.Future
 
 class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {

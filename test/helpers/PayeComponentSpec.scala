@@ -16,8 +16,6 @@
 
 package helpers
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import helpers.auth.AuthHelpers
 import helpers.fixtures._
@@ -25,8 +23,8 @@ import helpers.mocks.internal.BusinessRegistrationConnectorMock
 import helpers.mocks.{KeystoreMock, SaveForLaterMock, WSHTTPMock}
 import models.external.{AuditingInformation, CurrentProfile}
 import org.mockito.Mockito.reset
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.http.{HeaderNames, HttpProtocol, MimeTypes, Status}
 import play.api.mvc.Results.Redirect
@@ -91,7 +89,7 @@ trait PayeComponentSpec
       mockOldAuthConnector,
       mockBusinessRegistrationConnector,
       mockS4LConnector,
-      mockWSHttp,
+      mockHttpClient,
       mockIncorpInfoService,
       mockCompanyDetailsService,
       mockS4LService,

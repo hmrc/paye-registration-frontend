@@ -30,7 +30,7 @@ class TestCoHoAPIConnectorSpec extends PayeComponentSpec {
     val testConnector = new TestIncorpInfoConnector {
       override val incorpFEStubsUrl = testUrl
       override val incorpInfoUrl = testUrl
-      override val http = mockWSHttp
+      override val http = mockHttpClient
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
     }

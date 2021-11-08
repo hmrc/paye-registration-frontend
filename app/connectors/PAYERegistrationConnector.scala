@@ -16,18 +16,16 @@
 
 package connectors
 
-import java.util.NoSuchElementException
-
-import config.{AppConfig, WSHttp}
+import config.AppConfig
 import enums.{DownstreamOutcome, PAYEStatus, RegistrationDeletion}
-import javax.inject.Inject
 import models.api.{Director, Employment, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
-import play.api.Logger
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, Reads}
 import services.MetricsService
 import uk.gov.hmrc.http._
 
+import java.util.NoSuchElementException
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 sealed trait DESResponse
@@ -41,7 +39,7 @@ object Failed extends DESResponse
 object TimedOut extends DESResponse
 
 class PAYERegistrationConnectorImpl @Inject()(val metricsService: MetricsService,
-                                              val http: WSHttp,
+                                              val http: HttpClient,
                                               appConfig: AppConfig)(implicit val ec: ExecutionContext) extends PAYERegistrationConnector {
   val payeRegUrl = appConfig.servicesConfig.baseUrl("paye-registration")
 }
@@ -52,7 +50,7 @@ trait PAYERegistrationConnector {
   val http: CorePatch with CoreGet with CorePut with CoreDelete
   val metricsService: MetricsService
 
-  def createNewRegistration(regID: String, txID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYERegistrationAPI]): Future[DownstreamOutcome.Value] = {
+  def createNewRegistration(regID: String, txID: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
     http.PATCH[String, HttpResponse](s"$payeRegUrl/paye-registration/$regID/new", txID) map {
       _.status match {
@@ -139,7 +137,7 @@ trait PAYERegistrationConnector {
     }
   }
 
-  def getEmployment(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[Employment]): Future[Option[Employment]] = {
+  def getEmployment(regID: String)(implicit hc: HeaderCarrier): Future[Option[Employment]] = {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()
     val url = s"$payeRegUrl/paye-registration/$regID/employment-info"
     http.GET[HttpResponse](url) map { employment =>
@@ -355,7 +353,7 @@ trait PAYERegistrationConnector {
         logger.warn(s"[PAYERegistrationConnector] - [deleteRegistrationForRejectedIncorp] Deleting document for regId $regId and txId $txId failed as document was not draft or invalid")
         RegistrationDeletion.invalidStatus
       case notFound: Upstream4xxResponse if notFound.statusCode == NOT_FOUND =>
-        Logger.warn(s"s[PAYERegistrationConnector] - deleteRegistrationForRejectedIncorp paye reg returned 404 when expecting to find one for $regId : $txId ")
+        logger.warn(s"s[PAYERegistrationConnector] - deleteRegistrationForRejectedIncorp paye reg returned 404 when expecting to find one for $regId : $txId ")
         RegistrationDeletion.notfound
       case fiveXX: Upstream5xxResponse =>
         throw logResponse(fiveXX, "deleteRegistrationForRejectedIncorp", s"deleting document, error message: ${fiveXX.message}", regId, Some(txId))

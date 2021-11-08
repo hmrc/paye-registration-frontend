@@ -16,15 +16,15 @@
 
 package connectors.test
 
-import config.{AppConfig, WSHttp}
-import javax.inject.Inject
+import config.AppConfig
 import models.external.{BusinessProfile, BusinessRegistrationRequest}
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{CorePost, HeaderCarrier}
+import uk.gov.hmrc.http.{CorePost, HeaderCarrier, HttpClient}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TestBusinessRegConnectorImpl @Inject()(val http: WSHttp,
+class TestBusinessRegConnectorImpl @Inject()(val http: HttpClient,
                                              appConfig: AppConfig)(implicit val ec: ExecutionContext) extends TestBusinessRegConnector {
   val businessRegUrl = appConfig.servicesConfig.baseUrl("business-registration")
 }

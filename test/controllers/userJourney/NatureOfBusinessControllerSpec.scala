@@ -16,7 +16,6 @@
 
 package controllers.userJourney
 
-import config.AppConfig
 import enums.DownstreamOutcome
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.NatureOfBusiness
@@ -26,25 +25,35 @@ import play.api.mvc.{MessagesControllerComponents, Result}
 import play.api.test.FakeRequest
 import services.NatureOfBusinessService
 import uk.gov.hmrc.http.HeaderCarrier
-import scala.concurrent.{ExecutionContext, Future}
+import views.html.pages.error.restart
+import views.html.pages.natureOfBusiness
+
+import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionContext}
+import scala.concurrent.Future
 
 class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
-  val mockNatureOfBusinessService = mock[NatureOfBusinessService]
-  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
-  class Setup {
-    val testController = new NatureOfBusinessController(mockMcc) {
-      override val redirectToLogin = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-      override val authConnector = mockAuthConnector
-      override val natureOfBusinessService = mockNatureOfBusinessService
-      override val keystoreConnector = mockKeystoreConnector
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService = mockPayeRegService
-      override implicit val appConfig: AppConfig = mockAppConfig
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+  val mockNatureOfBusinessService: NatureOfBusinessService = mock[NatureOfBusinessService]
 
-    }
+  lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+  lazy val mockRestart: restart = app.injector.instanceOf[restart]
+  lazy val mockNatureOfBusinessPage: natureOfBusiness = app.injector.instanceOf[natureOfBusiness]
+
+  class Setup {
+    val testController: NatureOfBusinessController = new NatureOfBusinessController(
+      mockNatureOfBusinessService,
+      mockKeystoreConnector,
+      mockS4LService,
+      mockCompanyDetailsService,
+      mockIncorpInfoService,
+      mockAuthConnector,
+      mockIncorpInfoConnector,
+      mockPayeRegService,
+      mockMcc,
+      mockNatureOfBusinessPage,
+      mockRestart
+    )(mockAppConfig,
+      globalExecutionContext)
   }
 
   val testNOB = NatureOfBusiness(natureOfBusiness = "laundring")
@@ -56,7 +65,7 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
       AuthHelpers.showUnauthorised(testController.natureOfBusiness, request) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 
@@ -86,7 +95,7 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
       AuthHelpers.submitUnauthorised(testController.natureOfBusiness, request) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 

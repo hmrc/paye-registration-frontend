@@ -21,12 +21,11 @@ import connectors._
 import connectors.test._
 import controllers.AuthRedirectUrls
 import enums.DownstreamOutcome
-import javax.inject.{Inject,Singleton}
-import play.api.Logger
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -60,7 +59,7 @@ abstract class TestSetupController(mcc: MessagesControllerComponents) extends Bu
 
   private def log[T](f: String, res: Future[T])(implicit ec: ExecutionContext): Future[T] = {
     res.flatMap(msg => {
-      Logger.info(s"[TestSetupController] [$f] - ${msg.toString}")
+      logger.info(s"[TestSetupController] [$f] - ${msg.toString}")
       res
     })
   }

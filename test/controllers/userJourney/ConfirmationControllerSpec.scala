@@ -16,9 +16,6 @@
 
 package controllers.userJourney
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import config.AppConfig
 import connectors.{EmailDifficulties, EmailSent}
 import helpers.auth.AuthHelpers
 import helpers.{PayeComponentSpec, PayeFakedApp}
@@ -30,28 +27,37 @@ import play.api.http.Status
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HttpResponse
-import scala.concurrent.{ExecutionContext, Future}
+import views.html.pages.confirmation
+import views.html.pages.error.restart
+
+import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionContext}
+import scala.concurrent.Future
 
 class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
+
   lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
+  lazy val mockRestart = app.injector.instanceOf[restart]
+  lazy val mockConfirmationPage = app.injector.instanceOf[confirmation]
+
   class Setup extends AuthHelpers {
     override val authConnector = mockAuthConnector
     override val keystoreConnector = mockKeystoreConnector
 
-    val controller = new ConfirmationController(mockMcc) {
-      override val redirectToLogin = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-      override val emailService = mockEmailService
-      override val s4LService = mockS4LService
-      override val authConnector = mockAuthConnector
-      override val keystoreConnector = mockKeystoreConnector
-      override val confirmationService = mockConfirmationService
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService = mockPayeRegService
-      override implicit val appConfig: AppConfig = mockAppConfig
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
-    }
+    val controller = new ConfirmationController(
+      mockKeystoreConnector,
+      mockConfirmationService,
+      mockS4LService,
+      mockCompanyDetailsService,
+      mockIncorpInfoService,
+      mockEmailService,
+      mockAuthConnector,
+      mockIncorpInfoConnector,
+      mockPayeRegService,
+      mockMcc,
+      mockRestart,
+      mockConfirmationPage
+    )(mockAppConfig,
+      globalExecutionContext)
   }
 
   val successHttpResponse = HttpResponse(status = 200, body = "")
@@ -63,8 +69,8 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockConfirmationService.determineIfInclusiveContentIsShown) thenReturn false
 
       when(mockEmailService.sendAcknowledgementEmail(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future(EmailSent))
-      when(mockS4LService.clear(any())(any())) thenReturn Future(successHttpResponse)
+        .thenReturn(Future.successful(EmailSent))
+      when(mockS4LService.clear(any())(any())) thenReturn Future.successful(successHttpResponse)
 
       showAuthorisedWithCP(controller.showConfirmation, Fixtures.validCurrentProfile, FakeRequest()) {
         result =>
@@ -82,8 +88,8 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockConfirmationService.determineIfInclusiveContentIsShown) thenReturn true
 
       when(mockEmailService.sendAcknowledgementEmail(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future(EmailDifficulties))
-      when(mockS4LService.clear(any())(any())) thenReturn Future(successHttpResponse)
+        .thenReturn(Future.successful(EmailDifficulties))
+      when(mockS4LService.clear(any())(any())) thenReturn Future.successful(successHttpResponse)
 
       showAuthorisedWithCP(controller.showConfirmation, Fixtures.validCurrentProfile, FakeRequest()) {
         result =>

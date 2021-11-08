@@ -16,7 +16,6 @@
 
 package controllers.userJourney
 
-import config.AppConfig
 import enums.{DownstreamOutcome, UserCapacity}
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.view.CompletionCapacity
@@ -26,26 +25,31 @@ import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
 import services.CompletionCapacityService
 import uk.gov.hmrc.http.HeaderCarrier
-import scala.concurrent.{ExecutionContext, Future}
+import views.html.pages.completionCapacity
+
+import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionContext}
+import scala.concurrent.Future
 
 class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val mockCompletionCapacityService = mock[CompletionCapacityService]
   lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
-  class Setup {
-    val testController = new CompletionCapacityController(mockMcc) {
-      override val redirectToLogin = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-      override val authConnector = mockAuthConnector
-      override val messagesApi = mockMessagesApi
-      override val completionCapacityService = mockCompletionCapacityService
-      override val keystoreConnector = mockKeystoreConnector
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService = mockPayeRegService
-      override implicit val appConfig: AppConfig = mockAppConfig
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+  lazy val mockCompletionCapacityView = app.injector.instanceOf[completionCapacity]
 
-    }
+  class Setup {
+    val testController = new CompletionCapacityController(
+      mockCompletionCapacityService,
+      mockKeystoreConnector,
+      mockS4LService,
+      mockCompanyDetailsService,
+      mockIncorpInfoService,
+      mockAuthConnector,
+      mockIncorpInfoConnector,
+      mockPayeRegService,
+      mockMcc,
+      mockCompletionCapacityView
+    )(mockAppConfig,
+      globalExecutionContext)
   }
 
   "completionCapacity" should {
@@ -61,8 +65,6 @@ class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedA
     }
 
     "return an OK if a capacity has NOT been found" in new Setup {
-      val capacity = CompletionCapacity(UserCapacity.director, "")
-
       when(mockCompletionCapacityService.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(None))
 
@@ -84,8 +86,6 @@ class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedA
     }
 
     "return a SEE_OTHER" in new Setup {
-      val capacity = CompletionCapacity(UserCapacity.director, "")
-
       val request = FakeRequest().withFormUrlEncodedBody(
         "completionCapacity" -> "director",
         "completionCapacityOther" -> ""

@@ -19,11 +19,11 @@ package controllers.userJourney
 import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
-import javax.inject.Inject
 import play.api.mvc.MessagesControllerComponents
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DashboardControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,

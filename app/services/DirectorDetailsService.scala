@@ -19,12 +19,12 @@ package services
 import config.AppConfig
 import connectors.PAYERegistrationConnector
 import enums.{CacheKeys, DownstreamOutcome}
-import javax.inject.Inject
 import models.api.Director
 import models.view.{Directors, Ninos, UserEnteredNino}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.RegistrationAllowlist
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DirectorDetailsServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
@@ -41,7 +41,7 @@ trait DirectorDetailsService extends RegistrationAllowlist {
 
   implicit val formatRecordSet = Directors.directorMappingFormat
 
-  private[services] def ninosToDirectorsMap(details: Directors, ninos: Ninos)(implicit hc: HeaderCarrier): Map[String, Director] = {
+  private[services] def ninosToDirectorsMap(details: Directors, ninos: Ninos): Map[String, Director] = {
     details.directorMapping.map {
       case (k, v) => k -> v.copy(nino = ninos.ninoMapping.filter(_.id == k).map(_.nino).head)
     }

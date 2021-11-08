@@ -16,10 +16,10 @@
 
 package utils
 
+import helpers.PayeComponentSpec
+
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-
-import helpers.PayeComponentSpec
 
 class DateUtilSpec extends PayeComponentSpec with DateUtil {
   "calling toDate" should {

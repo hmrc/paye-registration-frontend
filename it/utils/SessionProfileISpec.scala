@@ -20,7 +20,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.{deleteRequestedFor, find
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.external.CurrentProfile
-import play.api.{Application, Environment, Mode}
+import play.api.Application
 import play.api.http.HeaderNames
 import play.api.http.Status.{OK, SEE_OTHER}
 import play.api.inject.guice.GuiceApplicationBuilder

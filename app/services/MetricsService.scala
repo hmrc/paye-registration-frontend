@@ -18,8 +18,8 @@ package services
 
 import com.codahale.metrics.{Counter, Timer}
 import com.kenshoo.play.metrics.Metrics
-import javax.inject.Inject
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class MetricsServiceImpl @Inject()(metrics: Metrics) extends MetricsService {

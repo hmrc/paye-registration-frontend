@@ -16,17 +16,16 @@
 
 package services
 
-import java.util.UUID
-
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, stubFor, urlMatching}
 import connectors.{BusinessRegistrationConnector, PAYERegistrationConnector}
 import enums.UserCapacity
 import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.view.CompletionCapacity
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.{Application, Environment, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext
 
 class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStub {

@@ -18,11 +18,10 @@ package filters
 
 import akka.stream.Materializer
 import config.AppConfig
-import javax.inject.Inject
-import org.joda.time.{DateTime, DateTimeZone}
 import play.api.http.HttpVerbs.{DELETE, POST}
 import play.api.mvc.{Filter, RequestHeader, Result}
 
+import javax.inject.Inject
 import scala.concurrent.Future
 
 class PAYECSRFExceptionsFilterImpl @Inject()(val mat: Materializer
@@ -40,9 +39,9 @@ trait PAYECSRFExceptionsFilter extends Filter {
 
   private[filters] def deleteFilteredHeaders(rh: RequestHeader) = {
     if ((rh.method == DELETE || rh.method == POST) && allowlist.exists(uri => rh.path.matches(uri))) {
-      rh.copy(headers = rh.headers.add("Csrf-Bypass" -> appConfig.csrfBypassValue))
+      rh.withHeaders(rh.headers.add("Csrf-Bypass" -> appConfig.csrfBypassValue))
     } else {
-      rh.copy(headers = rh.headers.remove("Csrf-Bypass"))
+      rh.withHeaders(rh.headers.remove("Csrf-Bypass"))
     }
   }
 }

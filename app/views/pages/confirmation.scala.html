@@ -14,10 +14,13 @@
  * limitations under the License.
  *@
 
-@import views.html.helpers.templates.hiddenDetails
-@import helpers.templates.linkNewWindow
-
 @import config.AppConfig
+@import helpers.templates.{hiddenDetails, linkNewWindow}
+
+@this(main_template: main_template,
+        hiddenDetails: hiddenDetails,
+        linkNewWindow: linkNewWindow)
+
 @(ackRef: String, displayNextTaxYearContent: Boolean)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @main_template(title = messages("pages.confirmation.description"), backButton = false) {
@@ -102,8 +105,8 @@
 @inclusiveProgressiveDisclosure = {
     <p>@messages("pages.confirmation.inclusive.section-2.disclosure.body")</p>
     <ul class="list list-bullet">
-        <li>@Messages("pages.confirmation.inclusive.section-2.disclosure.bullet1")
-            @linkNewWindow("https://www.gov.uk/running-payroll", Messages("pages.confirmation.inclusive.section-2.disclosure.bullet1.1"), "firstPaymentInNextTaxYear")</li>
+        <li>@messages("pages.confirmation.inclusive.section-2.disclosure.bullet1")
+            @linkNewWindow("https://www.gov.uk/running-payroll", messages("pages.confirmation.inclusive.section-2.disclosure.bullet1.1"), "firstPaymentInNextTaxYear")</li>
         <li>@messages("pages.confirmation.inclusive.section-2.disclosure.bullet2")</li>
         <li>@messages("pages.confirmation.inclusive.section-2.disclosure.bullet3")</li>
     </ul>

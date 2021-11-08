@@ -17,13 +17,14 @@
 package services
 
 import config.AppConfig
-import javax.inject.{Inject, Singleton}
 import models.external._
-import play.api.i18n.{Messages, MessagesApi}
+import play.api.i18n.Messages
 import play.api.mvc.Call
 
+import javax.inject.{Inject, Singleton}
+
 @Singleton
-class AddressLookupConfigBuilderService @Inject()(implicit messagesApi: MessagesApi, appConfig: AppConfig) {
+class AddressLookupConfigBuilderService @Inject()(appConfig: AppConfig) {
 
   lazy val payeRegistrationFrontendURL: String = appConfig.self
   lazy val timeoutLength: Int = appConfig.timeoutInSeconds.toInt

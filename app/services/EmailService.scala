@@ -16,15 +16,14 @@
 
 package services
 
-import java.time.LocalDate
-
 import connectors._
-import javax.inject.Inject
 import models.external.{CurrentProfile, EmailRequest}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.{NewTaxYear, PAYEFeatureSwitches, SystemDate}
 
+import java.time.LocalDate
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class EmailServiceImpl @Inject()(val companyRegistrationConnector: CompanyRegistrationConnector,

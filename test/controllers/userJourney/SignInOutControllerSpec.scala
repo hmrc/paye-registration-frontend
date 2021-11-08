@@ -16,30 +16,32 @@
 
 package controllers.userJourney
 
-import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
-
-import scala.concurrent.ExecutionContext
+import views.html.timeout
 
 class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val fakeRequest = FakeRequest()
-  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
-  class Setup {
 
-    val controller = new SignInOutController(mockMcc) {
-      override val ec: ExecutionContext = ExecutionContext.global
-      override val redirectToLogin = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-      override val keystoreConnector = mockKeystoreConnector
-      override val authConnector = mockAuthConnector
-      override val compRegFEURL: String = "testUrl"
-      override val compRegFEURI: String = "/testUri"
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService = mockPayeRegService
-      override implicit val appConfig: AppConfig = mockAppConfig
+  lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+  lazy val mockTimeout: timeout = app.injector.instanceOf[timeout]
+
+  class Setup {
+    val controller = new SignInOutController(
+      mockAuthConnector,
+      mockS4LService,
+      mockCompanyDetailsService,
+      mockIncorpInfoService,
+      mockKeystoreConnector,
+      mockIncorpInfoConnector,
+      mockPayeRegService,
+      mockMcc,
+      mockTimeout
+    ) {
+      override lazy val compRegFEURL: String = "testUrl"
+      override lazy val compRegFEURI: String = "/testUri"
     }
   }
 
@@ -48,7 +50,7 @@ class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showUnauthorised(controller.postSignIn, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 

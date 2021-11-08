@@ -16,10 +16,10 @@
 
 package services
 
-import java.time.LocalDate
-
 import helpers.PayeComponentSpec
 import utils.SystemDate
+
+import java.time.LocalDate
 
 class ThresholdServiceSpec extends PayeComponentSpec {
 

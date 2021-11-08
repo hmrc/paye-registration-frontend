@@ -18,8 +18,16 @@
 @import helpers.templates.{addressDisplay, hiddenDetails, payeErrorSummary, payeInputRadioGroup}
 @import models.Address
 @import models.view.{ChosenAddress, PrepopAddress}
-@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
 @import views.helpers.TitleHelper.title
+
+@this(main_template: main_template,
+        payeErrorSummary: payeErrorSummary,
+        hiddenDetails: hiddenDetails,
+        payeInputRadioGroup: payeInputRadioGroup,
+        addressDisplay: addressDisplay,
+        form: FormWithCSRF)
+
 @(chooseAddressForm: Form[ChosenAddress], roAddress: Option[Address], ppobAddress: Option[Address], prepopAddresses: Map[Int, Address])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @hiddenContent = {
@@ -33,7 +41,7 @@
 
     <h1 class="form-title heading-large" id="pageHeading">@messages("pages.ppobAddress.description")</h1>
 
-    @govHelpers.form(action = controllers.userJourney.routes.CompanyDetailsController.submitPPOBAddress) {
+    @form(action = controllers.userJourney.routes.CompanyDetailsController.submitPPOBAddress) {
         <p>@messages("pages.ppobAddress.peopleIntro1")</p>
         <p>@messages("pages.ppobAddress.peopleIntro2")</p>
         <div class="panel panel-border-wide">@messages("pages.ppobAddress.hint")</div>

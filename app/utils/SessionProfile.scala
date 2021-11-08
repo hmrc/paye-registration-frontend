@@ -20,7 +20,7 @@ import common.exceptions.InternalExceptions
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import enums.{CacheKeys, IncorporationStatus, RegistrationDeletion}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
-import play.api.Logger
+import play.api.Logger.logger
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Call, Request, Result}
 import services.PAYERegistrationService
@@ -44,12 +44,12 @@ trait SessionProfile extends InternalExceptions {
               payeRegistrationService.handleIIResponse(cp.companyTaxRegistration.transactionId, res.get) map {
                 case RegistrationDeletion.success => Redirect(controllers.userJourney.routes.SignInOutController.incorporationRejected())
                 case _ =>
-                  Logger.warn(s"Registration txId: ${cp.companyTaxRegistration.transactionId} - regId: ${cp.registrationID} " +
+                  logger.warn(s"Registration txId: ${cp.companyTaxRegistration.transactionId} - regId: ${cp.registrationID} " +
                     s"incorporation is rejected but the cleanup failed probably due to the wrong status of the paye registration")
                   Redirect(controllers.userJourney.routes.SignInOutController.postSignIn())
               } recover {
                 case err =>
-                  Logger.error(s"Registration txId: ${cp.companyTaxRegistration.transactionId} - regId: ${cp.registrationID} " +
+                  logger.error(s"Registration txId: ${cp.companyTaxRegistration.transactionId} - regId: ${cp.registrationID} " +
                     s"Incorporation is rejected but handleIIResponse threw an unexpected exception whilst trying to cleanup with message: ${err.getMessage}")
                   Redirect(controllers.userJourney.routes.SignInOutController.incorporationRejected())
               }
@@ -80,7 +80,7 @@ trait SessionProfile extends InternalExceptions {
 
       case ctDraft@CurrentProfile(_, CompanyRegistrationProfile("draft", _, _, hasPaid), _, _, _) =>
         if (hasPaid.isDefined) {
-          Logger.warn("[CurrentProfileChecks] CR Document status DRAFT but user HAS PAID for incorporation")
+          logger.warn("[CurrentProfileChecks] CR Document status DRAFT but user HAS PAID for incorporation")
         }
         Future.successful(Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes"))
 
@@ -92,7 +92,7 @@ trait SessionProfile extends InternalExceptions {
 
       case validProfile@CurrentProfile(_, CompanyRegistrationProfile(_, _, _, hasPaid), _, _, _) =>
         if (hasPaid.isEmpty) {
-          Logger.warn("[CurrentProfileChecks] CT PROCESSED but user HAS NO PAYMENT REFERENCE for incorporation")
+          logger.warn("[CurrentProfileChecks] CT PROCESSED but user HAS NO PAYMENT REFERENCE for incorporation")
         }
         f(validProfile)
     }

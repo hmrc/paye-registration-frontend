@@ -16,10 +16,10 @@
 
 package utils
 
-import java.time.LocalDateTime
-
-import javax.inject.Inject
 import org.joda.time.format.ISODateTimeFormat
+
+import java.time.LocalDateTime
+import javax.inject.Inject
 
 sealed trait FeatureSwitch {
   def name: String

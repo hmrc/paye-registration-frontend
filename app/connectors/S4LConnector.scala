@@ -17,12 +17,12 @@
 package connectors
 
 import com.codahale.metrics.{Counter, Timer}
-import javax.inject.Inject
 import play.api.libs.json.Format
 import services.MetricsService
 import uk.gov.hmrc.http.cache.client.{CacheMap, ShortLivedCache}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class S4LConnectorImpl @Inject()(val shortCache: ShortLivedCache,

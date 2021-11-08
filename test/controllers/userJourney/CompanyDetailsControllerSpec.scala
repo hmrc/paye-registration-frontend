@@ -16,8 +16,6 @@
 
 package controllers.userJourney
 
-import audit.{PPOBAddressAuditEvent, PPOBAddressAuditEventDetail}
-import config.AppConfig
 import enums.DownstreamOutcome
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.AuditingInformation
@@ -28,35 +26,47 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status
 import play.api.i18n.Messages
-import play.api.mvc.{AnyContent, Call, MessagesControllerComponents, Request, Result}
+import play.api.mvc._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
+import views.html.pages.companyDetails.{businessContactDetails, confirmROAddress, ppobAddress, tradingName}
+import views.html.pages.error.restart
 
+import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionContext}
 import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
-  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
+  lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+  lazy val mockTradingNamePage: tradingName = app.injector.instanceOf[tradingName]
+  lazy val mockRestartPage: restart = app.injector.instanceOf[restart]
+  lazy val mockBusinessContactDetailsPage: businessContactDetails = app.injector.instanceOf[businessContactDetails]
+  lazy val mockConfirmROAddress: confirmROAddress = app.injector.instanceOf[confirmROAddress]
+  lazy val mockPPOBAddressPage: ppobAddress = app.injector.instanceOf[ppobAddress]
 
   class Setup {
-    val controller = new CompanyDetailsController(mockMcc) {
-      override val redirectToLogin = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-      override val s4LService = mockS4LService
-      override val keystoreConnector = mockKeystoreConnector
-      override val authConnector = mockAuthConnector
-      override val companyDetailsService = mockCompanyDetailsService
-      override val incorpInfoService = mockIncorpInfoService
-      override val addressLookupService = mockAddressLookupService
-      override val prepopService = mockPrepopulationService
-      override val auditService = mockAuditService
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService = mockPayeRegService
-      override implicit val appConfig: AppConfig = mockAppConfig
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-    }
+    val controller = new CompanyDetailsController(
+      mockS4LService,
+      mockKeystoreConnector,
+      mockCompanyDetailsService,
+      mockIncorpInfoService,
+      mockAuthConnector,
+      mockAddressLookupService,
+      mockPrepopulationService,
+      mockAuditService,
+      mockIncorpInfoConnector,
+      mockPayeRegService,
+      mockMcc,
+      mockTradingNamePage,
+      mockRestartPage,
+      mockBusinessContactDetailsPage,
+      mockConfirmROAddress,
+      mockPPOBAddressPage
+    )(mockAppConfig,
+      globalExecutionContext
+    )
   }
 
   val companyNameKey: String = "CompanyName"
@@ -71,7 +81,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showUnauthorised(controller.tradingName, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 
@@ -93,7 +103,6 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "show the correctly pre-populated trading name page when negative data has already been entered" in new Setup {
-      val cName = "Tst Company Name"
       val negativeTradingNameCompanyDetails = Fixtures.validCompanyDetailsViewModel.copy(tradingName = Some(Fixtures.negativeTradingNameViewModel))
       when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(negativeTradingNameCompanyDetails))
@@ -112,7 +121,6 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "show a blank trading name page when no Trading Name data has been entered and no pre pop exists" in new Setup {
-      val cName = "Tst Company Name"
       val noTradingNameCompanyDetails = Fixtures.validCompanyDetailsViewModel.copy(tradingName = None)
       when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(noTradingNameCompanyDetails))
@@ -154,7 +162,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showUnauthorised(controller.submitTradingName, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 
@@ -187,7 +195,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return 400 when a user enters no data" in new Setup {
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future(Fixtures.validCompanyDetailsViewModel))
+        .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
       when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
@@ -206,7 +214,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         .thenReturn(Future.successful(Fixtures.validCoHoCompanyDetailsResponse))
 
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future(Fixtures.validCompanyDetailsViewModel))
+        .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
       AuthHelpers.submitAuthorisedWithCP(controller.submitTradingName, Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
         "differentName" -> "true"
@@ -220,16 +228,6 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
   "roAddress" should {
     "return an ok" when {
       "the user is authorised to view the page" in new Setup {
-
-        val testAddress =
-          Address(
-            "testL1",
-            "testL2",
-            Some("testL3"),
-            Some("testL4"),
-            Some("testPostCode"),
-            None
-          )
         when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
@@ -244,7 +242,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showUnauthorised(controller.roAddress, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
   }
@@ -255,7 +253,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showUnauthorised(controller.confirmRO, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 
@@ -322,7 +320,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showUnauthorised(controller.businessContactDetails, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
   }
@@ -332,7 +330,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showUnauthorised(controller.submitBusinessContactDetails, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some("/test/login")
+          redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
 
@@ -432,17 +430,9 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to business contact details if ro is chosen" in new Setup {
-      implicit val hc = HeaderCarrier()
-
       implicit val request = FakeRequest().withFormUrlEncodedBody(
         "chosenAddress" -> "roAddress"
       )
-
-      val auditEvent = new PPOBAddressAuditEvent(PPOBAddressAuditEventDetail(
-        "testExternalUserId",
-        "testAuthProviderId",
-        "testRegID"
-      ))
 
       when(mockCompanyDetailsService.copyROAddrToPPOBAddr(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
@@ -506,9 +496,6 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
   }
 
   "savePPOBAddress" should {
-
-    implicit val hc = HeaderCarrier()
-
     "return a DownStreamOutcome SUCCESS" in new Setup {
       val testAlfId = "1234567890"
       val expected =

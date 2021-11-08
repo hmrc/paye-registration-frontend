@@ -16,15 +16,15 @@
 
 package views.pages.companyDetails
 
-import java.util.Locale
-
 import forms.companyDetails.BusinessContactDetailsForm
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.DigitalContactDetails
 import org.jsoup.Jsoup
-import play.api.i18n.{I18nSupport, Lang, Messages, MessagesApi}
+import play.api.i18n.{I18nSupport, Lang, MessagesApi}
 import play.api.test.FakeRequest
 import views.html.pages.companyDetails.businessContactDetails
+
+import java.util.Locale
 
 class BusinessContactDetailsSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
   implicit val appConfig = mockAppConfig
@@ -43,8 +43,8 @@ class BusinessContactDetailsSpec extends PayeComponentSpec with PayeFakedApp wit
 
 
   "The Business contact details screen" should {
-    lazy val view = businessContactDetails(testBusinessContact, testCompanyName)
-    lazy val document = Jsoup.parse(view.body)
+    lazy val view = app.injector.instanceOf[businessContactDetails]
+    lazy val document = Jsoup.parse(view(testBusinessContact, testCompanyName).body)
 
     "have the correct title" in {
       document.getElementById("pageHeading").text mustBe mockMessages("pages.businessContact.description", testCompanyName)

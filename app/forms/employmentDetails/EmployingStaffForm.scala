@@ -17,13 +17,13 @@
 package forms.employmentDetails
 
 
-import java.time.LocalDate
-
 import forms.helpers.BooleanForm
 import models.view.WillBePaying
 import play.api.data.Forms._
 import play.api.data.{Form, Mapping}
 import uk.gov.voa.play.form.ConditionalMappings.{isEqual, mandatoryIf}
+
+import java.time.LocalDate
 
 object EmployingStaffForm extends BooleanForm {
   def isRequiredBeforeNewTaxYear(now: LocalDate): Boolean = now.isAfter(LocalDate.of(now.getYear, 2, 5)) && now.isBefore(LocalDate.of(now.getYear, 4, 6))

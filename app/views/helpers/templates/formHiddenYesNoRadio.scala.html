@@ -15,15 +15,18 @@
  *@
 
 @import views.html.helpers.templates.payeInputRadioGroup
+
+@this(radioHelper: payeInputRadioGroup)
+
 @(form: Form[_], fieldName: String, questionText: String, isHeading: Boolean, content: Html, hiddenTitle: Option[String] = None, helpText: Option[String] = None)(implicit messages: Messages)
 
 <div class="form-group" data-hidden='hidden'>
     <div class="form-group">
-        @payeInputRadioGroup(
+        @radioHelper(
             field = form(fieldName),
             Seq(
-                "true" -> Messages("app.common.yes"),
-                "false" -> Messages("app.common.no")),
+                "true" -> messages("app.common.yes"),
+                "false" -> messages("app.common.no")),
             isHeading,
             '_legend -> questionText,
             '_legendID -> fieldName,

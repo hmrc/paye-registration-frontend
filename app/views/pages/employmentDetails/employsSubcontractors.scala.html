@@ -14,30 +14,35 @@
  * limitations under the License.
  *@
 
-@import helpers.templates.{payeInputRadioGroup, payeErrorSummary}
-@import uk.gov.hmrc.play.views.html.{helpers => govHelpers}
+@import config.AppConfig
+@import helpers.templates.{payeErrorSummary, payeInputRadioGroup}
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
 @import views.helpers.TitleHelper.title
 
-@import config.AppConfig
+@this(main_template: main_template,
+        payeErrorSummary: payeErrorSummary,
+        payeInputRadioGroup: payeInputRadioGroup,
+        formWithCSRF: FormWithCSRF)
+
 @(subcontractorsForm: Form[Boolean],taxYearStart: String, taxTearFinish: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = title(Messages("pages.employsSubcontractors.title"), subcontractorsForm)) {
+@main_template(title = title(messages("pages.employsSubcontractors.title"), subcontractorsForm)) {
     @payeErrorSummary(
-        Messages("app.common.errorSummaryLabel"), subcontractorsForm, dataJourney=Some("Subcontractors")
+        messages("app.common.errorSummaryLabel"), subcontractorsForm, dataJourney=Some("Subcontractors")
     )
-    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.employsSubcontractors.description")</h1>
-    @govHelpers.form(action = controllers.userJourney.routes.EmploymentController.submitSubcontractors) {
-        <p id="taxYearText">@Messages("pages.employsSubcontractors.para",taxYearStart,taxTearFinish)</p>
+    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.employsSubcontractors.description")</h1>
+    @formWithCSRF(action = controllers.userJourney.routes.EmploymentController.submitSubcontractors) {
+        <p id="taxYearText">@messages("pages.employsSubcontractors.para",taxYearStart,taxTearFinish)</p>
 
         <div class="inline form-group">
             @payeInputRadioGroup(
                 subcontractorsForm("employsSubcontractors"),
                 Seq(
-                    "true"->Messages("app.common.yes"),
-                    "false"->Messages("app.common.no")
+                    "true"->messages("app.common.yes"),
+                    "false"->messages("app.common.no")
                 ),
                 isHeading = false,
-                '_legend -> Messages("pages.employsSubcontractors.description"),
+                '_legend -> messages("pages.employsSubcontractors.description"),
                 '_legendID -> "subcontractors",
                 '_helpText -> None,
                 '_labelAfter -> true,
@@ -45,6 +50,6 @@
                 '_groupClass -> "inline"
             )
         </div>
-        <button class="button" type="submit" id="continue" >@Messages("app.common.saveAndContinue")</button>
+        <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
     }
 }

@@ -16,9 +16,10 @@
 
 package controllers.test
 
-import javax.inject.{Inject, Singleton}
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.SessionKeys
+
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class EditSessionController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {

@@ -21,31 +21,28 @@ import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
 import forms.natureOfBuinessDetails.NatureOfBusinessForm
-import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
+import views.html.pages.error.restart
 import views.html.pages.{natureOfBusiness => NatureOfBusinessPage}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-class NatureOfBusinessControllerImpl @Inject()(val natureOfBusinessService: NatureOfBusinessService,
-                                               val keystoreConnector: KeystoreConnector,
-                                               val s4LService: S4LService,
-                                               val companyDetailsService: CompanyDetailsService,
-                                               val incorpInfoService: IncorporationInformationService,
-                                               val authConnector: AuthConnector,
-                                               val incorporationInformationConnector: IncorporationInformationConnector,
-                                               val payeRegistrationService: PAYERegistrationService,
-                                               mcc: MessagesControllerComponents
-                                              )(implicit val appConfig: AppConfig,implicit val ec: ExecutionContext) extends NatureOfBusinessController(mcc) with AuthRedirectUrls
-
-abstract class NatureOfBusinessController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-  implicit val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val authConnector: AuthConnector
-  val natureOfBusinessService: NatureOfBusinessService
-  val keystoreConnector: KeystoreConnector
+@Singleton
+class NatureOfBusinessController @Inject()(val natureOfBusinessService: NatureOfBusinessService,
+                                           val keystoreConnector: KeystoreConnector,
+                                           val s4LService: S4LService,
+                                           val companyDetailsService: CompanyDetailsService,
+                                           val incorpInfoService: IncorporationInformationService,
+                                           val authConnector: AuthConnector,
+                                           val incorporationInformationConnector: IncorporationInformationConnector,
+                                           val payeRegistrationService: PAYERegistrationService,
+                                           mcc: MessagesControllerComponents,
+                                           NatureOfBusinessPage: NatureOfBusinessPage,
+                                           restart: restart
+                                          )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
   def natureOfBusiness: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     profile =>
@@ -61,7 +58,7 @@ abstract class NatureOfBusinessController(mcc: MessagesControllerComponents) ext
         errors => Future.successful(BadRequest(NatureOfBusinessPage(errors))),
         success => natureOfBusinessService.saveNatureOfBusiness(success, profile.registrationID) map {
           case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.DirectorDetailsController.directorDetails())
-          case DownstreamOutcome.Failure => InternalServerError(views.html.pages.error.restart())
+          case DownstreamOutcome.Failure => InternalServerError(restart())
         }
       )
   }

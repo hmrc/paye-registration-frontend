@@ -17,19 +17,19 @@
 package connectors.test
 
 import common.Logging
-import config.{AppConfig, WSHttp}
+import config.AppConfig
 import connectors._
 import enums.DownstreamOutcome
-import javax.inject.Inject
 import models.api.{Employment, CompanyDetails => CompanyDetailsAPI, PAYEContact => PAYEContactAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
-import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpClient, HttpResponse}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestPAYERegConnectorImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
-                                         val http: WSHttp,
+                                         val http: HttpClient,
                                          appConfig: AppConfig, implicit val ec: ExecutionContext) extends TestPAYERegConnector {
   val payeRegUrl = appConfig.servicesConfig.baseUrl("paye-registration")
 }

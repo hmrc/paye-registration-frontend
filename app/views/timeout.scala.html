@@ -15,16 +15,19 @@
  *@
 
 @import config.AppConfig
+
+@this(main_template: main_template)
+
 @()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
-@main_template(title = Messages("page.timeout.description"), backButton = false){
+@main_template(title = messages("page.timeout.description"), backButton = false){
 
     <header class="page-header">
-        <h1 class="form-title heading-large" id="main-heading">@Messages("page.timeout.description")</h1>
+        <h1 class="form-title heading-large" id="main-heading">@messages("page.timeout.description")</h1>
     </header>
 
-    <p>@Messages("page.timeout.p1")</p>
+    <p>@messages("page.timeout.p1")</p>
 
-    <div class="form-group">@Messages("page.timeout.p2")
-        <a href="@{controllers.userJourney.routes.SignInOutController.signOut()}">@Messages("page.timeout.url")</a>.</div>
+    <div class="form-group">@messages("page.timeout.p2")
+        <a href="@{controllers.userJourney.routes.SignInOutController.signOut()}">@messages("page.timeout.url")</a>.</div>
 
 }

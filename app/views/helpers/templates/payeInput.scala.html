@@ -14,11 +14,11 @@
  * limitations under the License.
  *@
 
+@this()
+
 @(field: play.api.data.Field, args: (Symbol,Any)*)(implicit messages: Messages)
 
-@import play.api.i18n._
 @import views.html.helper._
-
 
 @elements = @{ new FieldElements(field.id, field, null, args.toMap, messages) }
 @parentField = @{args.toMap.get('parentField).asInstanceOf[Option[Field]]}
@@ -38,14 +38,14 @@
                   }
                   role="tooltip"
                   data-journey="search-page:error:@elements.field.name">
-                  @Messages(error)
+                  @messages(error.toString)
               </span>
         }
     }
 
 
     @if(parentElements.isDefined) {
-        @parentElements.get.errors.map { error => <span class="error-notification">@Messages(error)</span>}
+        @parentElements.get.errors.map { error => <span class="error-notification">@messages(error.toString)</span>}
     }
 
     @if(!labelAfter && elements.args.contains('_label)) {

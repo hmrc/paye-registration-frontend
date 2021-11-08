@@ -23,6 +23,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestAddressLookupControllerSpec extends PayeComponentSpec with PayeFakedApp {

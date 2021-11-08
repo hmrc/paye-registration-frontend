@@ -16,12 +16,11 @@
 
 package forms.helpers
 
-import java.time.LocalDate
-
 import play.api.data.format.Formatter
 import play.api.data.{FormError, Forms, Mapping}
 import utils.DateUtil
 
+import java.time.LocalDate
 import scala.util.Try
 
 trait CustomDateForm extends DateUtil {

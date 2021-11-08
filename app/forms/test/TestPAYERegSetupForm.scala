@@ -16,8 +16,6 @@
 
 package forms.test
 
-import java.time.LocalDate
-
 import enums.PAYEStatus
 import forms.helpers.{CustomDateForm, RequiredBooleanForm}
 import models.api._
@@ -28,6 +26,7 @@ import play.api.data.format.Formatter
 import play.api.data.{Form, FormError, Forms, Mapping}
 import utils.SystemDate
 
+import java.time.LocalDate
 import scala.util.Try
 
 object TestPAYERegSetupForm extends RequiredBooleanForm with CustomDateForm {

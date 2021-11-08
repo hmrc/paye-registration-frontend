@@ -16,9 +16,7 @@
 
 package controllers.test
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import config.AppConfig
+import connectors.KeystoreConnector
 import helpers.auth.AuthHelpers
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.BusinessProfile
@@ -26,34 +24,40 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import scala.concurrent.{ExecutionContext, Future}
+import views.html.pages.test.coHoCompanyDetailsSetup
+
+import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionContext}
+import scala.concurrent.Future
 
 class TestCoHoControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val testHttpResponse = HttpResponse(status = OK, body = "")
 
   class Setup extends CodeMocks with AuthHelpers {
-    override val authConnector = mockAuthConnector
-    override val keystoreConnector = mockKeystoreConnector
+    override val authConnector: AuthConnector = mockAuthConnector
+    override val keystoreConnector: KeystoreConnector = mockKeystoreConnector
 
-    lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
-    val controller = new TestCoHoController(mockMcc) {
-      override val appConfig: AppConfig = mockAppConfig
-      override val redirectToLogin = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
+    lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+    lazy val mockView: coHoCompanyDetailsSetup = app.injector.instanceOf[coHoCompanyDetailsSetup]
 
-      override val testIncorpInfoConnector = mockTestIncorpInfoConnector
-      override val keystoreConnector = mockKeystoreConnector
-      override val businessRegConnector = mockBusinessRegistrationConnector
-      override val coHoAPIService = mockIncorpInfoService
-      override val messagesApi = mockMessagesApi
-      override val authConnector = mockAuthConnector
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService = mockPayeRegService
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
-    }
+    val controller = new TestCoHoController(
+      mockTestIncorpInfoConnector,
+      mockIncorpInfoService,
+      mockKeystoreConnector,
+      mockBusinessRegistrationConnector,
+      mockAuthConnector,
+      mockS4LService,
+      mockCompanyDetailsService,
+      mockIncorpInfoService,
+      mockIncorpInfoConnector,
+      mockPayeRegService,
+      mockMcc,
+      mockView
+    )(mockAppConfig,
+      globalExecutionContext
+    )
   }
 
   "coHoCompanyDetailsSetup" should {
@@ -84,7 +88,7 @@ class TestCoHoControllerSpec extends PayeComponentSpec with PayeFakedApp {
         )
         mockFetchCurrentProfile()
 
-        mockBusinessRegFetch(Future(BusinessProfile(registrationID = "1", language = "EN")))
+        mockBusinessRegFetch(Future.successful(BusinessProfile(registrationID = "1", language = "EN")))
 
         when(mockTestIncorpInfoConnector.setupCoHoCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testHttpResponse))
@@ -113,7 +117,7 @@ class TestCoHoControllerSpec extends PayeComponentSpec with PayeFakedApp {
   "coHoCompanyDetailsTearDown" should {
     "return an OK" when {
       "the company details have been torn down" in new Setup {
-        mockBusinessRegFetch(Future(BusinessProfile(registrationID = "1", language = "EN")))
+        mockBusinessRegFetch(Future.successful(BusinessProfile(registrationID = "1", language = "EN")))
 
         when(mockTestIncorpInfoConnector.teardownIndividualCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testHttpResponse))

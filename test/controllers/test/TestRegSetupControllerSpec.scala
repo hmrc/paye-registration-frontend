@@ -16,7 +16,6 @@
 
 package controllers.test
 
-import config.AppConfig
 import enums.DownstreamOutcome
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
@@ -25,31 +24,41 @@ import org.mockito.Mockito.when
 import play.api.mvc.{MessagesControllerComponents, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
-import scala.concurrent.{ExecutionContext, Future}
+import views.html.pages.test.{payeRegCompanyDetailsSetup, payeRegEmploymentInfoSetup, payeRegPAYEContactSetup, payeRegistrationSetup}
+
+import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionContext}
+import scala.concurrent.Future
 
 class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val request = FakeRequest()
   lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
+  lazy val mockPayeRegistrationSetup = app.injector.instanceOf[payeRegistrationSetup]
+  lazy val mockPayeRegCompanyDetailsSetup = app.injector.instanceOf[payeRegCompanyDetailsSetup]
+  lazy val mockPayeRegPAYEContactSetup = app.injector.instanceOf[payeRegPAYEContactSetup]
+  lazy val mockPayeRegEmploymentInfoSetup = app.injector.instanceOf[payeRegEmploymentInfoSetup]
 
   class Setup {
-    val controller = new TestRegSetupController(mockMcc) {
-      override val appConfig: AppConfig = mockAppConfig
-      override val redirectToLogin = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
+    val controller = new TestRegSetupController(
+      mockPayeRegService,
+      mockTestPayeRegConnector,
+      mockKeystoreConnector,
+      mockTestBusRegConnector,
+      mockAuthConnector,
+      mockS4LService,
+      mockCompanyDetailsService,
+      mockIncorpInfoService,
+      mockIncorpInfoConnector,
+      mockPayeRegService,
+      mockMcc,
+      mockPayeRegistrationSetup,
+      mockPayeRegCompanyDetailsSetup,
+      mockPayeRegPAYEContactSetup,
+      mockPayeRegEmploymentInfoSetup
+    )(mockAppConfig,
+      globalExecutionContext) {
 
-      override val testPAYERegConnector = mockTestPayeRegConnector
-      override val payeRegService = mockPayeRegService
-      override val messagesApi = mockMessagesApi
-      override val authConnector = mockAuthConnector
-      override val keystoreConnector = mockKeystoreConnector
-      override val testBusinessRegConnector = mockTestBusRegConnector
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService = mockPayeRegService
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
-
-      override def withCurrentProfile(f: => (CurrentProfile) => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
+      override def withCurrentProfile(f: => CurrentProfile => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {
         f(CurrentProfile(
           "12345",
           CompanyRegistrationProfile("held", "txId"),

@@ -14,15 +14,19 @@
  * limitations under the License.
  *@
 
+@import config.AppConfig
 @import helpers.templates.summaryRow
 @import models.view.Summary
-@import uk.gov.hmrc.play.views.html.helpers.form
+@import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
 
-@import config.AppConfig
+@this(main_template: main_template,
+        summaryRow: summaryRow,
+        formWithCSRF: FormWithCSRF)
+
 @(summaryModel: Summary)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = Messages("pages.summary.description")) {
-    <h1 class="form-title heading-large" id="pageHeading">@Messages("pages.summary.description")</h1>
+@main_template(title = messages("pages.summary.description")) {
+    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.summary.description")</h1>
 
     @for(section <- summaryModel.sections) {
         <h2 class="heading-medium" id="@{section.id}SectionHeading">@{section.sectionHeading}</h2>
@@ -34,11 +38,11 @@
     }
     <br>
     <div class="form-group">
-        <h2 class="heading-medium">@Messages("pages.summary.heading2")</h2>
-        <p>@Messages("pages.summary.information")</p>
+        <h2 class="heading-medium">@messages("pages.summary.heading2")</h2>
+        <p>@messages("pages.summary.information")</p>
     </div>
 
-    @form(action = controllers.userJourney.routes.SummaryController.submitRegistration()) {
+    @formWithCSRF(action = controllers.userJourney.routes.SummaryController.submitRegistration()) {
         <div class="form-group">
             <button class="button" type="submit" id="continue" >@messages("app.common.submitYourApplication")</button>
         </div>

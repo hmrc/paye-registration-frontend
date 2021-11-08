@@ -21,41 +21,36 @@ import connectors.test.TestIncorpInfoConnector
 import connectors.{BusinessRegistrationConnector, IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import forms.test.TestCoHoCompanyDetailsForm
-import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
+import views.html.pages.test.coHoCompanyDetailsSetup
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-class TestCoHoControllerImpl @Inject()(val testIncorpInfoConnector: TestIncorpInfoConnector,
-                                       val coHoAPIService: IncorporationInformationService,
-                                       val keystoreConnector: KeystoreConnector,
-                                       val businessRegConnector: BusinessRegistrationConnector,
-                                       val authConnector: AuthConnector,
-                                       val s4LService: S4LService,
-                                       val companyDetailsService: CompanyDetailsService,
-                                       val incorpInfoService: IncorporationInformationService,
-                                       val incorporationInformationConnector: IncorporationInformationConnector,
-                                       val payeRegistrationService: PAYERegistrationService,
-                                       mcc: MessagesControllerComponents
-                                      )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends TestCoHoController(mcc) with AuthRedirectUrls
+@Singleton
+class TestCoHoController @Inject()(val testIncorpInfoConnector: TestIncorpInfoConnector,
+                                   val coHoAPIService: IncorporationInformationService,
+                                   val keystoreConnector: KeystoreConnector,
+                                   val businessRegConnector: BusinessRegistrationConnector,
+                                   val authConnector: AuthConnector,
+                                   val s4LService: S4LService,
+                                   val companyDetailsService: CompanyDetailsService,
+                                   val incorpInfoService: IncorporationInformationService,
+                                   val incorporationInformationConnector: IncorporationInformationConnector,
+                                   val payeRegistrationService: PAYERegistrationService,
+                                   mcc: MessagesControllerComponents,
+                                   coHoCompanyDetailsSetup: coHoCompanyDetailsSetup
+                                  )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
-abstract class TestCoHoController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-  val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val testIncorpInfoConnector: TestIncorpInfoConnector
-  val businessRegConnector: BusinessRegistrationConnector
-  val keystoreConnector: KeystoreConnector
-  val coHoAPIService: IncorporationInformationService
-
-  def coHoCompanyDetailsSetup = isAuthorised { implicit request =>
-    Future.successful(Ok(views.html.pages.test.coHoCompanyDetailsSetup(TestCoHoCompanyDetailsForm.form)))
+  def coHoCompanyDetailsSetup: Action[AnyContent] = isAuthorised { implicit request =>
+    Future.successful(Ok(coHoCompanyDetailsSetup(TestCoHoCompanyDetailsForm.form)))
   }
 
   def submitCoHoCompanyDetailsSetup: Action[AnyContent] = isAuthorised { implicit request =>
     TestCoHoCompanyDetailsForm.form.bindFromRequest.fold(
-      errors => Future.successful(BadRequest(views.html.pages.test.coHoCompanyDetailsSetup(errors))),
+      errors => Future.successful(BadRequest(coHoCompanyDetailsSetup(errors))),
       success => for {
         profile <- businessRegConnector.retrieveCurrentProfile
         res <- doAddCoHoCompanyDetails(profile.registrationID, success.companyName)

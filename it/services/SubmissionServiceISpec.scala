@@ -16,17 +16,16 @@
 
 package services
 
-import java.util.UUID
-
 import config.AppConfig
 import connectors._
 import enums.{CacheKeys, IncorporationStatus}
 import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
-import play.api.{Application, Environment, Mode}
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext
 
 class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {

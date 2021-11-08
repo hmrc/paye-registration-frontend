@@ -20,10 +20,10 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import models.external.CurrentProfile
 import org.scalatest.BeforeAndAfterEach
+import play.api.Application
 import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.DefaultCookieSigner
-import play.api.{Application, Environment, Mode}
 import play.mvc.Http.Status
 
 class RestartPAYEISpec extends IntegrationSpecBase

@@ -27,52 +27,48 @@ object PAYEContactDetails {
   implicit val digitalContactFormat = DigitalContactDetails.format
   implicit val format = Json.format[PAYEContactDetails]
 
-  val prepopReads: Reads[PAYEContactDetails] = new Reads[PAYEContactDetails] {
-    def reads(json: JsValue): JsResult[PAYEContactDetails] = {
-      val oFirstName = json.\("firstName").asOpt[String](Formatters.normalizeTrimmedReads)
-      val oMiddleName = json.\("middleName").asOpt[String](Formatters.normalizeTrimmedReads)
-      val oLastName = json.\("surname").asOpt[String](Formatters.normalizeTrimmedReads)
+  val prepopReads: Reads[PAYEContactDetails] = (json: JsValue) => {
+    val oFirstName = (json \ "firstName").asOpt[String](Formatters.normalizeTrimmedReads)
+    val oMiddleName = (json \ "middleName").asOpt[String](Formatters.normalizeTrimmedReads)
+    val oLastName = (json \ "surname").asOpt[String](Formatters.normalizeTrimmedReads)
 
-      DigitalContactDetails.prepopReads.reads(json) match {
-        case jsSuccess: JsSuccess[DigitalContactDetails] => JsSuccess(
-          PAYEContactDetails(
-            name = Seq(oFirstName, oMiddleName, oLastName).flatten.mkString(" "),
-            digitalContactDetails = jsSuccess.value)
-        )
-        case jsErr: JsError => jsErr
-      }
+    DigitalContactDetails.prepopReads.reads(json) match {
+      case jsSuccess: JsSuccess[DigitalContactDetails] => JsSuccess(
+        PAYEContactDetails(
+          name = Seq(oFirstName, oMiddleName, oLastName).flatten.mkString(" "),
+          digitalContactDetails = jsSuccess.value)
+      )
+      case jsErr: JsError => jsErr
     }
   }
 
-  val prepopWrites: Writes[PAYEContactDetails] = new Writes[PAYEContactDetails] {
-    def writes(payeContactDetails: PAYEContactDetails): JsValue = {
-      def splitName(fullName: String): (Option[String], Option[String], Option[String]) = {
-        val split = fullName.trim.split("\\s+")
+  val prepopWrites: Writes[PAYEContactDetails] = (payeContactDetails: PAYEContactDetails) => {
+    def splitName(fullName: String): (Option[String], Option[String], Option[String]) = {
+      val split = fullName.trim.split("\\s+")
 
-        val firstName = if (fullName.trim.isEmpty) None else Some(split.head)
-        val middleName = {
-          val middleSplit = split
-            .drop(1)
-            .dropRight(1)
-            .toList
+      val firstName = if (fullName.trim.isEmpty) None else Some(split.head)
+      val middleName = {
+        val middleSplit = split
+          .drop(1)
+          .dropRight(1)
+          .toList
 
-          if (middleSplit.nonEmpty) Some(middleSplit.mkString(" ")) else None
-        }
-        val lastName = if (split.length < 2) None else Some(split.last)
-
-        (firstName, middleName, lastName)
+        if (middleSplit.nonEmpty) Some(middleSplit.mkString(" ")) else None
       }
+      val lastName = if (split.length < 2) None else Some(split.last)
 
-      val (firstName, middleName, surname) = splitName(payeContactDetails.name)
-      val jsonFirstName = firstName.fold(Json.obj())(fn => Json.obj("firstName" -> fn))
-      val jsonMiddleName = middleName.fold(Json.obj())(mn => Json.obj("middleName" -> mn))
-      val jsonSurname = surname.fold(Json.obj())(sn => Json.obj("surname" -> sn))
-
-      jsonFirstName ++
-        jsonMiddleName ++
-        jsonSurname ++
-        Json.toJson(payeContactDetails.digitalContactDetails)(DigitalContactDetails.prepopWrites).as[JsObject]
+      (firstName, middleName, lastName)
     }
+
+    val (firstName, middleName, surname) = splitName(payeContactDetails.name)
+    val jsonFirstName = firstName.fold(Json.obj())(fn => Json.obj("firstName" -> fn))
+    val jsonMiddleName = middleName.fold(Json.obj())(mn => Json.obj("middleName" -> mn))
+    val jsonSurname = surname.fold(Json.obj())(sn => Json.obj("surname" -> sn))
+
+    jsonFirstName ++
+      jsonMiddleName ++
+      jsonSurname ++
+      Json.toJson(payeContactDetails.digitalContactDetails)(DigitalContactDetails.prepopWrites).as[JsObject]
   }
 }
 

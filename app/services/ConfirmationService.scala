@@ -16,13 +16,12 @@
 
 package services
 
-import java.time.LocalDate
-
 import connectors.PAYERegistrationConnector
-import javax.inject.Inject
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{NewTaxYear, SystemDate}
 
+import java.time.LocalDate
+import javax.inject.Inject
 import scala.concurrent.Future
 
 class ConfirmationServiceImpl @Inject()(val payeRegistrationConnector: PAYERegistrationConnector) extends ConfirmationService {

@@ -19,13 +19,13 @@ package filters
 import akka.event.slf4j.Logger
 import akka.stream.Materializer
 import controllers.userJourney.{routes => userJourneyRoutes}
-import javax.inject.{Inject, Singleton}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Filter, RequestHeader, Result}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import utils.Validators
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
 @Singleton
@@ -34,7 +34,7 @@ class PAYESessionIDFilterImpl @Inject()(val mat: Materializer) extends PAYESessi
 trait PAYESessionIDFilter extends Filter {
 
   private def getHeaderCarrier(request: RequestHeader): HeaderCarrier =
-    HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+    HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
   def apply(f: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
     getHeaderCarrier(rh).sessionId match {

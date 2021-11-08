@@ -17,13 +17,13 @@
 package controllers.test
 
 import config.AppConfig
-import javax.inject.Inject
 import connectors.{BusinessRegistrationConnector, IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestCacheControllerImpl @Inject()(val businessRegConnector: BusinessRegistrationConnector,

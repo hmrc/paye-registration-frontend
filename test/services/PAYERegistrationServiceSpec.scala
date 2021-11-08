@@ -46,14 +46,14 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
 
   "Calling assertRegistrationFootprint" should {
     "return a success response when the Registration is successfully created" in new Setup {
-      when(mockPAYERegConnector.createNewRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.createNewRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       await(service.assertRegistrationFootprint("123", "txID")) mustBe DownstreamOutcome.Success
     }
 
     "return a failure response when the Registration can't be created" in new Setup {
-      when(mockPAYERegConnector.createNewRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.createNewRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       await(service.assertRegistrationFootprint("123", "txID")) mustBe DownstreamOutcome.Failure

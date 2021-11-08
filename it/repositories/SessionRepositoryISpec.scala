@@ -16,14 +16,13 @@
 
 package repositories
 
-import java.util.UUID
-
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.api.SessionMap
-import play.api.{Application, Environment, Mode}
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SessionRepositoryISpec extends IntegrationSpecBase {

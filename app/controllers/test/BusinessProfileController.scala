@@ -20,12 +20,12 @@ import config.AppConfig
 import connectors._
 import connectors.test.TestBusinessRegConnector
 import controllers.{AuthRedirectUrls, PayeBaseController}
-import javax.inject.Inject
 import models.external.BusinessProfile
 import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class BusinessProfileControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,

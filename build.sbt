@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings, integrationTestSettings}
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
-import scoverage.ScoverageKeys
-import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 import sbt.Keys.dependencyOverrides
+import scoverage.ScoverageKeys
+import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, integrationTestSettings, scalaSettings}
+import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
+import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 val appName: String = "paye-registration-frontend"
 
@@ -43,14 +43,7 @@ lazy val microservice = Project(appName, file("."))
     scalaVersion := "2.12.12",
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true,
-    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     addTestReportOption(IntegrationTest, "int-test-reports"),
-    dependencyOverrides ++= Seq(
-      "com.typesafe.akka" %% "akka-actor" % "2.5.23",
-      "com.typesafe.akka" %% "akka-protobuf" % "2.5.23",
-      "com.typesafe.akka" %% "akka-slf4j" % "2.5.23",
-      "com.typesafe.akka" %% "akka-stream" % "2.5.23"
-    )
   )
 
 javaOptions in Test += "-Dlogger.resource=logback-test.xml"

@@ -15,7 +15,9 @@
  *@
 
 @import config.AppConfig
-@import controllers.userJourney.routes.SignInOutController
+@import controllers.userJourney.{routes => Routes}
+
+@this()
 
 @(appConfig: AppConfig)
 
@@ -23,8 +25,8 @@
     window.GOVUK.timeoutDialog({
         timeout: @appConfig.timeoutInSeconds,
         countdown: @appConfig.timeoutDisplayLength,
-        keepAliveUrl: '@SignInOutController.renewSession.url',
-        signOutUrl: '@SignInOutController.destroySession.url'
+        keepAliveUrl: '@Routes.SignInOutController.renewSession.url',
+        signOutUrl: '@Routes.SignInOutController.destroySession.url'
     });
 
     var dialogOpen;

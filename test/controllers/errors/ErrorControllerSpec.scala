@@ -16,31 +16,42 @@
 
 package controllers.errors
 
-import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.jsoup.Jsoup
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
-import scala.concurrent.ExecutionContext
+import views.html.pages.error.{ineligible, newIneligible, submissionFailed, submissionTimeout}
+
+import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionContext}
 
 class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
-  val regId = Fixtures.validCurrentProfile.get.registrationID
+  val regId: String = Fixtures.validCurrentProfile.get.registrationID
   val ticketId: Long = 123456789
-  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
-  class Setup {
-    val testController = new ErrorController(mockMcc) {
-      override val redirectToLogin = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-      override val keystoreConnector = mockKeystoreConnector
-      override val messagesApi = mockMessagesApi
-      override val authConnector = mockAuthConnector
-      override val thresholdService = mockThresholdService
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService = mockPayeRegService
-      override implicit val appConfig: AppConfig = mockAppConfig
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+  lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+  lazy val mockIneligibleView: ineligible = app.injector.instanceOf[ineligible]
+  lazy val mockNewIneligibleView: newIneligible = app.injector.instanceOf[newIneligible]
+  lazy val mockSubmissionTimeoutView: submissionTimeout = app.injector.instanceOf[submissionTimeout]
+  lazy val mockSubmissionFailedView: submissionFailed = app.injector.instanceOf[submissionFailed]
 
-    }
+  class Setup {
+
+    val testController = new ErrorController(
+      mockThresholdService,
+      mockKeystoreConnector,
+      mockCompanyDetailsService,
+      mockS4LService,
+      mockIncorpInfoService,
+      mockAuthConnector,
+      mockIncorpInfoConnector,
+      mockPayeRegService,
+      mockMcc,
+      mockIneligibleView,
+      mockNewIneligibleView,
+      mockSubmissionTimeoutView,
+      mockSubmissionFailedView
+    )(mockAppConfig,
+      globalExecutionContext)
+
   }
 
   "GET /start" should {

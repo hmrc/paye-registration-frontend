@@ -150,10 +150,10 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with PayeFakedApp {
         )
       )
 
-      when(mockKeystoreConnector.fetchByTransactionId(ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockKeystoreConnector.fetchByTransactionId(ArgumentMatchers.any()))
         .thenReturn(Future(Some(testSessionMap)))
 
-      when(mockKeystoreConnector.cacheSessionMap(ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockKeystoreConnector.cacheSessionMap(ArgumentMatchers.any()))
         .thenReturn(Future(testSessionMap))
 
       val result = await(service.updateCurrentProfileWithIncorpStatus(txId = "testTxId", status = IncorporationStatus.rejected))

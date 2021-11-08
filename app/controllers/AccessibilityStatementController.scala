@@ -17,16 +17,17 @@
 package controllers
 
 import config.AppConfig
-import javax.inject.{Inject, Singleton}
 import play.api.i18n.I18nSupport
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import views.html.statements.accessibility_statement
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
 @Singleton
-class AccessibilityStatementController @Inject()(mcc: MessagesControllerComponents)
+class AccessibilityStatementController @Inject()(mcc: MessagesControllerComponents,
+                                                 accessibility_statement: accessibility_statement)
                                                 (implicit appConfig: AppConfig) extends FrontendController(mcc) with I18nSupport {
 
   def show(pageUri: String): Action[AnyContent] = Action.async {

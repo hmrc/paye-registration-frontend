@@ -20,33 +20,27 @@ import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector, PAYERegistrationConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.{IncorporationStatus, RegistrationDeletion}
-import javax.inject.Inject
-import play.api.Logger
 import play.api.libs.json.{JsObject, JsSuccess, JsValue}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class RegistrationControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
-                                           val payeRegistrationConnector: PAYERegistrationConnector,
-                                           val authConnector: AuthConnector,
-                                           val companyDetailsService: CompanyDetailsService,
-                                           val s4LService: S4LService,
-                                           val incorpInfoService: IncorporationInformationService,
-                                           val payeRegistrationService: PAYERegistrationService,
-                                           val incorporationInformationConnector: IncorporationInformationConnector,
-                                           mcc: MessagesControllerComponents
-                                          )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends RegistrationController(mcc) with AuthRedirectUrls
+class RegistrationController @Inject()(val keystoreConnector: KeystoreConnector,
+                                       val payeRegistrationConnector: PAYERegistrationConnector,
+                                       val authConnector: AuthConnector,
+                                       val companyDetailsService: CompanyDetailsService,
+                                       val s4LService: S4LService,
+                                       val incorpInfoService: IncorporationInformationService,
+                                       val payeRegistrationService: PAYERegistrationService,
+                                       val incorporationInformationConnector: IncorporationInformationConnector,
+                                       mcc: MessagesControllerComponents
+                                      )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
-abstract class RegistrationController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-  val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val payeRegistrationConnector: PAYERegistrationConnector
-  val payeRegistrationService: PAYERegistrationService
 
   def delete(regId: String): Action[AnyContent] = Action.async { implicit request =>
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
@@ -78,11 +72,11 @@ abstract class RegistrationController(mcc: MessagesControllerComponents) extends
       case (JsSuccess(id, _), JsSuccess(status, _)) => payeRegistrationService.handleIIResponse(id, status).map {
         s =>
           if (s == RegistrationDeletion.notfound) {
-            Logger.warn(s"II returned $txId with status $incorpStatus but no paye doc found, returned 200 back to II to clear subscription")
+            logger.warn(s"II returned $txId with status $incorpStatus but no paye doc found, returned 200 back to II to clear subscription")
           }
           Ok
       } recover {
-        case e : Exception => InternalServerError
+        case e: Exception => InternalServerError
       }
       case _ =>
         logger.error(s"Incorp Status or transaction Id not received or invalid from II for txId $txId")

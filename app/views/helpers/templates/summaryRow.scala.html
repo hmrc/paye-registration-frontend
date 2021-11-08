@@ -16,7 +16,8 @@
 
 @import models.view.SummaryRow
 
-@import models.view.SummaryChangeLink
+@this()
+
 @(row: SummaryRow)(implicit messages: Messages)
 
 <div>
@@ -27,8 +28,8 @@
     }
   </dd>
   <dd class="cya-change">
-    @row.optChangeLink.map { case SummaryChangeLink(location, hiddenText) =>
-      <a href="@location" id="@{row.id}ChangeLink">@Messages("app.common.change")<span class ="visually-hidden" id="@{row.id}HelpText">@hiddenText</span></a>
+    @for(changeLink <- row.optChangeLink) {
+      <a href="@changeLink.location" id="@{row.id}ChangeLink">@messages("app.common.change")<span class ="visually-hidden" id="@{row.id}HelpText">@changeLink.hiddenText</span></a>
     }
   </dd>
 </div>

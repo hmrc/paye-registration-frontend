@@ -19,11 +19,11 @@ package frontend
 import controllers.userJourney.routes
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.scalatest.BeforeAndAfterEach
+import play.api.Application
 import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.json.Json
-import play.api.{Application, Environment, Mode}
 
 class PageVisibilityISpec extends IntegrationSpecBase
   with LoginStub

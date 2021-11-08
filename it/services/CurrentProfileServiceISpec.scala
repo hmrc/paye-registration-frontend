@@ -22,11 +22,10 @@ import connectors._
 import enums.IncorporationStatus
 import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProfile}
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.{Application, Environment, Mode}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
-
 
 import scala.concurrent.ExecutionContext
 

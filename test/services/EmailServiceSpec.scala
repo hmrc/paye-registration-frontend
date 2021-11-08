@@ -16,13 +16,12 @@
 
 package services
 
-import java.time.LocalDate
-
 import connectors._
 import helpers.PayeComponentSpec
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class EmailServiceSpec extends PayeComponentSpec {
@@ -40,7 +39,7 @@ class EmailServiceSpec extends PayeComponentSpec {
   "primeEmailData" should {
     "return a cache map" when {
       "the first payment date has been stashed" in {
-        when(mockPayeRegistrationConnector.getEmployment(any())(any(), any()))
+        when(mockPayeRegistrationConnector.getEmployment(any())(any()))
           .thenReturn(Future(Some(Fixtures.validEmploymentApi)))
 
         when(mockS4LConnector.saveForm(any(), any(), any())(any(), any()))

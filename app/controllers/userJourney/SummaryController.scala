@@ -18,40 +18,35 @@ package controllers.userJourney
 
 import config.AppConfig
 import connectors._
-import controllers.exceptions.FrontendControllerException
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.PAYEStatus
-import javax.inject.Inject
 import models.external.CurrentProfile
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
+import views.html.pages.error.submissionTimeout
 import views.html.pages.{summary => SummaryPage}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-class SummaryControllerImpl @Inject()(val summaryService: SummaryService,
-                                      val submissionService: SubmissionService,
-                                      val keystoreConnector: KeystoreConnector,
-                                      val authConnector: AuthConnector,
-                                      val s4LService: S4LService,
-                                      val companyDetailsService: CompanyDetailsService,
-                                      val incorpInfoService: IncorporationInformationService,
-                                      val payeRegistrationConnector: PAYERegistrationConnector,
-                                      val emailService: EmailService,
-                                      val incorporationInformationConnector: IncorporationInformationConnector,
-                                      val payeRegistrationService: PAYERegistrationService,
-                                      mcc: MessagesControllerComponents
-                                     )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends SummaryController(mcc) with AuthRedirectUrls
-
-abstract class SummaryController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-  implicit val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val summaryService: SummaryService
-  val submissionService: SubmissionService
-  val payeRegistrationConnector: PAYERegistrationConnector
-  val emailService: EmailService
+@Singleton
+class SummaryController @Inject()(val summaryService: SummaryService,
+                                  val submissionService: SubmissionService,
+                                  val keystoreConnector: KeystoreConnector,
+                                  val authConnector: AuthConnector,
+                                  val s4LService: S4LService,
+                                  val companyDetailsService: CompanyDetailsService,
+                                  val incorpInfoService: IncorporationInformationService,
+                                  val payeRegistrationConnector: PAYERegistrationConnector,
+                                  val emailService: EmailService,
+                                  val incorporationInformationConnector: IncorporationInformationConnector,
+                                  val payeRegistrationService: PAYERegistrationService,
+                                  mcc: MessagesControllerComponents,
+                                  SummaryPage: SummaryPage,
+                                  submissionTimeout: submissionTimeout
+                                 )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
   def summary: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     profile =>
@@ -61,9 +56,7 @@ abstract class SummaryController(mcc: MessagesControllerComponents) extends Paye
           summary <- summaryService.getRegistrationSummary(profile.registrationID, profile.companyTaxRegistration.transactionId)
         } yield {
           Ok(SummaryPage(summary))
-        }).recover {
-          case e: FrontendControllerException => e.recover
-        }
+        })
       }
   }
 
@@ -74,7 +67,7 @@ abstract class SummaryController(mcc: MessagesControllerComponents) extends Paye
           case Success => Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation())
           case Cancelled => Redirect(controllers.userJourney.routes.DashboardController.dashboard())
           case Failed => Redirect(controllers.errors.routes.ErrorController.failedSubmission())
-          case TimedOut => InternalServerError(views.html.pages.error.submissionTimeout())
+          case TimedOut => InternalServerError(submissionTimeout())
         }
       }
   }
