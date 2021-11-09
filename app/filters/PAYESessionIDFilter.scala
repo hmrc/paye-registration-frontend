@@ -41,7 +41,7 @@ trait PAYESessionIDFilter extends Filter {
       case Some(sessionId) if !sessionId.value.matches(Validators.desSessionRegex) =>
         Logger(getClass.getSimpleName)
           .warn(s"The session Id of ${sessionId.value} doesn't match the DES schema. Redirecting the user to sign in")
-        Future.successful(Redirect(userJourneyRoutes.SignInOutController.postSignIn()).withNewSession)
+        Future.successful(Redirect(userJourneyRoutes.SignInOutController.postSignIn).withNewSession)
       case _ => f(rh)
     }
   }

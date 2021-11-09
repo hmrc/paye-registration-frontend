@@ -16,7 +16,7 @@
 
 package models.view
 
-import play.api.Logger
+import common.Logging
 
 class ConvertToPrepopAddressException(msg: String) extends Exception(msg)
 
@@ -52,7 +52,7 @@ case class PrepopAddress(index: Int) extends AddressChoice {
   override def toString: String = s"${PrepopAddress.prefix}$index"
 }
 
-object PrepopAddress {
+object PrepopAddress extends Logging {
   val prefix = "prepopAddress"
   val prepopRegex = s"${PrepopAddress.prefix}[0-9]+"
 
@@ -62,7 +62,7 @@ object PrepopAddress {
       PrepopAddress(index)
     } else {
       val errMsg = s"[PrepopAddress] [fromString] Could not convert from String to PrepopAddress for value $s not valid"
-      Logger.warn(errMsg)
+      logger.warn(errMsg)
       throw new ConvertToPrepopAddressException(errMsg)
     }
   }

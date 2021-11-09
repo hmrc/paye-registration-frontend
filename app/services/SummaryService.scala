@@ -77,7 +77,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
           answers = Seq(displayCapacity),
           optChangeLink = Some(
             SummaryChangeLink(
-              controllers.userJourney.routes.CompletionCapacityController.completionCapacity(),
+              controllers.userJourney.routes.CompletionCapacityController.completionCapacity,
               messages("pages.summary.completionCapacity.hiddenChangeText")
             )
           )
@@ -100,7 +100,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
           }),
           optChangeLink = Some(
             SummaryChangeLink(
-              controllers.userJourney.routes.CompanyDetailsController.tradingName(),
+              controllers.userJourney.routes.CompanyDetailsController.tradingName,
               messages("pages.summary.tradingName.hiddenChangeText")
             )
           )
@@ -117,7 +117,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
           answers = addressToSummaryRowAnswers(companyDetails.ppobAddress),
           optChangeLink = Some(
             SummaryChangeLink(
-              controllers.userJourney.routes.CompanyDetailsController.ppobAddress(),
+              controllers.userJourney.routes.CompanyDetailsController.ppobAddress,
               messages("pages.summary.ppobAddress.hiddenChangeText")
             )
           )
@@ -130,7 +130,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
           }),
           optChangeLink = Some(
             SummaryChangeLink(
-              controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness(),
+              controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness,
               messages("pages.summary.natureOfBusiness.hiddenChangeText")
             )
           )
@@ -153,7 +153,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
           }),
           optChangeLink = Some(
             SummaryChangeLink(
-              controllers.userJourney.routes.CompanyDetailsController.businessContactDetails(),
+              controllers.userJourney.routes.CompanyDetailsController.businessContactDetails,
               messages("pages.summary.businessEmail.hiddenChangeText")
             )
           )
@@ -167,7 +167,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
           }),
           optChangeLink = Some(
             SummaryChangeLink(
-              controllers.userJourney.routes.CompanyDetailsController.businessContactDetails(),
+              controllers.userJourney.routes.CompanyDetailsController.businessContactDetails,
               messages("pages.summary.mobileNumber.hiddenChangeText")
             )
           )
@@ -181,7 +181,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
           }),
           optChangeLink = Some(
             SummaryChangeLink(
-              controllers.userJourney.routes.CompanyDetailsController.businessContactDetails(),
+              controllers.userJourney.routes.CompanyDetailsController.businessContactDetails,
               messages("pages.summary.businessTelephone.hiddenChangeText")
             )
           )
@@ -217,7 +217,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
           },
           optChangeLink = Some(
             SummaryChangeLink(
-              controllers.userJourney.routes.EmploymentController.paidEmployees(),
+              controllers.userJourney.routes.EmploymentController.paidEmployees,
               messages("pages.summary.employing.hiddenChangeText")
             )
           )
@@ -229,7 +229,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
               question = messages("pages.summary.earliestDate.question"),
               answers = Seq(DateTimeFormatter.ofPattern("dd/MM/yyyy").format(startDate)),
               optChangeLink = Some(SummaryChangeLink(
-                controllers.userJourney.routes.EmploymentController.paidEmployees(),
+                controllers.userJourney.routes.EmploymentController.paidEmployees,
                 messages("pages.summary.earliestDate.hiddenChangeText")
               ))
             )
@@ -248,7 +248,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
             Seq(messages("pages.summary.willBePaying.answers.false"))
           },
           optChangeLink = Some(SummaryChangeLink(
-            controllers.userJourney.routes.EmploymentController.employingStaff(),
+            controllers.userJourney.routes.EmploymentController.employingStaff,
             messages("pages.summary.willBePaying.hiddenChangeText")
           ))
         )),
@@ -263,7 +263,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
                 Seq(messages("pages.summary.beforeNextTaxYear.answers.false"))
               },
               optChangeLink = Some(SummaryChangeLink(
-                controllers.userJourney.routes.EmploymentController.employingStaff(),
+                controllers.userJourney.routes.EmploymentController.employingStaff,
                 messages("pages.summary.beforeNextTaxYear.hiddenChangeText")
               ))
             )
@@ -280,7 +280,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
         Seq(messages("pages.summary.inConstructionIndustry.answers.false"))
       },
       optChangeLink = Some(SummaryChangeLink(
-        controllers.userJourney.routes.EmploymentController.constructionIndustry(),
+        controllers.userJourney.routes.EmploymentController.constructionIndustry,
         messages("pages.summary.inConstructionIndustry.hiddenChangeText")
       ))
     ))
@@ -294,7 +294,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
         } else {
           Seq(messages("pages.summary.employsSubcontractors.answers.false"))
         }, optChangeLink = Some(SummaryChangeLink(
-          controllers.userJourney.routes.EmploymentController.subcontractors(),
+          controllers.userJourney.routes.EmploymentController.subcontractors,
           messages("pages.summary.employsSubcontractors.hiddenChangeText")
         ))
       )
@@ -309,7 +309,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
         } else {
           Seq(messages("pages.summary.paysPension.answers.false"))
         }, optChangeLink = Some(SummaryChangeLink(
-          controllers.userJourney.routes.EmploymentController.pensions(),
+          controllers.userJourney.routes.EmploymentController.pensions,
           messages("pages.summary.paysPension.hiddenChangeText")
         ))
       )
@@ -337,7 +337,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
           case None => ""
         }),
         optChangeLink = Some(SummaryChangeLink(
-          controllers.userJourney.routes.DirectorDetailsController.directorDetails(),
+          controllers.userJourney.routes.DirectorDetailsController.directorDetails,
           messages("pages.summary.director.hiddenChangeText", directorName)
         ))
       )
@@ -351,7 +351,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
   }
 
   private[services] def buildContactDetails(payeContactDetails: PAYEContact)(implicit messages: Messages) = {
-    val payeContactDetailsCall: Call = controllers.userJourney.routes.PAYEContactController.payeContactDetails()
+    val payeContactDetailsCall: Call = controllers.userJourney.routes.PAYEContactController.payeContactDetails
     val digitalContact = payeContactDetails.contactDetails.digitalContactDetails
     SummarySection(
       id = "payeContactDetails",
@@ -407,7 +407,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
           question = messages("pages.summary.correspondenceAddress.question"),
           answers = addressToSummaryRowAnswers(payeContactDetails.correspondenceAddress),
           optChangeLink = Some(SummaryChangeLink(
-            controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress(),
+            controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress,
             messages("pages.summary.correspondenceAddress.hiddenChangeText")
           ))
         )

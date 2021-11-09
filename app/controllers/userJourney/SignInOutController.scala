@@ -53,7 +53,7 @@ class SignInOutController @Inject()(val authConnector: AuthConnector,
   }
 
   def destroySession: Action[AnyContent] = Action {
-    Redirect(routes.SignInOutController.timeoutShow()).withNewSession
+    Redirect(routes.SignInOutController.timeoutShow).withNewSession
   }
 
   def timeoutShow = Action.async { implicit request =>

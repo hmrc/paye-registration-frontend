@@ -30,21 +30,19 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class PAYEContactServiceSpec extends PayeComponentSpec {
   val returnHttpResponse = HttpResponse(200)
 
   class Setup {
-    val service = new PAYEContactService {
-      val payeRegConnector = mockPAYERegConnector
-      val s4LService = mockS4LService
-      val keystoreConnector = mockKeystoreConnector
-      val companyDetailsService = mockCompanyDetailsService
-      val prepopService = mockPrepopulationService
-      val auditService = mockAuditService
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
-    }
+    val service = new PAYEContactService(
+      mockPAYERegConnector,
+      mockS4LService,
+      mockCompanyDetailsService,
+      mockPrepopulationService,
+      mockAuditService
+    )(global)
   }
 
   val testRegId = "54321"

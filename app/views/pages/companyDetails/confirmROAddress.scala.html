@@ -33,7 +33,7 @@
 
     <p id="lead-paragraph">@messages("pages.confirmRO.lede", companyName)</p>
 
-    @form(action = controllers.userJourney.routes.CompanyDetailsController.confirmRO()) {
+    @form(action = controllers.userJourney.routes.CompanyDetailsController.confirmRO) {
         <div class="form-group">
             @addressBlockDisplay(address, "ro-address")
         </div>

@@ -122,7 +122,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.paidEmployees().url)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.paidEmployees.url)
       }
     }
 
@@ -136,7 +136,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.paidEmployees().url)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.paidEmployees.url)
       }
     }
 
@@ -152,7 +152,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.paidEmployees().url)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.paidEmployees.url)
       }
     }
 
@@ -215,7 +215,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
         result =>
           status(result) mustBe Status.SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.SignInOutController.postSignIn().toString)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.SignInOutController.postSignIn.toString)
       }
     }
   }
@@ -278,7 +278,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         AuthHelpers.showAuthorised(controller().restartPaye, fakeRequest) {
           result =>
             status(result) mustBe Status.SEE_OTHER
-            redirectLocation(result) mustBe Some(controllers.userJourney.routes.DashboardController.dashboard().url)
+            redirectLocation(result) mustBe Some(controllers.userJourney.routes.DashboardController.dashboard.url)
         }
       }
     }

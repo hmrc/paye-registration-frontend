@@ -56,7 +56,7 @@ class CompletionCapacityController @Inject()(val completionCapacityService: Comp
         errors => Future.successful(BadRequest(CompletionCapacityView(errors))),
         success => {
           completionCapacityService.saveCompletionCapacity(profile.registrationID, success) map {
-            _ => Redirect(routes.CompanyDetailsController.tradingName())
+            _ => Redirect(routes.CompanyDetailsController.tradingName)
           }
         }
       )

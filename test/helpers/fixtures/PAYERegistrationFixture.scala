@@ -132,7 +132,7 @@ trait PAYERegistrationFixture {
         question = "testQuestion",
         answers = Seq("tstTrade"),
         optChangeLink = Some(SummaryChangeLink(
-          controllers.userJourney.routes.CompanyDetailsController.tradingName(),
+          controllers.userJourney.routes.CompanyDetailsController.tradingName,
           "testTradingNameHiddenText"
         ))
       ))

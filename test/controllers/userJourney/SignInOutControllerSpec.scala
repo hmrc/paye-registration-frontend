@@ -93,7 +93,7 @@ class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
       status(res) mustBe 303
       headers(res).contains("playFoo") mustBe false
 
-      redirectLocation(res) mustBe Some(controllers.userJourney.routes.SignInOutController.timeoutShow().url)
+      redirectLocation(res) mustBe Some(controllers.userJourney.routes.SignInOutController.timeoutShow.url)
     }
   }
 

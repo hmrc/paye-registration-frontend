@@ -96,7 +96,7 @@ class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedA
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitCompletionCapacity, Fixtures.validCurrentProfile, request) { result =>
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(routes.CompanyDetailsController.tradingName().url)
+        redirectLocation(result) mustBe Some(routes.CompanyDetailsController.tradingName.url)
       }
     }
   }

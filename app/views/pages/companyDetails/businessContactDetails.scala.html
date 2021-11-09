@@ -71,7 +71,7 @@
 
     <h1 class="form-title heading-large" id="pageHeading">@messages("pages.businessContact.description", companyName)</h1>
 
-    @form(action = controllers.userJourney.routes.CompanyDetailsController.submitBusinessContactDetails()) {
+    @form(action = controllers.userJourney.routes.CompanyDetailsController.submitBusinessContactDetails) {
 
         <div class="form-group">
         @oneOfManyErrorWrapper(contactForm, formContent)

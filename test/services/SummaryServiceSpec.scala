@@ -87,25 +87,25 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
           id = "employing",
           question = "Does the company employ anyone or provide expenses or benefits to staff?",
           answers = List("No"),
-          Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees(), "if the company employs anyone or provides expenses or benefits to staff."))
+          Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees, "if the company employs anyone or provides expenses or benefits to staff."))
         ),
         SummaryRow(
           id = "earliestDate",
           question = "When did it first start employing someone or providing expenses or benefits to staff?",
           answers = List("20/12/2016"),
-          Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees(), "when the company first started employing someone or providing expenses or benefits to staff."))
+          Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees, "when the company first started employing someone or providing expenses or benefits to staff."))
         ),
         SummaryRow(
           id = "inConstructionIndustry",
           question = "Does the company work in the construction industry?",
           answers = List("Yes"),
-          Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.constructionIndustry(), "whether or not the company works in the construction industry."))
+          Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.constructionIndustry, "whether or not the company works in the construction industry."))
         ),
         SummaryRow(
           id = "paysPension",
           question = "Does the company make pension payments to a former employee or their dependants?",
           answers = List("Yes"),
-          Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.pensions(), "if the company makes pension payments to a former employee or their dependants."))
+          Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.pensions, "if the company makes pension payments to a former employee or their dependants."))
         )
       )
     )
@@ -118,7 +118,7 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
           id = "completionCapacity",
           question = "What is your relationship to the company?",
           answers = Seq("High Priestess"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompletionCapacityController.completionCapacity(), "your relationship to the company."))
+          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompletionCapacityController.completionCapacity, "your relationship to the company."))
         )
       )
     )
@@ -131,7 +131,7 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
           id = "tradingName",
           question = "Does or will the company trade using a different name?",
           answers = Seq("No"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.tradingName(), "whether your company will trade under another name."))
+          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.tradingName, "whether your company will trade under another name."))
         ),
         SummaryRow(
           id = "roAddress",
@@ -143,13 +143,13 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
           id = "ppobAddress",
           question = "Where will the company carry out most of its business activities?",
           answers = formatHMTLPPOBAddress,
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.ppobAddress(), "where your company will carry out most of its business activities."))
+          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.ppobAddress, "where your company will carry out most of its business activities."))
         ),
         SummaryRow(
           id = "natureOfBusiness",
           question = "What does your company do?",
           answers = Seq("Firearms"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness(), "what your company does."))
+          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness, "what your company does."))
         )
       )
     )
@@ -162,19 +162,19 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
           id = "businessEmail",
           question = "What is the company contact's email address?",
           answers = Seq("test@email.com"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails(), "the company contact's email address."))
+          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's email address."))
         ),
         SummaryRow(
           id = "mobileNumber",
           question = "What is the company contact's number?",
           answers = Seq("1234567890"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails(), "the company contact's number."))
+          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's number."))
         ),
         SummaryRow(
           id = "businessTelephone",
           question = "What is the company contact's other number?",
           answers = Seq("0987654321"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails(), "the company contact's other number."))
+          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's other number."))
         )
       )
     )
@@ -187,7 +187,7 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
           id = "director0",
           question = "Timothy Buttersford's National Insurance number",
           answers = List("ZZ 12 34 56 A"),
-          Some(SummaryChangeLink(controllers.userJourney.routes.DirectorDetailsController.directorDetails(), "Timothy Buttersford's National Insurance number"))
+          Some(SummaryChangeLink(controllers.userJourney.routes.DirectorDetailsController.directorDetails, "Timothy Buttersford's National Insurance number"))
         )
       )
     )
@@ -200,31 +200,31 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
           id = "contactName",
           question = "What is the name of the company's PAYE contact?",
           answers = Seq("testName"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails(), "the name of the company's PAYE contact."))
+          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the name of the company's PAYE contact."))
         ),
         SummaryRow(
           id = "emailPAYEContact",
           question = "What is the email address of the company's PAYE contact?",
           answers = Seq("testEmail"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails(), "the email address of the company's PAYE contact."))
+          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the email address of the company's PAYE contact."))
         ),
         SummaryRow(
           id = "mobileNumberPAYEContact",
           question = "What is the contact number of the company's PAYE contact?",
           answers = Seq("1234567890"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails(), "the contact number of the company's PAYE contact."))
+          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the contact number of the company's PAYE contact."))
         ),
         SummaryRow(
           id = "phoneNumberPAYEContact",
           question = "What is the other contact number of the company's PAYE contact?",
           answers = Seq("0987654321"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails(), "the other contact number of the company's PAYE contact."))
+          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the other contact number of the company's PAYE contact."))
         ),
         SummaryRow(
           id = "correspondenceAddress",
           question = "Where should we send PAYE-related post to?",
           answers = formatHMTLCorrespondenceAddress,
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress(), "where we should send PAYE-related post to."))
+          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress, "where we should send PAYE-related post to."))
         )
       )
     )
@@ -294,19 +294,19 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
               id = "willBePaying",
               question = "Over the next 2 months will the company employ anyone or provide expenses or benefits to staff?",
               answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.employingStaff(), "if the company will employ anyone or provide expenses or benefits to staff, over the next 2 months."))
+              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.employingStaff, "if the company will employ anyone or provide expenses or benefits to staff, over the next 2 months."))
             ),
             SummaryRow(
               id = "inConstructionIndustry",
               question = "Does the company work in the construction industry?",
               answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.constructionIndustry(), "whether or not the company works in the construction industry."))
+              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.constructionIndustry, "whether or not the company works in the construction industry."))
             ),
             SummaryRow(
               id = "employsSubcontractors",
               question = "During the current tax year will the company hire any subcontractors in the construction industry?",
               answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.subcontractors(), "if the company will hire any subcontractors in the construction industry during the current tax year."))
+              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.subcontractors, "if the company will hire any subcontractors in the construction industry during the current tax year."))
             )
           )
         )
@@ -356,31 +356,31 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
               id = "employing",
               question = "Does the company employ anyone or provide expenses or benefits to staff?",
               answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees(), "if the company employs anyone or provides expenses or benefits to staff."))
+              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees, "if the company employs anyone or provides expenses or benefits to staff."))
             ),
             SummaryRow(
               id = "earliestDate",
               question = "When did it first start employing someone or providing expenses or benefits to staff?",
               answers = Seq("20/12/2016"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees(), "when the company first started employing someone or providing expenses or benefits to staff."))
+              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees, "when the company first started employing someone or providing expenses or benefits to staff."))
             ),
             SummaryRow(
               id = "inConstructionIndustry",
               question = "Does the company work in the construction industry?",
               answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.constructionIndustry(), "whether or not the company works in the construction industry."))
+              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.constructionIndustry, "whether or not the company works in the construction industry."))
             ),
             SummaryRow(
               id = "employsSubcontractors",
               question = "During the current tax year will the company hire any subcontractors in the construction industry?",
               answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.subcontractors(), "if the company will hire any subcontractors in the construction industry during the current tax year."))
+              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.subcontractors, "if the company will hire any subcontractors in the construction industry during the current tax year."))
             ),
             SummaryRow(
               id = "paysPension",
               question = "Does the company make pension payments to a former employee or their dependants?",
               answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.pensions(), "if the company makes pension payments to a former employee or their dependants."))
+              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.pensions, "if the company makes pension payments to a former employee or their dependants."))
             )
           )
         )
@@ -403,7 +403,7 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
             id = "tradingName",
             question = "Does or will the company trade using a different name?",
             answers = Seq("foo"),
-            optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.tradingName(), "whether your company will trade under another name."))
+            optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.tradingName, "whether your company will trade under another name."))
           ),
           SummaryRow(
             id = "roAddress",
@@ -415,13 +415,13 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
             id = "ppobAddress",
             question = "Where will the company carry out most of its business activities?",
             answers = formatHMTLPPOBAddress,
-            Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.ppobAddress(), "where your company will carry out most of its business activities."))
+            Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.ppobAddress, "where your company will carry out most of its business activities."))
           ),
           SummaryRow(
             id = "natureOfBusiness",
             question = "What does your company do?",
             answers = Seq("Firearms"),
-            Some(SummaryChangeLink(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness(), "what your company does."))
+            Some(SummaryChangeLink(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness, "what your company does."))
           )
         )
       )
@@ -437,31 +437,31 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
                 id = "employing",
                 question = "Does the company employ anyone or provide expenses or benefits to staff?",
                 answers = Seq("Yes"),
-                Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees(), "if the company employs anyone or provides expenses or benefits to staff."))
+                Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees, "if the company employs anyone or provides expenses or benefits to staff."))
               ),
               SummaryRow(
                 id = "earliestDate",
                 question = "When did it first start employing someone or providing expenses or benefits to staff?",
                 answers = Seq("20/12/2016"),
-                Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees(), "when the company first started employing someone or providing expenses or benefits to staff."))
+                Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees, "when the company first started employing someone or providing expenses or benefits to staff."))
               ),
               SummaryRow(
                 id = "inConstructionIndustry",
                 question = "Does the company work in the construction industry?",
                 answers = Seq("Yes"),
-                Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.constructionIndustry(), "whether or not the company works in the construction industry."))
+                Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.constructionIndustry, "whether or not the company works in the construction industry."))
               ),
               SummaryRow(
                 id = "employsSubcontractors",
                 question = "During the current tax year will the company hire any subcontractors in the construction industry?",
                 answers = Seq("Yes"),
-                Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.subcontractors(), "if the company will hire any subcontractors in the construction industry during the current tax year."))
+                Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.subcontractors, "if the company will hire any subcontractors in the construction industry during the current tax year."))
               ),
               SummaryRow(
                 id = "paysPension",
                 question = "Does the company make pension payments to a former employee or their dependants?",
                 answers = Seq("Yes"),
-                Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.pensions(), "if the company makes pension payments to a former employee or their dependants."))
+                Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.pensions, "if the company makes pension payments to a former employee or their dependants."))
               )
             )
           )
@@ -490,19 +490,19 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
               id = "willBePaying",
               question = "Over the next 2 months will the company employ anyone or provide expenses or benefits to staff?",
               answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.employingStaff(), "if the company will employ anyone or provide expenses or benefits to staff, over the next 2 months."))
+              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.employingStaff, "if the company will employ anyone or provide expenses or benefits to staff, over the next 2 months."))
             ),
             SummaryRow(
               id = "inConstructionIndustry",
               question = "Does the company work in the construction industry?",
               answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.constructionIndustry(), "whether or not the company works in the construction industry."))
+              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.constructionIndustry, "whether or not the company works in the construction industry."))
             ),
             SummaryRow(
               id = "employsSubcontractors",
               question = "During the current tax year will the company hire any subcontractors in the construction industry?",
               answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.subcontractors(), "if the company will hire any subcontractors in the construction industry during the current tax year."))
+              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.subcontractors, "if the company will hire any subcontractors in the construction industry during the current tax year."))
             )
           )
         )
@@ -546,7 +546,7 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
             id = "tradingName",
             question = "Does or will the company trade using a different name?",
             answers = Seq("Test Company Trading Name"),
-            optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.tradingName(), "whether your company will trade under another name."))
+            optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.tradingName, "whether your company will trade under another name."))
           ),
           SummaryRow(
             id = "roAddress",
@@ -558,13 +558,13 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
             id = "ppobAddress",
             question = "Where will the company carry out most of its business activities?",
             answers = formatHMTLPPOBAddress,
-            Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.ppobAddress(), "where your company will carry out most of its business activities."))
+            Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.ppobAddress, "where your company will carry out most of its business activities."))
           ),
           SummaryRow(
             id = "natureOfBusiness",
             question = "What does your company do?",
             answers = Seq("Novelty hairbrushes"),
-            Some(SummaryChangeLink(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness(), "what your company does."))
+            Some(SummaryChangeLink(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness, "what your company does."))
           )
         )
       )
@@ -607,19 +607,19 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
               id = "businessEmail",
               question = "What is the company contact's email address?",
               answers = Seq("test@email.com"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails(), "the company contact's email address."))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's email address."))
             )),
             Some(SummaryRow(
               id = "mobileNumber",
               question = "What is the company contact's number?",
               answers = Seq("1234567890"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails(), "the company contact's number."))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's number."))
             )),
             Some(SummaryRow(
               id = "businessTelephone",
               question = "What is the company contact's other number?",
               answers = Seq("0987654321"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails(), "the company contact's other number."))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's other number."))
             ))
           ).flatten
         )
@@ -644,19 +644,19 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
               id = "businessEmail",
               question = "What is the company contact's email address?",
               answers = Seq(""),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails(), "the company contact's email address."))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's email address."))
             ),
             SummaryRow(
               id = "mobileNumber",
               question = "What is the company contact's number?",
               answers = Seq(""),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails(), "the company contact's number."))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's number."))
             ),
             SummaryRow(
               id = "businessTelephone",
               question = "What is the company contact's other number?",
               answers = Seq(""),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails(), "the company contact's other number."))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's other number."))
             )
           )
         )
@@ -691,31 +691,31 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
               id = "contactName",
               question = "What is the name of the company's PAYE contact?",
               answers = Seq("tstName"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails(), "the name of the company's PAYE contact."))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the name of the company's PAYE contact."))
             ),
             SummaryRow(
               id = "emailPAYEContact",
               question = "What is the email address of the company's PAYE contact?",
               answers = Seq("test@email.com"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails(), "the email address of the company's PAYE contact."))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the email address of the company's PAYE contact."))
             ),
             SummaryRow(
               id = "mobileNumberPAYEContact",
               question = "What is the contact number of the company's PAYE contact?",
               answers = Seq("1234567890"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails(), "the contact number of the company's PAYE contact."))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the contact number of the company's PAYE contact."))
             ),
             SummaryRow(
               id = "phoneNumberPAYEContact",
               question = "What is the other contact number of the company's PAYE contact?",
               answers = Seq("0987654321"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails(), "the other contact number of the company's PAYE contact."))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the other contact number of the company's PAYE contact."))
             ),
             SummaryRow(
               id = "correspondenceAddress",
               question = "Where should we send PAYE-related post to?",
               answers = Seq("tstLine1", "tstLine2", "pstCode", "UK"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress(), "where we should send PAYE-related post to."))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress, "where we should send PAYE-related post to."))
             )
           )
         )
@@ -746,31 +746,31 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
               id = "contactName",
               question = "What is the name of the company's PAYE contact?",
               answers = Seq("tstName"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails(), "the name of the company's PAYE contact."))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the name of the company's PAYE contact."))
             ),
             SummaryRow(
               id = "emailPAYEContact",
               question = "What is the email address of the company's PAYE contact?",
               answers = Seq(""),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails(), "the email address of the company's PAYE contact."))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the email address of the company's PAYE contact."))
             ),
             SummaryRow(
               id = "mobileNumberPAYEContact",
               question = "What is the contact number of the company's PAYE contact?",
               answers = Seq(""),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails(), "the contact number of the company's PAYE contact."))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the contact number of the company's PAYE contact."))
             ),
             SummaryRow(
               id = "phoneNumberPAYEContact",
               question = "What is the other contact number of the company's PAYE contact?",
               answers = Seq(""),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails(), "the other contact number of the company's PAYE contact."))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the other contact number of the company's PAYE contact."))
             ),
             SummaryRow(
               id = "correspondenceAddress",
               question = "Where should we send PAYE-related post to?",
               answers = Seq("tstLine1", "tstLine2", "pstCode", "UK"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress(), "where we should send PAYE-related post to."))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress, "where we should send PAYE-related post to."))
             )
           )
         )
@@ -790,7 +790,7 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
             id = "completionCapacity",
             question = "What is your relationship to the company?",
             answers = Seq("Director"),
-            optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompletionCapacityController.completionCapacity(), "your relationship to the company."))
+            optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompletionCapacityController.completionCapacity, "your relationship to the company."))
           )
         )
       )
@@ -808,7 +808,7 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
             id = "completionCapacity",
             question = "What is your relationship to the company?",
             answers = Seq("Agent"),
-            optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompletionCapacityController.completionCapacity(), "your relationship to the company."))
+            optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompletionCapacityController.completionCapacity, "your relationship to the company."))
           )
         )
       )
@@ -826,7 +826,7 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
             id = "completionCapacity",
             question = "What is your relationship to the company?",
             answers = Seq("Executive in charge of helicopters"),
-            optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompletionCapacityController.completionCapacity(), "your relationship to the company."))
+            optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompletionCapacityController.completionCapacity, "your relationship to the company."))
           )
         )
       )
@@ -868,13 +868,13 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
               id = "director0",
               question = "Timothy Buttersford's National Insurance number",
               answers = Seq("ZZ 12 34 56 A"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.DirectorDetailsController.directorDetails(), "Timothy Buttersford's National Insurance number"))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.DirectorDetailsController.directorDetails, "Timothy Buttersford's National Insurance number"))
             ),
             SummaryRow(
               id = "director1",
               question = "Pierre Simpson's National Insurance number",
               answers = Seq(""),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.DirectorDetailsController.directorDetails(), "Pierre Simpson's National Insurance number"))
+              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.DirectorDetailsController.directorDetails, "Pierre Simpson's National Insurance number"))
             )
           )
         )

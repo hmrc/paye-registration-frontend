@@ -72,7 +72,7 @@
         @hiddenDetails("directors", messages("pages.directorDetails.information.dropdown.header"), hiddenDetailsContent)
     </div>
 
-    @form(action = controllers.userJourney.routes.DirectorDetailsController.submitDirectorDetails()) {
+    @form(action = controllers.userJourney.routes.DirectorDetailsController.submitDirectorDetails) {
         <div class="form-group">
             @oneOfManyErrorWrapper(ninoForm, formContent)
         </div>

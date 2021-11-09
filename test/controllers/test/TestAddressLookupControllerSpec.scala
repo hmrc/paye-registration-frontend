@@ -91,7 +91,7 @@ class TestAddressLookupControllerSpec extends PayeComponentSpec with PayeFakedAp
       AuthHelpers.showAuthorisedWithCP(controller.noLookupPPOBAddress, Fixtures.validCurrentProfile, fakeRequest) {
         response =>
           status(response) mustBe SEE_OTHER
-          redirectLocation(response) mustBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()}")
+          redirectLocation(response) mustBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.businessContactDetails}")
       }
     }
   }
@@ -128,7 +128,7 @@ class TestAddressLookupControllerSpec extends PayeComponentSpec with PayeFakedAp
       AuthHelpers.showAuthorisedWithCP(controller.noLookupCorrespondenceAddress, Fixtures.validCurrentProfile, fakeRequest) {
         response =>
           status(response) mustBe SEE_OTHER
-          redirectLocation(response) mustBe Some(s"${controllers.userJourney.routes.SummaryController.summary()}")
+          redirectLocation(response) mustBe Some(s"${controllers.userJourney.routes.SummaryController.summary}")
       }
     }
   }

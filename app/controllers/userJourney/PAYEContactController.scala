@@ -69,7 +69,7 @@ class PAYEContactController @Inject()(val companyDetailsService: CompanyDetailsS
             val trimmed = trimPAYEContactDetails(success)
             payeContactService.submitPayeContactDetails(profile.registrationID, trimmed) map {
               case DownstreamOutcome.Failure => InternalServerError(restart())
-              case DownstreamOutcome.Success => Redirect(routes.PAYEContactController.payeCorrespondenceAddress())
+              case DownstreamOutcome.Success => Redirect(routes.PAYEContactController.payeCorrespondenceAddress)
             }
           }
         )
@@ -107,7 +107,7 @@ class PAYEContactController @Inject()(val companyDetailsService: CompanyDetailsS
             BadRequest(PAYECorrespondenceAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob"), addressMap.get("correspondence"), prepopAddresses))
           },
           success => submitCorrespondenceAddress(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
-            case DownstreamOutcome.Success => Future.successful(Redirect(controllers.userJourney.routes.SummaryController.summary()))
+            case DownstreamOutcome.Success => Future.successful(Redirect(controllers.userJourney.routes.SummaryController.summary))
             case DownstreamOutcome.Failure => Future.successful(InternalServerError(restart()))
             case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("correspondence", controllers.userJourney.routes.PAYEContactController.savePAYECorrespondenceAddress(None)) map {
               Redirect(_)
@@ -167,7 +167,7 @@ class PAYEContactController @Inject()(val companyDetailsService: CompanyDetailsS
           res <- payeContactService.submitCorrespondence(profile.registrationID, address)
           _ <- prepopService.saveAddress(profile.registrationID, address)
         } yield res match {
-          case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
+          case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary)
           case DownstreamOutcome.Failure => InternalServerError(restart())
         }
         case None =>

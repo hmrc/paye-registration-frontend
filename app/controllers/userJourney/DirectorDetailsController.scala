@@ -62,7 +62,7 @@ class DirectorDetailsController @Inject()(val directorDetailsService: DirectorDe
           BadRequest(DirectorDetailsPage(errors, names))
         },
         success => directorDetailsService.submitNinos(success, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
-          _ => Redirect(routes.PAYEContactController.payeContactDetails())
+          _ => Redirect(routes.PAYEContactController.payeContactDetails)
         }
       )
   }

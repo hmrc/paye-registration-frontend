@@ -80,7 +80,6 @@ class Module extends AbstractModule {
     bind(classOf[EmploymentService]).to(classOf[EmploymentServiceImpl]).asEagerSingleton()
     bind(classOf[EmploymentService]).to(classOf[EmploymentServiceImpl]).asEagerSingleton()
     bind(classOf[NatureOfBusinessService]).to(classOf[NatureOfBusinessServiceImpl]).asEagerSingleton()
-    bind(classOf[PAYEContactService]).to(classOf[PAYEContactServiceImpl]).asEagerSingleton()
     bind(classOf[PAYERegistrationService]).to(classOf[PAYERegistrationServiceImpl]).asEagerSingleton()
     bind(classOf[PrepopulationService]).to(classOf[PrepopulationServiceImpl]).asEagerSingleton()
     bind(classOf[SubmissionService]).to(classOf[SubmissionServiceImpl]).asEagerSingleton()

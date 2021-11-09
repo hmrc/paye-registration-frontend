@@ -262,7 +262,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         AuthHelpers.showAuthorisedWithCP(controller.confirmRO, Fixtures.validCurrentProfile, fakeRequest) {
           result =>
             status(result) mustBe SEE_OTHER
-            redirectLocation(result) mustBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.ppobAddress()}")
+            redirectLocation(result) mustBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.ppobAddress}")
         }
       }
     }
@@ -365,7 +365,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       )) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(s"${routes.NatureOfBusinessController.natureOfBusiness()}")
+          redirectLocation(result) mustBe Some(s"${routes.NatureOfBusinessController.natureOfBusiness}")
       }
     }
   }

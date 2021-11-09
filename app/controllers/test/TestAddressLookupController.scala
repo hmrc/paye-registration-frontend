@@ -60,7 +60,7 @@ abstract class TestAddressLookupController(mcc: MessagesControllerComponents) ex
       res <- companyDetailsService.submitPPOBAddr(address, profile.registrationID, profile.companyTaxRegistration.transactionId)
       _   <- prepopService.saveAddress(profile.registrationID, address)
     } yield res match {
-      case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
+      case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails)
       case DownstreamOutcome.Failure => InternalServerError("Couldn't save mock PPOB Address")
     }
   }
@@ -78,7 +78,7 @@ abstract class TestAddressLookupController(mcc: MessagesControllerComponents) ex
       res <- payeContactService.submitCorrespondence(profile.registrationID, address)
       _   <- prepopService.saveAddress(profile.registrationID, address)
     } yield res match {
-      case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary())
+      case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.SummaryController.summary)
       case DownstreamOutcome.Failure => InternalServerError("Couldn't save mock Correspondence Address")
     }
   }
