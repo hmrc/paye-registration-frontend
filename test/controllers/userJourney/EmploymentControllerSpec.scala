@@ -117,7 +117,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showAuthorisedWithCP(testController.paidEmployees, Fixtures.validCurrentProfile, request) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.employingStaff().url)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.employingStaff.url)
       }
     }
   }
@@ -178,7 +178,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitAuthorisedWithCP(testController.submitPaidEmployees, Fixtures.validCurrentProfile, formRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.constructionIndustry().url)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.constructionIndustry.url)
       }
     }
 
@@ -196,7 +196,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitAuthorisedWithCP(testController.submitPaidEmployees, Fixtures.validCurrentProfile, formRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.employingStaff().url)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.employingStaff.url)
       }
     }
   }
@@ -256,7 +256,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitAuthorisedWithCP(testController.submitEmployingStaff, Fixtures.validCurrentProfile, formRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.constructionIndustry().url)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.constructionIndustry.url)
       }
     }
 
@@ -272,7 +272,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitAuthorisedWithCP(testController.submitEmployingStaff, Fixtures.validCurrentProfile, formRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.constructionIndustry().url)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.constructionIndustry.url)
       }
     }
 
@@ -288,7 +288,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitAuthorisedWithCP(testController.submitEmployingStaff, Fixtures.validCurrentProfile, formRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.applicationDelayed().url)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.applicationDelayed.url)
       }
     }
   }
@@ -326,7 +326,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitAuthorised(testController.submitApplicationDelayed, formRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.constructionIndustry().url)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.constructionIndustry.url)
       }
     }
   }
@@ -393,7 +393,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.subcontractors().url)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.subcontractors.url)
       }
     }
 
@@ -408,7 +408,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.pensions().url)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.pensions.url)
       }
     }
 
@@ -423,7 +423,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity().url)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity.url)
       }
     }
 
@@ -438,7 +438,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.errors.routes.ErrorController.newIneligible().url)
+          redirectLocation(result) mustBe Some(controllers.errors.routes.ErrorController.newIneligible.url)
       }
     }
 
@@ -453,7 +453,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity().url)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity.url)
       }
     }
 
@@ -468,7 +468,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.errors.routes.ErrorController.newIneligible().url)
+          redirectLocation(result) mustBe Some(controllers.errors.routes.ErrorController.newIneligible.url)
       }
     }
   }
@@ -536,7 +536,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitAuthorisedWithCP(testController.submitSubcontractors, Fixtures.validCurrentProfile, formRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.pensions().url)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.pensions.url)
       }
     }
 
@@ -552,7 +552,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitAuthorisedWithCP(testController.submitSubcontractors, Fixtures.validCurrentProfile, formRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity().url)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity.url)
       }
     }
   }
@@ -609,7 +609,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.submitAuthorisedWithCP(testController.submitPensions, Fixtures.validCurrentProfile, formRequest) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity().url)
+          redirectLocation(result) mustBe Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity.url)
       }
     }
   }

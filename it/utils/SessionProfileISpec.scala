@@ -184,7 +184,7 @@ class SessionProfileISpec extends IntegrationSpecBase with CachingStub {
 
         val res = await(sessionProfile.withCurrentProfile(testFunc))
         res.header.status mustBe SEE_OTHER
-        res.header.headers.get(HeaderNames.LOCATION) mustBe Some(controllers.userJourney.routes.PayeStartController.startPaye().url)
+        res.header.headers.get(HeaderNames.LOCATION) mustBe Some(controllers.userJourney.routes.PayeStartController.startPaye.url)
       }
     }
   }

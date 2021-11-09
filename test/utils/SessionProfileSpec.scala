@@ -123,7 +123,7 @@ class SessionProfileSpec extends PayeComponentSpec {
 
         val result = testSession.withCurrentProfile { _ => testFunc }
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
+        redirectLocation(result) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn}")
       }
     }
 
@@ -134,7 +134,7 @@ class SessionProfileSpec extends PayeComponentSpec {
 
         val result = testSession.withCurrentProfile { _ => testFunc }
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(s"${controllers.userJourney.routes.DashboardController.dashboard()}")
+        redirectLocation(result) mustBe Some(s"${controllers.userJourney.routes.DashboardController.dashboard}")
       }
     }
 
@@ -146,7 +146,7 @@ class SessionProfileSpec extends PayeComponentSpec {
 
         val result = testSession.withCurrentProfile { _ => testFunc }
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(s"${controllers.userJourney.routes.PayeStartController.startPaye()}")
+        redirectLocation(result) mustBe Some(s"${controllers.userJourney.routes.PayeStartController.startPaye}")
       }
     }
 
@@ -157,7 +157,7 @@ class SessionProfileSpec extends PayeComponentSpec {
 
         val result = testSession.withCurrentProfile { _ => testFunc }
         status(result) mustBe SEE_OTHER
-        redirectLocation(result) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.incorporationRejected()}")
+        redirectLocation(result) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.incorporationRejected}")
       }
     }
   }
@@ -175,24 +175,24 @@ class SessionProfileSpec extends PayeComponentSpec {
         status(res) mustBe 200
       }
     }
-    s"redirect user to ${controllers.userJourney.routes.SignInOutController.postSignIn().url}" when {
+    s"redirect user to ${controllers.userJourney.routes.SignInOutController.postSignIn.url}" when {
       "the corporation tax was rejected by the head of duty" in new Setup {
         val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("foo", "bar", Some("6")))
 
         val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
-        redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
+        redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn}")
       }
       "CR document has a locked status" in new Setup {
         val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("locked", "bar", None))
 
         val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
-        redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
+        redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn}")
       }
       "CR document has a held status and incorporation is unpaid" in new Setup {
         val cp = validProfile(regSubmitted = false).copy(companyTaxRegistration = CompanyRegistrationProfile("held", "bar", None, paidIncorporation = None))
 
         val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
-        redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn()}")
+        redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.postSignIn}")
       }
     }
     "redirect user to OTRS" when {
@@ -203,20 +203,20 @@ class SessionProfileSpec extends PayeComponentSpec {
         redirectLocation(res) mustBe Some("https://www.tax.service.gov.uk/business-registration/select-taxes")
       }
     }
-    s"redirect user to ${controllers.userJourney.routes.DashboardController.dashboard().url}" when {
+    s"redirect user to ${controllers.userJourney.routes.DashboardController.dashboard.url}" when {
       "PAYE has already been submitted" in new Setup {
         val cp = validProfile(regSubmitted = true)
 
         val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
-        redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.DashboardController.dashboard()}")
+        redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.DashboardController.dashboard}")
       }
     }
-    s"redirect user to ${controllers.userJourney.routes.SignInOutController.incorporationRejected().url}" when {
+    s"redirect user to ${controllers.userJourney.routes.SignInOutController.incorporationRejected.url}" when {
       "the company incorporation has been rejected" in new Setup {
         val cp = validProfile(regSubmitted = false).copy(incorpStatus = Some(IncorporationStatus.rejected))
 
         val res = testSession.currentProfileChecks(cp)(_ => Future.successful(Ok))
-        redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.incorporationRejected()}")
+        redirectLocation(res) mustBe Some(s"${controllers.userJourney.routes.SignInOutController.incorporationRejected}")
       }
     }
   }

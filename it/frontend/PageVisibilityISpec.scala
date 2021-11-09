@@ -170,7 +170,7 @@ class PageVisibilityISpec extends IntegrationSpecBase
       val response = await(fResponse)
 
       response.status mustBe 303
-      response.header("Location") mustBe Some(routes.DashboardController.dashboard().url)
+      response.header("Location") mustBe Some(routes.DashboardController.dashboard.url)
     }
   }
 

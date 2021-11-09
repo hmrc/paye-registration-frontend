@@ -30,7 +30,7 @@
 
     <p class="spaced-below">@messages("errorPages.retrySubmission.p2")</p>
 
-    @formWithCSRF(action = controllers.userJourney.routes.SummaryController.submitRegistration()) {
+    @formWithCSRF(action = controllers.userJourney.routes.SummaryController.submitRegistration) {
         <button class="button" type="submit" id="continue" >@messages("errorPages.retrySubmission.button")</button>
     }
 

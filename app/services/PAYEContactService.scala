@@ -16,32 +16,25 @@
 
 package services
 
+import common.Logging
 import connectors.PAYERegistrationConnector
 import enums.{CacheKeys, DownstreamOutcome}
 import models.Address
 import models.api.{PAYEContact => PAYEContactAPI}
 import models.external.AuditingInformation
 import models.view.{PAYEContactDetails, CompanyDetails => CompanyDetailsView, PAYEContact => PAYEContactView}
-import play.api.Logger.logger
 import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-class PAYEContactServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
-                                       val s4LService: S4LService,
-                                       val companyDetailsService: CompanyDetailsService,
-                                       val prepopService: PrepopulationService,
-                                       val auditService: AuditService)(implicit val ec: ExecutionContext) extends PAYEContactService
-
-trait PAYEContactService {
-  implicit val ec: ExecutionContext
-  val payeRegConnector: PAYERegistrationConnector
-  val s4LService: S4LService
-  val companyDetailsService: CompanyDetailsService
-  val prepopService: PrepopulationService
-  val auditService: AuditService
+@Singleton
+class PAYEContactService @Inject()(val payeRegConnector: PAYERegistrationConnector,
+                                   val s4LService: S4LService,
+                                   val companyDetailsService: CompanyDetailsService,
+                                   val prepopService: PrepopulationService,
+                                   val auditService: AuditService)(implicit val ec: ExecutionContext) extends Logging {
 
   private[services] def viewToAPI(viewData: PAYEContactView): Either[PAYEContactView, PAYEContactAPI] = viewData match {
     case PAYEContactView(Some(contactDetails), Some(correspondenceAddress)) =>

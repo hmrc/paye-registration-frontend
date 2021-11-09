@@ -42,7 +42,7 @@
         <p>@messages("pages.summary.information")</p>
     </div>
 
-    @formWithCSRF(action = controllers.userJourney.routes.SummaryController.submitRegistration()) {
+    @formWithCSRF(action = controllers.userJourney.routes.SummaryController.submitRegistration) {
         <div class="form-group">
             <button class="button" type="submit" id="continue" >@messages("app.common.submitYourApplication")</button>
         </div>

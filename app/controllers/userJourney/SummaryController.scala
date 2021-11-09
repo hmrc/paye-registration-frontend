@@ -64,9 +64,9 @@ class SummaryController @Inject()(val summaryService: SummaryService,
     profile =>
       invalidSubmissionGuard(profile) {
         submissionService.submitRegistration(profile) map {
-          case Success => Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation())
-          case Cancelled => Redirect(controllers.userJourney.routes.DashboardController.dashboard())
-          case Failed => Redirect(controllers.errors.routes.ErrorController.failedSubmission())
+          case Success => Redirect(controllers.userJourney.routes.ConfirmationController.showConfirmation)
+          case Cancelled => Redirect(controllers.userJourney.routes.DashboardController.dashboard)
+          case Failed => Redirect(controllers.errors.routes.ErrorController.failedSubmission)
           case TimedOut => InternalServerError(submissionTimeout())
         }
       }
@@ -76,10 +76,10 @@ class SummaryController @Inject()(val summaryService: SummaryService,
     payeRegistrationConnector.getRegistration(profile.registrationID) flatMap { regDoc =>
       regDoc.status match {
         case PAYEStatus.draft => f
-        case PAYEStatus.held | PAYEStatus.submitted => Future.successful(Redirect(routes.ConfirmationController.showConfirmation()))
-        case PAYEStatus.invalid => Future.successful(Redirect(controllers.errors.routes.ErrorController.ineligible()))
+        case PAYEStatus.held | PAYEStatus.submitted => Future.successful(Redirect(routes.ConfirmationController.showConfirmation))
+        case PAYEStatus.invalid => Future.successful(Redirect(controllers.errors.routes.ErrorController.ineligible))
         //TODO: Potentially need a new view to better demonstrate the problem
-        case PAYEStatus.rejected => Future.successful(Redirect(controllers.errors.routes.ErrorController.ineligible()))
+        case PAYEStatus.rejected => Future.successful(Redirect(controllers.errors.routes.ErrorController.ineligible))
       }
     }
   }

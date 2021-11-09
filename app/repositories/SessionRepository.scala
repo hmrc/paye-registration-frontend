@@ -46,13 +46,13 @@ object DatedSessionMap {
 }
 
 class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
-  extends ReactiveRepository[DatedSessionMap, BSONObjectID](config.getString("appName").get, mongo, DatedSessionMap.formats) {
+  extends ReactiveRepository[DatedSessionMap, BSONObjectID](config.get[String]("appName"), mongo, DatedSessionMap.formats) {
 
   val fieldName = "lastUpdated"
   val sessionRegistrationIndexIndex = "sessionRegistrationIndex"
 
   val expireAfterSeconds = "expireAfterSeconds"
-  val timeToLiveInSeconds: Int = config.getInt("mongodb.timeToLiveInSeconds").get
+  val timeToLiveInSeconds: Int = config.get[Int]("mongodb.timeToLiveInSeconds")
 
   createIndex(Seq("sessionId", "transactionId", "registrationId"), sessionRegistrationIndexIndex, timeToLiveInSeconds)
 

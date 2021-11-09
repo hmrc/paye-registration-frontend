@@ -78,7 +78,7 @@ class CompanyDetailsController @Inject()(val s4LService: S4LService,
           } else {
             val trimmedTradingName = success.copy(tradingName = success.tradingName.map(_.trim))
             companyDetailsService.submitTradingName(trimmedTradingName, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
-              case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.roAddress())
+              case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.roAddress)
               case DownstreamOutcome.Failure => InternalServerError(restart())
             }
           }
@@ -95,7 +95,7 @@ class CompanyDetailsController @Inject()(val s4LService: S4LService,
 
   def confirmRO: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     _ =>
-      Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.ppobAddress()))
+      Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.ppobAddress))
   }
 
   private def badRequestResponse(regId: String, txID: String, form: Form[TradingName])(implicit request: Request[AnyContent]): Future[Result] = {
@@ -127,14 +127,14 @@ class CompanyDetailsController @Inject()(val s4LService: S4LService,
             success => {
               val trimmed = success.copy(email = success.email map (_.trim), phoneNumber = success.phoneNumber map (_.trim), mobileNumber = success.mobileNumber map (_.trim))
               companyDetailsService.submitBusinessContact(trimmed, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
-                case DownstreamOutcome.Success => Redirect(routes.NatureOfBusinessController.natureOfBusiness())
+                case DownstreamOutcome.Success => Redirect(routes.NatureOfBusinessController.natureOfBusiness)
                   .removingFromSession(companyNameKey)
                 case DownstreamOutcome.Failure => InternalServerError(restart())
                   .removingFromSession(companyNameKey)
               }
             }
           )
-          case None => Future.successful(Redirect(routes.CompanyDetailsController.businessContactDetails()).removingFromSession(companyNameKey))
+          case None => Future.successful(Redirect(routes.CompanyDetailsController.businessContactDetails).removingFromSession(companyNameKey))
         }
   }
 
@@ -164,7 +164,7 @@ class CompanyDetailsController @Inject()(val s4LService: S4LService,
               prepopAddresses))
           },
           success => submitPPOBAddressChoice(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
-            case DownstreamOutcome.Success => Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails()))
+            case DownstreamOutcome.Success => Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails))
             case DownstreamOutcome.Failure => Future.successful(InternalServerError(restart()))
             case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("ppob", controllers.userJourney.routes.CompanyDetailsController.savePPOBAddress(None)) map {
               redirectUrl => Redirect(redirectUrl)
@@ -207,7 +207,7 @@ class CompanyDetailsController @Inject()(val s4LService: S4LService,
           res <- companyDetailsService.submitPPOBAddr(address, profile.registrationID, profile.companyTaxRegistration.transactionId)
           _ <- prepopService.saveAddress(profile.registrationID, address)
         } yield res match {
-          case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails())
+          case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails)
           case DownstreamOutcome.Failure => InternalServerError(restart())
         }
         case None =>

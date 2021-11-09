@@ -52,10 +52,10 @@ class EmploymentController @Inject()(val employmentService: EmploymentService,
   val taxYearObjWithSystemDate: SystemDateT = SystemDate
 
   private val handleJourneyPostConstruction: EmployingStaff => Result = {
-    case EmployingStaff(Some(EmployingAnyone(true, _)), _, _, _, _) => Redirect(controllers.userJourney.routes.EmploymentController.pensions())
+    case EmployingStaff(Some(EmployingAnyone(true, _)), _, _, _, _) => Redirect(controllers.userJourney.routes.EmploymentController.pensions)
     case EmployingStaff(_, Some(WillBePaying(true, _)), _, _, _) | EmployingStaff(_, Some(WillBePaying(false, _)), Some(true), _, _) =>
-      Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
-    case EmployingStaff(_, Some(WillBePaying(false, _)), Some(false), _, _) => Redirect(controllers.errors.routes.ErrorController.newIneligible())
+      Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity)
+    case EmployingStaff(_, Some(WillBePaying(false, _)), Some(false), _, _) => Redirect(controllers.errors.routes.ErrorController.newIneligible)
     case _ => throw new InternalServerException(s"[EmploymentController][handleJourneyPostConstruction] an invalid scenario was met for employment staff")
   }
 
@@ -63,7 +63,7 @@ class EmploymentController @Inject()(val employmentService: EmploymentService,
 
   private def ifIncorpDateExist(regId: String, txId: String)(action: LocalDate => Future[Result])(implicit hc: HeaderCarrier): Future[Result] =
     incorpInfoService.getIncorporationDate(regId, txId) flatMap {
-      _.fold(Future.successful(Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())))(action)
+      _.fold(Future.successful(Redirect(controllers.userJourney.routes.EmploymentController.employingStaff)))(action)
     }
 
   // PAID EMPLOYEES
@@ -86,9 +86,9 @@ class EmploymentController @Inject()(val employmentService: EmploymentService,
             employmentService.saveEmployingAnyone(model) map { model =>
               model.employingAnyone match {
                 case Some(EmployingAnyone(false, _)) =>
-                  Redirect(controllers.userJourney.routes.EmploymentController.employingStaff())
+                  Redirect(controllers.userJourney.routes.EmploymentController.employingStaff)
                 case Some(EmployingAnyone(true, _)) =>
-                  Redirect(controllers.userJourney.routes.EmploymentController.constructionIndustry())
+                  Redirect(controllers.userJourney.routes.EmploymentController.constructionIndustry)
               }
             }
           }
@@ -112,10 +112,10 @@ class EmploymentController @Inject()(val employmentService: EmploymentService,
         errors => Future.successful(BadRequest(willBePayingPage(errors, weeklyThreshold, now))),
         willBePaying => employmentService.saveWillEmployAnyone(willBePaying).map {
           _.willBePaying match {
-            case Some(WillBePaying(true, Some(false))) => Redirect(controllers.userJourney.routes.EmploymentController.applicationDelayed())
+            case Some(WillBePaying(true, Some(false))) => Redirect(controllers.userJourney.routes.EmploymentController.applicationDelayed)
             case None =>
               throw new InternalServerException(s"[EmploymentController][SubmitEmployingStaff] no WillBePaying block found on save for regId: ${profile.registrationID}")
-            case _ => Redirect(controllers.userJourney.routes.EmploymentController.constructionIndustry())
+            case _ => Redirect(controllers.userJourney.routes.EmploymentController.constructionIndustry)
           }
         }
       )
@@ -138,7 +138,7 @@ class EmploymentController @Inject()(val employmentService: EmploymentService,
         cis => employmentService.saveConstructionIndustry(cis) map {
           viewModel =>
             if (cis) {
-              Redirect(controllers.userJourney.routes.EmploymentController.subcontractors())
+              Redirect(controllers.userJourney.routes.EmploymentController.subcontractors)
             } else {
               handleJourneyPostConstruction(viewModel)
             }
@@ -152,7 +152,7 @@ class EmploymentController @Inject()(val employmentService: EmploymentService,
   }
 
   def submitApplicationDelayed: Action[AnyContent] = isAuthorised { implicit request =>
-    Future.successful(Redirect(controllers.userJourney.routes.EmploymentController.constructionIndustry()))
+    Future.successful(Redirect(controllers.userJourney.routes.EmploymentController.constructionIndustry))
   }
 
   // SUBCONTRACTORS
@@ -189,7 +189,7 @@ class EmploymentController @Inject()(val employmentService: EmploymentService,
       PaysPensionForm.form.bindFromRequest().fold(
         errors => Future.successful(BadRequest(PaysPensionPage(errors))),
         paysPension => employmentService.savePensionPayment(paysPension) map {
-          _ => Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity())
+          _ => Redirect(controllers.userJourney.routes.CompletionCapacityController.completionCapacity)
         }
       )
   }

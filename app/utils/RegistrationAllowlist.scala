@@ -16,17 +16,17 @@
 
 package utils
 
+import common.Logging
 import config.AppConfig
 import connectors.{DESResponse, IncorpInfoResponse, IncorpInfoSuccessResponse}
 import models.DigitalContactDetails
 import models.api.{Director, CompanyDetails => CompanyDetailsAPI}
 import models.external.{CoHoCompanyDetailsModel, CompanyRegistrationProfile, OfficerList}
-import play.api.Logger.logger
 
 import scala.concurrent.Future
 import scala.language.implicitConversions
 
-trait RegistrationAllowlist {
+trait RegistrationAllowlist extends Logging {
   val appConfig: AppConfig
 
   implicit def getDefaultCompanyDetailsAPI(regId: String): Option[CompanyDetailsAPI] = Some(CompanyDetailsAPI(

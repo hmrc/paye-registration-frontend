@@ -35,7 +35,7 @@ class AccessibilityStatementController @Inject()(mcc: MessagesControllerComponen
       Future.successful(
         Ok(accessibility_statement(
           appConfig.accessibilityReportUrl(pageUri),
-          appConfig.self + controllers.userJourney.routes.PayeStartController.startPaye().url
+          appConfig.self + controllers.userJourney.routes.PayeStartController.startPaye.url
         ))
       )
   }

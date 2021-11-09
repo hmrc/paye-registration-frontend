@@ -55,7 +55,7 @@ class PayeStartController @Inject()(val currentProfileService: CurrentProfileSer
   def startPaye(): Action[AnyContent] = isAuthorisedAndIsOrg { implicit request =>
     checkAndStoreCurrentProfile { profile =>
       assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId) {
-        Redirect(routes.EmploymentController.paidEmployees())
+        Redirect(routes.EmploymentController.paidEmployees)
       }
     }
   }
@@ -65,8 +65,8 @@ class PayeStartController @Inject()(val currentProfileService: CurrentProfileSer
       (regId, txId) <- getRegIdAndTxId
       deleted <- payeRegistrationService.deleteRejectedRegistration(regId, txId)
     } yield deleted match {
-      case RegistrationDeletion.success => Redirect(routes.PayeStartController.startPaye())
-      case RegistrationDeletion.invalidStatus => Redirect(controllers.userJourney.routes.DashboardController.dashboard())
+      case RegistrationDeletion.success => Redirect(routes.PayeStartController.startPaye)
+      case RegistrationDeletion.invalidStatus => Redirect(controllers.userJourney.routes.DashboardController.dashboard)
     }
   }
 

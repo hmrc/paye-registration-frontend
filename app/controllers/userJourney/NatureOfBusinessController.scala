@@ -57,7 +57,7 @@ class NatureOfBusinessController @Inject()(val natureOfBusinessService: NatureOf
       NatureOfBusinessForm.form.bindFromRequest.fold(
         errors => Future.successful(BadRequest(NatureOfBusinessPage(errors))),
         success => natureOfBusinessService.saveNatureOfBusiness(success, profile.registrationID) map {
-          case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.DirectorDetailsController.directorDetails())
+          case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.DirectorDetailsController.directorDetails)
           case DownstreamOutcome.Failure => InternalServerError(restart())
         }
       )

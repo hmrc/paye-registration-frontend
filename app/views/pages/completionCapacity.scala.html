@@ -43,7 +43,7 @@
         messages("app.common.errorSummaryLabel"), completionCapacityForm, dataJourney = Some("CompletionCapacity")
     )
 
-    @form(action = controllers.userJourney.routes.CompletionCapacityController.submitCompletionCapacity()) {
+    @form(action = controllers.userJourney.routes.CompletionCapacityController.submitCompletionCapacity) {
 
         <div class="form-group">
         @inputRadioGroupHidden(

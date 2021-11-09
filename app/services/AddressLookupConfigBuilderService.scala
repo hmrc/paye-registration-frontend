@@ -50,7 +50,7 @@ class AddressLookupConfigBuilderService @Inject()(appConfig: AppConfig) {
     )
     val timeoutConfig = TimeoutConfig(
       timeoutAmount = timeoutLength,
-      timeoutUrl = s"$payeRegistrationFrontendURL${controllers.userJourney.routes.SignInOutController.timeoutShow().url}"
+      timeoutUrl = s"$payeRegistrationFrontendURL${controllers.userJourney.routes.SignInOutController.timeoutShow.url}"
     )
     val journeyOptions = JourneyOptions(
       continueUrl = s"$payeRegistrationFrontendURL${handbackLocation.url}",
