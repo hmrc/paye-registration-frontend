@@ -398,8 +398,9 @@ accessibility.pageBody.use_this_service.ul.li5 = listen to the service using a s
 accessibility.pageBody.use_this_service.p3 = We have also made the text in the service as simple as possible to understand.
 accessibility.pageBody.use_this_service.p4 = <a href="https://mcmw.abilitynet.org.uk/">AbilityNet</a> has advice on making your device easier to use if you have a disability.
 accessibility.pageBody.how_accessible.h2 = How accessible this service is
-accessibility.pageBody.how_accessible.p1 = This service is fully compliant with the <a href="https://www.w3.org/TR/WCAG21/">Web Content Accessibility Guidelines version 2.1 AA standard</a>.
-accessibility.pageBody.how_accessible.p2 = There are no known accessibility issues within this service.
+accessibility.pageBody.how_accessible.p1 = This service is partially compliant with the <a href="https://www.w3.org/TR/WCAG21/">Web Content Accessibility Guidelines version 2.1 AA standard</a>.
+accessibility.pageBody.how_accessible.p2 = Some people may find parts of this service difficult to use:
+accessibility.pageBody.how_accessible.b1 = Some of the error messages within the service are repetitive or unclear, however the additional content on the screen should make it easier to understand a mistake.
 accessibility.pageBody.reporting_accessibility_problems.h2 = Reporting accessibility problems with this service
 accessibility.pageBody.reporting_accessibility_problems.p1 = We are always looking to improve the accessibility of this service. If you find any problems that are not listed on this page or think we are not meeting accessibility requirements, report the {0}.
 accessibility.pageBody.reporting_accessibility_problems.linkText = accessibility problem
@@ -411,8 +412,13 @@ accessibility.pageBody.contact_us.p2 = We can provide a British Sign Language (B
 accessibility.pageBody.contact_us.p3 = Find out how to <a href="https://www.gov.uk/dealing-hmrc-additional-needs">contact us</a>.
 accessibility.pageBody.technical_info.h2 = Technical information about this service’s accessibility
 accessibility.pageBody.technical_info.p1 = HMRC is committed to making this service accessible, in accordance with the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018.
-accessibility.pageBody.technical_info.p2 = This service is fully compliant with the <a href="https://www.w3.org/TR/WCAG21/">Web Content Accessibility Guidelines version 2.1 AA standard</a>.
+accessibility.pageBody.technical_info.p2 = This service is partially compliant with the <a href="https://www.w3.org/TR/WCAG21/">Web Content Accessibility Guidelines version 2.1 AA standard</a> due to the non-compliances listed below.
+accessibility.pageBody.technical_info.h3 = Non‐accessible content
+accessibility.pageBody.technical_info.h4 = Non‐compliance with the accessibility regulations
+accessibility.pageBody.technical_info.p3 = The content listed below is non-accessible for the following reasons.
+accessibility.pageBody.technical_info.p4 = When an error is committed on the page the error summary contains an unordered list, the list item which contains the ‘Tell us if you’re setting up a new limited company’ has been given an invalid role of ‘tooltip’. This issue may affect how screen reading software reads the list as the list has been structured incorrectly. This will be fixed by 28 January 2022.
+accessibility.pageBody.technical_info.p5 = When an error is committed in the ‘National Insurance’ input fields on the page, the error summary links and inline error messages all contain the same information. This may present difficulty to screen reader users who may be unable to distinguish between each error if multiple errors are present in the input fields. The error handling also fails to meet GOV.UK Design System guidelines. This will be fixed by 28 January 2022.
 accessibility.pageBody.how_we_test.h2 = How we tested this service
-accessibility.pageBody.how_we_test.p1 = The service was last tested on 3 October 2019 and was checked for compliance with WCAG 2.1 AA.
+accessibility.pageBody.how_we_test.p1 = The service was last tested on 31 August 2021 and was checked for compliance with WCAG 2.1 AA.
 accessibility.pageBody.how_we_test.p2 = The service was built using parts that were tested by the <a href="http://www.digitalaccessibilitycentre.org/">Digital Accessibility Centre</a>. The full service was tested by HMRC and included disabled users.
-accessibility.pageBody.how_we_test.p3 = This page was prepared on 1 May 2020. It was last updated on 7 May 2020.
+accessibility.pageBody.how_we_test.p3 = This page was prepared on 25 November 2021. It was last updated on 03 December 2021.

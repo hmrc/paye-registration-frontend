@@ -45,8 +45,9 @@ class AccessibilityStatementViewSpec extends PayeComponentSpec with PayeFakedApp
     val serviceP3 = "We have also made the text in the service as simple as possible to understand."
     val serviceP4 = "AbilityNet has advice on making your device easier to use if you have a disability."
     val howAccessH2 = "How accessible this service is"
-    val howAccessP1 = "This service is fully compliant with the Web Content Accessibility Guidelines version 2.1 AA standard."
-    val howAccessP2 = "There are no known accessibility issues within this service."
+    val howAccessP1 = "This service is partially compliant with the Web Content Accessibility Guidelines version 2.1 AA standard."
+    val howAccessP2 = "Some people may find parts of this service difficult to use:"
+    val howAccessB1 = "Some of the error messages within the service are repetitive or unclear, however the additional content on the screen should make it easier to understand a mistake."
     val reportProblemH2 = "Reporting accessibility problems with this service"
     val reportProblemP1 = "We are always looking to improve the accessibility of this service. If you find any problems that are not listed on this page or think we are not meeting accessibility requirements, report the accessibility problem."
     val howToDoH2 = "What to do if you are not happy with how we respond to your complaint"
@@ -57,11 +58,16 @@ class AccessibilityStatementViewSpec extends PayeComponentSpec with PayeFakedApp
     val contactUsP3 = "Find out how to contact us."
     val technicalInfoH2 = "Technical information about this service’s accessibility"
     val technicalInfoP1 = "HMRC is committed to making this service accessible, in accordance with the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018."
-    val technicalInfoP2 = "This service is fully compliant with the Web Content Accessibility Guidelines version 2.1 AA standard."
+    val technicalInfoP2 = "This service is partially compliant with the Web Content Accessibility Guidelines version 2.1 AA standard due to the non-compliances listed below."
+    val technicalInfoH3 = "Non‐accessible content"
+    val technicalInfoH4 = "Non‐compliance with the accessibility regulations"
+    val technicalInfoP3 = "The content listed below is non-accessible for the following reasons."
+    val technicalInfoP4 = "When an error is committed on the page the error summary contains an unordered list, the list item which contains the ‘Tell us if you’re setting up a new limited company’ has been given an invalid role of ‘tooltip’. This issue may affect how screen reading software reads the list as the list has been structured incorrectly. This will be fixed by 28 January 2022."
+    val technicalInfoP5 = "When an error is committed in the ‘National Insurance’ input fields on the page, the error summary links and inline error messages all contain the same information. This may present difficulty to screen reader users who may be unable to distinguish between each error if multiple errors are present in the input fields. The error handling also fails to meet GOV.UK Design System guidelines. This will be fixed by 28 January 2022."
     val howWeTestH2 = "How we tested this service"
-    val howWeTestP1 = "The service was last tested on 3 October 2019 and was checked for compliance with WCAG 2.1 AA."
+    val howWeTestP1 = "The service was last tested on 31 August 2021 and was checked for compliance with WCAG 2.1 AA."
     val howWeTestP2 = "The service was built using parts that were tested by the Digital Accessibility Centre. The full service was tested by HMRC and included disabled users."
-    val howWeTestP3 = "This page was prepared on 1 May 2020. It was last updated on 7 May 2020."
+    val howWeTestP3 = "This page was prepared on 25 November 2021. It was last updated on 03 December 2021."
     val accessibilityStatementLinkText = "accessibility statement"
     val abilityNetLinkText = "AbilityNet"
     val wcagLinkText = "Web Content Accessibility Guidelines version 2.1 AA standard"
@@ -115,13 +121,21 @@ class AccessibilityStatementViewSpec extends PayeComponentSpec with PayeFakedApp
       )
     }
 
+    "have multiple h3" in {
+      pageBody.select("h3").eachText() must contain allElementsOf Seq(
+        Messages.technicalInfoH3,
+        Messages.technicalInfoH4,
+      )
+    }
+
     "have multiple bullet points" in {
       pageBody.select("li").eachText() must contain allElementsOf Seq(
         Messages.serviceLi1,
         Messages.serviceLi2,
         Messages.serviceLi3,
         Messages.serviceLi4,
-        Messages.serviceLi5
+        Messages.serviceLi5,
+        Messages.howAccessB1
       )
     }
 
@@ -143,6 +157,9 @@ class AccessibilityStatementViewSpec extends PayeComponentSpec with PayeFakedApp
         Messages.contactUsP3,
         Messages.technicalInfoP1,
         Messages.technicalInfoP2,
+        Messages.technicalInfoP3,
+        Messages.technicalInfoP4,
+        Messages.technicalInfoP5,
         Messages.howWeTestP1,
         Messages.howWeTestP2,
         Messages.howWeTestP3
