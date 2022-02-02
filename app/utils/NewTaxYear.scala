@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 object NewTaxYear {
   val startPeriod = LocalDate.of(SystemDate.getSystemDate.getYear, 2, 6)
-  val endPeriod = LocalDate.of(SystemDate.getSystemDate.getYear, 8, 31)
+  val endPeriod = LocalDate.of(SystemDate.getSystemDate.getYear, 5, 17)
 
   val taxYearStart = LocalDate.of(SystemDate.getSystemDate.getYear, 4, 6)
 }
