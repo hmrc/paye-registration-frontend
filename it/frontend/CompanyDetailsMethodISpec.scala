@@ -812,7 +812,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       json mustBe Json.parse(updatedPayeDoc)
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      reqPostsAudit.size mustBe 0
+      reqPostsAudit.size mustBe 1
     }
 
     "return an error page when fail saving to microservice with full company details data and prepop address" in {
@@ -1181,7 +1181,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/what-company-does")
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      reqPostsAudit.size mustBe 1
+      reqPostsAudit.size mustBe 2
       val captorPost = reqPostsAudit.get(0)
       val jsonAudit = Json.parse(captorPost.getBodyAsString)
 
@@ -1271,7 +1271,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/what-company-does")
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      reqPostsAudit.size mustBe 0
+      reqPostsAudit.size mustBe 1
     }
   }
 }
