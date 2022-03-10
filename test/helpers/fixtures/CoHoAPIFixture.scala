@@ -37,13 +37,13 @@ trait CoHoAPIFixture {
   val validOfficerList = OfficerList(
     items = Seq(
       Officer(
-        name = Name(Some("test1"), Some("test11"), "testa", Some("Mr")),
+        nameElements = Some(Name(Some("test1"), Some("test11"), "testa", Some("Mr"))),
         role = "cic-manager",
         resignedOn = None,
         appointmentLink = None
       ),
       Officer(
-        name = Name(Some("test2"), Some("test22"), "testb", Some("Mr")),
+        nameElements = Some(Name(Some("test2"), Some("test22"), "testb", Some("Mr"))),
         role = "director",
         resignedOn = None,
         appointmentLink = None
@@ -54,13 +54,13 @@ trait CoHoAPIFixture {
   val invalidOfficerList = OfficerList(
     items = Seq(
       Officer(
-        name = Name(Some("test1"), Some("test11"), "testa", Some("Mr")),
+        nameElements = Some(Name(Some("test1"), Some("test11"), "testa", Some("Mr"))),
         role = "cic-manager",
         resignedOn = None,
         appointmentLink = None
       ),
       Officer(
-        name = Name(Some("test2"), Some("test22"), "testb", Some("Mr")),
+        nameElements = Some(Name(Some("test2"), Some("test22"), "testb", Some("Mr"))),
         role = "corporate-director",
         resignedOn = None,
         appointmentLink = None

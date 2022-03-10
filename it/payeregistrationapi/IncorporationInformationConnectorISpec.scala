@@ -154,17 +154,28 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
     val tstOfficerListModel = OfficerList(
       items = Seq(
         Officer(
-          name = Name(Some("test1"), Some("test11"), "testa", Some("Mr")),
+          nameElements = Some(Name(Some("test1"), Some("test11"), "testa", Some("Mr"))),
+          role = "cic-manager",
+          resignedOn = None,
+          appointmentLink = None
+        ),
+      )
+    )
+
+    val testOfficerNoneList = OfficerList(
+      items = Seq(
+        Officer(
+          nameElements = Some(Name(Some("test1"), Some("test11"), "testa", Some("Mr"))),
           role = "cic-manager",
           resignedOn = None,
           appointmentLink = None
         ),
         Officer(
-          name = Name(Some("test2"), Some("test22"), "testb", Some("Mr")),
+          nameElements = Some(Name(Some("test2"), Some("test22"), "testb", Some("Mr"))),
           role = "corporate-director",
           resignedOn = None,
           appointmentLink = None
-        )
+        ),
       )
     )
 
@@ -192,12 +203,6 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
         |      "officer_role" : "cic-manager"
         |    }, {
         |      "name" : "test",
-        |      "name_elements" : {
-        |        "forename" : "test2",
-        |        "other_forenames" : "test22",
-        |        "surname" : "testb",
-        |        "title" : "Mr"
-        |      },
         |      "officer_role" : "corporate-director"
         |    }
         |  ]
@@ -222,20 +227,14 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
           |    {
           |      "name" : "test",
           |      "name_elements" : {
-          |        "forename" : "tęšt1",
-          |        "other_forenames" : "tèēśt11",
-          |        "surname" : "tæßt.",
+          |        "forename" : "test1",
+          |        "other_forenames" : "teest11",
+          |        "surname" : "tt.",
           |        "title" : "Mr,"
           |      },
           |      "officer_role" : "cic-manager"
           |    }, {
           |      "name" : "test",
-          |      "name_elements" : {
-          |        "forename" : "žñœü",
-          |        "other_forenames" : "ÿürgëñ",
-          |        "surname" : "alfîë",
-          |        "title" : "Mr"
-          |      },
           |      "officer_role" : "corporate-director"
           |    }
           |  ]
@@ -244,14 +243,8 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
       val tstOfficerListModel = OfficerList(
         items = Seq(
           Officer(
-            name = Name(Some("test1"), Some("teest11"), "tt", Some("Mr")),
+            nameElements = Some(Name(Some("test1"), Some("teest11"), "tt", Some("Mr"))),
             role = "cic-manager",
-            resignedOn = None,
-            appointmentLink = None
-          ),
-          Officer(
-            name = Name(Some("znu"), Some("yurgen"), "alfie", Some("Mr")),
-            role = "corporate-director",
             resignedOn = None,
             appointmentLink = None
           )
@@ -270,7 +263,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
       def getResponse = incorpInfoConnector.getOfficerList(testTransId, "regAllowlist456")
 
       setupWiremockResult(404, "")
-      await(getResponse) mustBe tstOfficerListModel
+      await(getResponse) mustBe testOfficerNoneList
     }
 
     "throw an OfficerListNotFoundException when CoHo API returns an empty list" in new Setup {

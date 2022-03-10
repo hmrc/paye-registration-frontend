@@ -20,7 +20,7 @@ import com.codahale.metrics.{Counter, Timer}
 import common.exceptions.DownstreamExceptions.{IncorporationInformationResponseException, OfficerListNotFoundException}
 import config.AppConfig
 import enums.IncorporationStatus
-import models.external.{CoHoCompanyDetailsModel, IncorpUpdateResponse, OfficerList}
+import models.external.{CoHoCompanyDetailsModel, IncorpUpdateResponse, Officer, OfficerList}
 import play.api.http.Status.{ACCEPTED, OK}
 import play.api.libs.json._
 import services.MetricsService
@@ -152,12 +152,16 @@ trait IncorporationInformationConnector extends RegistrationAllowlist {
       val incorpInfoTimer = metricsService.incorpInfoResponseTimer.time()
       http.GET[JsObject](s"$incorpInfoUrl$incorpInfoUri/$transactionId/officer-list") map { obj =>
         incorpInfoTimer.stop()
-        val list = obj.\("officers").as[OfficerList]
-        if (list.items.isEmpty) {
+
+        val list = (obj \ "officers").as[Seq[Officer]].toList
+        val filteredList = list.filter(_.nameElements.isDefined)
+        val officerList = OfficerList(filteredList)
+
+        if (list.isEmpty) {
           logger.error(s"[IncorporationInformationConnector] [getOfficerList] - Received an empty Officer list for TX-ID $transactionId")
           throw new OfficerListNotFoundException
         } else {
-          list
+          officerList
         }
       } recover {
         case _: NotFoundException =>
