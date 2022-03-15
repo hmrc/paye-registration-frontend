@@ -59,7 +59,11 @@ trait IncorporationInformationService {
 
   private def convertOfficerList2Directors(officerList: OfficerList): Future[Directors] = {
     val directors = officerList.items.collect {
-      case officer: Officer if officer.resignedOn.isEmpty && officer.role.equals("director") => Director(name = officer.name, nino = None)
+      case officer: Officer if officer.resignedOn.isEmpty && officer.role.equals("director") =>
+        Director(
+          name = officer.nameElements.getOrElse(throw new InternalServerException("Name elements missing from Companies House JSON")),
+          nino = None
+        )
     }
     Future.successful(Directors(directorMapping = (directors.indices.map(_.toString) zip directors).toMap))
   }
