@@ -16,32 +16,35 @@
 
 package services
 
-import utils.SystemDate
+import config.AppConfig
 
 import java.time.LocalDate
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
-class ThresholdServiceImpl @Inject()() extends ThresholdService {
-  override def now: LocalDate = SystemDate.getSystemDate.toLocalDate
+@Singleton
+class ThresholdService @Inject()(appConfig: AppConfig){
 
-  override val nextTaxYearStart = LocalDate.of(2020, 4, 6)
-}
+  def now: LocalDate = LocalDate.now()
 
-trait ThresholdService {
-  protected def now: LocalDate
-
-  protected def nextTaxYearStart: LocalDate
-
-  //TODO: Raise another story to make this more robust
   def getCurrentThresholds: Map[String, Int] = {
-    if (now.isEqual(nextTaxYearStart) | now.isAfter(nextTaxYearStart)) {
-      buildThresholdMap(120, 520, 6240)
-    } else {
-      buildThresholdMap(118, 512, 6136)
+    val taxYearStartDate = LocalDate.parse(appConfig.taxYearStartDate)
+
+    val isTaxYear = now.isEqual(taxYearStartDate) || now.isAfter(taxYearStartDate)
+
+    val weeklyThreshold = appConfig.currentPayeWeeklyThreshold
+    val monthlyThreshold = appConfig.currentPayeMonthlyThreshold
+    val annualThreshold = appConfig.currentPayeAnnualThreshold
+
+    val oldWeeklyThreshold = appConfig.oldPayeWeeklyThreshold
+    val oldMonthlyThreshold = appConfig.oldPayeMonthlyThreshold
+    val oldAnnualThreshold = appConfig.oldPayeAnnualThreshold
+
+    if (isTaxYear) {
+      Map("weekly" -> weeklyThreshold, "monthly" -> monthlyThreshold, "annually" -> annualThreshold)
+    }
+    else {
+      Map("weekly" -> oldWeeklyThreshold, "monthly" -> oldMonthlyThreshold, "annually" -> oldAnnualThreshold)
     }
   }
 
-  private def buildThresholdMap(weekly: Int, monthly: Int, annually: Int): Map[String, Int] = {
-    Map("weekly" -> weekly, "monthly" -> monthly, "annually" -> annually)
-  }
 }

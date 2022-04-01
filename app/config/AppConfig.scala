@@ -71,17 +71,30 @@ class AppConfig @Inject()(configuration: Configuration) {
   lazy val defaultCHROAddress: Address = loadJsonConfigBase64[Address]("defaultCHROAddress")
   lazy val defaultSeqDirector: Seq[Director] = loadJsonConfigBase64[Seq[Director]]("defaultSeqDirector")(Director.seqReads)
   lazy val defaultCTStatus: String = loadStringConfigBase64("defaultCTStatus")
-  lazy val defaultOfficerList: OfficerList = loadJsonConfigBase64[OfficerList]("defaultOfficerList")(OfficerList.formatModel)
-  lazy val uriAllowList: Set[String] = configuration.getOptional[Seq[String]]("bootstrap.csrfexceptions.allowlist").getOrElse(Seq.empty).toSet
+  lazy val defaultOfficerList: OfficerList =
+    loadJsonConfigBase64[OfficerList]("defaultOfficerList")(OfficerList.formatModel)
+  lazy val uriAllowList: Set[String] =
+    configuration.getOptional[Seq[String]]("bootstrap.csrfexceptions.allowlist").getOrElse(Seq.empty).toSet
   lazy val csrfBypassValue: String = loadStringConfigBase64("Csrf-Bypass-value")
 
   private def encodeUrl(url: String): String = URLEncoder.encode(url, "UTF-8")
 
-  def accessibilityStatementUrl(pageUri: String) = controllers.routes.AccessibilityStatementController.show(pageUri).url
+  def accessibilityStatementUrl(pageUri: String): String =
+    controllers.routes.AccessibilityStatementController.show(pageUri).url
 
-  lazy val accessibilityStatementUrl = self + "/register-for-paye" + "/accessibility-statement" + "?pageUri=%2Fregister-for-paye%2F"
+  lazy val accessibilityStatementUrl: String =
+    self + "/register-for-paye" + "/accessibility-statement" + "?pageUri=%2Fregister-for-paye%2F"
 
   def accessibilityReportUrl(userAction: String): String =
     s"$contactHost/contact/accessibility-unauthenticated?service=paye-registration-frontend&userAction=${encodeUrl(userAction)}"
+
+  lazy val taxYearStartDate: String = servicesConfig.getString("tax-year-start-date")
+
+  lazy val currentPayeWeeklyThreshold: Int = servicesConfig.getInt("paye.weekly-threshold")
+  lazy val currentPayeMonthlyThreshold: Int = servicesConfig.getInt("paye.monthly-threshold")
+  lazy val currentPayeAnnualThreshold: Int = servicesConfig.getInt("paye.annual-threshold")
+  lazy val oldPayeWeeklyThreshold: Int = servicesConfig.getInt("paye.old-weekly-threshold")
+  lazy val oldPayeMonthlyThreshold: Int = servicesConfig.getInt("paye.old-monthly-threshold")
+  lazy val oldPayeAnnualThreshold: Int = servicesConfig.getInt("paye.old-annual-threshold")
 
 }

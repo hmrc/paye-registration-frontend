@@ -16,48 +16,48 @@
 
 package services
 
+import config.AppConfig
 import helpers.PayeComponentSpec
-import utils.SystemDate
+import play.api.Configuration
 
 import java.time.LocalDate
 
 class ThresholdServiceSpec extends PayeComponentSpec {
 
-  val testService = new ThresholdService {
-    override def now: LocalDate = SystemDate.getSystemDate.toLocalDate
-
-    override val nextTaxYearStart = LocalDate.of(2020, 4, 6)
-  }
-
-  override def afterAll(): Unit = {
-    super.afterAll()
-    System.setProperty("feature.system-date", "")
+  object TestAppConfig extends AppConfig(mock[Configuration]) {
+    override lazy val taxYearStartDate: String = LocalDate.now().toString
+    override lazy val currentPayeWeeklyThreshold: Int = 10
+    override lazy val currentPayeMonthlyThreshold: Int = 20
+    override lazy val currentPayeAnnualThreshold: Int = 30
+    override lazy val oldPayeWeeklyThreshold: Int = 5
+    override lazy val oldPayeMonthlyThreshold: Int = 10
+    override lazy val oldPayeAnnualThreshold: Int = 15
   }
 
   "getCurrentThresholds" should {
-    "return a map of the previous tax years thresholds" when {
-      "the system date is before the 6 Apr 2020" in {
-        System.setProperty("feature.system-date", "2020-04-05T12:00:00")
-
-        val result = testService.getCurrentThresholds
-        result mustBe Map("weekly" -> 118, "monthly" -> 512, "annually" -> 6136)
+    "return the old tax years thresholds if the date is before the tax year start date" in {
+      object TestService extends ThresholdService(TestAppConfig) {
+        override def now: LocalDate = LocalDate.now().minusDays(1)
       }
+
+      val result = TestService.getCurrentThresholds
+      result mustBe Map("weekly" -> 5, "monthly" -> 10, "annually" -> 15)
     }
 
-    "return a map of the next tax years thresholds" when {
-      "the system date is on the 6 Apr 2020" in {
-        System.setProperty("feature.system-date", "2020-04-06T12:00:00")
+    "return the new tax years thresholds if the date is on the tax year start date" in {
+      object TestService extends ThresholdService(TestAppConfig)
 
-        val result = testService.getCurrentThresholds
-        result mustBe Map("weekly" -> 120, "monthly" -> 520, "annually" -> 6240)
+      val result = TestService.getCurrentThresholds
+      result mustBe Map("weekly" -> 10, "monthly" -> 20, "annually" -> 30)
+    }
+
+    "return the new tax years thresholds if the date is after the tax year start date" in {
+      object TestService extends ThresholdService(TestAppConfig) {
+        override def now: LocalDate = LocalDate.now().plusDays(1)
       }
 
-      "the system date is after the 6 Apr 2020" in {
-        System.setProperty("feature.system-date", "2020-04-10T12:00:00")
-
-        val result = testService.getCurrentThresholds
-        result mustBe Map("weekly" -> 120, "monthly" -> 520, "annually" -> 6240)
-      }
+      val result = TestService.getCurrentThresholds
+      result mustBe Map("weekly" -> 10, "monthly" -> 20, "annually" -> 30)
     }
   }
 }
