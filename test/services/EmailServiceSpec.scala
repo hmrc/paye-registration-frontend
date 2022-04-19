@@ -16,25 +16,34 @@
 
 package services
 
+import config.AppConfig
 import connectors._
 import helpers.PayeComponentSpec
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import play.api.Configuration
+import utils.TaxYearConfig
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class EmailServiceSpec extends PayeComponentSpec {
 
-  def service() = new EmailService {
-    override val incorporationInformationConnector = mockIncorpInfoConnector
-    override val payeRegistrationConnector = mockPayeRegistrationConnector
-    override val s4LConnector = mockS4LConnector
-    override val companyRegistrationConnector = mockCompRegConnector
-    override val emailConnector = mockEmailConnector
-    override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
+  object TestAppConfig extends AppConfig(mock[Configuration]) {
+    override lazy val adminPeriodStart: String = "2022-02-06"
+    override lazy val adminPeriodEnd: String = "2022-05-17"
+    override lazy val taxYearStartDate: String = "2022-04-06"
   }
+
+  val service = new EmailService(
+    mockCompRegConnector,
+    mockEmailConnector,
+    mockPayeRegistrationConnector,
+    mockIncorpInfoConnector,
+    mockS4LConnector,
+    new TaxYearConfig(TestAppConfig)
+  )(ExecutionContext.Implicits.global)
+
 
   "primeEmailData" should {
     "return a cache map" when {
@@ -45,7 +54,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockS4LConnector.saveForm(any(), any(), any())(any(), any()))
           .thenReturn(Future(Fixtures.blankCacheMap))
 
-        val result = await(service().primeEmailData("testRegId"))
+        val result = await(service.primeEmailData("testRegId"))
         result mustBe Fixtures.blankCacheMap
       }
     }
@@ -66,7 +75,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockEmailConnector.requestEmailToBeSent(any())(any()))
           .thenReturn(Future.successful(EmailSent))
 
-        val result = await(service().sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
         result mustBe EmailSent
       }
 
@@ -83,7 +92,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockEmailConnector.requestEmailToBeSent(any())(any()))
           .thenReturn(Future.successful(EmailSent))
 
-        val result = await(service().sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
         result mustBe EmailSent
       }
     }
@@ -96,7 +105,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockS4LConnector.fetchAndGet[LocalDate](any(), any())(any(), any()))
           .thenReturn(Future(None))
 
-        val result = await(service().sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
         result mustBe EmailDifficulties
       }
 
@@ -110,7 +119,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockIncorpInfoConnector.getCoHoCompanyDetails(any(), any())(any()))
           .thenReturn(Future(IncorpInfoBadRequestResponse))
 
-        val result = await(service().sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
         result mustBe EmailDifficulties
       }
 
@@ -127,7 +136,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockEmailConnector.requestEmailToBeSent(any())(any()))
           .thenReturn(Future.successful(EmailDifficulties))
 
-        val result = await(service().sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
         result mustBe EmailDifficulties
       }
     }
@@ -137,7 +146,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockCompRegConnector.getVerifiedEmail(any())(any()))
           .thenReturn(Future.successful(None))
 
-        val result = await(service().sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
         result mustBe EmailNotFound
       }
     }

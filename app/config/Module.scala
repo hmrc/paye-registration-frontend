@@ -84,7 +84,6 @@ class Module extends AbstractModule {
     bind(classOf[PrepopulationService]).to(classOf[PrepopulationServiceImpl]).asEagerSingleton()
     bind(classOf[SubmissionService]).to(classOf[SubmissionServiceImpl]).asEagerSingleton()
     bind(classOf[DirectorDetailsService]).to(classOf[DirectorDetailsServiceImpl]).asEagerSingleton()
-    bind(classOf[EmailService]).to(classOf[EmailServiceImpl]).asEagerSingleton()
   }
 
   private def bindOtherControllers(): Unit = {

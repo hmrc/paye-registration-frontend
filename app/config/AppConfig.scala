@@ -97,4 +97,7 @@ class AppConfig @Inject()(configuration: Configuration) {
   lazy val oldPayeMonthlyThreshold: Int = servicesConfig.getInt("paye.old-monthly-threshold")
   lazy val oldPayeAnnualThreshold: Int = servicesConfig.getInt("paye.old-annual-threshold")
 
+  lazy val adminPeriodStart: String = servicesConfig.getString("paye.admin-period-start")
+  lazy val adminPeriodEnd: String = servicesConfig.getString("paye.admin-period-end")
+
 }

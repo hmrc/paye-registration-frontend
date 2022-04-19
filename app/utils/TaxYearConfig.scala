@@ -16,11 +16,17 @@
 
 package utils
 
+import config.AppConfig
+
 import java.time.LocalDate
+import javax.inject.{Inject, Singleton}
 
-object NewTaxYear {
-  val startPeriod = LocalDate.of(SystemDate.getSystemDate.getYear, 2, 6)
-  val endPeriod = LocalDate.of(SystemDate.getSystemDate.getYear, 5, 17)
+@Singleton
+class TaxYearConfig @Inject()(appConfig: AppConfig) {
 
-  val taxYearStart = LocalDate.of(SystemDate.getSystemDate.getYear, 4, 6)
+  val adminPeriodStart: LocalDate = LocalDate.parse(appConfig.adminPeriodStart)
+  val adminPeriodEnd: LocalDate = LocalDate.parse(appConfig.adminPeriodEnd)
+
+  val taxYearStartDate: LocalDate = LocalDate.parse(appConfig.taxYearStartDate)
+
 }
