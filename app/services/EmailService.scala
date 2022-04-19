@@ -20,32 +20,26 @@ import connectors._
 import models.external.{CurrentProfile, EmailRequest}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
-import utils.{NewTaxYear, PAYEFeatureSwitches, SystemDate}
+import utils.{SystemDate, TaxYearConfig}
 
 import java.time.LocalDate
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-class EmailServiceImpl @Inject()(val companyRegistrationConnector: CompanyRegistrationConnector,
-                                 val emailConnector: EmailConnector,
-                                 val payeRegistrationConnector: PAYERegistrationConnector,
-                                 val incorporationInformationConnector: IncorporationInformationConnector,
-                                 val s4LConnector: S4LConnector,
-                                 val pAYEFeatureSwitches: PAYEFeatureSwitches)(implicit val ec: ExecutionContext) extends EmailService
-
-trait EmailService {
-  val companyRegistrationConnector: CompanyRegistrationConnector
-  val payeRegistrationConnector: PAYERegistrationConnector
-  val emailConnector: EmailConnector
-  val s4LConnector: S4LConnector
-  val incorporationInformationConnector: IncorporationInformationConnector
-  implicit val ec: ExecutionContext
+@Singleton
+class EmailService @Inject()(companyRegistrationConnector: CompanyRegistrationConnector,
+                             emailConnector: EmailConnector,
+                             payeRegistrationConnector: PAYERegistrationConnector,
+                             incorporationInformationConnector: IncorporationInformationConnector,
+                             s4LConnector: S4LConnector,
+                             taxYearConfig: TaxYearConfig
+                            )(implicit val ec: ExecutionContext) {
 
   private val FIRST_PAYMENT_DATE = "firstPaymentDate"
 
-  private val startDateBoolean: Boolean = SystemDate.getSystemDate.toLocalDate.isEqual(NewTaxYear.startPeriod) | SystemDate.getSystemDate.toLocalDate.isAfter(NewTaxYear.startPeriod)
-  private val endDateBoolean: Boolean = SystemDate.getSystemDate.toLocalDate.isEqual(NewTaxYear.endPeriod) | SystemDate.getSystemDate.toLocalDate.isBefore(NewTaxYear.endPeriod)
-  private val fpdEqualOrAfterNTY: LocalDate => Boolean = fpd => fpd.isEqual(NewTaxYear.taxYearStart) | fpd.isAfter(NewTaxYear.taxYearStart)
+  private val startDateBoolean: Boolean = SystemDate.getSystemDate.toLocalDate.isEqual(taxYearConfig.adminPeriodStart) | SystemDate.getSystemDate.toLocalDate.isAfter(taxYearConfig.adminPeriodEnd)
+  private val endDateBoolean: Boolean = SystemDate.getSystemDate.toLocalDate.isEqual(taxYearConfig.adminPeriodEnd) | SystemDate.getSystemDate.toLocalDate.isBefore(taxYearConfig.adminPeriodEnd)
+  private val fpdEqualOrAfterNTY: LocalDate => Boolean = fpd => fpd.isEqual(taxYearConfig.taxYearStartDate) | fpd.isAfter(taxYearConfig.taxYearStartDate)
 
   private val templateId: LocalDate => String = fpd => if ((startDateBoolean & endDateBoolean) & fpdEqualOrAfterNTY(fpd)) {
     "register_your_company_register_paye_confirmation_new_tax_year"
