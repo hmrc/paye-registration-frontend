@@ -33,11 +33,11 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EmploymentController @Inject()(val employmentService: EmploymentService,
-                                     val thresholdService: ThresholdService,
+class EmploymentController @Inject()(employmentService: EmploymentService,
+                                     thresholdService: ThresholdService,
                                      val keystoreConnector: KeystoreConnector,
                                      val authConnector: AuthConnector,
-                                     val incorpInfoService: IncorporationInformationService,
+                                     incorpInfoService: IncorporationInformationService,
                                      val incorporationInformationConnector: IncorporationInformationConnector,
                                      val payeRegistrationService: PAYERegistrationService,
                                      mcc: MessagesControllerComponents,
@@ -47,7 +47,8 @@ class EmploymentController @Inject()(val employmentService: EmploymentService,
                                      ApplicationDelayedPage: applicationDelayed,
                                      SubcontractorsPage: employsSubcontractors,
                                      PaysPensionPage: paysPension
-                                    )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
+                                    )(implicit val appConfig: AppConfig,
+                                      val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
   val taxYearObjWithSystemDate: SystemDateT = SystemDate
 
@@ -59,7 +60,7 @@ class EmploymentController @Inject()(val employmentService: EmploymentService,
     case _ => throw new InternalServerException(s"[EmploymentController][handleJourneyPostConstruction] an invalid scenario was met for employment staff")
   }
 
-  def weeklyThreshold: Int = thresholdService.getCurrentThresholds.getOrElse("weekly", 120)
+  def weeklyThreshold: Int = thresholdService.getCurrentThresholds("weekly")
 
   private def ifIncorpDateExist(regId: String, txId: String)(action: LocalDate => Future[Result])(implicit hc: HeaderCarrier): Future[Result] =
     incorpInfoService.getIncorporationDate(regId, txId) flatMap {
@@ -89,6 +90,7 @@ class EmploymentController @Inject()(val employmentService: EmploymentService,
                   Redirect(controllers.userJourney.routes.EmploymentController.employingStaff)
                 case Some(EmployingAnyone(true, _)) =>
                   Redirect(controllers.userJourney.routes.EmploymentController.constructionIndustry)
+                  //TODO handle None case
               }
             }
           }

@@ -24,6 +24,8 @@ import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.crypto.DefaultCookieSigner
 
+import java.time.LocalDate
+
 class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStub with BeforeAndAfterEach with WiremockHelper {
 
   val mockHost = WiremockHelper.wiremockHost
@@ -188,7 +190,7 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
           "alreadyPaying" -> Seq("true"),
           "earliestDateDay" -> Seq("21"),
           "earliestDateMonth" -> Seq("05"),
-          "earliestDateYear" -> Seq("2019")
+          "earliestDateYear" -> Seq(LocalDate.now.minusYears(2).getYear.toString)
         ))
       val response = await(fResponse)
       response.status mustBe 303
