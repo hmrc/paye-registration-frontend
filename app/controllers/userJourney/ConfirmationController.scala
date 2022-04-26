@@ -16,6 +16,8 @@
 
 package controllers.userJourney
 
+import java.time.format.DateTimeFormatter
+
 import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
@@ -24,8 +26,8 @@ import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import views.html.pages.error.restart
 import views.html.pages.{confirmation => ConfirmationPage}
-
 import javax.inject.{Inject, Singleton}
+
 import scala.concurrent.ExecutionContext
 
 @Singleton
@@ -50,7 +52,7 @@ class ConfirmationController @Inject()(val keystoreConnector: KeystoreConnector,
         _ <- emailService.sendAcknowledgementEmail(profile, refs.get)
         _ <- s4LService.clear(profile.registrationID)
       } yield refs.fold(InternalServerError(restart())) {
-        ref => Ok(ConfirmationPage(ref, confirmationService.determineIfInclusiveContentIsShown))
+        ref => Ok(ConfirmationPage(ref, confirmationService.determineIfInclusiveContentIsShown,confirmationService.endDate.format(DateTimeFormatter.ofPattern("d MMM"))))
       }).recover {
         case _ => InternalServerError(restart())
       }
