@@ -37,7 +37,7 @@ class EmailService @Inject()(companyRegistrationConnector: CompanyRegistrationCo
 
   private val FIRST_PAYMENT_DATE = "firstPaymentDate"
 
-  private val startDateBoolean: Boolean = SystemDate.getSystemDate.toLocalDate.isEqual(taxYearConfig.adminPeriodStart) | SystemDate.getSystemDate.toLocalDate.isAfter(taxYearConfig.adminPeriodEnd)
+  private val startDateBoolean: Boolean = SystemDate.getSystemDate.toLocalDate.isEqual(taxYearConfig.adminPeriodStart) | SystemDate.getSystemDate.toLocalDate.isAfter(taxYearConfig.adminPeriodStart)
   private val endDateBoolean: Boolean = SystemDate.getSystemDate.toLocalDate.isEqual(taxYearConfig.adminPeriodEnd) | SystemDate.getSystemDate.toLocalDate.isBefore(taxYearConfig.adminPeriodEnd)
   private val fpdEqualOrAfterNTY: LocalDate => Boolean = fpd => fpd.isEqual(taxYearConfig.taxYearStartDate) | fpd.isAfter(taxYearConfig.taxYearStartDate)
 
