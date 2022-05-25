@@ -28,6 +28,9 @@ import org.mockito.Mockito.when
 import play.api.http.Status
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.http.HttpResponse
 import views.html.pages.confirmation
 import views.html.pages.error.restart
@@ -60,23 +63,29 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
       mockConfirmationPage
     )(mockAppConfig,
       globalExecutionContext)
+
   }
 
   val successHttpResponse = HttpResponse(status = 200, body = "")
 
   "showConfirmation" should {
     "display the confirmation page with an acknowledgement reference retrieved from backend with Inclusive content not shown" in new Setup {
+
       when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("BRPY00000000001")))
       when(mockConfirmationService.determineIfInclusiveContentIsShown) thenReturn false
       when(mockConfirmationService.endDate) thenReturn LocalDate.parse("2022-05-17")
 
-
-      when(mockEmailService.sendAcknowledgementEmail(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockEmailService.sendAcknowledgementEmail(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(EmailSent))
       when(mockS4LService.clear(any())(any())) thenReturn Future.successful(successHttpResponse)
 
-      showAuthorisedWithCP(controller.showConfirmation, Fixtures.validCurrentProfile, FakeRequest()) {
+      when(authConnector.authorise(ArgumentMatchers.eq(EmptyPredicate), ArgumentMatchers.eq(Retrievals.name))(ArgumentMatchers.any(), ArgumentMatchers.any())
+            ).thenReturn(Future.successful(Some(Name(Some("testFirstName"), None))))
+
+
+
+      showAuthorisedWithCpAndAuthResponse(controller.showConfirmation, Fixtures.validCurrentProfile, FakeRequest()) {
         result =>
           status(result) mustBe OK
           val doc = Jsoup.parse(contentAsString(result))
@@ -84,7 +93,6 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
           doc.getElementsByAttributeValueContaining("id", "standard-content").isEmpty mustBe false
           doc.getElementsByAttributeValueContaining("id", "inclusive-content").isEmpty mustBe true
           doc.toString must not include "17 May"
-
       }
     }
 
@@ -94,11 +102,13 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockConfirmationService.determineIfInclusiveContentIsShown) thenReturn true
       when(mockConfirmationService.endDate) thenReturn LocalDate.parse("2022-05-17")
 
-      when(mockEmailService.sendAcknowledgementEmail(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockEmailService.sendAcknowledgementEmail(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(EmailDifficulties))
       when(mockS4LService.clear(any())(any())) thenReturn Future.successful(successHttpResponse)
+      when(authConnector.authorise(ArgumentMatchers.eq(EmptyPredicate), ArgumentMatchers.eq(Retrievals.name))(ArgumentMatchers.any(), ArgumentMatchers.any())
+      ).thenReturn(Future.successful(Some(Name(Some("testFirstName"), None))))
 
-      showAuthorisedWithCP(controller.showConfirmation, Fixtures.validCurrentProfile, FakeRequest()) {
+      showAuthorisedWithCpAndAuthResponse(controller.showConfirmation, Fixtures.validCurrentProfile, FakeRequest()) {
         result =>
           val doc = Jsoup.parse(contentAsString(result))
           doc.getElementById("ack-ref").html mustBe "BRPY00000000001"

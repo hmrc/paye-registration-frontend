@@ -28,10 +28,12 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.http.{HeaderNames, HttpProtocol, MimeTypes, Status}
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{Call, Result}
+import play.api.mvc.{AnyContent, Call, Request, Result}
 import play.api.test._
+import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
 
 trait PayeComponentSpec
@@ -140,6 +142,10 @@ trait PayeComponentSpec
     def payeRegElFEUrl = "/prefe"
 
     def payeRegElFEUri = "/test/"
+
+
   }
+
+  def getNameFromAuth(implicit request: Request[AnyContent]): Future[Name]  = Future.successful(Name(Some("Fullname"), None))
 
 }

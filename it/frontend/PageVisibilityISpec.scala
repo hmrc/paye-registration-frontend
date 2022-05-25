@@ -177,7 +177,7 @@ class PageVisibilityISpec extends IntegrationSpecBase
   "GET Acknowledgement screen" should {
 
     "Show the page when paye registration has been submitted" in {
-      setupSimpleAuthMocks()
+      setupAuthMocks()
 
       stubSuccessfulLogin()
 

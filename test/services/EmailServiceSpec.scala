@@ -75,7 +75,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockEmailConnector.requestEmailToBeSent(any())(any()))
           .thenReturn(Future.successful(EmailSent))
 
-        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef", Some("Name from auth")))
         result mustBe EmailSent
       }
 
@@ -92,7 +92,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockEmailConnector.requestEmailToBeSent(any())(any()))
           .thenReturn(Future.successful(EmailSent))
 
-        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef", Some("Name from auth")))
         result mustBe EmailSent
       }
     }
@@ -105,7 +105,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockS4LConnector.fetchAndGet[LocalDate](any(), any())(any(), any()))
           .thenReturn(Future(None))
 
-        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef", Some("Name from auth")))
         result mustBe EmailDifficulties
       }
 
@@ -119,7 +119,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockIncorpInfoConnector.getCoHoCompanyDetails(any(), any())(any()))
           .thenReturn(Future(IncorpInfoBadRequestResponse))
 
-        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef", Some("Name from auth")))
         result mustBe EmailDifficulties
       }
 
@@ -136,7 +136,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockEmailConnector.requestEmailToBeSent(any())(any()))
           .thenReturn(Future.successful(EmailDifficulties))
 
-        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef", Some("Name from auth")))
         result mustBe EmailDifficulties
       }
     }
@@ -146,7 +146,7 @@ class EmailServiceSpec extends PayeComponentSpec {
         when(mockCompRegConnector.getVerifiedEmail(any())(any()))
           .thenReturn(Future.successful(None))
 
-        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef"))
+        val result = await(service.sendAcknowledgementEmail(cp, "testAckRef", Some("Name from auth")))
         result mustBe EmailNotFound
       }
     }

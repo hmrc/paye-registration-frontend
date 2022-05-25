@@ -24,7 +24,7 @@ import play.api.mvc._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AffinityGroup.{Individual, Organisation}
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, ~}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -84,6 +84,16 @@ trait AuthHelpers {
 
   def showAuthorisedWithCP(action: Action[AnyContent], currentProfile: Option[CurrentProfile], request: Request[AnyContent])(test: Future[Result] => Any) {
     when(authConnector.authorise[Unit](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      .thenReturn(Future.successful(()))
+
+    when(keystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      .thenReturn(Future(currentProfile))
+
+    test(action(request))
+  }
+
+  def showAuthorisedWithCpAndAuthResponse(action: Action[AnyContent], currentProfile: Option[CurrentProfile], request: Request[AnyContent])(test: Future[Result] => Any) {
+    when(authConnector.authorise[Unit](ArgumentMatchers.eq(ConfidenceLevel.L50), ArgumentMatchers.eq(EmptyRetrieval))(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(()))
 
     when(keystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
