@@ -159,7 +159,11 @@ trait LoginStub extends SessionCookieBaker {
               | "credentials" : {
               |   "providerId" : "testAuthProviderId",
               |   "providerType" : "GG"
-              | }
+              | },
+              | "name": {
+              |       "name": "testFirstName",
+              |       "lastName": "testLastName"
+              |    }
               |}
             """.stripMargin)
       )

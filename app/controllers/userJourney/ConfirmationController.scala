@@ -24,9 +24,12 @@ import controllers.{AuthRedirectUrls, PayeBaseController}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.http.InternalServerException
 import views.html.pages.error.restart
 import views.html.pages.{confirmation => ConfirmationPage}
 import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 
 import scala.concurrent.ExecutionContext
 
@@ -46,15 +49,21 @@ class ConfirmationController @Inject()(val keystoreConnector: KeystoreConnector,
                                       )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
   def showConfirmation: Action[AnyContent] = isAuthorisedWithProfileNoSubmissionCheck { implicit request =>
-    profile =>
-      (for {
-        refs <- confirmationService.getAcknowledgementReference(profile.registrationID)
-        _ <- emailService.sendAcknowledgementEmail(profile, refs.get)
+    profile => {
+      for {
+        Some(acknowledgementReference) <- confirmationService.getAcknowledgementReference(profile.registrationID)
+        optFullName <- authConnector.authorise(EmptyPredicate,Retrievals.name).map(_.flatMap(_.name))
+        _ <- emailService.sendAcknowledgementEmail(profile, acknowledgementReference, optFullName)
         _ <- s4LService.clear(profile.registrationID)
-      } yield refs.fold(InternalServerError(restart())) {
-        ref => Ok(ConfirmationPage(ref, confirmationService.determineIfInclusiveContentIsShown,confirmationService.endDate.format(DateTimeFormatter.ofPattern("d MMM"))))
-      }).recover {
-        case _ => InternalServerError(restart())
-      }
+      } yield
+        Ok(ConfirmationPage(
+          acknowledgementReference,
+          confirmationService.determineIfInclusiveContentIsShown,
+          confirmationService.endDate.format(DateTimeFormatter.ofPattern("d MMM"))
+        ))
+    }.recover {
+      case e =>
+        InternalServerError(restart())
+    }
   }
 }

@@ -21,9 +21,11 @@ import models.external.{CurrentProfile, EmailRequest}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.{SystemDate, TaxYearConfig}
-
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
 import javax.inject.{Inject, Singleton}
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -42,20 +44,28 @@ class EmailService @Inject()(companyRegistrationConnector: CompanyRegistrationCo
   private val fpdEqualOrAfterNTY: LocalDate => Boolean = fpd => fpd.isEqual(taxYearConfig.taxYearStartDate) | fpd.isAfter(taxYearConfig.taxYearStartDate)
 
   private val templateId: LocalDate => String = fpd => if ((startDateBoolean & endDateBoolean) & fpdEqualOrAfterNTY(fpd)) {
-    "register_your_company_register_paye_confirmation_new_tax_year"
+    "register_your_company_register_paye_confirmation_new_tax_year_v2"
   } else {
-    "register_your_company_register_paye_confirmation_current_tax_year"
+    "register_your_company_register_paye_confirmation_current_tax_year_v2"
   }
 
-  private def emailRequest(verifiedEmail: String, companyName: String, ackRef: String, firstPaymentDate: LocalDate): EmailRequest = EmailRequest(
-    to = Seq(verifiedEmail),
-    templateId = templateId(firstPaymentDate),
-    parameters = Map(
-      "companyName" -> companyName,
-      "referenceNumber" -> ackRef
-    ),
-    force = false
-  )
+  private def buildEmailRequest(verifiedEmail: String, companyName: String, ackRef: String, firstPaymentDate: LocalDate, nameFromAuth: Option[String]): EmailRequest = {
+    val salutation = nameFromAuth match {
+      case Some(name) => Map("salutation" -> s"Dear $name,")
+      case _ => Map.empty
+    }
+
+    EmailRequest(
+      to = Seq(verifiedEmail),
+      templateId = templateId(firstPaymentDate),
+      parameters = Map(
+        "companyName" -> companyName,
+        "referenceNumber" -> ackRef,
+        "contactDate" -> taxYearConfig.adminPeriodEnd.format(DateTimeFormatter.ofPattern("d MMM"))
+      ) ++ salutation,
+      force = false
+    )
+  }
 
   def primeEmailData(regId: String)(implicit hc: HeaderCarrier): Future[CacheMap] = {
     for {
@@ -64,26 +74,21 @@ class EmailService @Inject()(companyRegistrationConnector: CompanyRegistrationCo
     } yield stashed
   }
 
-  def sendAcknowledgementEmail(profile: CurrentProfile, ackRef: String)(implicit hc: HeaderCarrier): Future[EmailResponse] = {
-    companyRegistrationConnector.getVerifiedEmail(profile.registrationID) flatMap {
-      _.fold[Future[EmailResponse]](Future(EmailNotFound)) { verifiedEmail =>
-        (for {
+  def sendAcknowledgementEmail(profile: CurrentProfile, ackRef: String, nameFromAuth: Option[String])(implicit hc: HeaderCarrier): Future[EmailResponse] =
+    companyRegistrationConnector.getVerifiedEmail(profile.registrationID).flatMap {
+      case Some(verifiedEmail) =>
+        for {
           Some(firstPaymentDate) <- s4LConnector.fetchAndGet[LocalDate](profile.registrationID, FIRST_PAYMENT_DATE)
-          iiResponse <- incorporationInformationConnector.getCoHoCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map {
-            case IncorpInfoSuccessResponse(resp) => resp
-          }
-          emailResponse <- emailConnector.requestEmailToBeSent(emailRequest(
-            verifiedEmail = verifiedEmail,
-            companyName = iiResponse.companyName,
-            ackRef = ackRef,
-            firstPaymentDate = firstPaymentDate
-          ))
-        } yield emailResponse).recover {
-          case _ =>
-            logger.warn(s"[sendAcknowledgementEmail] - There was a problem sending the acknowledgement email for regId ${profile.registrationID} : txId ${profile.companyTaxRegistration.transactionId}")
-            EmailDifficulties
-        }
-      }
+          iiResponse <- incorporationInformationConnector.getCoHoCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId).map { case IncorpInfoSuccessResponse(resp) => resp }
+          emailRequest = buildEmailRequest(verifiedEmail, iiResponse.companyName, ackRef, firstPaymentDate, nameFromAuth)
+          emailResponse <- emailConnector.requestEmailToBeSent(emailRequest)
+        } yield emailResponse
+      case None =>
+        Future.successful(EmailNotFound)
+    }.recover {
+      case _ =>
+        logger.warn(s"[sendAcknowledgementEmail] - There was a problem sending the acknowledgement email for regId ${profile.registrationID} : txId ${profile.companyTaxRegistration.transactionId}")
+        EmailDifficulties
     }
-  }
+
 }
