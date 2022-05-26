@@ -59,7 +59,7 @@ class ConfirmationController @Inject()(val keystoreConnector: KeystoreConnector,
         Ok(ConfirmationPage(
           acknowledgementReference,
           confirmationService.determineIfInclusiveContentIsShown,
-          confirmationService.endDate.format(DateTimeFormatter.ofPattern("d MMM"))
+          confirmationService.endDate.format(DateTimeFormatter.ofPattern("d MMMM"))
         ))
     }.recover {
       case e =>
