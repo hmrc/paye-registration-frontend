@@ -100,7 +100,7 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("BRPY00000000001")))
       when(mockConfirmationService.determineIfInclusiveContentIsShown) thenReturn true
-      when(mockConfirmationService.endDate) thenReturn LocalDate.parse("2022-05-17")
+      when(mockConfirmationService.endDate) thenReturn LocalDate.parse("2022-09-17")
 
       when(mockEmailService.sendAcknowledgementEmail(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(EmailDifficulties))
@@ -114,7 +114,7 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
           doc.getElementById("ack-ref").html mustBe "BRPY00000000001"
           doc.getElementsByAttributeValueContaining("id", "standard-content").isEmpty mustBe true
           doc.getElementsByAttributeValueContaining("id", "inclusive-content").isEmpty mustBe false
-          doc.toString must include ("17 May")
+          doc.toString must include ("17 September")
       }
     }
 

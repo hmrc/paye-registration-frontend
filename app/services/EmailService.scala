@@ -61,7 +61,7 @@ class EmailService @Inject()(companyRegistrationConnector: CompanyRegistrationCo
       parameters = Map(
         "companyName" -> companyName,
         "referenceNumber" -> ackRef,
-        "contactDate" -> taxYearConfig.adminPeriodEnd.format(DateTimeFormatter.ofPattern("d MMM"))
+        "contactDate" -> taxYearConfig.adminPeriodEnd.format(DateTimeFormatter.ofPattern("d MMMM"))
       ) ++ salutation,
       force = false
     )
