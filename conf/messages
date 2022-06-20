@@ -54,7 +54,7 @@ errors.invalid.contactNum.tooShort                              = Enter a contac
 errors.invalid.contactNum.tooLong                               = Enter a contact number using 20 digits or less
 errors.invalid.nino                                             = Enter a valid National Insurance number
 errors.duplicate.nino                                           = You''ve entered the same National Insurance number more than once
-errors.invalid.sic.noEntry                                      = Tell us what the company does
+errors.invalid.sic.noEntry                                      = Enter the goods or services the company sells
 errors.invalid.sic.overCharLimit                                = Enter a business description using 100 characters or less
 errors.invalid.sic.invalidChars                                 = Enter a business description using only letters, numbers and - , / & ''
 errors.invalid.name.invalidChars                                = Tell us the contact name using only letters (without accents), hyphens and apostrophes
@@ -79,7 +79,7 @@ pages.tradingName.nameRulesSummary                              = What is a trad
 pages.tradingName.nameRulesIntro                                = A company can trade using a name that''s different from its registered name. This is also known as a ''business name''.
 pages.tradingName.nameRulesIntro1                               = Some companies choose a different trading name to help with branding or getting a domain name for their website.
 pages.tradingName.errorQuestion                                 = Enter the trading name
-pages.tradingName.error                                         = Tell us if the company will trade under another name
+pages.tradingName.error                                         = Select yes if the company uses a different trading name
 pages.tradingName.error.length                                  = Enter a trading name using 35 characters or less
 pages.tradingName.error.invalidChars                            = Tell us the trading name using only letters, numbers and - , . ( ) / & '' !
 pages.tradingdetails.input.hint-text                            = You can''t include ''limited'', ''Ltd'', ''limited liability partnership'', ''LLP'', ''public limited company'' or ''plc''
@@ -153,13 +153,13 @@ pages.willBePaying.beforeNewTaxYear.empty                     = Tell us if the c
 ## Construction Industry
 pages.constructionIndustry.title                                = Does the company work in the construction industry?
 pages.constructionIndustry.description                          = Does the company work in the construction industry?
-pages.constructionIndustry.error                                = Tell us if the company will work in the construction industry
+pages.constructionIndustry.error                                = Select yes if the company is in the construction industry
 
 ## Employs Subcontractors
 pages.employsSubcontractors.title                               = During the current tax year will the company hire any subcontractors in the construction industry?
 pages.employsSubcontractors.description                         = During the current tax year will the company hire any subcontractors in the construction industry?
 pages.employsSubcontractors.para                                = The current tax year is 6 April {0} to 5 April {1}.
-pages.employsSubcontractors.error                               = Tell us if the company will hire any subcontractors in the construction industry in the current tax year
+pages.employsSubcontractors.error                               = Select yes if the company will hire any construction industry subcontractors this tax year
 
 ## Pays Pension
 pages.paysPension.title                                         = Does the company make pension payments to a former employee or their dependants?
