@@ -142,10 +142,14 @@ class CompanyDetailsController @Inject()(val s4LService: S4LService,
     profile =>
       for {
         companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-        prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress, None)
+        prepopAddress <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress, None)
+          .map(_.headOption.map(_.toString))
       } yield {
         val addressMap = companyDetailsService.getPPOBPageAddresses(companyDetails)
-        Ok(PPOBAddressPage(PPOBForm.form.fill(ChosenAddress(PPOBAddress)), addressMap.get("ro"), addressMap.get("ppob"), prepopAddresses))
+          .collect { case (id, address) => id -> address.toString }
+          .++(Map("other" -> "Other"))
+
+        Ok(PPOBAddressPage(PPOBForm.form.fill(ChosenAddress(PPOBAddress)), addressMap, prepopAddress))
       }
   }
 
@@ -155,13 +159,16 @@ class CompanyDetailsController @Inject()(val s4LService: S4LService,
         PPOBForm.form.bindFromRequest.fold(
           errs => for {
             details <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-            prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, details.roAddress, details.ppobAddress, None)
+            prepopAddress <- prepopService.getPrePopAddresses(profile.registrationID, details.roAddress, details.ppobAddress, None)
+              .map(_.headOption.map(_._2.toString))
           } yield {
             val addressMap = companyDetailsService.getPPOBPageAddresses(details)
+              .collect { case (id, address) => id -> address.toString }
+              .++(Map("other" -> "Other"))
+
             BadRequest(PPOBAddressPage(errs,
-              addressMap.get("ro"),
-              addressMap.get("ppob"),
-              prepopAddresses))
+              addressMap,
+              prepopAddress))
           },
           success => submitPPOBAddressChoice(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
             case DownstreamOutcome.Success => Future.successful(Redirect(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails))

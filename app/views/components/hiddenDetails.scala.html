@@ -14,22 +14,16 @@
  * limitations under the License.
  *@
 
-@this()
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukDetails
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.details.Details
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+@import uk.gov.hmrc.govukfrontend.views.Aliases.HtmlContent
 
-@(form: Form[_], html: Html)(implicit messages: Messages)
+@this(govukDetails : GovukDetails)
 
-@errs = @{form.errors.filter(_.key.contains("noFieldsCompleted"))}
+@(summaryId: String, summaryText: String, hiddenContent: Html)(implicit messages: Messages)
 
-<div class="@if(errs.nonEmpty) {form-group-error} @if(form.globalErrors.nonEmpty) {form-group-error}">
-    @errs.map { err =>
-        <span class="error-notification" id="@{err.key}" role="tooltip">
-            @messages(err.message)
-        </span>
-    }
-    @if(form.globalErrors.nonEmpty) {
-        <span class="error-notification" id="@{form.globalError.get.key}" role="tooltip">
-            @messages(form.globalError.get.message)
-        </span>
-    }
-    @html
-</div>
+@govukDetails(Details(
+    summary = Text(summaryText),
+    content = HtmlContent(hiddenContent)
+))

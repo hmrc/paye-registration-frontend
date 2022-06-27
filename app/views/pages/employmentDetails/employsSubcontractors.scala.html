@@ -15,41 +15,41 @@
  *@
 
 @import config.AppConfig
-@import helpers.templates.{payeErrorSummary, payeInputRadioGroup}
 @import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
-@import views.helpers.TitleHelper.title
+@import views.TitleHelper.title
+@import views.html.templates.layout
 
-@this(main_template: main_template,
-        payeErrorSummary: payeErrorSummary,
-        payeInputRadioGroup: payeInputRadioGroup,
-        formWithCSRF: FormWithCSRF)
+@this(
+        layout: layout,
+        errorSummary: components.errorSummary,
+        yesNoRadio: components.yesNoRadio,
+        formWithCSRF: FormWithCSRF,
+        button: components.button,
+        h1: components.h1,
+        p: components.p)
 
 @(subcontractorsForm: Form[Boolean],taxYearStart: String, taxTearFinish: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = title(messages("pages.employsSubcontractors.title"), subcontractorsForm)) {
-    @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), subcontractorsForm, dataJourney=Some("Subcontractors")
-    )
-    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.employsSubcontractors.description")</h1>
-    @formWithCSRF(action = controllers.userJourney.routes.EmploymentController.submitSubcontractors) {
-        <p id="taxYearText">@messages("pages.employsSubcontractors.para",taxYearStart,taxTearFinish)</p>
+@layout(pageTitle = Some(title(messages("pages.employsSubcontractors.title"), subcontractorsForm))) {
 
-        <div class="inline form-group">
-            @payeInputRadioGroup(
-                subcontractorsForm("employsSubcontractors"),
-                Seq(
-                    "true"->messages("app.common.yes"),
-                    "false"->messages("app.common.no")
-                ),
-                isHeading = false,
-                '_legend -> messages("pages.employsSubcontractors.description"),
-                '_legendID -> "subcontractors",
-                '_helpText -> None,
-                '_labelAfter -> true,
-                '_labelClass -> "block-label",
-                '_groupClass -> "inline"
-            )
-        </div>
-        <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
+    @errorSummary(subcontractorsForm.errors)
+
+    @h1("pages.employsSubcontractors.description")
+
+    @formWithCSRF(action = controllers.userJourney.routes.EmploymentController.submitSubcontractors) {
+
+        @p { @messages("pages.employsSubcontractors.para",taxYearStart,taxTearFinish) }
+
+        @yesNoRadio(
+            form = subcontractorsForm,
+            id = "employsSubcontractors",
+            headingKey = messages("pages.employsSubcontractors.description"),
+            isPageHeading = false,
+            inline = true,
+            classes = "govuk-visually-hidden",
+            fieldName = "employsSubcontractors"
+        )
+
+        @button("app.common.saveAndContinue")
     }
 }

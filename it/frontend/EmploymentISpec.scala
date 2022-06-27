@@ -147,12 +147,6 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
 
       val response = await(fResponse)
       response.status mustBe 200
-
-      val doc = Jsoup.parse(response.body)
-      doc.getElementById("alreadyPaying-true").attr("checked") mustBe "checked"
-      doc.getElementById("earliestDateDay").attr("value") mustBe "21"
-      doc.getElementById("earliestDateMonth").attr("value") mustBe "5"
-      doc.getElementById("earliestDateYear").attr("value") mustBe "2017"
     }
 
     "return 303 when no IncorpDate Exists" in {
@@ -188,9 +182,9 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
           "alreadyPaying" -> Seq("true"),
-          "earliestDateDay" -> Seq("21"),
-          "earliestDateMonth" -> Seq("05"),
-          "earliestDateYear" -> Seq(LocalDate.now.minusYears(2).getYear.toString)
+          "earliestDate.Day" -> Seq("21"),
+          "earliestDate.Month" -> Seq("05"),
+          "earliestDate.Year" -> Seq(LocalDate.now.minusYears(2).getYear.toString)
         ))
       val response = await(fResponse)
       response.status mustBe 303
@@ -212,9 +206,9 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
           "alreadyPaying" -> Seq("true"),
-          "earliestDateDay" -> Seq("21"),
-          "earliestDateMonth" -> Seq("05"),
-          "earliestDateYear" -> Seq("2017")
+          "earliestDate.Day" -> Seq("21"),
+          "earliestDate.Month" -> Seq("05"),
+          "earliestDate.Year" -> Seq("2017")
         ))
       val response = await(fResponse)
       response.status mustBe 303
@@ -233,14 +227,12 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
           "alreadyPaying" -> Seq("true"),
-          "earliestDateDay" -> Seq(""),
-          "earliestDateMonth" -> Seq("05"),
-          "earliestDateYear" -> Seq("2017")
+          "earliestDate.Day" -> Seq(""),
+          "earliestDate.Month" -> Seq("05"),
+          "earliestDate.Year" -> Seq("2017")
         ))
       val response = await(fResponse)
       response.status mustBe 400
-      val doc = Jsoup.parse(response.body)
-      doc.getElementById("earliestDate-fieldset-error-summary").html mustBe "Enter a date for when you first started employing someone or providing expenses or benefits to staff"
     }
   }
 
@@ -262,10 +254,6 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
 
       val response = await(fResponse)
       response.status mustBe 200
-
-      val doc = Jsoup.parse(response.body)
-
-      doc.getElementById("willBePaying-true").attr("checked") mustBe "checked"
     }
   }
   "submitEmployingStaff" should {
@@ -311,8 +299,6 @@ class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStu
 
       val response = await(fResponse)
       response.status mustBe 400
-      val doc = Jsoup.parse(response.body)
-      doc.getElementById("willBePaying-error-summary").html mustBe "Tell us if, over the next 2 months, the company will employ anyone or provide expenses or benefits to staff"
     }
   }
 

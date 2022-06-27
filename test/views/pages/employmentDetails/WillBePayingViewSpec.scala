@@ -40,19 +40,19 @@ class WillBePayingViewSpec extends PayeComponentSpec with PayeFakedApp with I18n
         val now = LocalDate.of(2017, 2, 6)
         lazy val document = Jsoup.parse(view(EmployingStaffForm.form(now).fill(data), 116, now).body)
 
-        document.getElementById("beforeNewTaxYear-true").attr("value") mustBe "true"
+        document.getElementById("willBePaying").attr("value") mustBe "true"
       }
       "the current date is 5th Apr" in {
         val now = LocalDate.of(2017, 4, 5)
         lazy val document = Jsoup.parse(view(EmployingStaffForm.form(now).fill(data), 116, now).body)
 
-        document.getElementById("beforeNewTaxYear-true").attr("value") mustBe "true"
+        document.getElementById("willBePaying").attr("value") mustBe "true"
       }
       "the current date is between 6th Feb and 5th Apr" in {
         val now = LocalDate.of(2017, 2, 7)
         lazy val document = Jsoup.parse(view(EmployingStaffForm.form(now).fill(data), 116, now).body)
 
-        document.getElementById("beforeNewTaxYear-true").attr("value") mustBe "true"
+        document.getElementById("willBePaying").attr("value") mustBe "true"
       }
     }
 

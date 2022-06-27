@@ -297,7 +297,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "redirect to address lookup frontend if other is chosen" in new Setup {
       val request = FakeRequest("GET", "/testuri?id=123456789").withFormUrlEncodedBody(
-        "chosenAddress" -> "other"
+        "chosenAddress" -> "otherAddress"
       )
 
       when(mockAddressLookupService.buildAddressLookupUrl(ArgumentMatchers.any[String](), ArgumentMatchers.any[Call]())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Messages]))

@@ -14,25 +14,31 @@
  * limitations under the License.
  *@
 
-@import helpers.templates.payeInput
+@import config.AppConfig
 @import models.test.TestCC
 @import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
 
-@this(payeInput: payeInput,
-        formWithCSRF: FormWithCSRF)
+@this(inputText: components.inputText,
+        formWithCSRF: FormWithCSRF,
+        h1: components.h1,
+        h2: components.h2,
+        button: components.button)
 
-@(testCCForm: Form[TestCC])(implicit request: Request[_], messagesApi: Messages)
+@(testCCForm: Form[TestCC])(implicit request: Request[_], messagesApi: Messages, appConfig: AppConfig )
 
-<h1 class="form-title heading-large" id="pageHeading">Enter Completion Capacity</h1>
+
+@h1("Enter Completion Capacity")
 
 @formWithCSRF(action = controllers.test.routes.TestCCController.submitUpdateCC) {
-    <h2>Director, agent or other</h2>
-    <div class="inline form-group">
-    @payeInput(
-        testCCForm("cc"),
-        '_label -> "Completion Capacity"
+    @h2("Director, agent or other")
+    @inputText(
+        form = testCCForm,
+        name = "cc",
+        id = "cc",
+        label = "Completion Capacity",
+        classes = Some("form-label cascading"),
+        isPageHeading = false
     )
-    </div>
 
-    <button class="button" type="submit" id="continue" >Submit</button>
+    @button("app.common.submit")
 }

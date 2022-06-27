@@ -15,71 +15,64 @@
  *@
 
 @import config.AppConfig
-@import helpers.templates._
 @import models.view.Ninos
 @import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
-@import views.helpers.TitleHelper.title
+@import views.TitleHelper.title
+@import views.html.templates.layout
 
-@this(hiddenDetails: hiddenDetails,
-        oneOfManyErrorWrapper: oneOfManyErrorWrapper,
-        payeErrorSummary: payeErrorSummary,
-        payeInput: payeInput,
-        linkNewWindow: linkNewWindow,
-        main_template: main_template,
-        form: FormWithCSRF)
+@this(
+        hiddenDetails: components.hiddenDetails,
+        errorSummary: components.errorSummary,
+        inputText: components.inputText,
+        linkNewWindow: components.linkNewWindow,
+        layout: layout,
+        form: FormWithCSRF,
+        h1: components.h1,
+        p: components.p,
+        button: components.button)
 
 @(ninoForm: Form[Ninos], directorNames: Map[String, String])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@formContent = {
-    <fieldset>
-        <legend class="visually-hidden">@messages("pages.directorDetails.description")</legend>
-
-        @helper.repeat(ninoForm("nino")) { ninoField =>
-            <div class="form-field">
-                @payeInput(
-                    ninoField,
-                    '_inputClass -> "form-control-1-2 form-control--block",
-                    '_labelClass -> "form-label",
-                    '_inputHint -> {if(ninoField.name.filter("0123456789".toSet) == "0"){ messages("pages.directorDetails.input.hint-text") } else {""}},
-                    '_label -> messages("pages.directorDetails.name-suffix", directorNames.getOrElse(ninoField.name.filter("0123456789".toSet),"Error fetching name"))
-                )
-            </div>
-        }
-    </fieldset>
-}
 
 @hiddenDetailsContent = {
-    <p>
+    @p {
         @messages("pages.common.companiesHouse.hiddenIntro.1", messages("pages.directorDetails.hiddenIntro.value"))
         @linkNewWindow(messages("pages.common.companiesHouse.hiddenIntro.url"), messages("pages.directorDetails.hiddenIntro.label"), "directorDetails", None, true)
         @messages("pages.common.companiesHouse.hiddenIntro.2")
-    </p>
-    <p>
+    }
+
+    @p {
         @messages("pages.common.companiesHouse.hiddenIntro2.1")
         @linkNewWindow(messages("pages.common.companiesHouse.hiddenIntro2.url"), messages("pages.common.companiesHouse.hiddenIntro2.label"), "directorDetails", None, true)
-    </p>
+    }
 }
 
-@main_template(title = title(messages(s"pages.directorDetails.description"), ninoForm)) {
+@layout(pageTitle = Some(title(messages(s"pages.directorDetails.description"), ninoForm))) {
 
-    @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), ninoForm, dataJourney=Some("DirectorNINOs")
-    )
+    @errorSummary(ninoForm.errors)
 
-    <h1 class="form-title heading-large" id="pageHeading">@Html(messages(s"pages.directorDetails.description"))</h1>
+    @h1(messages(s"pages.directorDetails.description"))
 
-    <div class="form-group">
-        @hiddenDetails("directors", messages("pages.directorDetails.information.dropdown.header"), hiddenDetailsContent)
-    </div>
+    @hiddenDetails("directors", messages("pages.directorDetails.information.dropdown.header"), hiddenDetailsContent)
+
 
     @form(action = controllers.userJourney.routes.DirectorDetailsController.submitDirectorDetails) {
-        <div class="form-group">
-            @oneOfManyErrorWrapper(ninoForm, formContent)
-        </div>
 
-        <div class="form-group">
-            <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
-        </div>
+        @helper.repeat(ninoForm("nino")) { ninoField =>
+            <div class="form-field">
+                @inputText(
+                    form = ninoForm,
+                    name = ninoField.name,
+                    id = ninoField.name,
+                    hint = Some(Html{if(ninoField.name.filter("0123456789".toSet) == "0"){ messages("pages.directorDetails.input.hint-text") } else {""}}),
+                    label = messages("pages.directorDetails.name-suffix", directorNames.getOrElse(ninoField.name.filter("0123456789".toSet),"Error fetching name")),
+                    classes = Some("form-label"),
+                    isPageHeading = false
+                )
+            </div>
+        }
+
+        @button("app.common.saveAndContinue")
     }
 
 }

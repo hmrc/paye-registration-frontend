@@ -51,7 +51,7 @@ object DirectorDetailsForm {
       def showNinoError: Boolean = !(nino == "" || isValidNino(trimNino(nino)))
 
       (emptyForm, duplicates, showNinoError, nino) match {
-        case (true, _, _, _) => Left(Seq(FormError("noFieldsCompleted-nino[0]", "pages.directorDetails.errors.noneCompleted")))
+        case (true, _, _, _) => Left(Seq(FormError("nino[0]", "pages.directorDetails.errors.noneCompleted")))
         case (_, true, true, _) => Left(Seq(FormError("", "errors.duplicate.nino"), FormError(key, "errors.invalid.nino")))
         case (_, true, false, _) => Left(Seq(FormError("", "errors.duplicate.nino")))
         case (_, false, true, _) => Left(Seq(FormError(key, "errors.invalid.nino")))

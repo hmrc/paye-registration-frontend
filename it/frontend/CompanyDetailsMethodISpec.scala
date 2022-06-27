@@ -142,11 +142,10 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val document = Jsoup.parse(response.body)
 
       document.title() must include("Does or will the company trade using a different name?")
-      document.getElementById("pageHeading").text mustBe "Does or will the company trade using a different name?"
-      document.getElementById("differentName-true").attr("checked") mustBe "checked"
-      document.getElementById("differentName-false").attr("checked") mustBe ""
+      document.select("h1").text mustBe "Does or will the company trade using a different name?"
+      document.getElementById("differentName").attr("value") mustBe "true"
+      document.getElementById("differentName-no").attr("checked") mustBe ""
       document.getElementById("tradingName").`val` mustBe tradingName
-      document.getElementById("lead-paragraph").text mustBe "Tell us if the company will use a trading name that's different from test company."
     }
 
     "Return a populated from pre pop page if PayeReg returns a NotFound response" in {
@@ -190,13 +189,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
       mdtpCookieData("csrfToken") mustNot be("")
 
-      val document = Jsoup.parse(response.body)
-      document.title() must include("Does or will the company trade using a different name?")
-      document.getElementById("pageHeading").text mustBe "Does or will the company trade using a different name?"
-      document.getElementById("differentName-true").attr("checked") mustBe ""
-      document.getElementById("differentName-false").attr("checked") mustBe ""
-      document.getElementById("tradingName").`val` mustBe "fooBarWizz From Pre Pop"
-
     }
 
     "Return a populated page with a default Company Name if the regId is part of the allow-list with trading name pre populated" in {
@@ -219,13 +211,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val response = await(fResponse)
 
       response.status mustBe 200
-      val document = Jsoup.parse(response.body)
-      document.title() must include("Does or will the company trade using a different name?")
-      document.getElementById("pageHeading").text mustBe "Does or will the company trade using a different name?"
-      document.getElementById("differentName-true").attr("checked") mustBe ""
-      document.getElementById("differentName-false").attr("checked") mustBe "checked"
-      document.getElementById("tradingName").`val` mustBe "fooBarWizz From Pre Pop"
-      document.getElementById("lead-paragraph").html.contains("TEST-DEFAULT-COMPANY-NAME") mustBe true
     }
   }
 
@@ -338,7 +323,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val document = Jsoup.parse(response.body)
       document.title() must include(s"Confirm $defaultCompanyName's registered office address")
-      document.getElementById("ro-address-address-line-1").text mustBe "14 Test Default Street"
     }
   }
 
@@ -374,8 +358,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val document = Jsoup.parse(response.body)
       document.title() must include("What is the company's 'principal place of business'?")
-      document.getElementById("ro-address-line-1").text mustBe "11"
-      document.getElementsByAttributeValue("id", "ppob-address-line-1").size() mustBe 0
     }
 
     "show the page with the PPOB Address when PPOB Address is the same as RO Address" in {
@@ -411,9 +393,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val document = Jsoup.parse(response.body)
       document.title() must include("What is the company's 'principal place of business'?")
-      document.getElementById("ppob-address-line-1").text mustBe "11"
-      document.getElementsByAttributeValue("id", "ro-address-line-1").size() mustBe 0
-
     }
 
     "show the page with both PPOB and RO Addresses when there are two different addresses" in {
@@ -449,8 +428,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val document = Jsoup.parse(response.body)
       document.title() must include("What is the company's 'principal place of business'?")
-      document.getElementById("ro-address-line-1").text mustBe "11"
-      document.getElementById("ppob-address-line-1").text mustBe "22"
 
     }
 
@@ -485,8 +462,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val document = Jsoup.parse(response.body)
       document.title() must include("What is the company's 'principal place of business'?")
-      document.getElementById("ro-address-line-1").text mustBe "11"
-      document.getElementsByAttributeValue("id", "ppob-address-line-1").size() mustBe 0
       an[Exception] mustBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
     }
 
@@ -538,9 +513,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val document = Jsoup.parse(response.body)
       document.title() must include("What is the company's 'principal place of business'?")
-      document.getElementById("ro-address-line-1").text mustBe "11"
-      document.getElementsByAttributeValue("id", "ppob-address-line-1").size() mustBe 0
-      an[Exception] mustBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
+      an[Exception] mustBe thrownBy(document.getElementById("prepopaddress0").attr("value"))
     }
 
     "show the page with prepop addresses if data is returned from Business Registration" in {
@@ -593,21 +566,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
 
       val document = Jsoup.parse(response.body)
       document.title() must include("What is the company's 'principal place of business'?")
-      document.getElementById("ro-address-line-1").text mustBe "11"
-      document.getElementById("ppob-address-line-1").text mustBe "22"
-
-      document.getElementById("chosenAddress-prepopaddress0").attr("value") mustBe "prepopAddress0"
-      document.getElementById("chosenAddress-prepopaddress0").attr("name") mustBe "chosenAddress"
-      document.getElementById("prepopaddress0-address-line-1").text mustBe "prepopLine1"
-      document.getElementById("prepopaddress0-address-line-2").text mustBe ", prepopLine2"
-      document.getElementById("prepopaddress0-post-code").text mustBe ", AB9 8ZZ"
-
-      document.getElementById("chosenAddress-prepopaddress1").attr("value") mustBe "prepopAddress1"
-      document.getElementById("chosenAddress-prepopaddress1").attr("name") mustBe "chosenAddress"
-      document.getElementById("prepopaddress1-address-line-1").text mustBe "prepopLine11"
-      document.getElementById("prepopaddress1-address-line-2").text mustBe ", prepopLine22"
-      document.getElementById("prepopaddress1-address-line-3").text mustBe ", prepopLine33"
-      document.getElementById("prepopaddress1-country").text mustBe ", prepopCountry"
     }
   }
 

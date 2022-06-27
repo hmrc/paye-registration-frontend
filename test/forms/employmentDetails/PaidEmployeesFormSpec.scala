@@ -43,9 +43,9 @@ class PaidEmployeesFormSpec extends PayeComponentSpec {
 
   val payingSomeoneAllowableDate = Map(
     "alreadyPaying" -> "true",
-    "earliestDateDay" -> today.getDayOfMonth.toString,
-    "earliestDateMonth" -> today.getMonthValue.toString,
-    "earliestDateYear" -> today.getYear.toString
+    "earliestDate.Day" -> today.getDayOfMonth.toString,
+    "earliestDate.Month" -> today.getMonthValue.toString,
+    "earliestDate.Year" -> today.getYear.toString
   )
 
   val payingSomeoneNoDate = Map(
@@ -54,37 +54,37 @@ class PaidEmployeesFormSpec extends PayeComponentSpec {
 
   val payingSomeoneMoreThan2TaxYearsAgo = Map(
     "alreadyPaying" -> "true",
-    "earliestDateDay" -> "5",
-    "earliestDateMonth" -> "4",
-    "earliestDateYear" -> today.minusYears(5).getYear.toString
+    "earliestDate.Day" -> "5",
+    "earliestDate.Month" -> "4",
+    "earliestDate.Year" -> today.minusYears(5).getYear.toString
   )
 
   val payingSomeoneExactlyTwoTaxYearsAgo = Map(
     "alreadyPaying" -> "true",
-    "earliestDateDay" -> "6",
-    "earliestDateMonth" -> "4",
-    "earliestDateYear" -> today.minusYears(2).getYear.toString
+    "earliestDate.Day" -> "6",
+    "earliestDate.Month" -> "4",
+    "earliestDate.Year" -> today.minusYears(2).getYear.toString
   )
 
   val payingSomeoneInvalidDate = Map(
     "alreadyPaying" -> "true",
-    "earliestDateDay" -> "32",
-    "earliestDateMonth" -> today.getMonthValue.toString,
-    "earliestDateYear" -> today.minusYears(1).getYear.toString
+    "earliestDate.Day" -> "32",
+    "earliestDate.Month" -> today.getMonthValue.toString,
+    "earliestDate.Year" -> today.minusYears(1).getYear.toString
   )
 
   val payingSomeone2YearsAgo = Map(
     "alreadyPaying" -> "true",
-    "earliestDateDay" -> today.getDayOfMonth.toString,
-    "earliestDateMonth" -> today.getMonthValue.toString,
-    "earliestDateYear" -> today.minusYears(2).getYear.toString
+    "earliestDate.Day" -> today.getDayOfMonth.toString,
+    "earliestDate.Month" -> today.getMonthValue.toString,
+    "earliestDate.Year" -> today.minusYears(2).getYear.toString
   )
   val futureDate = today.plus(1, ChronoUnit.DAYS)
   val payingSomeoneInFuture = Map(
     "alreadyPaying" -> "true",
-    "earliestDateDay" -> futureDate.getDayOfMonth.toString,
-    "earliestDateMonth" -> futureDate.getMonthValue.toString,
-    "earliestDateYear" -> futureDate.getYear.toString
+    "earliestDate.Day" -> futureDate.getDayOfMonth.toString,
+    "earliestDate.Month" -> futureDate.getMonthValue.toString,
+    "earliestDate.Year" -> futureDate.getYear.toString
   )
 
   "PaidEmployeesForm" should {
@@ -92,22 +92,22 @@ class PaidEmployeesFormSpec extends PayeComponentSpec {
       testForm.form(incorpDate2MonthsPrior).bind(notPayingAnyone).value.get mustBe EmployingAnyone(false, None)
     }
     "return an error when not passing in a date when making payments" in new Setup(LocalDate.now) {
-      testForm.form(incorpDate2MonthsPrior).bind(payingSomeoneNoDate).errors mustBe Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.empty"))
+      testForm.form(incorpDate2MonthsPrior).bind(payingSomeoneNoDate).errors mustBe Seq(FormError(s"${customFormPrefix}", "pages.paidEmployees.date.empty" , Seq(s"${customFormPrefix}.Day")))
     }
     "return a completed form when paying someone and providing a date which is allowable" in new Setup(LocalDate.now) {
       testForm.form(incorpDate2MonthsPrior).bind(payingSomeoneAllowableDate).value.get mustBe EmployingAnyone(true, Some(LocalDate.of(today.getYear, today.getMonthValue, today.getDayOfMonth)))
     }
     "return a form error when passing in a paying date before date of incorp" in new Setup(LocalDate.now) {
-      testForm.form(incorpDate2MonthsPrior).bind(payingSomeone2YearsAgo).errors mustBe Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.dateTooEarly", Seq(incorpDate2MonthsPrior.format(dateTimeFormat))))
+      testForm.form(incorpDate2MonthsPrior).bind(payingSomeone2YearsAgo).errors mustBe Seq(FormError(s"${customFormPrefix}", "pages.paidEmployees.date.dateTooEarly", Seq(s"${customFormPrefix}.Day", incorpDate2MonthsPrior.format(dateTimeFormat))))
     }
     "return a form error when passing in a paying date on or after incorp date, but more than 2 tax years in the past" in new Setup(LocalDate.of(2018, 6, 19)) {
-      testForm.form(incorpDateWellInPast).bind(payingSomeoneMoreThan2TaxYearsAgo).errors mustBe Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.moreThanTwoTaxYears"))
+      testForm.form(incorpDateWellInPast).bind(payingSomeoneMoreThan2TaxYearsAgo).errors mustBe Seq(FormError(s"${customFormPrefix}", "pages.paidEmployees.date.moreThanTwoTaxYears", Seq(s"${customFormPrefix}.Day")))
     }
     "return a form error when passing in an invalid date" in new Setup(LocalDate.now) {
-      testForm.form(incorpDateWellInPast).bind(payingSomeoneInvalidDate).errors mustBe Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.invalid"))
+       testForm.form(incorpDateWellInPast).bind(payingSomeoneInvalidDate).errors mustBe Seq(FormError(s"${customFormPrefix}.Day", "pages.paidEmployees.date.invalid", Seq(s"${customFormPrefix}.Day")))
     }
     "return a form error when passing in a future date" in new Setup(LocalDate.now) {
-      testForm.form(incorpDateWellInPast).bind(payingSomeoneInFuture).errors mustBe Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.dateInFuture"))
+      testForm.form(incorpDateWellInPast).bind(payingSomeoneInFuture).errors mustBe Seq(FormError(s"${customFormPrefix}", "pages.paidEmployees.date.dateInFuture", Seq(s"${customFormPrefix}.Day")))
     }
 
     "return a completed form when paying someone and providing a date which is exactly two tax years ago" in new Setup(LocalDate.of(today.getYear, 6, 19)) {

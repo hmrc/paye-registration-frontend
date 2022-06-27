@@ -42,7 +42,7 @@ class TestCoHoController @Inject()(val testIncorpInfoConnector: TestIncorpInfoCo
                                    val payeRegistrationService: PAYERegistrationService,
                                    mcc: MessagesControllerComponents,
                                    coHoCompanyDetailsSetup: coHoCompanyDetailsSetup
-                                  )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
+                                  )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
   def coHoCompanyDetailsSetup: Action[AnyContent] = isAuthorised { implicit request =>
     Future.successful(Ok(coHoCompanyDetailsSetup(TestCoHoCompanyDetailsForm.form)))

@@ -27,7 +27,7 @@ object AddressChoice {
     case "roAddress" => ROAddress
     case "ppobAddress" => PPOBAddress
     case "correspondenceAddress" => CorrespondenceAddress
-    case "other" => Other
+    case "otherAddress" => Other
     case prepop => PrepopAddress.fromString(prepop)
   }
 }

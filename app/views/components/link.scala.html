@@ -14,22 +14,16 @@
  * limitations under the License.
  *@
 
-@import models.Address
+@import uk.gov.hmrc.govukfrontend.views.html.components.{toClasses => govukToClasses}
 
 @this()
-@(address : Address, blockId : String)
 
-    <span id="@{blockId}-address-line-1">@address.line1</span><br />
-    <span id="@{blockId}-address-line-2">@address.line2</span>
-    @address.line3.map { item =>
-        <br /><span id="@{blockId}-address-line-3">@item</span>
-    }
-    @address.line4.map { item =>
-        <br /><span id="@{blockId}-address-line-4">@item</span>
-    }
-    @address.postCode.map { item =>
-        <br /><span id="@{blockId}-post-code">@item</span>
-    }
-    @address.country.map { item =>
-        <br /><span id="@{blockId}-country">@item</span>
-    }
+@(
+        link: String,
+        messageKey: String,
+        id: Option[String] = None,
+        isExternal: Boolean = false,
+        isButton: Boolean = false
+)(implicit messages: Messages)
+
+<a href="@link" class="@govukToClasses("govuk-body", if(isButton)"govuk-button" else "govuk-link")" @id.map(x => s"id=$x") @if(isExternal) { target="_blank" } @if(isButton){ role="button" data-module="govuk-button" }>@messages(messageKey)@if(isExternal)(" " + messages("site.opensInNewTab"))</a>

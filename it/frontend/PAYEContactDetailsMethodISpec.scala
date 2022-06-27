@@ -466,14 +466,11 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       val document = Jsoup.parse(response.body)
       document.title() must include("Where should we send post about the company's PAYE?")
-      document.getElementById("chosenAddress-roaddress").attr("value") mustBe "roAddress"
-      document.getElementById("ro-address-line-1").text mustBe "1"
-      document.getElementById("ro-address-line-2").text mustBe ", 2"
-      document.getElementById("ro-post-code").text mustBe ", pc"
+      document.getElementById("chosenAddress").attr("value") mustBe "roAddress"
 
       an[Exception] mustBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
 
-      document.getElementById("chosenAddress-other").attr("value") mustBe "other"
+      document.getElementById("otherAddress").attr("value") mustBe "otherAddress"
     }
 
     "not be prepopulated if a wrong address is returned from Business Registration" in {
@@ -558,27 +555,11 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
       val document = Jsoup.parse(response.body)
       document.title() must include("Where should we send post about the company's PAYE?")
-      document.getElementById("chosenAddress-roaddress").attr("value") mustBe "roAddress"
-      document.getElementById("chosenAddress-roaddress").attr("name") mustBe "chosenAddress"
-      document.getElementById("ro-address-line-1").text mustBe "1"
-      document.getElementById("ro-address-line-2").text mustBe ", 2"
-      document.getElementById("ro-post-code").text mustBe ", pc"
+      document.getElementById("chosenAddress").attr("value") mustBe "roAddress"
+      document.getElementById("chosenAddress").attr("name") mustBe "chosenAddress"
 
-      document.getElementById("chosenAddress-prepopaddress0").attr("value") mustBe "prepopAddress0"
-      document.getElementById("chosenAddress-prepopaddress0").attr("name") mustBe "chosenAddress"
-      document.getElementById("prepopaddress0-address-line-1").text mustBe "prepopLine1"
-      document.getElementById("prepopaddress0-address-line-2").text mustBe ", prepopLine2"
-      document.getElementById("prepopaddress0-post-code").text mustBe ", AB9 8ZZ"
-
-      document.getElementById("chosenAddress-prepopaddress1").attr("value") mustBe "prepopAddress1"
-      document.getElementById("chosenAddress-prepopaddress1").attr("name") mustBe "chosenAddress"
-      document.getElementById("prepopaddress1-address-line-1").text mustBe "prepopLine11"
-      document.getElementById("prepopaddress1-address-line-2").text mustBe ", prepopLine22"
-      document.getElementById("prepopaddress1-address-line-3").text mustBe ", prepopLine33"
-      document.getElementById("prepopaddress1-country").text mustBe ", prepopCountry"
-
-      document.getElementById("chosenAddress-other").attr("value") mustBe "other"
-      document.getElementById("chosenAddress-other").attr("name") mustBe "chosenAddress"
+      document.getElementById("otherAddress").attr("value") mustBe "otherAddress"
+      document.getElementById("otherAddress").attr("name") mustBe "chosenAddress"
     }
   }
 

@@ -30,6 +30,7 @@ import play.api.test.FakeRequest
 import services.{SubmissionService, SummaryService}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
+import views.BaseSelectors
 import views.html.pages.error.submissionTimeout
 import views.html.pages.summary
 
@@ -37,6 +38,8 @@ import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionCon
 import scala.concurrent.Future
 
 class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
+
+  object Selectors extends BaseSelectors
 
   val mockSummaryService: SummaryService = mock[SummaryService]
   val mockSubmissionService: SubmissionService = mock[SubmissionService]
@@ -71,24 +74,6 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
   }
 
   "Calling summary to show the summary page" should {
-    "show the summary page when a valid model is returned from the microservice and the reg doc status is draft" in new Setup {
-      when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI))
-
-      when(mockEmailService.primeEmailData(ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Fixtures.blankCacheMap))
-
-      when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
-        .thenReturn(Future.successful(Fixtures.validSummaryView))
-
-      showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
-        (response: Future[Result]) =>
-          status(response) mustBe Status.OK
-          val result = Jsoup.parse(contentAsString(response))
-          result.body.getElementById("pageHeading").text() mustBe "Check and confirm your answers"
-          result.body.getElementById("tradingNameAnswer").text() mustBe "tstTrade"
-      }
-    }
 
     "return an Internal Server Error response when no valid model is returned from the microservice" in new Setup {
       when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
@@ -97,7 +82,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockEmailService.primeEmailData(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.blankCacheMap))
 
-      when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
+      when(mockSummaryService.getEmploymentSectionSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
         .thenReturn(Future.failed(new InternalError()))
 
       intercept[Exception](showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
@@ -111,7 +96,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.held)))
 
-        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
+        when(mockSummaryService.getEmploymentSectionSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
           .thenReturn(Future.failed(new InternalError()))
 
         showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
@@ -125,7 +110,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.submitted)))
 
-        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
+        when(mockSummaryService.getEmploymentSectionSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
           .thenReturn(Future.failed(new InternalError()))
 
         showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
@@ -139,7 +124,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.invalid)))
 
-        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
+        when(mockSummaryService.getEmploymentSectionSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
           .thenReturn(Future.failed(new InternalError()))
 
         showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {
@@ -153,7 +138,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.rejected)))
 
-        when(mockSummaryService.getRegistrationSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
+        when(mockSummaryService.getEmploymentSectionSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
           .thenReturn(Future.failed(new InternalError()))
 
         showAuthorisedWithCP(controller.summary, Fixtures.validCurrentProfile, FakeRequest()) {

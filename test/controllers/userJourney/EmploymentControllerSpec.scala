@@ -26,6 +26,7 @@ import play.api.mvc.{AnyContentAsEmpty, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.InternalServerException
 import utils.SystemDate
+import views.BaseSelectors
 import views.html.pages.employmentDetails._
 
 import java.time.format.DateTimeFormatter
@@ -34,6 +35,8 @@ import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionCon
 import scala.concurrent.Future
 
 class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
+
+  object Selectors extends BaseSelectors
 
   lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
   lazy val mockPaidEmployeesPage: paidEmployees = app.injector.instanceOf[paidEmployees]
@@ -164,9 +167,9 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     "redirect to CIS if the company already pays employees" in {
       val formRequest = request.withFormUrlEncodedBody(
         "alreadyPaying" -> "true",
-        "earliestDateDay" -> "12",
-        "earliestDateMonth" -> "4",
-        "earliestDateYear" -> LocalDate.now.minusYears(2).getYear.toString
+        "earliestDate.Day" -> "12",
+        "earliestDate.Month" -> "4",
+        "earliestDate.Year" -> LocalDate.now.minusYears(2).getYear.toString
       )
 
       when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
@@ -494,7 +497,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
         result =>
           status(result) mustBe OK
           val document = Jsoup.parse(contentAsString(result))
-          document.getElementById("taxYearText").text() mustBe s"The current tax year is 6 April $currentTaxYearStart to 5 April $currentTaxYearFinish."
+          document.select(Selectors.p(1)).text() mustBe s"The current tax year is 6 April $currentTaxYearStart to 5 April $currentTaxYearFinish."
       }
 
       val format: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")

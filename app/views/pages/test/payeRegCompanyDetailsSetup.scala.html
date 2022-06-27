@@ -14,145 +14,220 @@
  * limitations under the License.
  *@
 
-@import helpers.templates.{payeErrorSummary, payeInput}
+@import config.AppConfig
 @import models.api.{CompanyDetails => CompanyDetailsAPI}
 @import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
 
-@this(payeErrorSummary: payeErrorSummary,
-        payeInput: payeInput,
-        formWithCSRF: FormWithCSRF)
+@this(errorSummary: components.errorSummary,
+        inputText: components.inputText,
+        formWithCSRF: FormWithCSRF,
+        h1: components.h1,
+        button: components.button)
 
-@(detailsForm: Form[CompanyDetailsAPI])(implicit request: Request[_], messages: Messages)
+@(detailsForm: Form[CompanyDetailsAPI])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
+@errorSummary(detailsForm.errors)
 
-@payeErrorSummary(
-    messages("app.common.errorSummaryLabel"), detailsForm
-)
-
-<h1 class="form-title heading-large" id="pageHeading">Enter test company details</h1>
+@h1("app.test.heading")
 
 @formWithCSRF(action = controllers.test.routes.TestRegSetupController.submitRegSetupCompanyDetails) {
 
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("companyName"),
-        '_label -> "Company name"
+        @inputText(
+            form = detailsForm,
+            name = "companyName",
+            id = "companyName",
+            label = "Company name",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("tradingName"),
-        '_label -> "Trading name (optional)"
+        @inputText(
+            form = detailsForm,
+            name = "tradingName",
+            id = "tradingName",
+            label = "Trading name (optional)",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
 
     <h2>RO Address</h2>
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("roAddress.line1"),
-        '_label -> "RO Address Line 1"
+        @inputText(
+            form = detailsForm,
+            name = "roAddress.line1",
+            id = "roAddress.line1",
+            label = "RO Address Line 1",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("roAddress.line2"),
-        '_label -> "RO Address Line 2"
+        @inputText(
+            form = detailsForm,
+            name = "roAddress.line2",
+            id = "roAddress.line2",
+            label = "RO Address Line 2",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("roAddress.line3"),
-        '_label -> "RO Address Line 3 (optional)"
+        @inputText(
+            form = detailsForm,
+            name = "roAddress.line3",
+            id = "roAddress.line3",
+            label = "RO Address Line 3 (optional)",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("roAddress.line4"),
-        '_label -> "RO Address Line 4 (optional)"
+        @inputText(
+            form = detailsForm,
+            name = "roAddress.line4",
+            id = "roAddress.line4",
+            label = "RO Address Line 4 (optional)",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("roAddress.postCode"),
-        '_label -> "RO Address Postcode (optional)"
+        @inputText(
+            form = detailsForm,
+            name = "roAddress.postCode",
+            id = "roAddress.postCode",
+            label = "RO Address Postcode (optional)",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("roAddress.country"),
-        '_label -> "RO Address Country (optional)"
+        @inputText(
+            form = detailsForm,
+            name = "roAddress.country",
+            id = "roAddress.country",
+            label = "RO Address Country (optional)",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("roAddress.auditRef"),
-        '_label -> "RO Address Audit Ref (optional)"
+        @inputText(
+            form = detailsForm,
+            name = "roAddress.auditRef",
+            id = "roAddress.auditRef",
+            label = "RO Address Audit Ref (optional)",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
 
     <h2>PPOB Address</h2>
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("ppobAddress.line1"),
-        '_label -> "PPOB Address Line 1"
+        @inputText(
+            form = detailsForm,
+            name = "ppobAddress.line1",
+            id = "ppobAddress.line1",
+            label = "PPOB Address Line 1",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("ppobAddress.line2"),
-        '_label -> "PPOB Address Line 2"
+        @inputText(
+            form = detailsForm,
+            name = "ppobAddress.line2",
+            id = "ppobAddress.line2",
+            label = "PPOB Address Line 2",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("ppobAddress.line3"),
-        '_label -> "PPOB Address Line 3 (optional)"
+        @inputText(
+            form = detailsForm,
+            name = "ppobAddress.line3",
+            id = "ppobAddress.line3",
+            label = "PPOB Address Line 3 (optional)",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("ppobAddress.line4"),
-        '_label -> "PPOB Address Line 4 (optional)"
+        @inputText(
+            form = detailsForm,
+            name = "ppobAddress.line4",
+            id = "ppobAddress.line4",
+            label = "PPOB Address Line 4 (optional)",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("ppobAddress.postCode"),
-        '_label -> "PPOB Address Postcode (optional)"
+        @inputText(
+            form = detailsForm,
+            name = "ppobAddress.postCode",
+            id = "ppobAddress.postCode",
+            label = "PPOB Address Postcode (optional)",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("ppobAddress.country"),
-        '_label -> "PPOB Address Country (optional)"
+        @inputText(
+            form = detailsForm,
+            name = "ppobAddress.country",
+            id = "ppobAddress.country",
+            label = "PPOB Address Country (optional)",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("ppobAddress.auditRef"),
-        '_label -> "PPOB Address Audit Ref (optional)"
+        @inputText(
+            form = detailsForm,
+            name = "ppobAddress.auditRef",
+            id = "ppobAddress.auditRef",
+            label = "PPOB Address Audit Ref (optional)",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
 
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("businessContactDetails.businessEmail"),
-        '_label -> "Business email (optional)"
+        @inputText(
+            form = detailsForm,
+            name = "businessContactDetails.businessEmail",
+            id = "businessContactDetails.businessEmail",
+            label = "Business email (optional)",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("businessContactDetails.mobileNumber"),
-        '_label -> "Mobile number (optional)"
+        @inputText(
+            form = detailsForm,
+            name = "businessContactDetails.mobileNumber",
+            id = "businessContactDetails.mobileNumber",
+            label = "Mobile number (optional)",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @payeInput(
-        detailsForm("businessContactDetails.phoneNumber"),
-        '_label -> "Business telephone (optional)"
+        @inputText(
+            form = detailsForm,
+            name = "businessContactDetails.phoneNumber",
+            id = "businessContactDetails.phoneNumber",
+            label = "Business telephone (optional)",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
 
-    <button class="button" type="submit" id="continue" >Submit</button>
+    @button("app.common.submit")
 
 }

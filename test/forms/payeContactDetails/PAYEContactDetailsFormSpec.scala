@@ -174,11 +174,11 @@ class PAYEContactDetailsFormSpec extends PayeComponentSpec {
         "digitalContact.phoneNumber" -> ""
       )
       val boundForm = testForm.bind(data)
-      val formError = FormError("noFieldsCompleted-digitalContact.contactEmail", PAYEContactDetailsForm.noFieldsCompletedMessage)
+      val formError = FormError("digitalContact.contactEmail", PAYEContactDetailsForm.noFieldsCompletedMessage)
       val nameError = FormError("name", "pages.payeContact.nameMandatory")
 
       boundForm.error("name") mustBe Some(nameError)
-      boundForm.error("noFieldsCompleted-digitalContact.contactEmail") mustBe Some(formError)
+      boundForm.error("digitalContact.contactEmail") mustBe Some(formError)
     }
 
     "Have the correct error if name is not completed" in {

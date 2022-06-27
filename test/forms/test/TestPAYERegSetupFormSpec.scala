@@ -57,9 +57,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "employmentInfo.pensions" -> "false",
         "employmentInfo.cis" -> "true",
         "employmentInfo.subcontractors" -> "true",
-        "employmentInfo.earliestDateDay" -> "1",
-        "employmentInfo.earliestDateMonth" -> "1",
-        "employmentInfo.earliestDateYear" -> "2017",
+        "employmentInfo.earliestDate.Day" -> "1",
+        "employmentInfo.earliestDate.Month" -> "1",
+        "employmentInfo.earliestDate.Year" -> "2017",
         "sicCodes[0].code" -> "84",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
@@ -189,9 +189,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
           "employmentInfo.pensions" -> "false",
           "employmentInfo.cis" -> "true",
           "employmentInfo.subcontractors" -> "true",
-          "employmentInfo.earliestDateDay" -> "1",
-          "employmentInfo.earliestDateMonth" -> "1",
-          "employmentInfo.earliestDateYear" -> "2017",
+          "employmentInfo.earliestDate.Day" -> "1",
+          "employmentInfo.earliestDate.Month" -> "1",
+          "employmentInfo.earliestDate.Year" -> "2017",
           "sicCodes[0].code" -> "84",
           "sicCodes[0].description" -> "consulting",
           "sicCodes[1].code" -> "150",
@@ -248,9 +248,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "employmentInfo.pensions" -> "false",
         "employmentInfo.cis" -> "true",
         "employmentInfo.subcontractors" -> "true",
-        "employmentInfo.earliestDateDay" -> "1",
-        "employmentInfo.earliestDateMonth" -> "1",
-        "employmentInfo.earliestDateYear" -> "2017",
+        "employmentInfo.earliestDate.Day" -> "1",
+        "employmentInfo.earliestDate.Month" -> "1",
+        "employmentInfo.earliestDate.Year" -> "2017",
         "sicCodes[0].code" -> "",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
@@ -375,9 +375,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
           "employmentInfo.pensions" -> "false",
           "employmentInfo.cis" -> "true",
           "employmentInfo.subcontractors" -> "true",
-          "employmentInfo.earliestDateDay" -> "1",
-          "employmentInfo.earliestDateMonth" -> "1",
-          "employmentInfo.earliestDateYear" -> "2017",
+          "employmentInfo.earliestDate.Day" -> "1",
+          "employmentInfo.earliestDate.Month" -> "1",
+          "employmentInfo.earliestDate.Year" -> "2017",
           "sicCodes[0].description" -> "consulting",
           "sicCodes[1].code" -> "150",
           "directors[0].name.firstName" -> "Thierry",
@@ -420,9 +420,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "employmentInfo.pensions" -> "false",
         "employmentInfo.cis" -> "true",
         "employmentInfo.subcontractors" -> "true",
-        "employmentInfo.earliestDateDay" -> "1",
-        "employmentInfo.earliestDateMonth" -> "1",
-        "employmentInfo.earliestDateYear" -> "2017",
+        "employmentInfo.earliestDate.Day" -> "1",
+        "employmentInfo.earliestDate.Month" -> "1",
+        "employmentInfo.earliestDate.Year" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -467,9 +467,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "employmentInfo.pensions" -> "false",
         "employmentInfo.cis" -> "true",
         "employmentInfo.subcontractors" -> "true",
-        "employmentInfo.earliestDateDay" -> "1",
-        "employmentInfo.earliestDateMonth" -> "1",
-        "employmentInfo.earliestDateYear" -> "2017",
+        "employmentInfo.earliestDate.Day" -> "1",
+        "employmentInfo.earliestDate.Month" -> "1",
+        "employmentInfo.earliestDate.Year" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -514,9 +514,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "employmentInfo.pensions" -> "false",
         "employmentInfo.cis" -> "true",
         "employmentInfo.subcontractors" -> "true",
-        "employmentInfo.earliestDateDay" -> "1",
-        "employmentInfo.earliestDateMonth" -> "1",
-        "employmentInfo.earliestDateYear" -> "2017",
+        "employmentInfo.earliestDate.Day" -> "1",
+        "employmentInfo.earliestDate.Month" -> "1",
+        "employmentInfo.earliestDate.Year" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -561,9 +561,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "employmentInfo.pensions" -> "false",
         "employmentInfo.cis" -> "true",
         "employmentInfo.subcontractors" -> "true",
-        "employmentInfo.earliestDateDay" -> "1",
-        "employmentInfo.earliestDateMonth" -> "1",
-        "employmentInfo.earliestDateYear" -> "2017",
+        "employmentInfo.earliestDate.Day" -> "1",
+        "employmentInfo.earliestDate.Month" -> "1",
+        "employmentInfo.earliestDate.Year" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -607,9 +607,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "employmentInfo.pensions" -> "false",
         "employmentInfo.cis" -> "true",
         "employmentInfo.subcontractors" -> "true",
-        "employmentInfo.earliestDateDay" -> "1",
-        "employmentInfo.earliestDateMonth" -> "1",
-        "employmentInfo.earliestDateYear" -> "2017",
+        "employmentInfo.earliestDate.Day" -> "1",
+        "employmentInfo.earliestDate.Month" -> "1",
+        "employmentInfo.earliestDate.Year" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -655,9 +655,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "employmentInfo.pensions" -> "false",
         "employmentInfo.cis" -> "true",
         "employmentInfo.subcontractors" -> "true",
-        "employmentInfo.earliestDateDay" -> "1",
-        "employmentInfo.earliestDateMonth" -> "1",
-        "employmentInfo.earliestDateYear" -> "2017",
+        "employmentInfo.earliestDate.Day" -> "1",
+        "employmentInfo.earliestDate.Month" -> "1",
+        "employmentInfo.earliestDate.Year" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -704,9 +704,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "employmentInfo.pensions" -> "false",
         "employmentInfo.cis" -> "true",
         "employmentInfo.subcontractors" -> "true",
-        "employmentInfo.earliestDateDay" -> "1",
-        "employmentInfo.earliestDateMonth" -> "1",
-        "employmentInfo.earliestDateYear" -> "2017",
+        "employmentInfo.earliestDate.Day" -> "1",
+        "employmentInfo.earliestDate.Month" -> "1",
+        "employmentInfo.earliestDate.Year" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -751,9 +751,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "employmentInfo.employees" -> "alreadyEmploying",
         "employmentInfo.pensions" -> "false",
         "employmentInfo.cis" -> "true",
-        "employmentInfo.earliestDateDay" -> "1",
-        "employmentInfo.earliestDateMonth" -> "1",
-        "employmentInfo.earliestDateYear" -> "2017",
+        "employmentInfo.earliestDate.Day" -> "1",
+        "employmentInfo.earliestDate.Month" -> "1",
+        "employmentInfo.earliestDate.Year" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -799,8 +799,8 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "employmentInfo.pensions" -> "false",
         "employmentInfo.cis" -> "true",
         "employmentInfo.subcontractors" -> "true",
-        "employmentInfo.earliestDateMonth" -> "1",
-        "employmentInfo.earliestDateYear" -> "2017",
+        "employmentInfo.earliestDate.Month" -> "1",
+        "employmentInfo.earliestDate.Year" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -817,10 +817,10 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "payeContact.correspondenceAddress.postCode" -> "TE1 1ST"
       )
       val boundForm = testForm.bind(data)
-      val firstPaymentDayError = FormError("employmentInfo.earliestDate-fieldset", "pages.paidEmployees.date.empty")
+      val firstPaymentDayError = FormError("employmentInfo.earliestDate", "pages.paidEmployees.date.empty", Seq("employmentInfo.earliestDate.Day"))
 
 
-      boundForm.error("employmentInfo.earliestDate-fieldset") mustBe Some(firstPaymentDayError)
+      boundForm.error("employmentInfo.earliestDate") mustBe Some(firstPaymentDayError)
       boundForm.data mustBe data
     }
 
@@ -847,8 +847,8 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "employmentInfo.pensions" -> "false",
         "employmentInfo.cis" -> "true",
         "employmentInfo.subcontractors" -> "true",
-        "employmentInfo.earliestDateDay" -> "1",
-        "employmentInfo.earliestDateYear" -> "2017",
+        "employmentInfo.earliestDate.Day" -> "1",
+        "employmentInfo.earliestDate.Year" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -865,9 +865,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "payeContact.correspondenceAddress.postCode" -> "TE1 1ST"
       )
       val boundForm = testForm.bind(data)
-      val firstPaymentDayError = FormError("employmentInfo.earliestDate-fieldset", "pages.paidEmployees.date.empty")
+      val firstPaymentDayError = FormError("employmentInfo.earliestDate", "pages.paidEmployees.date.empty", Seq("employmentInfo.earliestDate.Day"))
 
-      boundForm.error("employmentInfo.earliestDate-fieldset") mustBe Some(firstPaymentDayError)
+      boundForm.error("employmentInfo.earliestDate") mustBe Some(firstPaymentDayError)
       boundForm.data mustBe data
     }
 
@@ -894,8 +894,8 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "employmentInfo.pensions" -> "false",
         "employmentInfo.cis" -> "true",
         "employmentInfo.subcontractors" -> "true",
-        "employmentInfo.earliestDateDay" -> "1",
-        "employmentInfo.earliestDateMonth" -> "1",
+        "employmentInfo.earliestDate.Day" -> "1",
+        "employmentInfo.earliestDate.Month" -> "1",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -912,9 +912,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "payeContact.correspondenceAddress.postCode" -> "TE1 1ST"
       )
       val boundForm = testForm.bind(data)
-      val firstPaymentDayError = FormError("employmentInfo.earliestDate-fieldset", "pages.paidEmployees.date.empty")
+      val firstPaymentDayError = FormError("employmentInfo.earliestDate", "pages.paidEmployees.date.empty", Seq("employmentInfo.earliestDate.Day"))
 
-      boundForm.error("employmentInfo.earliestDate-fieldset") mustBe Some(firstPaymentDayError)
+      boundForm.error("employmentInfo.earliestDate") mustBe Some(firstPaymentDayError)
       boundForm.data mustBe data
     }
 
@@ -941,9 +941,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "employmentInfo.pensions" -> "false",
         "employmentInfo.cis" -> "true",
         "employmentInfo.subcontractors" -> "true",
-        "employmentInfo.earliestDateDay" -> "1",
-        "employmentInfo.earliestDateMonth" -> "1",
-        "employmentInfo.earliestDateYear" -> "2017",
+        "employmentInfo.earliestDate.Day" -> "1",
+        "employmentInfo.earliestDate.Month" -> "1",
+        "employmentInfo.earliestDate.Year" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",
@@ -986,9 +986,9 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
         "employmentInfo.pensions" -> "false",
         "employmentInfo.cis" -> "true",
         "employmentInfo.subcontractors" -> "true",
-        "employmentInfo.earliestDateDay" -> "1",
-        "employmentInfo.earliestDateMonth" -> "1",
-        "employmentInfo.earliestDateYear" -> "2017",
+        "employmentInfo.earliestDate.Day" -> "1",
+        "employmentInfo.earliestDate.Month" -> "1",
+        "employmentInfo.earliestDate.Year" -> "2017",
         "sicCodes[0].description" -> "consulting",
         "sicCodes[1].code" -> "150",
         "directors[0].name.firstName" -> "Thierry",

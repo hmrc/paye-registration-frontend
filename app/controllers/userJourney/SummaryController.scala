@@ -53,9 +53,14 @@ class SummaryController @Inject()(val summaryService: SummaryService,
       invalidSubmissionGuard(profile) {
         (for {
           _ <- emailService.primeEmailData(profile.registrationID)
-          summary <- summaryService.getRegistrationSummary(profile.registrationID, profile.companyTaxRegistration.transactionId)
+          employment <- summaryService.getEmploymentSectionSummary(profile.registrationID, profile.companyTaxRegistration.transactionId)
+          completion <- summaryService.getCompletionCapacitySummary(profile.registrationID)
+          companyDetails <- summaryService.getCompanyDetailsSummary(profile.registrationID)
+          businessContact <- summaryService.getBusinessContactSummary(profile.registrationID)
+          directors <- summaryService.getDirectorsSummary(profile.registrationID)
+          contactDetails <- summaryService.getContactDetailsSummary(profile.registrationID)
         } yield {
-          Ok(SummaryPage(summary))
+          Ok(SummaryPage(employment, completion, companyDetails, businessContact, directors, contactDetails))
         })
       }
   }

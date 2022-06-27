@@ -14,56 +14,73 @@
  * limitations under the License.
  *@
 
-@import helpers.templates.{inlineDateInput, payeErrorSummary, payeInput}
+@import config.AppConfig
 @import models.api.Employment
 @import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
 
-@this(payeErrorSummary: payeErrorSummary,
-        payeInput: payeInput,
-        inlineDateInput: inlineDateInput,
-        formWithCSRF: FormWithCSRF)
+@this(errorSummary: components.errorSummary,
+        inputText: components.inputText,
+        dateInput: components.inputDate,
+        formWithCSRF: FormWithCSRF,
+        h1: components.h1,
+        button: components.button)
 
-@(form: Form[Employment])(implicit request: Request[_], messages: Messages)
+@(form: Form[Employment])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
+@errorSummary(form.errors)
 
-@payeErrorSummary(
-    messages("app.common.errorSummaryLabel"), form
-)
-
-<h1 class="form-title heading-large" id="pageHeading">Enter test company details</h1>
+@h1("app.test.heading")
 
 @formWithCSRF(action = controllers.test.routes.TestRegSetupController.submitRegSetupEmploymentInfo) {
 
     <div class="inline form-group">
-        @payeInput(
-            form("employees"),
-            '_label -> "hiring Employees Enum"
+        @inputText(
+            form = form,
+            name = "employees",
+            id = "employees",
+            label = "hiring Employees Enum",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @inlineDateInput(
-            form,
-            "earliestDate",
-            Some(Html("First Pay Date")))
+        @dateInput(
+            form = form,
+            id = "earliestDate",
+            legendContent = "app.test.heading",
+            hintText = Some("First Pay Date"),
+            legendAsPageHeading = false)
     </div>
     <div class="inline form-group">
-        @payeInput(
-            form("cis"),
-            '_label -> "in construction industry (true/false)"
+        @inputText(
+            form = form,
+            name = "cis",
+            id = "cis",
+            label = "in construction industry (true/false)",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @payeInput(
-            form("subcontractors"),
-            '_label -> "Subcontractors (true/false)"
+        @inputText(
+            form = form,
+            name = "subcontractors",
+            id = "subcontractors",
+            label = "Subcontractors (true/false)",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
     <div class="inline form-group">
-        @payeInput(
-            form("pensions"),
-            '_label -> "Pensions (optional)(true/false)"
+        @inputText(
+            form = form,
+            name = "pensions",
+            id = "pensions",
+            label = "Pensions (optional)(true/false)",
+            classes = Some("form-label cascading"),
+            isPageHeading = false
         )
     </div>
 
-    <button class="button" type="submit" id="continue" >Submit</button>
+    @button("app.common.submit")
 }

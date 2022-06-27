@@ -80,16 +80,17 @@ class PAYEContactController @Inject()(val companyDetailsService: CompanyDetailsS
       for {
         payeContact <- payeContactService.getPAYEContact(profile.registrationID)
         companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-        prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress, payeContact.correspondenceAddress)
-        addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
+        prepopAddress <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress, payeContact.correspondenceAddress)
+          .map(_.headOption.map(_.toString))
       } yield {
+        val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
+          .collect { case (id, address) => id -> address.toString }
+          .++(Map("other" -> "Other"))
         Ok(PAYECorrespondenceAddressPage(
           CorrespondenceAddressForm.form.fill(
             ChosenAddress(CorrespondenceAddress)),
-          addressMap.get("ro"),
-          addressMap.get("ppob"),
-          addressMap.get("correspondence"),
-          prepopAddresses
+          addressMap,
+          prepopAddress
         ))
       }
   }
@@ -101,10 +102,13 @@ class PAYEContactController @Inject()(val companyDetailsService: CompanyDetailsS
           errs => for {
             payeContact <- payeContactService.getPAYEContact(profile.registrationID)
             companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
-            prepopAddresses <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress, payeContact.correspondenceAddress)
-            addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
+            prepopAddress <- prepopService.getPrePopAddresses(profile.registrationID, companyDetails.roAddress, companyDetails.ppobAddress, payeContact.correspondenceAddress)
+              .map(_.headOption.map(_.toString))
           } yield {
-            BadRequest(PAYECorrespondenceAddressPage(errs, addressMap.get("ro"), addressMap.get("ppob"), addressMap.get("correspondence"), prepopAddresses))
+            val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
+              .collect { case (id, address) => id -> address.toString }
+              .++(Map("other" -> "Other"))
+            BadRequest(PAYECorrespondenceAddressPage(errs, addressMap, prepopAddress))
           },
           success => submitCorrespondenceAddress(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
             case DownstreamOutcome.Success => Future.successful(Redirect(controllers.userJourney.routes.SummaryController.summary))

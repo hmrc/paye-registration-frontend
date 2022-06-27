@@ -15,41 +15,36 @@
  *@
 
 @import config.AppConfig
-@import helpers.templates.{payeErrorSummary, payeInputRadioGroup}
 @import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
-@import views.helpers.TitleHelper.title
+@import views.TitleHelper.title
+@import views.html.templates.layout
 
-@this(main_template: main_template,
-        payeErrorSummary: payeErrorSummary,
-        payeInputRadioGroup: payeInputRadioGroup,
-        formWithCSRF: FormWithCSRF)
+@this(layout: layout,
+        errorSummary: components.errorSummary,
+        yesNoRadio: components.yesNoRadio,
+        formWithCSRF: FormWithCSRF,
+        button: components.button,
+        h1: components.h1)
 
 @(pensionsForm: Form[Boolean])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = title(messages("pages.paysPension.title"), pensionsForm)) {
-    @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), pensionsForm, dataJourney = Some("CompanyPension")
-    )
-    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.paysPension.description")</h1>
+@layout(pageTitle = Some(title(messages("pages.paysPension.title"), pensionsForm))) {
+
+    @errorSummary(pensionsForm.errors)
+
+    @h1("pages.paysPension.description")
+
     @formWithCSRF(action = controllers.userJourney.routes.EmploymentController.submitPensions) {
 
-        <div class="inline form-group">
-        @payeInputRadioGroup(
-            pensionsForm("paysPension"),
-            Seq(
-                "true" -> messages("app.common.yes"),
-                "false" -> messages("app.common.no")
-            ),
-            isHeading = false,
-            '_legend -> messages("pages.paysPension.description"),
-            '_legendID -> "paysPension",
-            '_helpText -> None,
-            '_labelAfter -> true,
-            '_labelClass -> "block-label",
-            '_groupClass -> "inline"
+        @yesNoRadio(
+            form = pensionsForm,
+            id = "paysPension",
+            headingKey = messages("pages.paysPension.description"),
+            isPageHeading = false,
+            inline = true,
+            classes = "govuk-visually-hidden",
+            fieldName = "paysPension"
         )
-        </div>
-
-        <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
+        @button("app.common.saveAndContinue")
     }
 }

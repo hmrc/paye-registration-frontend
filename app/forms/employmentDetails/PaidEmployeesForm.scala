@@ -44,11 +44,11 @@ trait PaidEmployeesFormT extends RequiredBooleanForm with CustomDateForm {
 
   override def validation(dt: LocalDate, cdt: LocalDate) = {
     if (dt.isBefore(cdt)) {
-      Left(Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.dateTooEarly", Seq(cdt.format(dateTimeFormat)))))
+      Left(Seq(FormError(s"${customFormPrefix}", ("pages.paidEmployees.date.dateTooEarly"), Seq(s"${customFormPrefix}.Day", cdt.format(dateTimeFormat)))))
     } else if (isOnOrAfter(dt, cdt) && !isOnOrAfter(dt, LocalDate.of(ctyMinus2Years, 4, 6))) {
-      Left(Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.moreThanTwoTaxYears")))
+      Left(Seq(FormError(s"${customFormPrefix}", "pages.paidEmployees.date.moreThanTwoTaxYears", Seq(s"${customFormPrefix}.Day"))))
     } else if (dt.isAfter(now)) {
-      Left(Seq(FormError(s"${customFormPrefix}-fieldset", "pages.paidEmployees.date.dateInFuture")))
+      Left(Seq(FormError(s"${customFormPrefix}", "pages.paidEmployees.date.dateInFuture", Seq(s"${customFormPrefix}.Day"))))
     } else {
       Right(dt)
     }

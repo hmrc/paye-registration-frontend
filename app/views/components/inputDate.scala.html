@@ -1,0 +1,83 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Fieldset
+@import uk.gov.hmrc.govukfrontend.views.Aliases.DateInput
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Legend
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+@import uk.gov.hmrc.govukfrontend.views.Aliases.InputItem
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Hint
+@import uk.gov.hmrc.govukfrontend.views.Aliases.ErrorMessage
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukDateInput
+
+@this(GovukDateInput: GovukDateInput)
+
+@(form: Form[_],
+  legendContent: String,
+  legendClasses: String = "govuk-fieldset__legend",
+  id: String = "date",
+  hintText: Option[String] = None,
+  legendAsPageHeading: Boolean = true,
+  includeDay: Boolean = true,
+  attributesDay: Map[String, String] = Map.empty,
+  attributesMonth: Map[String, String] = Map.empty,
+  attributesYear: Map[String, String] = Map.empty)(implicit messages: Messages)
+
+@GovukDateInput(DateInput(
+    fieldset = Some(Fieldset(
+        legend = Some(
+            Legend(
+                content = Text(messages(legendContent)),
+                isPageHeading = legendAsPageHeading,
+                classes = legendClasses
+            )
+        )
+    )),
+    id = id,
+    items = {
+        if (includeDay) {
+            Some(InputItem(
+                id = s"$id.Day",
+                classes = s"govuk-input--width-2${if(form(id).hasErrors || form.errors.exists(_.key.isEmpty)) " govuk-input--error" else ""}",
+                name =  s"$id.Day",
+                label = Some(messages("date.day")),
+                value = form(s"$id.Day").value,
+                attributes = attributesDay
+            ))
+        } else {
+            None
+        }
+    }.toSeq ++ Seq(
+        InputItem(
+            id = s"$id.Month",
+            classes = s"govuk-input--width-2${if(form(id).hasErrors || form.errors.exists(_.key.isEmpty)) " govuk-input--error" else ""}",
+            name = s"$id.Month",
+            label = Some(messages("date.month")),
+            value = form(s"$id.Month").value,
+            attributes = attributesMonth
+        ),
+        InputItem(
+            id = s"$id.Year",
+            classes = s"govuk-input--width-4${if(form(id).hasErrors || form.errors.exists(_.key.isEmpty)) " govuk-input--error" else ""}",
+            name = s"$id.Year",
+            label = Some(messages("date.year")),
+            value = form(s"$id.Year").value,
+            attributes = attributesYear
+        )
+    ),
+    hint = hintText.map(hint => Hint(content = Text(messages(hint)))),
+    errorMessage = form(id).error.fold(form.errors.find(_.key.isEmpty))(err => Some(err)).map(err => ErrorMessage(content = Text(messages(err.message, err.args.lastOption.getOrElse("")))))
+))

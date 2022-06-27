@@ -42,9 +42,10 @@ class AppConfig @Inject()(configuration: Configuration) {
 
   lazy val reportAProblemPartialUrl: String = loadConfig("reportAProblemPartialUrl")
   lazy val reportAProblemNonJSUrl: String = loadConfig("reportAProblemNonJSUrl")
+  lazy val reportAProblemLayout: String = "https://www.tax.service.gov.uk/contact/report-technical-problem?service=SCRS"
 
-  lazy val timeoutInSeconds: String = loadConfig("timeoutInSeconds")
-  lazy val timeoutDisplayLength: String = loadConfig("timeoutDisplayLength")
+  lazy val timeoutInSeconds: Int = servicesConfig.getInt("timeout.timeout")
+  lazy val timeoutDisplayLength: Int = servicesConfig.getInt("timeout.countdown")
 
   private def allowListConfig(key: String): Seq[String] = {
     Some(new String(Base64.getDecoder

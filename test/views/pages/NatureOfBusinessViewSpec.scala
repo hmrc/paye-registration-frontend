@@ -21,11 +21,15 @@ import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, Lang, MessagesApi}
 import play.api.test.FakeRequest
+import views.BaseSelectors
 import views.html.pages.natureOfBusiness
 
 import java.util.Locale
 
 class NatureOfBusinessViewSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
+
+  object Selectors extends BaseSelectors
+
   implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
   implicit lazy val messagesApi: MessagesApi = mockMessagesApi
@@ -36,11 +40,7 @@ class NatureOfBusinessViewSpec extends PayeComponentSpec with PayeFakedApp with 
     lazy val document = Jsoup.parse(view(NatureOfBusinessForm.form).body)
 
     "have the correct title" in {
-      document.getElementById("pageHeading").text mustBe mockMessages("pages.natureOfBusiness.description")
-    }
-
-    "have the correct label text" in {
-      document.getElementsByClass("form-label").first().text() mustBe mockMessages("pages.natureOfBusiness.textArea.label")
+      document.select(Selectors.h1).text() mustBe mockMessages("pages.natureOfBusiness.description")
     }
   }
 }

@@ -20,11 +20,15 @@ import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.jsoup.Jsoup
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
+import views.BaseSelectors
 import views.html.pages.error.{ineligible, newIneligible, submissionFailed, submissionTimeout}
 
 import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionContext}
 
 class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
+
+  object Selectors extends BaseSelectors
+
   val regId: String = Fixtures.validCurrentProfile.get.registrationID
   val ticketId: Long = 123456789
   lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
@@ -88,7 +92,7 @@ class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
         contentType(result) mustBe Some("text/html")
         charset(result) mustBe Some("utf-8")
         val document = Jsoup.parse(contentAsString(result))
-        document.getElementById("submissionFailedReportAProblem").attr("id") mustBe "submissionFailedReportAProblem"
+        document.select(Selectors.h1).text() mustBe "Something went wrong"
       }
     }
   }

@@ -26,7 +26,11 @@ case class Address(line1: String,
                    line4: Option[String],
                    postCode: Option[String],
                    country: Option[String] = None,
-                   auditRef: Option[String] = None)
+                   auditRef: Option[String] = None) {
+
+ override def toString: String = Seq(Some(line1), Some(line2), line3, line4, postCode, country).flatten.mkString(", ")
+
+}
 
 object Address {
   implicit val format = Json.format[Address]

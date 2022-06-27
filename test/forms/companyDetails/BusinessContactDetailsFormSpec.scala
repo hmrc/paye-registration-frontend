@@ -161,7 +161,7 @@ class BusinessContactDetailsFormSpec extends PayeComponentSpec {
     "Have the correct error if no fields are completed" in {
       val data: Map[String, String] = Map()
       val boundForm = testForm.bind(data)
-      val formError = FormError("noFieldsCompleted-businessEmail", BusinessContactDetailsForm.noFieldsCompletedMessage)
+      val formError = FormError("businessEmail", BusinessContactDetailsForm.noFieldsCompletedMessage)
 
       boundForm mustBe testForm.withError(formError)
     }

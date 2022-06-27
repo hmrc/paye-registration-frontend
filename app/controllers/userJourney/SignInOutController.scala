@@ -22,7 +22,7 @@ import controllers.{AuthRedirectUrls, PayeBaseController}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services.{CompanyDetailsService, IncorporationInformationService, PAYERegistrationService, S4LService}
 import uk.gov.hmrc.auth.core.AuthConnector
-import views.html.timeout
+import views.html.templates.timeout
 
 import java.io.File
 import javax.inject.{Inject, Singleton}
@@ -52,12 +52,13 @@ class SignInOutController @Inject()(val authConnector: AuthConnector,
     Future.successful(Ok.sendFile(new File("conf/renewSession.jpg")).as("image/jpeg"))
   }
 
-  def destroySession: Action[AnyContent] = Action {
-    Redirect(routes.SignInOutController.timeoutShow).withNewSession
+  def destroySession: Action[AnyContent] = Action.async {
+    _ => Future.successful(Redirect(routes.SignInOutController.timeoutShow).withNewSession)
   }
 
-  def timeoutShow = Action.async { implicit request =>
-    Future.successful(Ok(timeout()))
+  def timeoutShow: Action[AnyContent] = Action.async {
+    implicit request =>
+      Future.successful(Ok(timeout()))
   }
 
   def incorporationRejected: Action[AnyContent] = isAuthorised {

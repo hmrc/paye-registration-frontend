@@ -19,7 +19,7 @@ package controllers
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
-import views.html.statements.accessibility_statement
+import views.html.pages.statements.accessibility_statement
 
 
 class AccessibilityStatementControllerSpec extends PayeComponentSpec with PayeFakedApp {

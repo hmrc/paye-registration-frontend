@@ -19,7 +19,7 @@ package controllers.userJourney
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
-import views.html.timeout
+import views.html.templates.timeout
 
 class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
 

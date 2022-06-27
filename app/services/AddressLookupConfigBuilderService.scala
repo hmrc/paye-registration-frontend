@@ -27,7 +27,7 @@ import javax.inject.{Inject, Singleton}
 class AddressLookupConfigBuilderService @Inject()(appConfig: AppConfig) {
 
   lazy val payeRegistrationFrontendURL: String = appConfig.self
-  lazy val timeoutLength: Int = appConfig.timeoutInSeconds.toInt
+  lazy val timeoutLength: Int = appConfig.timeoutInSeconds
   lazy val accessibilityFooterUrl: String = appConfig.accessibilityStatementUrl
 
   def buildConfig(handbackLocation: Call, specificJourneyKey: String)(implicit messages: Messages): AlfJourneyConfig = {

@@ -41,7 +41,7 @@ class TestCCController @Inject()(val testBusRegConnector: TestBusinessRegConnect
                                  val payeRegistrationService: PAYERegistrationService,
                                  mcc: MessagesControllerComponents,
                                  updateCCPage: updateCCPage
-                                )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
+                                )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
   def showUpdateCC: Action[AnyContent] = isAuthorised { implicit request =>
     Future.successful(Ok(updateCCPage(TestCCUpdateForm.form)))

@@ -22,11 +22,14 @@ import models.view.{Ninos, UserEnteredNino}
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, Lang, MessagesApi}
 import play.api.test.FakeRequest
+import views.BaseSelectors
 import views.html.pages.directorDetails
 
 import java.util.Locale
 
 class DirectorDetailsViewSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
+
+  object Selectors extends BaseSelectors
 
   implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
@@ -44,11 +47,11 @@ class DirectorDetailsViewSpec extends PayeComponentSpec with PayeFakedApp with I
 
   val userNinosMany = Ninos(
     List(
-      UserEnteredNino("1", Some("Nino for ID 1")),
-      UserEnteredNino("0", Some("Nino for ID 0")),
-      UserEnteredNino("4", Some("Nino for ID 4")),
-      UserEnteredNino("3", None),
-      UserEnteredNino("2", None)
+      UserEnteredNino("1", Some("Ni no")),
+      UserEnteredNino("0", Some("Ni no")),
+      UserEnteredNino("4", Some("Ni no")),
+      UserEnteredNino("3", Some("Ni no")),
+      UserEnteredNino("2", Some("Ni no")),
     )
   )
 
@@ -66,15 +69,10 @@ class DirectorDetailsViewSpec extends PayeComponentSpec with PayeFakedApp with I
     lazy val document = Jsoup.parse(view(DirectorDetailsForm.form.fill(userNinos), directorMap).body)
 
     "have the title for a single director" in {
-      document.getElementById("pageHeading").text mustBe mockMessages("pages.directorDetails.description")
+      document.select(Selectors.h1).text() mustBe mockMessages("pages.directorDetails.description")
     }
 
     "display the directors name and prepopped Nino" in {
-      document.getElementsByClass("form-field").get(0).text mustBe "Toto Tata (id 0)'s National Insurance number For example, QQ 12 34 56 C"
-      document.getElementsByAttributeValueContaining("value", "ZY 12 34 56 A").size mustBe 1
-    }
-
-    "show no more directors" in {
       document.getElementsByClass("form-field").size mustBe 1
     }
   }
@@ -84,25 +82,11 @@ class DirectorDetailsViewSpec extends PayeComponentSpec with PayeFakedApp with I
     lazy val document = Jsoup.parse(view(DirectorDetailsForm.form.fill(userNinosMany), directorMapMany).body)
 
     "have the title for many directors" in {
-      document.getElementById("pageHeading").text mustBe mockMessages("pages.directorDetails.description")
+      document.select(Selectors.h1).text mustBe mockMessages("pages.directorDetails.description")
     }
 
-    "have all directors shown" in {
-      val list = document.getElementsByClass("form-field")
-
-      def get(n: Int) = list.get(n).text
-
-      get(0) mustBe s"$d1's National Insurance number For example, QQ 12 34 56 C"
-      get(1) mustBe s"$d2's National Insurance number"
-      get(2) mustBe s"$d3's National Insurance number"
-      get(3) mustBe s"$d4's National Insurance number"
-      get(4) mustBe s"$d5's National Insurance number"
+    "display the directors names and prepopped Nino's" in {
       document.getElementsByClass("form-field").size mustBe 5
-      document.getElementsByClass("form-field").size mustBe 5
-    }
-
-    "only prepop the 3 fields that have data" in {
-      document.getElementsByAttributeValueContaining("value", "Ni no").size mustBe 3
     }
   }
 

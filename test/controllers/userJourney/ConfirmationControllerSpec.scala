@@ -89,7 +89,7 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
         result =>
           status(result) mustBe OK
           val doc = Jsoup.parse(contentAsString(result))
-          doc.getElementById("ack-ref").html mustBe "BRPY00000000001"
+          doc.getElementsByClass("govuk-panel__body").text() mustBe "BRPY00000000001"
           doc.getElementsByAttributeValueContaining("id", "standard-content").isEmpty mustBe false
           doc.getElementsByAttributeValueContaining("id", "inclusive-content").isEmpty mustBe true
           doc.toString must not include "17 May"
@@ -111,7 +111,7 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
       showAuthorisedWithCpAndAuthResponse(controller.showConfirmation, Fixtures.validCurrentProfile, FakeRequest()) {
         result =>
           val doc = Jsoup.parse(contentAsString(result))
-          doc.getElementById("ack-ref").html mustBe "BRPY00000000001"
+          doc.getElementsByClass("govuk-panel__body").text() mustBe "BRPY00000000001"
           doc.getElementsByAttributeValueContaining("id", "standard-content").isEmpty mustBe true
           doc.getElementsByAttributeValueContaining("id", "inclusive-content").isEmpty mustBe false
           doc.toString must include ("17 September")

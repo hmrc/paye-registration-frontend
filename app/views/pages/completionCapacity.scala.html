@@ -17,53 +17,73 @@
 @import config.AppConfig
 @import models.view.CompletionCapacity
 @import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
-@import views.helpers.TitleHelper.title
-@import views.html.helpers.templates.{inputRadioGroupHidden, payeErrorSummary, payeInput}
+@import views.TitleHelper.title
+@import views.html.templates.layout
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 
-@this(payeInput: payeInput,
-        main_template: main_template,
-        payeErrorSummary: payeErrorSummary,
-        inputRadioGroupHidden: inputRadioGroupHidden,
-        form: FormWithCSRF)
+@this(inputText: components.inputText,
+        layout: layout,
+        errorSummary: components.errorSummary,
+        inputRadio: components.inputRadio,
+        form: FormWithCSRF,
+        h1: components.h1,
+        button: components.button)
 
 @(completionCapacityForm: Form[CompletionCapacity])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @otherHidden = {
-@payeInput(
-    completionCapacityForm("completionCapacityOther"),
-    '_inputClass -> "form-control-1-2",
-    '_labelClass -> "form-label cascading",
-    '_label -> messages("pages.completionCapacity.other.label")
+@inputText(
+    form = completionCapacityForm,
+    name = "completionCapacityOther",
+    id = "completionCapacityOther",
+    label = messages("pages.completionCapacity.other.label"),
+    classes = Some("form-label cascading"),
+    isPageHeading = false
 )
 }
 
-@main_template(title = title(messages("pages.completionCapacity.description"), completionCapacityForm)) {
+@layout(pageTitle = Some(title(messages("pages.completionCapacity.description"), completionCapacityForm))) {
 
-    @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), completionCapacityForm, dataJourney = Some("CompletionCapacity")
-    )
+    @errorSummary(completionCapacityForm.errors)
 
     @form(action = controllers.userJourney.routes.CompletionCapacityController.submitCompletionCapacity) {
 
-        <div class="form-group">
-        @inputRadioGroupHidden(
-            completionCapacityForm("completionCapacity"),
-            Seq("director" -> messages("pages.completionCapacity.director"),
-                "company secretary" -> messages("pages.completionCapacity.secretary"),
-                "agent" -> messages("pages.completionCapacity.agent"),
-                "other" -> messages("pages.completionCapacity.other")),
-            Seq("other" -> otherHidden),
-            isHeading = true,
-            '_idHidden -> "other",
-            '_classHidden -> "panel panel-indent",
-            '_labelClass -> "block-label radio-label",
-            '_legend -> messages("pages.completionCapacity.description")
-
+        @inputRadio(
+            form = completionCapacityForm,
+            fieldName = "completionCapacity",
+            inline = false,
+            legend = messages("pages.completionCapacity.description"),
+            items = Seq(
+                RadioItem(
+                    id = Some("completionCapacity"),
+                    content = Text(messages("pages.completionCapacity.director")),
+                    value = Some("director"),
+                    checked = completionCapacityForm("completionCapacity").value.contains("director")
+                ),
+                RadioItem(
+                    id = Some("company secretary"),
+                    content = Text(messages("pages.completionCapacity.secretary")),
+                    value = Some("company secretary"),
+                    checked = completionCapacityForm("completionCapacity").value.contains("company secretary")
+                ),
+                RadioItem(
+                    id = Some("agent"),
+                    content = Text(messages("pages.completionCapacity.agent")),
+                    value = Some("agent"),
+                    checked = completionCapacityForm("completionCapacity").value.contains("agent")
+                ),
+                RadioItem(
+                    id = Some("other"),
+                    content = Text(messages("pages.completionCapacity.other")),
+                    value = Some("other"),
+                    checked = completionCapacityForm("completionCapacity").value.contains("other"),
+                    conditionalHtml = Some(otherHidden)
+                ),
+            ),
+            legendAsHeading = true,
         )
-        </div>
 
-        <div class="form-group">
-            <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
-        </div>
+        @button("app.common.saveAndContinue")
     }
 }

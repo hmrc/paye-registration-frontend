@@ -14,22 +14,16 @@
  * limitations under the License.
  *@
 
-@import models.view.SummaryRow
-
 @this()
 
-@(row: SummaryRow)(implicit messages: Messages)
+@(content: Html, classes: String = "govuk-body", id: Option[String] = None)
 
-<div>
-  <dt id="@{row.id}Question" class="cya-question">@{row.question}</dt>
-  <dd class="cya-answer" id="@{row.id}Answer">
-    @for(answer <- row.answers) {
-      @answer<br>
-    }
-  </dd>
-  <dd class="cya-change">
-    @for(changeLink <- row.optChangeLink) {
-      <a href="@changeLink.location" id="@{row.id}ChangeLink">@messages("app.common.change")<span class ="visually-hidden" id="@{row.id}HelpText">@changeLink.hiddenText</span></a>
-    }
-  </dd>
-</div>
+@if(id.isDefined){
+    <p class="@classes" id ="@id">
+        @content
+    </p>
+} else {
+    <p class="@classes">
+        @content
+    </p>
+}

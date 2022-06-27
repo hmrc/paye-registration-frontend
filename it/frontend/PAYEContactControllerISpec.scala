@@ -133,7 +133,7 @@ class PAYEContactControllerISpec extends IntegrationSpecBase
         withHttpHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck").
         post(Map(
           "csrfToken" -> Seq("xxx-ignored-xxx"),
-          "chosenAddress" -> Seq("other")
+          "chosenAddress" -> Seq("otherAddress")
         ))
 
       val response = await(fResponse)

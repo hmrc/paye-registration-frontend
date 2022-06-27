@@ -14,16 +14,19 @@
  * limitations under the License.
  *@
 
-@this()
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcHeader
+@import uk.gov.hmrc.hmrcfrontend.views.Aliases.Header
 
-@(summaryId: String, summaryText: String, hiddenContent: Html)(implicit messages: Messages)
+@this(header: HmrcHeader)
 
-<details role="group">
-    <summary id=@{s"${summaryId}Summary"} role="button">
-        <span class="summary">@summaryText</span>
-    </summary>
+@(showSignOut: Boolean = true)(implicit messages: Messages)
 
-    <div class="panel-indent" id=@{s"${summaryId}Details"}>
-        @hiddenContent
-    </div>
-</details>
+@header(
+    Header(
+        homepageUrl = controllers.userJourney.routes.PayeStartController.startPaye.url,
+        serviceName = Some(messages("service.name")),
+        serviceUrl = controllers.userJourney.routes.PayeStartController.startPaye.url,
+        containerClasses = "govuk-width-container",
+        signOutHref = Some(controllers.userJourney.routes.SignInOutController.signOut.url),
+    )
+)

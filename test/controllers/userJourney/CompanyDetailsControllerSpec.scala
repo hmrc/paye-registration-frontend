@@ -31,6 +31,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
+import views.BaseSelectors
 import views.html.pages.companyDetails.{businessContactDetails, confirmROAddress, ppobAddress, tradingName}
 import views.html.pages.error.restart
 
@@ -38,6 +39,8 @@ import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionCon
 import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
+
+  object Selectors extends BaseSelectors
 
   lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
   lazy val mockTradingNamePage: tradingName = app.injector.instanceOf[tradingName]
@@ -95,9 +98,9 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         (response: Future[Result]) =>
           status(response) mustBe Status.OK
           val result = Jsoup.parse(contentAsString(response))
-          result.body.getElementById("pageHeading").text() mustBe "Does or will the company trade using a different name?"
-          result.body.getElementById("differentName-true").attr("checked") mustBe "checked"
-          result.body.getElementById("differentName-false").attr("checked") mustBe ""
+          result.body.select(Selectors.h1).text() mustBe "Does or will the company trade using a different name?"
+          result.body.getElementById("differentName").attr("value") mustBe "true"
+          result.body.getElementById("differentName-no").attr("value") mustBe "false"
           result.body.getElementById("tradingName").attr("value") mustBe Fixtures.validCompanyDetailsViewModel.tradingName.get.tradingName.get
       }
     }
@@ -113,9 +116,9 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         (response: Future[Result]) =>
           status(response) mustBe Status.OK
           val result = Jsoup.parse(contentAsString(response))
-          result.body.getElementById("pageHeading").text() mustBe "Does or will the company trade using a different name?"
-          result.body.getElementById("differentName-true").attr("checked") mustBe ""
-          result.body.getElementById("differentName-false").attr("checked") mustBe "checked"
+          result.body.select(Selectors.h1).text() mustBe "Does or will the company trade using a different name?"
+          result.body.getElementById("differentName").attr("checked") mustBe ""
+          result.body.getElementById("differentName").attr("value") mustBe "true"
           result.body.getElementById("tradingName").attr("value") mustBe "foo bar"
       }
     }
@@ -131,9 +134,9 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         (response: Future[Result]) =>
           status(response) mustBe Status.OK
           val result = Jsoup.parse(contentAsString(response))
-          result.body().getElementById("pageHeading").text() mustBe "Does or will the company trade using a different name?"
-          result.body.getElementById("differentName-true").attr("checked") mustBe ""
-          result.body.getElementById("differentName-false").attr("checked") mustBe ""
+          result.body().select(Selectors.h1).text() mustBe "Does or will the company trade using a different name?"
+          result.body.getElementById("differentName").attr("value") mustBe "true"
+          result.body.getElementById("differentName-no").attr("value") mustBe "false"
           result.body().getElementById("tradingName").attr("value") mustBe ""
       }
     }
@@ -149,9 +152,9 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         response =>
           status(response) mustBe Status.OK
           val result = Jsoup.parse(contentAsString(response))
-          result.body().getElementById("pageHeading").text() mustBe "Does or will the company trade using a different name?"
-          result.body.getElementById("differentName-true").attr("checked") mustBe ""
-          result.body.getElementById("differentName-false").attr("checked") mustBe ""
+          result.body().select(Selectors.h1).text() mustBe "Does or will the company trade using a different name?"
+          result.body.getElementById("differentName").attr("value") mustBe "true"
+          result.body.getElementById("differentName-no").attr("value") mustBe "false"
           result.body().getElementById("tradingName").attr("value") mustBe "foo bar wizz"
       }
     }
@@ -448,7 +451,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "redirect to address lookup frontend" in new Setup {
       val request = FakeRequest("GET", "/testuri?id=123456789").withFormUrlEncodedBody(
-        "chosenAddress" -> "other"
+        "chosenAddress" -> "otherAddress"
       )
 
       when(mockAddressLookupService.buildAddressLookupUrl(ArgumentMatchers.any[String](), ArgumentMatchers.any[Call]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Messages]))

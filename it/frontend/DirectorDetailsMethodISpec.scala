@@ -100,7 +100,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
       document.title() must include("What is the National Insurance number of at least one company director?")
       document.getElementsByClass("form-field").size mustBe 3
 
-      val list = document.getElementsByClass("form-label")
+      val list = document.getElementsByClass("form-field")
 
       def get(n: Int) = list.get(n).text
 
@@ -165,7 +165,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
       val document = Jsoup.parse(response.body)
       document.getElementsByClass("form-field").size mustBe 1
 
-      val list = document.getElementsByClass("form-label")
+      val list = document.getElementsByClass("form-field")
 
       def get(n: Int) = list.get(n).text
 
@@ -245,7 +245,7 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
       val document = Jsoup.parse(response.body)
       document.getElementsByClass("form-field").size mustBe 3
 
-      val list = document.getElementsByClass("form-label")
+      val list = document.getElementsByClass("form-field")
 
       def get(n: Int) = list.get(n).text
 

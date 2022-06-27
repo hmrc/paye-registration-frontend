@@ -21,11 +21,15 @@ import models.Address
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, Lang, MessagesApi}
 import play.api.test.FakeRequest
+import views.BaseSelectors
 import views.html.pages.companyDetails.confirmROAddress
 
 import java.util.Locale
 
 class ConfirmROAddressViewSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
+
+  object Selectors extends BaseSelectors
+
   implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
   implicit lazy val messagesApi: MessagesApi = mockMessagesApi
@@ -47,20 +51,7 @@ class ConfirmROAddressViewSpec extends PayeComponentSpec with PayeFakedApp with 
     lazy val document = Jsoup.parse(view(testCompanyName, testAddress).body)
 
     "have the correct title" in {
-      document.getElementById("pageHeading").text mustBe mockMessages("pages.confirmRO.description", testCompanyName)
-    }
-
-    "have the correct lede paragraph" in {
-      document.getElementById("lead-paragraph").text mustBe mockMessages("pages.confirmRO.lede", testCompanyName)
-    }
-
-    "have the correct drop down text" in {
-      document.getElementById("incorrect-address-Summary").text mustBe mockMessages("pages.confirmRO.help.link")
-    }
-
-    "have the correct drop down body text" in {
-      document.getElementById("incorrect-address-Details").text.contains(mockMessages("pages.confirmRO.hiddenIntro.label")) mustBe true
-      document.getElementById("incorrect-address-Details").text.contains(mockMessages("pages.common.companiesHouse.hiddenIntro.2")) mustBe true
+      document.select(Selectors.h1).text() mustBe mockMessages("pages.confirmRO.description", testCompanyName)
     }
 
     "have the correct drop down body link text" in {
