@@ -25,7 +25,7 @@ import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.config.{ControllerConfig, ControllerConfigs}
 import uk.gov.hmrc.play.bootstrap.filters.DefaultLoggingFilter
 import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
-import views.html.error_template
+import views.html.templates.error_template
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext

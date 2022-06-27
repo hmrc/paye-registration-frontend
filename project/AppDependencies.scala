@@ -48,7 +48,9 @@ object AppDependencies {
     "commons-validator" % "commons-validator" % commonsValidatorVersion,
     "uk.gov.hmrc" %% "govuk-template" % govukTemplateVersion,
     "uk.gov.hmrc" %% "play-ui" % playUiVersion,
-    "com.typesafe.play" %% "play-json-joda" % jsonJodaVersion
+    "com.typesafe.play" %% "play-json-joda" % jsonJodaVersion,
+    "uk.gov.hmrc" %% "play-frontend-hmrc" % "1.26.0-play-28",
+    "uk.gov.hmrc" %% "play-frontend-govuk" % "1.0.0-play-28"
   )
 
   private val unitTestDependencies = Seq(

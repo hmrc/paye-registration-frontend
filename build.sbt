@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import sbt.Keys.dependencyOverrides
 import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, integrationTestSettings, scalaSettings}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings

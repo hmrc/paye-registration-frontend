@@ -49,7 +49,7 @@ class OneOfManyFormSpec extends PayeComponentSpec {
     "fail to bind with no fields completed" in {
       val data = Map[String, String](
       )
-      TestForm.multiPartFormatter.bind("test1", data) mustBe Left(Seq(FormError("noFieldsCompleted-test1", "noFieldsErrMsg")))
+      TestForm.multiPartFormatter.bind("test1", data) mustBe Left(Seq(FormError("test1", "noFieldsErrMsg")))
     }
 
     "fail to bind with all fields blank" in {
@@ -58,7 +58,7 @@ class OneOfManyFormSpec extends PayeComponentSpec {
         "test2" -> "",
         "test3" -> ""
       )
-      TestForm.multiPartFormatter.bind("test1", data) mustBe Left(Seq(FormError("noFieldsCompleted-test1", "noFieldsErrMsg")))
+      TestForm.multiPartFormatter.bind("test1", data) mustBe Left(Seq(FormError("test1", "noFieldsErrMsg")))
     }
 
     "fail to bind with other, non included fields completed" in {
@@ -66,7 +66,7 @@ class OneOfManyFormSpec extends PayeComponentSpec {
         "unIncludedField" -> "string",
         "nextUnIncludedField" -> "string"
       )
-      TestForm.multiPartFormatter.bind("test1", data) mustBe Left(Seq(FormError("noFieldsCompleted-test1", "noFieldsErrMsg")))
+      TestForm.multiPartFormatter.bind("test1", data) mustBe Left(Seq(FormError("test1", "noFieldsErrMsg")))
     }
 
     "bind with multiple fields completed" in {

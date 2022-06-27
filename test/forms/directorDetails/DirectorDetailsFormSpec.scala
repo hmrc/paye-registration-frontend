@@ -100,7 +100,7 @@ class DirectorDetailsFormSpec extends PayeComponentSpec {
           errors => errors,
           success => testForm.fill(success)
         )
-        boundForm.errors mustBe Seq(FormError("noFieldsCompleted-nino[0]", "pages.directorDetails.errors.noneCompleted"))
+        boundForm.errors mustBe Seq(FormError("nino[0]", "pages.directorDetails.errors.noneCompleted"))
         boundForm.data mustBe data
       }
     }
@@ -118,7 +118,7 @@ class DirectorDetailsFormSpec extends PayeComponentSpec {
           errors => errors,
           success => testForm.fill(success)
         )
-        boundForm.errors mustBe Seq(FormError("noFieldsCompleted-nino[0]", "pages.directorDetails.errors.noneCompleted"))
+        boundForm.errors mustBe Seq(FormError("nino[0]", "pages.directorDetails.errors.noneCompleted"))
         boundForm.data mustBe data
       }
     }

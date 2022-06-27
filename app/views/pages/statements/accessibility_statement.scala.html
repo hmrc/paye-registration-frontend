@@ -1,0 +1,144 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import config.AppConfig
+@import views.html.templates.layout
+
+@this(
+        layout: layout,
+        h1: components.h1,
+        h2: components.h2,
+        h3: components.h3,
+        p: components.p,
+        bullets: components.bullets,
+        link: components.link)
+
+@(accessibilityReportUrl: String, serviceStartUrl: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+
+@link1 = {
+    @link(accessibilityReportUrl, messages("accessibility.pageBody.reporting_accessibility_problems.linkText"))
+
+}
+
+@layout(pageTitle = Some(messages("accessibility.pageTitle"))) {
+
+    @h1(messages("accessibility.pageHeading"))
+
+    @p{ @messages("accessibility.pageBody.intro.p1") }
+
+    @p{ @messages("accessibility.pageBody.intro.p2")
+        @link("https://www.gov.uk/help/accessibility", "accessibility.pageBody.intro.link1", isExternal = false)
+        @messages("accessibility.pageBody.intro.afterLink")
+    }
+
+    @p{
+        @messages("accessibility.pageBody.intro.p3")
+        @link(serviceStartUrl, serviceStartUrl)
+    }
+
+    @h2(messages("accessibility.pageBody.use_this_service.h2"))
+
+    @p{ @messages("accessibility.pageBody.use_this_service.p1") }
+
+    @p{ @messages("accessibility.pageBody.use_this_service.p2") }
+
+    @bullets(
+        messages("accessibility.pageBody.use_this_service.ul.li1"),
+        messages("accessibility.pageBody.use_this_service.ul.li2"),
+        messages("accessibility.pageBody.use_this_service.ul.li3"),
+        messages("accessibility.pageBody.use_this_service.ul.li4"),
+        messages("accessibility.pageBody.use_this_service.ul.li5")
+    )
+
+    @p { @messages("accessibility.pageBody.use_this_service.p3") }
+
+    @p {
+        @link("https://mcmw.abilitynet.org.uk/", "AbilityNet")
+        @messages("accessibility.pageBody.use_this_service.p4")
+    }
+
+    @h2(messages("accessibility.pageBody.how_accessible.h2"))
+
+    @p {
+        @messages("accessibility.pageBody.how_accessible.p1")
+        @link("https://www.w3.org/TR/WCAG21/", "accessibility.pageBody.how_accessible.link1")
+    }
+
+    @p { @messages("accessibility.pageBody.how_accessible.p2") }
+
+    @bullets(
+        messages("accessibility.pageBody.how_accessible.b1")
+    )
+
+    @h2(messages("accessibility.pageBody.reporting_accessibility_problems.h2"))
+
+    @p {
+        @messages("accessibility.pageBody.reporting_accessibility_problems.p1" )
+        @link(accessibilityReportUrl, "accessibility.pageBody.reporting_accessibility_problems.link1")
+    }
+
+    @h2(messages("accessibility.pageBody.what_to_do.h2"))
+
+    @p {
+        @messages("accessibility.pageBody.what_to_do.p1")
+        @link("https://www.equalityadvisoryservice.com/", "accessibility.pageBody.what_to_do.link1")
+        @messages("accessibility.pageBody.what_to_do.afterLink1")
+        @link("https://www.equalityni.org/Home", "accessibility.pageBody.what_to_do.link2")
+        @messages("accessibility.pageBody.what_to_do.afterLink2")
+    }
+
+    @h2(messages("accessibility.pageBody.contact_us.h2"))
+
+    @p { @messages("accessibility.pageBody.contact_us.p1") }
+
+    @p { @messages("accessibility.pageBody.contact_us.p2") }
+
+    @p { @messages("accessibility.pageBody.contact_us.p3")
+        @link("https://www.gov.uk/dealing-hmrc-additional-needs", "accessibility.pageBody.contact_us.link1")
+    }
+
+    @h2(messages("accessibility.pageBody.technical_info.h2"))
+
+    @p { @messages("accessibility.pageBody.technical_info.p1") }
+
+    @p {
+        @messages("accessibility.pageBody.technical_info.p2")
+        @link("https://www.w3.org/TR/WCAG21/", "accessibility.pageBody.technical_info.link1")
+        @messages("accessibility.pageBody.technical_info.afterLink")
+    }
+
+    @h3(messages("accessibility.pageBody.technical_info.h3"))
+
+    @p { @messages("accessibility.pageBody.technical_info.p3") }
+
+    @h3(messages("accessibility.pageBody.technical_info.h4"))
+
+    @p { @messages("accessibility.pageBody.technical_info.p4") }
+
+    @p { @messages("accessibility.pageBody.technical_info.p5") }
+
+    @h2(messages("accessibility.pageBody.how_we_test.h2"))
+
+    @p { @messages("accessibility.pageBody.how_we_test.p1") }
+
+    @p { @messages("accessibility.pageBody.how_we_test.p2")
+        @link("http://www.digitalaccessibilitycentre.org/", "accessibility.pageBody.how_we_test.link1")
+        @messages("accessibility.pageBody.how_we_test.afterLink")
+    }
+
+    @p { @messages("accessibility.pageBody.how_we_test.p3") }
+
+}

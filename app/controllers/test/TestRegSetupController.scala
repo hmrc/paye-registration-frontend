@@ -45,7 +45,7 @@ class TestRegSetupController @Inject()(val payeRegService: PAYERegistrationServi
                                        payeRegCompanyDetailsSetup: payeRegCompanyDetailsSetup,
                                        payeRegPAYEContactSetup: payeRegPAYEContactSetup,
                                        payeRegEmploymentInfoSetup: payeRegEmploymentInfoSetup
-                                      )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
+                                      )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
   def regTeardown: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     _ =>

@@ -15,24 +15,34 @@
  *@
 
 @import config.AppConfig
-@import helpers.templates.{hiddenDetails, linkNewWindow}
+@import views.html.templates.layout
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukPanel
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Panel
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+@import uk.gov.hmrc.govukfrontend.views.Aliases.HtmlContent
 
-@this(main_template: main_template,
-        hiddenDetails: hiddenDetails,
-        linkNewWindow: linkNewWindow)
+@this(
+        layout: layout,
+        hiddenDetails: components.hiddenDetails,
+        link: components.link,
+        h1: components.h1,
+        h2: components.h2,
+        p: components.p,
+        formWithCSRF: FormWithCSRF,
+        bullets: components.bullets,
+        govukPanel: GovukPanel,
+        button: components.button)
 
 @(ackRef: String, displayNextTaxYearContent: Boolean, contactDate: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = messages("pages.confirmation.description"), backButton = false) {
+@layout(pageTitle = Some(messages("pages.confirmation.description")), backLink = false) {
 
-    <div class="box-shaded-grey">
-        <h1 class="heading-large" id="pageHeading">@messages("pages.confirmation.description")</h1>
-        <p class="font-medium">
-            @messages("pages.confirmation.reference")
-            <br>
-            <strong id="ack-ref">@ackRef</strong>
-        </p>
-    </div>
+        @govukPanel(Panel(
+            title = Text(messages("pages.confirmation.description")),
+            headingLevel = 1,
+            content = HtmlContent(ackRef)
+        ))
 
         @if(displayNextTaxYearContent) {
             @inclusiveDateContent
@@ -40,73 +50,89 @@
             @standardContent()
         }
 
-    <form action="@controllers.userJourney.routes.DashboardController.dashboard" method="get">
-        <div class="form-group">
-            <button class="button" type="submit" id="continue" >@messages("app.common.finish")</button>
-        </div>
-    </form>
+    @formWithCSRF(action = controllers.userJourney.routes.DashboardController.dashboard ) {
+        @button("app.common.finish")
+    }
 
-    <a href="@controllers.userJourney.routes.EligibilityController.questionnaire">@messages("app.common.whatDidYouThink")</a>
+    @link(controllers.userJourney.routes.EligibilityController.questionnaire.url, messages("app.common.whatDidYouThink"), isExternal = true)
 }
 
 
 @standardContent() = {
     <div id="standard-content" class="form-group">
-        <h2>@messages("pages.confirmation.email.heading")</h2>
-        <p>@messages("pages.confirmation.email.body")</p>
+        @h2(messages("pages.confirmation.email.heading"))
+        @p{ @messages("pages.confirmation.email.body")}
 
-        <ul class="bullets">
-            <li>@messages("pages.confirmation.email.bullet-1")</li>
-            <li>@messages("pages.confirmation.standard.section-1.bullet1")</li>
-        </ul>
+        @bullets(
+            messages("pages.confirmation.email.bullet-1"),
+            messages("pages.confirmation.standard.section-1.bullet1")
+        )
+
+        @bullets(
+            messages("pages.confirmation.email.bullet-1"),
+            messages("pages.confirmation.standard.section-1.bullet1")
+        )
     </div>
 
     <div class="form-group">
-        <p>@messages("pages.confirmation.standard.section-2")</p>
+        @p{
+            @messages("pages.confirmation.standard.section-2")
+        }
 
-        <ul class="bullets">
-            <li>@messages("pages.confirmation.standard.section-2.bullet1")</li>
-            <li>@messages("pages.confirmation.standard.section-2.bullet2")</li>
-        </ul>
+        @bullets(
+            messages("pages.confirmation.standard.section-2.bullet1"),
+            messages("pages.confirmation.standard.section-2.bullet2")
+        )
     </div>
 
     <div class="form-group">
-        <p>@messages("pages.confirmation.standard.last")</p>
+        @p{
+            @messages("pages.confirmation.standard.last")
+        }
     </div>
 }
 
 @inclusiveDateContent = {
-    <h2>@messages("pages.confirmation.email.heading")</h2>
-    <p>@messages("pages.confirmation.email.body")</p>
-    <ul class="bullets">
-        <li>@messages("pages.confirmation.email.bullet-1")</li>
-    </ul>
+    @h2(messages("pages.confirmation.email.heading"))
+    @p {
+        @messages("pages.confirmation.email.body")
+    }
+    @bullets(
+        messages("pages.confirmation.email.bullet-1")
+    )
 
     <div id="inclusive-content" class="form-group">
-        <h2>@messages("pages.confirmation.inclusive.section-1.heading")</h2>
-        <p>@messages("pages.confirmation.inclusive.section-1")</p>
+    @h2(messages("pages.confirmation.inclusive.section-1.heading"))
+    @p{
+        @messages("pages.confirmation.inclusive.section-1")
+    }
 
-        <ul class="bullets">
-            <li>@messages("pages.confirmation.inclusive.section-1.bullet1")</li>
-            <li>@messages("pages.confirmation.standard.section-2.bullet2")</li>
-        </ul>
+    @bullets(
+        messages("pages.confirmation.inclusive.section-1.bullet1"),
+        messages("pages.confirmation.standard.section-2.bullet2")
+    )
 
-        <p>@messages("pages.confirmation.inclusive.section-1.last")</p>
+    @p {
+        @messages("pages.confirmation.inclusive.section-1.last")
+    }
     </div>
 
-    <div class="form-group">
-        <h2>@messages("pages.confirmation.inclusive.section-2.heading")</h2>
-        <p>@messages("pages.confirmation.inclusive.section-2.body",contactDate)</p>
+    @h2(messages("pages.confirmation.inclusive.section-2.heading"))
+    @p {
+        @messages("pages.confirmation.inclusive.section-2.body",contactDate)
+    }
 
-        @hiddenDetails("firstPaymentInNextTaxYear", messages("pages.confirmation.inclusive.section-2.disclosure.heading"), inclusiveProgressiveDisclosure)
-    </div>
+    @hiddenDetails("firstPaymentInNextTaxYear", messages("pages.confirmation.inclusive.section-2.disclosure.heading"), inclusiveProgressiveDisclosure)
 }
 
 @inclusiveProgressiveDisclosure = {
-    <p>@messages("pages.confirmation.inclusive.section-2.disclosure.body")</p>
+    @p {
+        @messages("pages.confirmation.inclusive.section-2.disclosure.body")
+    }
+
     <ul class="list list-bullet">
         <li>@messages("pages.confirmation.inclusive.section-2.disclosure.bullet1")
-            @linkNewWindow("https://www.gov.uk/running-payroll", messages("pages.confirmation.inclusive.section-2.disclosure.bullet1.1"), "firstPaymentInNextTaxYear")</li>
+            @link("https://www.gov.uk/running-payroll", messages("pages.confirmation.inclusive.section-2.disclosure.bullet1.1"))</li>
         <li>@messages("pages.confirmation.inclusive.section-2.disclosure.bullet2")</li>
         <li>@messages("pages.confirmation.inclusive.section-2.disclosure.bullet3")</li>
     </ul>

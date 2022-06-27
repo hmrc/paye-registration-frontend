@@ -1,0 +1,71 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukRadios
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Radios
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Fieldset
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Legend
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+@import uk.gov.hmrc.govukfrontend.views.Aliases.Hint
+@import uk.gov.hmrc.govukfrontend.views.Aliases.HtmlContent
+@import uk.gov.hmrc.govukfrontend.views.Aliases.RadioItem
+@import uk.gov.hmrc.govukfrontend.views.Aliases.ErrorMessage
+
+@this(govukRadios: GovukRadios)
+
+@(form: Form[_],
+        id: String = "value",
+        headingKey: String,
+        hint: Option[Html] = None,
+        headingMessageArgs: Seq[String] = Seq(),
+        isPageHeading: Boolean = true,
+        inline: Boolean = true,
+        classes: String = "govuk-fieldset__legend--xl",
+        hiddenYesContent: Option[Html] = None,
+        hiddenNoContent: Option[Html] = None,
+        fieldName: String = "value"
+)(implicit messages: Messages)
+
+@govukRadios(Radios(
+    classes = if(inline) "govuk-radios--inline" else "",
+    idPrefix = None,
+    name = fieldName,
+    fieldset = Some(Fieldset(
+        legend = Some(Legend(
+            content = Text(messages(headingKey, headingMessageArgs: _*)),
+            isPageHeading = isPageHeading,
+            classes = classes
+        ))
+    )),
+    hint = hint.map { hint => Hint(content = HtmlContent(hint)) },
+    items = Seq(
+        RadioItem(
+            id = Some(id),
+            value = Some("true"),
+            content = Text(messages("app.common.yes")),
+            checked = form(fieldName).value.contains("true"),
+            conditionalHtml = hiddenYesContent
+        ),
+        RadioItem(
+            id = Some(s"$id-no"),
+            value = Some("false"),
+            content = Text(messages("app.common.no")),
+            checked = form(fieldName).value.contains("false"),
+            conditionalHtml = hiddenNoContent
+        )
+    ),
+    errorMessage = form(fieldName).error.map(err => ErrorMessage(content = Text(messages(err.message, err.args: _*))))
+))

@@ -22,11 +22,15 @@ import models.DigitalContactDetails
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, Lang, MessagesApi}
 import play.api.test.FakeRequest
+import views.BaseSelectors
 import views.html.pages.companyDetails.businessContactDetails
 
 import java.util.Locale
 
 class BusinessContactDetailsSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
+
+  object Selectors extends BaseSelectors
+
   implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
   implicit lazy val messagesApi: MessagesApi = mockMessagesApi
@@ -47,7 +51,7 @@ class BusinessContactDetailsSpec extends PayeComponentSpec with PayeFakedApp wit
     lazy val document = Jsoup.parse(view(testBusinessContact, testCompanyName).body)
 
     "have the correct title" in {
-      document.getElementById("pageHeading").text mustBe mockMessages("pages.businessContact.description", testCompanyName)
+      document.select(Selectors.h1).text mustBe mockMessages("pages.businessContact.description", testCompanyName)
     }
   }
 }

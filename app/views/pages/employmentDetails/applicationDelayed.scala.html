@@ -16,22 +16,28 @@
 
 @import config.AppConfig
 @import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+@import views.html.templates.layout
 
-@this(main_template: main_template,
-        form: FormWithCSRF)
+@this(
+        layout: layout,
+        form: FormWithCSRF,
+        p: components.p,
+        h1: components.h1,
+        button: components.button
+)
 
 @()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = messages("pages.applicationDelayed.title")) {
+@layout(pageTitle = Some(messages("pages.applicationDelayed.title"))) {
 
-    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.applicationDelayed.description")</h1>
+    @h1("pages.applicationDelayed.description")
 
     @form(action = controllers.userJourney.routes.EmploymentController.submitApplicationDelayed) {
 
-        <p>@messages("pages.applicationDelayed.para1")</p>
-        <p>@messages("pages.applicationDelayed.para2")</p>
+        @p { @messages("pages.applicationDelayed.para1") }
+        @p { @messages("pages.applicationDelayed.para2") }
 
 
-        <button class="button" type="submit" id="continue" >@messages("app.common.continue")</button>
+        @button("app.common.saveAndContinue")
     }
 }

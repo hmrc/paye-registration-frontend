@@ -23,46 +23,31 @@ import models.Address
 import org.jsoup.Jsoup
 import play.api.i18n.{I18nSupport, Lang, MessagesApi}
 import play.api.test.FakeRequest
+import views.BaseSelectors
 import views.html.pages.companyDetails.ppobAddress
 import views.html.pages.payeContact.correspondenceAddress
 
 import java.util.Locale
 
 class ChooseAddressSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
+
+  object Selectors extends BaseSelectors
+
   implicit val appConfig = mockAppConfig
   implicit val request = FakeRequest()
   implicit lazy val messagesApi: MessagesApi = mockMessagesApi
   implicit val mockMessages = mockMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
 
   val testROAddress =
-    Address(
-      "testL1",
-      "testL2",
-      Some("testL3"),
-      Some("testL4"),
-      Some("testPostCode"),
-      None
-    )
+    "ro" -> "testL1, testL2, testL3, testL4, testPostCode"
 
   val testPPOBAddress =
-    Address(
-      "testL65",
-      "testL66",
-      Some("testL33"),
-      Some("testL44"),
-      Some("testPostCode"),
-      None
-    )
+    "ppob" -> "testL65, testL66, testL33, testL44, testPostCode"
 
   val testCorrespondenceAddress =
-    Address(
-      "testCAL65",
-      "testCAL66",
-      Some("testCAL33"),
-      Some("testCAL44"),
-      Some("testCAPostCode"),
-      None
-    )
+    "correspondence" -> "testCAL65, testCAL66, testCAL33, testCAL44, testCAPostCode"
+
+  val testOther = "other" -> "Other"
 
   val testListPrepopAddresses = Map(
     0 -> Address(
@@ -85,171 +70,93 @@ class ChooseAddressSpec extends PayeComponentSpec with PayeFakedApp with I18nSup
 
   "The PPOB Address screen without PPOB Address" should {
     lazy val view = app.injector.instanceOf[ppobAddress]
-    lazy val document = Jsoup.parse(view(PPOBForm.form, Some(testROAddress), None, Map.empty[Int, Address]).body)
+    lazy val document = Jsoup.parse(view(PPOBForm.form, Map(testROAddress, testOther), None).body)
 
     "have the correct title" in {
-      document.getElementById("pageHeading").text mustBe mockMessages("pages.ppobAddress.description")
+      document.select(Selectors.h1).text() mustBe mockMessages("pages.ppobAddress.description")
     }
 
     "have the correct name for radio button roAddress" in {
-      document.getElementById("chosenAddress-roaddress").attr("name") mustBe "chosenAddress"
+      document.getElementById("chosenAddress").attr("name") mustBe "chosenAddress"
     }
 
     "have the correct value for radio button roAddress" in {
-      document.getElementById("chosenAddress-roaddress").attr("value") mustBe "roAddress"
-    }
-
-    "have the correct text for radio button roAddress" in {
-      document.getElementById("ro-address-line-1").text mustBe "testL1"
+      document.getElementById("chosenAddress").attr("value") mustBe "roAddress"
     }
 
     "not have the radio button ppobAddress" in {
-      an[NullPointerException] mustBe thrownBy(document.getElementById("chosenAddress-ppobaddress").attr("name"))
+      an[NullPointerException] mustBe thrownBy(document.getElementById("ppobAddress").attr("name"))
     }
 
     "have the correct name for radio button other" in {
-      document.getElementById("chosenAddress-other").attr("name") mustBe "chosenAddress"
+      document.getElementById("otherAddress").attr("name") mustBe "chosenAddress"
     }
 
     "have the correct value for radio button other" in {
-      document.getElementById("chosenAddress-other").attr("value") mustBe "other"
+      document.getElementById("otherAddress").attr("value") mustBe "otherAddress"
     }
   }
 
   "The PPOB Address screen with PPOB Address" should {
     lazy val view = app.injector.instanceOf[ppobAddress]
-    lazy val document = Jsoup.parse(view(PPOBForm.form, Some(testROAddress), Some(testPPOBAddress), Map.empty[Int, Address]).body)
+    lazy val document = Jsoup.parse(view(PPOBForm.form, Map(testPPOBAddress), None).body)
 
     "have the correct name for radio button ppobAddress" in {
-      document.getElementById("chosenAddress-ppobaddress").attr("name") mustBe "chosenAddress"
+      document.getElementById("chosenAddress").attr("name") mustBe "chosenAddress"
     }
 
     "have the correct value for radio button ppobAddress" in {
-      document.getElementById("chosenAddress-ppobaddress").attr("value") mustBe "ppobAddress"
-    }
-
-    "have the correct text for radio button ppobAddress" in {
-      document.getElementById("ppob-address-line-1").text mustBe "testL65"
-    }
-  }
-
-  "The PPOB Address screen with Prepop Addresses" should {
-    lazy val view = app.injector.instanceOf[ppobAddress]
-    lazy val document = Jsoup.parse(view(PPOBForm.form, Some(testROAddress), Some(testPPOBAddress), testListPrepopAddresses).body)
-
-    "have the correct name for radio button prepopaddress0" in {
-      document.getElementById("chosenAddress-prepopaddress0").attr("name") mustBe "chosenAddress"
-    }
-
-    "have the correct value for radio button prepopaddress0" in {
-      document.getElementById("chosenAddress-prepopaddress0").attr("value") mustBe "prepopAddress0"
-    }
-
-    "have the correct text for radio button prepopaddress0" in {
-      document.getElementById("prepopaddress0-address-line-1").text mustBe "testPPAL01"
-    }
-
-    "have the correct name for radio button prepopaddress1" in {
-      document.getElementById("chosenAddress-prepopaddress1").attr("name") mustBe "chosenAddress"
-    }
-
-    "have the correct value for radio button prepopaddress1" in {
-      document.getElementById("chosenAddress-prepopaddress1").attr("value") mustBe "prepopAddress1"
-    }
-
-    "have the correct text for radio button prepopaddress1" in {
-      document.getElementById("prepopaddress1-address-line-1").text mustBe "testPPAL11"
+      document.getElementById("chosenAddress").attr("value") mustBe "ppobAddress"
     }
   }
 
   "The Correspondence Address screen without Correspondence Address" should {
     lazy val view = app.injector.instanceOf[correspondenceAddress]
-    lazy val document = Jsoup.parse(view(CorrespondenceAddressForm.form, Some(testROAddress), Some(testPPOBAddress), None, Map.empty[Int, Address]).body)
+    lazy val document = Jsoup.parse(view(CorrespondenceAddressForm.form, Map(testPPOBAddress, testROAddress, testOther),None).body)
 
     "have the correct title" in {
-      document.getElementById("pageHeading").text mustBe mockMessages("pages.correspondenceAddress.description")
+      document.select(Selectors.h1).text() mustBe mockMessages("pages.correspondenceAddress.description")
     }
 
     "have the correct name for radio button roAddress" in {
-      document.getElementById("chosenAddress-roaddress").attr("name") mustBe "chosenAddress"
+      document.getElementById("roAddress").attr("name") mustBe "chosenAddress"
     }
 
     "have the correct value for radio button roAddress" in {
-      document.getElementById("chosenAddress-roaddress").attr("value") mustBe "roAddress"
-    }
-
-    "have the correct text for radio button roAddress" in {
-      document.getElementById("ro-address-line-1").text mustBe "testL1"
+      document.getElementById("roAddress").attr("value") mustBe "roAddress"
     }
 
     "have the correct name for radio button ppobAddress" in {
-      document.getElementById("chosenAddress-ppobaddress").attr("name") mustBe "chosenAddress"
+      document.getElementById("chosenAddress").attr("name") mustBe "chosenAddress"
     }
 
     "have the correct value for radio button ppobAddress" in {
-      document.getElementById("chosenAddress-ppobaddress").attr("value") mustBe "ppobAddress"
-    }
-
-    "have the correct text for radio button ppobAddress" in {
-      document.getElementById("ppob-address-line-1").text mustBe "testL65"
+      document.getElementById("chosenAddress").attr("value") mustBe "ppobAddress"
     }
 
     "not have the radio button correspondenceAddress" in {
-      an[NullPointerException] mustBe thrownBy(document.getElementById("chosenAddress-correspondenceaddress").attr("name"))
+      an[NullPointerException] mustBe thrownBy(document.getElementById("correspondenceAddress").attr("name"))
     }
 
     "have the correct name for radio button other" in {
-      document.getElementById("chosenAddress-other").attr("name") mustBe "chosenAddress"
+      document.getElementById("otherAddress").attr("name") mustBe "chosenAddress"
     }
 
     "have the correct value for radio button other" in {
-      document.getElementById("chosenAddress-other").attr("value") mustBe "other"
+      document.getElementById("otherAddress").attr("value") mustBe "otherAddress"
     }
   }
 
   "The Correspondence Address screen with Correspondence Address" should {
     lazy val view = app.injector.instanceOf[correspondenceAddress]
-    lazy val document = Jsoup.parse(view(CorrespondenceAddressForm.form, Some(testROAddress), Some(testPPOBAddress), Some(testCorrespondenceAddress), Map.empty[Int, Address]).body)
+    lazy val document = Jsoup.parse(view(CorrespondenceAddressForm.form, Map(testCorrespondenceAddress), None).body)
 
     "have the correct name for radio button correspondenceAddress" in {
-      document.getElementById("chosenAddress-correspondenceaddress").attr("name") mustBe "chosenAddress"
+      document.getElementById("chosenAddress").attr("name") mustBe "chosenAddress"
     }
 
     "have the correct value for radio button correspondenceAddress" in {
-      document.getElementById("chosenAddress-correspondenceaddress").attr("value") mustBe "correspondenceAddress"
-    }
-
-    "have the correct text for radio button correspondenceAddress" in {
-      document.getElementById("correspondence-address-line-1").text mustBe "testCAL65"
-    }
-  }
-
-  "The Correspondence Address screen with Prepop Addresses" should {
-    lazy val view = app.injector.instanceOf[correspondenceAddress]
-    lazy val document = Jsoup.parse(view(CorrespondenceAddressForm.form, Some(testROAddress), Some(testPPOBAddress), Some(testCorrespondenceAddress), testListPrepopAddresses).body)
-
-    "have the correct name for radio button prepopaddress0" in {
-      document.getElementById("chosenAddress-prepopaddress0").attr("name") mustBe "chosenAddress"
-    }
-
-    "have the correct value for radio button prepopaddress0" in {
-      document.getElementById("chosenAddress-prepopaddress0").attr("value") mustBe "prepopAddress0"
-    }
-
-    "have the correct text for radio button prepopaddress0" in {
-      document.getElementById("prepopaddress0-address-line-1").text mustBe "testPPAL01"
-    }
-
-    "have the correct name for radio button prepopaddress1" in {
-      document.getElementById("chosenAddress-prepopaddress1").attr("name") mustBe "chosenAddress"
-    }
-
-    "have the correct value for radio button prepopaddress1" in {
-      document.getElementById("chosenAddress-prepopaddress1").attr("value") mustBe "prepopAddress1"
-    }
-
-    "have the correct text for radio button prepopaddress1" in {
-      document.getElementById("prepopaddress1-address-line-1").text mustBe "testPPAL11"
+      document.getElementById("chosenAddress").attr("value") mustBe "correspondenceAddress"
     }
   }
 }

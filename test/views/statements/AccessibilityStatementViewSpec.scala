@@ -19,18 +19,22 @@ package views.statements
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.jsoup.Jsoup
 import play.api.i18n.MessagesApi
-import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.twirl.api.Html
-import views.html.statements.accessibility_statement
+import views.BaseSelectors
+import views.html.pages.statements.accessibility_statement
 
 class AccessibilityStatementViewSpec extends PayeComponentSpec with PayeFakedApp {
+
+  object Selectors extends BaseSelectors
 
   object Messages {
     val title = "Accessibility statement for registering an employee for PAYE"
     val heading = "Accessibility statement for registering an employee for PAYE"
+    val beta = "beta This is a new service - your feedback (opens in new tab) will help us to improve it."
+    val hmrc = "HM Revenue & Customs"
     val introP1 = "This accessibility statement explains how accessible this service is, what to do if you have difficulty using it, and how to report accessibility problems with the service."
-    val introP2 = "This service is part of the wider GOV.UK website. There is a separate accessibility statement for the main GOV.UK website."
+    val introP2 = "This service is part of the wider GOV.UK website. There is a separate <a href=\"https://www.gov.uk/help/accessibility\">accessibility statement</a> for the main GOV.UK website."
 
     def introP3(serviceStartUrl: String) = s"This page only contains information about the registering an employee for PAYE service, available at $serviceStartUrl"
 
@@ -55,10 +59,10 @@ class AccessibilityStatementViewSpec extends PayeComponentSpec with PayeFakedApp
     val contactUsH2 = "Contacting us by phone or getting a visit from us in person"
     val contactUsP1 = "We provide a text relay service if you are deaf, hearing impaired or have a speech impediment."
     val contactUsP2 = "We can provide a British Sign Language (BSL) interpreter, or you can arrange a visit from an HMRC advisor to help you complete the service."
-    val contactUsP3 = "Find out how to contact us."
+    val contactUsP3 = "Find out how to <a href=\"https://www.gov.uk/dealing-hmrc-additional-needs\">contact us</a>."
     val technicalInfoH2 = "Technical information about this service’s accessibility"
     val technicalInfoP1 = "HMRC is committed to making this service accessible, in accordance with the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018."
-    val technicalInfoP2 = "This service is partially compliant with the Web Content Accessibility Guidelines version 2.1 AA standard due to the non-compliances listed below."
+    val technicalInfoP2 = "This service is partially compliant with the <a href=\"https://www.w3.org/TR/WCAG21/\">Web Content Accessibility Guidelines version 2.1 AA standard</a> due to the non-compliances listed below."
     val technicalInfoH3 = "Non‐accessible content"
     val technicalInfoH4 = "Non‐compliance with the accessibility regulations"
     val technicalInfoP3 = "The content listed below is non-accessible for the following reasons."
@@ -66,7 +70,7 @@ class AccessibilityStatementViewSpec extends PayeComponentSpec with PayeFakedApp
     val technicalInfoP5 = "When an error is committed in the ‘National Insurance’ input fields on the page, the error summary links and inline error messages all contain the same information. This may present difficulty to screen reader users who may be unable to distinguish between each error if multiple errors are present in the input fields. The error handling also fails to meet GOV.UK Design System guidelines. This will be fixed by 28 January 2022."
     val howWeTestH2 = "How we tested this service"
     val howWeTestP1 = "The service was last tested on 31 August 2021 and was checked for compliance with WCAG 2.1 AA."
-    val howWeTestP2 = "The service was built using parts that were tested by the Digital Accessibility Centre. The full service was tested by HMRC and included disabled users."
+    val howWeTestP2 = "The service was built using parts that were tested by the <a href=\"http://www.digitalaccessibilitycentre.org/\">Digital Accessibility Centre</a>"
     val howWeTestP3 = "This page was prepared on 25 November 2021. It was last updated on 03 December 2021."
     val accessibilityStatementLinkText = "accessibility statement"
     val abilityNetLinkText = "AbilityNet"
@@ -83,8 +87,9 @@ class AccessibilityStatementViewSpec extends PayeComponentSpec with PayeFakedApp
   val testPageUrl = "testPageUrl"
   val testServiceStartUrl = "testServiceStartUrl"
 
-  lazy val messagesApi: MessagesApi = mockMessagesApi
-  val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+  implicit val appConfig = mockAppConfig
+  implicit val request = FakeRequest()
+  implicit lazy val messagesApi: MessagesApi = mockMessagesApi
 
   lazy val page: Html = {
    val view = app.injector.instanceOf[accessibility_statement]
@@ -98,19 +103,18 @@ class AccessibilityStatementViewSpec extends PayeComponentSpec with PayeFakedApp
 
 
   "The accessibility statement page" should {
-    lazy val parsePage = Jsoup.parse(page.body)
-    lazy val pageBody = parsePage.getElementById("content")
+    lazy val document = Jsoup.parse(page.body)
 
     "have a heading" in {
-      pageBody.select("h1").text mustBe Messages.heading
+      document.select(Selectors.h1).text() mustBe Messages.heading
     }
 
     "have a title" in {
-      parsePage.title must include(Messages.title)
+      document.title must include(Messages.title)
     }
 
     "have multiple h2" in {
-      pageBody.select("h2").eachText() must contain allElementsOf Seq(
+      document.select("h2").eachText() must contain allElementsOf Seq(
         Messages.serviceH2,
         Messages.howAccessH2,
         Messages.reportProblemH2,
@@ -122,14 +126,14 @@ class AccessibilityStatementViewSpec extends PayeComponentSpec with PayeFakedApp
     }
 
     "have multiple h3" in {
-      pageBody.select("h3").eachText() must contain allElementsOf Seq(
+      document.select("h3").eachText() must contain allElementsOf Seq(
         Messages.technicalInfoH3,
         Messages.technicalInfoH4,
       )
     }
 
     "have multiple bullet points" in {
-      pageBody.select("li").eachText() must contain allElementsOf Seq(
+      document.select("li").eachText() must contain allElementsOf Seq(
         Messages.serviceLi1,
         Messages.serviceLi2,
         Messages.serviceLi3,
@@ -138,72 +142,5 @@ class AccessibilityStatementViewSpec extends PayeComponentSpec with PayeFakedApp
         Messages.howAccessB1
       )
     }
-
-    "have multiple paragraphs" in {
-      pageBody.select("p").eachText must contain allElementsOf Seq(
-        Messages.introP1,
-        Messages.introP2,
-        Messages.introP3(testServiceStartUrl),
-        Messages.serviceP1,
-        Messages.serviceP2,
-        Messages.serviceP3,
-        Messages.serviceP4,
-        Messages.howAccessP1,
-        Messages.howAccessP2,
-        Messages.reportProblemP1,
-        Messages.whatToDoP1,
-        Messages.contactUsP1,
-        Messages.contactUsP2,
-        Messages.contactUsP3,
-        Messages.technicalInfoP1,
-        Messages.technicalInfoP2,
-        Messages.technicalInfoP3,
-        Messages.technicalInfoP4,
-        Messages.technicalInfoP5,
-        Messages.howWeTestP1,
-        Messages.howWeTestP2,
-        Messages.howWeTestP3
-      )
-    }
-
-    "have a link to the govuk accessibility statement" in {
-      pageBody.select("a[href=https://www.gov.uk/help/accessibility]").text mustBe Messages.accessibilityStatementLinkText
-    }
-
-    "have a link to the service" in {
-      pageBody.select(s"a[href=$testServiceStartUrl]").text mustBe testServiceStartUrl
-    }
-
-    "have a link to ability net" in {
-      pageBody.select("a[href=https://mcmw.abilitynet.org.uk/]").text mustBe Messages.abilityNetLinkText
-    }
-
-    "have two links to the accessibility guidelines" in {
-      pageBody.select("a[href=https://www.w3.org/TR/WCAG21/]").text mustBe Seq(
-        Messages.wcagLinkText,
-        Messages.wcagLinkText
-      ).mkString(" ")
-    }
-
-    "have a link to contact us" in {
-      pageBody.select("a[href=https://www.gov.uk/dealing-hmrc-additional-needs]").text mustBe Messages.contactUsLinkText
-    }
-
-    "have a link to reporting problem form" in {
-      pageBody.select(s"a[href=$testAccessibilityReportUrl]").text mustBe Messages.reportProblemLinkText
-    }
-
-    "have a link to EASS" in {
-      pageBody.select("a[href=https://www.equalityadvisoryservice.com/]").text mustBe Messages.eassLinkText
-    }
-
-    "have a link to ECNI" in {
-      pageBody.select("a[href=https://www.equalityni.org/Home]").text mustBe Messages.ecniLinkText
-    }
-
-    "have a link to DAC" in {
-      pageBody.select("a[href=http://www.digitalaccessibilitycentre.org/]").text mustBe Messages.dacLinkText
-    }
-
   }
 }

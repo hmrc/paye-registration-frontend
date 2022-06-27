@@ -29,7 +29,7 @@ class ChooseAddressFormSpec extends PayeComponentSpec {
   "Binding ChooseAddressForm" when {
     "Supplied with full data for value other" should {
       val data = Map(
-        "chosenAddress" -> "other"
+        "chosenAddress" -> "otherAddress"
       )
 
       "Bind successfully" in {

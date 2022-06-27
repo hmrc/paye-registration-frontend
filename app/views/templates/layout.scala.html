@@ -1,0 +1,100 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcTimeoutDialog
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcBanner
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukBackLink
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcReportTechnicalIssueHelper
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukLayout
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardFooter
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.backlink.BackLink
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
+@import uk.gov.hmrc.hmrcfrontend.views.Aliases.Banner
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.Cy
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.En
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.timeoutdialog.TimeoutDialog
+
+@this(
+    trackingConsentSnippet: HmrcTrackingConsentSnippet,
+    hmrcTimeoutDialog: HmrcTimeoutDialog,
+    hmrcBanner: HmrcBanner,
+    phaseBanner: components.phaseBanner,
+    govukBackLink: GovukBackLink,
+    hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
+    siteHeader: components.siteHeader,
+    govukLayout: GovukLayout,
+    hmrcStandardFooter: HmrcStandardFooter
+)
+
+@(pageTitle: Option[String] = None, beforeContentBlock: Option[Html] = None, backLink: Boolean = true, signOutLink: Boolean = true, timeout: Boolean = true)(contentBlock: Html)(implicit request: Request[_], messages: Messages, appConfig: config.AppConfig)
+
+@trackingConsentSnippet()
+
+@head = {
+<!--[if lte IE 8]><link href=' @controllers.routes.Assets.versioned("stylesheets/application-ie-8.css")' rel="stylesheet" type="text/css" /><![endif]-->
+<!--[if gt IE 8]><!--> <link href='@controllers.routes.Assets.versioned("stylesheets/application.css")' media="screen" rel="stylesheet" type="text/css" />
+<!--<![endif]-->
+@if(timeout) {
+    @hmrcTimeoutDialog(TimeoutDialog(
+        language = Some("en"),
+        timeout = Option(appConfig.timeoutInSeconds),
+        countdown = Option(appConfig.timeoutDisplayLength),
+        keepAliveUrl = Some(controllers.userJourney.routes.SignInOutController.renewSession.url),
+        signOutUrl = Some(controllers.userJourney.routes.SignInOutController.signOut.url)
+    ))
+}
+}
+
+@beforeContentBlock = {
+@phaseBanner("beta")
+
+@if(backLink == true) {
+@govukBackLink(BackLink(href = "#", content = Text(messages("site.back")), attributes = Map("id" -> "back-link")))
+}
+}
+
+@scripts = {
+<script src='@controllers.routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
+<script src='@controllers.routes.Assets.versioned("lib/hmrc-frontend/hmrc/all.js")'></script>
+<script>window.GOVUKFrontend.initAll();
+    window.HMRCFrontend.initAll()</script>
+<script src="@controllers.routes.Assets.versioned("javascripts/backLink.js")"></script>
+}
+
+@content = {
+    <div class="govuk-!-margin-bottom-6">
+       @contentBlock
+    </div>
+
+    <div class="govuk-body">
+        <a lang="en" hreflang="en" class="govuk-link " target="_blank" href="@{
+            appConfig.reportAProblemLayout
+        }">
+        @messages("app.getHelp")
+        </a>
+    </div>
+}
+
+@govukLayout(
+    pageTitle = pageTitle,
+    headBlock = Some(head),
+    beforeContentBlock = Some(beforeContentBlock),
+    bodyEndBlock = None,
+    headerBlock = Some(siteHeader(signOutLink)),
+    footerBlock = Some(hmrcStandardFooter(accessibilityStatementUrl = Some(appConfig.accessibilityStatementUrl(request.uri)))),
+    scriptsBlock = Some(scripts)
+)(content)

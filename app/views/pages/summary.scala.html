@@ -15,36 +15,51 @@
  *@
 
 @import config.AppConfig
-@import helpers.templates.summaryRow
-@import models.view.Summary
+@import templates.layout
 @import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukSummaryList
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryList
 
-@this(main_template: main_template,
-        summaryRow: summaryRow,
-        formWithCSRF: FormWithCSRF)
+@this(
+        layout: layout,
+        formWithCSRF: FormWithCSRF,
+        button: components.button,
+        p: components.p,
+        h1: components.h1,
+        govukSummaryList : GovukSummaryList,
+        h2: components.h2)
 
-@(summaryModel: Summary)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
+@(employmentSection: SummaryList, completionSection: SummaryList, companyDetailsSection: SummaryList, businessContactSection: SummaryList, directorsSection: SummaryList, contactDetailsSection: SummaryList)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = messages("pages.summary.description")) {
-    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.summary.description")</h1>
+@layout(pageTitle = Some(messages("pages.summary.description"))) {
 
-    @for(section <- summaryModel.sections) {
-        <h2 class="heading-medium" id="@{section.id}SectionHeading">@{section.sectionHeading}</h2>
-        <dl class="govuk-check-your-answers cya-questions-long" id="@{section.id}Table">
-            @for(row <- section.rows) {
-                @summaryRow(row)
-            }
-        </dl>
-    }
-    <br>
-    <div class="form-group">
-        <h2 class="heading-medium">@messages("pages.summary.heading2")</h2>
-        <p>@messages("pages.summary.information")</p>
-    </div>
+    @h1(messages("pages.summary.description"))
+
+
+    @h2(messages("pages.summary.employees.sectionHeading"))
+    @govukSummaryList(employmentSection)
+
+    @h2(messages("pages.summary.completionCapacity.sectionHeading"))
+    @govukSummaryList(completionSection)
+
+    @h2(messages("pages.summary.companyDetails.sectionHeading"))
+    @govukSummaryList(companyDetailsSection)
+
+    @h2(messages("pages.summary.businessContactDetails.sectionHeading"))
+    @govukSummaryList(businessContactSection)
+
+    @h2(messages("pages.summary.directorDetails.sectionHeading"))
+    @govukSummaryList(directorsSection)
+
+    @h2(messages("pages.summary.payeContactDetails.sectionHeading"))
+    @govukSummaryList(contactDetailsSection)
+
+    @h2(messages("pages.summary.heading2"))
+
+    @p { @messages("pages.summary.information") }
+
 
     @formWithCSRF(action = controllers.userJourney.routes.SummaryController.submitRegistration) {
-        <div class="form-group">
-            <button class="button" type="submit" id="continue" >@messages("app.common.submitYourApplication")</button>
-        </div>
+        @button("app.common.submitYourApplication")
     }
 }

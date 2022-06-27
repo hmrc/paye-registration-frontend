@@ -15,41 +15,39 @@
  *@
 
 @import config.AppConfig
-@import helpers.templates.{payeErrorSummary, payeInputRadioGroup}
 @import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
-@import views.helpers.TitleHelper.title
+@import views.TitleHelper.title
+@import views.html.templates.layout
 
-@this(main_template: main_template,
-        payeErrorSummary: payeErrorSummary,
-        payeInputRadioGroup: payeInputRadioGroup,
-        formWithCSRF: FormWithCSRF)
+@this(
+        layout: layout,
+        errorSummary: components.errorSummary,
+        yesNoRadio: components.yesNoRadio,
+        formWithCSRF: FormWithCSRF,
+        h1: components.h1,
+        button: components.button)
 
 @(constructionIndustryForm: Form[Boolean])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = title(messages("pages.constructionIndustry.title"), constructionIndustryForm)) {
-    @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), constructionIndustryForm, dataJourney = Some("ConstructionIndustry")
-    )
-    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.constructionIndustry.description")</h1>
+@layout(pageTitle = Some(title(messages("pages.constructionIndustry.title"), constructionIndustryForm))) {
+
+    @errorSummary(constructionIndustryForm.errors)
+
+    @h1("pages.constructionIndustry.description")
     
     @formWithCSRF(action = controllers.userJourney.routes.EmploymentController.submitConstructionIndustry) {
 
-        <div class="inline form-group">
-        @payeInputRadioGroup(
-            constructionIndustryForm("inConstructionIndustry"),
-            Seq(
-                "true" -> messages("app.common.yes"),
-                "false" -> messages("app.common.no")
-            ),
-            isHeading = false,
-            '_legend -> messages("pages.constructionIndustry.description"),
-            '_legendID -> "constructionIndustry",
-            '_helpText -> None,
-            '_labelAfter -> true,
-            '_labelClass -> "block-label",
-            '_groupClass -> "inline"
+        @yesNoRadio(
+            form = constructionIndustryForm,
+            id = "inConstructionIndustry",
+            headingKey = messages("pages.constructionIndustry.description"),
+            isPageHeading = false,
+            inline = true,
+            classes = "govuk-visually-hidden",
+            fieldName = "inConstructionIndustry"
         )
-        </div>
-        <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
+
+        @button(messages("app.common.saveAndContinue"))
+
     }
 }

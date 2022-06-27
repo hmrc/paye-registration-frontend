@@ -15,70 +15,63 @@
  *@
 
 @import config.AppConfig
-@import helpers.templates.{oneOfManyErrorWrapper, payeErrorSummary, payeInput}
 @import models.DigitalContactDetails
 @import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
-@import views.helpers.TitleHelper.title
+@import views.TitleHelper.title
+@import views.html.templates.layout
+@import uk.gov.hmrc.govukfrontend.views.html.components.GovukErrorMessage
 
-@this(oneOfManyErrorWrapper: oneOfManyErrorWrapper,
-        payeErrorSummary: payeErrorSummary,
-        payeInput: payeInput,
-        main_template: main_template,
-        form: FormWithCSRF
+
+@this(
+        errorSummary: components.errorSummary,
+        layout: layout,
+        inputText: components.inputText,
+        errorMessage: GovukErrorMessage,
+        form: FormWithCSRF,
+        h1: components.h1,
+        p: components.p,
+        button: components.button
 )
 
 @(contactForm: Form[DigitalContactDetails], companyName: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@formContent = {
-    <fieldset>
-        <legend class="visually-hidden">
-        @messages("pages.businessContact.description", companyName)
-        </legend>
-        <div class="form-group">
-        @payeInput(
-            contactForm("businessEmail"),
-            '_inputClass -> "form-control-1-2",
-            '_labelClass -> "form-label cascading",
-            '_label -> messages("pages.businessContact.email")
-        )
-        </div>
 
-        <div class="form-group">
-        @payeInput(
-            contactForm("mobileNumber"),
-            '_labelClass -> "form-label cascading",
-            '_inputClass -> "form-control-1-2",
-            '_label -> messages("pages.businessContact.contact")
-        )
-        </div>
+@layout(pageTitle = Some(title(messages("pages.businessContact.description", companyName), contactForm))) {
 
-        <div>
-        @payeInput(
-            contactForm("phoneNumber"),
-            '_labelClass -> "form-label cascading",
-            '_inputClass -> "form-control-1-2",
-            '_label -> messages("pages.businessContact.othercontact")
-        )
-        </div>
-    </fieldset>
-}
+    @errorSummary(contactForm.errors)
 
-@main_template(title = title(messages("pages.businessContact.description", companyName), contactForm)) {
-
-    @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), contactForm, dataJourney = Some("DigitalContactDetails")
-    )
-
-    <h1 class="form-title heading-large" id="pageHeading">@messages("pages.businessContact.description", companyName)</h1>
+    @h1(messages("pages.businessContact.description", companyName))
 
     @form(action = controllers.userJourney.routes.CompanyDetailsController.submitBusinessContactDetails) {
 
-        <div class="form-group">
-        @oneOfManyErrorWrapper(contactForm, formContent)
-        </div>
+        @p {  @messages("pages.businessContact.description", companyName) }
 
-        <div class="form-group">
-            <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
-        </div>
+        @inputText(
+            form = contactForm,
+            name = "businessEmail",
+            id = "businessEmail",
+            label = messages("pages.businessContact.email"),
+            isPageHeading = false,
+        )
+
+        @inputText(
+            form = contactForm,
+            name = "mobileNumber",
+            id = "mobileNumber",
+            label = messages("pages.businessContact.contact"),
+            classes = Some("form-label cascading"),
+            isPageHeading = false,
+        )
+
+        @inputText(
+            form = contactForm,
+            name = "phoneNumber",
+            id = "phoneNumber",
+            label = messages("pages.businessContact.othercontact"),
+            classes = Some("form-label cascading"),
+            isPageHeading = false,
+        )
+
+        @button("app.common.saveAndContinue")
     }
 }

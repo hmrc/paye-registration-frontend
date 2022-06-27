@@ -19,6 +19,7 @@ package services
 import common.exceptions.InternalExceptions.APIConversionException
 import enums.PAYEStatus
 import helpers.PayeComponentSpec
+import models.SummaryListRowUtils.optSummaryListRowSeq
 import models.api.{Director, Name, SICCode, CompanyDetails => CompanyDetailsAPI, PAYEContact => PAYEContactAPI, PAYERegistration => PAYERegistrationAPI}
 import models.view._
 import models.{Address, DigitalContactDetails}
@@ -78,174 +79,6 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
     val formatHMTLROAddress = service.addressToSummaryRowAnswers(apiRegistrationNoTName.companyDetails.roAddress)
     val formatHMTLPPOBAddress = service.addressToSummaryRowAnswers(apiRegistrationNoTName.companyDetails.ppobAddress)
     val formatHMTLCorrespondenceAddress = service.addressToSummaryRowAnswers(Fixtures.validPAYEContactAPI.correspondenceAddress)
-
-    val employeeAPISS: SummarySection = SummarySection(
-      id = "employees",
-      sectionHeading = "Employment information",
-      Seq(
-        SummaryRow(
-          id = "employing",
-          question = "Does the company employ anyone or provide expenses or benefits to staff?",
-          answers = List("No"),
-          Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees, "if the company employs anyone or provides expenses or benefits to staff."))
-        ),
-        SummaryRow(
-          id = "earliestDate",
-          question = "When did it first start employing someone or providing expenses or benefits to staff?",
-          answers = List("20/12/2016"),
-          Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees, "when the company first started employing someone or providing expenses or benefits to staff."))
-        ),
-        SummaryRow(
-          id = "inConstructionIndustry",
-          question = "Does the company work in the construction industry?",
-          answers = List("Yes"),
-          Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.constructionIndustry, "whether or not the company works in the construction industry."))
-        ),
-        SummaryRow(
-          id = "paysPension",
-          question = "Does the company make pension payments to a former employee or their dependants?",
-          answers = List("Yes"),
-          Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.pensions, "if the company makes pension payments to a former employee or their dependants."))
-        )
-      )
-    )
-
-    val completionCapacitySS: SummarySection = SummarySection(
-      id = "completionCapacity",
-      sectionHeading = "About you",
-      Seq(
-        SummaryRow(
-          id = "completionCapacity",
-          question = "What is your relationship to the company?",
-          answers = Seq("High Priestess"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompletionCapacityController.completionCapacity, "your relationship to the company."))
-        )
-      )
-    )
-
-    val companyDetailsSS: SummarySection = SummarySection(
-      id = "companyDetails",
-      sectionHeading = "Company information",
-      Seq(
-        SummaryRow(
-          id = "tradingName",
-          question = "Does or will the company trade using a different name?",
-          answers = Seq("No"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.tradingName, "whether your company will trade under another name."))
-        ),
-        SummaryRow(
-          id = "roAddress",
-          question = "What is your company's registered office address?",
-          answers = formatHMTLROAddress,
-          None
-        ),
-        SummaryRow(
-          id = "ppobAddress",
-          question = "Where will the company carry out most of its business activities?",
-          answers = formatHMTLPPOBAddress,
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.ppobAddress, "where your company will carry out most of its business activities."))
-        ),
-        SummaryRow(
-          id = "natureOfBusiness",
-          question = "What does your company do?",
-          answers = Seq("Firearms"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness, "what your company does."))
-        )
-      )
-    )
-
-    val businessContactDetailsSS: SummarySection = SummarySection(
-      id = "businessContactDetails",
-      sectionHeading = "Company contact details",
-      Seq(
-        SummaryRow(
-          id = "businessEmail",
-          question = "What is the company contact's email address?",
-          answers = Seq("test@email.com"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's email address."))
-        ),
-        SummaryRow(
-          id = "mobileNumber",
-          question = "What is the company contact's number?",
-          answers = Seq("1234567890"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's number."))
-        ),
-        SummaryRow(
-          id = "businessTelephone",
-          question = "What is the company contact's other number?",
-          answers = Seq("0987654321"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's other number."))
-        )
-      )
-    )
-
-    val directorDetailsSS = SummarySection(
-      id = "directorDetails",
-      sectionHeading = "Director details",
-      Seq(
-        SummaryRow(
-          id = "director0",
-          question = "Timothy Buttersford's National Insurance number",
-          answers = List("ZZ 12 34 56 A"),
-          Some(SummaryChangeLink(controllers.userJourney.routes.DirectorDetailsController.directorDetails, "Timothy Buttersford's National Insurance number"))
-        )
-      )
-    )
-
-    val payeContactDetailsSS = SummarySection(
-      id = "payeContactDetails",
-      sectionHeading = "PAYE contact details",
-      Seq(
-        SummaryRow(
-          id = "contactName",
-          question = "What is the name of the company's PAYE contact?",
-          answers = Seq("testName"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the name of the company's PAYE contact."))
-        ),
-        SummaryRow(
-          id = "emailPAYEContact",
-          question = "What is the email address of the company's PAYE contact?",
-          answers = Seq("testEmail"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the email address of the company's PAYE contact."))
-        ),
-        SummaryRow(
-          id = "mobileNumberPAYEContact",
-          question = "What is the contact number of the company's PAYE contact?",
-          answers = Seq("1234567890"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the contact number of the company's PAYE contact."))
-        ),
-        SummaryRow(
-          id = "phoneNumberPAYEContact",
-          question = "What is the other contact number of the company's PAYE contact?",
-          answers = Seq("0987654321"),
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the other contact number of the company's PAYE contact."))
-        ),
-        SummaryRow(
-          id = "correspondenceAddress",
-          question = "Where should we send PAYE-related post to?",
-          answers = formatHMTLCorrespondenceAddress,
-          optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress, "where we should send PAYE-related post to."))
-        )
-      )
-    )
-
-    def generateSummarySections(employee: SummarySection = employeeAPISS,
-                                cc: SummarySection = completionCapacitySS,
-                                compDets: SummarySection = companyDetailsSS,
-                                bcDets: SummarySection = businessContactDetailsSS,
-                                dirDets: SummarySection = directorDetailsSS,
-                                payeCDets: SummarySection = payeContactDetailsSS): Summary = {
-      Summary(
-        Seq(
-          employee,
-          cc,
-          compDets,
-          bcDets,
-          dirDets,
-          payeCDets
-        )
-      )
-    }
   }
 
   val simpleSICCodes = List(SICCode(code = None, description = Some("Firearms")))
@@ -284,236 +117,25 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
   val runTimeException = new RuntimeException("tst")
 
   "Calling getRegistrationSummary" should {
-    "return a defined Summary when the connector returns a valid PAYE Registration response" in new Setup {
-      lazy val summaryNoTName = generateSummarySections(employee =
-        SummarySection(
-          id = "employees",
-          sectionHeading = "Employment information",
-          Seq(
-            SummaryRow(
-              id = "willBePaying",
-              question = "Over the next 2 months will the company employ anyone or provide expenses or benefits to staff?",
-              answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.employingStaff, "if the company will employ anyone or provide expenses or benefits to staff, over the next 2 months."))
-            ),
-            SummaryRow(
-              id = "inConstructionIndustry",
-              question = "Does the company work in the construction industry?",
-              answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.constructionIndustry, "whether or not the company works in the construction industry."))
-            ),
-            SummaryRow(
-              id = "employsSubcontractors",
-              question = "During the current tax year will the company hire any subcontractors in the construction industry?",
-              answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.subcontractors, "if the company will hire any subcontractors in the construction industry during the current tax year."))
-            )
-          )
-        )
-      )
-
-      when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(apiRegistrationNoTName))
-      when(mockEmploymentService.apiToView(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Fixtures.validEmploymentViewNotIncorporated)
-      when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(None))
-
-      await(service.getRegistrationSummary("45632", "fooBar")) mustBe summaryNoTName
-    }
-
     "return None when the connector returns a Forbidden response" in new Setup {
       when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(forbidden))
 
-      intercept[Upstream4xxResponse](await(service.getRegistrationSummary("45632", "fooBar")))
+      intercept[Upstream4xxResponse](await(service.getEmploymentSectionSummary("45632", "fooBar")))
     }
 
     "return None when the connector returns a Not Found response" in new Setup {
       when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(notFound))
 
-      intercept[NotFoundException](await(service.getRegistrationSummary("45632", "fooBar")))
+      intercept[NotFoundException](await(service.getEmploymentSectionSummary("45632", "fooBar")))
     }
 
     "return None when the connector returns an exception response" in new Setup {
       when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(runTimeException))
 
-      intercept[RuntimeException](await(service.getRegistrationSummary("45632", "fooBar")))
-    }
-  }
-
-  "getRegistrationSummary valid test" should {
-    "convert a PAYE Registration API Model to a Summary model with feature switch on for new Employment Block. incorped and trading name does not exist" in new Setup(true) {
-
-      lazy val summaryNoTName = generateSummarySections(employee =
-        SummarySection(
-          id = "employees",
-          sectionHeading = "Employment information",
-          Seq(
-            SummaryRow(
-              id = "employing",
-              question = "Does the company employ anyone or provide expenses or benefits to staff?",
-              answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees, "if the company employs anyone or provides expenses or benefits to staff."))
-            ),
-            SummaryRow(
-              id = "earliestDate",
-              question = "When did it first start employing someone or providing expenses or benefits to staff?",
-              answers = Seq("20/12/2016"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees, "when the company first started employing someone or providing expenses or benefits to staff."))
-            ),
-            SummaryRow(
-              id = "inConstructionIndustry",
-              question = "Does the company work in the construction industry?",
-              answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.constructionIndustry, "whether or not the company works in the construction industry."))
-            ),
-            SummaryRow(
-              id = "employsSubcontractors",
-              question = "During the current tax year will the company hire any subcontractors in the construction industry?",
-              answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.subcontractors, "if the company will hire any subcontractors in the construction industry during the current tax year."))
-            ),
-            SummaryRow(
-              id = "paysPension",
-              question = "Does the company make pension payments to a former employee or their dependants?",
-              answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.pensions, "if the company makes pension payments to a former employee or their dependants."))
-            )
-          )
-        )
-      )
-
-      when(mockEmploymentService.apiToView(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Fixtures.validEmploymentViewIncorporated)
-
-      when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(LocalDate.now)))
-
-      service.registrationToSummary(apiRegistrationNoTName, "regId", Some(LocalDate.now)) mustBe summaryNoTName
-    }
-    "convert a PAYE Registration API Model to a Summary model with feature switch on for new Employment Block. incorped and trading name exists" in new Setup(true) {
-      lazy val companyDetailsWithTradingNameSS = SummarySection(
-        id = "companyDetails",
-        sectionHeading = "Company information",
-        Seq(
-          SummaryRow(
-            id = "tradingName",
-            question = "Does or will the company trade using a different name?",
-            answers = Seq("foo"),
-            optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.tradingName, "whether your company will trade under another name."))
-          ),
-          SummaryRow(
-            id = "roAddress",
-            question = "What is your company's registered office address?",
-            answers = formatHMTLROAddress,
-            None
-          ),
-          SummaryRow(
-            id = "ppobAddress",
-            question = "Where will the company carry out most of its business activities?",
-            answers = formatHMTLPPOBAddress,
-            Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.ppobAddress, "where your company will carry out most of its business activities."))
-          ),
-          SummaryRow(
-            id = "natureOfBusiness",
-            question = "What does your company do?",
-            answers = Seq("Firearms"),
-            Some(SummaryChangeLink(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness, "what your company does."))
-          )
-        )
-      )
-
-      lazy val SummaryTradingName = generateSummarySections(
-        compDets = companyDetailsWithTradingNameSS,
-        employee =
-          SummarySection(
-            id = "employees",
-            sectionHeading = "Employment information",
-            Seq(
-              SummaryRow(
-                id = "employing",
-                question = "Does the company employ anyone or provide expenses or benefits to staff?",
-                answers = Seq("Yes"),
-                Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees, "if the company employs anyone or provides expenses or benefits to staff."))
-              ),
-              SummaryRow(
-                id = "earliestDate",
-                question = "When did it first start employing someone or providing expenses or benefits to staff?",
-                answers = Seq("20/12/2016"),
-                Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.paidEmployees, "when the company first started employing someone or providing expenses or benefits to staff."))
-              ),
-              SummaryRow(
-                id = "inConstructionIndustry",
-                question = "Does the company work in the construction industry?",
-                answers = Seq("Yes"),
-                Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.constructionIndustry, "whether or not the company works in the construction industry."))
-              ),
-              SummaryRow(
-                id = "employsSubcontractors",
-                question = "During the current tax year will the company hire any subcontractors in the construction industry?",
-                answers = Seq("Yes"),
-                Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.subcontractors, "if the company will hire any subcontractors in the construction industry during the current tax year."))
-              ),
-              SummaryRow(
-                id = "paysPension",
-                question = "Does the company make pension payments to a former employee or their dependants?",
-                answers = Seq("Yes"),
-                Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.pensions, "if the company makes pension payments to a former employee or their dependants."))
-              )
-            )
-          )
-      )
-
-      when(mockEmploymentService.apiToView(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Fixtures.validEmploymentViewIncorporated)
-
-      when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(LocalDate.now)))
-
-      service.registrationToSummary(
-        apiRegistrationNoTName.copy(companyDetails = apiRegistrationNoTName.companyDetails.copy(tradingName = Some("foo"))),
-        "regId",
-        Some(LocalDate.now)
-      ) mustBe SummaryTradingName
-    }
-    "convert a PAYE Registration API Model to a Summary model with feature switch on for new Employment Block that is not incorped" in new Setup(true) {
-
-      lazy val summaryNoTName = generateSummarySections(employee =
-        SummarySection(
-          id = "employees",
-          sectionHeading = "Employment information",
-          Seq(
-            SummaryRow(
-              id = "willBePaying",
-              question = "Over the next 2 months will the company employ anyone or provide expenses or benefits to staff?",
-              answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.employingStaff, "if the company will employ anyone or provide expenses or benefits to staff, over the next 2 months."))
-            ),
-            SummaryRow(
-              id = "inConstructionIndustry",
-              question = "Does the company work in the construction industry?",
-              answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.constructionIndustry, "whether or not the company works in the construction industry."))
-            ),
-            SummaryRow(
-              id = "employsSubcontractors",
-              question = "During the current tax year will the company hire any subcontractors in the construction industry?",
-              answers = Seq("Yes"),
-              Some(SummaryChangeLink(controllers.userJourney.routes.EmploymentController.subcontractors, "if the company will hire any subcontractors in the construction industry during the current tax year."))
-            )
-          )
-        )
-      )
-
-      when(mockEmploymentService.apiToView(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Fixtures.validEmploymentViewNotIncorporated)
-      when(mockIncorpInfoService.getIncorporationDate(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(None))
-
-      service.registrationToSummary(apiRegistrationNoTName, "regId", None) mustBe summaryNoTName
+      intercept[RuntimeException](await(service.getEmploymentSectionSummary("45632", "fooBar")))
     }
   }
 
@@ -538,36 +160,37 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
       override val formatHMTLROAddress = service.addressToSummaryRowAnswers(validCompanyDetailsAPI.roAddress)
       override val formatHMTLPPOBAddress = service.addressToSummaryRowAnswers(validCompanyDetailsAPI.ppobAddress)
 
-      val companyDetailsSection = SummarySection(
-        id = "companyDetails",
-        sectionHeading = "Company information",
-        Seq(
-          SummaryRow(
-            id = "tradingName",
-            question = "Does or will the company trade using a different name?",
-            answers = Seq("Test Company Trading Name"),
-            optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.tradingName, "whether your company will trade under another name."))
-          ),
-          SummaryRow(
-            id = "roAddress",
-            question = "What is your company's registered office address?",
-            answers = formatHMTLROAddress,
-            None
-          ),
-          SummaryRow(
-            id = "ppobAddress",
-            question = "Where will the company carry out most of its business activities?",
-            answers = formatHMTLPPOBAddress,
-            Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.ppobAddress, "where your company will carry out most of its business activities."))
-          ),
-          SummaryRow(
-            id = "natureOfBusiness",
-            question = "What does your company do?",
-            answers = Seq("Novelty hairbrushes"),
-            Some(SummaryChangeLink(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness, "what your company does."))
-          )
-        )
+      val tradingName = optSummaryListRowSeq(
+        messages("pages.summary.tradingName.question"),
+        Some(Seq("Test Company Trading Name")),
+        Some(controllers.userJourney.routes.CompanyDetailsController.tradingName.url)
       )
+
+      val roAddress = optSummaryListRowSeq(
+        messages("pages.summary.roAddress.question"),
+        Some(formatHMTLROAddress),
+        None
+      )
+
+      val ppobAddress = optSummaryListRowSeq(
+        messages("pages.summary.ppobAddress.question"),
+        Some(formatHMTLPPOBAddress),
+        Some(controllers.userJourney.routes.CompanyDetailsController.ppobAddress.url)
+      )
+
+      val natureOfBusiness = optSummaryListRowSeq(
+        messages("pages.summary.natureOfBusiness.question"),
+        Some(Seq("Novelty hairbrushes")),
+        Some(controllers.userJourney.routes.NatureOfBusinessController.natureOfBusiness.url)
+      )
+
+      val companyDetailsSection = Seq(
+        tradingName,
+        roAddress,
+        ppobAddress,
+        natureOfBusiness
+      ).flatten
+
       service.buildCompanyDetailsSection(validCompanyDetailsAPI, sicCodes) mustBe companyDetailsSection
     }
 
@@ -590,7 +213,7 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
   }
 
   "buildBusinessContactDetails" should {
-    "return a valid buiness contact details block" in new Setup {
+    "return a valid business contact details block" in new Setup {
       val businessContactDetailsModel =
         DigitalContactDetails(
           Some("test@email.com"),
@@ -598,31 +221,29 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
           Some("0987654321")
         )
 
-      val validBCDSection =
-        SummarySection(
-          id = "businessContactDetails",
-          sectionHeading = "Company contact details",
-          Seq(
-            Some(SummaryRow(
-              id = "businessEmail",
-              question = "What is the company contact's email address?",
-              answers = Seq("test@email.com"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's email address."))
-            )),
-            Some(SummaryRow(
-              id = "mobileNumber",
-              question = "What is the company contact's number?",
-              answers = Seq("1234567890"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's number."))
-            )),
-            Some(SummaryRow(
-              id = "businessTelephone",
-              question = "What is the company contact's other number?",
-              answers = Seq("0987654321"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's other number."))
-            ))
-          ).flatten
-        )
+      val businessEmail = optSummaryListRowSeq(
+        messages("pages.summary.businessEmail.question"),
+        Some(Seq("test@email.com")),
+        Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails.url)
+      )
+
+      val mobileNumber = optSummaryListRowSeq(
+        messages("pages.summary.mobileNumber.question"),
+        Some(Seq("1234567890")),
+        Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails.url)
+      )
+
+      val businessTelephone = optSummaryListRowSeq(
+        messages("pages.summary.businessTelephone.question"),
+        Some(Seq("0987654321")),
+        Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails.url)
+      )
+
+      val validBCDSection = Seq(
+        businessEmail,
+        mobileNumber,
+        businessTelephone
+      ).flatten
 
       service.buildBusinessContactDetailsSection(businessContactDetailsModel) mustBe validBCDSection
     }
@@ -635,31 +256,29 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
           None
         )
 
-      val validBCDSection =
-        SummarySection(
-          id = "businessContactDetails",
-          sectionHeading = "Company contact details",
-          Seq(
-            SummaryRow(
-              id = "businessEmail",
-              question = "What is the company contact's email address?",
-              answers = Seq(""),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's email address."))
-            ),
-            SummaryRow(
-              id = "mobileNumber",
-              question = "What is the company contact's number?",
-              answers = Seq(""),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's number."))
-            ),
-            SummaryRow(
-              id = "businessTelephone",
-              question = "What is the company contact's other number?",
-              answers = Seq(""),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails, "the company contact's other number."))
-            )
-          )
-        )
+      val businessEmail = optSummaryListRowSeq(
+        messages("pages.summary.businessEmail.question"),
+        Some(Seq("")),
+        Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails.url)
+      )
+
+      val mobileNumber = optSummaryListRowSeq(
+        messages("pages.summary.mobileNumber.question"),
+        Some(Seq("")),
+        Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails.url)
+      )
+
+      val businessTelephone = optSummaryListRowSeq(
+        messages("pages.summary.businessTelephone.question"),
+        Some(Seq("")),
+        Some(controllers.userJourney.routes.CompanyDetailsController.businessContactDetails.url)
+      )
+
+      val validBCDSection = Seq(
+        businessEmail,
+        mobileNumber,
+        businessTelephone
+      ).flatten
 
       service.buildBusinessContactDetailsSection(businessContactDetailsModel) mustBe validBCDSection
     }
@@ -682,43 +301,43 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
         tstAddress
       )
 
-      val validPAYEContactDetailsSection =
-        SummarySection(
-          id = "payeContactDetails",
-          sectionHeading = "PAYE contact details",
-          Seq(
-            SummaryRow(
-              id = "contactName",
-              question = "What is the name of the company's PAYE contact?",
-              answers = Seq("tstName"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the name of the company's PAYE contact."))
-            ),
-            SummaryRow(
-              id = "emailPAYEContact",
-              question = "What is the email address of the company's PAYE contact?",
-              answers = Seq("test@email.com"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the email address of the company's PAYE contact."))
-            ),
-            SummaryRow(
-              id = "mobileNumberPAYEContact",
-              question = "What is the contact number of the company's PAYE contact?",
-              answers = Seq("1234567890"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the contact number of the company's PAYE contact."))
-            ),
-            SummaryRow(
-              id = "phoneNumberPAYEContact",
-              question = "What is the other contact number of the company's PAYE contact?",
-              answers = Seq("0987654321"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the other contact number of the company's PAYE contact."))
-            ),
-            SummaryRow(
-              id = "correspondenceAddress",
-              question = "Where should we send PAYE-related post to?",
-              answers = Seq("tstLine1", "tstLine2", "pstCode", "UK"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress, "where we should send PAYE-related post to."))
-            )
-          )
-        )
+      val contactName = optSummaryListRowSeq(
+        messages("pages.summary.contactName.question"),
+        Some(Seq("tstName")),
+        Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails.url)
+      )
+
+      val emailContact = optSummaryListRowSeq(
+        messages("pages.summary.emailPAYEContact.question"),
+        Some(Seq("test@email.com")),
+        Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails.url)
+      )
+
+      val mobileContact = optSummaryListRowSeq(
+        messages("pages.summary.mobileNumberPAYEContact.question"),
+        Some(Seq("1234567890")),
+        Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails.url)
+      )
+
+      val phoneNumber = optSummaryListRowSeq(
+        messages("pages.summary.phoneNumberPAYEContact.question"),
+        Some(Seq("0987654321")),
+        Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails.url)
+      )
+
+      val correspondanceAddress = optSummaryListRowSeq(
+        messages("pages.summary.correspondenceAddress.question"),
+        Some(Seq("tstLine1", "tstLine2", "pstCode", "UK")),
+        Some(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress.url)
+      )
+
+      val validPAYEContactDetailsSection = Seq(
+        contactName,
+        emailContact,
+        mobileContact,
+        phoneNumber,
+        correspondanceAddress
+      ).flatten
 
       service.buildContactDetails(tstContactSectionAPI) mustBe validPAYEContactDetailsSection
     }
@@ -737,43 +356,43 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
         tstAddress
       )
 
-      val validPAYEContactDetailsSection =
-        SummarySection(
-          id = "payeContactDetails",
-          sectionHeading = "PAYE contact details",
-          Seq(
-            SummaryRow(
-              id = "contactName",
-              question = "What is the name of the company's PAYE contact?",
-              answers = Seq("tstName"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the name of the company's PAYE contact."))
-            ),
-            SummaryRow(
-              id = "emailPAYEContact",
-              question = "What is the email address of the company's PAYE contact?",
-              answers = Seq(""),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the email address of the company's PAYE contact."))
-            ),
-            SummaryRow(
-              id = "mobileNumberPAYEContact",
-              question = "What is the contact number of the company's PAYE contact?",
-              answers = Seq(""),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the contact number of the company's PAYE contact."))
-            ),
-            SummaryRow(
-              id = "phoneNumberPAYEContact",
-              question = "What is the other contact number of the company's PAYE contact?",
-              answers = Seq(""),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeContactDetails, "the other contact number of the company's PAYE contact."))
-            ),
-            SummaryRow(
-              id = "correspondenceAddress",
-              question = "Where should we send PAYE-related post to?",
-              answers = Seq("tstLine1", "tstLine2", "pstCode", "UK"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress, "where we should send PAYE-related post to."))
-            )
-          )
-        )
+      val contactName = optSummaryListRowSeq(
+        messages("pages.summary.contactName.question"),
+        Some(Seq("tstName")),
+        Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails.url)
+      )
+
+      val emailContact = optSummaryListRowSeq(
+        messages("pages.summary.emailPAYEContact.question"),
+        Some(Seq("")),
+        Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails.url)
+      )
+
+      val mobileContact = optSummaryListRowSeq(
+        messages("pages.summary.mobileNumberPAYEContact.question"),
+        Some(Seq("")),
+        Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails.url)
+      )
+
+      val phoneNumber = optSummaryListRowSeq(
+        messages("pages.summary.phoneNumberPAYEContact.question"),
+        Some(Seq("")),
+        Some(controllers.userJourney.routes.PAYEContactController.payeContactDetails.url)
+      )
+
+      val correspondanceAddress = optSummaryListRowSeq(
+        messages("pages.summary.correspondenceAddress.question"),
+        Some(Seq("tstLine1", "tstLine2", "pstCode", "UK")),
+        Some(controllers.userJourney.routes.PAYEContactController.payeCorrespondenceAddress.url)
+      )
+
+      val validPAYEContactDetailsSection = Seq(
+        contactName,
+        emailContact,
+        mobileContact,
+        phoneNumber,
+        correspondanceAddress
+      ).flatten
 
       service.buildContactDetails(tstContactSectionAPI) mustBe validPAYEContactDetailsSection
     }
@@ -782,56 +401,50 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
   "buildCompletionCapacitySection" should {
     "return a valid section for director" in new Setup {
       val capacity = "director"
-      val section = SummarySection(
-        id = "completionCapacity",
-        sectionHeading = "About you",
-        Seq(
-          SummaryRow(
-            id = "completionCapacity",
-            question = "What is your relationship to the company?",
-            answers = Seq("Director"),
-            optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompletionCapacityController.completionCapacity, "your relationship to the company."))
-          )
-        )
+
+      val completionCapacity = optSummaryListRowSeq(
+        messages("pages.summary.completionCapacity.question"),
+        Some(Seq("Director")),
+        Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity.url)
       )
 
-      service.buildCompletionCapacitySection(capacity) mustBe section
+      val completionCapacitySectionBuilder = Seq(
+        completionCapacity
+      ).flatten
+
+      service.buildCompletionCapacitySection(capacity) mustBe completionCapacitySectionBuilder
     }
 
     "return a valid section for agent" in new Setup {
       val capacity = "agent"
-      val section = SummarySection(
-        id = "completionCapacity",
-        sectionHeading = "About you",
-        Seq(
-          SummaryRow(
-            id = "completionCapacity",
-            question = "What is your relationship to the company?",
-            answers = Seq("Agent"),
-            optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompletionCapacityController.completionCapacity, "your relationship to the company."))
-          )
-        )
+
+      val completionCapacity = optSummaryListRowSeq(
+        messages("pages.summary.completionCapacity.question"),
+        Some(Seq("Agent")),
+        Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity.url)
       )
 
-      service.buildCompletionCapacitySection(capacity) mustBe section
+      val completionCapacitySectionBuilder = Seq(
+        completionCapacity
+      ).flatten
+
+      service.buildCompletionCapacitySection(capacity) mustBe completionCapacitySectionBuilder
     }
 
     "return a valid section for other - Executive in charge of helicopters" in new Setup {
       val capacity = "Executive in charge of helicopters"
-      val section = SummarySection(
-        id = "completionCapacity",
-        sectionHeading = "About you",
-        Seq(
-          SummaryRow(
-            id = "completionCapacity",
-            question = "What is your relationship to the company?",
-            answers = Seq("Executive in charge of helicopters"),
-            optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.CompletionCapacityController.completionCapacity, "your relationship to the company."))
-          )
-        )
+
+      val completionCapacity = optSummaryListRowSeq(
+        messages("pages.summary.completionCapacity.question"),
+        Some(Seq("Executive in charge of helicopters")),
+        Some(controllers.userJourney.routes.CompletionCapacityController.completionCapacity.url)
       )
 
-      service.buildCompletionCapacitySection(capacity) mustBe section
+      val completionCapacitySectionBuilder = Seq(
+        completionCapacity
+      ).flatten
+
+      service.buildCompletionCapacitySection(capacity) mustBe completionCapacitySectionBuilder
     }
   }
 
@@ -846,40 +459,22 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
             title = Some("Mr")
           ),
           nino = Some("ZZ123456A")
-        ),
-        Director(
-          name = Name(
-            forename = Some("Pierre"),
-            otherForenames = Some("Paul"),
-            surname = "Simpson",
-            title = Some("Mr")
-          ),
-          nino = None
         )
       )
 
 
-      val validDirectorDetailsSection: SummarySection =
-        SummarySection(
-          id = "directorDetails",
-          sectionHeading = "Director details",
-          Seq(
-            SummaryRow(
-              id = "director0",
-              question = "Timothy Buttersford's National Insurance number",
-              answers = Seq("ZZ 12 34 56 A"),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.DirectorDetailsController.directorDetails, "Timothy Buttersford's National Insurance number"))
-            ),
-            SummaryRow(
-              id = "director1",
-              question = "Pierre Simpson's National Insurance number",
-              answers = Seq(""),
-              optChangeLink = Some(SummaryChangeLink(controllers.userJourney.routes.DirectorDetailsController.directorDetails, "Pierre Simpson's National Insurance number"))
-            )
-          )
+      val validDirectorDetailsSection =
+        optSummaryListRowSeq(
+          "Timothy Buttersford's National Insurance number",
+          Some(Seq("ZZ 12 34 56 A")),
+          Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails.url)
         )
 
-      service.buildDirectorsSection(directorDetailsModel) mustBe validDirectorDetailsSection
+      val DirectorDetailsSectionBuilder = Seq(
+        validDirectorDetailsSection
+      ).flatten
+
+      service.buildDirectorsSection(directorDetailsModel) mustBe DirectorDetailsSectionBuilder
     }
   }
 }

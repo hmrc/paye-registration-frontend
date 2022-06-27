@@ -15,49 +15,52 @@
  *@
 
 @import config.AppConfig
-@import helpers.templates.{addressBlockDisplay, hiddenDetails, linkNewWindow}
 @import models.Address
 @import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+@import views.html.templates.layout
 
-@this(addressBlockDisplay: addressBlockDisplay,
-        hiddenDetails: hiddenDetails,
-        linkNewWindow: linkNewWindow,
-        main_template: main_template,
-        form: FormWithCSRF)
+@this(addressDisplay: components.addressBlockDisplay,
+        hiddenDetails: components.hiddenDetails,
+        linkNewWindow: components.linkNewWindow,
+        layout: layout,
+        form: FormWithCSRF,
+        h1: components.h1,
+        button: components.button,
+        p: components.p)
 
 @(companyName : String, address : Address)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = messages("pages.confirmRO.description", companyName)) {
+@layout(pageTitle = Some(messages("pages.confirmRO.description", companyName))) {
 
-    <h1 class="form-title heading-large" id="pageHeading">@Html(messages("pages.confirmRO.description", companyName))</h1>
+    @h1(messages("pages.confirmRO.description", companyName))
 
-    <p id="lead-paragraph">@messages("pages.confirmRO.lede", companyName)</p>
+    @p{ @messages("pages.confirmRO.lede", companyName) }
 
     @form(action = controllers.userJourney.routes.CompanyDetailsController.confirmRO) {
-        <div class="form-group">
-            @addressBlockDisplay(address, "ro-address")
-        </div>
 
-        <div class="form-group">
-            @hiddenDetails("incorrect-address-", messages("pages.confirmRO.help.link"), incorrectAddressContent)
-        </div>
+        @addressDisplay(address, "ro-address")
 
-        <div class="form-group">
-            <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
-        </div>
+
+        @hiddenDetails("incorrect-address-", messages("pages.confirmRO.help.link"), incorrectAddressContent)
+
+
+
+        @button("app.common.saveAndContinue")
+
     }
 }
 
 @incorrectAddressContent = {
-    <p>
+    @p {
         @messages("pages.common.companiesHouse.hiddenIntro.1")
         @linkNewWindow(messages("pages.common.companiesHouse.hiddenIntro.url"), messages("pages.confirmRO.hiddenIntro.label"), "confirmROAddress", Some("companies-house-link"), true)
         @messages("pages.common.companiesHouse.hiddenIntro.2")
-    </p>
-    <p>
+    }
+
+    @p {
         @messages("pages.common.companiesHouse.hiddenIntro2.1")
         @linkNewWindow(messages("pages.common.companiesHouse.hiddenIntro2.url"), messages("pages.common.companiesHouse.hiddenIntro2.label"), "confirmROAddress", None, true)
-    </p>
+    }
 }
 
 

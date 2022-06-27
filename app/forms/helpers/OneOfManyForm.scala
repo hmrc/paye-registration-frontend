@@ -28,7 +28,7 @@ trait OneOfManyForm {
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] = {
       if (optionalFields.flatMap(data.get).forall(_ == "")) {
-        Left(Seq(FormError(s"noFieldsCompleted-$key", noFieldsCompletedMessage)))
+        Left(Seq(FormError(s"$key", noFieldsCompletedMessage)))
       } else {
         Right(data.get(key).filterNot(_ == ""))
       }

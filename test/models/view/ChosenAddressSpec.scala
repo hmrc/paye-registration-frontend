@@ -28,7 +28,7 @@ class ChosenAddressSpec extends PayeComponentSpec {
 
   "AddressChoice fromString" should {
     "return a Other object when the input string is other" in {
-      AddressChoice.fromString("other") mustBe Other
+      AddressChoice.fromString("otherAddress") mustBe Other
     }
 
     "return a ROAddress object when the input string is roAddress" in {

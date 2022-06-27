@@ -15,52 +15,42 @@
  *@
 
 @import config.AppConfig
-@import helpers.templates.{payeErrorSummary, payeTextArea}
 @import models.view.NatureOfBusiness
 @import uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
-@import views.helpers.TitleHelper.title
+@import views.TitleHelper.title
+@import views.html.templates.layout
 
-@this(main_template: main_template,
-        payeErrorSummary: payeErrorSummary,
-        payeTextArea: payeTextArea,
-        formWithCSRF: FormWithCSRF)
+@this(
+        layout: layout,
+        errorSummary: components.errorSummary,
+        formWithCSRF: FormWithCSRF,
+        h1: components.h1,
+        p: components.p,
+        inputTextArea: components.inputTextArea,
+        button: components.button)
 
 @(sicForm: Form[NatureOfBusiness])(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = title(messages("pages.natureOfBusiness.description"), sicForm)) {
+@layout(pageTitle = Some(title(messages("pages.natureOfBusiness.description"), sicForm))) {
 
-    @payeErrorSummary(
-        messages("app.common.errorSummaryLabel"), sicForm, dataJourney=Some("NatureOfBusiness")
-    )
+    @errorSummary(sicForm.errors)
 
-    <h1 class="form-title heading-large" id="pageHeading">@Html(messages("pages.natureOfBusiness.description"))</h1>
+    @h1(messages("pages.natureOfBusiness.description"))
 
     @formWithCSRF(action = controllers.userJourney.routes.NatureOfBusinessController.submitNatureOfBusiness) {
-            <fieldset>
-              <div class="char-counter" data-char-counter>
-                @payeTextArea(
-                    sicForm("description"),
-                    '_divClass   -> "form-group",
-                    '_inputClass -> "form-control fill-width",
-                    '_labelClass -> "form-label",
-                    '_label      -> messages("pages.natureOfBusiness.textArea.label"),
-                    '_percentageWidth -> "100",
-                    '_rows       -> "4",
-                    '_maxlength  -> 100,
-                    '_dataCharField -> "data_char_field"
-                )
-                <p class="char-counter-text flush" id="no-js-counter-text">
-                    Max 100 characters
-                </p>
-              </div>
-            </fieldset>
 
-        <div class="form-group">
-            <button class="button" type="submit" id="continue" >@messages("app.common.saveAndContinue")</button>
-        </div>
+        @inputTextArea(
+            form = sicForm,
+            id = "description",
+            name = "description",
+            label = messages("pages.natureOfBusiness.textArea.label"),
+            isLabelHidden = false,
+            isPageHeading = false,
+            maxCharacters = Some(100)
+        )
+
+        <span id="continue">
+            @button("app.common.saveAndContinue")
+        </span>
     }
-
-    <script>
-        document.getElementById("no-js-counter-text").style.visibility = "hidden";
-    </script>
 }

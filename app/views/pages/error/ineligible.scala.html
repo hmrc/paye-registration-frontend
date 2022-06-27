@@ -15,28 +15,34 @@
  *@
 
 @import config.AppConfig
+@import views.html.templates.layout
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
-@this(main_template: main_template)
+@this(
+        layout: layout,
+        h1: components.h1,
+        p: components.p,
+        formWithCSRF: FormWithCSRF,
+        button: components.button,
+        bullets: components.bullets)
 
 @()(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@main_template(title = messages("errorPages.ineligible.description")) {
+@layout(pageTitle = Some(messages("errorPages.ineligible.description"))) {
 
-  <h1 class="heading-large">@messages("errorPages.ineligible.description")</h1>
+    @h1("errorPages.ineligible.description")
 
-  <p>@messages("errorPages.ineligible.p1")</p>
+    @p { @messages("errorPages.ineligible.p1") }
 
-  <p>@messages("errorPages.ineligible.p2")</p>
+    @p { @messages("errorPages.ineligible.p2") }
 
-  <ul class="list-bullet">
-    <li>@messages("errorPages.ineligible.l1")</li>
-    <li>@messages("errorPages.ineligible.l2")</li>
-    <li>@messages("errorPages.ineligible.l3")</li>
-  </ul>
+    @bullets(
+        messages("errorPages.ineligible.l1"),
+        messages("errorPages.ineligible.l2"),
+        messages("errorPages.ineligible.l3")
+    )
 
-  <form action="@controllers.userJourney.routes.DashboardController.dashboard" method="get">
-    <div class="form-group">
-      <button class="button" type="submit" id="continue" >@messages("app.common.companyRegistrationOverview")</button>
-    </div>
-  </form>
+    @formWithCSRF(action= controllers.userJourney.routes.DashboardController.dashboard) {
+        @button("app.common.companyRegistrationOverview")
+    }
 }
