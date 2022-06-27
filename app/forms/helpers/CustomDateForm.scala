@@ -44,7 +44,7 @@ trait CustomDateForm extends DateUtil {
     override def unbind(key: String, value: LocalDate): Map[String, String] = Map(
       s"${customFormPrefix}.Day" -> value.getDayOfMonth.toString,
       s"${customFormPrefix}.Month" -> value.getMonthValue.toString,
-      s"${customFormPrefix}.Year" -> value.getYear.toString,
+      s"${customFormPrefix}.Year" -> value.getYear.toString
     )
   }
 
