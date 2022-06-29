@@ -25,6 +25,7 @@ class FeatureSwitchSpec extends PayeComponentSpec {
     System.clearProperty("feature.cohoFirstHandOff")
     System.clearProperty("feature.businessActivitiesHandOff")
     System.clearProperty("feature.system-date")
+    System.clearProperty("feature.isWelsh")
     super.beforeEach()
   }
 
@@ -245,6 +246,18 @@ class FeatureSwitchSpec extends PayeComponentSpec {
       System.setProperty("feature.companyRegistration", "false")
 
       payeFeatureSwitch("companyRegistration") mustBe Some(BooleanFeatureSwitch("companyRegistration", false))
+    }
+
+    "return true if the isWelshEnabled system property is true" in {
+      System.setProperty("feature.isWelsh", "true")
+
+      payeFeatureSwitch("isWelsh") mustBe Some(BooleanFeatureSwitch("isWelsh", true))
+    }
+
+    "return false if the isWelshEnabled system property is false" in {
+      System.setProperty("feature.isWelsh", "false")
+
+      payeFeatureSwitch("isWelsh") mustBe Some(BooleanFeatureSwitch("isWelsh", false))
     }
 
     "return an empty option if a system property doesn't exist when using the apply function" in {

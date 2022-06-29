@@ -117,25 +117,31 @@ trait FeatureManager {
 class PAYEFeatureSwitch @Inject()(val manager: FeatureManager) extends PAYEFeatureSwitches {
   val companyRegistration = "companyRegistration"
   val setSystemDate = "system-date"
+  val isWelsh = "isWelsh"
 }
 
 trait PAYEFeatureSwitches {
 
   protected val companyRegistration: String
   protected val setSystemDate: String
+  protected val isWelsh: String
+
   protected val manager: FeatureManager
 
-  def companyReg = manager.getProperty(companyRegistration)
+  def companyReg: FeatureSwitch = manager.getProperty(companyRegistration)
 
-  def systemDate = manager.getProperty(setSystemDate)
+  def systemDate: FeatureSwitch = manager.getProperty(setSystemDate)
+
+  def isWelshEnabled: FeatureSwitch = manager.getProperty(isWelsh)
 
   def apply(name: String): Option[FeatureSwitch] = name match {
     case "companyRegistration" => Some(companyReg)
     case "system-date" => Some(systemDate)
+    case "isWelsh" => Some(isWelshEnabled)
     case _ => None
   }
 
   def all: Seq[FeatureSwitch] = {
-    Seq(companyReg, systemDate)
+    Seq(companyReg, systemDate, isWelshEnabled)
   }
 }
