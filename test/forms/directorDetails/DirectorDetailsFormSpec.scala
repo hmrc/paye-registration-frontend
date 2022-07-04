@@ -145,7 +145,7 @@ class DirectorDetailsFormSpec extends PayeComponentSpec {
       )
 
       val errs = Seq(
-        FormError("", "errors.duplicate.nino"),
+        FormError("nino", "errors.duplicate.nino"),
         FormError("nino[0]", "errors.invalid.nino"),
         FormError("nino[2]", "errors.invalid.nino"),
         FormError("nino[3]", "errors.invalid.nino"),
@@ -178,7 +178,7 @@ class DirectorDetailsFormSpec extends PayeComponentSpec {
 
       val boundForm = testForm.bind(data)
       boundForm.errors mustBe List(
-        FormError("", List("errors.duplicate.nino"))
+        FormError("nino", List("errors.duplicate.nino"))
       )
     }
   }

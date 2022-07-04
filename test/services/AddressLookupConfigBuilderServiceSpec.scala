@@ -27,7 +27,7 @@ class AddressLookupConfigBuilderServiceSpec extends PayeComponentSpec with PayeF
 
   implicit val mockMessages = mockMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
 
-  object TestService extends AddressLookupConfigBuilderService(mockAppConfig) {
+  object TestService extends AddressLookupConfigBuilderService(mockAppConfig, mockMessagesApi) {
     override lazy val payeRegistrationFrontendURL = "testPayeRegUrl"
     override lazy val timeoutLength = 22666
     override lazy val accessibilityFooterUrl = "http://localhost:9870/register-for-paye/accessibility-statement?pageUri=%2Fregister-for-paye%2F"
@@ -36,6 +36,7 @@ class AddressLookupConfigBuilderServiceSpec extends PayeComponentSpec with PayeF
 
   "buildConfig" should {
     "return a filled AlfJourneyConfig model" in {
+      System.setProperty("feature.isWelsh", "true")
 
       val result: AlfJourneyConfig = TestService.buildConfig(
         handbackLocation = Call("GET", "/foo"),
@@ -53,7 +54,7 @@ class AddressLookupConfigBuilderServiceSpec extends PayeComponentSpec with PayeF
           alphaPhase = false,
           showBackButtons = true,
           includeHMRCBranding = false,
-          disableTranslations = true,
+          disableTranslations = false,
 
           selectPageConfig = SelectPageConfig(
             proposalListLimit = 30,
@@ -73,36 +74,68 @@ class AddressLookupConfigBuilderServiceSpec extends PayeComponentSpec with PayeF
         ),
         labels = JourneyLabels(en = LanguageLabels(
           appLevelLabels = AppLevelLabels(
-            navTitle = "Register an employer for PAYE",
-            phaseBannerHtml = "This is a new service. Help us improve it - send your <a href=\"https://www.tax.service.gov.uk/register-for-paye/feedback\">feedback</a>."
+            navTitle = Some("Register an employer for PAYE"),
+            phaseBannerHtml = Some("This is a new service. Help us improve it - send your <a href=\"https://www.tax.service.gov.uk/register-for-paye/feedback\">feedback</a>.")
           ),
           SelectPageLabels(
-            title = "Choose an address",
-            heading = "Choose an address",
-            searchAgainLinkText = "Search again",
-            editAddressLinkText = "Edit address manually"
+            title = Some("Choose an address"),
+            heading = Some("Choose an address"),
+            searchAgainLinkText = Some("Search again"),
+            editAddressLinkText = Some("Edit address manually")
           ),
           LookupPageLabels(
-            title = "Search for your address",
-            heading = "Search for your address",
-            filterLabel = "House name or number (optional)",
-            submitLabel = "Search address",
-            manualAddressLinkText = "The address doesn't have a UK postcode"
+            title = Some("Search for your address"),
+            heading = Some("Search for your address"),
+            filterLabel = Some("House name or number (optional)"),
+            submitLabel = Some("Search address"),
+            manualAddressLinkText = Some("The address doesn't have a UK postcode")
           ),
           EditPageLabels(
-            title = "Enter address",
-            heading = "Enter address",
-            line1Label = "Address line 1",
-            line2Label = "Address line 2",
-            line3Label = "Address line 3"
+            title = Some("Enter address"),
+            heading = Some("Enter address"),
+            line1Label = Some("Address line 1"),
+            line2Label = Some("Address line 2"),
+            line3Label = Some("Address line 3")
           ),
           ConfirmPageLabels(
-            title = "Confirm where you'll carry out most of your business activities",
-            heading = "Confirm where you'll carry out most of your business activities",
-            submitLabel = "Save and continue",
-            changeLinkText = "Change"
+            title = Some("Review and confirm your address"),
+            heading = Some("Review and confirm your address"),
+            submitLabel = Some("Save and continue"),
+            changeLinkText = Some("Change")
           )
-        )
+        ),
+          cy = LanguageLabels(
+            appLevelLabels = AppLevelLabels(
+              navTitle = Some("Cofrestru cyflogwr ar gyfer TWE"),
+              phaseBannerHtml = Some("Mae hwn yn wasanaeth newydd. Helpwch ni i’w wella – anfonwch eich adborth.")
+            ),
+            SelectPageLabels(
+              title = Some("Dewiswch gyfeiriad"),
+              heading = Some("Dewiswch gyfeiriad"),
+              searchAgainLinkText = Some("Chwilio eto"),
+              editAddressLinkText = Some("Golygwch y cyfeiriad â llaw")
+            ),
+            LookupPageLabels(
+              title = Some("Chwiliwch am eich cyfeiriad"),
+              heading = Some("Chwiliwch am eich cyfeiriad"),
+              filterLabel = Some("Enw neu rif y tŷ (dewisol)"),
+              submitLabel = Some("Chwilio am y cyfeiriad"),
+              manualAddressLinkText = Some("Nid oes gan y cyfeiriad god post yn y DU")
+            ),
+            EditPageLabels(
+              title = Some("Nodwch gyfeiriad"),
+              heading = Some("Nodwch gyfeiriad"),
+              line1Label = Some("Cyfeiriad - llinell 1"),
+              line2Label = Some("Cyfeiriad - llinell 2"),
+              line3Label = Some("Cyfeiriad - llinell 3")
+            ),
+            ConfirmPageLabels(
+              title = Some("Adolygu a chadarnhau’ch cyfeiriad"),
+              heading = Some("Adolygu a chadarnhau’ch cyfeiriad"),
+              submitLabel = Some("Cadw ac yn eich blaen"),
+              changeLinkText = Some("Newid")
+            )
+          )
         )
       )
 
