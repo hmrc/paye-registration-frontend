@@ -105,9 +105,9 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
       def get(n: Int) = list.get(n).text
 
 
-      get(0) mustBe s"Mr test1 test11 testa's National Insurance number For example, QQ 12 34 56 C"
-      get(1) mustBe s"Mr test2 test22 testb's National Insurance number"
-      get(2) mustBe s"test3 test33 testc's National Insurance number"
+      get(0) mustBe s"Mr test1 test11 testa’s National Insurance number For example, QQ 12 34 56 C"
+      get(1) mustBe s"Mr test2 test22 testb’s National Insurance number"
+      get(2) mustBe s"test3 test33 testc’s National Insurance number"
     }
 
     "not show any officers who aren't directors or directors who are retired" in {
@@ -249,9 +249,9 @@ class DirectorDetailsMethodISpec extends IntegrationSpecBase
 
       def get(n: Int) = list.get(n).text
 
-      get(0) mustBe s"Mr test1 test11 testa's National Insurance number For example, QQ 12 34 56 C"
-      get(1) mustBe s"test2 test22 testb's National Insurance number"
-      get(2) mustBe s"a b c's National Insurance number"
+      get(0) mustBe s"Mr test1 test11 testa’s National Insurance number For example, QQ 12 34 56 C"
+      get(1) mustBe s"test2 test22 testb’s National Insurance number"
+      get(2) mustBe s"a b c’s National Insurance number"
     }
 
     "should throw error when no valid directors are returned" in {

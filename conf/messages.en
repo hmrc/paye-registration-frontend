@@ -54,8 +54,8 @@ page.timeout.url                                                = continue regis
 ## Application Delayed
 pages.applicationDelayed.title                                  = Your application will be delayed
 pages.applicationDelayed.description                            = Your application will be delayed
-pages.applicationDelayed.para1                                  = This is because the company won''t employ someone or provide expenses or benefits until the new tax year.
-pages.applicationDelayed.para2                                  = You can continue with your application but we won''t process it until after 6 April.
+pages.applicationDelayed.para1                                  = This is because the company won’t employ someone or provide expenses or benefits until the new tax year.
+pages.applicationDelayed.para2                                  = You can continue with your application but we won’t process it until after 6 April.
 
 ## User error messages
 errors.invalid.email                                            = Enter an email address using only letters, numbers and - . @ _ +
@@ -65,7 +65,7 @@ errors.invalid.contactNum                                       = Enter a valid 
 errors.invalid.contactNum.tooShort                              = Enter a contact number using 10 digits or more
 errors.invalid.contactNum.tooLong                               = Enter a contact number using 20 digits or less
 errors.invalid.nino                                             = Enter a valid National Insurance number
-errors.duplicate.nino                                           = You''ve entered the same National Insurance number more than once
+errors.duplicate.nino                                           = You’ve entered the same National Insurance number more than once
 errors.invalid.sic.noEntry                                      = Enter the goods or services the company sells
 errors.invalid.sic.overCharLimit                                = Enter a business description using 100 characters or less
 errors.invalid.sic.invalidChars                                 = Enter a business description using only letters, numbers and - , / & ''
@@ -85,38 +85,38 @@ pages.completionCapacity.error.invalidChars                     = Tell us your r
 
 ## Trading Name Page
 pages.tradingName.description                                   = Does or will the company trade using a different name?
-pages.tradingName.lede                                          = Tell us if the company will use a trading name that''s different from {0}.
+pages.tradingName.lede                                          = Tell us if the company will use a trading name that’s different from {0}.
 pages.tradingName.tradingNameLabel                              = Enter the trading name
 pages.tradingName.nameRulesSummary                              = What is a trading name?
-pages.tradingName.nameRulesIntro                                = A company can trade using a name that''s different from its registered name. This is also known as a ''business name''.
+pages.tradingName.nameRulesIntro                                = A company can trade using a name that’s different from its registered name. This is also known as a ’business name’.
 pages.tradingName.nameRulesIntro1                               = Some companies choose a different trading name to help with branding or getting a domain name for their website.
 pages.tradingName.errorQuestion                                 = Enter the trading name
 pages.tradingName.error                                         = Select yes if the company uses a different trading name
 pages.tradingName.error.length                                  = Enter a trading name using 35 characters or less
 pages.tradingName.error.invalidChars                            = Tell us the trading name using only letters, numbers and - , . ( ) / & '' !
-pages.tradingdetails.input.hint-text                            = You can''t include ''limited'', ''Ltd'', ''limited liability partnership'', ''LLP'', ''public limited company'' or ''plc''
+pages.tradingdetails.input.hint-text                            = You can’t include ’limited’, ’Ltd’, ’limited liability partnership’, ’LLP’, ’public limited company’ or ’plc’
 
 ## Confirm RO Address
-pages.confirmRO.description                                     = Confirm {0}''s registered office address
+pages.confirmRO.description                                     = Confirm {0}’s registered office address
 pages.confirmRO.lede                                            = This is the address on its Companies House record.
 pages.confirmRO.help.link                                       = What if the registered office address is wrong?
 pages.confirmRO.hiddenIntro.label                               = change the registered office address
 
 ## PPOB Address
-pages.ppobAddress.description                                   = What is the company''s ''principal place of business''?
+pages.ppobAddress.description                                   = What is the company’s ’principal place of business’?
 pages.ppobAddress.other                                         = A different address
-pages.ppobAddress.addressChoice.noEntry                         = Tell us the company''s principal place of business
+pages.ppobAddress.addressChoice.noEntry                         = Tell us the company’s principal place of business
 pages.ppobAddress.peopleIntro1                                  = This is where the company will carry out most of its business activities.
 pages.ppobAddress.peopleIntro2                                  = If this will be in different locations, use the address where the company will keep its financial or business records.
 pages.ppobAddress.hint                                          = This address will not go on the public record.
-pages.ppobAddress.help.link                                     = The company doesn''t have a principal place of business yet
-pages.ppobAddress.help.content                                  = Use the company''s registered office address for now and tell HMRC when it changes.
+pages.ppobAddress.help.link                                     = The company doesn’t have a principal place of business yet
+pages.ppobAddress.help.content                                  = Use the company’s registered office address for now and tell HMRC when it changes.
 
 ##Correspondence Address
-pages.correspondenceAddress.description                         = Where should we send post about the company''s PAYE?
-pages.correspondenceAddress.lede                                = We''ll use this address to send post relating to your PAYE scheme.
+pages.correspondenceAddress.description                         = Where should we send post about the company’s PAYE?
+pages.correspondenceAddress.lede                                = We’ll use this address to send post relating to your PAYE scheme.
 pages.correspondenceAddress.other                               = A different address
-pages.correspondenceAddress.addressChoice.noEntry               = Tell us where we should send post about the company''s PAYE
+pages.correspondenceAddress.addressChoice.noEntry               = Tell us where we should send post about the company’s PAYE
 
 ## Business Contact Details
 pages.businessContact.description                               = Give us one or more ways to contact {0}
@@ -126,13 +126,13 @@ pages.businessContact.othercontact                              = Other contact 
 pages.businessContact.noFieldsCompleted                         = Enter at least one way to contact the company
 
 ## PAYE Contact Details
-pages.payeContact.description                                   = Who should we contact about the company''s PAYE?
-pages.payeContact.p1                                            = Let us know who we can contact if we need more information about the company''s PAYE scheme.
+pages.payeContact.description                                   = Who should we contact about the company’s PAYE?
+pages.payeContact.p1                                            = Let us know who we can contact if we need more information about the company’s PAYE scheme.
 pages.payeContact.contactName                                   = Contact name
 pages.payeContact.email                                         = Email address
 pages.payeContact.contact                                       = Contact number
 pages.payeContact.othercontact                                  = Other contact number (optional)
-pages.payeContact.noFieldsCompleted                             = Enter at least one contact detail for the company''s PAYE
+pages.payeContact.noFieldsCompleted                             = Enter at least one contact detail for the company’s PAYE
 pages.payeContact.nameMandatory                                 = Enter a contact name
 
 ## Paid Employees
@@ -140,13 +140,13 @@ pages.paidEmployees.title                                       = Does the compa
 pages.paidEmployees.description                                 = Does the company do any of the following?
 pages.paidEmployees.para                                        = Tell us if the company has already started any of the following:
 pages.paidEmployees.bullet1                                     = paying employees, including company directors, £{0} or more a week
-pages.paidEmployees.bullet2                                     = employing anyone, including company directors, who''s already receiving a pension or who has another job
+pages.paidEmployees.bullet2                                     = employing anyone, including company directors, who’s already receiving a pension or who has another job
 pages.paidEmployees.bullet3                                     = providing expenses or benefits to employees, including company directors
 pages.paidEmployees.hiddenLabel                                 = What was the earliest date it started doing any of these things?
 pages.paidEmployees.input.hint-text                             = For example, 12 8 2017
 pages.paidEmployees.error                                       = Tell us if the company employs anyone or provides expenses or benefits to staff
-pages.paidEmployees.date.dateTooEarly                           = Enter a date that''s after the date the company was set up: {0}
-pages.paidEmployees.date.dateInFuture                           = Enter a date that''s in the past
+pages.paidEmployees.date.dateTooEarly                           = Enter a date that’s after the date the company was set up: {0}
+pages.paidEmployees.date.dateInFuture                           = Enter a date that’s in the past
 pages.paidEmployees.date.empty                                  = Enter a date for when you first started employing someone or providing expenses or benefits to staff
 pages.paidEmployees.date.invalid                                = Enter a valid date
 pages.paidEmployees.date.moreThanTwoTaxYears                    = Enter a date within the last 2 tax years
@@ -156,7 +156,7 @@ pages.willBePaying.title                                      = Over the next 2 
 pages.willBePaying.description                                = Over the next 2 months, will the company do any of the following?
 pages.willBePaying.para                                       = Tell us if the company will:
 pages.willBePaying.bullet1                                    = pay employees, including company directors, £{0} or more a week
-pages.willBePaying.bullet2                                    = employ anyone, including company directors, who''s already receiving a pension or who has another job
+pages.willBePaying.bullet2                                    = employ anyone, including company directors, who’s already receiving a pension or who has another job
 pages.willBePaying.bullet3                                    = provide expenses or benefits to employees, including company directors
 pages.willBePaying.beforeNextTaxYear.label                    = Will any of this happen before 6 April?
 pages.willBePaying.empty                                      = Tell us if, over the next 2 months, the company will employ anyone or provide expenses or benefits to staff
@@ -190,8 +190,8 @@ pages.directorDetails.information.dropdown.header               = Not the right 
 pages.directorDetails.information.dropdown.body                 = If the direct names are incorrect, you can change them with
 pages.directorDetails.input.hint-text                           = For example, QQ 12 34 56 C
 pages.directorDetails.hiddenIntro.value                         = director names are
-pages.directorDetails.hiddenIntro.label                         = change information about the company''s directors
-pages.directorDetails.name-suffix                               = {0}''s National Insurance number
+pages.directorDetails.hiddenIntro.label                         = change information about the company’s directors
+pages.directorDetails.name-suffix                               = {0}’s National Insurance number
 
 ## Summary Page
 pages.summary.description                                       = Check and confirm your answers
@@ -249,56 +249,56 @@ pages.summary.tradingName.question                              = Does or will t
 pages.summary.tradingName.answers.noAnswerGiven                 = No
 pages.summary.tradingName.hiddenChangeText                      = whether your company will trade under another name.
 
-pages.summary.roAddress.question                                = What is your company''s registered office address?
+pages.summary.roAddress.question                                = What is your company’s registered office address?
 
 pages.summary.ppobAddress.question                              = Where will the company carry out most of its business activities?
 pages.summary.ppobAddress.hiddenChangeText                      = where your company will carry out most of its business activities.
 
 pages.summary.businessContactDetails.sectionHeading             = Company contact details
 
-pages.summary.businessEmail.question                            = What is the company contact''s email address?
+pages.summary.businessEmail.question                            = What is the company contact’s email address?
 pages.summary.businessEmail.answers.noAnswerGiven               = '
-pages.summary.businessEmail.hiddenChangeText                    = the company contact''s email address.
+pages.summary.businessEmail.hiddenChangeText                    = the company contact’s email address.
 
-pages.summary.mobileNumber.question                             = What is the company contact''s number?
+pages.summary.mobileNumber.question                             = What is the company contact’s number?
 pages.summary.mobileNumber.answers.noAnswerGiven                = '
-pages.summary.mobileNumber.hiddenChangeText                     = the company contact''s number.
+pages.summary.mobileNumber.hiddenChangeText                     = the company contact’s number.
 
-pages.summary.businessTelephone.question                        = What is the company contact''s other number?
+pages.summary.businessTelephone.question                        = What is the company contact’s other number?
 pages.summary.businessTelephone.answers.noAnswerGiven           = '
-pages.summary.businessTelephone.hiddenChangeText                = the company contact''s other number.
+pages.summary.businessTelephone.hiddenChangeText                = the company contact’s other number.
 
 pages.summary.natureOfBusiness.question                         = What does your company do?
 pages.summary.natureOfBusiness.hiddenChangeText                 = what your company does.
 
 pages.summary.directorDetails.sectionHeading                    = Director details
-pages.summary.director.question                                 = {0}''s National Insurance number
-pages.summary.director.hiddenChangeText                         = {0}''s National Insurance number
+pages.summary.director.question                                 = {0}’s National Insurance number
+pages.summary.director.hiddenChangeText                         = {0}’s National Insurance number
 
 pages.summary.payeContactDetails.sectionHeading                 = PAYE contact details
 
-pages.summary.contactName.question                              = What is the name of the company''s PAYE contact?
-pages.summary.contactName.hiddenChangeText                      = the name of the company''s PAYE contact.
+pages.summary.contactName.question                              = What is the name of the company’s PAYE contact?
+pages.summary.contactName.hiddenChangeText                      = the name of the company’s PAYE contact.
 
-pages.summary.emailPAYEContact.question                         = What is the email address of the company''s PAYE contact?
+pages.summary.emailPAYEContact.question                         = What is the email address of the company’s PAYE contact?
 pages.summary.emailPAYEContact.answers.noAnswerGiven            = '
-pages.summary.emailPAYEContact.hiddenChangeText                 = the email address of the company''s PAYE contact.
+pages.summary.emailPAYEContact.hiddenChangeText                 = the email address of the company’s PAYE contact.
 
-pages.summary.mobileNumberPAYEContact.question                  = What is the contact number of the company''s PAYE contact?
+pages.summary.mobileNumberPAYEContact.question                  = What is the contact number of the company’s PAYE contact?
 pages.summary.mobileNumberPAYEContact.answers.noAnswerGiven     = '
-pages.summary.mobileNumberPAYEContact.hiddenChangeText          = the contact number of the company''s PAYE contact.
+pages.summary.mobileNumberPAYEContact.hiddenChangeText          = the contact number of the company’s PAYE contact.
 
-pages.summary.phoneNumberPAYEContact.question                   = What is the other contact number of the company''s PAYE contact?
+pages.summary.phoneNumberPAYEContact.question                   = What is the other contact number of the company’s PAYE contact?
 pages.summary.phoneNumberPAYEContact.answers.noAnswerGiven      = '
-pages.summary.phoneNumberPAYEContact.hiddenChangeText           = the other contact number of the company''s PAYE contact.
+pages.summary.phoneNumberPAYEContact.hiddenChangeText           = the other contact number of the company’s PAYE contact.
 
 pages.summary.correspondenceAddress.question                    = Where should we send PAYE-related post to?
 pages.summary.correspondenceAddress.hiddenChangeText            = where we should send PAYE-related post to.
 
-pages.summary.Description                                       = Review the information you''ve provided before you submit your application.
+pages.summary.Description                                       = Review the information you’ve provided before you submit your application.
 pages.summary.heading                                           = Check and confirm your answers
 pages.summary.heading2                                          = Now send your application
-pages.summary.information                                       = By submitting this application you''re confirming that the details you''re providing are correct and reflect the company''s current position.
+pages.summary.information                                       = By submitting this application you’re confirming that the details you’re providing are correct and reflect the company’s current position.
 
 ## Confirmation Page
 pages.confirmation.description                                  = Application submitted
@@ -306,55 +306,55 @@ pages.confirmation.reference                                    = Your reference
 
 ## Confirmation standard content
 pages.confirmation.standard.section-1.bullet1                   = another email within 10 working days letting you know the outcome of your application
-pages.confirmation.standard.section-2                           = If your application is successful you''ll receive:
+pages.confirmation.standard.section-2                           = If your application is successful you’ll receive:
 pages.confirmation.standard.section-2.bullet1                   = a letter with your PAYE and Accounts Office reference numbers within 5 working days of the company registering with Companies House
 pages.confirmation.standard.section-2.bullet2                   = an activation code to do PAYE online
 pages.confirmation.standard.info                                = Due to the volume of registrations that we currently have, it may take longer for you to receive your employer PAYE reference number.  We are working hard to resolve the backlog of cases and apologise for any inconvenience this may cause.
-pages.confirmation.standard.last                                = You''ll need these to send payroll information to HMRC.
+pages.confirmation.standard.last                                = You’ll need these to send payroll information to HMRC.
 
 ## Confirmation inclusive date content
-pages.confirmation.inclusive.section-1.heading                  = What happens after we''ve processed the application?
-pages.confirmation.inclusive.section-1                          = If your application is successful you''ll receive:
+pages.confirmation.inclusive.section-1.heading                  = What happens after we’ve processed the application?
+pages.confirmation.inclusive.section-1                          = If your application is successful you’ll receive:
 pages.confirmation.inclusive.section-1.bullet1                  = a letter with your PAYE and Accounts Office reference numbers within 5 working days of your application being approved
 pages.confirmation.inclusive.section-1.bullet2                  = an activation code to do PAYE online
-pages.confirmation.inclusive.section-1.last                     = You''ll need these to send payroll information to HMRC.
+pages.confirmation.inclusive.section-1.last                     = You’ll need these to send payroll information to HMRC.
 
-pages.confirmation.inclusive.section-2.heading                  = If the company''s first payment to someone is in the next tax year
-pages.confirmation.inclusive.section-2.body                     = We won''t start processing your application until after the next tax year begins (6 April). Please don''t contact us about the application until after {0}.
-pages.confirmation.inclusive.section-2.disclosure.heading       = Paying someone before we''ve processed the application?
-pages.confirmation.inclusive.section-2.disclosure.body          = You''l need to:
+pages.confirmation.inclusive.section-2.heading                  = If the company’s first payment to someone is in the next tax year
+pages.confirmation.inclusive.section-2.body                     = We won’t start processing your application until after the next tax year begins (6 April). Please don’t contact us about the application until after {0}.
+pages.confirmation.inclusive.section-2.disclosure.heading       = Paying someone before we’ve processed the application?
+pages.confirmation.inclusive.section-2.disclosure.body          = You’l need to:
 pages.confirmation.inclusive.section-2.disclosure.bullet1       = follow these instructions on
 pages.confirmation.inclusive.section-2.disclosure.bullet1.1     = running payroll
-pages.confirmation.inclusive.section-2.disclosure.bullet2       = hold off on sending a Full Payment Submission until you have the company''s PAYE registration details
-pages.confirmation.inclusive.section-2.disclosure.bullet3       = enter HMRC code G in the ''late reporting reason'' box
+pages.confirmation.inclusive.section-2.disclosure.bullet2       = hold off on sending a Full Payment Submission until you have the company’s PAYE registration details
+pages.confirmation.inclusive.section-2.disclosure.bullet3       = enter HMRC code G in the ’late reporting reason’ box
 
 pages.confirmation.email.heading                                = What happens next
-pages.confirmation.email.body                                   = You''ll receive:
+pages.confirmation.email.body                                   = You’ll receive:
 pages.confirmation.email.bullet-1                               = an email now with your application reference number
 
 ## New Ineligible
-errorPages.newIneligible.title                                  = You don''t need to register as an employer for PAYE
-errorPages.newIneligible.description                            = You don''t need to register as an employer for PAYE
-errorPages.newIneligible.para                                   = You''ll need to register if the company starts doing any of these things:
+errorPages.newIneligible.title                                  = You don’t need to register as an employer for PAYE
+errorPages.newIneligible.description                            = You don’t need to register as an employer for PAYE
+errorPages.newIneligible.para                                   = You’ll need to register if the company starts doing any of these things:
 errorPages.newIneligible.bullet1                                = paying employees, including company directors, £{0} or more a week
-errorPages.newIneligible.bullet2                                = employing anyone, including company directors, who''s already receiving a pension or who has another job
+errorPages.newIneligible.bullet2                                = employing anyone, including company directors, who’s already receiving a pension or who has another job
 errorPages.newIneligible.bullet3                                = providing expenses or benefits to employees, including company directors
 errorPages.newIneligible.bullet4                                = hiring subcontractors in the construction industry
 errorPages.newIneligible.link                                   = Back to GOV.UK
 
 ## Error Pages
-errorPages.restart.description                                  = Sorry, we''re having technical issues.
+errorPages.restart.description                                  = Sorry, we’re having technical issues.
 errorPages.restart.p1                                           = You can try again by <a href={0}>restarting</a> your PAYE registration.
-errorPages.ineligible.description                               = You don''t need to register an employer
-errorPages.ineligible.p1                                        = If you''re not going to employ staff or subcontractors in the next 2 months, you don''t need to register an employer.
-errorPages.ineligible.p2                                        = However, you''ll have to register if your plans change and you start paying:
+errorPages.ineligible.description                               = You don’t need to register an employer
+errorPages.ineligible.p1                                        = If you’re not going to employ staff or subcontractors in the next 2 months, you don’t need to register an employer.
+errorPages.ineligible.p2                                        = However, you’ll have to register if your plans change and you start paying:
 errorPages.ineligible.l1                                        = employees
 errorPages.ineligible.l2                                        = subcontractors
-errorPages.ineligible.l3                                        = yourself if you''re a director of a company
+errorPages.ineligible.l3                                        = yourself if you’re a director of a company
 
 ## Retry Submission
-errorPages.retrySubmission.description                          = We couldn''t process your application
-errorPages.retrySubmission.p1                                   = Sorry, there is a technical problem and we couldn''t process your application. Any details you entered have been saved.
+errorPages.retrySubmission.description                          = We couldn’t process your application
+errorPages.retrySubmission.p1                                   = Sorry, there is a technical problem and we couldn’t process your application. Any details you entered have been saved.
 errorPages.retrySubmission.p2                                   = Please resend your application.
 errorPages.retrySubmission.button                               = Resend
 
@@ -371,7 +371,7 @@ pages.alf.common.lookupPage.title                               = Search for you
 pages.alf.common.lookupPage.heading                             = Search for your address
 pages.alf.common.lookupPage.filterLabel                         = House name or number (optional)
 pages.alf.common.lookupPage.submitLabel                         = Search address
-pages.alf.common.lookupPage.manual                              = The address doesn''t have a UK postcode
+pages.alf.common.lookupPage.manual                              = The address doesn’t have a UK postcode
 
 pages.alf.ppob.lookupPage.title                                 = Company address
 pages.alf.correspondence.lookupPage.title                       = Search for your address
@@ -390,7 +390,7 @@ pages.alf.common.confirmPage.heading                            = Review and con
 pages.alf.common.confirmPage.submitLabel                        = Save and continue
 pages.alf.common.confirmPage.changeLinkText                     = Change
 
-pages.alf.ppob.confirmPage.heading                              = Confirm where you''ll carry out most of your business activities
+pages.alf.ppob.confirmPage.heading                              = Confirm where you’ll carry out most of your business activities
 pages.alf.correspondence.confirmPage.heading                    = Review and confirm your correspondence address
 
 ## Accessibility Statement

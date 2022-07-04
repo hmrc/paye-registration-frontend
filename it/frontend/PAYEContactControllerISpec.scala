@@ -190,7 +190,7 @@ class PAYEContactControllerISpec extends IntegrationSpecBase
             heading = Some("Search for your address"),
             filterLabel = Some("House name or number (optional)"),
             submitLabel = Some("Search address"),
-            manualAddressLinkText = Some("The address doesn't have a UK postcode")
+            manualAddressLinkText = Some("The address doesn’t have a UK postcode")
           ),
           EditPageLabels(
             title = Some("Enter address"),
