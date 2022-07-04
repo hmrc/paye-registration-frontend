@@ -14,30 +14,17 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcTrackingConsentSnippet
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcTimeoutDialog
-@import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcBanner
-@import uk.gov.hmrc.govukfrontend.views.html.components.GovukBackLink
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcReportTechnicalIssueHelper
-@import uk.gov.hmrc.govukfrontend.views.html.components.GovukLayout
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardFooter
-@import uk.gov.hmrc.govukfrontend.views.viewmodels.backlink.BackLink
-@import uk.gov.hmrc.govukfrontend.views.viewmodels.content.Text
-@import uk.gov.hmrc.hmrcfrontend.views.Aliases.Banner
-@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.Cy
-@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.language.En
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcLayout
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.timeoutdialog.TimeoutDialog
+@import views.html.helper.CSPNonce
+@import uk.gov.hmrc.hmrcfrontend.views.config.StandardBetaBanner
 
 @this(
-    trackingConsentSnippet: HmrcTrackingConsentSnippet,
     hmrcTimeoutDialog: HmrcTimeoutDialog,
-    hmrcBanner: HmrcBanner,
     phaseBanner: components.phaseBanner,
-    govukBackLink: GovukBackLink,
-    hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
-    siteHeader: components.siteHeader,
-    govukLayout: GovukLayout,
-    hmrcStandardFooter: HmrcStandardFooter
+    hmrcLayout: HmrcLayout,
+    standardBetaBanner: StandardBetaBanner
 )
 
 @(pageTitle: Option[String] = None, beforeContentBlock: Option[Html] = None, backLink: Boolean = true, signOutLink: Boolean = true, timeout: Boolean = true)(contentBlock: Html)(implicit request: Request[_], messages: Messages, appConfig: config.AppConfig)
@@ -46,7 +33,6 @@
 <!--[if lte IE 8]><link href=' @controllers.routes.Assets.versioned("stylesheets/application-ie-8.css")' rel="stylesheet" type="text/css" /><![endif]-->
 <!--[if gt IE 8]><!--> <link href='@controllers.routes.Assets.versioned("stylesheets/application.css")' media="screen" rel="stylesheet" type="text/css" />
 <!--<![endif]-->
-@trackingConsentSnippet()
 @if(timeout) {
     @hmrcTimeoutDialog(TimeoutDialog(
         language = Some("en"),
@@ -58,26 +44,13 @@
 }
 }
 
-@beforeContentBlock = {
-@phaseBanner("beta")
-
-@if(backLink == true) {
-@govukBackLink(BackLink(href = "#", content = Text(messages("site.back")), attributes = Map("id" -> "back-link")))
-}
-}
 
 @scripts = {
-<script src='@controllers.routes.Assets.versioned("lib/govuk-frontend/govuk/all.js")'></script>
-<script src='@controllers.routes.Assets.versioned("lib/hmrc-frontend/hmrc/all.js")'></script>
-<script>window.GOVUKFrontend.initAll();
-    window.HMRCFrontend.initAll()</script>
-<script src="@controllers.routes.Assets.versioned("javascripts/backLink.js")"></script>
+    <script @{CSPNonce.attr} src="@controllers.routes.Assets.versioned("javascripts/backLink.js")"></script>
 }
 
 @content = {
-    <div class="govuk-!-margin-bottom-6">
        @contentBlock
-    </div>
 
     <div class="govuk-body">
         <a lang="en" hreflang="en" class="govuk-link " target="_blank" href="@{
@@ -88,12 +61,17 @@
     </div>
 }
 
-@govukLayout(
+@hmrcLayout(
     pageTitle = pageTitle,
-    headBlock = Some(head),
-    beforeContentBlock = Some(beforeContentBlock),
-    bodyEndBlock = None,
-    headerBlock = Some(siteHeader(signOutLink)),
-    footerBlock = Some(hmrcStandardFooter(accessibilityStatementUrl = Some(appConfig.accessibilityStatementUrl(request.uri)))),
-    scriptsBlock = Some(scripts)
+    serviceName = Some(messages("service.name")),
+    isWelshTranslationAvailable = appConfig.languageTranslationEnabled,
+    additionalHeadBlock = Some(head),
+    signOutUrl = if (signOutLink) Some(controllers.userJourney.routes.SignInOutController.signOut.url) else None,
+    serviceUrl = Some(""),
+    phaseBanner = Some(standardBetaBanner(url = "")),
+    backLinkUrl = if (backLink) Some("#") else None,
+    displayHmrcBanner = false,
+    accessibilityStatementUrl = Some(appConfig.accessibilityStatementUrl(request.uri)),
+    nonce = CSPNonce.get,
+    additionalScriptsBlock = Some(scripts)
 )(content)

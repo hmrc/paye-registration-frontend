@@ -22,7 +22,7 @@ import scala.io.Source
 
 class MessagesVerificationTest extends PayeComponentSpec {
 
-  val lines = Source.fromFile("conf/messages").getLines().toList
+  val lines = Source.fromFile("conf/messages.en").getLines().toList
 
   private def key(line: String): String = line.takeWhile(_ != '=')
 
