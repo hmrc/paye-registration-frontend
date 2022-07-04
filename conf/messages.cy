@@ -85,7 +85,7 @@ pages.completionCapacity.error.invalidChars                             =    Rho
 
 ## Trading Name Page
 pages.tradingName.description                                           =    A yw neu a fydd y cwmni’n masnachu gan ddefnyddio enw gwahanol?
-pages.tradingName.lede                                                  =    Rhowch wybod i ni a fydd y cwmni’n defnyddio enw masnachu sy’n wahanol i {enw’r cwmni}.
+pages.tradingName.lede                                                  =    Rhowch wybod i ni a fydd y cwmni’n defnyddio enw masnachu sy’n wahanol i {0}.
 pages.tradingName.tradingNameLabel                                      =    Nodwch enw masnachu
 pages.tradingName.nameRulesSummary                                      =    Beth yw enw masnachu?
 pages.tradingName.nameRulesIntro                                        =    Gall cwmni fasnachu gan ddefnyddio enw sy’n wahanol i’w enw cofrestredig. Gelwir hyn hefyd yn “enw busnes”.
@@ -97,7 +97,7 @@ pages.tradingName.error.invalidChars                                    =    Rho
 pages.tradingdetails.input.hint-text                                    =    Nid oes modd i chi nodi “cyfyngedig”, “Cyf”, “partneriaeth atebolrwydd cyfyngedig”, “PAC”, “cwmni cyfyngedig cyhoeddus”, na “ccc”
 
 ## Confirm RO Address
-pages.confirmRO.description                                             =    Cadarnhau cyfeiriad swyddfa gofrestredig {enw’r cwmni}
+pages.confirmRO.description                                             =    Cadarnhau cyfeiriad swyddfa gofrestredig {0}
 pages.confirmRO.lede                                                    =    Dyma’r cyfeiriad ar ei gofnod Tŷ’r Cwmnïau.
 pages.confirmRO.help.link                                               =    Beth os yw cyfeiriad y swyddfa gofrestredig yn anghywir?
 pages.confirmRO.hiddenIntro.label                                       =    newid cyfeiriad y swyddfa gofrestredig
@@ -119,7 +119,7 @@ pages.correspondenceAddress.other                                       =    Cyf
 pages.correspondenceAddress.addressChoice.noEntry                       =    Rhowch wybod i ni ble y dylem anfon post am TWE y cwmni
 
 ## Business Contact Details
-pages.businessContact.description                                       =    Rhowch un ffordd neu fwy i ni o gysylltu â {enw’r cwmni}
+pages.businessContact.description                                       =    Rhowch un ffordd neu fwy i ni o gysylltu â {0}
 pages.businessContact.email                                             =    Cyfeiriad e-bost
 pages.businessContact.contact                                           =    Rhif cyswllt
 pages.businessContact.othercontact                                      =    Rhif cyswllt arall
@@ -191,7 +191,7 @@ pages.directorDetails.information.dropdown.body                         =    Os 
 pages.directorDetails.input.hint-text                                   =    Er enghraifft, QQ 12 34 56 C
 pages.directorDetails.hiddenIntro.value                                 =    enwau’r cyfarwyddwyr yw
 pages.directorDetails.hiddenIntro.label                                 =    newid gwybodaeth am gyfarwyddwyr y cwmni
-pages.directorDetails.name-suffix                                       =    Rhif Yswiriant Gwladol {enw’r cyfarwyddwr}
+pages.directorDetails.name-suffix                                       =    Rhif Yswiriant Gwladol {0}
 
 ## Summary Page
 pages.summary.description                                               =    Gwirio a chadarnhau’ch atebion
@@ -272,8 +272,8 @@ pages.summary.natureOfBusiness.question                                 =    Bet
 pages.summary.natureOfBusiness.hiddenChangeText                         =    beth mae’ch cwmni’n ei wneud.
 
 pages.summary.directorDetails.sectionHeading                            =    Manylion y cyfarwyddwr
-pages.summary.director.question                                         =    Rhif Yswiriant Gwladol {enw’r cyfarwyddwr}
-pages.summary.director.hiddenChangeText                                 =    Rhif Yswiriant Gwladol {enw’r cyfarwyddwr}
+pages.summary.director.question                                         =    Rhif Yswiriant Gwladol {0}
+pages.summary.director.hiddenChangeText                                 =    Rhif Yswiriant Gwladol {0}
 
 pages.summary.payeContactDetails.sectionHeading                         =    Manylion cyswllt TWE
 

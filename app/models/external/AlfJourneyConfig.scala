@@ -50,7 +50,9 @@ case class TimeoutConfig(timeoutAmount: Int,
                          timeoutUrl: String
                         )
 
-case class JourneyLabels(en: LanguageLabels
+case class JourneyLabels(
+                          en: LanguageLabels,
+                          cy: LanguageLabels
                         )
 
 case class LanguageLabels(appLevelLabels: AppLevelLabels,
@@ -60,34 +62,34 @@ case class LanguageLabels(appLevelLabels: AppLevelLabels,
                           confirmPageLabels: ConfirmPageLabels
                          )
 
-case class AppLevelLabels(navTitle: String,
-                          phaseBannerHtml: String
+case class AppLevelLabels(navTitle: Option[String],
+                          phaseBannerHtml: Option[String] = None
                          )
 
-case class SelectPageLabels(title: String,
-                            heading: String,
-                            searchAgainLinkText: String,
-                            editAddressLinkText: String
+case class SelectPageLabels(title: Option[String],
+                            heading: Option[String],
+                            searchAgainLinkText: Option[String],
+                            editAddressLinkText: Option[String]
                            )
 
-case class LookupPageLabels(title: String,
-                            heading: String,
-                            filterLabel: String,
-                            submitLabel: String,
-                            manualAddressLinkText: String
+case class LookupPageLabels(title: Option[String],
+                            heading: Option[String],
+                            filterLabel: Option[String],
+                            submitLabel: Option[String],
+                            manualAddressLinkText: Option[String]
                            )
 
-case class EditPageLabels(title: String,
-                          heading: String,
-                          line1Label: String,
-                          line2Label: String,
-                          line3Label: String
+case class EditPageLabels(title: Option[String],
+                          heading: Option[String],
+                          line1Label: Option[String],
+                          line2Label: Option[String],
+                          line3Label: Option[String]
                          )
 
-case class ConfirmPageLabels(title: String,
-                             heading: String,
-                             submitLabel: String,
-                             changeLinkText: String
+case class ConfirmPageLabels(title: Option[String],
+                             heading: Option[String],
+                             submitLabel: Option[String],
+                             changeLinkText: Option[String]
                             )
 
 object AlfJourneyConfig {

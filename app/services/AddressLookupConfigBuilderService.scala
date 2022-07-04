@@ -18,13 +18,18 @@ package services
 
 import config.AppConfig
 import models.external._
-import play.api.i18n.Messages
+import play.api.i18n.{Lang, Messages, MessagesApi}
+import play.api.libs.json.{Json, Writes}
 import play.api.mvc.Call
+import utils.MessageOption
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class AddressLookupConfigBuilderService @Inject()(appConfig: AppConfig) {
+class AddressLookupConfigBuilderService @Inject()(appConfig: AppConfig, val messagesApi: MessagesApi) {
+
+  val english = Lang("en")
+  val welsh = Lang("cy")
 
   lazy val payeRegistrationFrontendURL: String = appConfig.self
   lazy val timeoutLength: Int = appConfig.timeoutInSeconds
@@ -64,50 +69,62 @@ class AddressLookupConfigBuilderService @Inject()(appConfig: AppConfig) {
       selectPageConfig = selectPageConfig,
       confirmPageConfig = confirmPageConfig,
       timeoutConfig = timeoutConfig,
-      disableTranslations = true
-    )
-    val appLevelLabels = AppLevelLabels(
-      navTitle = messages(messageKeyWithSpecKey("navTitle")),
-      phaseBannerHtml = messages(messageKeyWithSpecKey("phaseBannerHtml"))
+      disableTranslations = !appConfig.languageTranslationEnabled
     )
 
-    val lookupPageLabels = LookupPageLabels(
-      title = messages(messageKeyWithSpecKey("lookupPage.heading")),
-      heading = messages(messageKeyWithSpecKey("lookupPage.heading")),
-      filterLabel = messages(messageKeyWithSpecKey("lookupPage.filterLabel")),
-      submitLabel = messages(messageKeyWithSpecKey("lookupPage.submitLabel")),
-      manualAddressLinkText = messages(messageKeyWithSpecKey("lookupPage.manual"))
+    def appLevelLabels(lang: Lang) = {
+      AppLevelLabels(
+        navTitle = MessageOption("pages.alf.common.navTitle", lang)(messagesApi),
+        phaseBannerHtml = MessageOption("pages.alf.common.phaseBannerHtml", lang)(messagesApi)
+      )
+    }
+
+    def lookupPageLabels(lang: Lang) = {
+      LookupPageLabels(
+        title = MessageOption("pages.alf.common.lookupPage.heading", lang)(messagesApi),
+        heading = MessageOption("pages.alf.common.lookupPage.heading", lang)(messagesApi),
+        filterLabel = MessageOption("pages.alf.common.lookupPage.filterLabel", lang)(messagesApi),
+        submitLabel = MessageOption("pages.alf.common.lookupPage.submitLabel", lang)(messagesApi),
+        manualAddressLinkText = MessageOption("pages.alf.common.lookupPage.manual", lang)(messagesApi)
+      )
+    }
+
+    def selectPageLabels(lang: Lang) = SelectPageLabels(
+      title = MessageOption("pages.alf.common.selectPage.description", lang)(messagesApi),
+      heading = MessageOption("pages.alf.common.selectPage.description", lang)(messagesApi),
+      searchAgainLinkText = MessageOption("pages.alf.common.selectPage.searchAgain", lang)(messagesApi),
+      editAddressLinkText = MessageOption("pages.alf.common.selectPage.editAddress", lang)(messagesApi)
     )
 
-    val selectPageLabels = SelectPageLabels(
-      title = messages(messageKeyWithSpecKey("selectPage.description")),
-      heading = messages(messageKeyWithSpecKey("selectPage.description")),
-      searchAgainLinkText = messages(messageKeyWithSpecKey("selectPage.searchAgain")),
-      editAddressLinkText = messages(messageKeyWithSpecKey("selectPage.editAddress"))
+    def editPageLabels(lang: Lang) = EditPageLabels(
+      title = MessageOption("pages.alf.common.editPage.description", lang)(messagesApi),
+      heading = MessageOption("pages.alf.common.editPage.description", lang)(messagesApi),
+      line1Label = MessageOption("pages.alf.common.editPage.line1Label", lang)(messagesApi),
+      line2Label = MessageOption("pages.alf.common.editPage.line2Label", lang)(messagesApi),
+      line3Label = MessageOption("pages.alf.common.editPage.line3Label", lang)(messagesApi)
     )
 
-    val editPageLabels = EditPageLabels(
-      title = messages(messageKeyWithSpecKey("editPage.description")),
-      heading = messages(messageKeyWithSpecKey("editPage.description")),
-      line1Label = messages(messageKeyWithSpecKey("editPage.line1Label")),
-      line2Label = messages(messageKeyWithSpecKey("editPage.line2Label")),
-      line3Label = messages(messageKeyWithSpecKey("editPage.line3Label"))
-    )
-
-    val confirmPageLabels = ConfirmPageLabels(
-      title = messages(messageKeyWithSpecKey("confirmPage.heading")),
-      heading = messages(messageKeyWithSpecKey("confirmPage.heading")),
-      submitLabel = messages(messageKeyWithSpecKey("confirmPage.submitLabel")),
-      changeLinkText = messages(messageKeyWithSpecKey("confirmPage.changeLinkText"))
+    def confirmPageLabels(lang: Lang) = ConfirmPageLabels(
+      title = MessageOption("pages.alf.common.confirmPage.heading", lang)(messagesApi),
+      heading = MessageOption("pages.alf.common.confirmPage.heading", lang)(messagesApi),
+      submitLabel = MessageOption("pages.alf.common.confirmPage.submitLabel", lang)(messagesApi),
+      changeLinkText = MessageOption("pages.alf.common.confirmPage.changeLinkText", lang)(messagesApi)
     )
 
     val journeyLabels = JourneyLabels(
       en = LanguageLabels(
-        appLevelLabels,
-        selectPageLabels,
-        lookupPageLabels,
-        editPageLabels,
-        confirmPageLabels
+        appLevelLabels(english),
+        selectPageLabels(english),
+        lookupPageLabels(english),
+        editPageLabels(english),
+        confirmPageLabels(english)
+      ),
+      cy = LanguageLabels(
+        appLevelLabels(welsh),
+        selectPageLabels(welsh),
+        lookupPageLabels(welsh),
+        editPageLabels(welsh),
+        confirmPageLabels(welsh)
       )
     )
 
