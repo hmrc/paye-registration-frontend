@@ -8,6 +8,8 @@ GET         /sign-out                                         controllers.userJo
 
 GET         /incorporation-rejected                           controllers.userJourney.SignInOutController.incorporationRejected
 
+GET         /language/:lang                                   controllers.LanguageSwitchController.switchToLanguage(lang: String)
+
 ## TIMEOUT
 GET        /renew-session                                     controllers.userJourney.SignInOutController.renewSession
 GET        /error/destroy-session                             controllers.userJourney.SignInOutController.destroySession

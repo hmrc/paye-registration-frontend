@@ -22,14 +22,14 @@ import helpers.PayeComponentSpec
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.Configuration
-import utils.TaxYearConfig
+import utils.{PAYEFeatureSwitch, TaxYearConfig}
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class EmailServiceSpec extends PayeComponentSpec {
 
-  object TestAppConfig extends AppConfig(mock[Configuration]) {
+  object TestAppConfig extends AppConfig(mock[Configuration], mock[PAYEFeatureSwitch]) {
     override lazy val adminPeriodStart: String = "2022-02-06"
     override lazy val adminPeriodEnd: String = "2022-05-17"
     override lazy val taxYearStartDate: String = "2022-04-06"

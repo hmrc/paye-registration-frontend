@@ -1,8 +1,8 @@
-var backLink = document.querySelector('#back-link[href="#"]')
+var backLinks = document.querySelectorAll('a[href="#"]')
 
-if (backLink != null) {
-    backLink.addEventListener('click', function(e) {
+if (backLinks.length > 0) {
+    backLinks.forEach(element => element.addEventListener('click', function(e) {
         e.preventDefault();
         window.history.back();
-    })
+    }))
 }

@@ -20,8 +20,10 @@ import models.Address
 import models.api.Director
 import models.external.OfficerList
 import play.api.Configuration
+import play.api.i18n.Lang
 import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import utils.{PAYEFeatureSwitch}
 
 import java.net.URLEncoder
 import java.nio.charset.Charset
@@ -29,7 +31,8 @@ import java.util.Base64
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class AppConfig @Inject()(configuration: Configuration) {
+class AppConfig @Inject()(configuration: Configuration,
+                          featureSwitch: PAYEFeatureSwitch) {
 
   val servicesConfig = new ServicesConfig(configuration)
 
@@ -88,6 +91,12 @@ class AppConfig @Inject()(configuration: Configuration) {
 
   def accessibilityReportUrl(userAction: String): String =
     s"$contactHost/contact/accessibility-unauthenticated?service=paye-registration-frontend&userAction=${encodeUrl(userAction)}"
+
+  def languageTranslationEnabled: Boolean = featureSwitch.isWelshEnabled.enabled
+
+  def languageMap: Map[String, Lang] = Map(
+    "english" -> Lang("en"),
+    "cymraeg" -> Lang("cy"))
 
   lazy val taxYearStartDate: String = servicesConfig.getString("tax-year-start-date")
 

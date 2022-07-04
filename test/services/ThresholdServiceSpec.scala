@@ -19,12 +19,13 @@ package services
 import config.AppConfig
 import helpers.PayeComponentSpec
 import play.api.Configuration
+import utils.PAYEFeatureSwitch
 
 import java.time.LocalDate
 
 class ThresholdServiceSpec extends PayeComponentSpec {
 
-  object TestAppConfig extends AppConfig(mock[Configuration]) {
+  object TestAppConfig extends AppConfig(mock[Configuration], mock[PAYEFeatureSwitch]) {
     override lazy val taxYearStartDate: String = LocalDate.now().toString
     override lazy val currentPayeWeeklyThreshold: Int = 10
     override lazy val currentPayeMonthlyThreshold: Int = 20
