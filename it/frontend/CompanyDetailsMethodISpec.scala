@@ -357,7 +357,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("csrfToken") mustNot be("")
 
       val document = Jsoup.parse(response.body)
-      document.title() must include("What is the company’s ’principal place of business’?")
+      document.title() must include("What is the company’s ‘principal place of business’?")
     }
 
     "show the page with the PPOB Address when PPOB Address is the same as RO Address" in {
@@ -392,7 +392,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("csrfToken") mustNot be("")
 
       val document = Jsoup.parse(response.body)
-      document.title() must include("What is the company’s ’principal place of business’?")
+      document.title() must include("What is the company’s ‘principal place of business’?")
     }
 
     "show the page with both PPOB and RO Addresses when there are two different addresses" in {
@@ -427,7 +427,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("csrfToken") mustNot be("")
 
       val document = Jsoup.parse(response.body)
-      document.title() must include("What is the company’s ’principal place of business’?")
+      document.title() must include("What is the company’s ‘principal place of business’?")
 
     }
 
@@ -461,7 +461,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("csrfToken") mustNot be("")
 
       val document = Jsoup.parse(response.body)
-      document.title() must include("What is the company’s ’principal place of business’?")
+      document.title() must include("What is the company’s ‘principal place of business’?")
       an[Exception] mustBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
     }
 
@@ -512,7 +512,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("csrfToken") mustNot be("")
 
       val document = Jsoup.parse(response.body)
-      document.title() must include("What is the company’s ’principal place of business’?")
+      document.title() must include("What is the company’s ‘principal place of business’?")
       an[Exception] mustBe thrownBy(document.getElementById("prepopaddress0").attr("value"))
     }
 
@@ -565,7 +565,7 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       mdtpCookieData("csrfToken") mustNot be("")
 
       val document = Jsoup.parse(response.body)
-      document.title() must include("What is the company’s ’principal place of business’?")
+      document.title() must include("What is the company’s ‘principal place of business’?")
     }
   }
 

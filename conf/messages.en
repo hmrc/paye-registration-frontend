@@ -88,13 +88,13 @@ pages.tradingName.description                                   = Does or will t
 pages.tradingName.lede                                          = Tell us if the company will use a trading name that’s different from {0}.
 pages.tradingName.tradingNameLabel                              = Enter the trading name
 pages.tradingName.nameRulesSummary                              = What is a trading name?
-pages.tradingName.nameRulesIntro                                = A company can trade using a name that’s different from its registered name. This is also known as a ’business name’.
+pages.tradingName.nameRulesIntro                                = A company can trade using a name that’s different from its registered name. This is also known as a ‘business name’.
 pages.tradingName.nameRulesIntro1                               = Some companies choose a different trading name to help with branding or getting a domain name for their website.
 pages.tradingName.errorQuestion                                 = Enter the trading name
 pages.tradingName.error                                         = Select yes if the company uses a different trading name
 pages.tradingName.error.length                                  = Enter a trading name using 35 characters or less
 pages.tradingName.error.invalidChars                            = Tell us the trading name using only letters, numbers and - , . ( ) / & '' !
-pages.tradingdetails.input.hint-text                            = You can’t include ’limited’, ’Ltd’, ’limited liability partnership’, ’LLP’, ’public limited company’ or ’plc’
+pages.tradingdetails.input.hint-text                            = You can’t include ‘limited’, ‘Ltd’, ‘limited liability partnership’, ‘LLP’, ‘public limited company’ or ‘plc’
 
 ## Confirm RO Address
 pages.confirmRO.description                                     = Confirm {0}’s registered office address
@@ -103,7 +103,7 @@ pages.confirmRO.help.link                                       = What if the re
 pages.confirmRO.hiddenIntro.label                               = change the registered office address
 
 ## PPOB Address
-pages.ppobAddress.description                                   = What is the company’s ’principal place of business’?
+pages.ppobAddress.description                                   = What is the company’s ‘principal place of business’?
 pages.ppobAddress.other                                         = A different address
 pages.ppobAddress.addressChoice.noEntry                         = Tell us the company’s principal place of business
 pages.ppobAddress.peopleIntro1                                  = This is where the company will carry out most of its business activities.
@@ -326,7 +326,7 @@ pages.confirmation.inclusive.section-2.disclosure.body          = You’l need t
 pages.confirmation.inclusive.section-2.disclosure.bullet1       = follow these instructions on
 pages.confirmation.inclusive.section-2.disclosure.bullet1.1     = running payroll
 pages.confirmation.inclusive.section-2.disclosure.bullet2       = hold off on sending a Full Payment Submission until you have the company’s PAYE registration details
-pages.confirmation.inclusive.section-2.disclosure.bullet3       = enter HMRC code G in the ’late reporting reason’ box
+pages.confirmation.inclusive.section-2.disclosure.bullet3       = enter HMRC code G in the ‘late reporting reason’ box
 
 pages.confirmation.email.heading                                = What happens next
 pages.confirmation.email.body                                   = You’ll receive:
