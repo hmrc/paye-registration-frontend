@@ -39,7 +39,7 @@
     name = "tradingName",
     id = "tradingName",
     label = messages("pages.tradingName.tradingNameLabel"),
-    classes = Some("form-label cascading"),
+    isLabelHidden = false,
     isPageHeading = false,
     hint = Some(Html(messages("pages.tradingdetails.input.hint-text")))
 )
@@ -67,7 +67,7 @@
             id = "differentName",
             headingKey = messages("pages.tradingName.description"),
             isPageHeading = false,
-            inline = true,
+            inline = false,
             classes = "govuk-visually-hidden",
             hiddenYesContent = Some(hiddenYesNoContent),
             fieldName = "differentName"
