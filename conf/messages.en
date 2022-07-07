@@ -71,7 +71,6 @@ errors.invalid.sic.overCharLimit                                = Enter a busine
 errors.invalid.sic.invalidChars                                 = Enter a business description using only letters, numbers and - , / & ''
 errors.invalid.name.invalidChars                                = Tell us the contact name using only letters (without accents), hyphens and apostrophes
 
-
 ## Completion Capacity page
 pages.completionCapacity.description                            = What is your relationship to the company?
 pages.completionCapacity.director                               = Company director
