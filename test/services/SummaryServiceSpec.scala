@@ -465,7 +465,7 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
 
       val validDirectorDetailsSection =
         optSummaryListRowSeq(
-          "Timothy Buttersford's National Insurance number",
+          "Timothy Buttersford’s National Insurance number",
           Some(Seq("ZZ 12 34 56 A")),
           Some(controllers.userJourney.routes.DirectorDetailsController.directorDetails.url)
         )

@@ -88,13 +88,13 @@ pages.tradingName.description                                           =    A y
 pages.tradingName.lede                                                  =    Rhowch wybod i ni a fydd y cwmni’n defnyddio enw masnachu sy’n wahanol i {0}.
 pages.tradingName.tradingNameLabel                                      =    Nodwch enw masnachu
 pages.tradingName.nameRulesSummary                                      =    Beth yw enw masnachu?
-pages.tradingName.nameRulesIntro                                        =    Gall cwmni fasnachu gan ddefnyddio enw sy’n wahanol i’w enw cofrestredig. Gelwir hyn hefyd yn “enw busnes”.
+pages.tradingName.nameRulesIntro                                        =    Gall cwmni fasnachu gan ddefnyddio enw sy’n wahanol i’w enw cofrestredig. Gelwir hyn hefyd yn ’enw busnes’.
 pages.tradingName.nameRulesIntro1                                       =    Mae rhai cwmnïau’n dewis enw masnachu gwahanol i helpu gyda brandio neu i gael enw parth ar gyfer eu gwefan.
 pages.tradingName.errorQuestion                                         =    Nodwch yr enw masnachu
 pages.tradingName.error                                                 =    Rhowch wybod i ni a fydd y cwmni’n masnachu o dan enw arall
 pages.tradingName.error.length                                          =    Nodwch enw llawn gan ddefnyddio 35 o gymeriadau neu lai
 pages.tradingName.error.invalidChars                                    =    Rhowch wybod i ni beth yw’r enw masnachu gan ddefnyddio dim ond llythrennau, rhifau a - , . ( ) / & '' !
-pages.tradingdetails.input.hint-text                                    =    Nid oes modd i chi nodi “cyfyngedig”, “Cyf”, “partneriaeth atebolrwydd cyfyngedig”, “PAC”, “cwmni cyfyngedig cyhoeddus”, na “ccc”
+pages.tradingdetails.input.hint-text                                    =    Nid oes modd i chi nodi ’cyfyngedig’, ’Cyf’, ’partneriaeth atebolrwydd cyfyngedig’, ’PAC’, ’cwmni cyfyngedig cyhoeddus’, na ’ccc’
 
 ## Confirm RO Address
 pages.confirmRO.description                                             =    Cadarnhau cyfeiriad swyddfa gofrestredig {0}
@@ -103,7 +103,7 @@ pages.confirmRO.help.link                                               =    Bet
 pages.confirmRO.hiddenIntro.label                                       =    newid cyfeiriad y swyddfa gofrestredig
 
 ## PPOB Address
-pages.ppobAddress.description                                           =    Beth yw “prif leoliad busnes” y cwmni?
+pages.ppobAddress.description                                           =    Beth yw ’prif leoliad busnes’ y cwmni?
 pages.ppobAddress.other                                                 =    Cyfeiriad gwahanol
 pages.ppobAddress.addressChoice.noEntry                                 =    Rhowch wybod i ni beth yw prif leoliad busnes y cwmni
 pages.ppobAddress.peopleIntro1                                          =    Dyma le mae’r cwmni’n cynnal y rhan fwyaf o’i weithgareddau busnes.

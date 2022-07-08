@@ -97,7 +97,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() must include("Who should we contact about the company's PAYE?")
+      document.title() must include("Who should we contact about the company’s PAYE?")
       document.getElementById("name").data() mustBe ""
       document.getElementById("digitalContact.contactEmail").attr("value") mustBe ""
       document.getElementById("digitalContact.mobileNumber").attr("value") mustBe ""
@@ -135,7 +135,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() must include("Who should we contact about the company's PAYE?")
+      document.title() must include("Who should we contact about the company’s PAYE?")
       document.getElementById("name").attr("value") mustBe ""
       document.getElementById("digitalContact.contactEmail").attr("value") mustBe ""
       document.getElementById("digitalContact.mobileNumber").attr("value") mustBe ""
@@ -176,7 +176,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() must include("Who should we contact about the company's PAYE?")
+      document.title() must include("Who should we contact about the company’s PAYE?")
       document.getElementById("name").attr("value") mustBe "fName mName1 mName2 sName"
       document.getElementById("digitalContact.contactEmail").attr("value") mustBe "email1@email.co.uk"
       document.getElementById("digitalContact.mobileNumber").attr("value") mustBe "543210543210"
@@ -215,7 +215,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() must include("Who should we contact about the company's PAYE?")
+      document.title() must include("Who should we contact about the company’s PAYE?")
       document.getElementById("name").attr("value") mustBe ""
       document.getElementById("digitalContact.contactEmail").attr("value") mustBe "email1@email.co.uk"
       document.getElementById("digitalContact.mobileNumber").attr("value") mustBe "543210543210"
@@ -465,7 +465,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() must include("Where should we send post about the company's PAYE?")
+      document.title() must include("Where should we send post about the company’s PAYE?")
       document.getElementById("chosenAddress").attr("value") mustBe "roAddress"
 
       an[Exception] mustBe thrownBy(document.getElementById("chosenAddress-prepopaddress0").attr("value"))
@@ -554,7 +554,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
 
       val document = Jsoup.parse(response.body)
-      document.title() must include("Where should we send post about the company's PAYE?")
+      document.title() must include("Where should we send post about the company’s PAYE?")
       document.getElementById("chosenAddress").attr("value") mustBe "roAddress"
       document.getElementById("chosenAddress").attr("name") mustBe "chosenAddress"
 
