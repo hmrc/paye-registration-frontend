@@ -16,17 +16,13 @@
 
 package views.pages
 
-import java.util.Locale
-
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.jsoup.Jsoup
-import org.jsoup.select.Elements
-import play.api.i18n.{I18nSupport, Lang, MessagesApi}
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.test.FakeRequest
 import play.twirl.api.Html
 import views.BaseSelectors
 import views.html.pages.confirmation
-import views.html.pages.statements.accessibility_statement
 
 class ConfirmationViewSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
 
@@ -45,7 +41,7 @@ class ConfirmationViewSpec extends PayeComponentSpec with PayeFakedApp with I18n
   lazy val page: Html = {
     val view = app.injector.instanceOf[confirmation]
 
-    view(ackRef,displayNextTaxYearContent, contactDate )(
+    view(ackRef, displayNextTaxYearContent, contactDate)(
       request,
       messagesApi.preferred(request),
       mockAppConfig
