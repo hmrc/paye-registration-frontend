@@ -69,6 +69,10 @@ class AppConfig @Inject()(configuration: Configuration,
     )
   }
 
+  //Questionnaire url
+  lazy val CompRegUrl: String = servicesConfig.baseUrl("company-registration-frontend")
+  lazy val questionnaireLink: String = CompRegUrl + "/register-your-company/questionnaire"
+
   lazy val self: String = servicesConfig.getConfString("paye-registration-frontend.www.url", "")
   lazy val regIdAllowlist: Seq[String] = allowListConfig("regIdAllowlist")
   lazy val defaultCompanyName: String = loadStringConfigBase64("defaultCompanyName")
