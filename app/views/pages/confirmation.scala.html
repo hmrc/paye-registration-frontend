@@ -54,7 +54,8 @@
         @button("app.common.finish")
     }
 
-    @link(controllers.userJourney.routes.EligibilityController.questionnaire.url, messages("app.common.whatDidYouThink"), isExternal = true)
+    @link(appConfig.questionnaireLink, messages("app.common.whatDidYouThink"),id = Some("Questionnaire"), isExternal = true)
+
 }
 
 
