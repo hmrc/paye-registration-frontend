@@ -257,15 +257,15 @@ pages.summary.ppobAddress.hiddenChangeText                              =    Ble
 pages.summary.businessContactDetails.sectionHeading                     =    Manylion cyswllt y cwmni
 
 pages.summary.businessEmail.question                                    =    Beth yw cyfeiriad e-bost cyswllt y cwmni?
-pages.summary.businessEmail.answers.noAnswerGiven                       =    ’
+pages.summary.businessEmail.answers.noAnswerGiven                       =    '
 pages.summary.businessEmail.hiddenChangeText                            =    cyfeiriad e-bost cyswllt y cwmni.
 
 pages.summary.mobileNumber.question                                     =    Beth yw rhif cyswllt y cwmni?
-pages.summary.mobileNumber.answers.noAnswerGiven                        =    ’
+pages.summary.mobileNumber.answers.noAnswerGiven                        =    '
 pages.summary.mobileNumber.hiddenChangeText                             =    rhif cyswllt y cwmni.
 
 pages.summary.businessTelephone.question                                =    Beth yw rhif arall cyswllt y cwmni?
-pages.summary.businessTelephone.answers.noAnswerGiven                   =    ’
+pages.summary.businessTelephone.answers.noAnswerGiven                   =    '
 pages.summary.businessTelephone.hiddenChangeText                        =    rhif arall cyswllt y cwmni.
 
 pages.summary.natureOfBusiness.question                                 =    Beth mae’ch cwmni’n ei wneud?
@@ -281,15 +281,15 @@ pages.summary.contactName.question                                      =    Bet
 pages.summary.contactName.hiddenChangeText                              =    enw cyswllt TWE y cwmni.
 
 pages.summary.emailPAYEContact.question                                 =    Beth yw cyfeiriad e-bost cyswllt TWE y cwmni?
-pages.summary.emailPAYEContact.answers.noAnswerGiven                    =    ’
+pages.summary.emailPAYEContact.answers.noAnswerGiven                    =    '
 pages.summary.emailPAYEContact.hiddenChangeText                         =    cyfeiriad e-bost cyswllt TWE y cwmni.
 
 pages.summary.mobileNumberPAYEContact.question                          =    Beth yw rhif cyswllt TWE y cwmni?
-pages.summary.mobileNumberPAYEContact.answers.noAnswerGiven             =    ’
+pages.summary.mobileNumberPAYEContact.answers.noAnswerGiven             =    '
 pages.summary.mobileNumberPAYEContact.hiddenChangeText                  =    rhif cyswllt TWE y cwmni.
 
 pages.summary.phoneNumberPAYEContact.question                           =    Beth yw rhif arall cyswllt TWE y cwmni?
-pages.summary.phoneNumberPAYEContact.answers.noAnswerGiven              =    ’
+pages.summary.phoneNumberPAYEContact.answers.noAnswerGiven              =    '
 pages.summary.phoneNumberPAYEContact.hiddenChangeText                   =    rhif arall cyswllt TWE y cwmni.
 
 pages.summary.correspondenceAddress.question                            =    I ble y dylem anfon post sy’n gysylltiedig â TWE?
