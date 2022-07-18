@@ -14,23 +14,22 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.govukfrontend.views.Aliases.CharacterCount
 @import uk.gov.hmrc.govukfrontend.views.Aliases.Label
-@import uk.gov.hmrc.govukfrontend.views.html.components.GovukCharacterCount
+@import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcCharacterCount
 @import uk.gov.hmrc.govukfrontend.views.html.components.GovukTextarea
 @import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 @import uk.gov.hmrc.govukfrontend.views.Aliases.Hint
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.content.HtmlContent
 @import uk.gov.hmrc.govukfrontend.views.Aliases.ErrorMessage
 @import uk.gov.hmrc.govukfrontend.views.Aliases.Textarea
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.charactercount.CharacterCount
 
 @this(
     govukTextArea: GovukTextarea,
-    govukCharacterCount: GovukCharacterCount
+        hmrcCharacterCount: HmrcCharacterCount
 )
 
-@(
-        form: Form[_],
+@(form: Form[_],
     id: String,
     name: String,
     label: String,
@@ -51,7 +50,7 @@
 }
 
 @if(maxCharacters.isDefined) {
-    @govukCharacterCount(CharacterCount(
+    @hmrcCharacterCount(CharacterCount(
         id = id,
         name = name,
         maxLength = maxCharacters,
