@@ -320,7 +320,7 @@ pages.confirmation.inclusive.section-1.bullet2                          =    cod
 pages.confirmation.inclusive.section-1.last                             =    Bydd angen y rhain arnoch i anfon gwybodaeth am y gyflogres at CThEM.
 
 pages.confirmation.inclusive.section-2.heading                          =    Os yw taliad cyntaf y cwmni i rywun yn y flwyddyn dreth nesaf
-pages.confirmation.inclusive.section-2.body                             =     Ni fyddwn yn dechrau prosesu eich cais tan ar ôl i’r flwyddyn dreth nesaf ddechrau (6 Ebrill) Peidiwch â chysylltu â ni am y cais tan ar ôl 31 Awst.
+pages.confirmation.inclusive.section-2.body                             =     Ni fyddwn yn dechrau prosesu eich cais tan ar ôl i’r flwyddyn dreth nesaf ddechrau (6 Ebrill) Peidiwch â chysylltu â ni am y cais tan ar ôl {0}.
 pages.confirmation.inclusive.section-2.disclosure.heading               =    Talu rhywun cyn i ni brosesu’r cais?
 pages.confirmation.inclusive.section-2.disclosure.body                  =    Bydd rhaid i chi:
 pages.confirmation.inclusive.section-2.disclosure.bullet1               =    dilyn y cyfarwyddiadau hyn ar

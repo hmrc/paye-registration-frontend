@@ -16,10 +16,17 @@
 
 package utils
 
-import java.time.LocalDate
+import com.ibm.icu.text.SimpleDateFormat
+import com.ibm.icu.util.{TimeZone, ULocale}
+import play.api.i18n.Messages
+
 import java.time.format.{DateTimeFormatter, ResolverStyle}
+import java.time.{LocalDate, ZoneId}
 
 trait DateUtil {
+
+  def defaultTimeZone: TimeZone = TimeZone.getTimeZone("Europe/London")
+
   def toDate(year: String, month: String, day: String): LocalDate = {
     LocalDate.parse(year + "-" + month + "-" + day, DateTimeFormatter.ofPattern("uuuu-M-d").withResolverStyle(ResolverStyle.STRICT))
   }
@@ -27,5 +34,21 @@ trait DateUtil {
   def fromDate(date: LocalDate): (String, String, String) = {
     val arrDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")).split("-")
     (arrDate(0), arrDate(1), arrDate(2))
+  }
+
+  private def toMilliseconds(localDate: LocalDate): Long =
+    localDate.atStartOfDay(ZoneId.of(defaultTimeZone.getID)).toInstant.toEpochMilli
+
+  private def dateFormat(pattern: String)(implicit messages: Messages) = createDateFormatForPattern(pattern)
+
+  def formatDate(date: LocalDate, pattern: String)(implicit messages: Messages): String = dateFormat(pattern).format(toMilliseconds(date))
+
+  private def createDateFormatForPattern(pattern: String)(implicit messages: Messages): SimpleDateFormat = {
+    val uLocale = new ULocale(messages.lang.code)
+    val validLang: Boolean = ULocale.getAvailableLocales.contains(uLocale)
+    val locale: ULocale = if (validLang) uLocale else ULocale.getDefault
+    val simpleDate = new SimpleDateFormat(pattern, locale)
+    simpleDate.setTimeZone(defaultTimeZone)
+    simpleDate
   }
 }
