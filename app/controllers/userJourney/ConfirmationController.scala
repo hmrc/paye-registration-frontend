@@ -16,21 +16,19 @@
 
 package controllers.userJourney
 
-import java.time.format.DateTimeFormatter
-
 import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.http.InternalServerException
-import views.html.pages.error.restart
-import views.html.pages.{confirmation => ConfirmationPage}
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import utils.DateUtil
+import views.html.pages.error.restart
+import views.html.pages.{confirmation => ConfirmationPage}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
 @Singleton
@@ -46,7 +44,7 @@ class ConfirmationController @Inject()(val keystoreConnector: KeystoreConnector,
                                        mcc: MessagesControllerComponents,
                                        restart: restart,
                                        ConfirmationPage: ConfirmationPage
-                                      )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
+                                      )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls with DateUtil {
 
   def showConfirmation: Action[AnyContent] = isAuthorisedWithProfileNoSubmissionCheck { implicit request =>
     profile => {
@@ -59,7 +57,7 @@ class ConfirmationController @Inject()(val keystoreConnector: KeystoreConnector,
         Ok(ConfirmationPage(
           acknowledgementReference,
           confirmationService.determineIfInclusiveContentIsShown,
-          confirmationService.endDate.format(DateTimeFormatter.ofPattern("d MMMM"))
+          formatDate(confirmationService.endDate, "d MMMM")
         ))
     }.recover {
       case e =>
