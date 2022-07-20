@@ -22,10 +22,12 @@ import connectors._
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.{CacheKeys, DownstreamOutcome, RegistrationDeletion}
 import models.external.CurrentProfile
+import play.api.i18n.Lang
 import play.api.mvc._
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.play.language.LanguageUtils
 import utils.PAYEFeatureSwitches
 import views.html.pages.error.restart
 
@@ -45,8 +47,12 @@ class PayeStartController @Inject()(val currentProfileService: CurrentProfileSer
                                     val featureSwitches: PAYEFeatureSwitches,
                                     val incorporationInformationConnector: IncorporationInformationConnector,
                                     mcc: MessagesControllerComponents,
-                                    restart: restart
+                                    restart: restart,
+                                    languageUtils: LanguageUtils
                                    )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
+
+  private val welsh = Lang("cy")
+  private val english = "english"
 
   def steppingStone(): Action[AnyContent] = Action { implicit request =>
     Redirect(s"$payeRegElFEURL$payeRegElFEURI")
@@ -55,7 +61,12 @@ class PayeStartController @Inject()(val currentProfileService: CurrentProfileSer
   def startPaye(): Action[AnyContent] = isAuthorisedAndIsOrg { implicit request =>
     checkAndStoreCurrentProfile { profile =>
       assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId) {
-        Redirect(routes.EmploymentController.paidEmployees)
+        //TODO Remove when Welsh FS is removed
+        if((languageUtils.getCurrentLang == welsh) && !appConfig.languageTranslationEnabled) {
+          Redirect(controllers.routes.LanguageSwitchController.setLanguage(english))
+        } else {
+          Redirect(routes.EmploymentController.paidEmployees)
+        }
       }
     }
   }
