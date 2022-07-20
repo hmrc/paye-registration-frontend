@@ -26,6 +26,7 @@ import uk.gov.hmrc.auth.core.{AuthConnector => AuthClientConnector}
 import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.language.LanguageUtils
 import utils.{FeatureManager, PAYEFeatureSwitch, PAYEFeatureSwitches}
 
 trait MockedComponents {
@@ -36,6 +37,7 @@ trait MockedComponents {
   val mockFeatureSwitch = mock[PAYEFeatureSwitch]
   val mockFeatureSwitches = mock[PAYEFeatureSwitches]
   val mockFeatureManager = mock[FeatureManager]
+  val mockLanguageUtils = mock[LanguageUtils]
 
   //Connector mocks
   val mockKeystoreConnector = mock[KeystoreConnector]

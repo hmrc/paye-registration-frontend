@@ -9,6 +9,7 @@ GET         /sign-out                                         controllers.userJo
 GET         /incorporation-rejected                           controllers.userJourney.SignInOutController.incorporationRejected
 
 GET         /language/:lang                                   controllers.LanguageSwitchController.switchToLanguage(lang: String)
+GET         /defaultLanguage/:lang                            controllers.LanguageSwitchController.setLanguage(lang: String)
 
 ## TIMEOUT
 GET        /renew-session                                     controllers.userJourney.SignInOutController.renewSession

@@ -18,7 +18,7 @@ package controllers
 
 import config.AppConfig
 import play.api.i18n.Lang
-import play.api.mvc.ControllerComponents
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.language.{LanguageController, LanguageUtils}
 
 import javax.inject.{Inject, Singleton}
@@ -30,6 +30,20 @@ class LanguageSwitchController @Inject()(appConfig: AppConfig,
                                         ) extends LanguageController(languageUtils, controllerComponents) {
 
   def languageMap: Map[String, Lang] = appConfig.languageMap
+
+  //TODO Remove when Welsh FS is removed
+  def setLanguage(language: String): Action[AnyContent] = Action { implicit request =>
+    val enabled: Boolean = languageMap.get(language).exists(languageUtils.isLangAvailable)
+    val lang: Lang =
+      if (enabled) {
+        languageMap.getOrElse(language, languageUtils.getCurrentLang)
+      }
+      else {
+        languageUtils.getCurrentLang
+      }
+
+    Redirect(fallbackURL).withLang(Lang.apply(lang.code))
+  }
 
   protected[controllers] def fallbackURL: String = controllers.userJourney.routes.PayeStartController.startPaye.url
 }
