@@ -50,15 +50,27 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
 
   val fieldName = "lastUpdated"
   val sessionRegistrationIndexIndex = "sessionRegistrationIndex"
+  val lastUpdatedIndex = "lastUpdatedIndex"
 
   val expireAfterSeconds = "expireAfterSeconds"
   val timeToLiveInSeconds: Int = config.get[Int]("mongodb.timeToLiveInSeconds")
 
-  createIndex(Seq("sessionId", "transactionId", "registrationId"), sessionRegistrationIndexIndex, timeToLiveInSeconds)
+  createIndex(Seq("sessionId", "transactionId", "registrationId"), sessionRegistrationIndexIndex)
+  createTTLIndex(Seq("lastUpdated"), lastUpdatedIndex, timeToLiveInSeconds)
 
-  private def createIndex(fields: Seq[String], indexName: String, ttl: Int): Future[Boolean] = {
-    val indexes = fields.map(field => (field, IndexType.Ascending))
-    collection.indexesManager.ensure(Index(indexes, Some(indexName), options = BSONDocument(expireAfterSeconds -> ttl))) map {
+  private def createIndex(fields: Seq[String], indexName: String): Future[Boolean] = {
+    collection.indexesManager.ensure(Index(createIndexes(fields), Some(indexName))) map {
+      result =>
+        result
+    } recover {
+      case e =>
+        logger.error("Failed to set index", e)
+        false
+    }
+  }
+
+  private def createTTLIndex(fields: Seq[String], indexName: String, ttl: Int): Future[Boolean] = {
+    collection.indexesManager.ensure(Index(createIndexes(fields), Some(indexName), options = BSONDocument(expireAfterSeconds -> ttl))) map {
       result =>
         logger.debug(s"set [$indexName] with value $ttl -> result : $result")
         result
@@ -68,6 +80,8 @@ class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
         false
     }
   }
+
+  def createIndexes(fields: Seq[String]):Seq[(String, IndexType)] = fields.map(field => (field, IndexType.Ascending))
 
   def upsertSessionMap(sm: SessionMap): Future[Boolean] =
     upsertSessionMapByKey("sessionId", sm.sessionId, sm)
