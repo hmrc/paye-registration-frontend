@@ -24,18 +24,19 @@ import play.api.libs.json._
 import repositories.ReactiveMongoRepository
 import uk.gov.hmrc.crypto.json.JsonEncryptor
 import uk.gov.hmrc.crypto.{ApplicationCrypto, Protected}
-import uk.gov.hmrc.mongo.MongoSpecSupport
+import uk.gov.hmrc.mongo.test.MongoSupport
+import org.mongodb.scala.bson.BsonDocument
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-trait CachingStub extends MongoSpecSupport with BeforeAndAfterEach {
+trait CachingStub extends MongoSupport with BeforeAndAfterEach {
   self: IntegrationSpecBase =>
   implicit lazy val jsonCrypto = new ApplicationCrypto(app.configuration.underlying).JsonCrypto
   implicit lazy val encryptionFormat = new JsonEncryptor[JsObject]()
 
-  lazy val repo = new ReactiveMongoRepository(app.configuration, mongo)
+  lazy val repo = new ReactiveMongoRepository(app.configuration, mongoComponent)
 
   def customAwait[A](future: Future[A])(implicit timeout: Duration): A = Await.result(future, timeout)
 
@@ -43,16 +44,16 @@ trait CachingStub extends MongoSpecSupport with BeforeAndAfterEach {
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    customAwait(repo.drop)(defaultTimeout)
-    await(repo.count) mustBe 0
+    customAwait(repo.collection.deleteMany(BsonDocument()).toFuture())(defaultTimeout)
+    await(repo.collection.countDocuments().toFuture()) mustBe 0
     resetWiremock()
   }
 
   def stubSessionCacheMetadata(session: String, regId: String, submitted: Boolean = false) = {
     customAwait(repo.ensureIndexes)(defaultTimeout)
-    customAwait(repo.drop)(defaultTimeout)
+    customAwait(repo.collection.deleteMany(BsonDocument()).toFuture())(defaultTimeout)
 
-    val preawait = customAwait(repo.count)(defaultTimeout)
+    val preawait = customAwait(repo.collection.countDocuments().toFuture())(defaultTimeout)
     val cp = CurrentProfile(
       registrationID = regId,
       companyTaxRegistration =
@@ -65,7 +66,7 @@ trait CachingStub extends MongoSpecSupport with BeforeAndAfterEach {
     )
     val currentProfileMapping: Map[String, JsValue] = Map("CurrentProfile" -> Json.toJson(cp))
     val res = customAwait(repo.upsertSessionMap(SessionMap(session, regId, "12345", currentProfileMapping)))(defaultTimeout)
-    if (customAwait(repo.count)(defaultTimeout) != preawait + 1) throw new Exception("Error adding data to database")
+    if (customAwait(repo.collection.countDocuments().toFuture())(defaultTimeout) != preawait + 1) throw new Exception("Error adding data to database")
     res
   }
 

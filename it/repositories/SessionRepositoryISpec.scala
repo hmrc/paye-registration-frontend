@@ -21,6 +21,7 @@ import models.api.SessionMap
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
+import org.mongodb.scala.bson.BsonDocument
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -49,14 +50,14 @@ class SessionRepositoryISpec extends IntegrationSpecBase {
   val sId = UUID.randomUUID().toString
 
   class Setup {
-    val repository = new ReactiveMongoRepository(app.configuration, mongo)
+    val repository = new ReactiveMongoRepository(app.configuration, mongoComponent)
 
-    await(repository.drop)
+    await(repository.collection.drop().toFuture())
     await(repository.ensureIndexes)
 
     //implicit val jsObjWts: OWrites[JsObject] = OWrites(identity)
 
-    def count = await(repository.count)
+    def count = await(repository.collection.countDocuments().toFuture())
   }
 
   "SessionRepository" should {
