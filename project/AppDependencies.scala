@@ -26,7 +26,7 @@ object AppDependencies {
   private val playAllowlistVersion = "1.0.0-play-28"
   private val playConditionalMappingVersion = "1.10.0-play-28"
   private val commonsValidatorVersion = "1.6"
-  private val hmrcMongoVersion = "0.65.0"
+  private val hmrcMongoVersion = "0.71.0"
   private val taxYearVersion = "1.6.0"
   private val govukTemplateVersion = "5.72.0-play-28"
   private val playUiVersion = "9.7.0-play-28"

@@ -23,5 +23,5 @@ case class SessionMap(sessionId: String, registrationId: String, transactionId: 
 }
 
 object SessionMap {
-  implicit val formats = Json.format[SessionMap]
+  implicit val format = Json.format[SessionMap]
 }

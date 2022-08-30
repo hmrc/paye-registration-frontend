@@ -61,14 +61,12 @@ class ReactiveMongoRepository(config: Configuration, mongo: MongoComponent)
         .name("lastUpdatedIndex")
         .expireAfter(config.get[Int]("mongodb.timeToLiveInSeconds").toLong, TimeUnit.SECONDS)
     )),
-    extraCodecs = Seq(Codecs.playFormatCodec(SessionMap.formats))
+    extraCodecs = Seq(Codecs.playFormatCodec(SessionMap.format))
   )  {
-
-
 
   def upsertSessionMapByKey(key: String, id: String, sm: SessionMap): Future[Boolean] =
     collection.findOneAndReplace(
-      filter = equal("id", sm.sessionId),
+      filter = equal(key, id),
       replacement = DatedSessionMap(sm),
       options = FindOneAndReplaceOptions().upsert(true)
     ).toFuture().map(_ => true)
@@ -84,17 +82,17 @@ class ReactiveMongoRepository(config: Configuration, mongo: MongoComponent)
   }
 
   def getSessionMap(id: String): Future[Option[SessionMap]] =
-    getSessionMapByKey(id)
+    getSessionMapByKey("sessionId",id)
 
 
   def getLatestSessionMapByTransactionId(id: String): Future[Option[SessionMap]] =
     getLatestSessionMapByKey("transactionId", id)
 
-  private def getSessionMapByKey(id: String): Future[Option[SessionMap]] =
-    collection.find[SessionMap](equal("id", id)).headOption()
+  private def getSessionMapByKey(key: String,id: String): Future[Option[SessionMap]] =
+    collection.find[SessionMap](equal(key, id)).headOption()
 
   private def getLatestSessionMapByKey(key: String, id: String): Future[Option[SessionMap]] =
-    collection.find[SessionMap](equal("id", id)).sort(equal("lastUpdated", -1)).headOption()
+    collection.find[SessionMap](equal(key, id)).sort(equal("lastUpdated", -1)).headOption()
 }
 
 @Singleton
