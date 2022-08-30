@@ -26,7 +26,6 @@ import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{FindOneAndReplaceOptions, IndexModel, IndexOptions}
 import play.api.Configuration
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.formats.MongoJodaFormats
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
@@ -34,38 +33,43 @@ import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class DatedCacheMap(sessionId: String,
+case class DatedSessionMap(sessionId: String,
                            registrationId: String,
                            transactionId: String,
                            data: Map[String, JsValue],
                            lastUpdated: DateTime = DateTime.now(DateTimeZone.UTC))
 
-object DatedCacheMap {
+object DatedSessionMap {
   implicit val dateFormat = MongoJodaFormats.dateTimeFormat
-  //TODO: Temporary, future stories to switch to JavaTime
-  implicit val formats = Json.format[DatedCacheMap]
+  implicit val formats = Json.format[DatedSessionMap]
 
-  def apply(sessionMap: SessionMap): DatedCacheMap = DatedCacheMap(sessionMap.sessionId, sessionMap.registrationId, sessionMap.transactionId, sessionMap.data)
+  def apply(sessionMap: SessionMap): DatedSessionMap = DatedSessionMap(sessionMap.sessionId, sessionMap.registrationId, sessionMap.transactionId, sessionMap.data)
 }
 
 class ReactiveMongoRepository(config: Configuration, mongo: MongoComponent)
-  extends PlayMongoRepository[DatedCacheMap](
+  extends PlayMongoRepository[DatedSessionMap](
     mongoComponent = mongo,
     collectionName = config.get[String]("appName"),
-    domainFormat = DatedCacheMap.formats,
+    domainFormat = DatedSessionMap.formats,
     indexes = Seq(IndexModel(
+        ascending("sessionId","transactionId","registrationId"),
+        IndexOptions()
+          .name("sessionRegistrationIndex")
+      ),IndexModel(
       ascending("lastUpdated"),
       IndexOptions()
-        .name("sessionRegistrationIndex")
+        .name("lastUpdatedIndex")
         .expireAfter(config.get[Int]("mongodb.timeToLiveInSeconds").toLong, TimeUnit.SECONDS)
     )),
     extraCodecs = Seq(Codecs.playFormatCodec(SessionMap.formats))
-  ) {
+  )  {
+
+
 
   def upsertSessionMapByKey(key: String, id: String, sm: SessionMap): Future[Boolean] =
     collection.findOneAndReplace(
       filter = equal("id", sm.sessionId),
-      replacement = DatedCacheMap(sm),
+      replacement = DatedSessionMap(sm),
       options = FindOneAndReplaceOptions().upsert(true)
     ).toFuture().map(_ => true)
 
