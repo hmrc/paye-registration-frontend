@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
+import AppDependencies.scalaTestVersion
+import play.core.PlayVersion
 import sbt._
 
-object AppDependencies {
 
-  private val playVersion = "-play-28"
+private object AppDependencies {
 
+
+  private val hmrcMongoVersion = "0.71.0"
+  private val taxYearVersion = "1.6.0"
   private val bootstrapVersion = "5.16.0"
   private val playPartialsVersion = "8.2.0-play-28"
   private val httpCachingVersion = "9.5.0-play-28"
   private val playAllowlistVersion = "1.0.0-play-28"
   private val playConditionalMappingVersion = "1.10.0-play-28"
   private val commonsValidatorVersion = "1.6"
-  private val hmrcMongoVersion = "0.71.0"
-  private val taxYearVersion = "1.6.0"
   private val govukTemplateVersion = "5.72.0-play-28"
   private val playUiVersion = "9.7.0-play-28"
   private val jsonJodaVersion = "2.9.2"
@@ -35,11 +37,14 @@ object AppDependencies {
   private val mockitoCoreVersion = "2.13.0"
   private val scalatestMockitoVersion = "3.2.10.0"
   private val jsoupVersion = "1.13.1"
-  private val wireMockVersion = "2.27.2"
+  private val wireMockVersion = "2.26.3"
+  private val playMongoTestVersion = "5.0.0-play-28"
   private val flexmarkVersion = "0.36.8"
   private val scalaTestVersion = "3.2.12"
 
-  private val compile = Seq(
+
+  val compile = Seq(
+
     "uk.gov.hmrc" %% "bootstrap-frontend-play-28" % bootstrapVersion,
     "uk.gov.hmrc" %% "tax-year" % taxYearVersion,
     "uk.gov.hmrc" %% "play-partials" % playPartialsVersion,
@@ -55,24 +60,27 @@ object AppDependencies {
     "uk.gov.hmrc" %% "play-frontend-govuk" % "1.0.0-play-28"
   )
 
-  private val unitTestDependencies = Seq(
-    "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusVersion % Test,
-    "org.scalatestplus" %% "mockito-3-4" % scalatestMockitoVersion % Test,
-    "com.vladsch.flexmark" % "flexmark-all" % flexmarkVersion % Test,
-    "org.jsoup" % "jsoup" % jsoupVersion % Test,
-    "org.mockito" % "mockito-core" % mockitoCoreVersion % Test
+  def defaultTest(scope: String) = Seq(
+    "org.jsoup" % "jsoup" % "1.10.3" % scope,
+    "org.mockito" % "mockito-core" % "4.1.0" % scope,
+    "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % scope,
+    "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % scope,
+    "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
+    "com.vladsch.flexmark" % "flexmark-all" % "0.62.2" % scope,
+    "org.scalatestplus" %% "scalacheck-1-16" % s"$scalaTestVersion.0" % scope
+
   )
 
-  private val integrationTestDependencies = Seq(
-    "org.scalatestplus.play" %% "scalatestplus-play" % scalaTestPlusVersion % IntegrationTest,
-    "org.scalatestplus" %% "mockito-4-5" % s"$scalaTestVersion.0" % IntegrationTest,
-    "com.vladsch.flexmark" % "flexmark-all" % flexmarkVersion % IntegrationTest,
-    "org.jsoup" % "jsoup" % jsoupVersion % IntegrationTest,
-    "com.github.tomakehurst" % "wiremock-jre8" % wireMockVersion % IntegrationTest,
-    "uk.gov.hmrc.mongo" %% "hmrc-mongo-test-play-28" % hmrcMongoVersion % IntegrationTest,
-    "org.scalatestplus" %% "scalacheck-1-16" % s"$scalaTestVersion.0" % IntegrationTest
-  )
+  object Test {
+    def apply() = defaultTest("test")
+  }
 
-  def apply(): Seq[ModuleID] = compile ++ unitTestDependencies ++ integrationTestDependencies
+  object IntegrationTest {
+    def apply() = defaultTest("it") ++ Seq(
+      "com.github.tomakehurst" % "wiremock-jre8" % "2.27.2" % "it",
+      "uk.gov.hmrc.mongo" %% "hmrc-mongo-test-play-28" % hmrcMongoVersion % "it"
+    )
+  }
 
+  def apply() = compile ++ Test() ++ IntegrationTest()
 }

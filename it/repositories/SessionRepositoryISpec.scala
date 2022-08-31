@@ -16,17 +16,18 @@
 
 package repositories
 
+import java.util.UUID
+
+import connectors.KeystoreConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.api.SessionMap
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
-import org.mongodb.scala.bson.BsonDocument
+import play.api.libs.json.{JsObject, Json, OWrites}
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
+import uk.gov.hmrc.mongo.test.MongoSupport
 
-import java.util.UUID
-import scala.concurrent.ExecutionContext.Implicits.global
-
-class SessionRepositoryISpec extends IntegrationSpecBase {
+class SessionRepositoryISpec extends IntegrationSpecBase with MongoSupport {
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
@@ -48,20 +49,22 @@ class SessionRepositoryISpec extends IntegrationSpecBase {
     .build
 
   val sId = UUID.randomUUID().toString
+  implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sId)))
 
   class Setup {
     val repository = new ReactiveMongoRepository(app.configuration, mongoComponent)
-
-    await(repository.collection.drop().toFuture())
+    val connector = app.injector.instanceOf[KeystoreConnector]
+    await(repository.collection.drop().head())
     await(repository.ensureIndexes)
 
-    //implicit val jsObjWts: OWrites[JsObject] = OWrites(identity)
+    implicit val jsObjWts: OWrites[JsObject] = OWrites(identity)
 
-    def count = await(repository.collection.countDocuments().toFuture())
+    def count = await(repository.collection.countDocuments().head())
   }
 
   "SessionRepository" should {
     val sessionMap = SessionMap(sId, "regId", "txId", Map("test" -> Json.obj()))
+
 
     "cache" when {
       "given a new session map" in new Setup() {
@@ -95,11 +98,8 @@ class SessionRepositoryISpec extends IntegrationSpecBase {
         count mustBe 0
       }
       "there is no session map to remove" in new Setup() {
-        await(repository.upsertSessionMap(sessionMap))
-        count mustBe 1
-
-        await(repository.removeDocument("wrongSessionId")) mustBe false
-        count mustBe 1
+        await(repository.removeDocument("wrongSessionId"))
+        count mustBe 0
       }
     }
 
