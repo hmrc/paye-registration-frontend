@@ -78,7 +78,7 @@ class ReactiveMongoRepository(config: Configuration, mongo: MongoComponent)
 
 
   def removeDocument(id: String): Future[Boolean] = {
-    collection.deleteOne(equal("sessionId", id)).map(_.wasAcknowledged()).head()
+    collection.deleteOne(equal("sessionId", id)).toFuture().map(_.wasAcknowledged())
   }
 
   def getSessionMap(id: String): Future[Option[SessionMap]] =
