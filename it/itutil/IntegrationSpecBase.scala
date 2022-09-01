@@ -19,14 +19,15 @@ package itutil
 import akka.util.Timeout
 import org.scalatest._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.ws.WSResponse
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import uk.gov.hmrc.mongo.MongoSpecSupport
+import uk.gov.hmrc.mongo.test.MongoSupport
 
 import scala.concurrent.duration._
 
-trait IntegrationSpecBase extends WordSpec with MustMatchers
+trait IntegrationSpecBase extends PlaySpec
     with GuiceOneServerPerSuite
     with ScalaFutures
     with IntegrationPatience
@@ -35,7 +36,7 @@ trait IntegrationSpecBase extends WordSpec with MustMatchers
     with BeforeAndAfterAll
     with FutureAwaits
     with DefaultAwaitTimeout
-    with MongoSpecSupport {
+    with MongoSupport {
 
   override implicit def defaultAwaitTimeout: Timeout = 5.seconds
 

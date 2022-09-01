@@ -16,19 +16,20 @@
 
 package repositories
 
-import models.api.SessionMap
-import org.joda.time.{DateTime, DateTimeZone}
-import play.api.Configuration
-import play.api.libs.json.{JsValue, Json}
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.DefaultDB
-import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
-import reactivemongo.play.json.ImplicitBSONHandlers._
-import uk.gov.hmrc.mongo.ReactiveRepository
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import java.util.concurrent.TimeUnit
 
 import javax.inject.{Inject, Singleton}
+import models.api.SessionMap
+import org.joda.time.{DateTime, DateTimeZone}
+import org.mongodb.scala.model.Filters.equal
+import org.mongodb.scala.model.Indexes.ascending
+import org.mongodb.scala.model.{Filters, FindOneAndReplaceOptions, IndexModel, IndexOptions}
+import play.api.Configuration
+import play.api.libs.json.{JsValue, Json}
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.formats.MongoJodaFormats
+import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -39,84 +40,65 @@ case class DatedSessionMap(sessionId: String,
                            lastUpdated: DateTime = DateTime.now(DateTimeZone.UTC))
 
 object DatedSessionMap {
-  implicit val dateFormat = ReactiveMongoFormats.dateTimeFormats
+  implicit val dateFormat = MongoJodaFormats.dateTimeFormat
   implicit val formats = Json.format[DatedSessionMap]
 
   def apply(sessionMap: SessionMap): DatedSessionMap = DatedSessionMap(sessionMap.sessionId, sessionMap.registrationId, sessionMap.transactionId, sessionMap.data)
 }
 
-class ReactiveMongoRepository(config: Configuration, mongo: () => DefaultDB)
-  extends ReactiveRepository[DatedSessionMap, BSONObjectID](config.get[String]("appName"), mongo, DatedSessionMap.formats) {
+class ReactiveMongoRepository(config: Configuration, mongo: MongoComponent)
+  extends PlayMongoRepository[DatedSessionMap](
+    mongoComponent = mongo,
+    collectionName = config.get[String]("appName"),
+    domainFormat = DatedSessionMap.formats,
+    indexes = Seq(IndexModel(
+        ascending("sessionId","transactionId","registrationId"),
+        IndexOptions()
+          .name("sessionRegistrationIndex")
+      ),IndexModel(
+      ascending("lastUpdated"),
+      IndexOptions()
+        .name("lastUpdatedIndex")
+        .expireAfter(config.get[Int]("mongodb.timeToLiveInSeconds").toLong, TimeUnit.SECONDS)
+    )),
+    extraCodecs = Seq(Codecs.playFormatCodec(SessionMap.format))
+  )  {
 
-  val fieldName = "lastUpdated"
-  val sessionRegistrationIndexIndex = "sessionRegistrationIndex"
-  val lastUpdatedIndex = "lastUpdatedIndex"
+  def upsertSessionMapByKey(key: String, id: String, sm: SessionMap): Future[Boolean] =
+    collection.findOneAndReplace(
+      filter = equal(key, id),
+      replacement = DatedSessionMap(sm),
+      options = FindOneAndReplaceOptions().upsert(true)
+    ).toFuture().map(_ => true)
 
-  val expireAfterSeconds = "expireAfterSeconds"
-  val timeToLiveInSeconds: Int = config.get[Int]("mongodb.timeToLiveInSeconds")
-
-  createIndex(Seq("sessionId", "transactionId", "registrationId"), sessionRegistrationIndexIndex)
-  createTTLIndex(Seq("lastUpdated"), lastUpdatedIndex, timeToLiveInSeconds)
-
-  private def createIndex(fields: Seq[String], indexName: String): Future[Boolean] = {
-    collection.indexesManager.ensure(Index(createIndexes(fields), Some(indexName))) map {
-      result =>
-        result
-    } recover {
-      case e =>
-        logger.error("Failed to set index", e)
-        false
-    }
-  }
-
-  private def createTTLIndex(fields: Seq[String], indexName: String, ttl: Int): Future[Boolean] = {
-    collection.indexesManager.ensure(Index(createIndexes(fields), Some(indexName), options = BSONDocument(expireAfterSeconds -> ttl))) map {
-      result =>
-        logger.debug(s"set [$indexName] with value $ttl -> result : $result")
-        result
-    } recover {
-      case e =>
-        logger.error("Failed to set TTL index", e)
-        false
-    }
-  }
-
-  def createIndexes(fields: Seq[String]):Seq[(String, IndexType)] = fields.map(field => (field, IndexType.Ascending))
 
   def upsertSessionMap(sm: SessionMap): Future[Boolean] =
     upsertSessionMapByKey("sessionId", sm.sessionId, sm)
 
-  private def upsertSessionMapByKey(key: String, id: String, sm: SessionMap): Future[Boolean] = {
-    val selector = Json.obj(key -> id)
-    val cmDocument = Json.toJson(DatedSessionMap(sm))
-    val modifier = BSONDocument("$set" -> cmDocument)
 
-    collection.update(selector, modifier, upsert = true).map(_.ok)
-  }
 
   def removeDocument(id: String): Future[Boolean] = {
-    collection.remove(BSONDocument("sessionId" -> id)).map(_.n > 0)
+    collection.deleteOne(equal("sessionId", id)).toFuture().map(_.wasAcknowledged())
   }
 
   def getSessionMap(id: String): Future[Option[SessionMap]] =
-    getSessionMapByKey("sessionId", id)
+    getSessionMapByKey("sessionId",id)
 
 
   def getLatestSessionMapByTransactionId(id: String): Future[Option[SessionMap]] =
     getLatestSessionMapByKey("transactionId", id)
 
-  private def getSessionMapByKey(key: String, id: String): Future[Option[SessionMap]] =
-    collection.find(Json.obj(key -> id)).one[SessionMap]
+  private def getSessionMapByKey(key: String,id: String): Future[Option[SessionMap]] =
+    collection.find[SessionMap](equal(key, id)).headOption()
 
   private def getLatestSessionMapByKey(key: String, id: String): Future[Option[SessionMap]] =
-    collection.find(Json.obj(key -> id)).sort(Json.obj("lastUpdated" -> -1)).one[SessionMap]
+    collection.find[SessionMap](equal(key, id)).sort(equal("lastUpdated", -1)).headOption()
 }
 
 @Singleton
-class SessionRepository @Inject()(config: Configuration,
-                                  reactiveMongoComponent: ReactiveMongoComponent) {
+class SessionRepository @Inject()(config: Configuration, reactiveMongoComponent: MongoComponent) {
 
-  private lazy val sessionRepository = new ReactiveMongoRepository(config, reactiveMongoComponent.mongoConnector.db)
+  private lazy val sessionRepository: ReactiveMongoRepository = new ReactiveMongoRepository(config, reactiveMongoComponent)
 
   def apply(): ReactiveMongoRepository = sessionRepository
 }
