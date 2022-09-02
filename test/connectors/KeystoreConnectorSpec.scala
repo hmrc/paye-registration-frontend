@@ -53,9 +53,7 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
 
       val returnSessionMap = SessionMap("testSessionId", "testRegId", "testTxId", Map("testKey" -> Json.toJson(testModel)))
 
-      when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
-
-      when(mockReactiveMongoRepo.upsertSessionMap(ArgumentMatchers.any()))
+      when(mockSessionRepository.upsertSessionMap(ArgumentMatchers.any()))
         .thenReturn(Future.successful(true))
 
       val result = await(connector.cache[TestModel]("testKey", "testRegId", "testTxId", testModel))
@@ -72,9 +70,7 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
       when(mockSessionCache.fetchAndGetEntry[List[TestModel]](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(list)))
 
-      when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
-
-      when(mockReactiveMongoRepo.getSessionMap(ArgumentMatchers.any()))
+      when(mockSessionRepository.getSessionMap(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(returnSessionMap)))
 
       val result = await(connector.fetchAndGet[List[TestModel]]("testKey"))
@@ -89,9 +85,7 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
       when(mockSessionCache.fetchAndGetEntry[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(cp)))
 
-      when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
-
-      when(mockReactiveMongoRepo.upsertSessionMap(ArgumentMatchers.any()))
+      when(mockSessionRepository.upsertSessionMap(ArgumentMatchers.any()))
         .thenReturn(Future.successful(true))
 
       val result = await(connector.fetchAndGetFromKeystore("testKey"))
@@ -105,9 +99,7 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
 
       val returnSessionMap = SessionMap("testSessionId", "testRegId", "testTxId", Map("testKey" -> Json.toJson(testModel)))
 
-      when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
-
-      when(mockReactiveMongoRepo.getSessionMap(ArgumentMatchers.any()))
+      when(mockSessionRepository.getSessionMap(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(returnSessionMap)))
 
       val result = await(connector.fetch())
@@ -117,9 +109,8 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
 
   "Removing from SessionRepository" should {
     "return a HTTP Response" in {
-      when(mockSessionRepository()).thenReturn(mockReactiveMongoRepo)
 
-      when(mockReactiveMongoRepo.removeDocument(ArgumentMatchers.any()))
+      when(mockSessionRepository.removeDocument(ArgumentMatchers.any()))
         .thenReturn(Future.successful(true))
 
       val result = await(connector.remove())

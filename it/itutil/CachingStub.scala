@@ -19,15 +19,14 @@ package itutil
 import com.github.tomakehurst.wiremock.client.WireMock._
 import models.api.SessionMap
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import org.mongodb.scala.bson.BsonDocument
 import org.scalatest.BeforeAndAfterEach
 import play.api.libs.json._
-import repositories.ReactiveMongoRepository
+import repositories.SessionRepository
 import uk.gov.hmrc.crypto.json.JsonEncryptor
 import uk.gov.hmrc.crypto.{ApplicationCrypto, Protected}
 import uk.gov.hmrc.mongo.test.MongoSupport
-import org.mongodb.scala.bson.BsonDocument
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
@@ -36,7 +35,7 @@ trait CachingStub extends MongoSupport with BeforeAndAfterEach {
   implicit lazy val jsonCrypto = new ApplicationCrypto(app.configuration.underlying).JsonCrypto
   implicit lazy val encryptionFormat = new JsonEncryptor[JsObject]()
 
-  lazy val repo = new ReactiveMongoRepository(app.configuration, mongoComponent)
+  lazy val repo = new SessionRepository(app.configuration, mongoComponent)
 
   def customAwait[A](future: Future[A])(implicit timeout: Duration): A = Await.result(future, timeout)
 
