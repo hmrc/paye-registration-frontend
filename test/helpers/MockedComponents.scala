@@ -20,7 +20,7 @@ import connectors._
 import connectors.test.{TestBusinessRegConnector, TestIncorpInfoConnector, TestPAYERegConnector}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.{Configuration, Environment}
-import repositories.{ReactiveMongoRepository, SessionRepository}
+import repositories.SessionRepository
 import services._
 import uk.gov.hmrc.auth.core.{AuthConnector => AuthClientConnector}
 import uk.gov.hmrc.http.HttpClient
@@ -74,7 +74,6 @@ trait MockedComponents {
   val mockAddressLookupConfigBuilderServiceMock = mock[AddressLookupConfigBuilderService]
 
   val mockSessionRepository = mock[SessionRepository]
-  val mockReactiveMongoRepo = mock[ReactiveMongoRepository]
   val mockConfiguration = mock[Configuration]
   val mockEnvironment = mock[Environment]
 }

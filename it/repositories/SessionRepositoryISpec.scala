@@ -16,18 +16,31 @@
 
 package repositories
 
-import java.util.UUID
-
 import connectors.KeystoreConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.api.SessionMap
-import play.api.Application
+import org.mockito.Mockito.when
+import org.mongodb.scala.MongoCommandException
+import org.mongodb.scala.model.Indexes.ascending
+import org.mongodb.scala.model.{IndexModel, IndexOptions}
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json, OWrites}
+import play.api.{Application, Configuration}
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.mongo.test.MongoSupport
 
-class SessionRepositoryISpec extends IntegrationSpecBase with MongoSupport {
+import java.util.UUID
+import java.util.concurrent.TimeUnit
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
+
+case class Index(name: String, expireAfterSeconds: Option[Int])
+object Index {
+  implicit val format = Json.format[Index]
+}
+
+class SessionRepositoryISpec extends IntegrationSpecBase with MongoSupport with MockitoSugar {
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
@@ -51,10 +64,18 @@ class SessionRepositoryISpec extends IntegrationSpecBase with MongoSupport {
   val sId = UUID.randomUUID().toString
   implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sId)))
 
-  class Setup {
-    val repository = new ReactiveMongoRepository(app.configuration, mongoComponent)
+  class Setup(replaceIndexes: Boolean = false) {
+
+    val mockConfiguration = mock[Configuration]
+    val expireAfter = app.configuration.get[Int]("mongodb.timeToLiveInSeconds")
+
+    when(mockConfiguration.get[Boolean]("mongodb.replaceIndexes")).thenReturn(replaceIndexes)
+    when(mockConfiguration.get[String]("appName")).thenReturn(app.configuration.get[String]("appName"))
+    when(mockConfiguration.get[Int]("mongodb.timeToLiveInSeconds")).thenReturn(expireAfter)
+
+    val repository = new SessionRepository(mockConfiguration, mongoComponent)
     val connector = app.injector.instanceOf[KeystoreConnector]
-    await(repository.collection.drop().head())
+    await(repository.collection.drop().toFuture())
     await(repository.ensureIndexes)
 
     implicit val jsObjWts: OWrites[JsObject] = OWrites(identity)
@@ -112,6 +133,96 @@ class SessionRepositoryISpec extends IntegrationSpecBase with MongoSupport {
         count mustBe 3
 
         await(repository.getLatestSessionMapByTransactionId(sessionMap.transactionId)) mustBe Some(sessionMap2)
+      }
+    }
+
+    "Ensuring Indexes" when {
+
+      def waitForMongoBackgroundTask[T](f: => Future[T], retryAttempt: Int = 0, nTimesToRetry: Int = 10): T =
+        await(f recover {
+          case e: MongoCommandException if e.getCode == 12587 =>
+            if(retryAttempt < nTimesToRetry) {
+              Thread.sleep(1000)
+              waitForMongoBackgroundTask(f, retryAttempt + 1, nTimesToRetry)
+            } else {
+              throw e
+            }
+        })
+
+      def listIndexes(repository: SessionRepository): Seq[Index] =
+        waitForMongoBackgroundTask(repository.collection.listIndexes().map(indexDoc => Json.parse(indexDoc.toJson).as[Index]).toFuture()).sortBy(_.name)
+
+      "when `replaceIndexes` is `false`" must {
+
+        "not allow indexes to be replaced with different implementations" in new Setup() {
+
+          listIndexes(repository) mustBe Seq(
+            Index("_id_", None),
+            Index("lastUpdatedIndex", Some(expireAfter)),
+            Index("sessionRegistrationIndex", None)
+          )
+
+          //Delete the indexes
+          waitForMongoBackgroundTask(repository.collection.dropIndexes().toFuture())
+
+          //Create an index with a different expiresAfter
+          val newExpireAfter = 12
+
+          waitForMongoBackgroundTask(repository.collection.createIndexes(Seq(
+            IndexModel(
+              ascending("lastUpdated"), IndexOptions().name("lastUpdatedIndex").expireAfter(newExpireAfter, TimeUnit.SECONDS)
+            )
+          )).toFuture())
+
+          //Check New Index with New Expire After created
+          listIndexes(repository) mustBe Seq(
+            Index("_id_", None),
+            Index("lastUpdatedIndex", Some(newExpireAfter))
+          )
+
+          //Ensure the repo indexes and expect Code:85 error (index exists with different options)
+          intercept[MongoCommandException](waitForMongoBackgroundTask(repository.ensureIndexes)).getCode mustBe 85
+        }
+      }
+
+      "when `replaceIndexes` is `true`" must {
+
+        "allow indexes to be replaced with different implementations" in new Setup(replaceIndexes = true) {
+
+          listIndexes(repository) mustBe Seq(
+            Index("_id_", None),
+            Index("lastUpdatedIndex", Some(expireAfter)),
+            Index("sessionRegistrationIndex", None)
+          )
+
+          //Delete the indexes
+          waitForMongoBackgroundTask(repository.collection.dropIndexes().toFuture())
+
+          //Create an index with a different expiresAfter
+          val newExpireAfter = 12
+
+          waitForMongoBackgroundTask(repository.collection.createIndexes(Seq(
+            IndexModel(
+              ascending("lastUpdated"), IndexOptions().name("lastUpdatedIndex").expireAfter(newExpireAfter, TimeUnit.SECONDS)
+            )
+          )).toFuture())
+
+          //Check New Index with New Expire After created
+          listIndexes(repository) mustBe Seq(
+            Index("_id_", None),
+            Index("lastUpdatedIndex", Some(newExpireAfter))
+          )
+
+          //Ensure the repo indexes
+          waitForMongoBackgroundTask(repository.ensureIndexes)
+
+          //Check the index has been replaced back to the expireAfter setting from ApplicationConf
+          listIndexes(repository) mustBe Seq(
+            Index("_id_", None),
+            Index("lastUpdatedIndex", Some(expireAfter)),
+            Index("sessionRegistrationIndex", None)
+          )
+        }
       }
     }
   }

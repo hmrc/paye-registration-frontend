@@ -56,19 +56,19 @@ trait KeystoreConnector {
   def cache[T](formId: String, regId: String, txId: String, body: T)(implicit hc: HeaderCarrier, format: Format[T]): Future[SessionMap] = {
     metricsService.processDataResponseWithMetrics[SessionMap](successCounter, failedCounter, timer) {
       val updatedCacheMap = SessionMap(sessionID, regId, txId, Map(formId -> Json.toJson(body)))
-      sessionRepository().upsertSessionMap(updatedCacheMap) map (_ => updatedCacheMap)
+      sessionRepository.upsertSessionMap(updatedCacheMap) map (_ => updatedCacheMap)
     }
   }
 
   def cacheSessionMap(map: SessionMap): Future[SessionMap] = {
     metricsService.processDataResponseWithMetrics[SessionMap](successCounter, failedCounter, timer) {
-      sessionRepository().upsertSessionMap(map) map (_ => map)
+      sessionRepository.upsertSessionMap(map) map (_ => map)
     }
   }
 
   def fetch()(implicit hc: HeaderCarrier): Future[Option[SessionMap]] = {
     metricsService.processOptionalDataWithMetrics[SessionMap](successCounter, emptyResponseCounter, timer) {
-      sessionRepository().getSessionMap(sessionID)
+      sessionRepository.getSessionMap(sessionID)
     }
   }
 
@@ -85,7 +85,7 @@ trait KeystoreConnector {
 
   def fetchAndGet[T](key: String)(implicit hc: HeaderCarrier, format: Format[T]): Future[Option[T]] = {
     metricsService.processOptionalDataWithMetrics[T](successCounter, emptyResponseCounter, timer) {
-      sessionRepository().getSessionMap(sessionID).map {
+      sessionRepository.getSessionMap(sessionID).map {
         _.flatMap(_.getEntry(key))
       }
     }
@@ -93,13 +93,13 @@ trait KeystoreConnector {
 
   def fetchByTransactionId(txId: String): Future[Option[SessionMap]] = {
     metricsService.processOptionalDataWithMetrics(successCounter, emptyResponseCounter, timer) {
-      sessionRepository().getLatestSessionMapByTransactionId(txId)
+      sessionRepository.getLatestSessionMapByTransactionId(txId)
     }
   }
 
   def remove()(implicit hc: HeaderCarrier): Future[Boolean] = {
     metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
-      sessionRepository().removeDocument(sessionID)
+      sessionRepository.removeDocument(sessionID)
     }
   }
 }

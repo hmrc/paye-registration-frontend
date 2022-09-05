@@ -16,52 +16,40 @@
 
 package repositories
 
-import java.util.concurrent.TimeUnit
-
-import javax.inject.{Inject, Singleton}
+import models.DatedSessionMap
 import models.api.SessionMap
-import org.joda.time.{DateTime, DateTimeZone}
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.Indexes.ascending
-import org.mongodb.scala.model.{Filters, FindOneAndReplaceOptions, IndexModel, IndexOptions}
+import org.mongodb.scala.model.{FindOneAndReplaceOptions, IndexModel, IndexOptions}
 import play.api.Configuration
-import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.play.json.formats.MongoJodaFormats
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
+import java.util.concurrent.TimeUnit
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class DatedSessionMap(sessionId: String,
-                           registrationId: String,
-                           transactionId: String,
-                           data: Map[String, JsValue],
-                           lastUpdated: DateTime = DateTime.now(DateTimeZone.UTC))
-
-object DatedSessionMap {
-  implicit val dateFormat = MongoJodaFormats.dateTimeFormat
-  implicit val formats = Json.format[DatedSessionMap]
-
-  def apply(sessionMap: SessionMap): DatedSessionMap = DatedSessionMap(sessionMap.sessionId, sessionMap.registrationId, sessionMap.transactionId, sessionMap.data)
-}
-
-class ReactiveMongoRepository(config: Configuration, mongo: MongoComponent)
+@Singleton
+class SessionRepository @Inject()(config: Configuration, mongo: MongoComponent)
   extends PlayMongoRepository[DatedSessionMap](
     mongoComponent = mongo,
     collectionName = config.get[String]("appName"),
     domainFormat = DatedSessionMap.formats,
-    indexes = Seq(IndexModel(
+    indexes = Seq(
+      IndexModel(
         ascending("sessionId","transactionId","registrationId"),
         IndexOptions()
           .name("sessionRegistrationIndex")
       ),IndexModel(
-      ascending("lastUpdated"),
-      IndexOptions()
-        .name("lastUpdatedIndex")
-        .expireAfter(config.get[Int]("mongodb.timeToLiveInSeconds").toLong, TimeUnit.SECONDS)
-    )),
-    extraCodecs = Seq(Codecs.playFormatCodec(SessionMap.format))
+        ascending("lastUpdated"),
+        IndexOptions()
+          .name("lastUpdatedIndex")
+          .expireAfter(config.get[Int]("mongodb.timeToLiveInSeconds").toLong, TimeUnit.SECONDS)
+      )
+    ),
+    extraCodecs = Seq(Codecs.playFormatCodec(SessionMap.format)),
+    replaceIndexes = config.get[Boolean]("mongodb.replaceIndexes")
   )  {
 
   def upsertSessionMapByKey(key: String, id: String, sm: SessionMap): Future[Boolean] =
@@ -93,12 +81,4 @@ class ReactiveMongoRepository(config: Configuration, mongo: MongoComponent)
 
   private def getLatestSessionMapByKey(key: String, id: String): Future[Option[SessionMap]] =
     collection.find[SessionMap](equal(key, id)).sort(equal("lastUpdated", -1)).headOption()
-}
-
-@Singleton
-class SessionRepository @Inject()(config: Configuration, reactiveMongoComponent: MongoComponent) {
-
-  private lazy val sessionRepository: ReactiveMongoRepository = new ReactiveMongoRepository(config, reactiveMongoComponent)
-
-  def apply(): ReactiveMongoRepository = sessionRepository
 }
