@@ -32,6 +32,8 @@ import uk.gov.hmrc.mongo.test.MongoSupport
 
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
 case class Index(name: String, expireAfterSeconds: Option[Int])
 object Index {
@@ -136,8 +138,19 @@ class SessionRepositoryISpec extends IntegrationSpecBase with MongoSupport with 
 
     "Ensuring Indexes" when {
 
+      def waitForMongoBackgroundTask[T](f: => Future[T], retryAttempt: Int = 0, nTimesToRetry: Int = 10): T =
+        await(f recover {
+          case e: MongoCommandException if e.getCode == 12587 =>
+            if(retryAttempt < nTimesToRetry) {
+              Thread.sleep(1000)
+              waitForMongoBackgroundTask(f, retryAttempt + 1, nTimesToRetry)
+            } else {
+              throw e
+            }
+        })
+
       def listIndexes(repository: SessionRepository): Seq[Index] =
-        await(repository.collection.listIndexes().map(indexDoc => Json.parse(indexDoc.toJson).as[Index]).toFuture()).sortBy(_.name)
+        waitForMongoBackgroundTask(repository.collection.listIndexes().map(indexDoc => Json.parse(indexDoc.toJson).as[Index]).toFuture()).sortBy(_.name)
 
       "when `replaceIndexes` is `false`" must {
 
@@ -150,12 +163,12 @@ class SessionRepositoryISpec extends IntegrationSpecBase with MongoSupport with 
           )
 
           //Delete the indexes
-          await(repository.collection.dropIndexes().toFuture())
+          waitForMongoBackgroundTask(repository.collection.dropIndexes().toFuture())
 
           //Create an index with a different expiresAfter
           val newExpireAfter = 12
 
-          await(repository.collection.createIndexes(Seq(
+          waitForMongoBackgroundTask(repository.collection.createIndexes(Seq(
             IndexModel(
               ascending("lastUpdated"), IndexOptions().name("lastUpdatedIndex").expireAfter(newExpireAfter, TimeUnit.SECONDS)
             )
@@ -168,7 +181,7 @@ class SessionRepositoryISpec extends IntegrationSpecBase with MongoSupport with 
           )
 
           //Ensure the repo indexes and expect Code:85 error (index exists with different options)
-          intercept[MongoCommandException](await(repository.ensureIndexes)).getCode mustBe 85
+          intercept[MongoCommandException](waitForMongoBackgroundTask(repository.ensureIndexes)).getCode mustBe 85
         }
       }
 
@@ -183,12 +196,12 @@ class SessionRepositoryISpec extends IntegrationSpecBase with MongoSupport with 
           )
 
           //Delete the indexes
-          await(repository.collection.dropIndexes().toFuture())
+          waitForMongoBackgroundTask(repository.collection.dropIndexes().toFuture())
 
           //Create an index with a different expiresAfter
           val newExpireAfter = 12
 
-          await(repository.collection.createIndexes(Seq(
+          waitForMongoBackgroundTask(repository.collection.createIndexes(Seq(
             IndexModel(
               ascending("lastUpdated"), IndexOptions().name("lastUpdatedIndex").expireAfter(newExpireAfter, TimeUnit.SECONDS)
             )
@@ -201,7 +214,7 @@ class SessionRepositoryISpec extends IntegrationSpecBase with MongoSupport with 
           )
 
           //Ensure the repo indexes
-          await(repository.ensureIndexes)
+          waitForMongoBackgroundTask(repository.ensureIndexes)
 
           //Check the index has been replaced back to the expireAfter setting from ApplicationConf
           listIndexes(repository) mustBe Seq(
