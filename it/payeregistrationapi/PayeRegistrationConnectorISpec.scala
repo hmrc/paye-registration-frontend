@@ -63,6 +63,8 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
   }
 
   val regId = "12345"
+  val txnId = "67890"
+
   implicit val hc = HeaderCarrier()
 
   def url(f: String) = s"/paye-registration/$regId$f"
@@ -407,6 +409,52 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       )
 
       await(getResponse) mustBe None
+    }
+  }
+
+  "Get Registration ID by TxnID" should {
+
+    "get a string when found" in new Setup {
+
+      def getResponse = payeRegistrationConnector.getRegistrationId(txnId)
+
+      stubFor(get(urlMatching(s"/paye-registration/$txnId/registration-id"))
+        .willReturn(
+          aResponse()
+            .withStatus(200)
+            .withBody(Json.toJson(regId).toString)
+        )
+      )
+
+      await(getResponse) mustBe regId
+    }
+
+    "return an exception when not found" in new Setup {
+
+      def getResponse = payeRegistrationConnector.getRegistrationId(txnId)
+
+      stubFor(get(urlMatching(s"/paye-registration/$txnId/registration-id"))
+        .willReturn(
+          aResponse()
+            .withStatus(404)
+        )
+      )
+
+      intercept[Exception](await(getResponse)).getMessage mustBe "GET of 'http://localhost:11111/paye-registration/67890/registration-id' returned 404 (Not Found). Response body: ''"
+    }
+
+    "return an exception when any other unexpected status returned" in new Setup {
+
+      def getResponse = payeRegistrationConnector.getRegistrationId(txnId)
+
+      stubFor(get(urlMatching(s"/paye-registration/$txnId/registration-id"))
+        .willReturn(
+          aResponse()
+            .withStatus(500)
+        )
+      )
+
+      intercept[Exception](await(getResponse)).getMessage mustBe "GET of 'http://localhost:11111/paye-registration/67890/registration-id' returned 500. Response body: ''"
     }
   }
 }
