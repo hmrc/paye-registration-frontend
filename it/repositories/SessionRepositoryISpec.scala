@@ -69,7 +69,7 @@ class SessionRepositoryISpec extends IntegrationSpecBase with MongoSupport with 
     val mockConfiguration = mock[Configuration]
     val expireAfter = app.configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
-    when(mockConfiguration.get[Boolean]("mongodb.replaceIndexes")).thenReturn(replaceIndexes)
+    when(mockConfiguration.get[String]("mongodb.replaceIndexes")).thenReturn(replaceIndexes.toString)
     when(mockConfiguration.get[String]("appName")).thenReturn(app.configuration.get[String]("appName"))
     when(mockConfiguration.get[Int]("mongodb.timeToLiveInSeconds")).thenReturn(expireAfter)
 

@@ -21,7 +21,7 @@ import models.api.SessionMap
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{FindOneAndReplaceOptions, IndexModel, IndexOptions}
-import play.api.Configuration
+import play.api.{Configuration, Logger}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
@@ -49,8 +49,12 @@ class SessionRepository @Inject()(config: Configuration, mongo: MongoComponent)
       )
     ),
     extraCodecs = Seq(Codecs.playFormatCodec(SessionMap.format)),
-    replaceIndexes = config.get[Boolean]("mongodb.replaceIndexes")
+    replaceIndexes = config.get[String]("mongodb.replaceIndexes").toBoolean
   )  {
+
+  lazy val logger = Logger(s"application.${getClass.getSimpleName}")
+
+  logger.info(s"[SessionRepository] Creating repo with replaceIndexes set to: ${config.get[String]("mongodb.replaceIndexes").toBoolean}")
 
   def upsertSessionMapByKey(key: String, id: String, sm: SessionMap): Future[Boolean] =
     collection.findOneAndReplace(
