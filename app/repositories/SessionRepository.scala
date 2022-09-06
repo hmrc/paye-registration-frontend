@@ -18,10 +18,10 @@ package repositories
 
 import models.DatedSessionMap
 import models.api.SessionMap
-import org.mongodb.scala.model.Filters.equal
+import org.mongodb.scala.model.Filters.{equal, exists}
 import org.mongodb.scala.model.Indexes.ascending
 import org.mongodb.scala.model.{FindOneAndReplaceOptions, IndexModel, IndexOptions}
-import play.api.Configuration
+import play.api.{Configuration, Logger}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
@@ -49,8 +49,15 @@ class SessionRepository @Inject()(config: Configuration, mongo: MongoComponent)
       )
     ),
     extraCodecs = Seq(Codecs.playFormatCodec(SessionMap.format)),
-    replaceIndexes = config.get[Boolean]("mongodb.replaceIndexes")
+    replaceIndexes = config.get[String]("mongodb.replaceIndexes").toBoolean
   )  {
+
+  val logger = Logger(s"application.${getClass.getSimpleName}")
+
+  collection.listIndexes().map(_.toJson()).toFuture().map { indexes =>
+    logger.info(s"[SessionRepository] Existing Indexes: \n" + indexes.mkString("\n"))
+  }
+  logger.info(s"[SessionRepository] Creating SessionRepository with replaceIndexes set to: ${config.get[String]("mongodb.replaceIndexes").toBoolean}")
 
   def upsertSessionMapByKey(key: String, id: String, sm: SessionMap): Future[Boolean] =
     collection.findOneAndReplace(
