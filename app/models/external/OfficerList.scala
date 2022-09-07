@@ -17,21 +17,21 @@
 package models.external
 
 import models.api.Name
-import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
-import play.api.libs.json.JodaReads.DefaultJodaDateTimeReads
 import play.api.libs.json._
+
+import java.time.LocalDate
 
 case class Officer(name: Name,
                    role: String,
-                   resignedOn: Option[DateTime],
+                   resignedOn: Option[LocalDate],
                    appointmentLink: Option[String]) // custom read to pick up (if required - TBC)
 
 object Officer {
   implicit val formatModel: Reads[Officer] = (
     (__ \ "name_elements").read[Name](Name.normalizeNameReads) and
       (__ \ "officer_role").read[String] and
-      (__ \ "resigned_on").readNullable[DateTime] and
+      (__ \ "resigned_on").readNullable[LocalDate] and
       (__ \ "appointment_link").readNullable[String]
     ) (Officer.apply _)
 

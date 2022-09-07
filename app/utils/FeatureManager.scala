@@ -16,8 +16,6 @@
 
 package utils
 
-import org.joda.time.format.ISODateTimeFormat
-
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -72,7 +70,6 @@ trait FeatureManager {
   val DisabledIntervalExtractor = """!(\S+)_(\S+)""".r
   val EnabledIntervalExtractor = """(\S+)_(\S+)""".r
   val UNSPECIFIED = "X"
-  val dateFormat = ISODateTimeFormat.dateTimeNoMillis()
 
   private[utils] def toDate(text: String): Option[LocalDateTime] = {
     text match {

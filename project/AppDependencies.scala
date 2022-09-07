@@ -32,7 +32,6 @@ private object AppDependencies {
   private val commonsValidatorVersion = "1.6"
   private val govukTemplateVersion = "5.72.0-play-28"
   private val playUiVersion = "9.7.0-play-28"
-  private val jsonJodaVersion = "2.9.2"
   private val scalaTestPlusVersion = "5.1.0"
   private val mockitoCoreVersion = "2.13.0"
   private val scalatestMockitoVersion = "3.2.10.0"
@@ -55,7 +54,6 @@ private object AppDependencies {
     "commons-validator" % "commons-validator" % commonsValidatorVersion,
     "uk.gov.hmrc" %% "govuk-template" % govukTemplateVersion,
     "uk.gov.hmrc" %% "play-ui" % playUiVersion,
-    "com.typesafe.play" %% "play-json-joda" % jsonJodaVersion,
     "uk.gov.hmrc" %% "play-frontend-hmrc" % "3.21.0-play-28",
     "uk.gov.hmrc" %% "play-frontend-govuk" % "1.0.0-play-28"
   )
