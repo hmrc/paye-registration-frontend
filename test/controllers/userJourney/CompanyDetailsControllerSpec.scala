@@ -28,6 +28,7 @@ import play.api.http.Status
 import play.api.i18n.Messages
 import play.api.mvc._
 import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.AuditResult

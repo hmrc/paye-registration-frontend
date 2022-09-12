@@ -156,7 +156,7 @@ trait LoginStub extends SessionCookieBaker {
             """
               |{
               | "externalId": "Ext-xxx",
-              | "credentials" : {
+              | "optionalCredentials" : {
               |   "providerId" : "testAuthProviderId",
               |   "providerType" : "GG"
               | },
