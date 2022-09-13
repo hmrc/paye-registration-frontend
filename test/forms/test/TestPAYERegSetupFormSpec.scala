@@ -129,8 +129,8 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
           SICCode(Some("150"), Some("laundring"))
         ),
         directors = List(
-          Director(Name(Some("Thierry"), Some("Dom"), "Henry", Some("Sir")), Some("ZZ12345C")),
-          Director(Name(Some("David"), Some("Michel"), "Trezeguet", Some("Mr")), Some("SR12345A"))
+          Director(Name(Some("Thierry"), Some("Dom"), Some("Henry"), Some("Sir")), Some("ZZ12345C")),
+          Director(Name(Some("David"), Some("Michel"), Some("Trezeguet"), Some("Mr")), Some("SR12345A"))
         ),
         payeContact = PAYEContact(
           contactDetails = PAYEContactDetails(
@@ -320,8 +320,8 @@ class TestPAYERegSetupFormSpec extends PayeComponentSpec {
           SICCode(Some("150"), None)
         ),
         directors = List(
-          Director(Name(Some("Thierry"), None, "Henry", None), Some("ZZ12345C")),
-          Director(Name(Some("David"), None, "Trezeguet", None), Some("SR12345A"))
+          Director(Name(Some("Thierry"), None, Some("Henry"), None), Some("ZZ12345C")),
+          Director(Name(Some("David"), None, Some("Trezeguet"), None), Some("SR12345A"))
         ),
         payeContact = PAYEContact(
           contactDetails = PAYEContactDetails(

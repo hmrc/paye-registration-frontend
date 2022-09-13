@@ -154,13 +154,13 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
     val tstOfficerListModel = OfficerList(
       items = Seq(
         Officer(
-          name = Name(Some("test1"), Some("test11"), "testa", Some("Mr")),
+          name = Name(Some("test1"), Some("test11"), Some("testa"), Some("Mr")),
           role = "cic-manager",
           resignedOn = None,
           appointmentLink = None
         ),
         Officer(
-          name = Name(Some("test2"), Some("test22"), "testb", Some("Mr")),
+          name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
           role = "corporate-director",
           resignedOn = None,
           appointmentLink = None
@@ -244,13 +244,13 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
       val tstOfficerListModel = OfficerList(
         items = Seq(
           Officer(
-            name = Name(Some("test1"), Some("teest11"), "tt", Some("Mr")),
+            name = Name(Some("test1"), Some("teest11"), Some("tt"), Some("Mr")),
             role = "cic-manager",
             resignedOn = None,
             appointmentLink = None
           ),
           Officer(
-            name = Name(Some("znu"), Some("yurgen"), "alfie", Some("Mr")),
+            name = Name(Some("znu"), Some("yurgen"), Some("alfie"), Some("Mr")),
             role = "corporate-director",
             resignedOn = None,
             appointmentLink = None

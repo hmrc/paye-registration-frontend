@@ -95,7 +95,7 @@ trait DirectorDetailsService extends RegistrationAllowlist {
 
   def createDisplayNamesMap(directors: Directors): Map[String, String] = {
     directors.directorMapping.map {
-      case (k, v) => (k, List(v.name.title, v.name.forename, v.name.otherForenames, Some(v.name.surname)).flatten.mkString(" "))
+      case (k, v) => (k, List(v.name.title, v.name.forename, v.name.otherForenames, v.name.surname).flatten.mkString(" "))
     }
   }
 

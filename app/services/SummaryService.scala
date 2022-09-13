@@ -257,7 +257,7 @@ class SummaryService @Inject()(val payeRegistrationConnector: PAYERegistrationCo
 
     def directorRowName(director: Director, i: Int) = {
       val directorName = director.nino match {
-        case _ => s"${director.name.forename.get} ${director.name.surname}"
+        case _ => s"${director.name.forename.get} ${director.name.surname.get}"
       }
       directorName
     }
