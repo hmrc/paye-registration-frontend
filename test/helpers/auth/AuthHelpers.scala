@@ -114,8 +114,8 @@ trait AuthHelpers {
 
 
   def submitAuthorisedWithCPAndAudit(action: Action[AnyContent], currentProfile: Option[CurrentProfile], request: FakeRequest[AnyContentAsFormUrlEncoded])(test: Future[Result] => Any) {
-    when(authConnector.authorise[~[Option[String], Credentials]](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-      .thenReturn(Future(new ~(Some("testId"), Credentials("testProviderId", "testProvideType"))))
+    when(authConnector.authorise[~[Option[String], Option[Credentials]]](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      .thenReturn(Future(new ~(Some("testId"), Some(Credentials("testProviderId", "testProvideType")))))
 
     when(keystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future(currentProfile))

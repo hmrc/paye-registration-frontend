@@ -197,7 +197,6 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
          """.stripMargin
 
 
-
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
 
       stubGet(s"/paye-registration/$regId/company-details", 404, "")
@@ -637,7 +636,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
            |  }
            |}""".stripMargin
 
-      setupSimpleAuthMocks()
+      setupAuthMocks()
       stubSuccessfulLogin()
       stubSessionCacheMetadata(SessionId, regId)
       stubGet(s"/save4later/paye-registration-frontend/$regId", 200, "")
