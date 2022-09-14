@@ -17,18 +17,19 @@
 package models
 
 import models.api.SessionMap
-import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.mongo.play.json.formats.MongoJodaFormats
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+
+import java.time.Instant
 
 case class DatedSessionMap(sessionId: String,
                            registrationId: String,
                            transactionId: String,
                            data: Map[String, JsValue],
-                           lastUpdated: DateTime = DateTime.now(DateTimeZone.UTC))
+                           lastUpdated: Instant = Instant.now)
 
 object DatedSessionMap {
-  implicit val dateFormat = MongoJodaFormats.dateTimeFormat
+  implicit val dateFormat = MongoJavatimeFormats.instantFormat
   implicit val formats = Json.format[DatedSessionMap]
 
   def apply(sessionMap: SessionMap): DatedSessionMap = DatedSessionMap(sessionMap.sessionId, sessionMap.registrationId, sessionMap.transactionId, sessionMap.data)

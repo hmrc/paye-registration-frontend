@@ -17,20 +17,11 @@
 package audit
 
 import helpers.PayeComponentSpec
-import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.json._
 import uk.gov.hmrc.http.{Authorization, ForwardedFor, HeaderCarrier, RequestId, SessionId}
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
 class RegistrationAuditEventSpec extends PayeComponentSpec {
-
-  implicit val dateTimeRead: Reads[DateTime] = (__ \ "$date").read[Long] map { dateTime =>
-    new DateTime(dateTime, DateTimeZone.UTC)
-  }
-
-  implicit val dateTimeWrite: Writes[DateTime] = new Writes[DateTime] {
-    def writes(dateTime: DateTime): JsValue = Json.obj("$date" -> dateTime.getMillis)
-  }
 
   implicit val format = Json.format[ExtendedDataEvent]
 
