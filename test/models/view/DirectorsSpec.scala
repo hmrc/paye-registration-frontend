@@ -84,13 +84,13 @@ class DirectorsSpec extends PayeComponentSpec {
 
   "Directors View Model" should {
 
-    val tstModel = Directors(Map("1" -> Director(name = Name(None, None, "James", None), nino = Some("ZZ123456A"))))
+    val tstModel = Directors(Map("1" -> Director(name = Name(None, None, Some("Nathan"), None), nino = Some("ZZ123456A"))))
     val tstJson = Json.parse(
       s"""{
          |  "directorMapping":{
          |    "1":{
          |      "director":{
-         |        "surname":"James"
+         |        "surname":"Nathan"
          |      },
          |    "nino":"ZZ123456A"
          |    }

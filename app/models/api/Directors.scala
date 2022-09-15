@@ -22,21 +22,21 @@ import utils.Formatters
 
 case class Name(forename: Option[String],
                 otherForenames: Option[String],
-                surname: String,
+                surname: Option[String],
                 title: Option[String])
 
 object Name {
   implicit val format = (
     (__ \ "forename").formatNullable[String] and
       (__ \ "other_forenames").formatNullable[String] and
-      (__ \ "surname").format[String] and
+      (__ \ "surname").formatNullable[String] and
       (__ \ "title").formatNullable[String]
     ) (Name.apply, unlift(Name.unapply))
 
   val normalizeNameReads = (
     (__ \ "forename").readNullable[String](Formatters.normalizeTrimmedHMRCReads) and
       (__ \ "other_forenames").readNullable[String](Formatters.normalizeTrimmedHMRCReads) and
-      (__ \ "surname").read[String](Formatters.normalizeTrimmedHMRCReads) and
+      (__ \ "surname").readNullable[String](Formatters.normalizeTrimmedHMRCReads) and
       (__ \ "title").readNullable[String](Formatters.normalizeTrimmedHMRCReads).map(opt => opt.filter(_.length <= 20))
     ) (Name.apply _)
 }

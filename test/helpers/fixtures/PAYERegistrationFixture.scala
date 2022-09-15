@@ -149,7 +149,7 @@ trait PAYERegistrationFixture {
     postCode = Some("TE1 1ST")
   )
 
-  def validName(f: String, m: Option[String], l: String) = Name(Some(f), m, l, None)
+  def validName(f: String, m: Option[String], l: String) = Name(Some(f), m, Some(l), None)
 
   val validDirectorList = Seq(Director(validName("Bob", None, "Smith"), Some("NINO")), Director(validName("Michael", Some("Jay"), "Fudgedybar"), None))
 

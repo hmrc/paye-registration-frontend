@@ -67,7 +67,7 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
           name = Name(
             forename = Some("Timothy"),
             otherForenames = Some("Potterley-Smythe"),
-            surname = "Buttersford",
+            surname = Some("Buttersford"),
             title = Some("Mr")
           ),
           nino = Some("ZZ123456A")
@@ -103,7 +103,7 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
         name = Name(
           forename = Some("Timothy"),
           otherForenames = Some("Potterley-Smythe"),
-          surname = "Buttersford",
+          surname = Some("Buttersford"),
           title = Some("Mr")
         ),
         nino = Some("ZZ123456A")
@@ -455,7 +455,7 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
           name = Name(
             forename = Some("Timothy"),
             otherForenames = Some("Potterley-Smythe"),
-            surname = "Buttersford",
+            surname = Some("Buttersford"),
             title = Some("Mr")
           ),
           nino = Some("ZZ123456A")

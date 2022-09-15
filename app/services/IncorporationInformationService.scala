@@ -61,6 +61,7 @@ trait IncorporationInformationService {
     val directors = officerList.items.collect {
       case officer: Officer if officer.resignedOn.isEmpty && officer.role.equals("director") => Director(name = officer.name, nino = None)
     }
-    Future.successful(Directors(directorMapping = (directors.indices.map(_.toString) zip directors).toMap))
+    val filteredDirectors = directors.filterNot(_.name.surname.isEmpty)
+    Future.successful(Directors(directorMapping = (filteredDirectors.indices.map(_.toString) zip filteredDirectors).toMap))
   }
 }

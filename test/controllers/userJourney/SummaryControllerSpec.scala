@@ -21,7 +21,6 @@ import enums.PAYEStatus
 import helpers.auth.AuthHelpers
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.CurrentProfile
-import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.http.Status

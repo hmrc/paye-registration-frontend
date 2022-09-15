@@ -145,7 +145,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       name = Name(
         forename = Some("Fourname"),
         otherForenames = None,
-        surname = "Sirname",
+        surname = Some("Sirname"),
         title = Some("Ms")
       ),
       nino = Some("nino")
@@ -154,7 +154,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
       name = Name(
         forename = Some("FirstName"),
         otherForenames = Some("MiddleName"),
-        surname = "LastName",
+        surname = Some("LastName"),
         title = Some("Mrs")
       ),
       nino = Some("nino2")

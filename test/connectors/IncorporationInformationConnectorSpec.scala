@@ -189,13 +189,13 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with PayeF
     val tstOfficerList = OfficerList(
       items = Seq(
         Officer(
-          name = Name(Some("test1"), Some("test11"), "testa", Some("Mr")),
+          name = Name(Some("test1"), Some("test11"), Some("testa"), Some("Mr")),
           role = "cic-manager",
           resignedOn = None,
           appointmentLink = None
         ),
         Officer(
-          name = Name(Some("test2"), Some("test22"), "testb", Some("Mr")),
+          name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
           role = "corporate-director",
           resignedOn = None,
           appointmentLink = None

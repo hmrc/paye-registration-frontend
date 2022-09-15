@@ -24,19 +24,19 @@ class OfficerListSpec extends PayeComponentSpec {
   val tstOfficerList = OfficerList(
     items = Seq(
       Officer(
-        name = Name(Some("Bob"), Some("Bimbly Bobblous"), "Bobbings", None),
+        name = Name(Some("Bob"), Some("Bimbly Bobblous"), Some("Bobbings"), None),
         role = "director",
         resignedOn = None,
         appointmentLink = None
       ),
       Officer(
-        name = Name(Some("Jingly"), None, "Jingles", Some("Mx")),
+        name = Name(Some("Jingly"), None, Some("Jingles"), Some("Mx")),
         role = "director",
         resignedOn = None,
         appointmentLink = None
       ),
       Officer(
-        name = Name(Some("Jorge"), None, "Freshwater", None),
+        name = Name(Some("Jorge"), None, Some("Freshwater"), None),
         role = "legend",
         resignedOn = None,
         appointmentLink = None

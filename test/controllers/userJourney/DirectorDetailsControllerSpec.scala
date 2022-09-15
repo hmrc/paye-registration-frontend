@@ -66,7 +66,7 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
           Name(
             Some("testName"),
             Some("testName"),
-            "testName",
+            Some("testName"),
             Some("testName")
           ),
           Some("testNino")

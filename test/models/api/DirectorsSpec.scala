@@ -51,14 +51,14 @@ class DirectorsSpec extends PayeComponentSpec {
     val tstModel = Name(
       forename = Some("Timothy"),
       otherForenames = Some("Potterley-Smythe"),
-      surname = "Buttersford",
+      surname = Some("Buttersford"),
       title = Some("Mr")
     )
 
     val tstModelTitle = Name(
       forename = Some("Timothy"),
       otherForenames = Some("Potterley-Smythe"),
-      surname = "Buttersford",
+      surname = Some("Buttersford"),
       title = None
     )
 
@@ -75,8 +75,8 @@ class DirectorsSpec extends PayeComponentSpec {
       Json.toJson[Name](tstModel) mustBe tstJson
     }
 
-    val tstEmptyJson = Json.parse(s"""{"surname":""}""".stripMargin)
-    val tstEmptyModel = Name(None, None, "", None)
+    val tstEmptyJson = Json.parse(s"""{}""".stripMargin)
+    val tstEmptyModel = Name(None, None, None, None)
 
     "read from json with empty data" in {
       Json.fromJson[Name](tstEmptyJson) mustBe JsSuccess(tstEmptyModel)
@@ -104,7 +104,7 @@ class DirectorsSpec extends PayeComponentSpec {
       name = Name(
         forename = Some("Timothy"),
         otherForenames = Some("Potterley-Smythe"),
-        surname = "Buttersford",
+        surname = Some("Buttersford"),
         title = Some("Mr")
       ),
       nino = Some("ZZ123456A")
@@ -120,15 +120,15 @@ class DirectorsSpec extends PayeComponentSpec {
 
     val tstEmptyJson = Json.parse(
       s"""{
-         |  "director":{"surname":""}
+         |  "director":{}
          |}""".stripMargin)
 
     val tstEmptyModel = Director(
       name = Name(
         forename = None,
         otherForenames = None,
-        surname = "",
-        title = None
+        title = None,
+        surname = None
       ),
       nino = None
     )

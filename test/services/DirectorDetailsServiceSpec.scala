@@ -103,7 +103,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
           name = Name(
             forename = Some("Timothy"),
             otherForenames = Some("Potterley-Smythe"),
-            surname = "Buttersford",
+            surname = Some("Buttersford"),
             title = Some("Mr")
           ),
           nino = Some("ZZ123456A")
@@ -112,7 +112,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
           name = Name(
             forename = Some("Peter"),
             otherForenames = Some("Pierre"),
-            surname = "Simpson",
+            surname = Some("Simpson"),
             title = Some("Sir")
           ),
           nino = None
@@ -121,11 +121,11 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       val tstModelView = Directors(
         directorMapping = Map(
           "0" -> Director(
-            name = Name(Some("Timothy"), Some("Potterley-Smythe"), "Buttersford", Some("Mr")),
+            name = Name(Some("Timothy"), Some("Potterley-Smythe"), Some("Buttersford"), Some("Mr")),
             nino = Some("ZZ123456A")
           ),
           "1" -> Director(
-            name = Name(Some("Peter"), Some("Pierre"), "Simpson", Some("Sir")),
+            name = Name(Some("Peter"), Some("Pierre"), Some("Simpson"), Some("Sir")),
             nino = None
           )
         )
@@ -142,7 +142,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
           name = Name(
             forename = Some("Timothy"),
             otherForenames = Some("Potterley-Smythe"),
-            surname = "Buttersford",
+            surname = Some("Buttersford"),
             title = Some("Mr")
           ),
           nino = Some("ZZ123456A")
@@ -151,7 +151,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
           name = Name(
             forename = Some("Peter"),
             otherForenames = Some("Pierre"),
-            surname = "Simpson",
+            surname = Some("Simpson"),
             title = Some("Sir")
           ),
           nino = None
@@ -161,11 +161,11 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       val tstModelView = Directors(
         directorMapping = Map(
           "0" -> Director(
-            name = Name(Some("Timothy"), Some("Potterley-Smythe"), "Buttersford", Some("Mr")),
+            name = Name(Some("Timothy"), Some("Potterley-Smythe"), Some("Buttersford"), Some("Mr")),
             nino = Some("ZZ123456A")
           ),
           "1" -> Director(
-            name = Name(Some("Peter"), Some("Pierre"), "Simpson", Some("Sir")),
+            name = Name(Some("Peter"), Some("Pierre"), Some("Simpson"), Some("Sir")),
             nino = None
           )
         )
@@ -180,11 +180,11 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     val tstDirectors = Directors(
       directorMapping = Map(
         "0" -> Director(
-          name = Name(Some("Timothy"), Some("Potterley-Smythe"), "Buttersford", Some("Mr")),
+          name = Name(Some("Timothy"), Some("Potterley-Smythe"), Some("Buttersford"), Some("Mr")),
           nino = Some("ZZ123456A")
         ),
         "1" -> Director(
-          name = Name(Some("Peter"), None, "Simpson", Some("Sir")),
+          name = Name(Some("Peter"), None, Some("Simpson"), Some("Sir")),
           nino = None
         )
       )
@@ -221,15 +221,15 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       "the II mapping is the same as the backend mapping" in new Setup {
         val iiDirectors = Directors(
           Map(
-            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("title")), None),
-            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+            "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
           )
         )
 
         val backendDirectors = Directors(
           Map(
-            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("title")), None),
-            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+            "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
           )
         )
 
@@ -238,15 +238,15 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       "the II mapping is the same as the backend mapping but the order of directors is different" in new Setup {
         val iiDirectors = Directors(
           Map(
-            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("title")), None),
-            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+            "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
           )
         )
 
         val backendDirectors = Directors(
           Map(
-            "0" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None),
-            "1" -> Director(Name(Some("first"), Some("middle"), "last", Some("title")), None)
+            "0" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None),
+            "1" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("title")), None)
 
           )
         )
@@ -259,15 +259,15 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       "the II mapping is different to the backend mapping" in new Setup {
         val iiDirectors = Directors(
           Map(
-            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("title")), None),
-            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+            "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
           )
         )
 
         val backendDirectors = Directors(
           Map(
-            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("NewTitle")), None),
-            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", Some("NewTitle")), None)
+            "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("NewTitle")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), Some("NewTitle")), None)
           )
         )
 
@@ -277,13 +277,13 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       "the II mapping is different (less elements in backend map" in new Setup {
         val iiDirectors = Directors(
           Map(
-            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("title")), None),
-            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+            "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
           )
         )
         val backendDirectors = Directors(
           Map(
-            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("NewTitle")), None)
+            "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("NewTitle")), None)
           )
         )
 
@@ -292,14 +292,14 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       "the II mapping is different whereby the casing is different for title" in new Setup {
         val iiDirectors = Directors(
           Map(
-            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("title")), None),
-            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+            "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
           )
         )
         val backendDirectors = Directors(
           Map(
-            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("Title")), None),
-            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+            "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("Title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
           )
         )
 
@@ -309,13 +309,13 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       "the ii mapping is different whereby coho has less elements" in new Setup {
         val iiDirectors = Directors(
           Map(
-            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("title")), None)
+            "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("title")), None)
           )
         )
         val backendDirectors = Directors(
           Map(
-            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("Title")), None),
-            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+            "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("Title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
           )
         )
 
@@ -327,8 +327,8 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
         )
         val backendDirectors = Directors(
           Map(
-            "0" -> Director(Name(Some("first"), Some("middle"), "last", Some("Title")), None),
-            "1" -> Director(Name(Some("first1"), Some("middle1"), "last1", None), None)
+            "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("Title")), None),
+            "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
           )
         )
 
@@ -348,11 +348,11 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
       val expectedDirectorDetailsViewModel = Map(
         "0" -> Director(
-          name = Name(Some("Bob"), None, "Smith", None),
+          name = Name(Some("Bob"), None, Some("Smith"), None),
           nino = Some("AA123456Z")
         ),
         "1" -> Director(
-          name = Name(Some("Michael"), Some("Jay"), "Fudgedybar", None),
+          name = Name(Some("Michael"), Some("Jay"), Some("Fudgedybar"), None),
           nino = Some("ZZ123456A")
         )
       )
@@ -370,7 +370,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       val directorDetails = Directors(
         directorMapping = Map(
           "0" -> Director(
-            name = Name(Some("test2"), Some("test22"), "testb", Some("Mr")),
+            name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
             nino = None
           )
         )
@@ -391,7 +391,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     "return coho directors when paye reg directors do not match" in new Setup {
 
       def dir(nino: Option[String], title: Option[String]) = Director(
-        name = Name(Some("test2"), Some("test22"), "testb", title),
+        name = Name(Some("test2"), Some("test22"), Some("testb"), title),
         nino = nino)
 
       val cohoDirectors = Directors(
@@ -420,7 +420,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return coho directors when s4l directors do not match" in new Setup {
       def dir(nino: Option[String], title: Option[String]) = Director(
-        name = Name(Some("test2"), Some("test22"), "testb", title),
+        name = Name(Some("test2"), Some("test22"), Some("testb"), title),
         nino = nino)
 
       val cohoDirectors = Directors(
@@ -448,7 +448,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     "return the correct View response when Director Details are returned from the microservice" in new Setup {
 
       val dir = Director(
-        name = Name(Some("test2"), Some("test22"), "testb", Some("Mr")),
+        name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
         nino = None
       )
 
@@ -478,7 +478,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       val directorDetails = Directors(
         directorMapping = Map(
           "0" -> Director(
-            name = Name(Some("test2"), Some("test22"), "testb", Some("Mr")),
+            name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
             nino = None
           )
         )
@@ -502,7 +502,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       val directorDetails = Directors(
         directorMapping = Map(
           "0" -> Director(
-            name = Name(Some("test2"), Some("test22"), "testb", Some("Mr")),
+            name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
             nino = None
           )
         )
