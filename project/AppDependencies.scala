@@ -22,23 +22,16 @@ import sbt._
 private object AppDependencies {
 
 
-  private val hmrcMongoVersion = "0.71.0"
-  private val taxYearVersion = "1.6.0"
+  private val hmrcMongoVersion = "0.73.0"
+  private val taxYearVersion = "3.0.0"
   private val bootstrapVersion = "5.16.0"
-  private val playPartialsVersion = "8.2.0-play-28"
-  private val httpCachingVersion = "9.5.0-play-28"
+  private val playPartialsVersion = "8.3.0-play-28"
+  private val httpCachingVersion = "9.6.0-play-28"
   private val playAllowlistVersion = "1.0.0-play-28"
-  private val playConditionalMappingVersion = "1.10.0-play-28"
+  private val playConditionalMappingVersion = "1.11.0-play-28"
   private val commonsValidatorVersion = "1.6"
-  private val govukTemplateVersion = "5.72.0-play-28"
-  private val playUiVersion = "9.7.0-play-28"
-  private val scalaTestPlusVersion = "5.1.0"
-  private val mockitoCoreVersion = "2.13.0"
-  private val scalatestMockitoVersion = "3.2.10.0"
-  private val jsoupVersion = "1.13.1"
-  private val wireMockVersion = "2.26.3"
-  private val playMongoTestVersion = "5.0.0-play-28"
-  private val flexmarkVersion = "0.36.8"
+  private val govukTemplateVersion = "5.78.0-play-28"
+  private val playUiVersion = "9.11.0-play-28"
   private val scalaTestVersion = "3.2.12"
 
 
@@ -54,8 +47,8 @@ private object AppDependencies {
     "commons-validator" % "commons-validator" % commonsValidatorVersion,
     "uk.gov.hmrc" %% "govuk-template" % govukTemplateVersion,
     "uk.gov.hmrc" %% "play-ui" % playUiVersion,
-    "uk.gov.hmrc" %% "play-frontend-hmrc" % "3.21.0-play-28",
-    "uk.gov.hmrc" %% "play-frontend-govuk" % "1.0.0-play-28"
+    "uk.gov.hmrc" %% "play-frontend-hmrc" % "3.27.0-play-28",
+    "uk.gov.hmrc" %% "play-frontend-govuk" % "2.0.0-play-28"
   )
 
   def defaultTest(scope: String) = Seq(
