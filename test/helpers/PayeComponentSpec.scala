@@ -63,6 +63,8 @@ trait PayeComponentSpec
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
+  def fakeRequest(method: String = "GET") = FakeRequest(method, "")
+
   private def resetMocks(): Unit = {
     reset(
       mockPAYEContactService,

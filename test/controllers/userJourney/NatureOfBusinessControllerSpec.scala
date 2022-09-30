@@ -58,11 +58,9 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
 
   val testNOB = NatureOfBusiness(natureOfBusiness = "laundring")
 
-  val request = FakeRequest()
-
   "natureOfBusiness" should {
     "return a SEE_OTHER if user is not authorised" in new Setup {
-      AuthHelpers.showUnauthorised(testController.natureOfBusiness, request) {
+      AuthHelpers.showUnauthorised(testController.natureOfBusiness, fakeRequest()) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -73,7 +71,7 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
       when(mockNatureOfBusinessService.getNatureOfBusiness(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Some(testNOB)))
 
-      AuthHelpers.showAuthorisedWithCP(testController.natureOfBusiness, Fixtures.validCurrentProfile, request) {
+      AuthHelpers.showAuthorisedWithCP(testController.natureOfBusiness, Fixtures.validCurrentProfile, fakeRequest()) {
         (result: Future[Result]) =>
           status(result) mustBe OK
       }
@@ -83,7 +81,7 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
       when(mockNatureOfBusinessService.getNatureOfBusiness(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(None))
 
-      AuthHelpers.showAuthorisedWithCP(testController.natureOfBusiness, Fixtures.validCurrentProfile, request) {
+      AuthHelpers.showAuthorisedWithCP(testController.natureOfBusiness, Fixtures.validCurrentProfile, fakeRequest()) {
         (result: Future[Result]) =>
           status(result) mustBe OK
       }
@@ -92,7 +90,7 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
 
   "submitNatureOfBusiness" should {
     "return a SEE_OTHER if the user is not authorised" in new Setup {
-      AuthHelpers.submitUnauthorised(testController.natureOfBusiness, request) {
+      AuthHelpers.submitUnauthorised(testController.natureOfBusiness, fakeRequest("POST")) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -100,7 +98,7 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
     }
 
     "return a BAD_REQUEST if the submitted form is empty" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "description" -> ""
       )
 
@@ -111,7 +109,7 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
     }
 
     "return a BAD_REQUEST if there is problem with the submitted form" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "description" -> "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       )
 
@@ -123,7 +121,7 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
 
     "show an error page when there is an error response from the microservice" in new Setup {
       when(mockNatureOfBusinessService.saveNatureOfBusiness(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
-      AuthHelpers.submitAuthorisedWithCP(testController.submitNatureOfBusiness(), Fixtures.validCurrentProfile, FakeRequest().withFormUrlEncodedBody(
+      AuthHelpers.submitAuthorisedWithCP(testController.submitNatureOfBusiness(), Fixtures.validCurrentProfile, fakeRequest("POST").withFormUrlEncodedBody(
         "description" -> "testing"
       )) {
         result =>
@@ -132,7 +130,7 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
     }
 
     "return a SEE_OTHER and redirect to the directors page" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "description" -> "computing"
       )
       when(mockNatureOfBusinessService.saveNatureOfBusiness(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))

@@ -640,7 +640,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       tags.contains("X-Session-ID") mustBe true
       tags.contains("X-Request-ID") mustBe true
       tags.contains("deviceID") mustBe true
-      tags("Authorization") mustBe Json.toJson("-")
       tags("transactionName") mustBe Json.toJson("registeredOfficeUsedAsPrincipalPlaceOfBusiness")
     }
 
@@ -1170,7 +1169,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       tags.contains("X-Session-ID") mustBe true
       tags.contains("X-Request-ID") mustBe true
       tags.contains("deviceID") mustBe true
-      tags("Authorization") mustBe Json.toJson("-")
       tags("transactionName") mustBe Json.toJson("businessContactAmendment")
     }
 

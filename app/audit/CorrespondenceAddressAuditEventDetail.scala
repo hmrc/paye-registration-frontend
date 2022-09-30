@@ -16,10 +16,8 @@
 
 package audit
 
-import audit.RegistrationAuditEvent.{AUTH_PROVIDER_ID, EXTERNAL_USER_ID, JOURNEY_ID}
-import play.api.libs.json.{JsObject, JsValue, Json, Writes}
-import play.api.mvc.{AnyContent, Request}
-import uk.gov.hmrc.http.HeaderCarrier
+import audit.RegistrationAuditEventConstants.{AUTH_PROVIDER_ID, EXTERNAL_USER_ID, JOURNEY_ID}
+import play.api.libs.json.{Json, Writes}
 
 case class CorrespondenceAddressAuditEventDetail(externalUserId: String,
                                                  authProviderId: String,
@@ -29,8 +27,8 @@ case class CorrespondenceAddressAuditEventDetail(externalUserId: String,
 object CorrespondenceAddressAuditEventDetail {
   private val ADDRESS_USED = "addressUsed"
 
-  implicit val writes = new Writes[CorrespondenceAddressAuditEventDetail] {
-    override def writes(detail: CorrespondenceAddressAuditEventDetail): JsValue = Json.obj(
+  implicit val writes = Writes[CorrespondenceAddressAuditEventDetail] { detail =>
+    Json.obj(
       EXTERNAL_USER_ID -> detail.externalUserId,
       AUTH_PROVIDER_ID -> detail.authProviderId,
       JOURNEY_ID -> detail.regId,
@@ -38,6 +36,3 @@ object CorrespondenceAddressAuditEventDetail {
     )
   }
 }
-
-class CorrespondenceAddressAuditEvent(details: CorrespondenceAddressAuditEventDetail)(implicit hc: HeaderCarrier, req: Request[AnyContent])
-  extends RegistrationAuditEvent("correspondenceAddress", None, Json.toJson(details).as[JsObject])(hc, Some(req))

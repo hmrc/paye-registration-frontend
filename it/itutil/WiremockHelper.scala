@@ -22,6 +22,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import play.api.http.HeaderNames
 import play.api.libs.ws.{WSClient, WSRequest}
 
 object WiremockHelper {
@@ -49,9 +50,16 @@ trait WiremockHelper {
 
   lazy val ws: WSClient = app.injector.instanceOf(classOf[WSClient])
 
-  def buildClient(path: String): WSRequest = ws.url(s"http://localhost:$port/register-for-paye$path").withFollowRedirects(false)
+  def buildClient(path: String): WSRequest =
+    ws
+      .url(s"http://localhost:$port/register-for-paye$path")
+      .withFollowRedirects(false)
 
-  def buildClientInternal(path: String): WSRequest = ws.url(s"http://localhost:$port/internal$path").withFollowRedirects(false)
+  def buildClientInternal(path: String, additionalHeaders: (String, String)*): WSRequest =
+    ws
+      .url(s"http://localhost:$port/internal$path")
+      .withHttpHeaders(Seq(HeaderNames.AUTHORIZATION -> "FooBarToken") ++ additionalHeaders:_*)
+      .withFollowRedirects(false)
 
 
   def stubGet(url: String, status: Integer, body: String): StubMapping =

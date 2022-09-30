@@ -16,7 +16,7 @@
 
 package audit
 
-import audit.RegistrationAuditEvent.{AUTH_PROVIDER_ID, EXTERNAL_USER_ID, JOURNEY_ID}
+import audit.RegistrationAuditEventConstants.{AUTH_PROVIDER_ID, EXTERNAL_USER_ID, JOURNEY_ID}
 import play.api.libs.json.{JsObject, JsValue, Json, Writes}
 import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -28,8 +28,8 @@ case class PPOBAddressAuditEventDetail(externalUserId: String,
 object PPOBAddressAuditEventDetail {
   private val REGISTERED_OFFICE_ADDRESS = "registeredOfficeAddress"
 
-  implicit val writes = new Writes[PPOBAddressAuditEventDetail] {
-    override def writes(detail: PPOBAddressAuditEventDetail): JsValue = Json.obj(
+  implicit val writes = Writes[PPOBAddressAuditEventDetail] { detail =>
+    Json.obj(
       EXTERNAL_USER_ID -> detail.externalUserId,
       AUTH_PROVIDER_ID -> detail.authProviderId,
       JOURNEY_ID -> detail.regId,
@@ -37,6 +37,3 @@ object PPOBAddressAuditEventDetail {
     )
   }
 }
-
-class PPOBAddressAuditEvent(details: PPOBAddressAuditEventDetail)(implicit hc: HeaderCarrier, req: Request[AnyContent])
-  extends RegistrationAuditEvent("registeredOfficeUsedAsPrincipalPlaceOfBusiness", None, Json.toJson(details).as[JsObject])(hc, Some(req))

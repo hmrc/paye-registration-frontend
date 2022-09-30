@@ -77,12 +77,10 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   val tstTradingNameModel = TradingNameView(differentName = true, tradingName = Some("test trading name"))
 
-  val fakeRequest = FakeRequest("GET", "/")
-
   "calling the tradingName action" should {
 
     "return 303 for an unauthorised user" in new Setup {
-      AuthHelpers.showUnauthorised(controller.tradingName, fakeRequest) {
+      AuthHelpers.showUnauthorised(controller.tradingName, fakeRequest()) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -95,7 +93,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
-      AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest) {
+      AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest()) {
         (response: Future[Result]) =>
           status(response) mustBe Status.OK
           val result = Jsoup.parse(contentAsString(response))
@@ -113,7 +111,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("foo bar")))
 
-      AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest) {
+      AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest()) {
         (response: Future[Result]) =>
           status(response) mustBe Status.OK
           val result = Jsoup.parse(contentAsString(response))
@@ -131,7 +129,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
-      AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest) {
+      AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest()) {
         (response: Future[Result]) =>
           status(response) mustBe Status.OK
           val result = Jsoup.parse(contentAsString(response))
@@ -149,7 +147,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         .thenReturn(Future.successful(defaultCompanyDetailsView))
       when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("foo bar wizz")))
-      AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest) {
+      AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest()) {
         response =>
           status(response) mustBe Status.OK
           val result = Jsoup.parse(contentAsString(response))
@@ -163,7 +161,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "calling the submitTradingName action" should {
     "return 303 for an unauthorised user" in new Setup {
-      AuthHelpers.showUnauthorised(controller.submitTradingName, fakeRequest) {
+      AuthHelpers.showUnauthorised(controller.submitTradingName, fakeRequest("POST")) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -174,7 +172,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      AuthHelpers.submitAuthorisedWithCP(controller.submitTradingName, Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
+      AuthHelpers.submitAuthorisedWithCP(controller.submitTradingName, Fixtures.validCurrentProfile, fakeRequest("POST").withFormUrlEncodedBody(
         "differentName" -> "true",
         "tradingName" -> "Tradez R us"
       )) {
@@ -188,7 +186,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-      AuthHelpers.submitAuthorisedWithCP(controller.submitTradingName, Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
+      AuthHelpers.submitAuthorisedWithCP(controller.submitTradingName, Fixtures.validCurrentProfile, fakeRequest("POST").withFormUrlEncodedBody(
         "differentName" -> "true",
         "tradingName" -> "Tradez R us"
       )) {
@@ -207,7 +205,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCoHoCompanyDetailsResponse))
 
-      AuthHelpers.submitAuthorisedWithCP(controller.submitTradingName, Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody()) {
+      AuthHelpers.submitAuthorisedWithCP(controller.submitTradingName, Fixtures.validCurrentProfile, fakeRequest("POST").withFormUrlEncodedBody()) {
         result =>
           status(result) mustBe Status.BAD_REQUEST
       }
@@ -220,7 +218,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
-      AuthHelpers.submitAuthorisedWithCP(controller.submitTradingName, Fixtures.validCurrentProfile, fakeRequest.withFormUrlEncodedBody(
+      AuthHelpers.submitAuthorisedWithCP(controller.submitTradingName, Fixtures.validCurrentProfile, fakeRequest("POST").withFormUrlEncodedBody(
         "differentName" -> "true"
       )) {
         result =>
@@ -235,7 +233,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
-        AuthHelpers.showAuthorisedWithCP(controller.roAddress, Fixtures.validCurrentProfile, fakeRequest) {
+        AuthHelpers.showAuthorisedWithCP(controller.roAddress, Fixtures.validCurrentProfile, fakeRequest()) {
           result =>
             status(result) mustBe OK
         }
@@ -243,7 +241,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return 303 for an unauthorised user" in new Setup {
-      AuthHelpers.showUnauthorised(controller.roAddress, fakeRequest) {
+      AuthHelpers.showUnauthorised(controller.roAddress, fakeRequest()) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -254,7 +252,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
   "confirm roAddress" should {
 
     "return 303 for an unauthorised user" in new Setup {
-      AuthHelpers.showUnauthorised(controller.confirmRO, fakeRequest) {
+      AuthHelpers.showUnauthorised(controller.confirmRO, fakeRequest("POST")) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -263,7 +261,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "redirect to next page" when {
       "the user clicks confirm" in new Setup {
-        AuthHelpers.showAuthorisedWithCP(controller.confirmRO, Fixtures.validCurrentProfile, fakeRequest) {
+        AuthHelpers.showAuthorisedWithCP(controller.confirmRO, Fixtures.validCurrentProfile, fakeRequest("POST")) {
           result =>
             status(result) mustBe SEE_OTHER
             redirectLocation(result) mustBe Some(s"${controllers.userJourney.routes.CompanyDetailsController.ppobAddress}")
@@ -280,7 +278,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel.copy(businessContactDetails = Some(bcd))))
 
-        AuthHelpers.showAuthorisedWithCP(controller.businessContactDetails, Fixtures.validCurrentProfile, fakeRequest) {
+        AuthHelpers.showAuthorisedWithCP(controller.businessContactDetails, Fixtures.validCurrentProfile, fakeRequest()) {
           result =>
             status(result) mustBe OK
         }
@@ -295,7 +293,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockPrepopulationService.getBusinessContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(None))
 
-        AuthHelpers.showAuthorisedWithCP(controller.businessContactDetails, Fixtures.validCurrentProfile, fakeRequest) {
+        AuthHelpers.showAuthorisedWithCP(controller.businessContactDetails, Fixtures.validCurrentProfile, fakeRequest()) {
           result =>
             status(result) mustBe OK
         }
@@ -313,7 +311,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
-        AuthHelpers.showAuthorisedWithCP(controller.businessContactDetails, Fixtures.validCurrentProfile, fakeRequest) {
+        AuthHelpers.showAuthorisedWithCP(controller.businessContactDetails, Fixtures.validCurrentProfile, fakeRequest()) {
           result =>
             status(result) mustBe OK
         }
@@ -321,7 +319,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return 303 for an unauthorised user" in new Setup {
-      AuthHelpers.showUnauthorised(controller.businessContactDetails, fakeRequest) {
+      AuthHelpers.showUnauthorised(controller.businessContactDetails, fakeRequest()) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -331,7 +329,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "submit businessContactDetails" should {
     "return 303 for an unauthorised user" in new Setup {
-      AuthHelpers.showUnauthorised(controller.submitBusinessContactDetails, fakeRequest) {
+      AuthHelpers.showUnauthorised(controller.submitBusinessContactDetails, fakeRequest("POST")) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -342,7 +340,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
-      AuthHelpers.submitAuthorisedWithCPAndAudit(controller.submitBusinessContactDetails, Fixtures.validCurrentProfile, fakeRequest.withSession(companyNameKey -> "FakeCompany").withFormUrlEncodedBody()) {
+      AuthHelpers.submitAuthorisedWithCPAndAudit(controller.submitBusinessContactDetails, Fixtures.validCurrentProfile, fakeRequest("POST").withSession(companyNameKey -> "FakeCompany").withFormUrlEncodedBody()) {
         result =>
           status(result) mustBe BAD_REQUEST
       }
@@ -352,7 +350,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockCompanyDetailsService.submitBusinessContact(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-      AuthHelpers.submitAuthorisedWithCPAndAudit(controller.submitBusinessContactDetails, Fixtures.validCurrentProfile, fakeRequest.withSession(companyNameKey -> "FakeCompany").withFormUrlEncodedBody(
+      AuthHelpers.submitAuthorisedWithCPAndAudit(controller.submitBusinessContactDetails, Fixtures.validCurrentProfile, fakeRequest("POST").withSession(companyNameKey -> "FakeCompany").withFormUrlEncodedBody(
         "mobileNumber" -> "07123456789"
       )) {
         result =>
@@ -364,7 +362,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockCompanyDetailsService.submitBusinessContact(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      AuthHelpers.submitAuthorisedWithCPAndAudit(controller.submitBusinessContactDetails, Fixtures.validCurrentProfile, fakeRequest.withSession(companyNameKey -> "FakeCompany").withFormUrlEncodedBody(
+      AuthHelpers.submitAuthorisedWithCPAndAudit(controller.submitBusinessContactDetails, Fixtures.validCurrentProfile, fakeRequest("POST").withSession(companyNameKey -> "FakeCompany").withFormUrlEncodedBody(
         "mobileNumber" -> "07123456789"
       )) {
         result =>
@@ -390,7 +388,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockCompanyDetailsService.getPPOBPageAddresses(ArgumentMatchers.any()))
         .thenReturn(addressMap)
 
-      AuthHelpers.showAuthorisedWithCP(controller.ppobAddress, Fixtures.validCurrentProfile, fakeRequest) { result =>
+      AuthHelpers.showAuthorisedWithCP(controller.ppobAddress, Fixtures.validCurrentProfile, fakeRequest()) { result =>
         status(result) mustBe OK
       }
     }
@@ -398,7 +396,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "submitPPOBAddress" should {
     "return a BAD_REQUEST" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "chosenAddress" -> ""
       )
 
@@ -420,7 +418,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to business contact details if ppob is chosen" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "chosenAddress" -> "ppobAddress"
       )
 
@@ -434,7 +432,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to business contact details if ro is chosen" in new Setup {
-      implicit val request = FakeRequest().withFormUrlEncodedBody(
+      implicit val request = fakeRequest("POST").withFormUrlEncodedBody(
         "chosenAddress" -> "roAddress"
       )
 
@@ -451,7 +449,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to address lookup frontend" in new Setup {
-      val request = FakeRequest("GET", "/testuri?id=123456789").withFormUrlEncodedBody(
+      val request = FakeRequest("POST", "/testuri?id=123456789").withFormUrlEncodedBody(
         "chosenAddress" -> "otherAddress"
       )
 
@@ -464,7 +462,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "show an error page if correspondence address is chosen, somehow" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "chosenAddress" -> "correspondenceAddress"
       )
 
@@ -474,7 +472,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to error page when fail saving PPOB Address" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "chosenAddress" -> "prepopAddress13"
       )
 
@@ -522,7 +520,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockPrepopulationService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(expected))
 
-      AuthHelpers.showAuthorisedWithCP(controller.savePPOBAddress(Some(testAlfId)), Fixtures.validCurrentProfile, fakeRequest) { result =>
+      AuthHelpers.showAuthorisedWithCP(controller.savePPOBAddress(Some(testAlfId)), Fixtures.validCurrentProfile, fakeRequest()) { result =>
         status(result) mustBe SEE_OTHER
       }
     }
@@ -548,7 +546,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockPrepopulationService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(expected))
 
-      AuthHelpers.showAuthorisedWithCP(controller.savePPOBAddress(Some(testAlfId)), Fixtures.validCurrentProfile, fakeRequest) { result =>
+      AuthHelpers.showAuthorisedWithCP(controller.savePPOBAddress(Some(testAlfId)), Fixtures.validCurrentProfile, fakeRequest()) { result =>
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
     }

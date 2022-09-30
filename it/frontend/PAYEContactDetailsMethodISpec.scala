@@ -353,7 +353,6 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       tags.contains("X-Session-ID") mustBe true
       tags.contains("X-Request-ID") mustBe true
       tags.contains("deviceID") mustBe true
-      tags("Authorization") mustBe Json.toJson("-")
       tags("transactionName") mustBe Json.toJson("payeContactDetailsAmendment")
     }
 
@@ -767,7 +766,6 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       tags.contains("X-Session-ID") mustBe true
       tags.contains("X-Request-ID") mustBe true
       tags.contains("deviceID") mustBe true
-      tags("Authorization") mustBe Json.toJson("-")
       tags("transactionName") mustBe Json.toJson("correspondenceAddress")
     }
   }

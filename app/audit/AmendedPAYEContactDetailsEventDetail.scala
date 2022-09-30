@@ -21,20 +21,6 @@ import play.api.libs.json.{Format, JsObject, Json, __}
 import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 
-case class AuditPAYEContactDetails(contactName: String,
-                                   email: Option[String],
-                                   mobileNumber: Option[String],
-                                   phoneNumber: Option[String])
-
-object AuditPAYEContactDetails {
-  implicit val auditPAYEContactDetailsFormat: Format[AuditPAYEContactDetails] = (
-    (__ \ "contactName").format[String] and
-      (__ \ "email").formatNullable[String] and
-      (__ \ "mobileNumber").formatNullable[String] and
-      (__ \ "phoneNumber").formatNullable[String]
-    ) (AuditPAYEContactDetails.apply, unlift(AuditPAYEContactDetails.unapply))
-}
-
 case class AmendedPAYEContactDetailsEventDetail(externalUserId: String,
                                                 authProviderId: String,
                                                 journeyId: String,
@@ -50,6 +36,3 @@ object AmendedPAYEContactDetailsEventDetail {
       (__ \ "newPAYEContactDetails").format[AuditPAYEContactDetails]
     ) (AmendedPAYEContactDetailsEventDetail.apply, unlift(AmendedPAYEContactDetailsEventDetail.unapply))
 }
-
-class AmendedPAYEContactDetailsEvent(detail: AmendedPAYEContactDetailsEventDetail)(implicit hc: HeaderCarrier, req: Request[AnyContent])
-  extends RegistrationAuditEvent("payeContactDetailsAmendment", None, Json.toJson(detail).as[JsObject])(hc, Some(req))

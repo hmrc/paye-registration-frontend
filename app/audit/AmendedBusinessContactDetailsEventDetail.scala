@@ -17,7 +17,7 @@
 package audit
 
 
-import audit.RegistrationAuditEvent.{AUTH_PROVIDER_ID, EXTERNAL_USER_ID, JOURNEY_ID}
+import audit.RegistrationAuditEventConstants.{AUTH_PROVIDER_ID, EXTERNAL_USER_ID, JOURNEY_ID}
 import models.DigitalContactDetails
 import play.api.libs.json.{JsObject, JsValue, Json, Writes}
 import play.api.mvc.{AnyContent, Request}
@@ -33,8 +33,8 @@ object AmendedBusinessContactDetailsEventDetail {
   private val PREVIOUS_CONTACT_DETAILS = "previousContactDetails"
   private val NEW_CONTACT_DETAILS = "newContactDetails"
 
-  implicit val writes = new Writes[AmendedBusinessContactDetailsEventDetail] {
-    override def writes(detail: AmendedBusinessContactDetailsEventDetail): JsValue = Json.obj(
+  implicit val writes = Writes[AmendedBusinessContactDetailsEventDetail] { detail =>
+    Json.obj(
       EXTERNAL_USER_ID -> detail.externalUserId,
       AUTH_PROVIDER_ID -> detail.authProviderId,
       JOURNEY_ID -> detail.regId,
@@ -43,6 +43,3 @@ object AmendedBusinessContactDetailsEventDetail {
     )
   }
 }
-
-class AmendedBusinessContactDetailsEvent(detail: AmendedBusinessContactDetailsEventDetail)(implicit hc: HeaderCarrier, req: Request[AnyContent])
-  extends RegistrationAuditEvent("businessContactAmendment", None, Json.toJson(detail).as[JsObject])(hc, Some(req))

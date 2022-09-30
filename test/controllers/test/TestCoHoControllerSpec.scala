@@ -63,7 +63,7 @@ class TestCoHoControllerSpec extends PayeComponentSpec with PayeFakedApp {
   "coHoCompanyDetailsSetup" should {
     "return an OK" when {
       "the company details page has been rendered" in new Setup {
-        showAuthorised(controller.coHoCompanyDetailsSetup, FakeRequest()) { result =>
+        showAuthorised(controller.coHoCompanyDetailsSetup, fakeRequest()) { result =>
           status(result) mustBe OK
         }
       }
@@ -73,7 +73,7 @@ class TestCoHoControllerSpec extends PayeComponentSpec with PayeFakedApp {
   "submitCoHoCompanyDetailsSetup" should {
     "return an OK" when {
       "the registration ID has been fetched and the test company details submitted" in new Setup {
-        val request = FakeRequest().withFormUrlEncodedBody(
+        val request = fakeRequest("POST").withFormUrlEncodedBody(
           "companyName" -> "testCompanyName",
           "sicCodes[0]" -> "1234567890",
           "descriptions[0]" -> "testDescription-0",
@@ -102,7 +102,7 @@ class TestCoHoControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return a BAD_REQUEST" when {
       "the form values are invalid" in new Setup {
-        val request = FakeRequest().withFormUrlEncodedBody("invalidKey" -> "invalidValue")
+        val request = fakeRequest("POST").withFormUrlEncodedBody("invalidKey" -> "invalidValue")
 
         mockFetchCurrentProfile()
 
@@ -122,7 +122,7 @@ class TestCoHoControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockTestIncorpInfoConnector.teardownIndividualCoHoCompanyDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(testHttpResponse))
 
-        showAuthorised(controller.coHoCompanyDetailsTearDown, FakeRequest()) { result =>
+        showAuthorised(controller.coHoCompanyDetailsTearDown, fakeRequest()) { result =>
           status(result) mustBe OK
         }
       }

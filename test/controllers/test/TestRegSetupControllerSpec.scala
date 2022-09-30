@@ -31,7 +31,6 @@ import scala.concurrent.Future
 
 class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
-  val request = FakeRequest()
   lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
   lazy val mockPayeRegistrationSetup = app.injector.instanceOf[payeRegistrationSetup]
   lazy val mockPayeRegCompanyDetailsSetup = app.injector.instanceOf[payeRegCompanyDetailsSetup]
@@ -76,7 +75,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockTestPayeRegConnector.testRegistrationTeardown()(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-        AuthHelpers.showAuthorisedWithCP(controller.regTeardown, Fixtures.validCurrentProfile, request) { result =>
+        AuthHelpers.showAuthorisedWithCP(controller.regTeardown, Fixtures.validCurrentProfile, fakeRequest()) { result =>
           status(result) mustBe OK
         }
       }
@@ -87,7 +86,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockTestPayeRegConnector.testRegistrationTeardown()(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-        AuthHelpers.showAuthorisedWithCP(controller.regTeardown, Fixtures.validCurrentProfile, request) { result =>
+        AuthHelpers.showAuthorisedWithCP(controller.regTeardown, Fixtures.validCurrentProfile, fakeRequest()) { result =>
           status(result) mustBe INTERNAL_SERVER_ERROR
         }
       }
@@ -100,7 +99,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockTestPayeRegConnector.tearDownIndividualRegistration(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-        AuthHelpers.showAuthorised(controller.individualRegTeardown("regID"), request) { result =>
+        AuthHelpers.showAuthorised(controller.individualRegTeardown("regID"), fakeRequest()) { result =>
           status(result) mustBe OK
         }
       }
@@ -111,7 +110,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockTestPayeRegConnector.tearDownIndividualRegistration(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-        AuthHelpers.showAuthorised(controller.individualRegTeardown("regID"), request) { result =>
+        AuthHelpers.showAuthorised(controller.individualRegTeardown("regID"), fakeRequest()) { result =>
           status(result) mustBe INTERNAL_SERVER_ERROR
         }
       }
@@ -121,7 +120,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
   "regSetup" should {
     "return an OK" when {
       "the reg setup has been rendered with the form and the regId fetched" in new Setup {
-        AuthHelpers.showAuthorisedWithCP(controller.regSetup, Fixtures.validCurrentProfile, request) { result =>
+        AuthHelpers.showAuthorisedWithCP(controller.regSetup, Fixtures.validCurrentProfile, fakeRequest()) { result =>
           status(result) mustBe OK
         }
       }
@@ -131,7 +130,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
   "submitRegSetup" should {
     "return a BAD_REQUEST" when {
       "there was a problem validating the form values" in new Setup {
-        val request = FakeRequest().withFormUrlEncodedBody()
+        val request = fakeRequest("POST").withFormUrlEncodedBody()
 
         AuthHelpers.submitAuthorisedWithCP(controller.submitRegSetup, Fixtures.validCurrentProfile, request) { result =>
           status(result) mustBe BAD_REQUEST
@@ -141,7 +140,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return an OK" when {
       "the form has been validated and the PAYE Reg document has been cached" in new Setup {
-        val request = FakeRequest().withFormUrlEncodedBody(
+        val request = fakeRequest("POST").withFormUrlEncodedBody(
           "registrationID" -> "testRegId",
           "transactionID" -> "10-1028374",
           "formCreationTimestamp" -> "2017-10-10T12:00:00Z",
@@ -214,7 +213,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return an INTERNAL_SERVER_ERROR" when {
       "the form has been validated but there was a problem caching the document" in new Setup {
-        val request = FakeRequest().withFormUrlEncodedBody(
+        val request = fakeRequest("POST").withFormUrlEncodedBody(
           "registrationID" -> "testRegId",
           "transactionID" -> "10-1028374",
           "formCreationTimestamp" -> "2017-10-10T12:00:00Z",
@@ -288,7 +287,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
   "regSetupCompanyDetails" should {
     "return an OK" when {
       "the payeRegCompanyDetailsSetup page has been rendered" in new Setup {
-        AuthHelpers.showAuthorised(controller.regSetupCompanyDetails, request) { result =>
+        AuthHelpers.showAuthorised(controller.regSetupCompanyDetails, fakeRequest()) { result =>
           status(result) mustBe OK
         }
       }
@@ -298,7 +297,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
   "submitRegSetupCompanyDetails" should {
     "return a BAD_REQUEST" when {
       "the form values cannot be validated" in new Setup {
-        val request = FakeRequest().withFormUrlEncodedBody()
+        val request = fakeRequest("POST").withFormUrlEncodedBody()
         AuthHelpers.submitAuthorisedWithCP(controller.submitRegSetupCompanyDetails, Fixtures.validCurrentProfile, request) { result =>
           status(result) mustBe BAD_REQUEST
         }
@@ -307,7 +306,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return a OK" when {
       "the form data is valid and the test company details are cached" in new Setup {
-        val request = FakeRequest().withFormUrlEncodedBody(
+        val request = fakeRequest("POST").withFormUrlEncodedBody(
           "crn" -> "testCrn",
           "companyName" -> "testCompanyName",
           "tradingName" -> "testTradingName",
@@ -338,7 +337,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return an INTERNAL_SERVER_ERROR" when {
       "the form data is valid but the test company details were not cached" in new Setup {
-        val request = FakeRequest().withFormUrlEncodedBody(
+        val request = fakeRequest("POST").withFormUrlEncodedBody(
           "crn" -> "testCrn",
           "companyName" -> "testCompanyName",
           "tradingName" -> "testTradingName",
@@ -371,7 +370,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
   "regSetupPAYEContact" should {
     "return an OK" when {
       "the payeRegPAYEContactSetup page has been rendered" in new Setup {
-        AuthHelpers.showAuthorised(controller.regSetupPAYEContact, request) { result =>
+        AuthHelpers.showAuthorised(controller.regSetupPAYEContact, fakeRequest()) { result =>
           status(result) mustBe OK
         }
       }
@@ -381,7 +380,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
   "submitRegSetupPAYEContact" should {
     "return a BAD_REQUEST" when {
       "the form data cant be validated" in new Setup {
-        val request = FakeRequest().withFormUrlEncodedBody()
+        val request = fakeRequest("POST").withFormUrlEncodedBody()
         AuthHelpers.submitAuthorisedWithCP(controller.submitRegSetupPAYEContact, Fixtures.validCurrentProfile, request) { result =>
           status(result) mustBe BAD_REQUEST
         }
@@ -390,7 +389,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return an OK" when {
       "the form data has been validated and cached" in new Setup {
-        val request = FakeRequest().withFormUrlEncodedBody(
+        val request = fakeRequest("POST").withFormUrlEncodedBody(
           "payeContactDetails.name" -> "testName",
           "payeContactDetails.digitalContactDetails.email" -> "test@email.com",
           "payeContactDetails.digitalContactDetails.mobileNumber" -> "testNumber",
@@ -413,7 +412,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return an INTERNAL_SERVER_ERROR" when {
       "the form data has been validated but not cached" in new Setup {
-        val request = FakeRequest().withFormUrlEncodedBody(
+        val request = fakeRequest("POST").withFormUrlEncodedBody(
           "payeContactDetails.name" -> "testName",
           "payeContactDetails.digitalContactDetails.email" -> "test@email.com",
           "payeContactDetails.digitalContactDetails.mobileNumber" -> "testNumber",
