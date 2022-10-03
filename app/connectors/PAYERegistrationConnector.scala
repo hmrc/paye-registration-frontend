@@ -22,6 +22,7 @@ import models.api.{Director, Employment, PAYEContact, SICCode, CompanyDetails =>
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, Reads}
 import services.MetricsService
+import uk.gov.hmrc.http.UpstreamErrorResponse.unapply
 import uk.gov.hmrc.http._
 
 import java.util.NoSuchElementException
@@ -104,7 +105,7 @@ trait PAYERegistrationConnector {
     } recover {
       case e: Exception =>
         logResponse(e, "submitRegistration", "submitting PAYE Registration to DES", regId) match {
-          case _: Upstream5xxResponse => TimedOut
+          case error: UpstreamErrorResponse if UpstreamErrorResponse.Upstream5xxResponse.unapply(error).isDefined => TimedOut
           case _ => Failed
         }
     }
@@ -322,11 +323,11 @@ trait PAYERegistrationConnector {
         case OK => RegistrationDeletion.success
       }
     } recover {
-      case fourXX: Upstream4xxResponse if fourXX.upstreamResponseCode == PRECONDITION_FAILED =>
+      case response: UpstreamErrorResponse if response.statusCode == PRECONDITION_FAILED =>
         logger.warn(s"[PAYERegistrationConnector] - [deleteRejectedRegistrationDocument] Deleting document for regId $regId and txId $txId failed as document was not rejected")
         RegistrationDeletion.invalidStatus
-      case fiveXX: Upstream5xxResponse =>
-        throw logResponse(fiveXX, "deleteRejectedRegistrationDocument", s"deleting document, error message: ${fiveXX.message}", regId, Some(txId))
+      case response: UpstreamErrorResponse =>
+        throw logResponse(response, "deleteRejectedRegistrationDocument", s"deleting document, error message: ${response.message}", regId, Some(txId))
     }
   }
 
@@ -336,11 +337,11 @@ trait PAYERegistrationConnector {
         case OK => RegistrationDeletion.success
       }
     } recover {
-      case fourXX: Upstream4xxResponse if fourXX.upstreamResponseCode == PRECONDITION_FAILED =>
+      case response: UpstreamErrorResponse if response.statusCode == PRECONDITION_FAILED =>
         logger.warn(s"[PAYERegistrationConnector] - [deleteCurrentRegistrationInProgress] Deleting document for regId $regId and txId $txId failed as document was not draft or invalid")
         RegistrationDeletion.invalidStatus
-      case fiveXX: Upstream5xxResponse =>
-        throw logResponse(fiveXX, "deleteCurrentRegistrationInProgress", s"deleting document, error message: ${fiveXX.message}", regId, Some(txId))
+      case response: UpstreamErrorResponse =>
+        throw logResponse(response, "deleteCurrentRegistrationInProgress", s"deleting document, error message: ${response.message}", regId, Some(txId))
     }
   }
 
@@ -349,14 +350,14 @@ trait PAYERegistrationConnector {
       _.status match {
         case OK => RegistrationDeletion.success}
     } recover {
-      case fourXX: Upstream4xxResponse if fourXX.upstreamResponseCode == PRECONDITION_FAILED =>
+      case response: UpstreamErrorResponse if response.statusCode == PRECONDITION_FAILED =>
         logger.warn(s"[PAYERegistrationConnector] - [deleteRegistrationForRejectedIncorp] Deleting document for regId $regId and txId $txId failed as document was not draft or invalid")
         RegistrationDeletion.invalidStatus
-      case notFound: Upstream4xxResponse if notFound.statusCode == NOT_FOUND =>
+      case response: UpstreamErrorResponse if response.statusCode == NOT_FOUND =>
         logger.warn(s"s[PAYERegistrationConnector] - deleteRegistrationForRejectedIncorp paye reg returned 404 when expecting to find one for $regId : $txId ")
         RegistrationDeletion.notfound
-      case fiveXX: Upstream5xxResponse =>
-        throw logResponse(fiveXX, "deleteRegistrationForRejectedIncorp", s"deleting document, error message: ${fiveXX.message}", regId, Some(txId))
+      case response: UpstreamErrorResponse =>
+        throw logResponse(response, "deleteRegistrationForRejectedIncorp", s"deleting document, error message: ${response.message}", regId, Some(txId))
     }
   }
 
@@ -368,11 +369,11 @@ trait PAYERegistrationConnector {
     e match {
       case e: NotFoundException => log("NOT FOUND")
       case e: BadRequestException => log("BAD REQUEST")
-      case e: Upstream4xxResponse => e.upstreamResponseCode match {
+      case e: UpstreamErrorResponse => e.statusCode match {
+        case status if status >= 500 => log(s"Upstream 5xx: ${e.statusCode}")
         case 403 => log("FORBIDDEN")
-        case _ => log(s"Upstream 4xx: ${e.upstreamResponseCode} ${e.message}")
+        case _ => log(s"Upstream 4xx: ${e.statusCode} ${e.message}")
       }
-      case e: Upstream5xxResponse => log(s"Upstream 5xx: ${e.upstreamResponseCode}")
       case e: Exception => log(s"ERROR: ${e.getMessage}")
     }
     e

@@ -23,7 +23,7 @@ val appName: String = "paye-registration-frontend"
 
 lazy val scoverageSettings = Seq(
   ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;models/.data/..*;view.*;config.*;.*(AuthService|BuildInfo|Routes).*",
-  ScoverageKeys.coverageMinimum := 80,
+  ScoverageKeys.coverageMinimumStmtTotal := 80,
   ScoverageKeys.coverageFailOnMinimum := false,
   ScoverageKeys.coverageHighlighting := true
 )
@@ -39,10 +39,11 @@ lazy val microservice = Project(appName, file("."))
   .settings(majorVersion := 1)
   .configs(IntegrationTest)
   .settings(
+    scalacOptions += "-Xlint:-unused",
     scalaVersion := "2.12.15",
     libraryDependencies ++= AppDependencies(),
     retrieveManaged := true,
     addTestReportOption(IntegrationTest, "int-test-reports"),
   )
 
-javaOptions in Test += "-Dlogger.resource=logback-test.xml"
+Test / javaOptions += "-Dlogger.resource=logback-test.xml"

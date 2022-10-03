@@ -210,7 +210,7 @@ class EmploymentServiceSpec extends PayeComponentSpec {
           .thenReturn(Future(willEmployNextYearApiModel))
 
         when(mockS4LService.clear(any())(any()))
-          .thenReturn(Future(HttpResponse(200)))
+          .thenReturn(Future(HttpResponse(200, "")))
 
         val result = await(testService().saveEmployingStaff("testRegId", willEmployNextYearViewModel))
         result mustBe willEmployNextYearViewModel
@@ -227,7 +227,7 @@ class EmploymentServiceSpec extends PayeComponentSpec {
         .thenReturn(Future(alreadyEmployingApiModel))
 
       when(mockS4LService.clear(any())(any()))
-        .thenReturn(Future(HttpResponse(200)))
+        .thenReturn(Future(HttpResponse(200, "")))
 
       await(testService().fetchAndUpdateViewModel(identity)) mustBe alreadyEmployingViewModel
     }

@@ -28,14 +28,14 @@ import org.mockito.Mockito._
 import play.api.libs.json.{Format, Json}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
-  val returnHttpResponse = HttpResponse(200)
+  val returnHttpResponse = HttpResponse(200, "")
 
   class Setup {
     val service = new CompanyDetailsService {
@@ -295,14 +295,14 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       await(service.getCompanyDetails("54321", "txId")) mustBe CompanyDetailsView("tstCompanyName", None, tstROAddress, None, Some(tstDigitalContactDetails))
     }
 
-    "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
+    "throw an UpstreamErrorResponse when a 403 response is returned from the connector" in new Setup {
       when(mockS4LService.fetchAndGet(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(None))
 
       when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
+        .thenReturn(Future.failed(UpstreamErrorResponse("403", 403, 403)))
 
-      an[Upstream4xxResponse] mustBe thrownBy(await(service.getCompanyDetails("54321", "txId")))
+      an[UpstreamErrorResponse] mustBe thrownBy(await(service.getCompanyDetails("54321", "txId")))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {

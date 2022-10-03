@@ -37,24 +37,25 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     }
   }
 
-  val ok = HttpResponse(200)
-  val noContent = HttpResponse(204)
+  val ok = HttpResponse(200, "")
+  val accepted = HttpResponse(202, "")
+  val noContent = HttpResponse(204, "")
   val badRequest = new BadRequestException("400")
-  val forbidden = Upstream4xxResponse("403", 403, 403)
-  val upstream4xx = Upstream4xxResponse("418", 418, 418)
-  val upstream5xx = Upstream5xxResponse("403", 403, 403)
+  val forbidden = UpstreamErrorResponse("403", 403, 403)
+  val upstream4xx = UpstreamErrorResponse("418", 418, 418)
+  val upstream5xx = UpstreamErrorResponse("500", 500, 500)
   val notFound = new NotFoundException("404")
   val internalServiceException = new InternalServerException("502")
 
   "Calling createNewRegistration" should {
     "return a successful outcome when the microservice successfully creates a new PAYE Registration" in new Setup {
-      mockHttpPATCH[String, HttpResponse]("tst-url", HttpResponse(OK))
+      mockHttpPATCH[String, HttpResponse]("tst-url", ok)
 
       await(connector.createNewRegistration("tstID", "tstTXID")) mustBe DownstreamOutcome.Success
     }
 
     "return a failed outcome when the microservice returns a 2xx response other than OK" in new Setup {
-      mockHttpPATCH[String, HttpResponse]("tst-url", HttpResponse(ACCEPTED))
+      mockHttpPATCH[String, HttpResponse]("tst-url", accepted)
 
       await(connector.createNewRegistration("tstID", "tstTXID")) mustBe DownstreamOutcome.Failure
     }
@@ -71,13 +72,13 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
       await(connector.createNewRegistration("tstID", "tstTXID")) mustBe DownstreamOutcome.Failure
     }
 
-    "return an Upstream4xxResponse" in new Setup {
+    "return an UpstreamErrorResponse" in new Setup {
       mockHttpFailedPATCH[String, HttpResponse]("tst-url", upstream4xx)
 
       await(connector.createNewRegistration("tstID", "tstTXID")) mustBe DownstreamOutcome.Failure
     }
 
-    "return Upstream5xxResponse" in new Setup {
+    "return UpstreamErrorResponse" in new Setup {
       mockHttpFailedPATCH[String, HttpResponse]("tst-url", upstream5xx)
 
       await(connector.createNewRegistration("tstID", "tstTXID")) mustBe DownstreamOutcome.Failure
@@ -100,7 +101,7 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
       mockHttpFailedGET[PAYERegistrationAPI]("test-url", forbidden)
 
-      intercept[Upstream4xxResponse](await(connector.getRegistration("tstID")))
+      intercept[UpstreamErrorResponse](await(connector.getRegistration("tstID")))
     }
 
     "return the correct PAYEResponse when a Not Found response is returned by the microservice" in new Setup {
@@ -126,7 +127,7 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
       mockHttpFailedGET[PAYERegistrationAPI]("test-url", forbidden)
 
-      intercept[Upstream4xxResponse](await(connector.getRegistration("tstID")))
+      intercept[UpstreamErrorResponse](await(connector.getRegistration("tstID")))
     }
 
     "return the correct PAYEResponse when a Not Found response is returned by the microservice" in new Setup {
@@ -158,7 +159,7 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
       mockHttpFailedGET[CompanyDetailsAPI]("test-url", forbidden)
 
-      intercept[Upstream4xxResponse](await(connector.getCompanyDetails("tstID")))
+      intercept[UpstreamErrorResponse](await(connector.getCompanyDetails("tstID")))
     }
 
     "return a Not Found PAYEResponse when the microservice returns no Company Details API model" in new Setup {
@@ -184,7 +185,7 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
       mockHttpFailedPATCH[CompanyDetailsAPI, CompanyDetailsAPI]("tst-url", forbidden)
 
-      intercept[Upstream4xxResponse](await(connector.upsertCompanyDetails("tstID", Fixtures.validCompanyDetailsAPI)))
+      intercept[UpstreamErrorResponse](await(connector.upsertCompanyDetails("tstID", Fixtures.validCompanyDetailsAPI)))
     }
 
     "return a Not Found PAYEResponse when the microservice returns a NotFound response (No PAYERegistration in database)" in new Setup {
@@ -202,13 +203,13 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
 
   "Calling getEmployment" should {
     "return the correct PAYEResponse when the microservice returns an Employment API model" in new Setup {
-      mockHttpGet[HttpResponse]("tst-url", HttpResponse(200, Some(Json.toJson(Fixtures.validEmploymentApi))))
+      mockHttpGet[HttpResponse]("tst-url", HttpResponse(200, json = Json.toJson(Fixtures.validEmploymentApi), headers = Map()))
 
       await(connector.getEmployment("tstID")) mustBe Some(Fixtures.validEmploymentApi)
     }
 
     "return a None when the microservice returns a 204 status code" in new Setup {
-      mockHttpGet[HttpResponse]("tst-url", HttpResponse(204))
+      mockHttpGet[HttpResponse]("tst-url", noContent)
 
       await(connector.getEmployment("tstID")) mustBe None
     }
@@ -222,7 +223,7 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
       mockHttpFailedGET[Employment]("test-url", forbidden)
 
-      intercept[Upstream4xxResponse](await(connector.getEmployment("tstID")))
+      intercept[UpstreamErrorResponse](await(connector.getEmployment("tstID")))
     }
 
     "return a exception PAYEResponse when the microservice returns no doc" in new Setup {
@@ -248,7 +249,7 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
       mockHttpFailedPATCH[Employment, Employment]("tst-url", forbidden)
 
-      intercept[Upstream4xxResponse](await(connector.upsertEmployment("tstID", Fixtures.validEmploymentApi)))
+      intercept[UpstreamErrorResponse](await(connector.upsertEmployment("tstID", Fixtures.validEmploymentApi)))
     }
 
     "return a Not Found PAYEResponse when the microservice returns a NotFound response (No PAYERegistration in database)" in new Setup {
@@ -280,7 +281,7 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
       mockHttpFailedGET[Seq[Director]]("test-url", forbidden)
 
-      intercept[Upstream4xxResponse](await(connector.getDirectors("tstID")))
+      intercept[UpstreamErrorResponse](await(connector.getDirectors("tstID")))
     }
 
     "return a Not Found PAYEResponse when the microservice returns no Employment API model" in new Setup {
@@ -306,7 +307,7 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
       mockHttpFailedPATCH[Seq[Director], Seq[Director]]("tst-url", forbidden)
 
-      intercept[Upstream4xxResponse](await(connector.upsertDirectors("tstID", Fixtures.validDirectorList)))
+      intercept[UpstreamErrorResponse](await(connector.upsertDirectors("tstID", Fixtures.validDirectorList)))
     }
 
     "return a Not Found PAYEResponse when the microservice returns a NotFound response (No PAYERegistration in database)" in new Setup {
@@ -338,7 +339,7 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
       mockHttpFailedGET[Seq[SICCode]]("test-url", forbidden)
 
-      intercept[Upstream4xxResponse](await(connector.getSICCodes("tstID")))
+      intercept[UpstreamErrorResponse](await(connector.getSICCodes("tstID")))
     }
 
     "return a Not Found PAYEResponse when the microservice returns no Employment API model" in new Setup {
@@ -364,7 +365,7 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
       mockHttpFailedPATCH[Seq[SICCode], Seq[SICCode]]("tst-url", forbidden)
 
-      intercept[Upstream4xxResponse](await(connector.upsertSICCodes("tstID", Fixtures.validSICCodesList)))
+      intercept[UpstreamErrorResponse](await(connector.upsertSICCodes("tstID", Fixtures.validSICCodesList)))
     }
 
     "return a Not Found PAYEResponse when the microservice returns a NotFound response (No PAYERegistration in database)" in new Setup {
@@ -396,7 +397,7 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
       mockHttpFailedGET[PAYEContact]("test-url", forbidden)
 
-      intercept[Upstream4xxResponse](await(connector.getPAYEContact("tstID")))
+      intercept[UpstreamErrorResponse](await(connector.getPAYEContact("tstID")))
     }
 
     "return a Not Found PAYEResponse when the microservice returns no Company Details API model" in new Setup {
@@ -422,7 +423,7 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
       mockHttpFailedPATCH[PAYEContact, PAYEContact]("tst-url", forbidden)
 
-      intercept[Upstream4xxResponse](await(connector.upsertPAYEContact("tstID", Fixtures.validPAYEContactAPI)))
+      intercept[UpstreamErrorResponse](await(connector.upsertPAYEContact("tstID", Fixtures.validPAYEContactAPI)))
     }
 
     "return a Not Found PAYEResponse when the microservice returns a NotFound response (No PAYERegistration in database)" in new Setup {
@@ -454,7 +455,7 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
       mockHttpFailedGET[String]("test-url", forbidden)
 
-      intercept[Upstream4xxResponse](await(connector.getCompletionCapacity("tstID")))
+      intercept[UpstreamErrorResponse](await(connector.getCompletionCapacity("tstID")))
     }
 
     "return a Not Found PAYEResponse when the microservice returns no Completion Capacity String" in new Setup {
@@ -480,7 +481,7 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
       mockHttpFailedPATCH[String, String]("tst-url", forbidden)
 
-      intercept[Upstream4xxResponse](await(connector.upsertCompletionCapacity("tstID", "tst")))
+      intercept[UpstreamErrorResponse](await(connector.upsertCompletionCapacity("tstID", "tst")))
     }
 
     "return a Not Found PAYEResponse when the microservice returns a NotFound response (No PAYERegistration in database)" in new Setup {
@@ -511,7 +512,7 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
       mockHttpFailedGET[String]("test-url", forbidden)
 
-      intercept[Upstream4xxResponse](await(connector.getAcknowledgementReference("tstID")))
+      intercept[UpstreamErrorResponse](await(connector.getAcknowledgementReference("tstID")))
     }
 
     "return a Not Found PAYEResponse when the microservice returns no Eligibility response" in new Setup {
@@ -555,20 +556,20 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
 
   "deleteRejectedRegistrationDocument" should {
     "return a RegistrationDeletion Success" in new Setup {
-      mockHttpDelete[HttpResponse](HttpResponse(OK))
+      mockHttpDelete[HttpResponse](ok)
 
       val result: RegistrationDeletion.Value = await(connector.deleteRejectedRegistrationDocument("testRegId", "testTxID"))
       result mustBe RegistrationDeletion.success
     }
 
     "return a RegistrationDeletion failure" in new Setup {
-      mockHttpFailedDelete[HttpResponse](Upstream5xxResponse("msg", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR))
+      mockHttpFailedDelete[HttpResponse](UpstreamErrorResponse("msg", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR))
 
-      intercept[Upstream5xxResponse](await(connector.deleteRejectedRegistrationDocument("testRegId", "testTxID")))
+      intercept[UpstreamErrorResponse](await(connector.deleteRejectedRegistrationDocument("testRegId", "testTxID")))
     }
 
     "return a RegistrationDeletion invalidStatus" in new Setup {
-      mockHttpFailedDelete[HttpResponse](Upstream4xxResponse("msg", PRECONDITION_FAILED, PRECONDITION_FAILED))
+      mockHttpFailedDelete[HttpResponse](UpstreamErrorResponse("msg", PRECONDITION_FAILED, PRECONDITION_FAILED))
 
       val result: RegistrationDeletion.Value = await(connector.deleteRejectedRegistrationDocument("testRegId", "testTxID"))
       result mustBe RegistrationDeletion.invalidStatus
@@ -577,28 +578,28 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
 
   "deleteRegistrationForRejectedIncorp" should {
     "return a success" in new Setup {
-      mockHttpDelete[HttpResponse](HttpResponse(OK))
+      mockHttpDelete[HttpResponse](ok)
 
       val result: RegistrationDeletion.Value = await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId"))
       result mustBe RegistrationDeletion.success
     }
 
     "return an invalid status" in new Setup {
-      mockHttpFailedDelete[HttpResponse](Upstream4xxResponse("msg", PRECONDITION_FAILED, PRECONDITION_FAILED))
+      mockHttpFailedDelete[HttpResponse](UpstreamErrorResponse("msg", PRECONDITION_FAILED, PRECONDITION_FAILED))
 
       val result: RegistrationDeletion.Value = await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId"))
       result mustBe RegistrationDeletion.invalidStatus
     }
     "return a not found when 404 is returned from paye reg" in new Setup {
-      mockHttpFailedDelete[HttpResponse](Upstream4xxResponse("msg", 404, 404))
+      mockHttpFailedDelete[HttpResponse](UpstreamErrorResponse("msg", 404, 404))
 
       val result: RegistrationDeletion.Value = await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId"))
       result mustBe RegistrationDeletion.notfound
     }
-    "throw an Upstream5xxResponse" in new Setup {
-      mockHttpFailedDelete[HttpResponse](Upstream5xxResponse("msg", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR))
+    "throw an UpstreamErrorResponse" in new Setup {
+      mockHttpFailedDelete[HttpResponse](UpstreamErrorResponse("msg", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR))
 
-      intercept[Upstream5xxResponse](await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId")))
+      intercept[UpstreamErrorResponse](await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId")))
     }
   }
 }

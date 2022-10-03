@@ -21,7 +21,7 @@ import helpers.PayeComponentSpec
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException, Upstream4xxResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException, UpstreamErrorResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,7 +40,7 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
 
   val validCurrentProfile = CurrentProfile("testRegId", CompanyRegistrationProfile("rejected", "txId"), "en", false, None)
 
-  val forbidden = Upstream4xxResponse("403", 403, 403)
+  val forbidden = UpstreamErrorResponse("403", 403, 403)
   val notFound = new NotFoundException("404")
   val runTimeException = new RuntimeException("tst")
 
@@ -95,7 +95,7 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
           .thenReturn(Future("testRegId"))
 
         when(mockS4LService.clear(ArgumentMatchers.any())(ArgumentMatchers.any()))
-          .thenReturn(Future(HttpResponse(200)))
+          .thenReturn(Future(HttpResponse(200, "")))
 
         when(mockPAYERegConnector.deleteRegistrationForRejectedIncorp(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future(RegistrationDeletion.success))
@@ -109,7 +109,7 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
           .thenReturn(Future(Some("testRegId")))
 
         when(mockS4LService.clear(ArgumentMatchers.any())(ArgumentMatchers.any()))
-          .thenReturn(Future(HttpResponse(200)))
+          .thenReturn(Future(HttpResponse(200, "")))
 
         when(mockPAYERegConnector.deleteRegistrationForRejectedIncorp(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future(RegistrationDeletion.success))

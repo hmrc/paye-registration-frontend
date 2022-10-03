@@ -75,33 +75,33 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with PayeF
          |}
       """.stripMargin)
     "return Some(IncorporationStatus.Value) when II returns a 200" in new Setup {
-      val httpResponse = HttpResponse(200, Some(responseJson))
+      val httpResponse = HttpResponse(200, json = responseJson, headers = Map())
       mockHttpPOST[JsObject, HttpResponse]("", httpResponse)
 
       await(connector.setupSubscription("fooTxID", "barSubscriber")) mustBe Some(IncorporationStatus.accepted)
     }
     "return JsResultException when subscriber does not match with the one returned from II" in new Setup {
-      val httpResponse = HttpResponse(200, Some(responseJson))
+      val httpResponse = HttpResponse(200, json = responseJson, headers = Map())
       mockHttpPOST[JsObject, HttpResponse]("", httpResponse)
 
       intercept[JsResultException](await(connector.setupSubscription("fooTxID", "bar", subscriber = "fooBarWillNotMatch")))
     }
 
     "return None when II returns a 202" in new Setup {
-      val httpResponse = HttpResponse(202, Some(responseJson))
+      val httpResponse = HttpResponse(202, json = responseJson, headers = Map())
       mockHttpPOST[JsObject, HttpResponse]("", httpResponse)
 
       await(connector.setupSubscription("foo", "bar")) mustBe None
     }
 
     "return IncorporationInformationResponseException when II returns any other status than 200 / 202 but still a success response" in new Setup {
-      val httpResponse = HttpResponse(203, Some(responseJson))
+      val httpResponse = HttpResponse(203, json = responseJson, headers = Map())
       mockHttpPOST[JsObject, HttpResponse]("", httpResponse)
 
       intercept[IncorporationInformationResponseException](await(connector.setupSubscription("foo", "bar")))
     }
     "return an JsResultException when json cannot be parsed for a 200 from II" in new Setup {
-      val httpResponse = HttpResponse(200, Some(Json.obj("foo" -> "bar")))
+      val httpResponse = HttpResponse(200, json = Json.obj("foo" -> "bar"), headers = Map())
       mockHttpPOST[JsObject, HttpResponse]("", httpResponse)
 
       intercept[JsResultException](await(connector.setupSubscription("fooTxID", "barSubscriber")))
@@ -115,7 +115,7 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with PayeF
 
   "cancelSubscription" should {
     "return true if an OK is returned from ii" in new Setup {
-      mockHttpDelete[HttpResponse](HttpResponse(200))
+      mockHttpDelete[HttpResponse](HttpResponse(200, ""))
       await(connector.cancelSubscription("tx-12345", "12345")) mustBe true
     }
     "return true if a NotFound is returned from ii" in new Setup {
@@ -169,12 +169,12 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with PayeF
       """.stripMargin)
 
     "return an Incorp Info JsValue" in new Setup(true) {
-      mockHttpGet[HttpResponse](connector.incorpInfoUrl, Future.successful(HttpResponse(200, Some(testJsonWithDate))))
+      mockHttpGet[HttpResponse](connector.incorpInfoUrl, Future.successful(HttpResponse(200, json = testJsonWithDate, headers = Map())))
       await(connector.getIncorporationInfo(testRegId, testTransId)) mustBe testJsonWithDate
     }
 
     "return an empty json" in new Setup(true) {
-      mockHttpGet[HttpResponse](connector.incorpInfoUrl, Future.successful(HttpResponse(204)))
+      mockHttpGet[HttpResponse](connector.incorpInfoUrl, Future.successful(HttpResponse(204, "")))
       await(connector.getIncorporationInfo(testRegId, testTransId)) mustBe Json.obj()
     }
 
