@@ -36,8 +36,6 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
 
   val mockDirectorDetailService = mock[DirectorDetailsService]
 
-  val fakeRequest = FakeRequest()
-
   lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
   lazy val mockDirectorDetailsPage = app.injector.instanceOf[directorDetails]
   lazy val mockRestart = app.injector.instanceOf[restart]
@@ -83,7 +81,7 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
 
   "directorDetails" should {
     "return a SEE_OTHER if user is not authorised" in new Setup {
-      AuthHelpers.showUnauthorised(testController.directorDetails, fakeRequest) {
+      AuthHelpers.showUnauthorised(testController.directorDetails, fakeRequest()) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -100,7 +98,7 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
       when(mockDirectorDetailService.createDisplayNamesMap(ArgumentMatchers.any()))
         .thenReturn(directorMap)
 
-      AuthHelpers.showAuthorisedWithCP(testController.directorDetails, Fixtures.validCurrentProfile, FakeRequest()) {
+      AuthHelpers.showAuthorisedWithCP(testController.directorDetails, Fixtures.validCurrentProfile, fakeRequest()) {
         (result: Future[Result]) =>
           status(result) mustBe OK
       }
@@ -109,7 +107,7 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
 
   "submitDirectorDetails" should {
     "return a SEE_OTHER if the user is not authorised" in new Setup {
-      AuthHelpers.showUnauthorised(testController.submitDirectorDetails, fakeRequest) {
+      AuthHelpers.showUnauthorised(testController.submitDirectorDetails, fakeRequest("POST")) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -117,7 +115,7 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
     }
 
     "return a BAD_REQUEST if there is problem with the submitted form" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "nino[0]" -> ""
       )
       when(mockDirectorDetailService.getDirectorDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
@@ -133,7 +131,7 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
     }
 
     "return a SEE_OTHER and redirect to the PAYE Contact page" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody()
+      val request = fakeRequest("POST").withFormUrlEncodedBody()
       when(mockDirectorDetailService.submitNinos(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 

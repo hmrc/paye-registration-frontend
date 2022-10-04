@@ -64,14 +64,12 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
       globalExecutionContext)
   }
 
-  val request = FakeRequest()
-
   "payeContactDetails" should {
     "return an OK with data from registration" in new Setup {
       when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Fixtures.validPAYEContactView))
 
-      AuthHelpers.showAuthorisedWithCP(testController.payeContactDetails, Fixtures.validCurrentProfile, request) {
+      AuthHelpers.showAuthorisedWithCP(testController.payeContactDetails, Fixtures.validCurrentProfile, fakeRequest()) {
         (result: Future[Result]) =>
           status(result) mustBe OK
       }
@@ -81,7 +79,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.emptyPAYEContactView))
 
-      AuthHelpers.showAuthorisedWithCP(testController.payeContactDetails, Fixtures.validCurrentProfile, request) {
+      AuthHelpers.showAuthorisedWithCP(testController.payeContactDetails, Fixtures.validCurrentProfile, fakeRequest()) {
         (result: Future[Result]) =>
           status(result) mustBe OK
       }
@@ -94,7 +92,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockPrepopService.getPAYEContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(None))
 
-      AuthHelpers.showAuthorisedWithCP(testController.payeContactDetails, Fixtures.validCurrentProfile, request) {
+      AuthHelpers.showAuthorisedWithCP(testController.payeContactDetails, Fixtures.validCurrentProfile, fakeRequest()) {
         (result: Future[Result]) =>
           status(result) mustBe OK
       }
@@ -103,7 +101,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "submitPAYEContactDetails" should {
     "return a BAD_REQUEST if there is problem with the submitted form, no name" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "name" -> ""
       )
 
@@ -114,7 +112,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return a BAD_REQUEST if there is problem with the submitted form, no contact details" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "name" -> "teeeeeeest"
       )
 
@@ -125,7 +123,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "show an error page when there is an error response from the microservice" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "name" -> "tata",
         "digitalContact.contactEmail" -> "tata@test.aaaaaaaaaaa"
       )
@@ -140,7 +138,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return a SEE_OTHER and redirect to the Correspondence Address page" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "name" -> "tata",
         "digitalContact.contactEmail" -> "tata@test.aaaaaaaaaaa"
       )
@@ -178,7 +176,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockPAYEContactService.getCorrespondenceAddresses(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(addressMap)
 
-      AuthHelpers.showAuthorisedWithCP(testController.payeCorrespondenceAddress, Fixtures.validCurrentProfile, request) { result =>
+      AuthHelpers.showAuthorisedWithCP(testController.payeCorrespondenceAddress, Fixtures.validCurrentProfile, fakeRequest()) { result =>
         status(result) mustBe OK
       }
     }
@@ -186,7 +184,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "submitPAYECorrespondenceAddress" should {
     "return a BAD_REQUEST" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "chosenAddress" -> ""
       )
 
@@ -213,7 +211,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to summary if correspondence is chosen" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "chosenAddress" -> "correspondenceAddress"
       )
 
@@ -224,7 +222,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to summary if ro is chosen" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "chosenAddress" -> "roAddress"
       )
 
@@ -244,7 +242,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to summary if ppob is chosen" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "chosenAddress" -> "ppobAddress"
       )
 
@@ -264,7 +262,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return a 500 in case of DownstreamOutcome FAILURE when saving with a missing PPOB Address" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "chosenAddress" -> "ppobAddress"
       )
 
@@ -277,7 +275,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return a 500 in case of DownstreamOutcome FAILURE" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "chosenAddress" -> "roAddress"
       )
 
@@ -296,7 +294,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to address lookup frontend if other is chosen" in new Setup {
-      val request = FakeRequest("GET", "/testuri?id=123456789").withFormUrlEncodedBody(
+      val request = FakeRequest("POST", "/testuri?id=123456789").withFormUrlEncodedBody(
         "chosenAddress" -> "otherAddress"
       )
 
@@ -309,7 +307,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "show an error page when fail saving Correspondence Address" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "chosenAddress" -> "prepopAddress13"
       )
 
@@ -356,7 +354,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(expected))
 
-      AuthHelpers.showAuthorisedWithCP(testController.savePAYECorrespondenceAddress(Some(testAlfId)), Fixtures.validCurrentProfile, request) { result =>
+      AuthHelpers.showAuthorisedWithCP(testController.savePAYECorrespondenceAddress(Some(testAlfId)), Fixtures.validCurrentProfile, fakeRequest()) { result =>
         status(result) mustBe SEE_OTHER
       }
     }
@@ -382,7 +380,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(expected))
 
-      AuthHelpers.showAuthorisedWithCP(testController.savePAYECorrespondenceAddress(Some(testAlfId)), Fixtures.validCurrentProfile, request) { result =>
+      AuthHelpers.showAuthorisedWithCP(testController.savePAYECorrespondenceAddress(Some(testAlfId)), Fixtures.validCurrentProfile, fakeRequest()) { result =>
         status(result) mustBe INTERNAL_SERVER_ERROR
       }
     }

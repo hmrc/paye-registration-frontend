@@ -42,7 +42,7 @@ trait SaveForLaterMock {
 
   def mockS4LClear(mockS4LConnector: S4LConnector = mockS4LConnector): OngoingStubbing[Future[HttpResponse]] = {
     when(mockS4LConnector.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
-      .thenReturn(Future.successful(HttpResponse(200)))
+      .thenReturn(Future.successful(HttpResponse(200, "")))
   }
 
   def mockS4LSaveForm[T](formId: String, cacheMap: CacheMap, mockS4LConnector: S4LConnector = mockS4LConnector): OngoingStubbing[Future[CacheMap]] = {

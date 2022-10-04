@@ -19,7 +19,7 @@ package itutil
 import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.ws.WSCookie
-import uk.gov.hmrc.crypto.{CompositeSymmetricCrypto, Crypted, PlainText}
+import uk.gov.hmrc.crypto.{Crypted, PlainText, SymmetricCryptoFactory}
 import uk.gov.hmrc.http.SessionKeys
 
 import java.net.{URLDecoder, URLEncoder}
@@ -37,7 +37,8 @@ trait LoginStub extends SessionCookieBaker {
 
     Map(
       SessionKeys.sessionId -> sessionID,
-      SessionKeys.lastRequestTimestamp -> rollbackTimestamp
+      SessionKeys.lastRequestTimestamp -> rollbackTimestamp,
+      SessionKeys.authToken -> "FooBarToken"
     ) ++ additionalData
   }
 
@@ -193,7 +194,7 @@ trait SessionCookieBaker {
     }
 
     val encodedCookie = encode(sessionData)
-    val encrypted = CompositeSymmetricCrypto.aesGCM(cookieKey, Seq()).encrypt(encodedCookie).value
+    val encrypted = SymmetricCryptoFactory.aesGcmCrypto(cookieKey).encrypt(encodedCookie).value
 
     s"""mdtp="$encrypted"; Path=/; HTTPOnly"; Path=/; HTTPOnly"""
   }
@@ -204,10 +205,10 @@ trait SessionCookieBaker {
 
   def getCookieData(cookieData: String): Map[String, String] = {
 
-    val decrypted = CompositeSymmetricCrypto.aesGCM(cookieKey, Seq()).decrypt(Crypted(cookieData)).value
+    val decrypted = SymmetricCryptoFactory.aesGcmCrypto(cookieKey).decrypt(Crypted(cookieData)).value
     val result = decrypted.split("&")
       .map(_.split("="))
-      .map { case Array(k, v) => (k, URLDecoder.decode(v)) }
+      .map { case Array(k, v) => (k, URLDecoder.decode(v, "UTF-8")) }
       .toMap
 
     result

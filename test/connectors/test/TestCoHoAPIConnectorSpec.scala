@@ -38,7 +38,7 @@ class TestCoHoAPIConnectorSpec extends PayeComponentSpec {
 
   "setupCoHoCompanyDetails" should {
     "return a valid response when successfully set up" in new Setup {
-      val resp = HttpResponse(responseStatus = 200)
+      val resp = HttpResponse(200, "")
 
       mockHttpPOST[JsValue, HttpResponse](testConnector.incorpFEStubsUrl, resp)
 
@@ -48,7 +48,7 @@ class TestCoHoAPIConnectorSpec extends PayeComponentSpec {
 
   "teardownCoHoCompanyDetails" should {
     "return a valid response when successfully set up" in new Setup {
-      val resp = HttpResponse(responseStatus = 200)
+      val resp = HttpResponse(200, "")
 
       mockHttpPUT[String, HttpResponse](testConnector.incorpFEStubsUrl, resp)
 

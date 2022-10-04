@@ -2,5 +2,5 @@
 
 + nocsrf
 DELETE      /:regID/delete                                    controllers.internal.RegistrationController.delete(regID: String)
-
++ nocsrf
 POST        /company-incorporation                            controllers.internal.RegistrationController.companyIncorporation

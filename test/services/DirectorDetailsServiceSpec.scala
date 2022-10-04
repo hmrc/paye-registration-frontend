@@ -25,12 +25,12 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
-  val returnHttpResponse = HttpResponse(200)
+  val returnHttpResponse = HttpResponse(200, "")
 
   class Setup {
     val service = new DirectorDetailsService {
@@ -498,7 +498,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       await(service.getDirectorDetails("12345", "txId")) mustBe directorDetails
     }
 
-    "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
+    "throw an UpstreamErrorResponse when a 403 response is returned from the connector" in new Setup {
       val directorDetails = Directors(
         directorMapping = Map(
           "0" -> Director(
@@ -515,9 +515,9 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
         .thenReturn(Future.successful(None))
 
       when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
-        .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
+        .thenReturn(Future.failed(UpstreamErrorResponse("403", 403, 403)))
 
-      an[Upstream4xxResponse] mustBe thrownBy(await(service.getDirectorDetails("12345", "txId")))
+      an[UpstreamErrorResponse] mustBe thrownBy(await(service.getDirectorDetails("12345", "txId")))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {

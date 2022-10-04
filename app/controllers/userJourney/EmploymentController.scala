@@ -88,9 +88,8 @@ class EmploymentController @Inject()(employmentService: EmploymentService,
               model.employingAnyone match {
                 case Some(EmployingAnyone(false, _)) =>
                   Redirect(controllers.userJourney.routes.EmploymentController.employingStaff)
-                case Some(EmployingAnyone(true, _)) =>
+                case _ =>
                   Redirect(controllers.userJourney.routes.EmploymentController.constructionIndustry)
-                  //TODO handle None case
               }
             }
           }

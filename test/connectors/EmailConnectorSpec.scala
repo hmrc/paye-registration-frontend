@@ -45,7 +45,7 @@ class EmailConnectorSpec extends PayeComponentSpec {
     "return an EmailSent" when {
       "call to email service returns a non success code" in new Setup {
         when(mockHttpClient.POST[EmailRequest, HttpResponse](same("FOOBARWIZZ"), same(validEmailRequest), any())(any(), any(), any(), any()))
-          .thenReturn(Future.successful(HttpResponse(200, None, Map.empty, None)))
+          .thenReturn(Future.successful(HttpResponse(200, "")))
 
         val res = await(emailConn.requestEmailToBeSent(validEmailRequest))
         res mustBe EmailSent

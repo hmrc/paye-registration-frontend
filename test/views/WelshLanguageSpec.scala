@@ -49,7 +49,8 @@ class WelshLanguageSpec extends PayeComponentSpec with PayeFakedApp with I18nSup
     try {
       testCode(messageKeysEnglish, messageKeysWelsh)
     } finally {
-      IOUtils.close(englishMessages, welshMessages)
+      englishMessages.close()
+      welshMessages.close()
     }
   }
 

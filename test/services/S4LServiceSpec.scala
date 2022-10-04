@@ -71,7 +71,7 @@ class S4LServiceSpec extends PayeComponentSpec {
 
     "clear down S4L data" in new Setup {
       when(mockS4LConnector.clear(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
-        .thenReturn(Future.successful(HttpResponse(200)))
+        .thenReturn(Future.successful(HttpResponse(200, "")))
 
       await(service.clear("regId")).status mustBe 200
     }

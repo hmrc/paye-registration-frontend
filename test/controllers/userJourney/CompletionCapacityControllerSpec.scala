@@ -59,7 +59,7 @@ class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedA
       when(mockCompletionCapacityService.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(Some(capacity)))
 
-      AuthHelpers.showAuthorisedWithCP(testController.completionCapacity, Fixtures.validCurrentProfile, FakeRequest()) { result =>
+      AuthHelpers.showAuthorisedWithCP(testController.completionCapacity, Fixtures.validCurrentProfile, fakeRequest()) { result =>
         status(result) mustBe OK
       }
     }
@@ -68,7 +68,7 @@ class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedA
       when(mockCompletionCapacityService.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(None))
 
-      AuthHelpers.showAuthorisedWithCP(testController.completionCapacity, Fixtures.validCurrentProfile, FakeRequest()) { result =>
+      AuthHelpers.showAuthorisedWithCP(testController.completionCapacity, Fixtures.validCurrentProfile, fakeRequest()) { result =>
         status(result) mustBe OK
       }
     }
@@ -76,7 +76,7 @@ class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedA
 
   "submitCompletionCapacity" should {
     "return a BadRequest" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "" -> ""
       )
 
@@ -86,7 +86,7 @@ class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedA
     }
 
     "return a SEE_OTHER" in new Setup {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = fakeRequest("POST").withFormUrlEncodedBody(
         "completionCapacity" -> "director",
         "completionCapacityOther" -> ""
       )

@@ -22,12 +22,12 @@ import models.api.SICCode
 import models.view.NatureOfBusiness
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import uk.gov.hmrc.http.{HttpResponse, Upstream4xxResponse}
+import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class NatureOfBusinessServiceSpec extends PayeComponentSpec {
-  val returnHttpResponse = HttpResponse(200)
+  val returnHttpResponse = HttpResponse(200, "")
 
   class Setup {
     val service = new NatureOfBusinessService {
@@ -85,11 +85,11 @@ class NatureOfBusinessServiceSpec extends PayeComponentSpec {
       await(service.getNatureOfBusiness("54321")) mustBe Some(NatureOfBusiness(natureOfBusiness = "laundring"))
     }
 
-    "throw an Upstream4xxResponse when a 403 response is returned from the connector" in new Setup {
+    "throw an UpstreamErrorResponse when a 403 response is returned from the connector" in new Setup {
       when(mockPAYERegConnector.getSICCodes(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any()))
-        .thenReturn(Future.failed(Upstream4xxResponse("403", 403, 403)))
+        .thenReturn(Future.failed(UpstreamErrorResponse("403", 403, 403)))
 
-      an[Upstream4xxResponse] mustBe thrownBy(await(service.getNatureOfBusiness("54321")))
+      an[UpstreamErrorResponse] mustBe thrownBy(await(service.getNatureOfBusiness("54321")))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {

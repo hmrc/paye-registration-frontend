@@ -29,7 +29,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.{NotFoundException, Upstream4xxResponse}
+import uk.gov.hmrc.http.{NotFoundException, UpstreamErrorResponse}
 
 import java.time.LocalDate
 import scala.concurrent.Future
@@ -112,7 +112,7 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
     payeContact = Fixtures.validPAYEContactAPI
   )
 
-  val forbidden = Upstream4xxResponse("403", 403, 403)
+  val forbidden = UpstreamErrorResponse("403", 403, 403)
   val notFound = new NotFoundException("404")
   val runTimeException = new RuntimeException("tst")
 
@@ -121,7 +121,7 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
       when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(forbidden))
 
-      intercept[Upstream4xxResponse](await(service.getEmploymentSectionSummary("45632", "fooBar")))
+      intercept[UpstreamErrorResponse](await(service.getEmploymentSectionSummary("45632", "fooBar")))
     }
 
     "return None when the connector returns a Not Found response" in new Setup {

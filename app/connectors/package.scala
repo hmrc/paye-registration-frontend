@@ -15,7 +15,7 @@
  */
 
 import common.Logging
-import uk.gov.hmrc.http.{BadRequestException, NotFoundException, Upstream4xxResponse, Upstream5xxResponse}
+import uk.gov.hmrc.http.{BadRequestException, NotFoundException, UpstreamErrorResponse}
 
 package object connectors extends Logging {
   def logResponse(e: Throwable, m: String, regId: Option[String] = None): Throwable = {
@@ -26,11 +26,11 @@ package object connectors extends Logging {
     e match {
       case _: NotFoundException => log("NOT FOUND")
       case _: BadRequestException => log("BAD REQUEST")
-      case e: Upstream4xxResponse => e.upstreamResponseCode match {
+      case e: UpstreamErrorResponse => e.statusCode match {
+        case status if status >= 500 => log(s"Upstream 5xx: $status")
         case 403 => log("FORBIDDEN")
-        case _ => log(s"Upstream 4xx: ${e.upstreamResponseCode} ${e.message}")
+        case _ => log(s"Upstream 4xx: ${e.statusCode} ${e.message}")
       }
-      case e: Upstream5xxResponse => log(s"Upstream 5xx: ${e.upstreamResponseCode}")
       case e: Exception => log(s"ERROR: ${e.getMessage}")
     }
     e

@@ -100,9 +100,9 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
 
     "throw a Forbidden exception if the request has been deemed unauthorised" in new Setup {
       when(mockHttpClient.GET[JsValue](ArgumentMatchers.contains("/business-registration/business-tax-registration"),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(Upstream4xxResponse("Forbidden", 403, 403)))
+        .thenReturn(Future.failed(UpstreamErrorResponse("Forbidden", 403, 403)))
 
-      intercept[Upstream4xxResponse](await(testConnector.retrieveCompletionCapacity))
+      intercept[UpstreamErrorResponse](await(testConnector.retrieveCompletionCapacity))
     }
 
     "throw a Exception when something unexpected happened" in new Setup {
@@ -159,7 +159,7 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
     "return the trading name on successful response from Business-Registration" in new Setup {
       when(mockHttpClient.POST[String, HttpResponse](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
         (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(HttpResponse(204)))
+        .thenReturn(Future.successful(HttpResponse(204, "")))
 
       await(testConnector.upsertTradingName(regId, tradingName)) mustBe tradingName
 
@@ -201,14 +201,14 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
 
     "return no Contact Details if Business Registration returns a 4xx" in new Setup {
       when(mockHttpClient.GET[PAYEContactDetails](ArgumentMatchers.contains(s"/business-registration/$regId/contact-details"),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(new Upstream4xxResponse("412", 412, 412)))
+        .thenReturn(Future.failed(UpstreamErrorResponse("412", 412, 412)))
 
       await(testConnector.retrieveContactDetails(regId)) mustBe None
     }
 
     "return no Contact Details if Business Registration does not respond" in new Setup {
       when(mockHttpClient.GET[PAYEContactDetails](ArgumentMatchers.contains(s"/business-registration/$regId/contact-details"),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(new Upstream5xxResponse("Timed out", 502, 502)))
+        .thenReturn(Future.failed(UpstreamErrorResponse("Timed out", 502, 502)))
 
       await(testConnector.retrieveContactDetails(regId)) mustBe None
     }
@@ -289,7 +289,7 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
 
     "return an empty list of addresses in the case of an error" in new Setup {
       when(mockHttpClient.GET[JsValue](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(Upstream4xxResponse("badRequest", 400, 400)))
+        .thenReturn(Future.failed(UpstreamErrorResponse("badRequest", 400, 400)))
 
       await(testConnector.retrieveAddresses(regId)) mustBe Seq.empty
     }
@@ -314,14 +314,14 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
 
     "successfully upsert an address" in new Setup {
       when(mockHttpClient.POST[Address, HttpResponse](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"), ArgumentMatchers.any[Address](), ArgumentMatchers.any())(ArgumentMatchers.any[Writes[Address]](), ArgumentMatchers.any[HttpReads[HttpResponse]](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(HttpResponse(200, None, Map.empty, None)))
+        .thenReturn(Future.successful(HttpResponse(200, "")))
 
       await(testConnector.upsertAddress(regId, address)) mustBe address
     }
 
     "successfully complete in case of BR error response" in new Setup {
       when(mockHttpClient.POST[Address, HttpResponse](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"), ArgumentMatchers.any[Address](), ArgumentMatchers.any())(ArgumentMatchers.any[Writes[Address]](), ArgumentMatchers.any[HttpReads[HttpResponse]](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(Upstream5xxResponse("error", 500, 500)))
+        .thenReturn(Future.failed(UpstreamErrorResponse("error", 500, 500)))
 
       await(testConnector.upsertAddress(regId, address)) mustBe address
     }

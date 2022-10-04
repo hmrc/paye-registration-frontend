@@ -43,7 +43,7 @@ class RegistrationController @Inject()(val keystoreConnector: KeystoreConnector,
 
 
   def delete(regId: String): Action[AnyContent] = Action.async { implicit request =>
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(request)
     authorised() {
       payeRegistrationService.deletePayeRegistrationInProgress(regId) map {
         case RegistrationDeletion.success => Ok

@@ -46,8 +46,6 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
   lazy val mockSubcontractorsPage: employsSubcontractors = app.injector.instanceOf[employsSubcontractors]
   lazy val mockPaysPensionPage: paysPension = app.injector.instanceOf[paysPension]
 
-  val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-
   val testController = new EmploymentController(
     mockEmploymentService,
     mockThresholdService,
@@ -89,7 +87,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "paidEmployees" should {
     "redirect if the user is not authorised" in {
-      AuthHelpers.showUnauthorised(testController.paidEmployees, request) {
+      AuthHelpers.showUnauthorised(testController.paidEmployees, fakeRequest()) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -105,7 +103,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
       mockGetThreshold
 
-      AuthHelpers.showAuthorisedWithCP(testController.paidEmployees, Fixtures.validCurrentProfile, request) {
+      AuthHelpers.showAuthorisedWithCP(testController.paidEmployees, Fixtures.validCurrentProfile, fakeRequest()) {
         result => status(result) mustBe OK
       }
     }
@@ -117,7 +115,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
       mockGetThreshold
 
-      AuthHelpers.showAuthorisedWithCP(testController.paidEmployees, Fixtures.validCurrentProfile, request) {
+      AuthHelpers.showAuthorisedWithCP(testController.paidEmployees, Fixtures.validCurrentProfile, fakeRequest()) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some(controllers.userJourney.routes.EmploymentController.employingStaff.url)
@@ -127,7 +125,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "submitPaidEmployees" should {
     "redirect if the user is not authorised" in {
-      AuthHelpers.submitUnauthorised(testController.submitPaidEmployees, request) {
+      AuthHelpers.submitUnauthorised(testController.submitPaidEmployees, fakeRequest("POST")) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -135,7 +133,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return a bad request if the form isn't filled in" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "" -> ""
       )
 
@@ -150,7 +148,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return a bad request if the alreadyPays = yes and no date filed in" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "alreadyPays" -> "yes"
       )
 
@@ -165,7 +163,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to CIS if the company already pays employees" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "alreadyPaying" -> "true",
         "earliestDate.Day" -> "12",
         "earliestDate.Month" -> "4",
@@ -186,7 +184,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to will you be paying page if the company doesn't already pay employees" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "alreadyPaying" -> "false"
       )
 
@@ -206,7 +204,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "employingStaff" should {
     "redirect if the user is not authorised" in {
-      AuthHelpers.showUnauthorised(testController.employingStaff, request) {
+      AuthHelpers.showUnauthorised(testController.employingStaff, fakeRequest()) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -218,7 +216,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
       mockGetThreshold
 
-      AuthHelpers.showAuthorisedWithCP(testController.employingStaff, Fixtures.validCurrentProfile, request) {
+      AuthHelpers.showAuthorisedWithCP(testController.employingStaff, Fixtures.validCurrentProfile, fakeRequest()) {
         result => status(result) mustBe OK
       }
     }
@@ -229,7 +227,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockEmploymentService.saveEmployingAnyone(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(employingAnyoneView))
 
-      AuthHelpers.submitUnauthorised(testController.submitEmployingStaff, request) {
+      AuthHelpers.submitUnauthorised(testController.submitEmployingStaff, fakeRequest("POST")) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -237,7 +235,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return  a bad request if form is not filled in" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "" -> ""
       )
 
@@ -249,7 +247,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to CIS if user selects no" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "willBePaying" -> "false"
       )
 
@@ -264,7 +262,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to CIS if user will be paying employees before 6th april" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "willBePaying" -> "true",
         "beforeNewTaxYear" -> "true"
       )
@@ -280,7 +278,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to Application Delayed Page if user will be paying employees after 6th april" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "willBePaying" -> "true",
         "beforeNewTaxYear" -> "false"
       )
@@ -299,7 +297,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "applicationDelayed" should {
     "redirect if the user is not authorised" in {
-      AuthHelpers.showUnauthorised(testController.applicationDelayed, request) {
+      AuthHelpers.showUnauthorised(testController.applicationDelayed, fakeRequest()) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -307,7 +305,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "render the page" in {
-      AuthHelpers.showAuthorised(testController.applicationDelayed, request) {
+      AuthHelpers.showAuthorised(testController.applicationDelayed, fakeRequest()) {
         result => status(result) mustBe OK
       }
     }
@@ -315,7 +313,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "submitApplicationDelayed" should {
     "redirect if the user is not authorised" in {
-      AuthHelpers.submitUnauthorised(testController.submitApplicationDelayed, request) {
+      AuthHelpers.submitUnauthorised(testController.submitApplicationDelayed, fakeRequest()) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -323,7 +321,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to the CIS page" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest().withFormUrlEncodedBody(
         "" -> ""
       )
       AuthHelpers.submitAuthorised(testController.submitApplicationDelayed, formRequest) {
@@ -336,7 +334,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "constructionIndustry" should {
     "redirect if the user is not authorised" in {
-      AuthHelpers.showUnauthorised(testController.constructionIndustry, request) {
+      AuthHelpers.showUnauthorised(testController.constructionIndustry, fakeRequest()) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -348,7 +346,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockEmploymentService.fetchEmployingStaff(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(emptyView))
 
-      AuthHelpers.showAuthorisedWithCP(testController.constructionIndustry, Fixtures.validCurrentProfile, request) {
+      AuthHelpers.showAuthorisedWithCP(testController.constructionIndustry, Fixtures.validCurrentProfile, fakeRequest()) {
         result => status(result) mustBe OK
       }
     }
@@ -356,14 +354,14 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "submitConstructionIndustry" should {
     "redirect if the user is not authorised" in {
-      AuthHelpers.submitUnauthorised(testController.submitConstructionIndustry, request) {
+      AuthHelpers.submitUnauthorised(testController.submitConstructionIndustry, fakeRequest("POST")) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
       }
     }
     "return a 500 testing handlePostJourneyConstruction error scenario" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "inConstructionIndustry" -> "false"
       )
 
@@ -377,7 +375,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return a bad request if the form is empty" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "" -> ""
       )
       AuthHelpers.submitAuthorisedWithCP(testController.submitConstructionIndustry, Fixtures.validCurrentProfile, formRequest) {
@@ -386,7 +384,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to the subcontractors page if yes is selected" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "inConstructionIndustry" -> "true"
       )
 
@@ -401,7 +399,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to the pensions page if no is selected and the company already pays employees" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "inConstructionIndustry" -> "false"
       )
 
@@ -416,7 +414,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to the completion capacity page if no is selected and the company will pay employees" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "inConstructionIndustry" -> "false"
       )
 
@@ -431,7 +429,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to the don't register page if no is selected and the company will not and has never paid employees" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "inConstructionIndustry" -> "false"
       )
 
@@ -446,7 +444,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to the completion capacity page if no is selected and the company will pay employees and no incorp date" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "inConstructionIndustry" -> "false"
       )
 
@@ -461,7 +459,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to the don't register page if no is selected and the company will not and has never paid employees and no incorp date" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "inConstructionIndustry" -> "false"
       )
 
@@ -478,7 +476,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "subcontractors" should {
     "redirect if the user is not authorised" in {
-      AuthHelpers.showUnauthorised(testController.subcontractors, request) {
+      AuthHelpers.showUnauthorised(testController.subcontractors, fakeRequest()) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -493,7 +491,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockEmploymentService.fetchEmployingStaff(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(emptyView))
 
-      AuthHelpers.showAuthorisedWithCP(testController.subcontractors, Fixtures.validCurrentProfile, request) {
+      AuthHelpers.showAuthorisedWithCP(testController.subcontractors, Fixtures.validCurrentProfile, fakeRequest()) {
         result =>
           status(result) mustBe OK
           val document = Jsoup.parse(contentAsString(result))
@@ -509,7 +507,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "submitSubcontractors" should {
     "redirect if the user is not authorised" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "inConstructionIndustry" -> "false"
       )
       AuthHelpers.submitUnauthorised(testController.submitSubcontractors, formRequest) {
@@ -520,7 +518,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return a bad request if the form is empty" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "" -> ""
       )
       AuthHelpers.submitAuthorisedWithCP(testController.submitSubcontractors, Fixtures.validCurrentProfile, formRequest) {
@@ -529,7 +527,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to pension page if the company already pays employees" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "employsSubcontractors" -> "true"
       )
 
@@ -544,7 +542,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to the completion capacity page if the company has never paid employees" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "employsSubcontractors" -> "false"
       )
 
@@ -562,7 +560,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "pensions" should {
     "redirect if the user is not authorised" in {
-      AuthHelpers.showUnauthorised(testController.pensions, request) {
+      AuthHelpers.showUnauthorised(testController.pensions, fakeRequest()) {
         result =>
           status(result) mustBe SEE_OTHER
           redirectLocation(result) mustBe Some("http://localhost:9553/bas-gateway/sign-in?accountType=organisation&continue_url=http%3A%2F%2Flocalhost%3A9870%2Fregister-for-paye%2Fstart-pay-as-you-earn&origin=paye-registration-frontend")
@@ -574,7 +572,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockEmploymentService.fetchEmployingStaff(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(emptyView))
 
-      AuthHelpers.showAuthorisedWithCP(testController.pensions, Fixtures.validCurrentProfile, request) {
+      AuthHelpers.showAuthorisedWithCP(testController.pensions, Fixtures.validCurrentProfile, fakeRequest()) {
         result => status(result) mustBe OK
       }
     }
@@ -582,7 +580,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "submitPensions" should {
     "redirect if the user is not authorised" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "payPension" -> "false"
       )
       AuthHelpers.submitUnauthorised(testController.submitPensions, formRequest) {
@@ -593,7 +591,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return a bad request if the form is empty" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "" -> ""
       )
       AuthHelpers.submitAuthorisedWithCP(testController.submitPensions, Fixtures.validCurrentProfile, formRequest) {
@@ -602,7 +600,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to completion capacity if pays pensions" in {
-      val formRequest = request.withFormUrlEncodedBody(
+      val formRequest = fakeRequest("POST").withFormUrlEncodedBody(
         "paysPension" -> "true"
       )
 
