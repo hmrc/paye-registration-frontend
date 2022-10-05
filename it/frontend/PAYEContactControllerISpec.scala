@@ -209,7 +209,7 @@ class PAYEContactControllerISpec extends IntegrationSpecBase
           cy = LanguageLabels(
             appLevelLabels = AppLevelLabels(
               navTitle = Some("Cofrestru cyflogwr ar gyfer TWE"),
-              phaseBannerHtml = Some("Mae hwn yn wasanaeth newydd. Helpwch ni i’w wella – anfonwch eich adborth.")
+              phaseBannerHtml = Some("""Mae hwn yn wasanaeth newydd. Helpwch ni i’w wella – anfonwch eich <a href="https://www.tax.service.gov.uk/register-for-paye/feedback">adborth</a>.""")
             ),
             SelectPageLabels(
               title = Some("Dewiswch gyfeiriad"),

@@ -1,9 +1,9 @@
 ## Global
 service.name                                                            =    Cofrestru fel cyflogwr ar gyfer TWE
 site.govuk                                                              =    GOV.UK/CYMRAEG
-common.feedbackFirst                                                    =    Mae hwn yn wasanaeth newydd – bydd eich <a href="{0}">adborth</a> yn ein helpu i’w wella.
-common.feedbackSecond                                                   =
-common.feedbackThird                                                    =
+common.feedbackFirst                                                    =    Mae hwn yn wasanaeth newydd – bydd eich
+common.feedbackSecond                                                   =    adborth
+common.feedbackThird                                                    =    yn ein helpu i’w wella.
 site.opensInNewTab                                                      =    (yn agor tab newydd)
 app.common.yes                                                          =    Iawn
 app.common.no                                                           =    Na
@@ -344,7 +344,7 @@ errorPages.newIneligible.link                                           =    Yn 
 
 ## Error Pages
 errorPages.restart.description                                          =    Mae’n ddrwg gennym, rydym yn cael anawsterau technegol
-errorPages.restart.p1                                                   =    Gallwch roi cynnig arall arni drwy ailgychwyn eich cofrestriad TWE.
+errorPages.restart.p1                                                   =    Gallwch roi cynnig arall arni drwy <a href={0}>ailgychwyn</a> eich cofrestriad TWE.
 errorPages.ineligible.description                                       =    Does dim angen i chi gofrestru cyflogwr
 errorPages.ineligible.p1                                                =    Os nad ydych yn mynd i gyflogi staff neu isgontractwyr yn ystod y 2 fis nesaf, nid oes angen i chi gofrestru cyflogwr.
 errorPages.ineligible.p2                                                =    Fodd bynnag, bydd yn rhaid i chi gofrestru os bydd eich cynlluniau’n newid a’ch bod yn dechrau talu:
@@ -364,7 +364,7 @@ errorPages.failedSubmission.p1                                          =    Er 
 
 ## Address Lookup Frontend Configuration
 pages.alf.common.navTitle                                               =    Cofrestru cyflogwr ar gyfer TWE
-pages.alf.common.phaseBannerHtml                                        =    Mae hwn yn wasanaeth newydd. Helpwch ni i’w wella – anfonwch eich adborth.
+pages.alf.common.phaseBannerHtml                                        =    Mae hwn yn wasanaeth newydd. Helpwch ni i’w wella – anfonwch eich <a href="https://www.tax.service.gov.uk/register-for-paye/feedback">adborth</a>.
 pages.alf.common.deskProServiceName                                     =    SCRS
 
 pages.alf.common.lookupPage.title                                       =    Chwiliwch am eich cyfeiriad
