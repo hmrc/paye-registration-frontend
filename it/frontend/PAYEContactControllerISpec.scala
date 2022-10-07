@@ -150,7 +150,7 @@ class PAYEContactControllerISpec extends IntegrationSpecBase
         options = JourneyOptions(
           continueUrl = "http://localhost:9870/register-for-paye/return-from-address-for-ppob",
           homeNavHref = "http://www.hmrc.gov.uk/",
-          accessibilityFooterUrl = "http://localhost:9870/register-for-paye/accessibility-statement?pageUri=%2Fregister-for-paye%2F",
+          accessibilityFooterUrl = "http://localhost:12346/accessibility-statement/paye-registration",
           deskProServiceName = "SCRS",
           showPhaseBanner = true,
           alphaPhase = false,
