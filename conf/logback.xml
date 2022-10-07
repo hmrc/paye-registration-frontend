@@ -5,19 +5,19 @@
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>logs/paye-registration-frontend.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>%date{ISO8601} level=[%level] logger=[%logger] thread=[%thread] message=[%message] %replace(exception=[%xException]){'^exception=\[\]$',''}%n</pattern>
+            <pattern>[%highlight(%.-4level)] rid=[%X{X-Request-ID}] user=[%X{Authorization}] %message %replace(exception=[%xException]){'^exception=\[\]$',''} %date{ISO8601} %n</pattern>
         </encoder>
     </appender>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>%date{ISO8601} level=%coloredLevel logger=[%logger] thread=[%thread] rid=[%X{X-Request-ID}] user=[%X{Authorization}] message=[%message] %replace(exception=[%xException]){'^exception=\[\]$',''}%n</pattern>
+            <pattern>[%highlight(%.-4level)] rid=[%X{X-Request-ID}] user=[%X{Authorization}] %message %replace(exception=[%xException]){'^exception=\[\]$',''} %date{ISO8601} %n</pattern>
         </encoder>
     </appender>
 
     <appender name="STDOUT_IGNORE_NETTY" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>%date{ISO8601} level=%coloredLevel logger=[%logger] thread=[%thread] rid=[not-available] user=[not-available] message=[%message] %replace(exception=[%xException]){'^exception=\[\]$',''}%n</pattern>
+            <pattern>[%highlight(%.-4level)] rid=[%X{X-Request-ID}] user=[%X{Authorization}] %message %replace(exception=[%xException]){'^exception=\[\]$',''} %date{ISO8601} %n</pattern>
         </encoder>
     </appender>
 
@@ -51,7 +51,7 @@
     <logger name="play.core.netty"              level="INFO"/>
 
     <logger name="uk.gov"               level="INFO"/>
-    <logger name="application"          level="INFO"/>
+    <logger name="application"          level="DEBUG"/>
     <logger name="org.eclipse.jetty"    level="INFO"/>
     <logger name="org.apache.http"      level="INFO"/>
     <logger name="io.netty"             level="INFO"/>
@@ -60,7 +60,7 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <root level="INFO">
+    <root level="WARN">
         <appender-ref ref="FILE"/>
         <appender-ref ref="STDOUT"/>
     </root>

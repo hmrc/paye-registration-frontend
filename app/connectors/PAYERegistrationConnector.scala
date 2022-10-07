@@ -298,7 +298,7 @@ trait PAYERegistrationConnector {
     } recover {
       case _: NotFoundException =>
         payeRegTimer.stop()
-        logger.info(s"[PAYERegistrationConnector] [getStatus] received NotFound when checking status for regId $regId")
+        logger.info(s"[getStatus] received NotFound when checking status for regId $regId")
         None
       case e: Throwable =>
         payeRegTimer.stop()
@@ -324,7 +324,7 @@ trait PAYERegistrationConnector {
       }
     } recover {
       case response: UpstreamErrorResponse if response.statusCode == PRECONDITION_FAILED =>
-        logger.warn(s"[PAYERegistrationConnector] - [deleteRejectedRegistrationDocument] Deleting document for regId $regId and txId $txId failed as document was not rejected")
+        logger.warn(s"[deleteRejectedRegistrationDocument] Deleting document for regId $regId and txId $txId failed as document was not rejected")
         RegistrationDeletion.invalidStatus
       case response: UpstreamErrorResponse =>
         throw logResponse(response, "deleteRejectedRegistrationDocument", s"deleting document, error message: ${response.message}", regId, Some(txId))
@@ -338,7 +338,7 @@ trait PAYERegistrationConnector {
       }
     } recover {
       case response: UpstreamErrorResponse if response.statusCode == PRECONDITION_FAILED =>
-        logger.warn(s"[PAYERegistrationConnector] - [deleteCurrentRegistrationInProgress] Deleting document for regId $regId and txId $txId failed as document was not draft or invalid")
+        logger.warn(s"[deleteCurrentRegistrationInProgress] Deleting document for regId $regId and txId $txId failed as document was not draft or invalid")
         RegistrationDeletion.invalidStatus
       case response: UpstreamErrorResponse =>
         throw logResponse(response, "deleteCurrentRegistrationInProgress", s"deleting document, error message: ${response.message}", regId, Some(txId))
@@ -351,10 +351,10 @@ trait PAYERegistrationConnector {
         case OK => RegistrationDeletion.success}
     } recover {
       case response: UpstreamErrorResponse if response.statusCode == PRECONDITION_FAILED =>
-        logger.warn(s"[PAYERegistrationConnector] - [deleteRegistrationForRejectedIncorp] Deleting document for regId $regId and txId $txId failed as document was not draft or invalid")
+        logger.warn(s"[deleteRegistrationForRejectedIncorp] Deleting document for regId $regId and txId $txId failed as document was not draft or invalid")
         RegistrationDeletion.invalidStatus
       case response: UpstreamErrorResponse if response.statusCode == NOT_FOUND =>
-        logger.warn(s"s[PAYERegistrationConnector] - deleteRegistrationForRejectedIncorp paye reg returned 404 when expecting to find one for $regId : $txId ")
+        logger.warn(s"[deleteRegistrationForRejectedIncorp] paye reg returned 404 when expecting to find one for $regId : $txId ")
         RegistrationDeletion.notfound
       case response: UpstreamErrorResponse =>
         throw logResponse(response, "deleteRegistrationForRejectedIncorp", s"deleting document, error message: ${response.message}", regId, Some(txId))
@@ -364,7 +364,7 @@ trait PAYERegistrationConnector {
   private[connectors] def logResponse(e: Throwable, f: String, m: String, regId: String, txId: Option[String] = None): Throwable = {
     val optTxId = txId.map(t => s" and txId: $t").getOrElse("")
 
-    def log(s: String) = logger.warn(s"[PAYERegistrationConnector] [$f] received $s when $m for regId: $regId$optTxId")
+    def log(s: String) = logger.warn(s"[$f] received $s when $m for regId: $regId$optTxId")
 
     e match {
       case e: NotFoundException => log("NOT FOUND")

@@ -47,7 +47,7 @@ trait BusinessRegistrationConnector {
     } recover {
       case e =>
         businessRegistrationTimer.stop()
-        throw logResponse(e, "retrieving current profile")
+        throw logResponse(e, "retrieveCurrentProfile", "retrieving current profile")
     }
   }
 
@@ -62,7 +62,7 @@ trait BusinessRegistrationConnector {
         None
       case e =>
         businessRegistrationTimer.stop()
-        throw logResponse(e, "retrieving completion capacity")
+        throw logResponse(e, "retrieveCompletionCapacity", "retrieving completion capacity")
     }
   }
 
@@ -74,7 +74,7 @@ trait BusinessRegistrationConnector {
     } recover {
       case e =>
         businessRegistrationTimer.stop()
-        logResponse(e, "retrieving Trading Name from pre-pop", Some(regId))
+        logResponse(e, "retrieveTradingName", "retrieving Trading Name from pre-pop", Some(regId))
         None
     }
   }
@@ -89,7 +89,7 @@ trait BusinessRegistrationConnector {
     } recover {
       case e =>
         businessRegistrationTimer.stop()
-        logResponse(e, "upserting Trading Name to pre-pop", Some(regId))
+        logResponse(e, "upsertTradingName", "upserting Trading Name to pre-pop", Some(regId))
         tradingName
     }
   }
@@ -106,7 +106,7 @@ trait BusinessRegistrationConnector {
         None
       case e =>
         businessRegistrationTimer.stop()
-        logResponse(e, "retrieving contact details")
+        logResponse(e, "retrieveContactDetails", "retrieving contact details")
         None
     }
   }
@@ -120,7 +120,7 @@ trait BusinessRegistrationConnector {
     } recover {
       case e: Exception =>
         businessRegistrationTimer.stop()
-        logResponse(e, "upserting contact details")
+        logResponse(e, "upsertContactDetails", "upserting contact details")
         contactDetails
     }
   }
@@ -136,7 +136,7 @@ trait BusinessRegistrationConnector {
         Seq.empty
       case ex =>
         businessRegistrationTimer.stop()
-        logResponse(ex, "fetching addresses from pre-pop", Some(regId))
+        logResponse(ex, "retrieveAddresses", "fetching addresses from pre-pop", Some(regId))
         Seq.empty
     }
   }
@@ -150,7 +150,7 @@ trait BusinessRegistrationConnector {
     } recover {
       case e: Exception =>
         businessRegistrationTimer.stop()
-        logResponse(e, "upserting address")
+        logResponse(e, "upsertAddress", "upserting address")
         address
     }
   }

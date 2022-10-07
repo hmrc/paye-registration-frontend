@@ -17,7 +17,7 @@
 package connectors
 
 import com.codahale.metrics.{Counter, Timer}
-import common.Logging
+import utils.Logging
 import config.AppConfig
 import models.Address
 import models.external._
@@ -54,7 +54,7 @@ class AddressLookupConnector @Inject()(metricsService: MetricsService,
       http.POST[AlfJourneyConfig, HttpResponse](postUrl, alfJourneyConfig)
     } map {
       _.header("Location").getOrElse {
-        logger.warn("[AddressLookupConnector] [getOnRampUrl] - ERROR: Location header not set in ALF response")
+        logger.warn("[getOnRampUrl] ERROR: Location header not set in ALF response")
         throw new ALFLocationHeaderNotSetException
       }
     }

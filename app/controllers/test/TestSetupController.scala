@@ -59,7 +59,7 @@ abstract class TestSetupController(mcc: MessagesControllerComponents) extends Bu
 
   private def log[T](f: String, res: Future[T])(implicit ec: ExecutionContext): Future[T] = {
     res.flatMap(msg => {
-      logger.info(s"[TestSetupController] [$f] - ${msg.toString}")
+      logger.info(s"[$f] ${msg.toString}")
       res
     })
   }

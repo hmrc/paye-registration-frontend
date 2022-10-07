@@ -147,7 +147,7 @@ class PAYEContactController @Inject()(val companyDetailsService: CompanyDetailsS
       _ <- auditService.auditCorrespondenceAddress(regId, "PrincipalPlaceOfBusiness")
     } yield res) recover {
       case _: PPOBAddressNotFoundException =>
-        logger.warn(s"[PAYEContactService] [submitCorrespondenceWithPPOBAddress] - Error while saving Correspondence Address with a PPOBAddress which is missing")
+        logger.warn(s"[submitCorrespondenceWithPPOBAddress] Error while saving Correspondence Address with a PPOBAddress which is missing")
         DownstreamOutcome.Failure
     }
   }
@@ -158,7 +158,7 @@ class PAYEContactController @Inject()(val companyDetailsService: CompanyDetailsS
       res <- payeContactService.submitCorrespondence(regId, prepopAddress)
     } yield res) recover {
       case e: S4LFetchException =>
-        logger.warn(s"[PAYEContactService] [submitCorrespondenceWithPrepopAddress] - Error while saving Correspondence Address with a PrepopAddress: ${e.getMessage}")
+        logger.warn(s"[submitCorrespondenceWithPrepopAddress] Error while saving Correspondence Address with a PrepopAddress: ${e.getMessage}")
         DownstreamOutcome.Failure
     }
   }

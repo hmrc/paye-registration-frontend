@@ -16,7 +16,7 @@
 
 package models.view
 
-import common.Logging
+import utils.Logging
 
 class ConvertToPrepopAddressException(msg: String) extends Exception(msg)
 
@@ -61,7 +61,7 @@ object PrepopAddress extends Logging {
       val index = s.substring(prefix.length).toInt
       PrepopAddress(index)
     } else {
-      val errMsg = s"[PrepopAddress] [fromString] Could not convert from String to PrepopAddress for value $s not valid"
+      val errMsg = s"[fromString] Could not convert from String to PrepopAddress for value $s not valid"
       logger.warn(errMsg)
       throw new ConvertToPrepopAddressException(errMsg)
     }

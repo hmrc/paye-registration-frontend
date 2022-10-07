@@ -16,7 +16,6 @@
 
 package utils
 
-import common.Logging
 import config.AppConfig
 import connectors.{DESResponse, IncorpInfoResponse, IncorpInfoSuccessResponse}
 import models.DigitalContactDetails
@@ -58,7 +57,7 @@ trait RegistrationAllowlist extends Logging {
 
   def ifRegIdNotAllowlisted[T](regId: String)(f: => Future[T])(implicit default: String => T): Future[T] = {
     if (appConfig.regIdAllowlist.contains(regId)) {
-      logger.info(s"Registration ID $regId is in the allow-list")
+      logger.info(s"[ifRegIdNotAllowlisted] Registration ID $regId is in the allow-list")
       Future.successful(default(regId))
     } else {
       f

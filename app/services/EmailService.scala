@@ -87,7 +87,7 @@ class EmailService @Inject()(companyRegistrationConnector: CompanyRegistrationCo
         Future.successful(EmailNotFound)
     }.recover {
       case _ =>
-        logger.warn(s"[sendAcknowledgementEmail] - There was a problem sending the acknowledgement email for regId ${profile.registrationID} : txId ${profile.companyTaxRegistration.transactionId}")
+        logger.warn(s"[sendAcknowledgementEmail] There was a problem sending the acknowledgement email for regId ${profile.registrationID} : txId ${profile.companyTaxRegistration.transactionId}")
         EmailDifficulties
     }
 

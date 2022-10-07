@@ -80,12 +80,12 @@ trait IncorporationInformationConnector extends RegistrationAllowlist {
         case OK => Some(resp.json.as[IncorporationStatus.Value](IncorpUpdateResponse.reads(transactionId, subscriber, regime)))
         case ACCEPTED => None
         case _ =>
-          logger.warn(s"[IncorporationInformationConnect] - [setupSubscription] returned a successful response but with an incorrect code of: ${resp.status} for regId: $regId and txId: $transactionId")
+          logger.warn(s"[setupSubscription] returned a successful response but with an incorrect code of: ${resp.status} for regId: $regId and txId: $transactionId")
           throw new IncorporationInformationResponseException(s"Calling II on ${constructIncorporationInfoUri(transactionId, regime, subscriber)} returned a ${resp.status}")
       }
     } recover {
       case e =>
-        logger.warn(s"[IncorporationInformationConnect] - [setupSubscription] an unexpected error ${e.getMessage} occurred when calling II for regId: $regId txId: $transactionId")
+        logger.warn(s"[setupSubscription] an unexpected error ${e.getMessage} occurred when calling II for regId: $regId txId: $transactionId")
         throw e
     }
   }
@@ -93,10 +93,10 @@ trait IncorporationInformationConnector extends RegistrationAllowlist {
   def cancelSubscription(transactionId: String, regId: String, regime: String = "paye-fe", subscriber: String = "SCRS")(implicit hc: HeaderCarrier): Future[Boolean] = {
     http.DELETE[HttpResponse](s"$incorpInfoUrl/incorporation-information/subscribe/$transactionId/regime/$regime/subscriber/$subscriber").map(_ => true)
       .recover {
-        case _: NotFoundException => logger.info(s"[IncorporationInformationConnect] - [cancelSubscription] no subscription found when trying to delete subscription. it might already have been deleted")
+        case _: NotFoundException => logger.info(s"[cancelSubscription] no subscription found when trying to delete subscription. it might already have been deleted")
           true
         case e =>
-          logger.warn(s"[IncorporationInformationConnect] - [cancelSubscription] an unexpected error ${e.getMessage} occurred when calling II for regId: $regId txId: $transactionId")
+          logger.warn(s"[cancelSubscription] an unexpected error ${e.getMessage} occurred when calling II for regId: $regId txId: $transactionId")
           false
       }
   }
@@ -114,18 +114,18 @@ trait IncorporationInformationConnector extends RegistrationAllowlist {
           IncorpInfoSuccessResponse(res)
       } recover {
         case _: BadRequestException =>
-          logger.error(s"[IncorporationInformationConnector] [getCoHoCompanyDetails] - Received a BadRequest status code when expecting company details for regId: $regId / TX-ID: $transactionId")
+          logger.error(s"[getCoHoCompanyDetails] Received a BadRequest status code when expecting company details for regId: $regId / TX-ID: $transactionId")
           incorpInfoTimer.stop()
           failedCounter.inc(1)
           IncorpInfoBadRequestResponse
         case _: NotFoundException =>
-          logger.error(s"[IncorporationInformationConnector] - [getCoHoCompanyDetails] - Received a NotFound status code when expecting company details for regId: $regId / TX-ID: $transactionId")
+          logger.error(s"[getCoHoCompanyDetails] Received a NotFound status code when expecting company details for regId: $regId / TX-ID: $transactionId")
           incorpInfoTimer.stop()
           failedCounter.inc(1)
           IncorpInfoNotFoundResponse
         case ex: Exception =>
           logger.error(
-            s"[IncorporationInformationConnector] [getCoHoCompanyDetails] - Received an error when expecting company details for regId: $regId / TX-ID: $transactionId - error: ${ex.getMessage}"
+            s"[getCoHoCompanyDetails] Received an error when expecting company details for regId: $regId / TX-ID: $transactionId error: ${ex.getMessage}"
           )
           incorpInfoTimer.stop()
           failedCounter.inc(1)
@@ -143,7 +143,7 @@ trait IncorporationInformationConnector extends RegistrationAllowlist {
   } recover {
     case e: Exception =>
       throw new InternalServerException(
-        s"[IncorporationInformationConnector][getIncorporationInfo] an error occurred while getting the incorporation info for regId: $regId and txId: $txId - error: ${e.getMessage}"
+        s"[IncorporationInformationConnector][getIncorporationInfo] an error occurred while getting the incorporation info for regId: $regId and txId: $txId error: ${e.getMessage}"
       )
   }
 
@@ -154,22 +154,22 @@ trait IncorporationInformationConnector extends RegistrationAllowlist {
         incorpInfoTimer.stop()
         val list = obj.\("officers").as[OfficerList]
         if (list.items.isEmpty) {
-          logger.error(s"[IncorporationInformationConnector] [getOfficerList] - Received an empty Officer list for TX-ID $transactionId")
+          logger.error(s"[getOfficerList] Received an empty Officer list for TX-ID $transactionId")
           throw new OfficerListNotFoundException
         } else {
           list
         }
       } recover {
         case _: NotFoundException =>
-          logger.error(s"[IncorporationInformationConnector] [getOfficerList] - Received a NotFound status code when expecting an Officer list for TX-ID $transactionId")
+          logger.error(s"[getOfficerList] Received a NotFound status code when expecting an Officer list for TX-ID $transactionId")
           incorpInfoTimer.stop()
           throw new OfficerListNotFoundException
         case badRequestErr: BadRequestException =>
-          logger.error(s"[IncorporationInformationConnector] [getOfficerList] - Received a BadRequest status code when expecting an Officer list for TX-ID $transactionId")
+          logger.error(s"[getOfficerList] Received a BadRequest status code when expecting an Officer list for TX-ID $transactionId")
           incorpInfoTimer.stop()
           throw badRequestErr
         case ex: Exception =>
-          logger.error(s"[IncorporationInformationConnector] [getOfficerList] - Received an error response when expecting an Officer list for TX-ID $transactionId - error: ${ex.getMessage}")
+          logger.error(s"[getOfficerList] Received an error response when expecting an Officer list for TX-ID $transactionId error: ${ex.getMessage}")
           incorpInfoTimer.stop()
           throw ex
       }

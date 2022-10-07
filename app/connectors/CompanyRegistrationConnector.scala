@@ -66,15 +66,15 @@ trait CompanyRegistrationConnector {
     } recover {
       case badRequestErr: BadRequestException =>
         companyRegTimer.stop()
-        logger.error(s"[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received a BadRequest status code when expecting a Company Registration document for reg id: $regId")
+        logger.error(s"[getCompanyRegistrationDetails] Received a BadRequest status code when expecting a Company Registration document for reg id: $regId")
         throw badRequestErr
       case noRefsErr: DownstreamExceptions.ConfirmationRefsNotFoundException =>
         companyRegTimer.stop()
-        logger.error(s"[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received an error when expecting a Company Registration document for reg id: $regId could not find confirmation references (has user completed Incorp/CT?)")
+        logger.error(s"[getCompanyRegistrationDetails] Received an error when expecting a Company Registration document for reg id: $regId could not find confirmation references (has user completed Incorp/CT?)")
         throw noRefsErr
       case ex: Exception =>
         companyRegTimer.stop()
-        logger.error(s"[CompanyRegistrationConnect] [getCompanyRegistrationDetails] - Received an error when expecting a Company Registration document for reg id: $regId - error: ${ex.getMessage}")
+        logger.error(s"[getCompanyRegistrationDetails] Received an error when expecting a Company Registration document for reg id: $regId error: ${ex.getMessage}")
         throw ex
     }
   }
@@ -85,10 +85,10 @@ trait CompanyRegistrationConnector {
     http.GET[JsObject](emailRetrieveURL).map(js => Some((js \ "address").as[String]))
       .recover {
         case e: HttpException =>
-          logger.warn(s"[getVerifiedEmail] - A call was made to company reg and an unsuccessful response was returned for regId: $regId and message: ${e.getMessage}")
+          logger.warn(s"[getVerifiedEmail] A call was made to company reg and an unsuccessful response was returned for regId: $regId and message: ${e.getMessage}")
           None
         case e: Exception =>
-          logger.error(s"[getVerifiedEmail] - An unexpected exception occurred for regId: $regId and message: ${e.getMessage}")
+          logger.error(s"[getVerifiedEmail] An unexpected exception occurred for regId: $regId and message: ${e.getMessage}")
           None
       }
   }

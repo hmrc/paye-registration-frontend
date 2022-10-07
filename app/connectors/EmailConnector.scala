@@ -16,7 +16,7 @@
 
 package connectors
 
-import common.Logging
+import utils.Logging
 import config.AppConfig
 import models.external.EmailRequest
 import uk.gov.hmrc.http._
@@ -44,7 +44,7 @@ trait EmailConnector extends Logging {
 
   def requestEmailToBeSent(emailRequest: EmailRequest)(implicit hc: HeaderCarrier): Future[EmailResponse] = {
     http.POST[EmailRequest, HttpResponse](sendEmailURL, emailRequest).map { _ =>
-      logger.info(s"Email has been sent successfully for template ${emailRequest.templateId}")
+      logger.info(s"[requestEmailToBeSent] Email has been sent successfully for template ${emailRequest.templateId}")
       EmailSent
     }.recover {
       case b: HttpException =>

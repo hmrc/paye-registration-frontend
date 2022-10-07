@@ -49,16 +49,16 @@ class RegistrationController @Inject()(val keystoreConnector: KeystoreConnector,
         case RegistrationDeletion.success => Ok
         case RegistrationDeletion.invalidStatus => PreconditionFailed
         case RegistrationDeletion.forbidden =>
-          logger.warn(s"[RegistrationController] [delete] - Requested document regId $regId to be deleted is not corresponding to the CurrentProfile regId")
+          logger.warn(s"[delete] Requested document regId $regId to be deleted is not corresponding to the CurrentProfile regId")
           BadRequest
       } recover {
         case ex: Exception =>
-          logger.error(s"[RegistrationController] [delete] - Received an error when deleting Registration regId: $regId - error: ${ex.getMessage}")
+          logger.error(s"[delete] Received an error when deleting Registration regId: $regId - error: ${ex.getMessage}")
           InternalServerError
       }
     } recover {
       case _ =>
-        logger.warn(s"[RegistrationController] [delete] - Can't get the Authority")
+        logger.warn(s"[delete] Can't get the Authority")
         Unauthorized
     }
   }
@@ -72,14 +72,14 @@ class RegistrationController @Inject()(val keystoreConnector: KeystoreConnector,
       case (JsSuccess(id, _), JsSuccess(status, _)) => payeRegistrationService.handleIIResponse(id, status).map {
         s =>
           if (s == RegistrationDeletion.notfound) {
-            logger.warn(s"II returned $txId with status $incorpStatus but no paye doc found, returned 200 back to II to clear subscription")
+            logger.warn(s"[companyIncorporation] II returned $txId with status $incorpStatus but no paye doc found, returned 200 back to II to clear subscription")
           }
           Ok
       } recover {
         case e: Exception => InternalServerError
       }
       case _ =>
-        logger.error(s"Incorp Status or transaction Id not received or invalid from II for txId $txId")
+        logger.error(s"[companyIncorporation] Incorp Status or transaction Id not received or invalid from II for txId $txId")
         Future.successful(InternalServerError)
     }
   }

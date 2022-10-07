@@ -23,8 +23,8 @@ val appName: String = "paye-registration-frontend"
 
 lazy val scoverageSettings = Seq(
   ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;models/.data/..*;view.*;config.*;.*(AuthService|BuildInfo|Routes).*",
-  ScoverageKeys.coverageMinimumStmtTotal := 80,
-  ScoverageKeys.coverageFailOnMinimum := false,
+  ScoverageKeys.coverageMinimumStmtTotal := 90,
+  ScoverageKeys.coverageFailOnMinimum := true,
   ScoverageKeys.coverageHighlighting := true
 )
 

@@ -16,7 +16,7 @@
 
 package connectors.test
 
-import common.Logging
+import utils.Logging
 import config.AppConfig
 import connectors._
 import enums.DownstreamOutcome
@@ -79,7 +79,7 @@ trait TestPAYERegConnector extends Logging {
       resp => DownstreamOutcome.Success
     } recover {
       case e: Exception =>
-        logger.warn(s"[PAYERegistrationConnector] [testRegistrationTeardown] received error when clearing registration details - Error: ${e.getMessage}")
+        logger.warn(s"[testRegistrationTeardown] received error when clearing registration details - Error: ${e.getMessage}")
         DownstreamOutcome.Failure
     }
   }
@@ -89,7 +89,7 @@ trait TestPAYERegConnector extends Logging {
       resp => DownstreamOutcome.Success
     } recover {
       case e: Exception =>
-        logger.warn(s"[PAYERegistrationConnector] [tearDownIndividualRegistration] received error when clearing registration details - Error: ${e.getMessage}")
+        logger.warn(s"[tearDownIndividualRegistration] received error when clearing registration details - Error: ${e.getMessage}")
         DownstreamOutcome.Failure
     }
   }
@@ -99,7 +99,7 @@ trait TestPAYERegConnector extends Logging {
       resp => DownstreamOutcome.Success
     } recover {
       case e: Exception =>
-        logger.warn(s"[PAYERegistrationConnector] [updateStatus] received error when updating status details - Error: ${e.getMessage}")
+        logger.warn(s"[updateStatus] received error when updating status details - Error: ${e.getMessage}")
         DownstreamOutcome.Failure
     }
   }

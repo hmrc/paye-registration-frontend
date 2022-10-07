@@ -16,7 +16,7 @@
 
 package services
 
-import common.Logging
+import utils.Logging
 import connectors.PAYERegistrationConnector
 import enums.{CacheKeys, DownstreamOutcome}
 import models.Address
@@ -105,7 +105,7 @@ class PAYEContactService @Inject()(val payeRegConnector: PAYERegistrationConnect
           for {
             _ <- auditService.auditPAYEContactDetails(regId, newViewData, currentView.contactDetails)
             _ <- prepopService.saveContactDetails(regId, newViewData) map {
-              _ => logger.info(s"[PAYEContactService] [submitPayeContactDetails] Successfully saved Contact Details to Prepopulation for regId: $regId")
+              _ => logger.info(s"[submitPayeContactDetails] Successfully saved Contact Details to Prepopulation for regId: $regId")
             }
           } yield currentView
         case currentView =>

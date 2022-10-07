@@ -197,11 +197,11 @@ class CompanyDetailsController @Inject()(val s4LService: S4LService,
         res <- companyDetailsService.submitPPOBAddr(prepopAddress, regId, txId)
       } yield res) recover {
         case e: S4LFetchException =>
-          logger.warn(s"[CompanyDetailsController] [submitPPOBAddressChoice] - Error while saving PPOB Address with a PrepopAddress: ${e.getMessage}")
+          logger.warn(s"[submitPPOBAddressChoice] Error while saving PPOB Address with a PrepopAddress: ${e.getMessage}")
           DownstreamOutcome.Failure
       }
       case CorrespondenceAddress =>
-        logger.warn("[CompanyDetailsController] [submitPPOBAddressChoice] - Correspondence address returned as selected address in PPOB Address page")
+        logger.warn("[submitPPOBAddressChoice] Correspondence address returned as selected address in PPOB Address page")
         Future.successful(DownstreamOutcome.Failure)
     }
   }
@@ -218,7 +218,7 @@ class CompanyDetailsController @Inject()(val s4LService: S4LService,
           case DownstreamOutcome.Failure => InternalServerError(restart())
         }
         case None =>
-          throw new Exception("[CompanyDetailsController] [savePPOBAddress] 'id' query string missing from ALF handback")
+          throw new Exception("[savePPOBAddress] 'id' query string missing from ALF handback")
       }
   }
 }
