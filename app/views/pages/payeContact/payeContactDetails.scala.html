@@ -61,6 +61,7 @@
             label = messages("pages.payeContact.contact"),
             classes = Some("form-label cascading"),
             isPageHeading = false,
+            attributes = Map("autocomplete" -> "tel")
         )
         @inputText(
             form = contactForm,
@@ -69,6 +70,7 @@
             label = messages("pages.payeContact.othercontact"),
             classes = Some("form-label cascading"),
             isPageHeading = false,
+            attributes = Map("autocomplete" -> "tel")
         )
 
         @button("app.common.saveAndContinue")
