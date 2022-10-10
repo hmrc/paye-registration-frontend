@@ -36,7 +36,8 @@
         classes: Option[String] = None,
         stripWhitespace: Boolean = false,
         autocomplete: Option[String] = None,
-        inputType: String = "text"
+        inputType: String = "text",
+        attributes: Map[String, String] = Map.empty,
 )(implicit messages: Messages)
 
 @labelClasses = @{
@@ -60,7 +61,8 @@
         value = form(name).value,
         autocomplete = autocomplete.map(value => value),
         inputType = inputType,
-        errorMessage = form(name).error.map(err => ErrorMessage(content = Text(messages(err.message, err.args: _*))))
+        errorMessage = form(name).error.map(err => ErrorMessage(content = Text(messages(err.message, err.args: _*)))),
+        attributes = attributes
     )
 )
 
