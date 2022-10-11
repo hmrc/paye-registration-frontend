@@ -55,7 +55,11 @@
                         checked = chooseAddressForm(s"chosenAddress").value.contains(s"${id}Address") || prepopAddress.contains(desc),
                         id = if(idx == 0) { Some("chosenAddress") } else Some(s"${id}Address")
                     )
-            },
+            } ++ Seq(RadioItem(
+                content = HtmlContent(messages("pages.correspondenceAddress.other")),
+                value = Some("otherAddress"),
+                id = Some("otherAddress")
+            )),
             legendAsHeading = false,
             classes = "govuk-visually-hidden"
         )
