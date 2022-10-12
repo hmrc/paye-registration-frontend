@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import common.Logging
+import utils.Logging
 import uk.gov.hmrc.http.{BadRequestException, NotFoundException, UpstreamErrorResponse}
 
 package object connectors extends Logging {
-  def logResponse(e: Throwable, m: String, regId: Option[String] = None): Throwable = {
+  def logResponse(e: Throwable, method: String, msg: String, regId: Option[String] = None): Throwable = {
     val optRegId = regId.map(r => s" and regId: $regId").getOrElse("")
 
-    def log(s: String) = logger.error(s"received $s when $m$optRegId")
+    def log(s: String) = logger.error(s"[$method] received $s when $msg$optRegId")
 
     e match {
       case _: NotFoundException => log("NOT FOUND")
