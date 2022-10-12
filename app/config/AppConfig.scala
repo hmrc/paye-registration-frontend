@@ -88,11 +88,8 @@ class AppConfig @Inject()(configuration: Configuration,
 
   private def encodeUrl(url: String): String = URLEncoder.encode(url, "UTF-8")
 
-  def accessibilityStatementUrl(pageUri: String): String =
-    controllers.routes.AccessibilityStatementController.show(pageUri).url
-
-  lazy val accessibilityStatementUrl: String =
-    self + "/register-for-paye" + "/accessibility-statement" + "?pageUri=%2Fregister-for-paye%2F"
+  lazy val accessibilityStatementPath = loadConfig("microservice.services.accessibility-statement.host")
+  lazy val accessibilityStatementUrl = s"$accessibilityStatementPath/accessibility-statement/paye-registration"
 
   def accessibilityReportUrl(userAction: String): String =
     s"$contactHost/contact/accessibility-unauthenticated?service=paye-registration-frontend&userAction=${encodeUrl(userAction)}"
