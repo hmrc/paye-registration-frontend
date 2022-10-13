@@ -82,9 +82,6 @@ class AppConfig @Inject()(configuration: Configuration,
   lazy val defaultCTStatus: String = loadStringConfigBase64("defaultCTStatus")
   lazy val defaultOfficerList: OfficerList =
     loadJsonConfigBase64[OfficerList]("defaultOfficerList")(OfficerList.formatModel)
-  lazy val uriAllowList: Set[String] =
-    configuration.getOptional[Seq[String]]("bootstrap.csrfexceptions.allowlist").getOrElse(Seq.empty).toSet
-  lazy val csrfBypassValue: String = loadStringConfigBase64("Csrf-Bypass-value")
 
   private def encodeUrl(url: String): String = URLEncoder.encode(url, "UTF-8")
 

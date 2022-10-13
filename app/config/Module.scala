@@ -21,7 +21,7 @@ import connectors._
 import connectors.test._
 import controllers.test._
 import controllers.userJourney._
-import filters.{PAYECSRFExceptionsFilter, PAYECSRFExceptionsFilterImpl, PAYESessionIDFilter, PAYESessionIDFilterImpl}
+import filters.{PAYESessionIDFilter, PAYESessionIDFilterImpl}
 import services._
 import uk.gov.hmrc.http.cache.client.{SessionCache, ShortLivedCache, ShortLivedHttpCaching}
 import uk.gov.hmrc.play.bootstrap.filters.DefaultLoggingFilter
@@ -41,7 +41,6 @@ class Module extends AbstractModule {
   private def bindFilters(): Unit = {
     bind(classOf[PAYESessionIDFilter]).to(classOf[PAYESessionIDFilterImpl]).asEagerSingleton()
     bind(classOf[DefaultLoggingFilter]).to(classOf[LoggingFilterImpl]).asEagerSingleton()
-    bind(classOf[PAYECSRFExceptionsFilter]).to(classOf[PAYECSRFExceptionsFilterImpl]).asEagerSingleton()
   }
 
   private def bindHmrcDependencies(): Unit = {
