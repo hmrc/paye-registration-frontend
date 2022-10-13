@@ -85,13 +85,12 @@ class PAYEContactController @Inject()(val companyDetailsService: CompanyDetailsS
       } yield {
         val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
           .collect { case (id, address) => id -> address.toString }
-          .++(Map("other" -> "Other"))
-        Ok(PAYECorrespondenceAddressPage(
-          CorrespondenceAddressForm.form.fill(
-            ChosenAddress(CorrespondenceAddress)),
-          addressMap,
-          prepopAddress
-        ))
+        Ok(
+          PAYECorrespondenceAddressPage(
+            CorrespondenceAddressForm.form.fill(ChosenAddress(CorrespondenceAddress)),
+            addressMap,
+            prepopAddress
+          ))
       }
   }
 
@@ -107,7 +106,6 @@ class PAYEContactController @Inject()(val companyDetailsService: CompanyDetailsS
           } yield {
             val addressMap = payeContactService.getCorrespondenceAddresses(payeContact.correspondenceAddress, companyDetails)
               .collect { case (id, address) => id -> address.toString }
-              .++(Map("other" -> "Other"))
             BadRequest(PAYECorrespondenceAddressPage(errs, addressMap, prepopAddress))
           },
           success => submitCorrespondenceAddress(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
