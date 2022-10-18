@@ -1,7 +1,5 @@
 # paye-registration-frontend
 
-[ ![Download](https://api.bintray.com/packages/hmrc/releases/paye-registration-frontend/images/download.svg) ](https://bintray.com/hmrc/releases/paye-registration-frontend/_latestVersion)
-
 Source code for the PAYE Registration frontend microservice, part of the SCRS journey.
 
 ## Running the Application
