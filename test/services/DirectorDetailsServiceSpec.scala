@@ -37,7 +37,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val payeRegConnector = mockPAYERegConnector
       override val incorpInfoService = mockIncorpInfoService
       override val s4LService = mockS4LService
-      override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
     }
@@ -48,7 +48,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val payeRegConnector = mockPAYERegConnector
       override val incorpInfoService = mockIncorpInfoService
       override val s4LService = mockS4LService
-      override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -67,7 +67,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val payeRegConnector = mockPAYERegConnector
       override val incorpInfoService = mockIncorpInfoService
       override val s4LService = mockS4LService
-      override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -86,7 +86,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val payeRegConnector = mockPAYERegConnector
       override val incorpInfoService = mockIncorpInfoService
       override val s4LService = mockS4LService
-      override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
 

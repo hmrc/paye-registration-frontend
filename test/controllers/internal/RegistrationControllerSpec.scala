@@ -42,7 +42,7 @@ class RegistrationControllerSpec extends PayeComponentSpec with PayeFakedApp {
       mockPayeRegService,
       mockIncorpInfoConnector,
       mockMcc
-    )(mockAppConfig,
+    )(injAppConfig,
       globalExecutionContext)
 
   }

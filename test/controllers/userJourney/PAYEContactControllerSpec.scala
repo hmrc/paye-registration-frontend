@@ -60,7 +60,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
       mockPayeContactDetails,
       mockCorrespondenceAddress,
       mockRestart
-    )(mockAppConfig,
+    )(injAppConfig,
       globalExecutionContext)
   }
 

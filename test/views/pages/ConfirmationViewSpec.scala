@@ -29,9 +29,9 @@ class ConfirmationViewSpec extends PayeComponentSpec with PayeFakedApp with I18n
 
   object Selectors extends BaseSelectors
 
-  implicit val appConfig = mockAppConfig
+  implicit val appConfig = injAppConfig
   implicit val request = FakeRequest()
-  implicit lazy val messagesApi: MessagesApi = mockMessagesApi
+  implicit lazy val messagesApi: MessagesApi = injMessagesApi
   lazy val view = app.injector.instanceOf[confirmation]
 
   val ackRef = "ackRef"
@@ -44,7 +44,7 @@ class ConfirmationViewSpec extends PayeComponentSpec with PayeFakedApp with I18n
     view(ackRef, displayNextTaxYearContent, contactDate)(
       request,
       messagesApi.preferred(request),
-      mockAppConfig
+      injAppConfig
     )
   }
 

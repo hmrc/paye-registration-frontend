@@ -68,7 +68,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       mockBusinessContactDetailsPage,
       mockConfirmROAddress,
       mockPPOBAddressPage
-    )(mockAppConfig,
+    )(injAppConfig,
       globalExecutionContext
     )
   }

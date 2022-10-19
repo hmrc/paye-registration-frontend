@@ -32,11 +32,11 @@ class TestAddressLookupControllerSpec extends PayeComponentSpec with PayeFakedAp
   lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
   class Setup {
     val controller = new TestAddressLookupController(mockMcc) {
-      override val appConfig = mockAppConfig
+      override val appConfig = injAppConfig
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
 
-      override val messagesApi = mockMessagesApi
+      override val messagesApi = injMessagesApi
       override val authConnector = mockAuthConnector
       override val companyDetailsService = mockCompanyDetailsService
       override val payeContactService = mockPAYEContactService

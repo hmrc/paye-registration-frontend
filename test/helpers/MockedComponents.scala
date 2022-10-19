@@ -16,6 +16,7 @@
 
 package helpers
 
+import config.AppConfig
 import connectors._
 import connectors.test.{TestBusinessRegConnector, TestIncorpInfoConnector, TestPAYERegConnector}
 import org.scalatestplus.mockito.MockitoSugar
@@ -26,12 +27,15 @@ import uk.gov.hmrc.auth.core.{AuthConnector => AuthClientConnector}
 import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.http.cache.client.SessionCache
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.language.LanguageUtils
 import utils.{FeatureManager, PAYEFeatureSwitch, PAYEFeatureSwitches}
 
 trait MockedComponents {
   self: MockitoSugar =>
 
+  val mockAppConfig = mock[AppConfig]
+  val mockServicesConfig = mock[ServicesConfig]
   val mockHttpClient = mock[HttpClient]
   val mockSessionCache = mock[SessionCache]
   val mockFeatureSwitch = mock[PAYEFeatureSwitch]

@@ -45,7 +45,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val s4LService = mockS4LService
       override val prepopService = mockPrepopulationService
       override val auditService = mockAuditService
-      override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
     }
   }
@@ -58,7 +58,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val s4LService = mockS4LService
       override val prepopService = mockPrepopulationService
       override val auditService = mockAuditService
-      override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
       override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
@@ -79,7 +79,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val s4LService = mockS4LService
       override val prepopService = mockPrepopulationService
       override val auditService = mockAuditService
-      override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -101,7 +101,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val s4LService = mockS4LService
       override val prepopService = mockPrepopulationService
       override val auditService = mockAuditService
-      override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
 

@@ -39,7 +39,7 @@ class TestCacheControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val keystoreConnector = mockKeystoreConnector
       override val s4LService = mockS4LService
       override val businessRegConnector = mockBusinessRegistrationConnector
-      override val messagesApi = mockMessagesApi
+      override val messagesApi = injMessagesApi
       override val authConnector = mockAuthConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector
       override val payeRegistrationService = mockPayeRegService

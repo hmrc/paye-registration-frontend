@@ -50,7 +50,7 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with PayeF
 
       override def timer = metricsService.incorpInfoResponseTimer.time()
 
-      override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
     }

@@ -64,7 +64,6 @@ class Module extends AbstractModule {
     bind(classOf[KeystoreConnector]).to(classOf[KeystoreConnectorImpl]).asEagerSingleton()
     bind(classOf[PAYERegistrationConnector]).to(classOf[PAYERegistrationConnectorImpl]).asEagerSingleton()
     bind(classOf[S4LConnector]).to(classOf[S4LConnectorImpl]).asEagerSingleton()
-    bind(classOf[EmailConnector]).to(classOf[EmailConnectorImpl]).asEagerSingleton()
   }
 
   private def bindServices(): Unit = {

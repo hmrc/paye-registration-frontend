@@ -54,7 +54,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
       mockPayeRegCompanyDetailsSetup,
       mockPayeRegPAYEContactSetup,
       mockPayeRegEmploymentInfoSetup
-    )(mockAppConfig,
+    )(injAppConfig,
       globalExecutionContext) {
 
       override def withCurrentProfile(f: => CurrentProfile => Future[Result], payeRegistrationSubmitted: Boolean)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] = {

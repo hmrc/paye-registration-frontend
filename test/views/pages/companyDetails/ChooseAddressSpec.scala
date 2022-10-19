@@ -33,10 +33,10 @@ class ChooseAddressSpec extends PayeComponentSpec with PayeFakedApp with I18nSup
 
   object Selectors extends BaseSelectors
 
-  implicit val appConfig = mockAppConfig
+  implicit val appConfig = injAppConfig
   implicit val request = FakeRequest()
-  implicit lazy val messagesApi: MessagesApi = mockMessagesApi
-  implicit val mockMessages = mockMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
+  implicit lazy val messagesApi: MessagesApi = injMessagesApi
+  implicit val mockMessages = injMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
 
   val testROAddress =
     "ro" -> "testL1, testL2, testL3, testL4, testPostCode"

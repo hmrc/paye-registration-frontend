@@ -42,7 +42,7 @@ class TestSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
       override val authConnector = mockAuthConnector
       override val testIncorpInfoConnector = mockTestIncorpInfoConnector
       override val coHoAPIService = mockIncorpInfoService
-      override val messagesApi = mockMessagesApi
+      override val messagesApi = injMessagesApi
       override val payeRegService = mockPayeRegService
       override val testPAYERegConnector = mockTestPayeRegConnector
       override val s4LService = mockS4LService

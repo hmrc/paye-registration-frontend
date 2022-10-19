@@ -31,7 +31,7 @@ class DashboardControllerSpec extends PayeComponentSpec with PayeFakedApp {
     val controller = new DashboardController(mockMcc) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-      override val appConfig: AppConfig = mockAppConfig
+      override val appConfig: AppConfig = injAppConfig
       override val authConnector = mockAuthConnector
       override val keystoreConnector = mockKeystoreConnector
       override val companyRegUrl = "testUrl"

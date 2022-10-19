@@ -23,6 +23,6 @@ import play.api.i18n.MessagesApi
 trait PayeFakedApp extends GuiceOneAppPerSuite {
   self: PayeComponentSpec =>
 
-  implicit lazy val mockMessagesApi = app.injector.instanceOf[MessagesApi]
-  implicit lazy val mockAppConfig = app.injector.instanceOf[AppConfig]
+  implicit lazy val injMessagesApi = app.injector.instanceOf[MessagesApi]
+  implicit lazy val injAppConfig = app.injector.instanceOf[AppConfig]
 }

@@ -55,7 +55,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
       mockMcc,
       mockRestart,
       mockLanguageUtils,
-    )(mockAppConfig,
+    )(injAppConfig,
       globalExecutionContext)
   }
 

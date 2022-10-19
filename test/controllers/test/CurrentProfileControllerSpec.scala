@@ -33,11 +33,11 @@ class CurrentProfileControllerSpec extends PayeComponentSpec with PayeFakedApp {
   lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
   class Setup {
     val controller = new BusinessProfileController(mockMcc) {
-      override val appConfig: AppConfig = mockAppConfig
+      override val appConfig: AppConfig = injAppConfig
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
 
-      override val messagesApi = mockMessagesApi
+      override val messagesApi = injMessagesApi
       override val businessRegConnector = mockBusinessRegistrationConnector
       override val keystoreConnector = mockKeystoreConnector
       override val testBusinessRegConnector = mockTestBusRegConnector

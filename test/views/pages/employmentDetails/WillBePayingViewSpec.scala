@@ -27,9 +27,9 @@ import views.html.pages.employmentDetails.willBePaying
 import java.time.LocalDate
 
 class WillBePayingViewSpec extends PayeComponentSpec with PayeFakedApp with I18nSupport {
-  implicit val appConfig = mockAppConfig
+  implicit val appConfig = injAppConfig
   implicit val request = FakeRequest()
-  implicit lazy val messagesApi: MessagesApi = mockMessagesApi
+  implicit lazy val messagesApi: MessagesApi = injMessagesApi
 
   "The Will Be Paying screen" should {
     lazy val view = app.injector.instanceOf[willBePaying]

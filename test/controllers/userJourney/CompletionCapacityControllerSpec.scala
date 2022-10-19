@@ -48,7 +48,7 @@ class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedA
       mockPayeRegService,
       mockMcc,
       mockCompletionCapacityView
-    )(mockAppConfig,
+    )(injAppConfig,
       globalExecutionContext)
   }
 
