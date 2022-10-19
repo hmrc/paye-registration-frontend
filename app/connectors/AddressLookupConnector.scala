@@ -19,6 +19,7 @@ package connectors
 import com.codahale.metrics.{Counter, Timer}
 import utils.Logging
 import config.AppConfig
+import connectors.httpParsers.AddressLookupHttpParsers
 import models.Address
 import models.external._
 import play.api.libs.json.Reads
@@ -32,7 +33,7 @@ import scala.util.control.NoStackTrace
 @Singleton
 class AddressLookupConnector @Inject()(metricsService: MetricsService,
                                        http: HttpClient
-                                      )(appConfig: AppConfig, implicit val ec: ExecutionContext) extends Logging {
+                                      )(appConfig: AppConfig, implicit val ec: ExecutionContext) extends AddressLookupHttpParsers with Logging {
 
   lazy val addressLookupFrontendUrl: String = appConfig.servicesConfig.baseUrl("address-lookup-frontend")
   val successCounter: Counter = metricsService.addressLookupSuccessResponseCounter
@@ -40,25 +41,15 @@ class AddressLookupConnector @Inject()(metricsService: MetricsService,
 
   def timer: Timer.Context = metricsService.addressLookupResponseTimer.time()
 
-  def getAddress(id: String)(implicit hc: HeaderCarrier): Future[Address] = {
-    implicit val reads: Reads[Address] = Address.addressLookupReads
+  def getAddress(id: String)(implicit hc: HeaderCarrier): Future[Address] =
     metricsService.processDataResponseWithMetrics[Address](successCounter, failedCounter, timer) {
-      http.GET[Address](s"$addressLookupFrontendUrl/api/confirmed?id=$id")
+      http.GET[Address](s"$addressLookupFrontendUrl/api/confirmed?id=$id")(addressHttpReads, hc, ec)
     }
-  }
 
-  def getOnRampUrl(alfJourneyConfig: AlfJourneyConfig)(implicit hc: HeaderCarrier): Future[String] = {
-    val postUrl = s"$addressLookupFrontendUrl/api/v2/init"
-
+  def getOnRampUrl(alfJourneyConfig: AlfJourneyConfig)(implicit hc: HeaderCarrier): Future[String] =
     metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
-      http.POST[AlfJourneyConfig, HttpResponse](postUrl, alfJourneyConfig)
-    } map {
-      _.header("Location").getOrElse {
-        logger.warn("[getOnRampUrl] ERROR: Location header not set in ALF response")
-        throw new ALFLocationHeaderNotSetException
-      }
+      http.POST[AlfJourneyConfig, String](s"$addressLookupFrontendUrl/api/v2/init", alfJourneyConfig)(AlfJourneyConfig.journeyConfigFormat, onRampHttpReads, hc, ec)
     }
-  }
 }
 
 class ALFLocationHeaderNotSetException extends NoStackTrace

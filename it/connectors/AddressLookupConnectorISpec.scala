@@ -25,7 +25,7 @@ import play.api.Application
 import play.api.http.HeaderNames
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, NO_CONTENT}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsResultException, JsValue, Json}
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 
 class AddressLookupConnectorISpec extends IntegrationSpecBase {
@@ -104,6 +104,13 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
         val result = await(connector.getAddress(addressId))
 
         result mustBe testAddress
+      }
+
+      "return a JsResultException where the JSON is malformed" in {
+
+        stubGetAddress(200, Some(Json.obj("foo" -> "bar")))
+
+        intercept[JsResultException](await(connector.getAddress(addressId)))
       }
 
       "handle a NOT_FOUND returning the NOT_FOUND_EXCEPTION" in {
