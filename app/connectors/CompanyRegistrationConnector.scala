@@ -28,25 +28,15 @@ import utils.{PAYEFeatureSwitch, PAYEFeatureSwitches}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyRegistrationConnectorImpl @Inject()(val featureSwitch: PAYEFeatureSwitch,
-                                                 val http: HttpClient,
-                                                 val metricsService: MetricsService,
-                                                 appConfig: AppConfig)(implicit val ec: ExecutionContext) extends CompanyRegistrationConnector {
-  lazy val companyRegistrationUrl: String = appConfig.servicesConfig.baseUrl("company-registration")
-  lazy val companyRegistrationUri: String = appConfig.servicesConfig.getConfString("company-registration.uri", "")
-  lazy val stubUrl: String = appConfig.servicesConfig.baseUrl("incorporation-frontend-stubs")
-  lazy val stubUri: String = appConfig.servicesConfig.getConfString("incorporation-frontend-stubs.uri", "")
-}
+class CompanyRegistrationConnector @Inject()(val featureSwitch: PAYEFeatureSwitch,
+                                             val http: HttpClient,
+                                             val metricsService: MetricsService,
+                                             appConfig: AppConfig)(implicit val ec: ExecutionContext) {
 
-trait CompanyRegistrationConnector {
-  val companyRegistrationUrl: String
-  val companyRegistrationUri: String
-  val stubUrl: String
-  val stubUri: String
-  val http: CoreGet
-  val metricsService: MetricsService
-  val featureSwitch: PAYEFeatureSwitches
-  implicit val ec: ExecutionContext
+  lazy val companyRegistrationUrl: String = appConfig.servicesConfig.baseUrl("company-registration")
+  lazy val companyRegistrationUri: String = appConfig.servicesConfig.getString("microservice.services.company-registration.uri")
+  lazy val stubUrl: String = appConfig.servicesConfig.baseUrl("incorporation-frontend-stubs")
+  lazy val stubUri: String = appConfig.servicesConfig.getString("microservice.services.incorporation-frontend-stubs.uri")
 
   def getCompanyRegistrationDetails(regId: String)(implicit hc: HeaderCarrier): Future[CompanyRegistrationProfile] = {
     val companyRegTimer = metricsService.companyRegistrationResponseTimer.time()

@@ -30,30 +30,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class IncorporationInformationConnectorSpec extends PayeComponentSpec with PayeFakedApp {
 
-  val testUrl = "testIIUrl"
-  val testUri = "testIIUri"
-  val testStubUrl = "testIIStubUrl"
-  val testStubUri = "testIIStubUri"
-  val testPayeRegFeUrl = "http://paye-fe"
-
   class Setup(unStubbed: Boolean = true) extends CodeMocks {
-    val connector = new IncorporationInformationConnector {
-      val stubUrl = testStubUrl
-      val stubUri = testStubUri
-      val incorpInfoUrl = testUrl
-      val incorpInfoUri = testUri
-      val payeRegFeUrl = testPayeRegFeUrl
-      override val http: HttpClient = mockHttpClient
-      override val metricsService = new MockMetrics
-      override val successCounter = metricsService.companyDetailsSuccessResponseCounter
-      override val failedCounter = metricsService.companyDetailsFailedResponseCounter
-
-      override def timer = metricsService.incorpInfoResponseTimer.time()
-
-      override implicit val appConfig: AppConfig = injAppConfig
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
-    }
+    val connector = new IncorporationInformationConnector(
+      new MockMetrics,
+      mockHttpClient
+    )(injAppConfig, scala.concurrent.ExecutionContext.Implicits.global)
   }
 
   "setupSubscription" should {

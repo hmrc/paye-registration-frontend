@@ -30,44 +30,23 @@ import utils.RegistrationAllowlist
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class IncorporationInformationConnectorImpl @Inject()(val metricsService: MetricsService,
-                                                      val http: HttpClient
-                                                     )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends IncorporationInformationConnector {
+sealed trait IncorpInfoResponse
+case class IncorpInfoSuccessResponse(response: CoHoCompanyDetailsModel) extends IncorpInfoResponse
+case object IncorpInfoBadRequestResponse extends IncorpInfoResponse
+case object IncorpInfoNotFoundResponse extends IncorpInfoResponse
+case class IncorpInfoErrorResponse(ex: Exception) extends IncorpInfoResponse
 
-  lazy val incorpInfoUrl = appConfig.servicesConfig.baseUrl("incorporation-information")
-  lazy val incorpInfoUri = appConfig.servicesConfig.getConfString("incorporation-information.uri", "")
-  lazy val payeRegFeUrl = appConfig.servicesConfig.getConfString("paye-registration-frontend.ii-callback.url",
-    throw new IllegalArgumentException("[IncorporationInformationConnector] config value payeRegFeUrl cannot be found"))
+class IncorporationInformationConnector @Inject()(val metricsService: MetricsService,
+                                                      val http: HttpClient
+                                                     )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends RegistrationAllowlist {
+
+  val incorpInfoUrl = appConfig.servicesConfig.baseUrl("incorporation-information")
+  val incorpInfoUri = appConfig.servicesConfig.getString("microservice.services.incorporation-information.uri")
+  val payeRegFeUrl = appConfig.servicesConfig.getString("microservice.services.paye-registration-frontend.ii-callback.url")
   val successCounter = metricsService.companyDetailsSuccessResponseCounter
   val failedCounter = metricsService.companyDetailsFailedResponseCounter
 
   def timer: Timer.Context = metricsService.incorpInfoResponseTimer.time()
-
-}
-
-sealed trait IncorpInfoResponse
-
-case class IncorpInfoSuccessResponse(response: CoHoCompanyDetailsModel) extends IncorpInfoResponse
-
-case object IncorpInfoBadRequestResponse extends IncorpInfoResponse
-
-case object IncorpInfoNotFoundResponse extends IncorpInfoResponse
-
-case class IncorpInfoErrorResponse(ex: Exception) extends IncorpInfoResponse
-
-trait IncorporationInformationConnector extends RegistrationAllowlist {
-  implicit val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val incorpInfoUrl: String
-  val incorpInfoUri: String
-  val payeRegFeUrl: String
-  val http: CoreGet with CorePost with CoreDelete
-  val metricsService: MetricsService
-
-  val successCounter: Counter
-  val failedCounter: Counter
-
-  def timer: Timer.Context
 
   def setupSubscription(transactionId: String, regId: String, regime: String = "paye-fe", subscriber: String = "SCRS")(implicit hc: HeaderCarrier): Future[Option[IncorporationStatus.Value]] = {
     def constructIncorporationInfoUri(transactionId: String, regime: String, subscriber: String): String = {
