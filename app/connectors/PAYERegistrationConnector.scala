@@ -30,26 +30,16 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 sealed trait DESResponse
-
 object Success extends DESResponse
-
 object Cancelled extends DESResponse
-
 object Failed extends DESResponse
-
 object TimedOut extends DESResponse
 
-class PAYERegistrationConnectorImpl @Inject()(val metricsService: MetricsService,
-                                              val http: HttpClient,
-                                              appConfig: AppConfig)(implicit val ec: ExecutionContext) extends PAYERegistrationConnector {
-  val payeRegUrl = appConfig.servicesConfig.baseUrl("paye-registration")
-}
+class PAYERegistrationConnector @Inject()(val metricsService: MetricsService,
+                                          val http: HttpClient,
+                                          appConfig: AppConfig)(implicit val ec: ExecutionContext) {
 
-trait PAYERegistrationConnector {
-  implicit val ec: ExecutionContext
-  val payeRegUrl: String
-  val http: CorePatch with CoreGet with CorePut with CoreDelete
-  val metricsService: MetricsService
+  val payeRegUrl = appConfig.servicesConfig.baseUrl("paye-registration")
 
   def createNewRegistration(regID: String, txID: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
     val payeRegTimer = metricsService.payeRegistrationResponseTimer.time()

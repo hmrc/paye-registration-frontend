@@ -20,6 +20,8 @@ import enums.{DownstreamOutcome, RegistrationDeletion}
 import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics
 import models.api.{Director, Employment, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito.when
 import play.api.libs.json.Json
 import uk.gov.hmrc.http._
 
@@ -28,13 +30,15 @@ import scala.concurrent.ExecutionContext
 class PAYERegistrationConnectorSpec extends PayeComponentSpec {
 
   class Setup extends CodeMocks {
-    val connector = new PAYERegistrationConnector {
-      override val payeRegUrl: String = "tst-url"
-      override val http: HttpClient = mockHttpClient
-      override val metricsService = new MockMetrics
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-    }
+    when(mockAppConfig.servicesConfig).thenReturn(mockServicesConfig)
+    when(mockServicesConfig.baseUrl("paye-registration")).thenReturn("tst-url")
+
+    val connector = new PAYERegistrationConnector(
+      new MockMetrics,
+      mockHttpClient,
+      mockAppConfig
+    )
   }
 
   val ok = HttpResponse(200, "")

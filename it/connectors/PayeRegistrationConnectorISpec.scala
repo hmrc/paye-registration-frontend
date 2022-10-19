@@ -36,7 +36,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
     ))
     .build
 
-  val payeRegistrationConnector = app.injector.instanceOf[PAYERegistrationConnectorImpl]
+  val payeRegistrationConnector = app.injector.instanceOf[PAYERegistrationConnector]
 
   val regId = "12345"
   val txnId = "67890"
