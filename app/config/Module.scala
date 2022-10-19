@@ -59,7 +59,6 @@ class Module extends AbstractModule {
     bind(classOf[TestBusinessRegConnector]).to(classOf[TestBusinessRegConnectorImpl]).asEagerSingleton()
     bind(classOf[TestIncorpInfoConnector]).to(classOf[TestIncorpInfoConnectorImpl]).asEagerSingleton()
     bind(classOf[TestPAYERegConnector]).to(classOf[TestPAYERegConnectorImpl]).asEagerSingleton()
-    bind(classOf[BusinessRegistrationConnector]).to(classOf[BusinessRegistrationConnectorImpl]).asEagerSingleton()
     bind(classOf[CompanyRegistrationConnector]).to(classOf[CompanyRegistrationConnectorImpl]).asEagerSingleton()
     bind(classOf[IncorporationInformationConnector]).to(classOf[IncorporationInformationConnectorImpl]).asEagerSingleton()
     bind(classOf[KeystoreConnector]).to(classOf[KeystoreConnectorImpl]).asEagerSingleton()

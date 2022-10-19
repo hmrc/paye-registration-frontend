@@ -16,6 +16,7 @@
 
 package connectors
 
+import config.AppConfig
 import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics
 import models.external.BusinessProfile
@@ -25,19 +26,25 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
 
   class Setup {
-    val testConnector = new BusinessRegistrationConnector {
-      override val businessRegUrl = "testBusinessRegUrl"
-      override val http = mockHttpClient
-      override val metricsService = new MockMetrics
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-    }
+    val mockAppConfig = mock[AppConfig]
+    val mockServicesConfig = mock[ServicesConfig]
+
+    when(mockAppConfig.servicesConfig).thenReturn(mockServicesConfig)
+    when(mockServicesConfig.baseUrl("business-registration")).thenReturn("testBusinessRegUrl")
+
+    val testConnector = new BusinessRegistrationConnector(
+      metricsService = new MockMetrics,
+      http = mockHttpClient,
+      appConfig = mockAppConfig
+    )(scala.concurrent.ExecutionContext.Implicits.global)
   }
 
   "retrieveCurrentProfile" should {

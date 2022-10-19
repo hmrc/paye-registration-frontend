@@ -27,17 +27,11 @@ import uk.gov.hmrc.http._
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class BusinessRegistrationConnectorImpl @Inject()(val metricsService: MetricsService,
+class BusinessRegistrationConnector @Inject()(val metricsService: MetricsService,
                                                   val http: HttpClient,
-                                                  appConfig: AppConfig)(implicit val ec: ExecutionContext) extends BusinessRegistrationConnector {
-  val businessRegUrl = appConfig.servicesConfig.baseUrl("business-registration")
-}
+                                                  appConfig: AppConfig)(implicit val ec: ExecutionContext) {
 
-trait BusinessRegistrationConnector {
-  val businessRegUrl: String
-  val http: CoreGet with CorePost
-  val metricsService: MetricsService
-  implicit val ec: ExecutionContext
+  val businessRegUrl = appConfig.servicesConfig.baseUrl("business-registration")
 
   def retrieveCurrentProfile(implicit hc: HeaderCarrier, rds: HttpReads[BusinessProfile]): Future[BusinessProfile] = {
     val businessRegistrationTimer = metricsService.businessRegistrationResponseTimer.time()
