@@ -32,6 +32,13 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
   val testUri = "testUri"
 
   class Setup(stubbed: Boolean) {
+
+    when(mockAppConfig.servicesConfig).thenReturn(mockServicesConfig)
+    when(mockServicesConfig.baseUrl("company-registration")).thenReturn(testUrl)
+    when(mockServicesConfig.getString("microservice.services.company-registration.uri")).thenReturn(testUri)
+    when(mockServicesConfig.baseUrl("incorporation-frontend-stubs")).thenReturn(testUrl)
+    when(mockServicesConfig.getString("microservice.services.incorporation-frontend-stubs.uri")).thenReturn(testUri)
+
     val testConnector = new CompanyRegistrationConnector(
       mockFeatureSwitch,
       mockHttpClient,
