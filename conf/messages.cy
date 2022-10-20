@@ -66,7 +66,7 @@ errors.invalid.contactNum.tooShort                                      =    Nod
 errors.invalid.contactNum.tooLong                                       =    Nodwch rif cyswllt gan ddefnyddio 20 digid neu lai
 errors.invalid.nino                                                     =    Nodwch rif Yswiriant Gwladol dilys
 errors.duplicate.nino                                                   =    Rydych wedi nodi’r un rhif Yswiriant Gwladol fwy nag unwaith
-errors.invalid.sic.noEntry                                              =    Rhowch wybod i ni beth mae’r cwmni’n ei wneud
+errors.invalid.sic.noEntry                                              =    Nodwch y nwyddau neu’r gwasanaethau y mae’r busnes yn eu gwerthu
 errors.invalid.sic.overCharLimit                                        =    Nodwch ddisgrifiad o’r busnes gan ddefnyddio 100 o gymeriadau neu lai
 errors.invalid.sic.invalidChars                                         =    Nodwch ddisgrifiad o’r busnes gan ddefnyddio dim ond llythrennau, rhifau a - , / & ''
 errors.invalid.name.invalidChars                                        =    Nodwch yr enw cyswllt gan ddefnyddio dim ond llythrennau (heb acenion), cysylltnodau a chollnodau
@@ -91,7 +91,7 @@ pages.tradingName.nameRulesSummary                                      =    Bet
 pages.tradingName.nameRulesIntro                                        =    Gall cwmni fasnachu gan ddefnyddio enw sy’n wahanol i’w enw cofrestredig. Gelwir hyn hefyd yn ’enw busnes’.
 pages.tradingName.nameRulesIntro1                                       =    Mae rhai cwmnïau’n dewis enw masnachu gwahanol i helpu gyda brandio neu i gael enw parth ar gyfer eu gwefan.
 pages.tradingName.errorQuestion                                         =    Nodwch yr enw masnachu
-pages.tradingName.error                                                 =    Rhowch wybod i ni a fydd y cwmni’n masnachu o dan enw arall
+pages.tradingName.error                                                 =    Dewiswch ‘Iawn’ os yw’r cwmni’n defnyddio enw masnachu gwahanol
 pages.tradingName.error.length                                          =    Nodwch enw llawn gan ddefnyddio 35 o gymeriadau neu lai
 pages.tradingName.error.invalidChars                                    =    Rhowch wybod i ni beth yw’r enw masnachu gan ddefnyddio dim ond llythrennau, rhifau a - , . ( ) / & '' !
 pages.tradingdetails.input.hint-text                                    =    Nid oes modd i chi nodi ’cyfyngedig’, ’Cyf’, ’partneriaeth atebolrwydd cyfyngedig’, ’PAC’, ’cwmni cyfyngedig cyhoeddus’, na ’ccc’
@@ -165,13 +165,13 @@ pages.willBePaying.beforeNewTaxYear.empty                               =    Rho
 ## Construction Industry
 pages.constructionIndustry.title                                        =    A yw’r cwmni’n gweithio yn y diwydiant adeiladu?
 pages.constructionIndustry.description                                  =    A yw’r cwmni’n gweithio yn y diwydiant adeiladu?
-pages.constructionIndustry.error                                        =    Rhowch wybod i ni a fydd y cwmni’n gweithio yn y diwydiant adeiladu
+pages.constructionIndustry.error                                        =    Dewiswch ‘Iawn’ os yw’r cwmni yn y diwydiant adeiladu
 
 ## Employs Subcontractors
 pages.employsSubcontractors.title                                       =    Yn ystod y flwyddyn dreth bresennol a fydd y cwmni’n hurio unrhyw isgontractwyr yn y diwydiant adeiladu?
 pages.employsSubcontractors.description                                 =    Yn ystod y flwyddyn dreth bresennol a fydd y cwmni’n hurio unrhyw isgontractwyr yn y diwydiant adeiladu?
 pages.employsSubcontractors.para                                        =    Mae’r flwyddyn dreth bresennol yn rhedeg rhwng 6 Ebrill {0} a 5 Ebrill {1}.
-pages.employsSubcontractors.error                                       =    Rhowch wybod i ni a fydd y cwmni’n hurio unrhyw isgontractwyr yn y diwydiant adeiladu yn y flwyddyn dreth bresennol
+pages.employsSubcontractors.error                                       =    Dewiswch ‘Iawn’ os bydd y cwmni’n hurio unrhyw isgontractwyr o’r diwydiant adeiladu yn ystod y flwyddyn dreth hon
 
 ## Pays Pension
 pages.paysPension.title                                                 =    A yw’r cwmni’n gwneud taliadau pensiwn i gyn-gyflogai neu ei ddibynyddion?
