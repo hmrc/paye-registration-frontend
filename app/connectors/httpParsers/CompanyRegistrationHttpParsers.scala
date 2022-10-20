@@ -1,0 +1,68 @@
+/*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package connectors.httpParsers
+
+import common.exceptions.DownstreamExceptions
+import models.external.CompanyRegistrationProfile
+import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK}
+import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions, HttpReads, HttpResponse, NotFoundException, UpstreamErrorResponse}
+import utils.Logging
+
+import scala.util.{Failure, Success, Try}
+
+trait CompanyRegistrationHttpParsers extends Logging with HttpErrorFunctions {
+
+  def companyRegistrationDetailsHttpReads(regId: String): HttpReads[CompanyRegistrationProfile] = (_: String, _: String, response: HttpResponse) => response.status match {
+      case OK =>
+        Try(response.json.as[CompanyRegistrationProfile](CompanyRegistrationProfile.companyRegistrationReads)) match {
+          case Success(profile) => profile
+          case Failure(e: DownstreamExceptions.ConfirmationRefsNotFoundException) =>
+            logger.error(s"[companyRegistrationDetailsHttpReads] Received an error when expecting a Company Registration document for reg id: $regId could not find confirmation references (has user completed Incorp/CT?)")
+            throw e
+          case Failure(e) =>
+            logger.error(s"[companyRegistrationDetailsHttpReads] JSON returned from company-registration could not be parsed to CompanyRegistrationProfile model for reg id: $regId")
+            throw e
+        }
+      case NOT_FOUND =>
+        logger.error(s"[companyRegistrationDetailsHttpReads] Received a NotFound status code when expecting a Company Registration document for reg id: $regId")
+        throw new NotFoundException(s"[companyRegistrationDetailsHttpReads] Received a NotFound status code when expecting a Company Registration document for reg id: $regId")
+      case BAD_REQUEST =>
+        logger.error(s"[companyRegistrationDetailsHttpReads] Received a BadRequest status code when expecting a Company Registration document for reg id: $regId")
+        throw new BadRequestException(s"Received a BadRequest status code when expecting a Company Registration document for reg id: $regId")
+      case status =>
+        logger.error(s"[companyRegistrationDetailsHttpReads] Unexpected Error Occurred when expecting a Company Registration document for reg id: $regId. Status '$status'")
+        throw UpstreamErrorResponse("Unexpected Error Occurred when calling company-registration service", status)
+    }
+
+  def verifiedEmailHttpReads(regId: String): HttpReads[Option[String]] = (_: String, _: String, response: HttpResponse) => response.status match {
+    case OK =>
+      (response.json \ "address").asOpt[String] match {
+        case Some(address) => Some(address)
+        case None =>
+          logger.info(s"[verifiedEmailHttpReads] A response for the verified email was returned but did not contain the 'address' object for regId: $regId")
+          None
+      }
+    case NOT_FOUND =>
+      logger.info(s"[verifiedEmailHttpReads] A call was made to company reg and a NotFound response was returned for regId: $regId")
+      None
+    case status =>
+      logger.error(s"[verifiedEmailHttpReads] Unexpected Error Occurred when expecting a Verified Email for reg id: $regId. Status '$status'")
+      None
+  }
+}
+
+object CompanyRegistrationHttpParsers extends CompanyRegistrationHttpParsers
