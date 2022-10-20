@@ -17,15 +17,15 @@
 package services
 
 import connectors._
+import models.{EmailDifficulties, EmailNotFound, EmailResponse}
 import models.external.{CurrentProfile, EmailRequest}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.{SystemDate, TaxYearConfig}
+
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-
 import javax.inject.{Inject, Singleton}
-
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

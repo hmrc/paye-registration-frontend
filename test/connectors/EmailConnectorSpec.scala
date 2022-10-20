@@ -17,6 +17,7 @@
 package connectors
 
 import helpers.PayeComponentSpec
+import models.{EmailDifficulties, EmailResponse, EmailSent}
 import models.external.EmailRequest
 import org.mockito.{ArgumentCaptor, ArgumentMatchers}
 import org.mockito.ArgumentMatchers.{any, same}
@@ -47,9 +48,9 @@ class EmailConnectorSpec extends PayeComponentSpec {
 
   "requestEmailToBeSent" should {
     "return an EmailSent" when {
-      "call to email service returns a non success code" in new Setup {
-        when(mockHttpClient.POST[EmailRequest, HttpResponse](same("FOOBARWIZZ"), same(validEmailRequest), any())(any(), any(), any(), any()))
-          .thenReturn(Future.successful(HttpResponse(200, "")))
+      "call to email service returns a success" in new Setup {
+        when(mockHttpClient.POST[EmailRequest, EmailResponse](same("FOOBARWIZZ"), same(validEmailRequest), any())(any(), any(), any(), any()))
+          .thenReturn(Future.successful(EmailSent))
 
         val res = await(emailConn.requestEmailToBeSent(validEmailRequest))
         res mustBe EmailSent
@@ -60,8 +61,8 @@ class EmailConnectorSpec extends PayeComponentSpec {
 
     "return an EmailDifficulties" when {
       "call to email service returns a non success code" in new Setup {
-        when(mockHttpClient.POST[EmailRequest, HttpResponse](same("FOOBARWIZZ"), same(validEmailRequest), any())(any(), any(), any(), any()))
-          .thenReturn(Future.failed(new HttpException("", 502)))
+        when(mockHttpClient.POST[EmailRequest, EmailResponse](same("FOOBARWIZZ"), same(validEmailRequest), any())(any(), any(), any(), any()))
+          .thenReturn(Future.failed(new Exception("foo")))
 
         val res = await(emailConn.requestEmailToBeSent(validEmailRequest))
         res mustBe EmailDifficulties

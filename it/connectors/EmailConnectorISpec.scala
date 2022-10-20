@@ -20,7 +20,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.external._
 import models.view.PAYEContactDetails
-import models.{Address, DigitalContactDetails}
+import models.{Address, DigitalContactDetails, EmailDifficulties, EmailSent}
 import play.api.Application
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
