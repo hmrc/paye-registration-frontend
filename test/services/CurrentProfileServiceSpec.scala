@@ -57,7 +57,7 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with PayeFakedApp {
   "fetchAndStoreCurrentProfile" should {
 
     "Return a successful outcome after successfully storing a valid Business Registration response" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future(validBusinessProfile))
 
       when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
@@ -76,7 +76,7 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "Return a successful outcome after nothing is returned from II subscription" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future(validBusinessProfile))
 
       when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
@@ -95,21 +95,21 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "Return an unsuccessful outcome when there is no record in Business Registration" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new NotFoundException("")))
 
       intercept[NotFoundException](await(service.fetchAndStoreCurrentProfile))
     }
 
     "Return an unsuccessful outcome when the user is not authorised for Business Registration" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new ForbiddenException("")))
 
       intercept[ForbiddenException](await(service.fetchAndStoreCurrentProfile))
     }
 
     "Return an unsuccessful outcome when Business Registration returns an error response" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new RuntimeException("")))
 
       intercept[RuntimeException](await(service.fetchAndStoreCurrentProfile))

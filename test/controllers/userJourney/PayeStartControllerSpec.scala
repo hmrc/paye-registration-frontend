@@ -251,7 +251,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(None))
 
-        when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any()))
           .thenReturn(Future.successful(testBusinessProfile))
 
         when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.any())(ArgumentMatchers.any()))

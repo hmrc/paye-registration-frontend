@@ -27,7 +27,7 @@ trait BusinessRegistrationConnectorMock {
   this: MockedComponents =>
 
   def mockBusinessRegFetch(response: Future[BusinessProfile]) = {
-    when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
+    when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any()))
       .thenReturn(response)
   }
 }
