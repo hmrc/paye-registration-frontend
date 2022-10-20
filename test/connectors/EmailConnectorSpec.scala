@@ -18,6 +18,7 @@ package connectors
 
 import helpers.PayeComponentSpec
 import models.external.EmailRequest
+import org.mockito.{ArgumentCaptor, ArgumentMatchers}
 import org.mockito.ArgumentMatchers.{any, same}
 import org.mockito.Mockito.{times, verify, when}
 import uk.gov.hmrc.http.{CorePost, HttpException, HttpResponse}
@@ -27,12 +28,15 @@ import scala.concurrent.{ExecutionContext, Future}
 class EmailConnectorSpec extends PayeComponentSpec {
 
   class Setup {
-    val emailConn = new EmailConnector {
-      override val http: CorePost = mockHttpClient
-      override val sendEmailURL: String = "FOOBARWIZZ"
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-    }
+    when(mockAppConfig.servicesConfig).thenReturn(mockServicesConfig)
+    when(mockServicesConfig.getString(ArgumentMatchers.eq("microservice.services.email.sendAnEmailURL")))
+      .thenReturn("FOOBARWIZZ")
+
+    val emailConn = new EmailConnector(
+      mockHttpClient,
+      mockAppConfig
+    )
     val validEmailRequest = EmailRequest(
       to = "foo@foo.com" :: Nil,
       templateId = "fooBarWizzId",

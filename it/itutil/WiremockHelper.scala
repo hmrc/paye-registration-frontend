@@ -17,12 +17,13 @@
 package itutil
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.{ResponseDefinitionBuilder, WireMock}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.http.HeaderNames
+import play.api.libs.json.JsValue
 import play.api.libs.ws.{WSClient, WSRequest}
 
 object WiremockHelper {
@@ -61,6 +62,10 @@ trait WiremockHelper {
       .withHttpHeaders(Seq(HeaderNames.AUTHORIZATION -> "FooBarToken") ++ additionalHeaders:_*)
       .withFollowRedirects(false)
 
+  def buildResponse(status: Int, body: Option[JsValue]): ResponseDefinitionBuilder = body match {
+    case Some(value) => aResponse().withStatus(status).withBody(value.toString)
+    case None => aResponse().withStatus(status)
+  }
 
   def stubGet(url: String, status: Integer, body: String): StubMapping =
     stubFor(get(urlMatching(url))

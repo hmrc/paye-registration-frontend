@@ -37,7 +37,7 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override val payeRegistrationConnector = mockPAYERegConnector
       override val keystoreConnector = mockKeystoreConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector
-      override implicit val appConfig: AppConfig = mockAppConfig
+      override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
     }

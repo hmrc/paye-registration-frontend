@@ -61,7 +61,7 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
       mockMcc,
       mockRestart,
       mockConfirmationPage
-    )(mockAppConfig,
+    )(injAppConfig,
       globalExecutionContext)
 
   }

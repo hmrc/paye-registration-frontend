@@ -32,7 +32,7 @@ import scala.concurrent.Future
 
 class AddressLookupServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
-  implicit val mockMessages = mockMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
+  implicit val mockMessages = injMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
   val metricsMock = new MockMetrics
 
   class Setup {

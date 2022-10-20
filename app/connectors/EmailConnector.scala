@@ -25,28 +25,19 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 sealed trait EmailResponse
-
 case object EmailSent extends EmailResponse
-
 case object EmailDifficulties extends EmailResponse
-
 case object EmailNotFound extends EmailResponse
 
-class EmailConnectorImpl @Inject()(val http: HttpClient, appConfig: AppConfig)(implicit val ec: ExecutionContext) extends EmailConnector {
-  val sendEmailURL: String = appConfig.servicesConfig.getConfString("email.sendAnEmailURL",
-    throw new Exception("email.sendAnEmailURL not found"))
-}
+class EmailConnector @Inject()(val http: HttpClient, appConfig: AppConfig)(implicit val ec: ExecutionContext) extends Logging {
 
-trait EmailConnector extends Logging {
-  val http: CorePost
-  val sendEmailURL: String
-  implicit val ec: ExecutionContext
+  val sendEmailURL: String = appConfig.servicesConfig.getString("microservice.services.email.sendAnEmailURL")
 
-  def requestEmailToBeSent(emailRequest: EmailRequest)(implicit hc: HeaderCarrier): Future[EmailResponse] = {
+  def requestEmailToBeSent(emailRequest: EmailRequest)(implicit hc: HeaderCarrier): Future[EmailResponse] =
     http.POST[EmailRequest, HttpResponse](sendEmailURL, emailRequest).map { _ =>
       logger.info(s"[requestEmailToBeSent] Email has been sent successfully for template ${emailRequest.templateId}")
       EmailSent
-    }.recover {
+    } recover {
       case b: HttpException =>
         logger.warn(s"[requestEmailToBeSent] received a Http error when attempting to request an email to be sent via the email service with templateId: ${emailRequest.templateId} with details: ${b.getMessage}")
         EmailDifficulties
@@ -54,5 +45,4 @@ trait EmailConnector extends Logging {
         logger.error(s"[requestEmailToBeSent] an unexpected error has occurred when attemping to request an email to be sent via the email service with templateId: ${emailRequest.templateId} with details: ${e.getMessage}")
         EmailDifficulties
     }
-  }
 }

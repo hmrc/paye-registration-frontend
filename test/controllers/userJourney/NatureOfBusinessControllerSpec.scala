@@ -52,7 +52,7 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
       mockMcc,
       mockNatureOfBusinessPage,
       mockRestart
-    )(mockAppConfig,
+    )(injAppConfig,
       globalExecutionContext)
   }
 

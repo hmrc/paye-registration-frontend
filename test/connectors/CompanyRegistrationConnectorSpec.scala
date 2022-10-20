@@ -32,18 +32,21 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
   val testUri = "testUri"
 
   class Setup(stubbed: Boolean) {
-    val testConnector = new CompanyRegistrationConnector {
-      val companyRegistrationUri = testUri
-      val companyRegistrationUrl = testUrl
-      val stubUri = testUri
-      val stubUrl = testUrl
-      val http = mockHttpClient
-      override val metricsService = new MockMetrics
-      override val featureSwitch = mockFeatureSwitch
 
+    when(mockAppConfig.servicesConfig).thenReturn(mockServicesConfig)
+    when(mockServicesConfig.baseUrl("company-registration")).thenReturn(testUrl)
+    when(mockServicesConfig.getString("microservice.services.company-registration.uri")).thenReturn(testUri)
+    when(mockServicesConfig.baseUrl("incorporation-frontend-stubs")).thenReturn(testUrl)
+    when(mockServicesConfig.getString("microservice.services.incorporation-frontend-stubs.uri")).thenReturn(testUri)
+
+    val testConnector = new CompanyRegistrationConnector(
+      mockFeatureSwitch,
+      mockHttpClient,
+      new MockMetrics,
+      mockAppConfig
+    ) {
       override def useCompanyRegistration = stubbed
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
     }
   }
 

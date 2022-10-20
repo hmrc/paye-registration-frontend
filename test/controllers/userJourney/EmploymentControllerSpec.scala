@@ -61,7 +61,7 @@ class EmploymentControllerSpec extends PayeComponentSpec with PayeFakedApp {
     mockApplicationDelayedPage,
     mockSubcontractorsPage,
     mockPaysPensionPage)(
-    mockAppConfig,
+    injAppConfig,
     globalExecutionContext
   )
 

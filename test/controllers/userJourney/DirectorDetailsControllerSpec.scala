@@ -53,7 +53,7 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
       mockMcc,
       mockDirectorDetailsPage,
       mockRestart
-    )(mockAppConfig,
+    )(injAppConfig,
       globalExecutionContext)
   }
 

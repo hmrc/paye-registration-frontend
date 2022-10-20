@@ -35,7 +35,7 @@ class PayeBaseControllerSpec extends PayeComponentSpec with PayeFakedApp {
     val testBaseController = new PayeBaseController(mockMcc) {
       override val redirectToLogin = MockAuthRedirects.redirectToLogin
       override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-      override val messagesApi = mockMessagesApi
+      override val messagesApi = injMessagesApi
       override val authConnector = mockAuthConnector
       override val keystoreConnector = mockKeystoreConnector
       override val incorporationInformationConnector = mockIncorpInfoConnector

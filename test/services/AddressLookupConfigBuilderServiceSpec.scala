@@ -25,9 +25,9 @@ import java.util.Locale
 
 class AddressLookupConfigBuilderServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
-  implicit val mockMessages = mockMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
+  implicit val mockMessages = injMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
 
-  object TestService extends AddressLookupConfigBuilderService(mockAppConfig, mockMessagesApi) {
+  object TestService extends AddressLookupConfigBuilderService(injAppConfig, injMessagesApi) {
     override lazy val payeRegistrationFrontendURL = "testPayeRegUrl"
     override lazy val timeoutLength = 22666
     override lazy val accessibilityFooterUrl = "http://localhost:9870/register-for-paye/accessibility-statement?pageUri=%2Fregister-for-paye%2F"

@@ -53,7 +53,7 @@ class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
       mockNewIneligibleView,
       mockSubmissionTimeoutView,
       mockSubmissionFailedView
-    )(mockAppConfig,
+    )(injAppConfig,
       globalExecutionContext)
 
   }

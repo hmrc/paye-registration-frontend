@@ -67,6 +67,7 @@ trait PayeComponentSpec
 
   private def resetMocks(): Unit = {
     reset(
+      mockAppConfig,
       mockPAYEContactService,
       mockPrepopService,
       mockAddressLookupService,

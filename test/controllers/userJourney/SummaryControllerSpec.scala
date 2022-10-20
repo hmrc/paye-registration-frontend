@@ -66,7 +66,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
       mockMcc,
       mockSummaryPage,
       mockSubmissionTimeout
-    )(mockAppConfig,
+    )(injAppConfig,
       globalExecutionContext
     )
 
