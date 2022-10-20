@@ -82,13 +82,8 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-    def setupWiremockResult(status: Int, body: Option[JsValue]) = {
-      val response = body match {
-        case Some(value) => aResponse().withStatus(status).withBody(value.toString)
-        case None => aResponse().withStatus(status)
-      }
-      stubFor(get(urlMatching(s"$incorpInfoUri/$testTransId/company-profile")).willReturn(response))
-    }
+    def setupWiremockResult(status: Int, body: Option[JsValue]) =
+      stubFor(get(urlMatching(s"$incorpInfoUri/$testTransId/company-profile")).willReturn(buildResponse(status, body)))
 
     "fetch and convert company details" in {
 
@@ -164,13 +159,8 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
         )
       )
 
-    def setupWiremockResult(status: Int, body: Option[JsValue]) = {
-      val response = body match {
-        case Some(value) => aResponse().withStatus(status).withBody(value.toString)
-        case None => aResponse().withStatus(status)
-      }
-      stubFor(get(urlMatching(s"$incorpInfoUri/$testTransId/officer-list")).willReturn(response))
-    }
+    def setupWiremockResult(status: Int, body: Option[JsValue]) =
+      stubFor(get(urlMatching(s"$incorpInfoUri/$testTransId/officer-list")).willReturn(buildResponse(status, body)))
 
     "get an officer list" in {
 
@@ -248,13 +238,6 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
       setupWiremockResult(NOT_FOUND, None)
 
       intercept[OfficerListNotFoundException](await(incorpInfoConnector.getOfficerList(testTransId, testRegId)))
-    }
-
-    "throw a BadRequestException" in {
-
-      setupWiremockResult(BAD_REQUEST, None)
-
-      intercept[BadRequestException](await(incorpInfoConnector.getOfficerList(testTransId, testRegId)))
     }
 
     "throw an Exception" in {
