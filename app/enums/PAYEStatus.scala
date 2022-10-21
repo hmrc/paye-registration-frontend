@@ -28,4 +28,5 @@ object PAYEStatus extends Enumeration {
   val cancelled : Value = Value
 
   implicit val format : Format[PAYEStatus.Value] = Format(Reads.enumNameReads(PAYEStatus), Writes.enumNameWrites)
+  val payeRegResponseReads: Reads[PAYEStatus.Value] = (__ \ "status").read[PAYEStatus.Value]
 }

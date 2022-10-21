@@ -453,7 +453,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         stubGetRegistrationId(NOT_FOUND, None)
 
         intercept[Exception](await(payeRegistrationConnector.getRegistrationId(txnId))).getMessage mustBe
-          "GET of 'http://localhost:11111/paye-registration/67890/registration-id' returned 404 (Not Found). Response body: ''"
+          "Calling url: 'http://localhost:11111/paye-registration/67890/registration-id' returned unexpected status: '404' for txId: '67890'"
       }
 
       "return an exception when any other unexpected status returned" in {
@@ -461,7 +461,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         stubGetRegistrationId(INTERNAL_SERVER_ERROR, None)
 
         intercept[Exception](await(payeRegistrationConnector.getRegistrationId(txnId))).getMessage mustBe
-          "GET of 'http://localhost:11111/paye-registration/67890/registration-id' returned 500. Response body: ''"
+          "Calling url: 'http://localhost:11111/paye-registration/67890/registration-id' returned unexpected status: '500' for txId: '67890'"
       }
     }
   }

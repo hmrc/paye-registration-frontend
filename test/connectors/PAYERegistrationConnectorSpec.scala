@@ -177,37 +177,37 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
 
   "Calling getEmployment" should {
     "return the correct PAYEResponse when the microservice returns an Employment API model" in new Setup {
-      mockHttpGet[HttpResponse]("tst-url", HttpResponse(200, json = Json.toJson(Fixtures.validEmploymentApi), headers = Map()))
+      mockHttpGet[Option[Employment]]("tst-url", Some(Fixtures.validEmploymentApi))
 
       await(connector.getEmployment("tstID")) mustBe Some(Fixtures.validEmploymentApi)
     }
 
     "return a None when the microservice returns a 204 status code" in new Setup {
-      mockHttpGet[HttpResponse]("tst-url", noContent)
+      mockHttpGet[Option[Employment]]("tst-url", None)
 
       await(connector.getEmployment("tstID")) mustBe None
     }
 
     "return the correct PAYEResponse when a Bad Request response is returned by the microservice" in new Setup {
-      mockHttpFailedGET[Employment]("tst-url", badRequest)
+      mockHttpFailedGET[Option[Employment]]("tst-url", badRequest)
 
       intercept[BadRequestException](await(connector.getEmployment("tstID")))
     }
 
     "return the correct PAYEResponse when a Forbidden response is returned by the microservice" in new Setup {
-      mockHttpFailedGET[Employment]("test-url", forbidden)
+      mockHttpFailedGET[Option[Employment]]("test-url", forbidden)
 
       intercept[UpstreamErrorResponse](await(connector.getEmployment("tstID")))
     }
 
     "return a exception PAYEResponse when the microservice returns no doc" in new Setup {
-      mockHttpFailedGET[Employment]("tst-url", notFound)
+      mockHttpFailedGET[Option[Employment]]("tst-url", notFound)
 
       intercept[NotFoundException](await(connector.getEmployment("tstID")))
     }
 
     "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
-      mockHttpFailedGET[Employment]("tst-url", internalServiceException)
+      mockHttpFailedGET[Option[Employment]]("tst-url", internalServiceException)
 
       intercept[InternalServerException](await(connector.getEmployment("tstID")))
     }
@@ -256,12 +256,6 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
       mockHttpFailedGET[Seq[Director]]("test-url", forbidden)
 
       intercept[UpstreamErrorResponse](await(connector.getDirectors("tstID")))
-    }
-
-    "return a Not Found PAYEResponse when the microservice returns no Employment API model" in new Setup {
-      mockHttpFailedGET[Seq[Director]]("tst-url", notFound)
-
-      await(connector.getDirectors("tstID")) mustBe Seq.empty
     }
 
     "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
@@ -314,12 +308,6 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
       mockHttpFailedGET[Seq[SICCode]]("test-url", forbidden)
 
       intercept[UpstreamErrorResponse](await(connector.getSICCodes("tstID")))
-    }
-
-    "return a Not Found PAYEResponse when the microservice returns no Employment API model" in new Setup {
-      mockHttpFailedGET[Seq[SICCode]]("tst-url", notFound)
-
-      await(connector.getSICCodes("tstID")) mustBe Seq.empty
     }
 
     "return the correct PAYEResponse when an Internal Server Error response is returned by the microservice" in new Setup {
@@ -504,74 +492,40 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
 
   "calling submitRegistration" should {
     "return a Success" in new Setup {
-      mockHttpPUT[String, HttpResponse]("test-url", ok)
-
+      mockHttpPUT[String, DESResponse]("test-url", Success)
       await(connector.submitRegistration("tstID")) mustBe Success
     }
 
-    "return a NoContent" in new Setup {
-      mockHttpPUT[String, HttpResponse]("test-url", noContent)
-
-      await(connector.submitRegistration("tstID")) mustBe Cancelled
-    }
-
-    "return a Failed" in new Setup {
-      mockHttpFailedPUT[String, HttpResponse]("test-url", badRequest)
+    "return Failed when Exception thrown" in new Setup {
+      mockHttpFailedPUT[String, DESResponse]("test-url", new Exception("foo"))
 
       await(connector.submitRegistration("tstID")) mustBe Failed
-    }
-
-    "return a TimedOut" in new Setup {
-      mockHttpFailedPUT[String, HttpResponse]("test-url", upstream5xx)
-
-      await(connector.submitRegistration("tstID")) mustBe TimedOut
     }
   }
 
   "deleteRejectedRegistrationDocument" should {
     "return a RegistrationDeletion Success" in new Setup {
-      mockHttpDelete[HttpResponse](ok)
+      mockHttpDelete[RegistrationDeletion.Value](RegistrationDeletion.success)
 
       val result: RegistrationDeletion.Value = await(connector.deleteRejectedRegistrationDocument("testRegId", "testTxID"))
       result mustBe RegistrationDeletion.success
     }
+    "return a Exception on error" in new Setup {
+      mockHttpFailedDelete[RegistrationDeletion.Value](UpstreamErrorResponse("msg", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR))
 
-    "return a RegistrationDeletion failure" in new Setup {
-      mockHttpFailedDelete[HttpResponse](UpstreamErrorResponse("msg", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR))
-
-      intercept[UpstreamErrorResponse](await(connector.deleteRejectedRegistrationDocument("testRegId", "testTxID")))
-    }
-
-    "return a RegistrationDeletion invalidStatus" in new Setup {
-      mockHttpFailedDelete[HttpResponse](UpstreamErrorResponse("msg", PRECONDITION_FAILED, PRECONDITION_FAILED))
-
-      val result: RegistrationDeletion.Value = await(connector.deleteRejectedRegistrationDocument("testRegId", "testTxID"))
-      result mustBe RegistrationDeletion.invalidStatus
+      intercept[Exception](await(connector.deleteRejectedRegistrationDocument("testRegId", "testTxID")))
     }
   }
 
   "deleteRegistrationForRejectedIncorp" should {
     "return a success" in new Setup {
-      mockHttpDelete[HttpResponse](ok)
+      mockHttpDelete[RegistrationDeletion.Value](RegistrationDeletion.success)
 
       val result: RegistrationDeletion.Value = await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId"))
       result mustBe RegistrationDeletion.success
     }
-
-    "return an invalid status" in new Setup {
-      mockHttpFailedDelete[HttpResponse](UpstreamErrorResponse("msg", PRECONDITION_FAILED, PRECONDITION_FAILED))
-
-      val result: RegistrationDeletion.Value = await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId"))
-      result mustBe RegistrationDeletion.invalidStatus
-    }
-    "return a not found when 404 is returned from paye reg" in new Setup {
-      mockHttpFailedDelete[HttpResponse](UpstreamErrorResponse("msg", 404, 404))
-
-      val result: RegistrationDeletion.Value = await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId"))
-      result mustBe RegistrationDeletion.notfound
-    }
     "throw an UpstreamErrorResponse" in new Setup {
-      mockHttpFailedDelete[HttpResponse](UpstreamErrorResponse("msg", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR))
+      mockHttpFailedDelete[RegistrationDeletion.Value](UpstreamErrorResponse("msg", INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR))
 
       intercept[UpstreamErrorResponse](await(connector.deleteRegistrationForRejectedIncorp("testRegId", "testTxId")))
     }

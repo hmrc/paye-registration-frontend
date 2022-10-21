@@ -16,6 +16,7 @@
 
 package connectors
 
+import common.exceptions.DownstreamExceptions
 import enums.IncorporationStatus
 import helpers.mocks.MockMetrics
 import helpers.{PayeComponentSpec, PayeFakedApp}
@@ -91,9 +92,9 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with PayeF
       await(connector.getIncorporationInfoDate(testRegId, testTransId)) mustBe Some(incorpDate)
     }
 
-    "return an InternalServerException when unexpected failed future occurs" in new Setup(true) {
-      mockHttpGet[Option[LocalDate]](connector.incorpInfoUrl, Future.failed(new Exception("tstException")))
-      intercept[InternalServerException](await(connector.getIncorporationInfoDate(testRegId, testTransId)))
+    "return an IncorporationInformationResponseException when unexpected failed future occurs" in new Setup(true) {
+      mockHttpGet[Option[LocalDate]](connector.incorpInfoUrl, Future.failed(new DownstreamExceptions.IncorporationInformationResponseException("tstException")))
+      intercept[DownstreamExceptions.IncorporationInformationResponseException](await(connector.getIncorporationInfoDate(testRegId, testTransId)))
     }
   }
 

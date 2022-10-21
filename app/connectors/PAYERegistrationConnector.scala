@@ -20,13 +20,9 @@ import config.AppConfig
 import connectors.httpParsers.PAYERegistrationHttpParsers
 import enums.{DownstreamOutcome, PAYEStatus, RegistrationDeletion}
 import models.api.{Director, Employment, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
-import play.api.http.Status._
-import play.api.libs.json.{JsObject, Reads}
 import services.MetricsService
-import uk.gov.hmrc.http.UpstreamErrorResponse.unapply
 import uk.gov.hmrc.http._
 
-import java.util.NoSuchElementException
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -49,46 +45,40 @@ class PAYERegistrationConnector @Inject()(val metricsService: MetricsService,
       }
     }
 
-  def getRegistration(regID: String)(implicit hc: HeaderCarrier): Future[PAYERegistrationAPI] = withTimer {
-    withRecovery()("getRegistration", Some(regID)) {
-      http.GET[PAYERegistrationAPI](s"$payeRegUrl/paye-registration/$regID")
+  def getRegistration(regID: String)(implicit hc: HeaderCarrier): Future[PAYERegistrationAPI] =
+    withTimer {
+      withRecovery()("getRegistration", Some(regID)) {
+        http.GET[PAYERegistrationAPI](s"$payeRegUrl/paye-registration/$regID")(httpReads("getRegistration", Some(regID)), hc, ec)
+      }
     }
-  }
 
   def getRegistrationId(txId: String)(implicit hc: HeaderCarrier): Future[String] =
     withTimer {
       withRecovery()("getRegistration", txId = Some(txId)) {
-        http.GET[String](s"$payeRegUrl/paye-registration/$txId/registration-id")
+        http.GET[String](s"$payeRegUrl/paye-registration/$txId/registration-id")(httpReads("getRegistrationId", txId = Some(txId)), hc, ec)
       }
     }
 
   def submitRegistration(regId: String)(implicit hc: HeaderCarrier): Future[DESResponse] =
     withTimer {
       withRecovery[DESResponse](Some(Failed))("submitRegistration", Some(regId)) {
-        http.PUT[String, HttpResponse](s"$payeRegUrl/paye-registration/$regId/submit-registration", "") map {
-          _.status match {
-            case OK => Success
-            case NO_CONTENT => Cancelled
-          }
-        } recover {
-          case error: UpstreamErrorResponse if UpstreamErrorResponse.Upstream5xxResponse.unapply(error).isDefined =>
-            logger.error("[submitRegistration] Timed out when submitting PAYE Registration to DES")
-            TimedOut
-        }
+        http.PUT[String, DESResponse](s"$payeRegUrl/paye-registration/$regId/submit-registration", "")(implicitly, submitRegistrationHttpReads(regId), hc, ec)
       }
     }
 
   def getCompanyDetails(regID: String)(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsAPI]] =
     withTimer {
       withRecovery()("getCompanyDetails", Some(regID)) {
-        http.GET[Option[CompanyDetailsAPI]](s"$payeRegUrl/paye-registration/$regID/company-details")
+        http.GET[Option[CompanyDetailsAPI]](s"$payeRegUrl/paye-registration/$regID/company-details")(optionHttpReads("getCompanyDetails", Some(regID)), hc, ec)
       }
     }
 
   def upsertCompanyDetails(regID: String, companyDetails: CompanyDetailsAPI)(implicit hc: HeaderCarrier): Future[CompanyDetailsAPI] =
     withTimer {
       withRecovery()("upsertCompanyDetails", Some(regID)) {
-        http.PATCH[CompanyDetailsAPI, CompanyDetailsAPI](s"$payeRegUrl/paye-registration/$regID/company-details", companyDetails)
+        http.PATCH[CompanyDetailsAPI, CompanyDetailsAPI](s"$payeRegUrl/paye-registration/$regID/company-details", companyDetails)(
+          implicitly, httpReads("upsertCompanyDetails", Some(regID)), hc, ec
+        )
       }
     }
 
@@ -96,144 +86,118 @@ class PAYERegistrationConnector @Inject()(val metricsService: MetricsService,
     withTimer {
       withRecovery()("getEmployment", Some(regID)) {
         val url = s"$payeRegUrl/paye-registration/$regID/employment-info"
-        http.GET[HttpResponse](url) map { employment =>
-          if (employment.status == 204) None else employment.json.validate[Employment] fold(
-            _ => throw new NoSuchElementException(s"Call to $url returned a ${employment.status} but no Employment could be created"),
-            Some(_)
-          )
-        }
+        http.GET[Option[Employment]](url)(optionHttpReads("getEmployment", Some(regID)), hc, ec)
       }
     }
 
   def upsertEmployment(regID: String, employment: Employment)(implicit hc: HeaderCarrier): Future[Employment] =
     withTimer {
       withRecovery()("upsertEmployment", Some(regID)) {
-        http.PATCH[Employment, Employment](s"$payeRegUrl/paye-registration/$regID/employment-info", employment)
+        http.PATCH[Employment, Employment](s"$payeRegUrl/paye-registration/$regID/employment-info", employment)(
+          implicitly, httpReads("upsertEmployment", Some(regID)), hc, ec
+        )
       }
     }
 
   def getDirectors(regID: String)(implicit hc: HeaderCarrier): Future[Seq[Director]] =
     withTimer {
       withRecovery()("getDirectors", Some(regID)) {
-        http.GET[Seq[Director]](s"$payeRegUrl/paye-registration/$regID/directors") recover {
-          case _: NotFoundException =>
-            Seq.empty
-        }
+        http.GET[Seq[Director]](s"$payeRegUrl/paye-registration/$regID/directors")(seqHttpReads("getDirectors", Some(regID)), hc, ec)
       }
     }
 
-  def upsertDirectors(regID: String, directors: Seq[Director])(implicit hc: HeaderCarrier, rds: HttpReads[Seq[Director]]) =
+  def upsertDirectors(regID: String, directors: Seq[Director])(implicit hc: HeaderCarrier) =
     withTimer {
       withRecovery()("upsertDirectors", Some(regID)) {
-        http.PATCH[Seq[Director], Seq[Director]](s"$payeRegUrl/paye-registration/$regID/directors", directors)
+        http.PATCH[Seq[Director], Seq[Director]](s"$payeRegUrl/paye-registration/$regID/directors", directors)(
+          implicitly, httpReads("upsertDirectors", Some(regID)), hc, ec
+        )
       }
     }
 
   def getSICCodes(regID: String)(implicit hc: HeaderCarrier): Future[Seq[SICCode]] =
     withTimer {
       withRecovery()("getSICCodes", Some(regID)) {
-        http.GET[Seq[SICCode]](s"$payeRegUrl/paye-registration/$regID/sic-codes") recover {
-          case _: NotFoundException =>
-            Seq.empty
-        }
+        http.GET[Seq[SICCode]](s"$payeRegUrl/paye-registration/$regID/sic-codes")(seqHttpReads("getSICCodes", Some(regID)), hc, ec)
       }
     }
 
-  def upsertSICCodes(regID: String, sicCodes: Seq[SICCode])(implicit hc: HeaderCarrier, rds: HttpReads[Seq[SICCode]]) =
+  def upsertSICCodes(regID: String, sicCodes: Seq[SICCode])(implicit hc: HeaderCarrier) =
     withTimer {
       withRecovery()("upsertSICCodes", Some(regID)) {
-        http.PATCH[Seq[SICCode], Seq[SICCode]](s"$payeRegUrl/paye-registration/$regID/sic-codes", sicCodes)
+        http.PATCH[Seq[SICCode], Seq[SICCode]](s"$payeRegUrl/paye-registration/$regID/sic-codes", sicCodes)(
+          implicitly, httpReads("upsertSICCodes", Some(regID)), hc, ec
+        )
       }
     }
 
-  def getPAYEContact(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[PAYEContact]): Future[Option[PAYEContact]] =
+  def getPAYEContact(regID: String)(implicit hc: HeaderCarrier): Future[Option[PAYEContact]] =
     withTimer {
       withRecovery()("getPAYEContact", Some(regID)) {
-        http.GET[Option[PAYEContact]](s"$payeRegUrl/paye-registration/$regID/contact-correspond-paye")
+        http.GET[Option[PAYEContact]](s"$payeRegUrl/paye-registration/$regID/contact-correspond-paye")(optionHttpReads("getPAYEContact", Some(regID)), hc, ec)
       }
     }
 
-  def upsertPAYEContact(regID: String, payeContact: PAYEContact)(implicit hc: HeaderCarrier, rds: HttpReads[PAYEContact]): Future[PAYEContact] =
+  def upsertPAYEContact(regID: String, payeContact: PAYEContact)(implicit hc: HeaderCarrier): Future[PAYEContact] =
     withTimer {
       withRecovery()("upsertPAYEContact", Some(regID)) {
-        http.PATCH[PAYEContact, PAYEContact](s"$payeRegUrl/paye-registration/$regID/contact-correspond-paye", payeContact)
+        http.PATCH[PAYEContact, PAYEContact](s"$payeRegUrl/paye-registration/$regID/contact-correspond-paye", payeContact)(
+          implicitly, httpReads("upsertPAYEContact", Some(regID)), hc, ec
+        )
       }
     }
 
-  def getCompletionCapacity(regID: String)(implicit hc: HeaderCarrier, rds: HttpReads[String]): Future[Option[String]] =
+  def getCompletionCapacity(regID: String)(implicit hc: HeaderCarrier): Future[Option[String]] =
     withTimer {
       withRecovery()("getCompletionCapacity", Some(regID)) {
-        http.GET[Option[String]](s"$payeRegUrl/paye-registration/$regID/capacity")
+        http.GET[Option[String]](s"$payeRegUrl/paye-registration/$regID/capacity")(optionHttpReads("getCompletionCapacity", Some(regID)), hc, ec)
       }
     }
 
-  def upsertCompletionCapacity(regID: String, completionCapacity: String)(implicit hc: HeaderCarrier, rds: HttpReads[String]): Future[String] =
+  def upsertCompletionCapacity(regID: String, completionCapacity: String)(implicit hc: HeaderCarrier): Future[String] =
     withTimer {
       withRecovery()("upsertCompletionCapacity", Some(regID)) {
-        http.PATCH[String, String](s"$payeRegUrl/paye-registration/$regID/capacity", completionCapacity)
+        http.PATCH[String, String](s"$payeRegUrl/paye-registration/$regID/capacity", completionCapacity)(
+          implicitly, httpReads("upsertCompletionCapacity", Some(regID)), hc, ec
+        )
       }
     }
 
   def getAcknowledgementReference(regID: String)(implicit hc: HeaderCarrier): Future[Option[String]] =
     withTimer {
       withRecovery()("getAcknowledgementReference", Some(regID)) {
-        http.GET[Option[String]](s"$payeRegUrl/paye-registration/$regID/acknowledgement-reference")
+        http.GET[Option[String]](s"$payeRegUrl/paye-registration/$regID/acknowledgement-reference")(optionHttpReads("getAcknowledgementReference", Some(regID)), hc, ec)
       }
     }
 
   def getStatus(regId: String)(implicit hc: HeaderCarrier): Future[Option[PAYEStatus.Value]] =
     withTimer {
       withRecovery[Option[PAYEStatus.Value]](None)("getAcknowledgementReference", Some(regId)) {
-        http.GET[JsObject](s"$payeRegUrl/paye-registration/$regId/status") map { json =>
-          Some((json \ "status").as[PAYEStatus.Value](Reads.enumNameReads(PAYEStatus)))
-        } recover {
-          case _: NotFoundException =>
-            logger.info(s"[getStatus] received NotFound when checking status for regId $regId")
-            None
-        }
+        http.GET[Option[PAYEStatus.Value]](s"$payeRegUrl/paye-registration/$regId/status")(
+          optionHttpReads("getStatus", Some(regId))(PAYEStatus.payeRegResponseReads, manifest[PAYEStatus.Value]), hc, ec
+        )
       }
     }
 
   def deleteRejectedRegistrationDocument(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] =
     withRecovery()("deleteRejectedRegistrationDocument", Some(regId), Some(txId)) {
-      http.DELETE[HttpResponse](s"$payeRegUrl/paye-registration/$regId/delete") map {
-        _.status match {
-          case OK => RegistrationDeletion.success
-        }
-      } recover {
-        case response: UpstreamErrorResponse if response.statusCode == PRECONDITION_FAILED =>
-          logger.warn(s"[deleteRejectedRegistrationDocument] Deleting document for regId $regId and txId $txId failed as document was not rejected")
-          RegistrationDeletion.invalidStatus
-      }
+      http.DELETE[RegistrationDeletion.Value](s"$payeRegUrl/paye-registration/$regId/delete")(
+        deletionHttpReads("deleteRejectedRegistrationDocument", regId, txId), hc, ec
+      )
     }
 
   def deleteCurrentRegistrationInProgress(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] =
     withRecovery()("deleteCurrentRegistrationInProgress", Some(regId), Some(txId)) {
-      http.DELETE[HttpResponse](s"$payeRegUrl/paye-registration/$regId/delete-in-progress") map {
-        _.status match {
-          case OK => RegistrationDeletion.success
-        }
-      } recover {
-        case response: UpstreamErrorResponse if response.statusCode == PRECONDITION_FAILED =>
-          logger.warn(s"[deleteCurrentRegistrationInProgress] Deleting document for regId $regId and txId $txId failed as document was not draft or invalid")
-          RegistrationDeletion.invalidStatus
-      }
+      http.DELETE[RegistrationDeletion.Value](s"$payeRegUrl/paye-registration/$regId/delete-in-progress")(
+        deletionHttpReads("deleteCurrentRegistrationInProgress", regId, txId), hc, ec
+      )
     }
 
   def deleteRegistrationForRejectedIncorp(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] =
     withRecovery()("deleteRegistrationForRejectedIncorp", Some(regId), Some(txId)) {
-      http.DELETE[HttpResponse](s"$payeRegUrl/paye-registration/$regId/delete-rejected-incorp") map {
-        _.status match {
-          case OK => RegistrationDeletion.success
-        }
-      } recover {
-        case response: UpstreamErrorResponse if response.statusCode == PRECONDITION_FAILED =>
-          logger.warn(s"[deleteRegistrationForRejectedIncorp] Deleting document for regId $regId and txId $txId failed as document was not draft or invalid")
-          RegistrationDeletion.invalidStatus
-        case response: UpstreamErrorResponse if response.statusCode == NOT_FOUND =>
-          logger.warn(s"[deleteRegistrationForRejectedIncorp] paye reg returned 404 when expecting to find one for $regId : $txId ")
-          RegistrationDeletion.notfound
-      }
+      http.DELETE[RegistrationDeletion.Value](s"$payeRegUrl/paye-registration/$regId/delete-rejected-incorp")(
+        deletionHttpReads("deleteRegistrationForRejectedIncorp", regId, txId), hc, ec
+      )
     }
 
   // Test Endpoint
@@ -248,10 +212,4 @@ class PAYERegistrationConnector @Inject()(val metricsService: MetricsService,
 
   private def withTimer[T](f: => Future[T]) =
     metricsService.processDataResponseWithMetrics(metricsService.payeRegistrationResponseTimer.time())(f)
-
-  private def withRecovery[T](response: => Option[T] = None)(functionName: String, regId: Option[String] = None, txId: Option[String] = None)(f: => Future[T]) =
-    f recover { case ex: Exception =>
-      logger.error(s"[$functionName] Exception of type '${ex.getClass.getSimpleName}' was thrown${regId.fold("")(" for regId: " + _)}${txId.fold("")(" for txId: " + _)}")
-      response.fold(throw ex)(identity)
-    }
 }

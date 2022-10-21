@@ -39,7 +39,7 @@ class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with Log
 
   "IncorporationInformationHttpParsers" when {
 
-    "calling .requestEmailToBeSentHttpReads" when {
+    "calling .setupSubscriptionHttpReads" when {
 
       val incorStatusResponseJson = Json.obj(
         "SCRSIncorpStatus" -> Json.obj(
@@ -84,7 +84,7 @@ class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with Log
             val e = intercept[JsResultException](IncorporationInformationHttpParsers.setupSubscriptionHttpReads(regId, transactionId, subscriber, regime)
               .read("", "", HttpResponse(OK, json = incorStatusResponseJsonWrongUser, Map())))
 
-            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][setupSubscriptionHttpReads] JSON returned from incorporation-information could not be parsed regId: $regId and txId: $transactionId")
+            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][setupSubscriptionHttpReads] JSON returned could not be parsed to scala.Enumeration$$Value model for regId: '$regId' and txId: '$transactionId'")
           }
         }
       }
@@ -97,7 +97,7 @@ class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with Log
             intercept[JsResultException](IncorporationInformationHttpParsers.setupSubscriptionHttpReads(regId, transactionId, subscriber, regime)
               .read("", "", HttpResponse(OK, json = Json.obj(), Map())))
 
-            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][setupSubscriptionHttpReads] JSON returned from incorporation-information could not be parsed regId: $regId and txId: $transactionId")
+            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][setupSubscriptionHttpReads] JSON returned could not be parsed to scala.Enumeration$$Value model for regId: '$regId' and txId: '$transactionId'")
           }
         }
       }
@@ -117,9 +117,9 @@ class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with Log
 
           withCaptureOfLoggingFrom(IncorporationInformationHttpParsers.logger) { logs =>
             intercept[DownstreamExceptions.IncorporationInformationResponseException](IncorporationInformationHttpParsers.setupSubscriptionHttpReads(regId, transactionId, subscriber, regime)
-              .read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              .read("", "/foo/bar", HttpResponse(INTERNAL_SERVER_ERROR, "")))
 
-            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][setupSubscription] An unexpected response was received when calling II for regId: $regId and txId: $transactionId. Status: '$INTERNAL_SERVER_ERROR'")
+            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][setupSubscription] Calling url: '/foo/bar' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId' and txId: '$transactionId'")
           }
         }
       }
@@ -155,7 +155,7 @@ class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with Log
           withCaptureOfLoggingFrom(IncorporationInformationHttpParsers.logger) { logs =>
             IncorporationInformationHttpParsers.cancelSubscriptionHttpReads(regId, transactionId)
               .read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")) mustBe false
-            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][cancelSubscriptionHttpReads] An unexpected response was received when calling II for regId: $regId and txId: $transactionId. Status: '$INTERNAL_SERVER_ERROR'")
+            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][cancelSubscriptionHttpReads] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId' and txId: '$transactionId'")
           }
         }
       }
@@ -191,7 +191,7 @@ class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with Log
             intercept[JsResultException](IncorporationInformationHttpParsers.getCoHoCompanyDetailsHttpReads(regId, transactionId)
               .read("", "", HttpResponse(OK, json = Json.obj(), Map())) mustBe IncorpInfoSuccessResponse(companyDetails))
 
-            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][getCoHoCompanyDetailsHttpReads] JSON returned from incorporation-information could not be parsed for regId: $regId and txId: $transactionId")
+            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][getCoHoCompanyDetailsHttpReads] JSON returned could not be parsed to models.external.CoHoCompanyDetailsModel model for regId: '$regId' and txId: '$transactionId'")
           }
         }
       }
@@ -227,7 +227,7 @@ class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with Log
           withCaptureOfLoggingFrom(IncorporationInformationHttpParsers.logger) { logs =>
             intercept[DownstreamExceptions.IncorporationInformationResponseException](IncorporationInformationHttpParsers.getCoHoCompanyDetailsHttpReads(regId, transactionId)
               .read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
-            logs.containsMsg(Level.ERROR, s"An unexpected response was received when calling II for regId: $regId and txId: $transactionId. Status: '$INTERNAL_SERVER_ERROR'")
+            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][getCoHoCompanyDetailsHttpReads] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId' and txId: '$transactionId'")
           }
         }
       }
@@ -294,7 +294,7 @@ class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with Log
           withCaptureOfLoggingFrom(IncorporationInformationHttpParsers.logger) { logs =>
             intercept[DownstreamExceptions.IncorporationInformationResponseException](IncorporationInformationHttpParsers.getIncorpInfoDateHttpReads(regId, transactionId)
               .read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
-            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][getIncorpInfoDateHttpReads] An unexpected response was received when calling II for regId: $regId and txId: $transactionId. Status: '$INTERNAL_SERVER_ERROR'")
+            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][getIncorpInfoDateHttpReads] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId' and txId: '$transactionId'")
           }
         }
       }
@@ -362,7 +362,7 @@ class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with Log
             intercept[JsResultException](IncorporationInformationHttpParsers.getOfficersHttpReads(regId, transactionId)
               .read("", "", HttpResponse(OK, json = Json.obj(), Map())))
 
-            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][getOfficersHttpReads] JSON returned from incorporation-information could not be parsed for regId: $regId and txId: $transactionId")
+            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][getOfficersHttpReads] JSON returned could not be parsed to models.external.OfficerList model for regId: '$regId' and txId: '$transactionId'")
           }
         }
       }
@@ -400,7 +400,7 @@ class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with Log
           withCaptureOfLoggingFrom(IncorporationInformationHttpParsers.logger) { logs =>
             intercept[DownstreamExceptions.IncorporationInformationResponseException](IncorporationInformationHttpParsers.getOfficersHttpReads(regId, transactionId)
               .read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
-            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][getOfficerList] An unexpected response was received when calling II for regId: $regId and txId: $transactionId. Status: '$INTERNAL_SERVER_ERROR'")
+            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][getOfficerList] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId' and txId: '$transactionId'")
           }
         }
       }

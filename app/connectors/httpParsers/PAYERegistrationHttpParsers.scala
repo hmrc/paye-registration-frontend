@@ -17,30 +17,47 @@
 package connectors.httpParsers
 
 import common.exceptions
-import common.exceptions.DownstreamExceptions
-import connectors.{IncorpInfoBadRequestResponse, IncorpInfoNotFoundResponse, IncorpInfoResponse, IncorpInfoSuccessResponse}
-import enums.{DownstreamOutcome, IncorporationStatus}
-import models.external.{CoHoCompanyDetailsModel, IncorpUpdateResponse, OfficerList}
+import connectors.{Cancelled, DESResponse, TimedOut, Success => DESSuccess}
+import enums.{DownstreamOutcome, RegistrationDeletion}
 import play.api.http.Status._
-import uk.gov.hmrc.http.{HttpErrorFunctions, HttpReads, HttpResponse}
-import utils.Logging
+import uk.gov.hmrc.http.HttpReads.is5xx
+import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
-import java.time.LocalDate
-import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
+trait PAYERegistrationHttpParsers extends BaseHttpReads {
 
-trait PAYERegistrationHttpParsers extends Logging with HttpErrorFunctions {
+  override def unexpectedStatusException(url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
+    new exceptions.DownstreamExceptions.PAYEMicroserviceException(s"Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")
 
   def createNewRegistrationHttpReads(regId: String, transactionId: String): HttpReads[DownstreamOutcome.Value] =
     (_: String, url: String, response: HttpResponse) => response.status match {
       case OK => DownstreamOutcome.Success
       case status =>
-        unexpectedStatusHandling("createNewRegistrationHttpReads", regId, transactionId, url, status, Some(DownstreamOutcome.Failure))
+        unexpectedStatusHandling(Some(DownstreamOutcome.Failure))("createNewRegistrationHttpReads", url, status, Some(regId), Some(transactionId))
     }
 
-  private def unexpectedStatusHandling[T](functionName: String, regId: String, transactionId: String, url: String, status: Int, defaultResult: => Option[T] = None): T = {
-    logger.error(s"[$functionName] An unexpected response was received when calling paye-registration for regId: $regId and txId: $transactionId. Status: '$status'")
-    defaultResult.fold(throw new exceptions.DownstreamExceptions.PAYEMicroserviceException(s"Calling paye-registration on $url returned status: '$status'"))(identity)
+  def submitRegistrationHttpReads(regId: String): HttpReads[DESResponse] =
+    (_: String, url: String, response: HttpResponse) => response.status match {
+      case OK => DESSuccess
+      case NO_CONTENT => Cancelled
+      case status if is5xx(status) =>
+        logger.error("[submitRegistrationHttpReads] Timed out when submitting PAYE Registration to DES")
+        TimedOut
+      case status =>
+        unexpectedStatusHandling()("submitRegistrationHttpReads", url, status, Some(regId))
+    }
+
+  def deletionHttpReads(functionName: String, regId: String, txId: String): HttpReads[RegistrationDeletion.Value] = {
+    (_: String, url: String, response: HttpResponse) => response.status match {
+      case OK | NO_CONTENT | ACCEPTED => RegistrationDeletion.success
+      case PRECONDITION_FAILED =>
+        logger.warn(s"[$functionName] Deleting document for regId $regId and txId $txId failed as document was not rejected")
+        RegistrationDeletion.invalidStatus
+      case NOT_FOUND =>
+        logger.info(s"[$functionName] paye reg returned 404 when expecting to find one to delete for $regId : $txId ")
+        RegistrationDeletion.notfound
+      case status =>
+        unexpectedStatusHandling()(functionName, url, status, Some(regId), Some(txId))
+    }
   }
 }
 
