@@ -17,15 +17,16 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import common.exceptions.DownstreamExceptions
 import itutil.{IntegrationSpecBase, WiremockHelper}
-import models.{Address, DigitalContactDetails}
 import models.external._
 import models.view.PAYEContactDetails
+import models.{Address, DigitalContactDetails}
 import play.api.Application
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 
 class BusinessRegistrationConnectorISpec extends IntegrationSpecBase {
 
@@ -67,18 +68,11 @@ class BusinessRegistrationConnectorISpec extends IntegrationSpecBase {
         result mustBe businessProfile
       }
 
-      "handle a NOT_FOUND returning the NOT_FOUND_EXCEPTION" in {
-
-        stubRetrieveCurrentProfile(NOT_FOUND, None)
-
-        intercept[NotFoundException](await(connector.retrieveCurrentProfile))
-      }
-
-      "handle any other response returning an UpstreamErrorResponse" in {
+      "handle any other response returning an BusinessRegistrationException" in {
 
         stubRetrieveCurrentProfile(INTERNAL_SERVER_ERROR, None)
 
-        intercept[UpstreamErrorResponse](await(connector.retrieveCurrentProfile))
+        intercept[DownstreamExceptions.BusinessRegistrationException](await(connector.retrieveCurrentProfile))
       }
     }
 
@@ -124,11 +118,11 @@ class BusinessRegistrationConnectorISpec extends IntegrationSpecBase {
         result mustBe None
       }
 
-      "handle any other response returning an UpstreamErrorResponse" in {
+      "handle any other response returning an BusinessRegistrationException" in {
 
         stubRetrieveCompletionCapacity(INTERNAL_SERVER_ERROR, None)
 
-        intercept[UpstreamErrorResponse](await(connector.retrieveCompletionCapacity))
+        intercept[DownstreamExceptions.BusinessRegistrationException](await(connector.retrieveCompletionCapacity))
       }
     }
 

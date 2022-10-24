@@ -38,7 +38,7 @@ case class IncorpInfoErrorResponse(ex: Exception) extends IncorpInfoResponse
 
 class IncorporationInformationConnector @Inject()(val metricsService: MetricsService,
                                                   val http: HttpClient
-                                                 )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends RegistrationAllowlist with IncorporationInformationHttpParsers {
+                                                 )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends BaseConnector with RegistrationAllowlist with IncorporationInformationHttpParsers {
 
   val incorpInfoUrl = appConfig.servicesConfig.baseUrl("incorporation-information")
   val incorpInfoUri = appConfig.servicesConfig.getString("microservice.services.incorporation-information.uri")

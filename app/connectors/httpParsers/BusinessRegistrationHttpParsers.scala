@@ -16,102 +16,50 @@
 
 package connectors.httpParsers
 
+import common.exceptions.DownstreamExceptions
+import connectors.BaseConnector
 import models.Address
 import models.external.BusinessProfile
 import models.view.{CompanyDetails, PAYEContactDetails}
-import play.api.http.Status.{NOT_FOUND, OK}
-import play.api.libs.json.{JsValue, Reads}
-import uk.gov.hmrc.http.{HttpErrorFunctions, HttpReads, HttpResponse, NotFoundException, UpstreamErrorResponse}
-import utils.Logging
+import play.api.libs.json.{Reads, __}
+import uk.gov.hmrc.http.HttpReads
 
-import scala.util.{Failure, Success, Try}
+trait BusinessRegistrationHttpParsers extends BaseHttpReads { _: BaseConnector =>
 
-trait BusinessRegistrationHttpParsers extends Logging with HttpErrorFunctions {
+  override def unexpectedStatusException(url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
+    new DownstreamExceptions.BusinessRegistrationException(s"Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")
 
-  val businessProfileHttpReads: HttpReads[BusinessProfile] = (_: String, _: String, response: HttpResponse) => response.status match {
-      case OK =>
-        Try(response.json.as[BusinessProfile]) match {
-          case Success(business) => business
-          case Failure(e) =>
-            logger.error("[businessProfileHttpReads] JSON returned from business-registration could not be parsed to BusinessProfile model")
-            throw e
-        }
-      case NOT_FOUND =>
-        logger.warn("[businessProfileHttpReads] Business Profile could not be found")
-        throw new NotFoundException("Business Profile could not be found")
-      case status =>
-        logger.error(s"[businessProfileHttpReads] Unexpected Error Occurred when calling business-registration service. Status '$status'")
-        throw UpstreamErrorResponse("Unexpected Error Occurred when calling business-registration service", status)
-    }
+  val businessProfileHttpReads: HttpReads[BusinessProfile] =
+    httpReads("businessProfileHttpReads")
 
-  val retrieveCompletionCapacityHttpReads: HttpReads[Option[String]] = (_: String, _: String, response: HttpResponse) => response.status match {
-      case OK =>
-        (response.json \ "completionCapacity").asOpt[String]
-      case NOT_FOUND =>
-        None
-      case status =>
-        logger.error(s"[retrieveCompletionCapacityHttpReads] Unexpected Error Occurred when calling business-registration service. Status '$status'")
-        throw UpstreamErrorResponse("Unexpected Error Occurred when calling business-registration service", status)
-    }
-
-  val retrieveTradingNameHttpReads: HttpReads[Option[String]] = (_: String, _: String, response: HttpResponse) => response.status match {
-      case OK =>
-        response.json.as[Option[String]](CompanyDetails.tradingNameApiPrePopReads)
-      case _ =>
-        logger.info(s"[retrieveTradingNameHttpReads] No Trading name retrieved from business-registration pre-pop")
-        None
-    }
-
-  def upsertTradingNameHttpReads(tradingName: String): HttpReads[String] = (_: String, _: String, response: HttpResponse) => response.status match {
-    case OK => tradingName
-    case status =>
-      logger.error(s"[upsertTradingNameHttpReads] Unexpected Error Occurred when calling business-registration service. Status '$status'")
-      tradingName
+  val retrieveCompletionCapacityHttpReads: HttpReads[Option[String]] = {
+    implicit val reads = (__ \ "completionCapacity").read[String]
+    optionHttpReads("retrieveCompletionCapacityHttpReads")
   }
 
-  val retrieveContactDetailsHttpReads: HttpReads[Option[PAYEContactDetails]] = (_: String, _: String, response: HttpResponse) => response.status match {
-    case OK =>
-      Try(response.json.as[PAYEContactDetails](PAYEContactDetails.prepopReads)) match {
-        case Success(contactDetails) => Some(contactDetails)
-        case Failure(e) =>
-          logger.error("[retrieveContactDetailsHttpReads] JSON returned from business-registration could not be parsed to PAYEContactDetails model")
-          throw e
-      }
-    case NOT_FOUND =>
-      None
-    case status =>
-      logger.error(s"[retrieveContactDetailsHttpReads] Unexpected Error Occurred when calling business-registration service. Status '$status'")
-      None
+  def retrieveTradingNameHttpReads(regId: String): HttpReads[Option[String]] = {
+    implicit val reads = CompanyDetails.tradingNameApiPrePopReads
+    optionHttpReads("retrieveTradingNameHttpReads", Some(regId), logInfoMsg = true, defaultToNoneOnError = true)
   }
 
-  def upsertContactDetailsHttpReads(contactDetails: PAYEContactDetails): HttpReads[PAYEContactDetails] = (_: String, _: String, response: HttpResponse) => response.status match {
-    case OK => contactDetails
-    case status =>
-      logger.error(s"[upsertContactDetailsHttpReads] Unexpected Error Occurred when calling business-registration service. Status '$status'")
-      contactDetails
+  def upsertTradingNameHttpReads(regId: String, tradingName: String): HttpReads[String] =
+    basicUpsertReads("upsertTradingNameHttpReads", tradingName, Some(regId))
+
+  def retrieveContactDetailsHttpReads(regId: String): HttpReads[Option[PAYEContactDetails]] = {
+    implicit val reads = PAYEContactDetails.prepopReads
+    optionHttpReads("retrieveContactDetailsHttpReads", Some(regId), defaultToNoneOnError = true)
   }
 
-  val retrieveAddressesHttpReads: HttpReads[Seq[Address]] = (_: String, _: String, response: HttpResponse) => response.status match {
-    case OK =>
-      Try((response.json \ "addresses").as[Seq[Address]](Reads.seq(Address.prePopReads))) match {
-        case Success(addresses) => addresses
-        case Failure(e) =>
-          logger.error("[retrieveAddressesHttpReads] JSON returned from business-registration could not be parsed to Seq[Address] model")
-          throw e
-      }
-    case NOT_FOUND =>
-      Seq()
-    case status =>
-      logger.error(s"[retrieveAddressesHttpReads] Unexpected Error Occurred when calling business-registration service. Status '$status'")
-      Seq()
+  def upsertContactDetailsHttpReads(regId: String, contactDetails: PAYEContactDetails): HttpReads[PAYEContactDetails] =
+    basicUpsertReads("upsertContactDetailsHttpReads", contactDetails, Some(regId))
+
+  def retrieveAddressesHttpReads(regId: String): HttpReads[Seq[Address]] = {
+    implicit val reads = (__ \ "addresses").read[Seq[Address]](Reads.seq(Address.prePopReads))
+    seqHttpReads("retrieveAddressesHttpReads", Some(regId), defaultToEmptyOnError = true)(reads, manifest[Address])
   }
 
-  def upsertAddressHttpReads(address: Address): HttpReads[Address] = (_: String, _: String, response: HttpResponse) => response.status match {
-    case OK => address
-    case status =>
-      logger.error(s"[upsertAddressHttpReads] Unexpected Error Occurred when calling business-registration service. Status '$status'")
-      address
-  }
+  def upsertAddressHttpReads(regId: String, address: Address): HttpReads[Address] =
+    basicUpsertReads("upsertAddressHttpReads", address, Some(regId))
 }
 
-object BusinessRegistrationHttpParsers extends BusinessRegistrationHttpParsers
+object BusinessRegistrationHttpParsers extends BusinessRegistrationHttpParsers with BaseConnector

@@ -18,7 +18,7 @@ package connectors.httpParsers
 
 import common.exceptions
 import common.exceptions.DownstreamExceptions
-import connectors.{IncorpInfoBadRequestResponse, IncorpInfoNotFoundResponse, IncorpInfoResponse, IncorpInfoSuccessResponse}
+import connectors.{BaseConnector, IncorpInfoBadRequestResponse, IncorpInfoNotFoundResponse, IncorpInfoResponse, IncorpInfoSuccessResponse}
 import enums.IncorporationStatus
 import models.external.{CoHoCompanyDetailsModel, IncorpUpdateResponse, OfficerList}
 import play.api.http.Status._
@@ -28,10 +28,10 @@ import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import java.time.LocalDate
 import scala.util.{Failure, Success, Try}
 
-trait IncorporationInformationHttpParsers extends BaseHttpReads {
+trait IncorporationInformationHttpParsers extends BaseHttpReads { _: BaseConnector =>
 
   override def unexpectedStatusException(url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
-    new exceptions.DownstreamExceptions.IncorporationInformationResponseException(s"Calling url: '$url' returned unexpected status: '$status' ${logContext(regId, txId)}")
+    new exceptions.DownstreamExceptions.IncorporationInformationResponseException(s"Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")
 
   def setupSubscriptionHttpReads(regId: String, transactionId: String, subscriber: String, regime: String): HttpReads[Option[IncorporationStatus.Value]] =
     (_: String, url: String, response: HttpResponse) => response.status match {
@@ -105,4 +105,4 @@ trait IncorporationInformationHttpParsers extends BaseHttpReads {
     }
 }
 
-object IncorporationInformationHttpParsers extends IncorporationInformationHttpParsers
+object IncorporationInformationHttpParsers extends IncorporationInformationHttpParsers with BaseConnector

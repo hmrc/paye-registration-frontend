@@ -16,18 +16,21 @@
 
 package connectors.httpParsers
 
-import connectors.ALFLocationHeaderNotSetException
+import common.exceptions
+import connectors.{ALFLocationHeaderNotSetException, BaseConnector}
 import models.Address
 import play.api.http.HeaderNames
-import play.api.http.Status.NOT_FOUND
-import uk.gov.hmrc.http.{HttpErrorFunctions, HttpReads, HttpResponse, NotFoundException, UpstreamErrorResponse}
-import utils.Logging
+import uk.gov.hmrc.http.HttpReads.is2xx
+import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
 import scala.util.{Failure, Success, Try}
 
-trait AddressLookupHttpParsers extends Logging with HttpErrorFunctions {
+trait AddressLookupHttpParsers extends BaseHttpReads { _ : BaseConnector =>
 
-  val addressHttpReads: HttpReads[Address] = (_: String, _: String, response: HttpResponse) => response.status match {
+  override def unexpectedStatusException(url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
+    new exceptions.DownstreamExceptions.AddressLookupException(s"Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")
+
+  val addressHttpReads: HttpReads[Address] = (_: String, url: String, response: HttpResponse) => response.status match {
     case status if is2xx(status) =>
       Try(response.json.as[Address](Address.addressLookupReads)) match {
         case Success(address) => address
@@ -35,24 +38,19 @@ trait AddressLookupHttpParsers extends Logging with HttpErrorFunctions {
           logger.error("[addressHttpReads] Address returned from ALF could not be parsed to Address model")
           throw e
       }
-    case NOT_FOUND =>
-      logger.warn("[addressHttpReads] Address could not be found for the supplied journey ID")
-      throw new NotFoundException("Address could not be found for the supplied journey ID")
     case status =>
-      logger.error(s"[addressHttpReads] Unexpected Error Occurred when calling AddressLookup service. Status '$status'")
-      throw UpstreamErrorResponse("Unexpected Error Occurred when calling AddressLookup service", status)
+      unexpectedStatusHandling()("addressHttpReads", url, status)
   }
 
-  val onRampHttpReads: HttpReads[String] = (_: String, _: String, response: HttpResponse) => response.status match {
+  val onRampHttpReads: HttpReads[String] = (_: String, url: String, response: HttpResponse) => response.status match {
     case status if is2xx(status) =>
       response.header(HeaderNames.LOCATION).getOrElse {
         logger.error("[onRampHttpReads] Location header not set in AddressLookup response")
         throw new ALFLocationHeaderNotSetException
       }
     case status =>
-      logger.error(s"[onRampHttpReads] Unexpected Error Occurred when calling AddressLookup service. Status '$status'")
-      throw UpstreamErrorResponse("Unexpected Error Occurred when calling AddressLookup service", status)
+      unexpectedStatusHandling()("onRampHttpReads", url, status)
   }
 }
 
-object AddressLookupHttpParsers extends AddressLookupHttpParsers
+object AddressLookupHttpParsers extends AddressLookupHttpParsers with BaseConnector

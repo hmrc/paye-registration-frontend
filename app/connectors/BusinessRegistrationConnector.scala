@@ -29,75 +29,73 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class BusinessRegistrationConnector @Inject()(val metricsService: MetricsService,
                                               val http: HttpClient,
-                                              appConfig: AppConfig)(implicit val ec: ExecutionContext) extends BusinessRegistrationHttpParsers {
+                                              appConfig: AppConfig)(implicit val ec: ExecutionContext) extends BaseConnector with BusinessRegistrationHttpParsers {
 
   val businessRegUrl = appConfig.servicesConfig.baseUrl("business-registration")
 
   def retrieveCurrentProfile(implicit hc: HeaderCarrier): Future[BusinessProfile] =
     withTimer {
-      http.GET[BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration")(businessProfileHttpReads, hc, ec)
+      withRecovery()("retrieveCurrentProfile") {
+        http.GET[BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration")(businessProfileHttpReads, hc, ec)
+      }
     }
 
   def retrieveCompletionCapacity(implicit hc: HeaderCarrier): Future[Option[String]] =
     withTimer {
-      http.GET[Option[String]](s"$businessRegUrl/business-registration/business-tax-registration")(retrieveCompletionCapacityHttpReads, hc, ec)
+      withRecovery()("retrieveCurrentProfile") {
+        http.GET[Option[String]](s"$businessRegUrl/business-registration/business-tax-registration")(retrieveCompletionCapacityHttpReads, hc, ec)
+      }
     }
 
   def retrieveTradingName(regId: String)(implicit hc: HeaderCarrier): Future[Option[String]] =
-    withDefaultResponseRecovery[Option[String]](None)("retrieveTradingName", regId) {
-      withTimer {
-        http.GET[Option[String]](s"$businessRegUrl/business-registration/$regId/trading-name")(retrieveTradingNameHttpReads, hc, ec)
+    withTimer {
+      withRecovery(Some(Option.empty[String]))("retrieveTradingName", Some(regId)) {
+        http.GET[Option[String]](s"$businessRegUrl/business-registration/$regId/trading-name")(retrieveTradingNameHttpReads(regId), hc, ec)
       }
     }
 
   def upsertTradingName(regId: String, tradingName: String)(implicit hc: HeaderCarrier): Future[String] =
-    withDefaultResponseRecovery(tradingName)("upsertTradingName", regId) {
-      withTimer {
+    withTimer {
+      withRecovery(Some(tradingName))("upsertTradingName", Some(regId)) {
         http.POST[String, String](s"$businessRegUrl/business-registration/$regId/trading-name", tradingName)(
-          CompanyDetails.tradingNameApiPrePopWrites, upsertTradingNameHttpReads(tradingName), hc, ec
+          CompanyDetails.tradingNameApiPrePopWrites, upsertTradingNameHttpReads(regId, tradingName), hc, ec
         )
       }
     }
 
   def retrieveContactDetails(regId: String)(implicit hc: HeaderCarrier): Future[Option[PAYEContactDetails]] =
-    withDefaultResponseRecovery[Option[PAYEContactDetails]](None)("retrieveContactDetails", regId) {
-      withTimer {
-        http.GET[Option[PAYEContactDetails]](s"$businessRegUrl/business-registration/$regId/contact-details")(retrieveContactDetailsHttpReads, hc, ec)
+    withTimer {
+      withRecovery(Some(Option.empty[PAYEContactDetails]))("retrieveContactDetails", Some(regId)) {
+        http.GET[Option[PAYEContactDetails]](s"$businessRegUrl/business-registration/$regId/contact-details")(retrieveContactDetailsHttpReads(regId), hc, ec)
       }
     }
 
   def upsertContactDetails(regId: String, contactDetails: PAYEContactDetails)(implicit hc: HeaderCarrier): Future[PAYEContactDetails] =
-    withDefaultResponseRecovery(contactDetails)("upsertContactDetails", regId) {
-      withTimer {
+    withTimer {
+      withRecovery(Some(contactDetails))("upsertContactDetails", Some(regId)) {
         http.POST[PAYEContactDetails, PAYEContactDetails](s"$businessRegUrl/business-registration/$regId/contact-details", contactDetails)(
-          PAYEContactDetails.prepopWrites, upsertContactDetailsHttpReads(contactDetails), hc, ec
+          PAYEContactDetails.prepopWrites, upsertContactDetailsHttpReads(regId, contactDetails), hc, ec
         )
       }
     }
 
   def retrieveAddresses(regId: String)(implicit hc: HeaderCarrier): Future[Seq[Address]] =
-    withDefaultResponseRecovery(Seq.empty[Address])("retrieveAddresses", regId) {
+    withRecovery(Some(Seq.empty[Address]))("retrieveAddresses", Some(regId)) {
       withTimer {
-        http.GET[Seq[Address]](s"$businessRegUrl/business-registration/$regId/addresses")(retrieveAddressesHttpReads, hc, ec)
+        http.GET[Seq[Address]](s"$businessRegUrl/business-registration/$regId/addresses")(retrieveAddressesHttpReads(regId), hc, ec)
       }
     }
 
   def upsertAddress(regId: String, address: Address)(implicit hc: HeaderCarrier): Future[Address] =
-    withDefaultResponseRecovery(address)("upsertAddress", regId) {
+    withRecovery(Some(address))("upsertAddress", Some(regId)) {
       withTimer {
         http.POST[Address, Address](s"$businessRegUrl/business-registration/$regId/addresses", address)(
-          Address.prePopWrites, upsertAddressHttpReads(address), hc, ec
+          Address.prePopWrites, upsertAddressHttpReads(regId, address), hc, ec
         )
       }
     }
 
   private def withTimer[T](f: => Future[T]) =
     metricsService.processDataResponseWithMetrics(metricsService.businessRegistrationResponseTimer.time())(f)
-
-  private def withDefaultResponseRecovery[T](response: => T)(functionName: String, regId: String)(f: => Future[T]) =
-    f recover { case ex: Exception =>
-      logger.error(s"[$functionName] Exception of type '${ex.getClass.getName}' was thrown for regId: $regId")
-      response
-    }
 
 }

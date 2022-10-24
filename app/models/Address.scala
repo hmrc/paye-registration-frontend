@@ -16,6 +16,7 @@
 
 package models
 
+import models.Address.prePopReads
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import utils.{Formatters, Validators}
@@ -191,6 +192,8 @@ object Address {
       (__ \ "country").writeNullable[String] and
       (__ \ "auditRef").writeNullable[String]
     ) (unlift(Address.unapply))
+
+  val prePopAddressesReads: Reads[Seq[Address]] = (__ \ "addresses").read[Seq[Address]](Reads.seq(prePopReads))
 
   val prePopFormat = Format(prePopReads, prePopWrites)
 }

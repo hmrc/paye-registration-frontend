@@ -17,6 +17,7 @@
 package connectors.httpParsers
 
 import ch.qos.logback.classic.Level
+import common.exceptions.DownstreamExceptions
 import connectors.ALFLocationHeaderNotSetException
 import helpers.PayeComponentSpec
 import models.Address
@@ -96,24 +97,13 @@ class AddressLookupHttpParsersSpec extends PayeComponentSpec with LogCapturingHe
         }
       }
 
-      "response is NOT_FOUND" must {
-
-        "return a NotFoundException and log a warning" in {
-
-          withCaptureOfLoggingFrom(AddressLookupHttpParsers.logger) { logs =>
-            intercept[NotFoundException](AddressLookupHttpParsers.addressHttpReads.read("", "", HttpResponse(NOT_FOUND, "")))
-            logs.containsMsg(Level.WARN,"[AddressLookupHttpParsers][addressHttpReads] Address could not be found for the supplied journey ID")
-          }
-        }
-      }
-
       "response is any other status, e.g ISE" must {
 
-        "return an UpstreamErrorResponse and log an error" in {
+        "return an AddressLookupException and log an error" in {
 
           withCaptureOfLoggingFrom(AddressLookupHttpParsers.logger) { logs =>
-            intercept[UpstreamErrorResponse](AddressLookupHttpParsers.addressHttpReads.read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
-            logs.containsMsg(Level.ERROR, s"[AddressLookupHttpParsers][addressHttpReads] Unexpected Error Occurred when calling AddressLookup service. Status '$INTERNAL_SERVER_ERROR'")
+            intercept[DownstreamExceptions.AddressLookupException](AddressLookupHttpParsers.addressHttpReads.read("", "/address/1234", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+            logs.containsMsg(Level.ERROR, s"[AddressLookupHttpParsers][addressHttpReads] Calling url: '/address/1234' returned unexpected status: '$INTERNAL_SERVER_ERROR'")
           }
         }
       }
@@ -146,11 +136,11 @@ class AddressLookupHttpParsersSpec extends PayeComponentSpec with LogCapturingHe
 
       "response is any other status, e.g ISE" must {
 
-        "return an UpstreamErrorResponse and log an error" in {
+        "return an AddressLookupException and log an error" in {
 
           withCaptureOfLoggingFrom(AddressLookupHttpParsers.logger) { logs =>
-            intercept[UpstreamErrorResponse](AddressLookupHttpParsers.onRampHttpReads.read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
-            logs.containsMsg(Level.ERROR, s"[AddressLookupHttpParsers][onRampHttpReads] Unexpected Error Occurred when calling AddressLookup service. Status '$INTERNAL_SERVER_ERROR'")
+            intercept[DownstreamExceptions.AddressLookupException](AddressLookupHttpParsers.onRampHttpReads.read("", "/address/1234", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+            logs.containsMsg(Level.ERROR, s"[AddressLookupHttpParsers][onRampHttpReads] Calling url: '/address/1234' returned unexpected status: '$INTERNAL_SERVER_ERROR'")
           }
         }
       }

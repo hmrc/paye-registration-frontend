@@ -17,13 +17,13 @@
 package connectors.httpParsers
 
 import common.exceptions
-import connectors.{Cancelled, DESResponse, TimedOut, Success => DESSuccess}
+import connectors.{BaseConnector, Cancelled, DESResponse, TimedOut, Success => DESSuccess}
 import enums.{DownstreamOutcome, RegistrationDeletion}
 import play.api.http.Status._
 import uk.gov.hmrc.http.HttpReads.is5xx
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
-trait PAYERegistrationHttpParsers extends BaseHttpReads {
+trait PAYERegistrationHttpParsers extends BaseHttpReads { _: BaseConnector =>
 
   override def unexpectedStatusException(url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
     new exceptions.DownstreamExceptions.PAYEMicroserviceException(s"Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")

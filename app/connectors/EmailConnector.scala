@@ -18,22 +18,23 @@ package connectors
 
 import config.AppConfig
 import connectors.httpParsers.EmailHttpParsers
-import models.{EmailDifficulties, EmailResponse}
 import models.external.EmailRequest
+import models.{EmailDifficulties, EmailResponse}
 import uk.gov.hmrc.http._
-import utils.Logging
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class EmailConnector @Inject()(val http: HttpClient, appConfig: AppConfig)(implicit val ec: ExecutionContext) extends Logging with EmailHttpParsers {
+class EmailConnector @Inject()(val http: HttpClient, appConfig: AppConfig)(implicit val ec: ExecutionContext) extends EmailHttpParsers {
 
   val sendEmailURL: String = appConfig.servicesConfig.getString("microservice.services.email.sendAnEmailURL")
 
-  def requestEmailToBeSent(emailRequest: EmailRequest)(implicit hc: HeaderCarrier): Future[EmailResponse] =
+  def requestEmailToBeSent(emailRequest: EmailRequest)(implicit hc: HeaderCarrier): Future[EmailResponse] = {
+
     http.POST[EmailRequest, EmailResponse](sendEmailURL, emailRequest)(EmailRequest.format, requestEmailToBeSentHttpReads(emailRequest), hc, ec) recover {
       case e: Exception =>
         logger.error(s"[requestEmailToBeSent] an unexpected error has occurred when attemping to request an email to be sent via the email service with templateId: ${emailRequest.templateId} with details: ${e.getMessage}")
         EmailDifficulties
     }
+  }
 }

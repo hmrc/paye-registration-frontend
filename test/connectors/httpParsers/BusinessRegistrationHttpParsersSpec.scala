@@ -17,6 +17,7 @@
 package connectors.httpParsers
 
 import ch.qos.logback.classic.Level
+import common.exceptions.DownstreamExceptions
 import connectors.ALFLocationHeaderNotSetException
 import helpers.PayeComponentSpec
 import models.{Address, DigitalContactDetails}
@@ -28,6 +29,8 @@ import uk.gov.hmrc.http.{HttpResponse, NotFoundException, UpstreamErrorResponse}
 import utils.LogCapturingHelper
 
 class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturingHelper {
+
+  val regId = "reg1234"
 
   "BusinessRegistrationHttpParsers" when {
 
@@ -55,18 +58,7 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
               intercept[JsResultException](BusinessRegistrationHttpParsers.businessProfileHttpReads.read("", "", HttpResponse(OK, json = Json.obj(), Map())))
-              logs.containsMsg(Level.ERROR, "[businessProfileHttpReads] JSON returned from business-registration could not be parsed to BusinessProfile model")
-            }
-          }
-        }
-
-        "response is NOT_FOUND" must {
-
-          "return a NotFoundException and log a warn message" in {
-
-            withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
-              intercept[NotFoundException](BusinessRegistrationHttpParsers.businessProfileHttpReads.read("", "", HttpResponse(NOT_FOUND, "")))
-              logs.containsMsg(Level.WARN, "[businessProfileHttpReads] Business Profile could not be found")
+              logs.containsMsg(Level.ERROR, "[businessProfileHttpReads] JSON returned could not be parsed to models.external.BusinessProfile model")
             }
           }
         }
@@ -76,8 +68,8 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
           "return an Upstream Error response and log an error" in {
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
-              intercept[UpstreamErrorResponse](BusinessRegistrationHttpParsers.businessProfileHttpReads.read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
-              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][businessProfileHttpReads] Unexpected Error Occurred when calling business-registration service. Status '$INTERNAL_SERVER_ERROR'")
+              intercept[DownstreamExceptions.BusinessRegistrationException](BusinessRegistrationHttpParsers.businessProfileHttpReads.read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][businessProfileHttpReads] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR'")
             }
           }
         }
@@ -115,11 +107,11 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
 
         "response is any other status, e.g ISE" must {
 
-          "return an Upstream Error response and log an error" in {
+          "return an BusinessRegistrationException response and log an error" in {
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
-              intercept[UpstreamErrorResponse](BusinessRegistrationHttpParsers.retrieveCompletionCapacityHttpReads.read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
-              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][retrieveCompletionCapacityHttpReads] Unexpected Error Occurred when calling business-registration service. Status '$INTERNAL_SERVER_ERROR'")
+              intercept[DownstreamExceptions.BusinessRegistrationException](BusinessRegistrationHttpParsers.retrieveCompletionCapacityHttpReads.read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][retrieveCompletionCapacityHttpReads] Calling url: '' returned unexpected status: '${INTERNAL_SERVER_ERROR}'")
             }
           }
         }
@@ -139,7 +131,7 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
 
           "return the Trading Name" in {
 
-            BusinessRegistrationHttpParsers.retrieveTradingNameHttpReads.read("", "", HttpResponse(OK, json = tradingNameJson, Map())) mustBe Some(tradingName)
+            BusinessRegistrationHttpParsers.retrieveTradingNameHttpReads(regId).read("", "", HttpResponse(OK, json = tradingNameJson, Map())) mustBe Some(tradingName)
           }
         }
 
@@ -147,29 +139,29 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
 
           "return None" in {
 
-            BusinessRegistrationHttpParsers.retrieveTradingNameHttpReads.read("", "", HttpResponse(OK, json = Json.obj(), Map())) mustBe None
+            BusinessRegistrationHttpParsers.retrieveTradingNameHttpReads(regId).read("", "", HttpResponse(OK, json = Json.obj(), Map())) mustBe None
           }
         }
 
         "response is any other status, e.g ISE" must {
 
-          "return None and log an info message" in {
+          "return None and log an error message" in {
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
-              BusinessRegistrationHttpParsers.retrieveTradingNameHttpReads.read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")) mustBe None
-              logs.containsMsg(Level.INFO, s"[BusinessRegistrationHttpParsers][retrieveTradingNameHttpReads] No Trading name retrieved from business-registration pre-pop")
+              BusinessRegistrationHttpParsers.retrieveTradingNameHttpReads(regId).read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")) mustBe None
+              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][retrieveTradingNameHttpReads] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
         }
       }
 
-      "calling .upsertTradingNameHttpReads(tradingName: String)" when {
+      "calling .upsertTradingNameHttpReads(regId: String, tradingName: String)" when {
 
         "response is OK" must {
 
           "return the Trading Name" in {
 
-            BusinessRegistrationHttpParsers.upsertTradingNameHttpReads(tradingName).read("", "", HttpResponse(OK, "")) mustBe tradingName
+            BusinessRegistrationHttpParsers.upsertTradingNameHttpReads(regId, tradingName).read("", "", HttpResponse(OK, "")) mustBe tradingName
           }
         }
 
@@ -178,8 +170,8 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
           "return the Trading Name but log an error message" in {
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
-              BusinessRegistrationHttpParsers.upsertTradingNameHttpReads(tradingName).read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")) mustBe tradingName
-              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][upsertTradingNameHttpReads] Unexpected Error Occurred when calling business-registration service. Status '$INTERNAL_SERVER_ERROR'")
+              BusinessRegistrationHttpParsers.upsertTradingNameHttpReads(regId, tradingName).read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")) mustBe tradingName
+              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][upsertTradingNameHttpReads] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
         }
@@ -211,7 +203,7 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
 
           "return the Contact Details" in {
 
-            BusinessRegistrationHttpParsers.retrieveContactDetailsHttpReads.read("", "", HttpResponse(OK, json = payeContactDetailsJson, Map())) mustBe Some(payeContactDetails)
+            BusinessRegistrationHttpParsers.retrieveContactDetailsHttpReads(regId).read("", "", HttpResponse(OK, json = payeContactDetailsJson, Map())) mustBe Some(payeContactDetails)
           }
         }
 
@@ -220,8 +212,8 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
           "return a JsResultException and log an error message" in {
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
-              intercept[JsResultException](BusinessRegistrationHttpParsers.retrieveContactDetailsHttpReads.read("", "", HttpResponse(OK, json = Json.obj(), Map())))
-              logs.containsMsg(Level.ERROR, "[BusinessRegistrationHttpParsers][retrieveContactDetailsHttpReads] JSON returned from business-registration could not be parsed to PAYEContactDetails model")
+              intercept[JsResultException](BusinessRegistrationHttpParsers.retrieveContactDetailsHttpReads(regId).read("", "", HttpResponse(OK, json = Json.obj(), Map())))
+              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][retrieveContactDetailsHttpReads] JSON returned could not be parsed to models.view.PAYEContactDetails model for regId: '$regId'")
             }
           }
         }
@@ -230,7 +222,7 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
 
           "return None" in {
 
-            BusinessRegistrationHttpParsers.retrieveContactDetailsHttpReads.read("", "", HttpResponse(NOT_FOUND, json = Json.obj(), Map())) mustBe None
+            BusinessRegistrationHttpParsers.retrieveContactDetailsHttpReads(regId).read("", "", HttpResponse(NOT_FOUND, json = Json.obj(), Map())) mustBe None
           }
         }
 
@@ -239,20 +231,20 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
           "return a None but log an error" in {
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
-              BusinessRegistrationHttpParsers.retrieveContactDetailsHttpReads.read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")) mustBe None
-              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][retrieveContactDetailsHttpReads] Unexpected Error Occurred when calling business-registration service. Status '$INTERNAL_SERVER_ERROR'")
+              BusinessRegistrationHttpParsers.retrieveContactDetailsHttpReads(regId).read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")) mustBe None
+              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][retrieveContactDetailsHttpReads] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
         }
       }
 
-      "calling .upsertContactDetailsHttpReads(contactDetails: PAYEContactDetails)" when {
+      "calling .upsertContactDetailsHttpReads(regId: String, contactDetails: PAYEContactDetails)" when {
 
         "response is OK" must {
 
           "return the PAYE Contact Details" in {
 
-            BusinessRegistrationHttpParsers.upsertContactDetailsHttpReads(payeContactDetails).read("", "", HttpResponse(OK, "")) mustBe payeContactDetails
+            BusinessRegistrationHttpParsers.upsertContactDetailsHttpReads(regId, payeContactDetails).read("", "", HttpResponse(OK, "")) mustBe payeContactDetails
           }
         }
 
@@ -261,8 +253,8 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
           "return PAYE Contact Details but log an error message" in {
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
-              BusinessRegistrationHttpParsers.upsertContactDetailsHttpReads(payeContactDetails).read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")) mustBe payeContactDetails
-              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][upsertContactDetailsHttpReads] Unexpected Error Occurred when calling business-registration service. Status '$INTERNAL_SERVER_ERROR'")
+              BusinessRegistrationHttpParsers.upsertContactDetailsHttpReads(regId, payeContactDetails).read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")) mustBe payeContactDetails
+              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][upsertContactDetailsHttpReads] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
         }
@@ -296,7 +288,7 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
 
           "return a Sequence of Addresses" in {
 
-            BusinessRegistrationHttpParsers.retrieveAddressesHttpReads.read("", "", HttpResponse(OK, json = addressesJson, Map())) mustBe Seq(address, address)
+            BusinessRegistrationHttpParsers.retrieveAddressesHttpReads(regId).read("", "", HttpResponse(OK, json = addressesJson, Map())) mustBe Seq(address, address)
           }
         }
 
@@ -305,8 +297,8 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
           "return a JsResultException and log an error" in {
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
-              intercept[JsResultException](BusinessRegistrationHttpParsers.retrieveAddressesHttpReads.read("", "", HttpResponse(OK, json = Json.obj(), Map())))
-              logs.containsMsg(Level.ERROR, "[BusinessRegistrationHttpParsers][retrieveAddressesHttpReads] JSON returned from business-registration could not be parsed to Seq[Address] model")
+              intercept[JsResultException](BusinessRegistrationHttpParsers.retrieveAddressesHttpReads(regId).read("", "", HttpResponse(OK, json = Json.obj(), Map())))
+              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][retrieveAddressesHttpReads] JSON returned could not be parsed to scala.collection.Seq model for regId: '$regId'")
             }
           }
         }
@@ -315,7 +307,7 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
 
           "return an empty Sequence" in {
 
-            BusinessRegistrationHttpParsers.retrieveAddressesHttpReads.read("", "", HttpResponse(NOT_FOUND, "")) mustBe Seq()
+            BusinessRegistrationHttpParsers.retrieveAddressesHttpReads(regId).read("", "", HttpResponse(NOT_FOUND, "")) mustBe Seq()
           }
         }
 
@@ -324,8 +316,8 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
           "return an empty sequence but log an error" in {
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
-              BusinessRegistrationHttpParsers.retrieveAddressesHttpReads.read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")) mustBe Seq()
-              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][retrieveAddressesHttpReads] Unexpected Error Occurred when calling business-registration service. Status '$INTERNAL_SERVER_ERROR'")
+              BusinessRegistrationHttpParsers.retrieveAddressesHttpReads(regId).read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")) mustBe Seq()
+              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][retrieveAddressesHttpReads] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
         }
@@ -337,7 +329,7 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
 
           "return the PAYE Contact Details" in {
 
-            BusinessRegistrationHttpParsers.upsertAddressHttpReads(address).read("", "", HttpResponse(OK, "")) mustBe address
+            BusinessRegistrationHttpParsers.upsertAddressHttpReads(regId, address).read("", "", HttpResponse(OK, "")) mustBe address
           }
         }
 
@@ -346,8 +338,8 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
           "return PAYE Contact Details but log an error message" in {
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
-              BusinessRegistrationHttpParsers.upsertAddressHttpReads(address).read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")) mustBe address
-              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][upsertAddressHttpReads] Unexpected Error Occurred when calling business-registration service. Status '$INTERNAL_SERVER_ERROR'")
+              BusinessRegistrationHttpParsers.upsertAddressHttpReads(regId, address).read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")) mustBe address
+              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][upsertAddressHttpReads] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
         }

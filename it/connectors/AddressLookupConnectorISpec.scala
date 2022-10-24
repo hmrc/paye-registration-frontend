@@ -18,6 +18,7 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.http.{HttpHeader, HttpHeaders}
+import common.exceptions.DownstreamExceptions
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.Address
 import models.external._
@@ -113,18 +114,11 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
         intercept[JsResultException](await(connector.getAddress(addressId)))
       }
 
-      "handle a NOT_FOUND returning the NOT_FOUND_EXCEPTION" in {
-
-        stubGetAddress(404, None)
-
-        intercept[NotFoundException](await(connector.getAddress(addressId)))
-      }
-
-      "handle any other response returning an UpstreamErrorResponse" in {
+      "handle any other response returning an AddressLookupException" in {
 
         stubGetAddress(500, None)
 
-        intercept[UpstreamErrorResponse](await(connector.getAddress(addressId)))
+        intercept[DownstreamExceptions.AddressLookupException](await(connector.getAddress(addressId)))
       }
     }
 
@@ -234,7 +228,7 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
         stubFor(
           post(urlPathEqualTo(s"/api/v2/init"))
             .withRequestBody(equalToJson(requestBody.toString))
-            .willReturn(aResponse().withHeaders(headers))
+            .willReturn(aResponse().withStatus(status).withHeaders(headers))
         )
       }
 
@@ -247,18 +241,18 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
         result mustBe "/foo/bar/wizz"
       }
 
-      "handle a NOT_FOUND returning ALFLocationHeaderNotSetException" in {
+      "return ALFLocationHeaderNotSetException when response is success but no header exists" in {
 
-        stubAddressOnRamp(Json.toJson(alfJourneyConfig))(NOT_FOUND)
+        stubAddressOnRamp(Json.toJson(alfJourneyConfig))(NO_CONTENT)
 
         intercept[ALFLocationHeaderNotSetException](await(connector.getOnRampUrl(alfJourneyConfig)))
       }
 
-      "handle any other response returning ALFLocationHeaderNotSetException" in {
+      "handle any other response returning AddressLookupException" in {
 
         stubAddressOnRamp(Json.toJson(alfJourneyConfig))(INTERNAL_SERVER_ERROR)
 
-        intercept[ALFLocationHeaderNotSetException](await(connector.getOnRampUrl(alfJourneyConfig)))
+        intercept[DownstreamExceptions.AddressLookupException](await(connector.getOnRampUrl(alfJourneyConfig)))
       }
     }
   }

@@ -19,13 +19,12 @@ package connectors
 import com.github.tomakehurst.wiremock.client.WireMock._
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.external._
-import models.view.PAYEContactDetails
-import models.{Address, DigitalContactDetails, EmailDifficulties, EmailSent}
+import models.{EmailDifficulties, EmailSent}
 import play.api.Application
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 
 class EmailConnectorISpec extends IntegrationSpecBase {
 

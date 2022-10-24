@@ -34,7 +34,7 @@ object TimedOut extends DESResponse
 
 class PAYERegistrationConnector @Inject()(val metricsService: MetricsService,
                                           val http: HttpClient,
-                                          appConfig: AppConfig)(implicit val ec: ExecutionContext) extends PAYERegistrationHttpParsers {
+                                          appConfig: AppConfig)(implicit val ec: ExecutionContext) extends BaseConnector with PAYERegistrationHttpParsers {
 
   val payeRegUrl = appConfig.servicesConfig.baseUrl("paye-registration")
 

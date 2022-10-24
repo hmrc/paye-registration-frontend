@@ -18,10 +18,11 @@ package connectors.httpParsers
 
 import models.external.EmailRequest
 import models.{EmailDifficulties, EmailResponse, EmailSent}
-import uk.gov.hmrc.http.{HttpErrorFunctions, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.HttpReads.is2xx
+import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import utils.Logging
 
-trait EmailHttpParsers extends Logging with HttpErrorFunctions {
+trait EmailHttpParsers extends Logging {
 
   def requestEmailToBeSentHttpReads(emailRequest: EmailRequest): HttpReads[EmailResponse] = (_: String, _: String, response: HttpResponse) => response.status match {
     case status if is2xx(status) =>

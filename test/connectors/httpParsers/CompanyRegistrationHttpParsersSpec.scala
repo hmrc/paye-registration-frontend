@@ -98,35 +98,13 @@ class CompanyRegistrationHttpParsersSpec extends PayeComponentSpec with LogCaptu
         }
       }
 
-      "response is NOT_FOUND" must {
-
-        "return a NotFoundException and log a warn message" in {
-
-          withCaptureOfLoggingFrom(CompanyRegistrationHttpParsers.logger) { logs =>
-            intercept[NotFoundException](CompanyRegistrationHttpParsers.companyRegistrationDetailsHttpReads(regId).read("", "", HttpResponse(NOT_FOUND, "")))
-            logs.containsMsg(Level.ERROR, s"[companyRegistrationDetailsHttpReads] Received a NotFound status code when expecting a Company Registration document for reg id: $regId")
-          }
-        }
-      }
-
-      "response is BAD_REQUEST" must {
-
-        "return a NotFoundException and log a warn message" in {
-
-          withCaptureOfLoggingFrom(CompanyRegistrationHttpParsers.logger) { logs =>
-            intercept[BadRequestException](CompanyRegistrationHttpParsers.companyRegistrationDetailsHttpReads(regId).read("", "", HttpResponse(BAD_REQUEST, "")))
-            logs.containsMsg(Level.ERROR, s"[companyRegistrationDetailsHttpReads] Received a BadRequest status code when expecting a Company Registration document for reg id: $regId")
-          }
-        }
-      }
-
       "response is any other status, e.g ISE" must {
 
         "return an Upstream Error response and log an error" in {
 
           withCaptureOfLoggingFrom(CompanyRegistrationHttpParsers.logger) { logs =>
-            intercept[UpstreamErrorResponse](CompanyRegistrationHttpParsers.companyRegistrationDetailsHttpReads(regId).read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
-            logs.containsMsg(Level.ERROR, s"[companyRegistrationDetailsHttpReads] Unexpected Error Occurred when expecting a Company Registration document for reg id: $regId. Status '$INTERNAL_SERVER_ERROR'")
+            intercept[DownstreamExceptions.CompanyRegistrationException](CompanyRegistrationHttpParsers.companyRegistrationDetailsHttpReads(regId).read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+            logs.containsMsg(Level.ERROR, s"[companyRegistrationDetailsHttpReads] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
           }
         }
       }
@@ -173,7 +151,7 @@ class CompanyRegistrationHttpParsersSpec extends PayeComponentSpec with LogCaptu
 
           withCaptureOfLoggingFrom(CompanyRegistrationHttpParsers.logger) { logs =>
             CompanyRegistrationHttpParsers.verifiedEmailHttpReads(regId).read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")) mustBe None
-            logs.containsMsg(Level.ERROR, s"[verifiedEmailHttpReads] Unexpected Error Occurred when expecting a Verified Email for reg id: $regId. Status '$INTERNAL_SERVER_ERROR'")
+            logs.containsMsg(Level.ERROR, s"[verifiedEmailHttpReads] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
           }
         }
       }

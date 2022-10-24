@@ -30,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class CompanyRegistrationConnector @Inject()(val featureSwitch: PAYEFeatureSwitch,
                                              val http: HttpClient,
                                              val metricsService: MetricsService,
-                                             appConfig: AppConfig)(implicit val ec: ExecutionContext) extends CompanyRegistrationHttpParsers {
+                                             appConfig: AppConfig)(implicit val ec: ExecutionContext) extends BaseConnector with CompanyRegistrationHttpParsers {
 
   lazy val companyRegistrationUrl: String = appConfig.servicesConfig.baseUrl("company-registration")
   lazy val companyRegistrationUri: String = appConfig.servicesConfig.getString("microservice.services.company-registration.uri")
@@ -39,18 +39,20 @@ class CompanyRegistrationConnector @Inject()(val featureSwitch: PAYEFeatureSwitc
 
   def getCompanyRegistrationDetails(regId: String)(implicit hc: HeaderCarrier): Future[CompanyRegistrationProfile] = {
     val url = if (useCompanyRegistration) s"$companyRegistrationUrl$companyRegistrationUri/corporation-tax-registration" else s"$stubUrl$stubUri"
-    metricsService.processDataResponseWithMetrics(metricsService.companyRegistrationResponseTimer.time()) {
-      http.GET[CompanyRegistrationProfile](s"$url/$regId/corporation-tax-registration")(companyRegistrationDetailsHttpReads(regId), hc, ec)
+    withTimer {
+      withRecovery()("getCompanyRegistrationDetails", Some(regId)) {
+        http.GET[CompanyRegistrationProfile](s"$url/$regId/corporation-tax-registration")(companyRegistrationDetailsHttpReads(regId), hc, ec)
+      }
     }
   }
 
   def getVerifiedEmail(regId: String)(implicit hc: HeaderCarrier): Future[Option[String]] =
-    withDefaultResponseRecovery[Option[String]](None) {
+    withRecovery(Some(Option.empty[String]))("getVerifiedEmail", Some(regId)) {
       http.GET[Option[String]](s"$companyRegistrationUrl$companyRegistrationUri/corporation-tax-registration/$regId/retrieve-email")(verifiedEmailHttpReads(regId), hc, ec)
     }
 
   private[connectors] def useCompanyRegistration: Boolean = featureSwitch.companyReg.enabled
 
-  private def withDefaultResponseRecovery[T](response: => T)(f: => Future[T]) =
-    f recover { case _ => response }
+  private def withTimer[T](f: => Future[T]) =
+    metricsService.processDataResponseWithMetrics(metricsService.companyRegistrationResponseTimer.time())(f)
 }
