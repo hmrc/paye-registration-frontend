@@ -202,11 +202,11 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         await(payeRegistrationConnector.upsertDirectors(regId, dirList)) mustBe dirList
       }
 
-      "return Exception when NOT_FOUND response" in {
+      "return an Empty Sequence when NOT_FOUND response" in {
 
         stubUpsertDirectors(Json.toJson(dirList))(NOT_FOUND, None)
 
-        intercept[Exception](await(payeRegistrationConnector.upsertDirectors(regId, dirList)))
+        await(payeRegistrationConnector.upsertDirectors(regId, dirList)) mustBe Seq()
       }
 
       "throw Exception when INTERNAL_SERVER_ERROR response" in {
@@ -245,7 +245,7 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
         stubGetSICCodes(NOT_FOUND, None)
 
-        await(payeRegistrationConnector.getSICCodes(regId)) mustBe List.empty
+        await(payeRegistrationConnector.getSICCodes(regId)) mustBe Seq()
       }
     }
 
@@ -265,9 +265,16 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
         await(payeRegistrationConnector.upsertSICCodes(regId, sicCodes)) mustBe sicCodes
       }
 
-      "throw an Exception for any other response" in {
+      "return an empty list for NOT_FOUND" in {
 
         stubUpsertSICCodes(Json.toJson(sicCodes))(NOT_FOUND, None)
+
+        await(payeRegistrationConnector.upsertSICCodes(regId, sicCodes)) mustBe Seq()
+      }
+
+      "throw an Exception for any other response" in {
+
+        stubUpsertSICCodes(Json.toJson(sicCodes))(INTERNAL_SERVER_ERROR, None)
 
         intercept[Exception](await(payeRegistrationConnector.upsertSICCodes(regId, sicCodes)))
       }

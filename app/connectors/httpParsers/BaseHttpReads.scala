@@ -18,7 +18,7 @@ package connectors.httpParsers
 
 import connectors.BaseConnector
 import play.api.http.Status.{NOT_FOUND, NO_CONTENT, OK}
-import play.api.libs.json.{JsResultException, Reads}
+import play.api.libs.json.Reads
 import uk.gov.hmrc.http.HttpReads.is2xx
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import utils.Logging
@@ -47,11 +47,7 @@ trait BaseHttpReads extends Logging { _: BaseConnector =>
                          defaultToNoneOnError: Boolean = false)(implicit reads: Reads[T], mf: Manifest[T]): HttpReads[Option[T]] = (_: String, url: String, response: HttpResponse) =>
     response.status match {
       case OK =>
-        Try(jsonParse(response)(functionName, regId, txId)) match {
-          case Success(value) => Some(value)
-          case Failure(ex: JsResultException) if ex.errors.flatMap(_._2.flatMap(_.messages)).contains("error.path.missing") => None
-          case Failure(ex) => throw ex
-        }
+        Try(jsonParse(response)(functionName, regId, txId)).toOption
       case status if is2xx(status) || status == NOT_FOUND =>
         if(logInfoMsg) logger.info(s"[$functionName] No data retrieved when calling url: '$url'" + logContext(regId, txId))
         None

@@ -20,9 +20,8 @@ import common.exceptions
 import common.exceptions.DownstreamExceptions
 import connectors.BaseConnector
 import models.external.CompanyRegistrationProfile
-import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK}
-import uk.gov.hmrc.http.{BadRequestException, HttpErrorFunctions, HttpReads, HttpResponse, NotFoundException, UpstreamErrorResponse}
-import utils.Logging
+import play.api.http.Status.{NOT_FOUND, OK}
+import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
 import scala.util.{Failure, Success, Try}
 

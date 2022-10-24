@@ -18,11 +18,11 @@ package connectors.httpParsers
 
 import common.exceptions
 import common.exceptions.DownstreamExceptions
-import connectors.{BaseConnector, IncorpInfoBadRequestResponse, IncorpInfoNotFoundResponse, IncorpInfoResponse, IncorpInfoSuccessResponse}
+import connectors._
 import enums.IncorporationStatus
 import models.external.{CoHoCompanyDetailsModel, IncorpUpdateResponse, OfficerList}
 import play.api.http.Status._
-import play.api.libs.json.{Reads, __}
+import play.api.libs.json.__
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
 import java.time.LocalDate

@@ -18,9 +18,9 @@ package connectors.httpParsers
 
 import common.exceptions
 import connectors.{BaseConnector, Cancelled, DESResponse, TimedOut, Success => DESSuccess}
-import enums.{DownstreamOutcome, RegistrationDeletion}
+import enums.{DownstreamOutcome, PAYEStatus, RegistrationDeletion}
+import models.api._
 import play.api.http.Status._
-import uk.gov.hmrc.http.HttpReads.is5xx
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
 trait PAYERegistrationHttpParsers extends BaseHttpReads { _: BaseConnector =>
@@ -35,16 +35,60 @@ trait PAYERegistrationHttpParsers extends BaseHttpReads { _: BaseConnector =>
         unexpectedStatusHandling(Some(DownstreamOutcome.Failure))("createNewRegistrationHttpReads", url, status, Some(regId), Some(transactionId))
     }
 
+  def getRegistrationHttpReads(regId: String): HttpReads[PAYERegistration] =
+    httpReads("getRegistrationHttpReads", Some(regId))
+
+  def getRegistrationIdHttpReads(txId: String): HttpReads[String] =
+    httpReads("getRegistrationIdHttpReads", txId = Some(txId))
+
   def submitRegistrationHttpReads(regId: String): HttpReads[DESResponse] =
     (_: String, url: String, response: HttpResponse) => response.status match {
       case OK => DESSuccess
       case NO_CONTENT => Cancelled
-      case status if is5xx(status) =>
-        logger.error("[submitRegistrationHttpReads] Timed out when submitting PAYE Registration to DES")
+      case GATEWAY_TIMEOUT | REQUEST_TIMEOUT  =>
+        logger.error("[submitRegistrationHttpReads] Timed out when submitting PAYE Registration to DES" + logContext(Some(regId)))
         TimedOut
       case status =>
         unexpectedStatusHandling()("submitRegistrationHttpReads", url, status, Some(regId))
     }
+
+  def getCompanyDetailsHttpReads(regId: String): HttpReads[Option[CompanyDetails]] =
+    optionHttpReads("getCompanyDetailsHttpReads", Some(regId))
+
+  def upsertCompanyDetailsHttpReads(regId: String): HttpReads[CompanyDetails] =
+    httpReads("upsertCompanyDetailsHttpReads", Some(regId))
+
+  def getEmploymentHttpReads(regId: String): HttpReads[Option[Employment]] =
+    optionHttpReads("getEmploymentHttpReads", Some(regId))
+
+  def upsertEmploymentHttpReads(regId: String): HttpReads[Employment] =
+    httpReads("upsertEmploymentHttpReads", Some(regId))
+
+  def directorsHttpReads(regId: String): HttpReads[Seq[Director]] =
+    seqHttpReads("directorsHttpReads", Some(regId))
+
+  def sicCodesHttpReads(regId: String): HttpReads[Seq[SICCode]] =
+    seqHttpReads("sicCodesHttpReads", Some(regId))
+
+  def getPAYEContactHttpReads(regId: String): HttpReads[Option[PAYEContact]] =
+    optionHttpReads("getPAYEContactHttpReads", Some(regId))
+
+  def upsertPAYEContactHttpReads(regId: String): HttpReads[PAYEContact] =
+    httpReads("upsertPAYEContactHttpReads", Some(regId))
+
+  def getCompletionCapacityHttpReads(regId: String): HttpReads[Option[String]] =
+    optionHttpReads("getCompletionCapacityHttpReads", Some(regId))
+
+  def upsertCompletionCapacityHttpReads(regId: String): HttpReads[String] =
+    httpReads("upsertCompletionCapacityHttpReads", Some(regId))
+
+  def getAcknowledgementReferenceHttpReads(regId: String): HttpReads[Option[String]] =
+    optionHttpReads("getAcknowledgementReferenceHttpReads", Some(regId))
+
+  def getStatusHttpReads(regId: String): HttpReads[Option[PAYEStatus.Value]] = {
+    implicit val rds = PAYEStatus.payeRegResponseReads
+    optionHttpReads("getStatusHttpReads", Some(regId))
+  }
 
   def deletionHttpReads(functionName: String, regId: String, txId: String): HttpReads[RegistrationDeletion.Value] = {
     (_: String, url: String, response: HttpResponse) => response.status match {
@@ -61,4 +105,4 @@ trait PAYERegistrationHttpParsers extends BaseHttpReads { _: BaseConnector =>
   }
 }
 
-
+object PAYERegistrationHttpParsers extends PAYERegistrationHttpParsers with BaseConnector

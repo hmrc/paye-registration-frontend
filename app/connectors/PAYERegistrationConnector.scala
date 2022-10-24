@@ -20,6 +20,7 @@ import config.AppConfig
 import connectors.httpParsers.PAYERegistrationHttpParsers
 import enums.{DownstreamOutcome, PAYEStatus, RegistrationDeletion}
 import models.api.{Director, Employment, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
+import play.api.libs.json.Writes
 import services.MetricsService
 import uk.gov.hmrc.http._
 
@@ -48,14 +49,14 @@ class PAYERegistrationConnector @Inject()(val metricsService: MetricsService,
   def getRegistration(regID: String)(implicit hc: HeaderCarrier): Future[PAYERegistrationAPI] =
     withTimer {
       withRecovery()("getRegistration", Some(regID)) {
-        http.GET[PAYERegistrationAPI](s"$payeRegUrl/paye-registration/$regID")(httpReads("getRegistration", Some(regID)), hc, ec)
+        http.GET[PAYERegistrationAPI](s"$payeRegUrl/paye-registration/$regID")(getRegistrationHttpReads(regID), hc, ec)
       }
     }
 
   def getRegistrationId(txId: String)(implicit hc: HeaderCarrier): Future[String] =
     withTimer {
       withRecovery()("getRegistration", txId = Some(txId)) {
-        http.GET[String](s"$payeRegUrl/paye-registration/$txId/registration-id")(httpReads("getRegistrationId", txId = Some(txId)), hc, ec)
+        http.GET[String](s"$payeRegUrl/paye-registration/$txId/registration-id")(getRegistrationIdHttpReads(txId), hc, ec)
       }
     }
 
@@ -69,7 +70,7 @@ class PAYERegistrationConnector @Inject()(val metricsService: MetricsService,
   def getCompanyDetails(regID: String)(implicit hc: HeaderCarrier): Future[Option[CompanyDetailsAPI]] =
     withTimer {
       withRecovery()("getCompanyDetails", Some(regID)) {
-        http.GET[Option[CompanyDetailsAPI]](s"$payeRegUrl/paye-registration/$regID/company-details")(optionHttpReads("getCompanyDetails", Some(regID)), hc, ec)
+        http.GET[Option[CompanyDetailsAPI]](s"$payeRegUrl/paye-registration/$regID/company-details")(getCompanyDetailsHttpReads(regID), hc, ec)
       }
     }
 
@@ -77,7 +78,7 @@ class PAYERegistrationConnector @Inject()(val metricsService: MetricsService,
     withTimer {
       withRecovery()("upsertCompanyDetails", Some(regID)) {
         http.PATCH[CompanyDetailsAPI, CompanyDetailsAPI](s"$payeRegUrl/paye-registration/$regID/company-details", companyDetails)(
-          implicitly, httpReads("upsertCompanyDetails", Some(regID)), hc, ec
+          CompanyDetailsAPI.format, upsertCompanyDetailsHttpReads(regID), hc, ec
         )
       }
     }
@@ -85,97 +86,84 @@ class PAYERegistrationConnector @Inject()(val metricsService: MetricsService,
   def getEmployment(regID: String)(implicit hc: HeaderCarrier): Future[Option[Employment]] =
     withTimer {
       withRecovery()("getEmployment", Some(regID)) {
-        val url = s"$payeRegUrl/paye-registration/$regID/employment-info"
-        http.GET[Option[Employment]](url)(optionHttpReads("getEmployment", Some(regID)), hc, ec)
+        http.GET[Option[Employment]](s"$payeRegUrl/paye-registration/$regID/employment-info")(getEmploymentHttpReads(regID), hc, ec)
       }
     }
 
   def upsertEmployment(regID: String, employment: Employment)(implicit hc: HeaderCarrier): Future[Employment] =
     withTimer {
       withRecovery()("upsertEmployment", Some(regID)) {
-        http.PATCH[Employment, Employment](s"$payeRegUrl/paye-registration/$regID/employment-info", employment)(
-          implicitly, httpReads("upsertEmployment", Some(regID)), hc, ec
-        )
+        http.PATCH[Employment, Employment](s"$payeRegUrl/paye-registration/$regID/employment-info", employment)(Employment.format, upsertEmploymentHttpReads(regID), hc, ec)
       }
     }
 
   def getDirectors(regID: String)(implicit hc: HeaderCarrier): Future[Seq[Director]] =
     withTimer {
       withRecovery()("getDirectors", Some(regID)) {
-        http.GET[Seq[Director]](s"$payeRegUrl/paye-registration/$regID/directors")(seqHttpReads("getDirectors", Some(regID)), hc, ec)
+        http.GET[Seq[Director]](s"$payeRegUrl/paye-registration/$regID/directors")(directorsHttpReads(regID), hc, ec)
       }
     }
 
-  def upsertDirectors(regID: String, directors: Seq[Director])(implicit hc: HeaderCarrier) =
+  def upsertDirectors(regID: String, directors: Seq[Director])(implicit hc: HeaderCarrier): Future[Seq[Director]] =
     withTimer {
       withRecovery()("upsertDirectors", Some(regID)) {
-        http.PATCH[Seq[Director], Seq[Director]](s"$payeRegUrl/paye-registration/$regID/directors", directors)(
-          implicitly, httpReads("upsertDirectors", Some(regID)), hc, ec
-        )
+        http.PATCH[Seq[Director], Seq[Director]](s"$payeRegUrl/paye-registration/$regID/directors", directors)(Writes.seq[Director], directorsHttpReads(regID), hc, ec)
       }
     }
 
   def getSICCodes(regID: String)(implicit hc: HeaderCarrier): Future[Seq[SICCode]] =
     withTimer {
       withRecovery()("getSICCodes", Some(regID)) {
-        http.GET[Seq[SICCode]](s"$payeRegUrl/paye-registration/$regID/sic-codes")(seqHttpReads("getSICCodes", Some(regID)), hc, ec)
+        http.GET[Seq[SICCode]](s"$payeRegUrl/paye-registration/$regID/sic-codes")(sicCodesHttpReads(regID), hc, ec)
       }
     }
 
-  def upsertSICCodes(regID: String, sicCodes: Seq[SICCode])(implicit hc: HeaderCarrier) =
+  def upsertSICCodes(regID: String, sicCodes: Seq[SICCode])(implicit hc: HeaderCarrier): Future[Seq[SICCode]] =
     withTimer {
       withRecovery()("upsertSICCodes", Some(regID)) {
-        http.PATCH[Seq[SICCode], Seq[SICCode]](s"$payeRegUrl/paye-registration/$regID/sic-codes", sicCodes)(
-          implicitly, httpReads("upsertSICCodes", Some(regID)), hc, ec
-        )
+        http.PATCH[Seq[SICCode], Seq[SICCode]](s"$payeRegUrl/paye-registration/$regID/sic-codes", sicCodes)(Writes.seq[SICCode], sicCodesHttpReads(regID), hc, ec)
       }
     }
 
   def getPAYEContact(regID: String)(implicit hc: HeaderCarrier): Future[Option[PAYEContact]] =
     withTimer {
       withRecovery()("getPAYEContact", Some(regID)) {
-        http.GET[Option[PAYEContact]](s"$payeRegUrl/paye-registration/$regID/contact-correspond-paye")(optionHttpReads("getPAYEContact", Some(regID)), hc, ec)
+        http.GET[Option[PAYEContact]](s"$payeRegUrl/paye-registration/$regID/contact-correspond-paye")(getPAYEContactHttpReads(regID), hc, ec)
       }
     }
 
   def upsertPAYEContact(regID: String, payeContact: PAYEContact)(implicit hc: HeaderCarrier): Future[PAYEContact] =
     withTimer {
       withRecovery()("upsertPAYEContact", Some(regID)) {
-        http.PATCH[PAYEContact, PAYEContact](s"$payeRegUrl/paye-registration/$regID/contact-correspond-paye", payeContact)(
-          implicitly, httpReads("upsertPAYEContact", Some(regID)), hc, ec
-        )
+        http.PATCH[PAYEContact, PAYEContact](s"$payeRegUrl/paye-registration/$regID/contact-correspond-paye", payeContact)(PAYEContact.format, upsertPAYEContactHttpReads(regID), hc, ec)
       }
     }
 
   def getCompletionCapacity(regID: String)(implicit hc: HeaderCarrier): Future[Option[String]] =
     withTimer {
       withRecovery()("getCompletionCapacity", Some(regID)) {
-        http.GET[Option[String]](s"$payeRegUrl/paye-registration/$regID/capacity")(optionHttpReads("getCompletionCapacity", Some(regID)), hc, ec)
+        http.GET[Option[String]](s"$payeRegUrl/paye-registration/$regID/capacity")(getCompletionCapacityHttpReads(regID), hc, ec)
       }
     }
 
   def upsertCompletionCapacity(regID: String, completionCapacity: String)(implicit hc: HeaderCarrier): Future[String] =
     withTimer {
       withRecovery()("upsertCompletionCapacity", Some(regID)) {
-        http.PATCH[String, String](s"$payeRegUrl/paye-registration/$regID/capacity", completionCapacity)(
-          implicitly, httpReads("upsertCompletionCapacity", Some(regID)), hc, ec
-        )
+        http.PATCH[String, String](s"$payeRegUrl/paye-registration/$regID/capacity", completionCapacity)(implicitly, upsertCompletionCapacityHttpReads(regID), hc, ec)
       }
     }
 
   def getAcknowledgementReference(regID: String)(implicit hc: HeaderCarrier): Future[Option[String]] =
     withTimer {
       withRecovery()("getAcknowledgementReference", Some(regID)) {
-        http.GET[Option[String]](s"$payeRegUrl/paye-registration/$regID/acknowledgement-reference")(optionHttpReads("getAcknowledgementReference", Some(regID)), hc, ec)
+        http.GET[Option[String]](s"$payeRegUrl/paye-registration/$regID/acknowledgement-reference")(getAcknowledgementReferenceHttpReads(regID), hc, ec)
       }
     }
 
   def getStatus(regId: String)(implicit hc: HeaderCarrier): Future[Option[PAYEStatus.Value]] =
     withTimer {
-      withRecovery[Option[PAYEStatus.Value]](None)("getAcknowledgementReference", Some(regId)) {
-        http.GET[Option[PAYEStatus.Value]](s"$payeRegUrl/paye-registration/$regId/status")(
-          optionHttpReads("getStatus", Some(regId))(PAYEStatus.payeRegResponseReads, manifest[PAYEStatus.Value]), hc, ec
-        )
+      withRecovery[Option[PAYEStatus.Value]](None)("getStatus", Some(regId)) {
+        http.GET[Option[PAYEStatus.Value]](s"$payeRegUrl/paye-registration/$regId/status")(getStatusHttpReads(regId), hc, ec)
       }
     }
 

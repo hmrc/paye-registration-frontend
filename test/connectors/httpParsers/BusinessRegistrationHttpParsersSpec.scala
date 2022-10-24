@@ -209,10 +209,10 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
 
         "response is OK and JSON is malformed" must {
 
-          "return a JsResultException and log an error message" in {
+          "return None but log an error message" in {
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
-              intercept[JsResultException](BusinessRegistrationHttpParsers.retrieveContactDetailsHttpReads(regId).read("", "", HttpResponse(OK, json = Json.obj(), Map())))
+              BusinessRegistrationHttpParsers.retrieveContactDetailsHttpReads(regId).read("", "", HttpResponse(OK, json = Json.obj(), Map())) mustBe None
               logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][retrieveContactDetailsHttpReads] JSON returned could not be parsed to models.view.PAYEContactDetails model for regId: '$regId'")
             }
           }
