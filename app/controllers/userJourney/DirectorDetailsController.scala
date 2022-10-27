@@ -27,7 +27,7 @@ import views.html.pages.error.restart
 import views.html.pages.{directorDetails => DirectorDetailsPage}
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DirectorDetailsController @Inject()(val directorDetailsService: DirectorDetailsService,
@@ -48,22 +48,25 @@ class DirectorDetailsController @Inject()(val directorDetailsService: DirectorDe
       directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map { directors =>
         val ninos = directorDetailsService.createDirectorNinos(directors)
         val names = directorDetailsService.createDisplayNamesMap(directors)
-        Ok(DirectorDetailsPage(DirectorDetailsForm.form.fill(ninos), names))
+        Ok(DirectorDetailsPage(DirectorDetailsForm.form(names).fill(ninos), names))
       } recover {
         case _ => InternalServerError(restart())
       }
   }
 
   def submitDirectorDetails: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
-    profile =>
-      DirectorDetailsForm.form.bindFromRequest.fold(
-        errors => directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) map { directors =>
-          val names = directorDetailsService.createDisplayNamesMap(directors)
-          BadRequest(DirectorDetailsPage(errors, names))
-        },
-        success => directorDetailsService.submitNinos(success, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
-          _ => Redirect(routes.PAYEContactController.payeContactDetails)
-        }
-      )
+    profile => {
+      directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) flatMap { directors =>
+        val names = directorDetailsService.createDisplayNamesMap(directors)
+        DirectorDetailsForm.form(names).bindFromRequest.fold(
+          errors =>
+            Future.successful(BadRequest(DirectorDetailsPage(errors, names))),
+          success =>
+            directorDetailsService.submitNinos(success, profile.registrationID, profile.companyTaxRegistration.transactionId) map {
+              _ => Redirect(routes.PAYEContactController.payeContactDetails)
+            }
+        )
+      }
+    }
   }
 }

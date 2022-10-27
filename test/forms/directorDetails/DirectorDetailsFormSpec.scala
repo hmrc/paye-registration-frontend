@@ -22,7 +22,27 @@ import play.api.data.FormError
 
 class DirectorDetailsFormSpec extends PayeComponentSpec {
 
-  val testForm = DirectorDetailsForm.form
+  val testDirectorMapping = Map(
+    "0"  -> "Director 1",
+    "1"  -> "Director 2",
+    "2"  -> "Director 3",
+    "3"  -> "Director 4",
+    "4"  -> "Director 5",
+    "5"  -> "Director 6",
+    "6"  -> "Director 7",
+    "7"  -> "Director 8",
+    "8"  -> "Director 9",
+    "9"  -> "Director 10",
+    "10" -> "Director 11",
+    "11" -> "Director 12",
+    "12" -> "Director 13",
+    "13" -> "Director 14",
+    "14" -> "Director 15",
+    "15" -> "Director 16",
+    "16" -> "Director 17"
+  )
+
+  val testForm = DirectorDetailsForm.form(testDirectorMapping)
 
   "Binding BusinessContactDetailsForm to a model" when {
 
@@ -146,18 +166,18 @@ class DirectorDetailsFormSpec extends PayeComponentSpec {
 
       val errs = Seq(
         FormError("nino", "errors.duplicate.nino"),
-        FormError("nino[0]", "errors.invalid.nino"),
-        FormError("nino[2]", "errors.invalid.nino"),
-        FormError("nino[3]", "errors.invalid.nino"),
-        FormError("nino[4]", "errors.invalid.nino"),
-        FormError("nino[6]", "errors.invalid.nino"),
-        FormError("nino[7]", "errors.invalid.nino"),
-        FormError("nino[8]", "errors.invalid.nino"),
-        FormError("nino[9]", "errors.invalid.nino"),
-        FormError("nino[10]", "errors.invalid.nino"),
-        FormError("nino[12]", "errors.invalid.nino"),
-        FormError("nino[13]", "errors.invalid.nino"),
-        FormError("nino[14]", "errors.invalid.nino")
+        FormError("nino[0]", "errors.invalid.nino", Seq("Director 1")),
+        FormError("nino[2]", "errors.invalid.nino", Seq("Director 3")),
+        FormError("nino[3]", "errors.invalid.nino", Seq("Director 4")),
+        FormError("nino[4]", "errors.invalid.nino", Seq("Director 5")),
+        FormError("nino[6]", "errors.invalid.nino", Seq("Director 7")),
+        FormError("nino[7]", "errors.invalid.nino", Seq("Director 8")),
+        FormError("nino[8]", "errors.invalid.nino", Seq("Director 9")),
+        FormError("nino[9]", "errors.invalid.nino", Seq("Director 10")),
+        FormError("nino[10]", "errors.invalid.nino", Seq("Director 11")),
+        FormError("nino[12]", "errors.invalid.nino", Seq("Director 13")),
+        FormError("nino[13]", "errors.invalid.nino", Seq("Director 14")),
+        FormError("nino[14]", "errors.invalid.nino", Seq("Director 15"))
       )
 
       "Fail to bind with the correct errors" in {
