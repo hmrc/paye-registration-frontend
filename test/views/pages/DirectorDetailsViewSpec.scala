@@ -66,7 +66,7 @@ class DirectorDetailsViewSpec extends PayeComponentSpec with PayeFakedApp with I
 
   "The confirm your Director Details screen with one director" should {
     lazy val view = app.injector.instanceOf[directorDetails]
-    lazy val document = Jsoup.parse(view(DirectorDetailsForm.form.fill(userNinos), directorMap).body)
+    lazy val document = Jsoup.parse(view(DirectorDetailsForm.form(directorMap).fill(userNinos), directorMap).body)
 
     "have the title for a single director" in {
       document.select(Selectors.h1).text() mustBe mockMessages("pages.directorDetails.description")
@@ -79,7 +79,7 @@ class DirectorDetailsViewSpec extends PayeComponentSpec with PayeFakedApp with I
 
   "The confirm your Director Details screen with many directors" should {
     lazy val view = app.injector.instanceOf[directorDetails]
-    lazy val document = Jsoup.parse(view(DirectorDetailsForm.form.fill(userNinosMany), directorMapMany).body)
+    lazy val document = Jsoup.parse(view(DirectorDetailsForm.form(directorMapMany).fill(userNinosMany), directorMapMany).body)
 
     "have the title for many directors" in {
       document.select(Selectors.h1).text mustBe mockMessages("pages.directorDetails.description")

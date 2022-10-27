@@ -21,11 +21,11 @@ import play.api.data.Forms._
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError, Forms, Mapping}
 import utils.Formatters
-import utils.Validators.isValidNino
+import utils.Validators.{isValidNino, nameValidation}
 
 object DirectorDetailsForm {
 
-  implicit def userNinoFormatter: Formatter[UserEnteredNino] = new Formatter[UserEnteredNino] {
+  implicit def userNinoFormatter(names: Map[String, String]): Formatter[UserEnteredNino] = new Formatter[UserEnteredNino] {
 
     def getIndex(key: String): String = {
       key.filter("0123456789".toSet)
@@ -48,13 +48,15 @@ object DirectorDetailsForm {
 
       def nino = data.getOrElse(key, "")
 
+      val name = names(getIndex(key))
+
       def showNinoError: Boolean = !(nino == "" || isValidNino(trimNino(nino)))
 
       (emptyForm, duplicates, showNinoError, nino) match {
         case (true, _, _, _) => Left(Seq(FormError("nino[0]", "pages.directorDetails.errors.noneCompleted")))
-        case (_, true, true, _) => Left(Seq(FormError("nino", "errors.duplicate.nino"), FormError(key, "errors.invalid.nino")))
+        case (_, true, true, _) => Left(Seq(FormError("nino", "errors.duplicate.nino"), FormError(key, "errors.invalid.nino", Seq(name))))
         case (_, true, false, _) => Left(Seq(FormError("nino", "errors.duplicate.nino")))
-        case (_, false, true, _) => Left(Seq(FormError(key, "errors.invalid.nino")))
+        case (_, false, true, _) => Left(Seq(FormError(key, "errors.invalid.nino", Seq(name))))
         case (_, false, false, "") => Right(UserEnteredNino(getIndex(key), None))
         case (_, false, false, validNino) => Right(UserEnteredNino(getIndex(key), Some(trimNino(validNino))))
       }
@@ -63,11 +65,11 @@ object DirectorDetailsForm {
     def unbind(key: String, value: UserEnteredNino) = Map(s"nino[${value.id}]" -> Formatters.ninoFormatter(value.nino.getOrElse("")))
   }
 
-  val userNino: Mapping[UserEnteredNino] = Forms.of[UserEnteredNino](userNinoFormatter)
+  def userNino(names: Map[String, String]): Mapping[UserEnteredNino] = Forms.of[UserEnteredNino](userNinoFormatter(names))
 
-  val form = Form(
+  def form(names: Map[String, String]) = Form(
     mapping(
-      "nino" -> list(userNino)
+      "nino" -> list(userNino(names))
     )(Ninos.apply)(Ninos.unapply)
   )
 }
