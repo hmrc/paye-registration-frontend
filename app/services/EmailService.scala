@@ -21,7 +21,7 @@ import models.{EmailDifficulties, EmailNotFound, EmailResponse}
 import models.external.{CurrentProfile, EmailRequest}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
-import utils.{SystemDate, TaxYearConfig}
+import utils.{Logging, SystemDate, TaxYearConfig}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -35,7 +35,7 @@ class EmailService @Inject()(companyRegistrationConnector: CompanyRegistrationCo
                              incorporationInformationConnector: IncorporationInformationConnector,
                              s4LConnector: S4LConnector,
                              taxYearConfig: TaxYearConfig
-                            )(implicit val ec: ExecutionContext) {
+                            )(implicit val ec: ExecutionContext) extends Logging {
 
   private val FIRST_PAYMENT_DATE = "firstPaymentDate"
 
