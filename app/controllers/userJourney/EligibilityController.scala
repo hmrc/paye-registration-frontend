@@ -42,11 +42,12 @@ abstract class EligibilityController(mcc: MessagesControllerComponents) extends 
   implicit val ec: ExecutionContext
   val config = appConfig.servicesConfig
 
-  val compRegFEURL: String
-  val compRegFEURI: String
+  val contactFrontendUrl: String
+  val contactFrontendURI: String
 
-  def questionnaire: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
+  def feedback: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     _ =>
-      Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/questionnaire"))
+      Future.successful(Redirect(s"$contactFrontendUrl$contactFrontendURI/feedback"))
   }
 }
+

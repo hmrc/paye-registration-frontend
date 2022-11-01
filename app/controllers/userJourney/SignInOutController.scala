@@ -44,8 +44,8 @@ class SignInOutController @Inject()(val authConnector: AuthConnector,
     Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/post-sign-in"))
   }
 
-  def signOut: Action[AnyContent] = isAuthorised { implicit request =>
-    Future.successful(Redirect(s"$compRegFEURL$compRegFEURI/questionnaire").withNewSession)
+  def signOut: Action[AnyContent] = Action.async {
+    _ => Future.successful(Redirect(appConfig.betaFeedbackUrl).withNewSession)
   }
 
   def renewSession: Action[AnyContent] = isAuthorised { implicit request =>

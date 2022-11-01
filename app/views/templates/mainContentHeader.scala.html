@@ -14,18 +14,20 @@
  * limitations under the License.
  *@
 
-@this()
+@import config.AppConfig
+@import views.html.components.link
 
-@(backButtonEnabled: Boolean)(implicit messages: Messages)
+
+@this(link: link)
+
+@(backButtonEnabled: Boolean)(implicit messages: Messages, appConfig: AppConfig)
 
 <div id="global-header-bar"></div>
 <div class="phase-banner">
     <p>
         <strong class="phase-tag">BETA</strong>
         <span>@messages("app.common.feedbackFirst")
-            <a href="https://www.tax.service.gov.uk/contact/beta-feedback?service=SCRS">
-                @messages("app.common.feedbackSecond")
-            </a>
+                @link(appConfig.feedbackUrl, "common.feedbackSecond", isExternal = true)
             @messages("app.common.feedbackThird")
         </span>
     </p>

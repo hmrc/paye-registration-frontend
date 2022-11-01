@@ -52,7 +52,7 @@ class ConfirmationViewSpec extends PayeComponentSpec with PayeFakedApp with I18n
     lazy val document = Jsoup.parse(page.body)
     "show the correct content" in {
       document.getElementById("Questionnaire").text() mustBe "What do you think of the service? (usually takes one minute to complete) (opens in new tab)"
-      document.getElementById("Questionnaire").attr("href") mustBe "http://localhost:9970/register-your-company/questionnaire"
+      document.getElementById("Questionnaire").attr("href") mustBe "http://localhost:9250/contact/beta-feedback?service=SCRS"
       document.getElementById("Questionnaire").attr("target") mustBe "_blank"
     }
   }

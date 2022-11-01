@@ -39,7 +39,7 @@
         timeout = Option(appConfig.timeoutInSeconds),
         countdown = Option(appConfig.timeoutDisplayLength),
         keepAliveUrl = Some(controllers.userJourney.routes.SignInOutController.renewSession.url),
-        signOutUrl = Some(controllers.userJourney.routes.SignInOutController.signOut.url)
+        signOutUrl = Some(appConfig.feedbackUrl)
     ))
 }
 }
@@ -68,7 +68,7 @@
     additionalHeadBlock = Some(head),
     signOutUrl = if (signOutLink) Some(controllers.userJourney.routes.SignInOutController.signOut.url) else None,
     serviceUrl = Some(""),
-    phaseBanner = Some(standardBetaBanner(url = "")),
+    phaseBanner = Some(standardBetaBanner(url = appConfig.feedbackUrl)),
     backLinkUrl = if (backLink) Some("#") else None,
     displayHmrcBanner = false,
     accessibilityStatementUrl = Some(appConfig.accessibilityStatementUrl),

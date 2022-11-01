@@ -16,6 +16,7 @@
 
 package controllers.userJourney
 
+import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
@@ -27,6 +28,7 @@ class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
   lazy val mockTimeout: timeout = app.injector.instanceOf[timeout]
+  lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
 
   class Setup {
     val controller = new SignInOutController(
@@ -68,7 +70,7 @@ class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showAuthorised(controller.signOut, FakeRequest()) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(s"${controller.compRegFEURL}${controller.compRegFEURI}/questionnaire")
+          redirectLocation(result) mustBe Some(appConfig.betaFeedbackUrl)
       }
     }
   }
