@@ -70,8 +70,6 @@ class AppConfig @Inject()(configuration: Configuration,
   }
 
   //feedback
-  lazy val contactFrontendUrl = servicesConfig.getConfString("feedback-frontend.www.url", "")
-  lazy val contactFrontendURI = servicesConfig.getConfString("feedback-frontend.www.uri", "")
   def feedbackUrl: String =
     s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier"
 
