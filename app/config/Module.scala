@@ -90,6 +90,5 @@ class Module extends AbstractModule {
 
   private def bindUserJourneyControllers(): Unit = {
     bind(classOf[DashboardController]).to(classOf[DashboardControllerImpl]).asEagerSingleton()
-    bind(classOf[EligibilityController]).to(classOf[EligibilityControllerImpl]).asEagerSingleton()
   }
 }

@@ -70,10 +70,7 @@ class AppConfig @Inject()(configuration: Configuration,
   }
 
   //feedback
-  def feedbackUrl: String =
-    s"$contactHost/contact/beta-feedback?service=$contactFormServiceIdentifier"
-
-  lazy val feedbackFrontendUrl = loadConfig("microservice.services.feedback-frontend.url")
+  lazy val feedbackFrontendUrl = loadConfig("microservice.services.feedback-frontend.host")
   lazy val betaFeedbackUrl = s"$feedbackFrontendUrl/feedback/$contactFormServiceIdentifier"
 
   lazy val self: String = servicesConfig.getConfString("paye-registration-frontend.www.url", "")

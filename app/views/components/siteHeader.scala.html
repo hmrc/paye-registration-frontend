@@ -28,6 +28,6 @@
         serviceName = Some(messages("service.name")),
         serviceUrl = controllers.userJourney.routes.PayeStartController.startPaye.url,
         containerClasses = "govuk-width-container",
-        signOutHref = Some(appConfig.feedbackUrl),
+        signOutHref = Some(controllers.userJourney.routes.SignInOutController.signOut.url),
     )
 )
