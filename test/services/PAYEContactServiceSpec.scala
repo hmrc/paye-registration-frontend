@@ -231,7 +231,7 @@ class PAYEContactServiceSpec extends PayeComponentSpec {
       when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(Fixtures.validPAYEContactAPI)))
 
       when(mockS4LService.saveForm[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.anyString())
@@ -245,14 +245,14 @@ class PAYEContactServiceSpec extends PayeComponentSpec {
       when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any()))
         .thenReturn(Future.failed(UpstreamErrorResponse("403", 403, 403)))
 
       an[UpstreamErrorResponse] mustBe thrownBy(await(service.getPAYEContact(testRegId)))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
-      when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new RuntimeException))
 
       an[Exception] mustBe thrownBy(await(service.getPAYEContact(testRegId)))
@@ -261,7 +261,7 @@ class PAYEContactServiceSpec extends PayeComponentSpec {
     "return the correct View response when PAYE Contact are returned from Prepopulation" in new Setup {
       when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
-      when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
       when(mockPrepopulationService.getPAYEContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
@@ -277,7 +277,7 @@ class PAYEContactServiceSpec extends PayeComponentSpec {
     "return None when no PAYE Contact are returned from the connector and Prepopulation" in new Setup {
       when(mockS4LService.fetchAndGet[PAYEContactView](ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
-      when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
       when(mockPrepopulationService.getPAYEContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
@@ -310,7 +310,7 @@ class PAYEContactServiceSpec extends PayeComponentSpec {
     )
 
     "return a success response when the upsert completes successfully" in new Setup {
-      when(mockPAYERegConnector.upsertPAYEContact(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.upsertPAYEContact(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validPAYEContactAPI))
       when(mockS4LService.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]))
         .thenReturn(Future.successful(returnHttpResponse))

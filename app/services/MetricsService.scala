@@ -72,6 +72,17 @@ trait MetricsService {
   val addressLookupFailedResponseCounter: Counter
 
 
+  def processDataResponseWithMetrics[T](timer: Timer.Context)(f: => Future[T])(implicit ec: ExecutionContext): Future[T] = {
+    f map { data =>
+      timer.stop()
+      data
+    } recover {
+      case e =>
+        timer.stop()
+        throw e
+    }
+  }
+
   def processDataResponseWithMetrics[T](success: Counter, failed: Counter, timer: Timer.Context)(f: => Future[T])(implicit ec: ExecutionContext): Future[T] = {
     f map { data =>
       timer.stop()

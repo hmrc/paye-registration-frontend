@@ -104,7 +104,7 @@ class NatureOfBusinessServiceSpec extends PayeComponentSpec {
     "return a success response when the upsert completes successfully" in new Setup {
       val validNatureOfBusiness = NatureOfBusiness(natureOfBusiness = "laundring")
 
-      when(mockPAYERegConnector.upsertSICCodes(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.upsertSICCodes(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validSICCodesList))
 
       await(service.saveNatureOfBusiness(validNatureOfBusiness, "54321")) mustBe DownstreamOutcome.Success

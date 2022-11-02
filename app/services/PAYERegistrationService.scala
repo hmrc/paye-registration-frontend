@@ -44,7 +44,7 @@ trait PAYERegistrationService {
 
   def deleteRejectedRegistration(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
     payeRegistrationConnector.deleteRejectedRegistrationDocument(regId, txId) flatMap {
-      case RegistrationDeletion.success => keyStoreConnector.remove() map {
+      case RegistrationDeletion.success | RegistrationDeletion.notfound => keyStoreConnector.remove() map {
         _ => RegistrationDeletion.success
       }
       case RegistrationDeletion.invalidStatus => Future.successful(RegistrationDeletion.invalidStatus)

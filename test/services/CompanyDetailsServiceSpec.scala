@@ -252,7 +252,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockS4LService.fetchAndGet(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(Fixtures.validCompanyDetailsAPI)))
 
       when(mockS4LService.saveForm(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
@@ -277,7 +277,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockS4LService.fetchAndGet(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
       when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
@@ -299,14 +299,14 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockS4LService.fetchAndGet(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any()))
         .thenReturn(Future.failed(UpstreamErrorResponse("403", 403, 403)))
 
       an[UpstreamErrorResponse] mustBe thrownBy(await(service.getCompanyDetails("54321", "txId")))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
-      when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new ArrayIndexOutOfBoundsException))
 
       an[Exception] mustBe thrownBy(await(service.getCompanyDetails("54321", "txId")))

@@ -20,6 +20,7 @@ import connectors._
 import enums.{DownstreamOutcome, UserCapacity}
 import models.view.CompletionCapacity
 import uk.gov.hmrc.http.HeaderCarrier
+import utils.Logging
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -27,7 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class CompletionCapacityServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
                                               val businessRegistrationConnector: BusinessRegistrationConnector)(implicit val ec: ExecutionContext) extends CompletionCapacityService
 
-trait CompletionCapacityService {
+trait CompletionCapacityService extends Logging {
 
   val payeRegConnector: PAYERegistrationConnector
   val businessRegistrationConnector: BusinessRegistrationConnector

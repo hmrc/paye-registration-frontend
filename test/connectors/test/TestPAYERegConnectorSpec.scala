@@ -78,7 +78,7 @@ class TestPAYERegConnectorSpec extends PayeComponentSpec {
     "return a successful outcome for a successful add of PAYE Contact" in new Setup {
       mockFetchCurrentProfile("54321")
 
-      when(mockPAYERegConnector.upsertPAYEContact(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.upsertPAYEContact(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validPAYEContactAPI))
 
       await(connector.addTestPAYEContact(Fixtures.validPAYEContactAPI, "54321")) mustBe DownstreamOutcome.Success
@@ -87,7 +87,7 @@ class TestPAYERegConnectorSpec extends PayeComponentSpec {
     "return a failed outcome for an unsuccessful add of PAYE Contact" in new Setup {
       mockFetchCurrentProfile("54321")
 
-      when(mockPAYERegConnector.upsertPAYEContact(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.upsertPAYEContact(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new RuntimeException("tst")))
 
       await(connector.addTestPAYEContact(Fixtures.validPAYEContactAPI, "54321")) mustBe DownstreamOutcome.Failure

@@ -34,4 +34,10 @@ trait DownstreamExceptions {
 
   class IncorporationInformationResponseException(msg: String) extends Exception(msg)
 
+  class CompanyRegistrationException(msg: String) extends Exception(msg)
+
+  class BusinessRegistrationException(msg: String) extends Exception(msg)
+
+  class AddressLookupException(msg: String) extends Exception(msg)
+
 }

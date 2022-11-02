@@ -16,14 +16,12 @@
 
 package connectors
 
-import com.codahale.metrics.{Counter, Timer}
-import utils.Logging
 import config.AppConfig
+import connectors.httpParsers.AddressLookupHttpParsers
 import models.Address
 import models.external._
-import play.api.libs.json.Reads
 import services.MetricsService
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -32,32 +30,26 @@ import scala.util.control.NoStackTrace
 @Singleton
 class AddressLookupConnector @Inject()(metricsService: MetricsService,
                                        http: HttpClient
-                                      )(appConfig: AppConfig, implicit val ec: ExecutionContext) extends Logging {
+                                      )(appConfig: AppConfig, implicit val ec: ExecutionContext) extends BaseConnector with AddressLookupHttpParsers {
 
   lazy val addressLookupFrontendUrl: String = appConfig.servicesConfig.baseUrl("address-lookup-frontend")
-  val successCounter: Counter = metricsService.addressLookupSuccessResponseCounter
-  val failedCounter: Counter = metricsService.addressLookupFailedResponseCounter
 
-  def timer: Timer.Context = metricsService.addressLookupResponseTimer.time()
-
-  def getAddress(id: String)(implicit hc: HeaderCarrier): Future[Address] = {
-    implicit val reads: Reads[Address] = Address.addressLookupReads
-    metricsService.processDataResponseWithMetrics[Address](successCounter, failedCounter, timer) {
-      http.GET[Address](s"$addressLookupFrontendUrl/api/confirmed?id=$id")
+  def getAddress(id: String)(implicit hc: HeaderCarrier): Future[Address] =
+    withTimer {
+      http.GET[Address](s"$addressLookupFrontendUrl/api/confirmed?id=$id")(addressHttpReads, hc, ec)
     }
-  }
 
-  def getOnRampUrl(alfJourneyConfig: AlfJourneyConfig)(implicit hc: HeaderCarrier): Future[String] = {
-    val postUrl = s"$addressLookupFrontendUrl/api/v2/init"
-
-    metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
-      http.POST[AlfJourneyConfig, HttpResponse](postUrl, alfJourneyConfig)
-    } map {
-      _.header("Location").getOrElse {
-        logger.warn("[getOnRampUrl] ERROR: Location header not set in ALF response")
-        throw new ALFLocationHeaderNotSetException
-      }
+  def getOnRampUrl(alfJourneyConfig: AlfJourneyConfig)(implicit hc: HeaderCarrier): Future[String] =
+    withTimer {
+      http.POST[AlfJourneyConfig, String](s"$addressLookupFrontendUrl/api/v2/init", alfJourneyConfig)(AlfJourneyConfig.journeyConfigFormat, onRampHttpReads, hc, ec)
     }
+
+  private def withTimer[T](f: => Future[T]) = {
+    metricsService.processDataResponseWithMetrics(
+      metricsService.addressLookupSuccessResponseCounter,
+      metricsService.addressLookupFailedResponseCounter,
+      metricsService.addressLookupResponseTimer.time()
+    )(f)
   }
 }
 

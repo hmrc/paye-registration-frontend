@@ -37,7 +37,7 @@ object CompanyDetails {
   implicit val businessContactFormat = DigitalContactDetails.format
   implicit val format = Json.format[CompanyDetails]
 
-  val tradingNameApiPrePopReads: Reads[Option[String]] = (__ \ "tradingName").readNullable[String]
+  val tradingNameApiPrePopReads: Reads[String] = (__ \ "tradingName").read[String]
   val tradingNameApiPrePopWrites: Writes[String] = new Writes[String] {
     override def writes(tradingName: String): JsValue = Json.obj("tradingName" -> tradingName)
   }

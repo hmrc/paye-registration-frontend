@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-package enums
+package models
 
-import play.api.libs.json._
-
-object PAYEStatus extends Enumeration {
-  val draft : Value = Value
-  val held : Value = Value
-  val submitted : Value = Value
-  val invalid : Value = Value
-  val acknowledged : Value = Value
-  val rejected : Value = Value
-  val cancelled : Value = Value
-
-  implicit val format : Format[PAYEStatus.Value] = Format(Reads.enumNameReads(PAYEStatus), Writes.enumNameWrites)
-  val payeRegResponseReads: Reads[PAYEStatus.Value] = (__ \ "status").read[PAYEStatus.Value]
-}
+sealed trait EmailResponse
+case object EmailSent extends EmailResponse
+case object EmailDifficulties extends EmailResponse
+case object EmailNotFound extends EmailResponse

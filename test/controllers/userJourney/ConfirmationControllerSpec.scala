@@ -16,11 +16,9 @@
 
 package controllers.userJourney
 
-import java.time.LocalDate
-
-import connectors.{EmailDifficulties, EmailSent}
 import helpers.auth.AuthHelpers
 import helpers.{PayeComponentSpec, PayeFakedApp}
+import models.{EmailDifficulties, EmailSent}
 import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
@@ -29,12 +27,13 @@ import play.api.http.Status
 import play.api.mvc.MessagesControllerComponents
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.Name
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.http.HttpResponse
 import views.html.pages.confirmation
 import views.html.pages.error.restart
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionContext}
 import scala.concurrent.Future
 

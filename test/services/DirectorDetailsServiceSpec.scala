@@ -530,7 +530,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   "Calling saveDirectorDetails" should {
     "return a success response when the upsert completes successfully" in new Setup {
-      when(mockPAYERegConnector.upsertDirectors(ArgumentMatchers.contains("12345"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.upsertDirectors(ArgumentMatchers.contains("12345"), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validDirectorList))
 
       when(mockS4LService.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
