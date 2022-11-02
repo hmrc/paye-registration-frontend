@@ -61,7 +61,6 @@ class PayeStartController @Inject()(val currentProfileService: CurrentProfileSer
   def startPaye(): Action[AnyContent] = isAuthorisedAndIsOrg { implicit request =>
     checkAndStoreCurrentProfile { profile =>
       assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId) {
-        //TODO Remove when Welsh FS is removed
         if((languageUtils.getCurrentLang == welsh) && !appConfig.languageTranslationEnabled) {
           Redirect(controllers.routes.LanguageSwitchController.setLanguage(english))
         } else {

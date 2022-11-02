@@ -16,9 +16,9 @@
 
 package connectors.test
 
-import utils.Logging
 import config.AppConfig
 import connectors._
+import connectors.httpParsers.{BaseHttpReads, PAYERegistrationHttpParsers}
 import enums.DownstreamOutcome
 import models.api.{Employment, CompanyDetails => CompanyDetailsAPI, PAYEContact => PAYEContactAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.http.Status
@@ -34,7 +34,7 @@ class TestPAYERegConnectorImpl @Inject()(val payeRegConnector: PAYERegistrationC
   val payeRegUrl = appConfig.servicesConfig.baseUrl("paye-registration")
 }
 
-trait TestPAYERegConnector extends Logging {
+trait TestPAYERegConnector extends BaseConnector with PAYERegistrationHttpParsers {
 
   implicit val ec: ExecutionContext
   val payeRegUrl: String
@@ -42,41 +42,35 @@ trait TestPAYERegConnector extends Logging {
   val payeRegConnector: PAYERegistrationConnector
 
   def addPAYERegistration(reg: PAYERegistrationAPI)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    http.POST[PAYERegistrationAPI, HttpResponse](s"$payeRegUrl/paye-registration/test-only/update-registration/${reg.registrationID}", reg) map {
-      _.status match {
-        case Status.OK => DownstreamOutcome.Success
-        case _ => DownstreamOutcome.Failure
-      }
-    }
+    http.POST[PAYERegistrationAPI, DownstreamOutcome.Value](s"$payeRegUrl/paye-registration/test-only/update-registration/${reg.registrationID}", reg)(
+      PAYERegistrationAPI.format, createNewRegistrationHttpReads(reg.registrationID, reg.transactionID), hc, ec
+    )
   }
 
-  def addTestCompanyDetails(details: CompanyDetailsAPI, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def addTestCompanyDetails(details: CompanyDetailsAPI, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] =
     payeRegConnector.upsertCompanyDetails(regId, details) map {
       _ => DownstreamOutcome.Success
     } recover {
       case _ => DownstreamOutcome.Failure
     }
-  }
 
-  def addTestPAYEContact(details: PAYEContactAPI, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def addTestPAYEContact(details: PAYEContactAPI, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] =
     payeRegConnector.upsertPAYEContact(regId, details) map {
       _ => DownstreamOutcome.Success
     } recover {
       case _ => DownstreamOutcome.Failure
     }
-  }
 
-  def addTestEmploymentInfo(details: Employment, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def addTestEmploymentInfo(details: Employment, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] =
     payeRegConnector.upsertEmployment(regId, details) map {
       _ => DownstreamOutcome.Success
     } recover {
       case _ => DownstreamOutcome.Failure
     }
-  }
 
   def testRegistrationTeardown()(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    http.GET[HttpResponse](s"$payeRegUrl/paye-registration/test-only/registration-teardown") map {
-      resp => DownstreamOutcome.Success
+    http.GET[HttpResponse](s"$payeRegUrl/paye-registration/test-only/registration-teardown")(rawReads, hc, ec) map {
+      _ => DownstreamOutcome.Success
     } recover {
       case e: Exception =>
         logger.warn(s"[testRegistrationTeardown] received error when clearing registration details - Error: ${e.getMessage}")
@@ -85,8 +79,8 @@ trait TestPAYERegConnector extends Logging {
   }
 
   def tearDownIndividualRegistration(regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    http.GET[HttpResponse](s"$payeRegUrl/paye-registration/test-only/delete-registration/$regId") map {
-      resp => DownstreamOutcome.Success
+    http.GET[HttpResponse](s"$payeRegUrl/paye-registration/test-only/delete-registration/$regId")(rawReads, hc, ec) map {
+      _ => DownstreamOutcome.Success
     } recover {
       case e: Exception =>
         logger.warn(s"[tearDownIndividualRegistration] received error when clearing registration details - Error: ${e.getMessage}")
@@ -95,8 +89,8 @@ trait TestPAYERegConnector extends Logging {
   }
 
   def updateStatus(regId: String, status: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
-    http.POST[JsObject, HttpResponse](s"$payeRegUrl/paye-registration/test-only/update-status/$regId/$status", Json.obj()) map {
-      resp => DownstreamOutcome.Success
+    http.POST[JsObject, HttpResponse](s"$payeRegUrl/paye-registration/test-only/update-status/$regId/$status", Json.obj())(implicitly, rawReads, hc, ec) map {
+      _ => DownstreamOutcome.Success
     } recover {
       case e: Exception =>
         logger.warn(s"[updateStatus] received error when updating status details - Error: ${e.getMessage}")

@@ -17,6 +17,8 @@
 package connectors.test
 
 import config.AppConfig
+import connectors.BaseConnector
+import connectors.httpParsers.{BaseHttpReads, IncorporationInformationHttpParsers}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http._
 
@@ -29,7 +31,7 @@ class TestIncorpInfoConnectorImpl @Inject()(val http: HttpClient,
   val incorpInfoUrl = appConfig.servicesConfig.baseUrl("incorporation-information")
 }
 
-trait TestIncorpInfoConnector {
+trait TestIncorpInfoConnector extends BaseConnector with IncorporationInformationHttpParsers {
   implicit val ec: ExecutionContext
   val incorpFEStubsUrl: String
   val incorpInfoUrl: String
@@ -151,21 +153,19 @@ trait TestIncorpInfoConnector {
          |}
     """.stripMargin)
 
-    http.POST[JsValue, HttpResponse](s"$incorpFEStubsUrl/incorporation-frontend-stubs/insert-data", officers)
+    http.POST[JsValue, HttpResponse](s"$incorpFEStubsUrl/incorporation-frontend-stubs/insert-data", officers)(implicitly, rawReads, hc, ec)
   }
 
-  def teardownCoHoCompanyDetails()(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    http.PUT[String, HttpResponse](s"$incorpFEStubsUrl/incorporation-frontend-stubs/wipe-data", "")
-  }
+  def teardownCoHoCompanyDetails()(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    http.PUT[String, HttpResponse](s"$incorpFEStubsUrl/incorporation-frontend-stubs/wipe-data", "")(implicitly, rawReads, hc, ec)
 
-  def teardownIndividualCoHoCompanyDetails(regId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    http.PUT[String, HttpResponse](s"$incorpFEStubsUrl/incorporation-frontend-stubs/wipe-individual-data", txId(regId))
-  }
+  def teardownIndividualCoHoCompanyDetails(regId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    http.PUT[String, HttpResponse](s"$incorpFEStubsUrl/incorporation-frontend-stubs/wipe-individual-data", txId(regId))(implicitly, rawReads, hc, ec)
 
   def addIncorpUpdate(regId: String, success: Boolean, incorpDate: Option[String], crn: Option[String])(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val url = s"$incorpInfoUrl/incorporation-information/test-only/add-incorp-update?txId=${txId(regId)}&success=$success" ++
       incorpDate.fold("")(d => s"&date=$d") ++
       crn.fold("")(c => s"&crn=$c")
-    http.GET[HttpResponse](url)
+    http.GET[HttpResponse](url)(rawReads, hc, ec)
   }
 }

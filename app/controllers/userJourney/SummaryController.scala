@@ -83,7 +83,6 @@ class SummaryController @Inject()(val summaryService: SummaryService,
         case PAYEStatus.draft => f
         case PAYEStatus.held | PAYEStatus.submitted => Future.successful(Redirect(routes.ConfirmationController.showConfirmation))
         case PAYEStatus.invalid => Future.successful(Redirect(controllers.errors.routes.ErrorController.ineligible))
-        //TODO: Potentially need a new view to better demonstrate the problem
         case PAYEStatus.rejected => Future.successful(Redirect(controllers.errors.routes.ErrorController.ineligible))
       }
     }

@@ -16,6 +16,7 @@
 
 package connectors.httpParsers
 
+import common.exceptions
 import connectors.BaseConnector
 import play.api.http.Status.{NOT_FOUND, NO_CONTENT, OK}
 import play.api.libs.json.Reads
@@ -27,7 +28,10 @@ import scala.util.{Failure, Success, Try}
 
 trait BaseHttpReads extends Logging { _: BaseConnector =>
 
-  def unexpectedStatusException(url: String, status: Int, regId: Option[String], txId: Option[String]): Exception
+  def unexpectedStatusException(url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
+    new Exception(s"Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")
+
+  val rawReads: HttpReads[HttpResponse] = (_: String, _:String, response: HttpResponse) => response
 
   def httpReads[T](functionName: String,
                    regId: Option[String] = None,

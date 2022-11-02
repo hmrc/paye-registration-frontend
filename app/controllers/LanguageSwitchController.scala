@@ -31,7 +31,6 @@ class LanguageSwitchController @Inject()(appConfig: AppConfig,
 
   def languageMap: Map[String, Lang] = appConfig.languageMap
 
-  //TODO Remove when Welsh FS is removed
   def setLanguage(language: String): Action[AnyContent] = Action { implicit request =>
     val enabled: Boolean = languageMap.get(language).exists(languageUtils.isLangAvailable)
     val lang: Lang =
