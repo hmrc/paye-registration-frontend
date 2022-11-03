@@ -19,6 +19,7 @@ package services
 import config.AppConfig
 import connectors._
 import helpers.PayeComponentSpec
+import models.{EmailDifficulties, EmailNotFound, EmailSent}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.Configuration

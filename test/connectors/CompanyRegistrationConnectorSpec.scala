@@ -31,7 +31,7 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
   val testUrl = "testUrl"
   val testUri = "testUri"
 
-  class Setup(stubbed: Boolean) {
+  class Setup {
 
     when(mockAppConfig.servicesConfig).thenReturn(mockServicesConfig)
     when(mockServicesConfig.baseUrl("company-registration")).thenReturn(testUrl)
@@ -45,112 +45,61 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
       new MockMetrics,
       mockAppConfig
     ) {
-      override def useCompanyRegistration = stubbed
+      override def useCompanyRegistration = false
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
     }
   }
 
   val status = "submitted"
   val transactionId = "submitted"
-  val ackRefStatus = "04"
-  val ackRefStatusOpt = Some(ackRefStatus)
+  val ackRefStatus = Some("04")
 
-  val profileJson =
-    Json.parse(
-      s"""
-         |{
-         |    "registration-id" : "testRegId",
-         |    "status" : "$status",
-         |    "confirmationReferences" : {
-         |       "acknowledgement-reference" : "BRCT-0123456789",
-         |       "transaction-id" : "$transactionId"
-         |    },
-         |    "acknowledgementReferences" : {
-         |       "status" : "$ackRefStatus"
-         |    }
-         |}
-      """.stripMargin).as[JsObject]
+  "calling .getCompanyRegistrationDetails(regId: String)" should {
 
-  val profileJsonMin =
-    Json.parse(
-      s"""
-         |{
-         |    "registration-id" : "testRegId",
-         |    "status" : "$status"
-         |}
-      """.stripMargin).as[JsObject]
+    "return a CompanyProfile when successful" in new Setup {
 
-  "getCompanyRegistrationDetails" should {
-    "return a CompanyProfile" in new Setup(false) {
-      when(mockHttpClient.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
-        .thenReturn(Future(profileJson))
+      val compRegProfile = CompanyRegistrationProfile(status, transactionId, ackRefStatus)
+
+      when(mockHttpClient.GET[CompanyRegistrationProfile](any(), any(), any())(any(), any[HeaderCarrier](), any()))
+        .thenReturn(Future(compRegProfile))
 
       val result = await(testConnector.getCompanyRegistrationDetails("testRegId"))
-      result mustBe CompanyRegistrationProfile(status, transactionId, ackRefStatusOpt)
+
+      result mustBe compRegProfile
     }
 
-    "throw a bad request exception" in new Setup(false) {
-      when(mockHttpClient.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
-        .thenReturn(Future.failed(new BadRequestException("tstException")))
+    "throwing any other exception" in new Setup {
 
-      intercept[BadRequestException](await(testConnector.getCompanyRegistrationDetails("testRegId")))
-    }
+      when(mockHttpClient.GET[JsObject](any(), any(), any())(any(), any[HeaderCarrier](), any()))
+        .thenReturn(Future.failed(new Exception("foo")))
 
-    "throw any other exception" in new Setup(false) {
-      when(mockHttpClient.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
-        .thenReturn(Future.failed(new RuntimeException("tstException")))
-
-      intercept[RuntimeException](await(testConnector.getCompanyRegistrationDetails("testRegId")))
-    }
-
-    "be stubbed" when {
-      "returning a CompanyProfile" in new Setup(false) {
-        when(mockHttpClient.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
-          .thenReturn(Future(profileJson))
-
-        val result = await(testConnector.getCompanyRegistrationDetails("testRegId"))
-        result mustBe CompanyRegistrationProfile(status, transactionId, ackRefStatusOpt)
-      }
-
-      "throwing a bad request exception" in new Setup(false) {
-        when(mockHttpClient.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
-          .thenReturn(Future.failed(new BadRequestException("tstException")))
-
-        intercept[BadRequestException](await(testConnector.getCompanyRegistrationDetails("testRegId")))
-      }
-
-      "throwing any other exception" in new Setup(false) {
-        when(mockHttpClient.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
-          .thenReturn(Future.failed(new RuntimeException("tstException")))
-
-        intercept[RuntimeException](await(testConnector.getCompanyRegistrationDetails("testRegId")))
-      }
+      intercept[Exception](await(testConnector.getCompanyRegistrationDetails("testRegId")))
     }
   }
-  "getVerifiedEmail" should {
-    val emailResponse = Json.parse(
-      """{
-        | "address": "foo@foo.com",
-        | "type": "foo",
-        | "link-sent": true,
-        | "verified": true,
-        | "return-link-email-sent": true
-        |}
-      """.stripMargin).as[JsObject]
-    "return future option string" in new Setup(stubbed = false) {
-      when(mockHttpClient.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
-        .thenReturn(Future.successful(emailResponse))
+
+  "calling .getVerifiedEmail(regId: String)" should {
+
+    "return future option string" in new Setup {
+
+      val email = "foo@foo.com"
+
+      when(mockHttpClient.GET[Option[String]](any(),any(),any())(any(), any[HeaderCarrier](), any()))
+        .thenReturn(Future.successful(Some(email)))
 
       val res = await(testConnector.getVerifiedEmail("fooBarAndWizz"))
-      res mustBe Some("foo@foo.com")
-      verify(mockHttpClient, times(1)).GET[JsObject](any(),any(),any())(any(), any(), any())
+
+      res mustBe Some(email)
     }
-    "return a None when company reg call fails" in new Setup(stubbed = false) {
-      when(mockHttpClient.GET[JsObject](any(),any(),any())(any(), any[HeaderCarrier](), any()))
-        .thenReturn(Future.failed(new BadRequestException("tstException")))
+
+    "return a None for any other exception" in new Setup {
+
+      when(mockHttpClient.GET[Option[String]](any(),any(),any())(any(), any[HeaderCarrier](), any()))
+        .thenReturn(Future.failed(new Exception("foo")))
 
       val res = await(testConnector.getVerifiedEmail("fooBarAndWizz"))
+
       res mustBe None
     }
   }
 }
+

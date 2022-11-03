@@ -75,7 +75,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
   "Calling summary to show the summary page" should {
 
     "return an Internal Server Error response when no valid model is returned from the microservice" in new Setup {
-      when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI))
 
       when(mockEmailService.primeEmailData(ArgumentMatchers.any())(ArgumentMatchers.any()))
@@ -92,7 +92,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return a see other" when {
       "the reg document status is held" in new Setup {
-        when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.held)))
 
         when(mockSummaryService.getEmploymentSectionSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
@@ -106,7 +106,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
       }
 
       "the reg document status is submitted" in new Setup {
-        when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.submitted)))
 
         when(mockSummaryService.getEmploymentSectionSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
@@ -120,7 +120,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
       }
 
       "the reg document status is invalid" in new Setup {
-        when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.invalid)))
 
         when(mockSummaryService.getEmploymentSectionSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
@@ -134,7 +134,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
       }
 
       "the reg document status is rejected" in new Setup {
-        when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI.copy(status = PAYEStatus.rejected)))
 
         when(mockSummaryService.getEmploymentSectionSummary(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Request[AnyContent]]))
@@ -151,7 +151,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "Calling submitRegistration" should {
     "show the confirmation page" in new Setup {
-      when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI))
 
       when(mockSubmissionService.submitRegistration(ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any())).thenReturn(Future.successful(Success))
@@ -163,7 +163,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
       }
     }
     "show the dashboard" in new Setup {
-      when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI))
 
       when(mockSubmissionService.submitRegistration(ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any())).thenReturn(Future.successful(Cancelled))
@@ -175,7 +175,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
       }
     }
     "show the retry page" in new Setup {
-      when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI))
 
       when(mockSubmissionService.submitRegistration(ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any())).thenReturn(Future.successful(TimedOut))
@@ -186,7 +186,7 @@ class SummaryControllerSpec extends PayeComponentSpec with PayeFakedApp {
       }
     }
     "show the deskpro page" in new Setup {
-      when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPayeRegistrationConnector.getRegistration(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validPAYERegistrationAPI))
 
       when(mockSubmissionService.submitRegistration(ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any())).thenReturn(Future.successful(Failed))

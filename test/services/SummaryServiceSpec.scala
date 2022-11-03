@@ -118,21 +118,21 @@ class SummaryServiceSpec extends PayeComponentSpec with GuiceOneAppPerSuite {
 
   "Calling getRegistrationSummary" should {
     "return None when the connector returns a Forbidden response" in new Setup {
-      when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any()))
         .thenReturn(Future.failed(forbidden))
 
       intercept[UpstreamErrorResponse](await(service.getEmploymentSectionSummary("45632", "fooBar")))
     }
 
     "return None when the connector returns a Not Found response" in new Setup {
-      when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any()))
         .thenReturn(Future.failed(notFound))
 
       intercept[NotFoundException](await(service.getEmploymentSectionSummary("45632", "fooBar")))
     }
 
     "return None when the connector returns an exception response" in new Setup {
-      when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getRegistration(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any()))
         .thenReturn(Future.failed(runTimeException))
 
       intercept[RuntimeException](await(service.getEmploymentSectionSummary("45632", "fooBar")))

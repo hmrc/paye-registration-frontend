@@ -37,8 +37,6 @@ class AddressLookupConnectorSpec extends PayeComponentSpec with PayeFakedApp {
       mockHttpClient
     )(mockAppConfig, globalExecutionContext) {
       override lazy val addressLookupFrontendUrl = "testBusinessRegUrl"
-      override val successCounter: Counter = mockMetrics.addressLookupSuccessResponseCounter
-      override val failedCounter: Counter = mockMetrics.addressLookupFailedResponseCounter
     }
   }
 

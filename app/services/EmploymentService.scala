@@ -98,7 +98,7 @@ trait EmploymentService {
         }
       }
     } recover {
-      case e: Exception => throw new InternalServerException(s"[EmploymentService][fetchEmployingStaff] an error occured for regId ${cp.registrationID} with error - ${e.getMessage}")
+      case e: Exception => throw new InternalServerException(s"[EmploymentService][fetchEmployingStaff] an error Occurred for regId ${cp.registrationID} with error - ${e.getMessage}")
     }
   }
 
@@ -110,7 +110,7 @@ trait EmploymentService {
         _ <- s4LService.clear(regId)
       } yield viewData
     ) recover {
-      case e: Exception => throw new InternalServerException(s"[EmploymentService][saveEmployingStaff] an error occured for regId $regId with error - ${e.getMessage}")
+      case e: Exception => throw new InternalServerException(s"[EmploymentService][saveEmployingStaff] an error Occurred for regId $regId with error - ${e.getMessage}")
     }
   }
 

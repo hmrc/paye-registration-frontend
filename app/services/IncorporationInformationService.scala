@@ -44,9 +44,8 @@ trait IncorporationInformationService {
     }
   }
 
-  def getIncorporationDate(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[Option[LocalDate]] = incorpInfoConnector.getIncorporationInfo(regId, txId)
-    .map(js => (js \ "incorporationDate").asOpt[String].map(LocalDate.parse))
-    .recover {
+  def getIncorporationDate(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[Option[LocalDate]] =
+    incorpInfoConnector.getIncorporationInfoDate(regId, txId) recover {
       case e: Exception => throw new InternalServerException(s"[IncorpInfoService][getIncorpDate] an exception occurred for regId: $regId, txId: $txId error - ${e.getMessage}")
     }
 

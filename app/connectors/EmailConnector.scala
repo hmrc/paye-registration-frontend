@@ -16,33 +16,25 @@
 
 package connectors
 
-import utils.Logging
 import config.AppConfig
+import connectors.httpParsers.EmailHttpParsers
 import models.external.EmailRequest
+import models.{EmailDifficulties, EmailResponse}
 import uk.gov.hmrc.http._
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-sealed trait EmailResponse
-case object EmailSent extends EmailResponse
-case object EmailDifficulties extends EmailResponse
-case object EmailNotFound extends EmailResponse
-
-class EmailConnector @Inject()(val http: HttpClient, appConfig: AppConfig)(implicit val ec: ExecutionContext) extends Logging {
+class EmailConnector @Inject()(val http: HttpClient, appConfig: AppConfig)(implicit val ec: ExecutionContext) extends EmailHttpParsers {
 
   val sendEmailURL: String = appConfig.servicesConfig.getString("microservice.services.email.sendAnEmailURL")
 
-  def requestEmailToBeSent(emailRequest: EmailRequest)(implicit hc: HeaderCarrier): Future[EmailResponse] =
-    http.POST[EmailRequest, HttpResponse](sendEmailURL, emailRequest).map { _ =>
-      logger.info(s"[requestEmailToBeSent] Email has been sent successfully for template ${emailRequest.templateId}")
-      EmailSent
-    } recover {
-      case b: HttpException =>
-        logger.warn(s"[requestEmailToBeSent] received a Http error when attempting to request an email to be sent via the email service with templateId: ${emailRequest.templateId} with details: ${b.getMessage}")
-        EmailDifficulties
+  def requestEmailToBeSent(emailRequest: EmailRequest)(implicit hc: HeaderCarrier): Future[EmailResponse] = {
+
+    http.POST[EmailRequest, EmailResponse](sendEmailURL, emailRequest)(EmailRequest.format, requestEmailToBeSentHttpReads(emailRequest), hc, ec) recover {
       case e: Exception =>
         logger.error(s"[requestEmailToBeSent] an unexpected error has occurred when attemping to request an email to be sent via the email service with templateId: ${emailRequest.templateId} with details: ${e.getMessage}")
         EmailDifficulties
     }
+  }
 }

@@ -74,37 +74,19 @@ class IncorporationInformationServiceSpec extends PayeComponentSpec {
   }
 
   "Calling getIncorporationDate should" should {
-    val testJsonWithDate = Json.parse(
-      """
-        |{
-        |   "crn" : "some-crn",
-        |   "incorporationDate" : "2018-05-05"
-        |}
-      """.stripMargin)
-
-    val testJsonNoDate = Json.parse(
-      """
-        |{
-        |   "crn" : "some-crn"
-        |}
-      """.stripMargin)
 
     "get the incorporation date if it is present in the response" in new Setup {
-      when(mockIncorpInfoConnector.getIncorporationInfo(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(testJsonWithDate))
 
-      await(service.getIncorporationDate("regId", "txId")) mustBe Some(LocalDate.of(2018, 5, 5))
+      val date = LocalDate.of(2018, 5, 5)
+
+      when(mockIncorpInfoConnector.getIncorporationInfoDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(date)))
+
+      await(service.getIncorporationDate("regId", "txId")) mustBe Some(date)
     }
 
-    "return a None if no date is found" in new Setup {
-      when(mockIncorpInfoConnector.getIncorporationInfo(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
-        .thenReturn(Future.successful(testJsonNoDate))
-
-      await(service.getIncorporationDate("regId", "txId")) mustBe None
-    }
-
-    "throw a BadRequestException when Bad Request response is returned from Incorporation Information" in new Setup {
-      when(mockIncorpInfoConnector.getIncorporationInfo(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+    "throw an Exception when unexpected failed future occurs" in new Setup {
+      when(mockIncorpInfoConnector.getIncorporationInfoDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
         .thenReturn(Future.failed(new Exception))
 
       a[Exception] mustBe thrownBy(await(service.getIncorporationDate("regId", "txId")))

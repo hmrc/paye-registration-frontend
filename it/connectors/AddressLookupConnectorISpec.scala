@@ -18,6 +18,7 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.http.{HttpHeader, HttpHeaders}
+import common.exceptions.DownstreamExceptions
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.Address
 import models.external._
@@ -25,7 +26,7 @@ import play.api.Application
 import play.api.http.HeaderNames
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, NO_CONTENT}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsResultException, JsValue, Json}
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 
 class AddressLookupConnectorISpec extends IntegrationSpecBase {
@@ -106,18 +107,18 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
         result mustBe testAddress
       }
 
-      "handle a NOT_FOUND returning the NOT_FOUND_EXCEPTION" in {
+      "return a JsResultException where the JSON is malformed" in {
 
-        stubGetAddress(404, None)
+        stubGetAddress(200, Some(Json.obj("foo" -> "bar")))
 
-        intercept[NotFoundException](await(connector.getAddress(addressId)))
+        intercept[JsResultException](await(connector.getAddress(addressId)))
       }
 
-      "handle any other response returning an UpstreamErrorResponse" in {
+      "handle any other response returning an AddressLookupException" in {
 
         stubGetAddress(500, None)
 
-        intercept[UpstreamErrorResponse](await(connector.getAddress(addressId)))
+        intercept[DownstreamExceptions.AddressLookupException](await(connector.getAddress(addressId)))
       }
     }
 
@@ -227,7 +228,7 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
         stubFor(
           post(urlPathEqualTo(s"/api/v2/init"))
             .withRequestBody(equalToJson(requestBody.toString))
-            .willReturn(aResponse().withHeaders(headers))
+            .willReturn(aResponse().withStatus(status).withHeaders(headers))
         )
       }
 
@@ -240,18 +241,18 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
         result mustBe "/foo/bar/wizz"
       }
 
-      "handle a NOT_FOUND returning ALFLocationHeaderNotSetException" in {
+      "return ALFLocationHeaderNotSetException when response is success but no header exists" in {
 
-        stubAddressOnRamp(Json.toJson(alfJourneyConfig))(NOT_FOUND)
+        stubAddressOnRamp(Json.toJson(alfJourneyConfig))(NO_CONTENT)
 
         intercept[ALFLocationHeaderNotSetException](await(connector.getOnRampUrl(alfJourneyConfig)))
       }
 
-      "handle any other response returning ALFLocationHeaderNotSetException" in {
+      "handle any other response returning AddressLookupException" in {
 
         stubAddressOnRamp(Json.toJson(alfJourneyConfig))(INTERNAL_SERVER_ERROR)
 
-        intercept[ALFLocationHeaderNotSetException](await(connector.getOnRampUrl(alfJourneyConfig)))
+        intercept[DownstreamExceptions.AddressLookupException](await(connector.getOnRampUrl(alfJourneyConfig)))
       }
     }
   }

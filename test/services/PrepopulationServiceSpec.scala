@@ -75,13 +75,13 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
 
   "getBusinessContactDetails" should {
     "return optional digital contact details" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc), ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc)))
         .thenReturn(Future.successful(Some(validContactDetails)))
 
       await(service.getBusinessContactDetails(regId)) mustBe Some(validDigitalContact)
     }
     "return no digital contact details" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc), ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc)))
         .thenReturn(Future.successful(None))
 
       await(service.getBusinessContactDetails(regId)) mustBe None
@@ -90,13 +90,13 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
 
   "getPAYEContactDetails" should {
     "return optional contact details" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc), ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc)))
         .thenReturn(Future.successful(Some(validContactDetails)))
 
       await(service.getPAYEContactDetails(regId)) mustBe Some(validContactDetails)
     }
     "return no contact details" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc), ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc)))
         .thenReturn(Future.successful(None))
 
       await(service.getPAYEContactDetails(regId)) mustBe None

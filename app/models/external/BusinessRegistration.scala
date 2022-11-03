@@ -16,6 +16,7 @@
 
 package models.external
 
+import common.exceptions
 import enums.IncorporationStatus
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -40,6 +41,16 @@ case class CompanyRegistrationProfile(status: String,
 
 object CompanyRegistrationProfile {
   implicit val formats = Json.format[CompanyRegistrationProfile]
+
+  val companyRegistrationReads = (
+    (__ \ "status").read[String] and
+      (__ \ "confirmationReferences" \ "transaction-id").readNullable[String].map {
+        case Some(txId) => txId
+        case None => throw new exceptions.DownstreamExceptions.ConfirmationRefsNotFoundException
+      } and
+      (__ \ "acknowledgementReferences" \ "status").readNullable[String] and
+      (__ \ "confirmationReferences" \ "payment-reference").readNullable[String]
+    )(CompanyRegistrationProfile.apply _)
 }
 
 case class CurrentProfile(registrationID: String,

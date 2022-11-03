@@ -16,17 +16,17 @@
 
 package connectors
 
-import com.codahale.metrics.{Counter, Timer}
-import common.exceptions.DownstreamExceptions.{IncorporationInformationResponseException, OfficerListNotFoundException}
+import com.codahale.metrics.Timer
 import config.AppConfig
+import connectors.httpParsers.IncorporationInformationHttpParsers
 import enums.IncorporationStatus
 import models.external.{CoHoCompanyDetailsModel, IncorpUpdateResponse, OfficerList}
-import play.api.http.Status.{ACCEPTED, OK}
 import play.api.libs.json._
 import services.MetricsService
 import uk.gov.hmrc.http._
 import utils.RegistrationAllowlist
 
+import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -37,8 +37,8 @@ case object IncorpInfoNotFoundResponse extends IncorpInfoResponse
 case class IncorpInfoErrorResponse(ex: Exception) extends IncorpInfoResponse
 
 class IncorporationInformationConnector @Inject()(val metricsService: MetricsService,
-                                                      val http: HttpClient
-                                                     )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends RegistrationAllowlist {
+                                                  val http: HttpClient
+                                                 )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends BaseConnector with RegistrationAllowlist with IncorporationInformationHttpParsers {
 
   val incorpInfoUrl = appConfig.servicesConfig.baseUrl("incorporation-information")
   val incorpInfoUri = appConfig.servicesConfig.getString("microservice.services.incorporation-information.uri")
@@ -49,109 +49,56 @@ class IncorporationInformationConnector @Inject()(val metricsService: MetricsSer
   def timer: Timer.Context = metricsService.incorpInfoResponseTimer.time()
 
   def setupSubscription(transactionId: String, regId: String, regime: String = "paye-fe", subscriber: String = "SCRS")(implicit hc: HeaderCarrier): Future[Option[IncorporationStatus.Value]] = {
-    def constructIncorporationInfoUri(transactionId: String, regime: String, subscriber: String): String = {
-      s"/incorporation-information/subscribe/$transactionId/regime/$regime/subscriber/$subscriber"
-    }
-
-    val postJson = Json.obj("SCRSIncorpSubscription" -> Json.obj("callbackUrl" -> s"$payeRegFeUrl/company-incorporation"))
-    http.POST[JsObject, HttpResponse](s"$incorpInfoUrl${constructIncorporationInfoUri(transactionId, regime, subscriber)}", postJson) map { resp =>
-      resp.status match {
-        case OK => Some(resp.json.as[IncorporationStatus.Value](IncorpUpdateResponse.reads(transactionId, subscriber, regime)))
-        case ACCEPTED => None
-        case _ =>
-          logger.warn(s"[setupSubscription] returned a successful response but with an incorrect code of: ${resp.status} for regId: $regId and txId: $transactionId")
-          throw new IncorporationInformationResponseException(s"Calling II on ${constructIncorporationInfoUri(transactionId, regime, subscriber)} returned a ${resp.status}")
-      }
-    } recover {
-      case e =>
-        logger.warn(s"[setupSubscription] an unexpected error ${e.getMessage} occurred when calling II for regId: $regId txId: $transactionId")
-        throw e
+    withRecovery()("setupSubscription", Some(regId), Some(transactionId)) {
+      implicit val reads = IncorpUpdateResponse.reads(transactionId, subscriber, regime)
+      http.POST[JsObject, Option[IncorporationStatus.Value]](
+        url = s"$incorpInfoUrl${s"/incorporation-information/subscribe/$transactionId/regime/$regime/subscriber/$subscriber"}",
+        body = Json.obj("SCRSIncorpSubscription" -> Json.obj("callbackUrl" -> s"$payeRegFeUrl/company-incorporation"))
+      )(implicitly, optionHttpReads("setupSubscription", Some(regId), Some(transactionId)), hc, ec)
     }
   }
 
-  def cancelSubscription(transactionId: String, regId: String, regime: String = "paye-fe", subscriber: String = "SCRS")(implicit hc: HeaderCarrier): Future[Boolean] = {
-    http.DELETE[HttpResponse](s"$incorpInfoUrl/incorporation-information/subscribe/$transactionId/regime/$regime/subscriber/$subscriber").map(_ => true)
-      .recover {
-        case _: NotFoundException => logger.info(s"[cancelSubscription] no subscription found when trying to delete subscription. it might already have been deleted")
-          true
-        case e =>
-          logger.warn(s"[cancelSubscription] an unexpected error ${e.getMessage} occurred when calling II for regId: $regId txId: $transactionId")
-          false
-      }
-  }
+  def cancelSubscription(transactionId: String, regId: String, regime: String = "paye-fe", subscriber: String = "SCRS")(implicit hc: HeaderCarrier): Future[Boolean] =
+    withRecovery(response = Some(false))("cancelSubscription", Some(regId), Some(transactionId)) {
+      http.DELETE[Boolean](
+        url = s"$incorpInfoUrl/incorporation-information/subscribe/$transactionId/regime/$regime/subscriber/$subscriber"
+      )(cancelSubscriptionHttpReads(regId, transactionId), hc, ec)
+    }
 
-  def getCoHoCompanyDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[IncorpInfoResponse] = {
+  def getCoHoCompanyDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[IncorpInfoResponse] =
     ifRegIdNotAllowlisted(regId) {
-      implicit val rds: Reads[CoHoCompanyDetailsModel] = CoHoCompanyDetailsModel.incorpInfoReads
-
       val incorpInfoTimer: Timer.Context = timer
-
-      http.GET[CoHoCompanyDetailsModel](s"$incorpInfoUrl$incorpInfoUri/$transactionId/company-profile") map {
-        res =>
-          incorpInfoTimer.stop()
-          successCounter.inc(1)
-          IncorpInfoSuccessResponse(res)
+      http.GET[IncorpInfoResponse](s"$incorpInfoUrl$incorpInfoUri/$transactionId/company-profile")(getCoHoCompanyDetailsHttpReads(regId, transactionId), hc, ec).map { response =>
+        incorpInfoTimer.stop()
+        if(response.isInstanceOf[IncorpInfoSuccessResponse]) successCounter.inc() else failedCounter.inc()
+        response
       } recover {
-        case _: BadRequestException =>
-          logger.error(s"[getCoHoCompanyDetails] Received a BadRequest status code when expecting company details for regId: $regId / TX-ID: $transactionId")
-          incorpInfoTimer.stop()
-          failedCounter.inc(1)
-          IncorpInfoBadRequestResponse
-        case _: NotFoundException =>
-          logger.error(s"[getCoHoCompanyDetails] Received a NotFound status code when expecting company details for regId: $regId / TX-ID: $transactionId")
-          incorpInfoTimer.stop()
-          failedCounter.inc(1)
-          IncorpInfoNotFoundResponse
         case ex: Exception =>
-          logger.error(
-            s"[getCoHoCompanyDetails] Received an error when expecting company details for regId: $regId / TX-ID: $transactionId error: ${ex.getMessage}"
-          )
+          logger.error(s"[getCoHoCompanyDetails] Received an error when expecting company details for regId: $regId / TX-ID: $transactionId error: ${ex.getMessage}")
           incorpInfoTimer.stop()
-          failedCounter.inc(1)
+          failedCounter.inc()
           IncorpInfoErrorResponse(ex)
       }
     }
-  }
 
-  def getIncorporationInfo(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[JsValue] = {
-    val incorpInfoTimer = metricsService.incorpInfoResponseTimer.time()
-    http.GET[HttpResponse](s"$incorpInfoUrl$incorpInfoUri/$txId/incorporation-update") map { value =>
-      incorpInfoTimer.stop()
-      if (value.status == 204) Json.obj() else value.json
-    }
-  } recover {
-    case e: Exception =>
-      throw new InternalServerException(
-        s"[IncorporationInformationConnector][getIncorporationInfo] an error occurred while getting the incorporation info for regId: $regId and txId: $txId error: ${e.getMessage}"
-      )
-  }
-
-  def getOfficerList(transactionId: String, regId: String)(implicit hc: HeaderCarrier): Future[OfficerList] = {
-    ifRegIdNotAllowlisted(regId) {
-      val incorpInfoTimer = metricsService.incorpInfoResponseTimer.time()
-      http.GET[JsObject](s"$incorpInfoUrl$incorpInfoUri/$transactionId/officer-list") map { obj =>
-        incorpInfoTimer.stop()
-        val list = obj.\("officers").as[OfficerList]
-        if (list.items.isEmpty) {
-          logger.error(s"[getOfficerList] Received an empty Officer list for TX-ID $transactionId")
-          throw new OfficerListNotFoundException
-        } else {
-          list
-        }
-      } recover {
-        case _: NotFoundException =>
-          logger.error(s"[getOfficerList] Received a NotFound status code when expecting an Officer list for TX-ID $transactionId")
-          incorpInfoTimer.stop()
-          throw new OfficerListNotFoundException
-        case badRequestErr: BadRequestException =>
-          logger.error(s"[getOfficerList] Received a BadRequest status code when expecting an Officer list for TX-ID $transactionId")
-          incorpInfoTimer.stop()
-          throw badRequestErr
-        case ex: Exception =>
-          logger.error(s"[getOfficerList] Received an error response when expecting an Officer list for TX-ID $transactionId error: ${ex.getMessage}")
-          incorpInfoTimer.stop()
-          throw ex
+  def getIncorporationInfoDate(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[Option[LocalDate]] =
+    withTimer {
+      withRecovery()("getIncorporationInfoDate", Some(regId), Some(txId)) {
+        http.GET[Option[LocalDate]](s"$incorpInfoUrl$incorpInfoUri/$txId/incorporation-update")(getIncorpInfoDateHttpReads(regId, txId), hc, ec)
       }
     }
-  }
+
+  def getOfficerList(transactionId: String, regId: String)(implicit hc: HeaderCarrier): Future[OfficerList] =
+    ifRegIdNotAllowlisted(regId) {
+      withTimer {
+        withRecovery()("getOfficerList", Some(regId), Some(transactionId)) {
+          http.GET[OfficerList](s"$incorpInfoUrl$incorpInfoUri/$transactionId/officer-list")(
+            getOfficersHttpReads(regId, transactionId), hc, ec
+          )
+        }
+      }
+    }
+
+  private def withTimer[T](f: => Future[T]) =
+    metricsService.processDataResponseWithMetrics(metricsService.incorpInfoResponseTimer.time())(f)
 }

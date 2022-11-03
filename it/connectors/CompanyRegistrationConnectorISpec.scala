@@ -17,17 +17,14 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import common.exceptions
 import common.exceptions.DownstreamExceptions
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.external._
-import models.view.PAYEContactDetails
-import models.{Address, DigitalContactDetails}
 import play.api.Application
-import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
+import play.api.http.Status.{INTERNAL_SERVER_ERROR, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, NotFoundException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 
 class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
 
@@ -112,22 +109,13 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
             intercept[DownstreamExceptions.ConfirmationRefsNotFoundException](await(connector.getCompanyRegistrationDetails(regId)))
           }
 
-          "handle a NOT_FOUND returning the NOT_FOUND_EXCEPTION" in {
-
-            await(buildClient(s"/test-only/feature-flag/companyRegistration/${!useStub}").get())
-
-            stubCompanyRegistrationDetails(NOT_FOUND, None)
-
-            intercept[NotFoundException](await(connector.getCompanyRegistrationDetails(regId)))
-          }
-
-          "handle any other response returning an UpstreamErrorResponse" in {
+          "handle any other response returning an CompanyRegistrationException" in {
 
             await(buildClient(s"/test-only/feature-flag/companyRegistration/${!useStub}").get())
 
             stubCompanyRegistrationDetails(INTERNAL_SERVER_ERROR, None)
 
-            intercept[UpstreamErrorResponse](await(connector.getCompanyRegistrationDetails(regId)))
+            intercept[DownstreamExceptions.CompanyRegistrationException](await(connector.getCompanyRegistrationDetails(regId)))
           }
         }
       }
