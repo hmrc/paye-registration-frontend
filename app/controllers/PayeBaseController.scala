@@ -154,8 +154,4 @@ trait AuthRedirectUrls {
   lazy val payeRegElFEURL = appConfig.servicesConfig.getString(s"$configRoot.paye-registration-eligibility-frontend.www.url")
   lazy val payeRegElFEURI = appConfig.servicesConfig.getString(s"$configRoot.paye-registration-eligibility-frontend.www.uri")
 
-  lazy val contactFrontendUrl = appConfig.servicesConfig.getString(s"$configRoot.contact-frontend.www.url")
-  lazy val contactFrontendURI = appConfig.servicesConfig.getString(s"$configRoot.contact-frontend.www.uri")
-
-
 }
