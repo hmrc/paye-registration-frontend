@@ -102,7 +102,3 @@ GET        /submission-failure                                controllers.errors
 
 ## DASHBOARD
 GET        /business-registration-overview                    controllers.userJourney.DashboardController.dashboard
-
-## Questionnaire
-
-GET       /questionnaire                                     controllers.userJourney.EligibilityController.questionnaire

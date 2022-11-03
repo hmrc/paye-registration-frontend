@@ -68,7 +68,7 @@
     additionalHeadBlock = Some(head),
     signOutUrl = if (signOutLink) Some(controllers.userJourney.routes.SignInOutController.signOut.url) else None,
     serviceUrl = Some(""),
-    phaseBanner = Some(standardBetaBanner(url = "")),
+    phaseBanner = Some(standardBetaBanner(url = appConfig.betaFeedbackUrl)),
     backLinkUrl = if (backLink) Some("#") else None,
     displayHmrcBanner = false,
     accessibilityStatementUrl = Some(appConfig.accessibilityStatementUrl),

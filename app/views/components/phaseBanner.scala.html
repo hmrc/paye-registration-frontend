@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import config.AppConfig
 @import views.html.components.link
 @import uk.gov.hmrc.govukfrontend.views.html.components.GovukPhaseBanner
 @import uk.gov.hmrc.govukfrontend.views.Aliases.PhaseBanner
@@ -27,11 +28,11 @@
         link: link
 )
 
-@(phase: String)(implicit request: Request[_], messages: Messages)
+@(phase: String)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
 @feedbackBanner = {
     @messages("common.feedbackFirst")
-    @link("https://www.tax.service.gov.uk/contact/beta-feedback?service=SCRS", "common.feedbackSecond", isExternal = true)
+    @link(appConfig.betaFeedbackUrl, "common.feedbackSecond", isExternal = true)
     @messages("common.feedbackThird")
 }
 

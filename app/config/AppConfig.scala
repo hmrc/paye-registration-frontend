@@ -16,6 +16,11 @@
 
 package config
 
+import java.net.URLEncoder
+import java.nio.charset.Charset
+import java.util.Base64
+
+import javax.inject.{Inject, Singleton}
 import models.Address
 import models.api.Director
 import models.external.OfficerList
@@ -23,12 +28,7 @@ import play.api.Configuration
 import play.api.i18n.Lang
 import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import utils.{PAYEFeatureSwitch}
-
-import java.net.URLEncoder
-import java.nio.charset.Charset
-import java.util.Base64
-import javax.inject.{Inject, Singleton}
+import utils.PAYEFeatureSwitch
 
 @Singleton
 class AppConfig @Inject()(configuration: Configuration,
@@ -69,10 +69,9 @@ class AppConfig @Inject()(configuration: Configuration,
     )
   }
 
-  //Questionnaire url
-  lazy val compRegFEURL = servicesConfig.getConfString("company-registration-frontend.www.url", "")
-  lazy val compRegFEURI = servicesConfig.getConfString("company-registration-frontend.www.uri", "")
-  lazy val questionnaireLink: String = compRegFEURL + compRegFEURI + "/questionnaire"
+  //feedback
+  lazy val feedbackFrontendUrl = loadConfig("microservice.services.feedback-frontend.host")
+  lazy val betaFeedbackUrl = s"$feedbackFrontendUrl/feedback/$contactFormServiceIdentifier"
 
   lazy val self: String = servicesConfig.getConfString("paye-registration-frontend.www.url", "")
   lazy val regIdAllowlist: Seq[String] = allowListConfig("regIdAllowlist")
