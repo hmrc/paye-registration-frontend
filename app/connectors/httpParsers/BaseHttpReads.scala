@@ -18,7 +18,7 @@ package connectors.httpParsers
 
 import common.exceptions
 import connectors.BaseConnector
-import play.api.http.Status.{NOT_FOUND, NO_CONTENT, OK}
+import play.api.http.Status.{CREATED, NOT_FOUND, NO_CONTENT, OK}
 import play.api.libs.json.Reads
 import uk.gov.hmrc.http.HttpReads.is2xx
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
@@ -38,7 +38,7 @@ trait BaseHttpReads extends Logging { _: BaseConnector =>
                    txId: Option[String] = None,
                    defaultResponse: Option[T] = None)(implicit reads: Reads[T], mf: Manifest[T]): HttpReads[T] = (_: String, url: String, response: HttpResponse) =>
     response.status match {
-      case OK =>
+      case OK | CREATED =>
         jsonParse(response)(functionName, regId, txId)
       case status =>
         unexpectedStatusHandling(defaultResponse)(functionName, url, status, regId, txId)
@@ -50,7 +50,7 @@ trait BaseHttpReads extends Logging { _: BaseConnector =>
                          logInfoMsg: Boolean = false,
                          defaultToNoneOnError: Boolean = false)(implicit reads: Reads[T], mf: Manifest[T]): HttpReads[Option[T]] = (_: String, url: String, response: HttpResponse) =>
     response.status match {
-      case OK =>
+      case OK | CREATED =>
         Try(jsonParse(response)(functionName, regId, txId)).toOption
       case status if is2xx(status) || status == NOT_FOUND =>
         if(logInfoMsg) logger.info(s"[$functionName] No data retrieved when calling url: '$url'" + logContext(regId, txId))
@@ -66,7 +66,7 @@ trait BaseHttpReads extends Logging { _: BaseConnector =>
                       txId: Option[String] = None,
                       defaultToEmptyOnError: Boolean = false)(implicit reads: Reads[Seq[T]], mf: Manifest[T]): HttpReads[Seq[T]] = (_: String, url: String, response: HttpResponse) =>
     response.status match {
-      case OK =>
+      case OK | CREATED =>
         jsonParse(response)(functionName, regId, txId)
       case NOT_FOUND | NO_CONTENT =>
         Seq.empty
@@ -83,7 +83,7 @@ trait BaseHttpReads extends Logging { _: BaseConnector =>
                           regId: Option[String] = None,
                           txId: Option[String] = None)(implicit reads: Reads[T], mf: Manifest[T]): HttpReads[T] = (_: String, url: String, response: HttpResponse) =>
     response.status match {
-      case OK => upsert
+      case OK | CREATED => upsert
       case status =>
         logger.error(s"[$functionName] Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")
         upsert
