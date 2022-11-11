@@ -191,7 +191,7 @@ class PAYERegistrationConnector @Inject()(val metricsService: MetricsService,
   // Test Endpoint
   def setBackendDate(date: String)(implicit hc: HeaderCarrier): Future[Boolean] = {
     val newDate = if (date.isEmpty) "time-clear" else s"${date}Z"
-    http.GET[HttpResponse](s"$payeRegUrl/paye-registration/test-only/feature-flag/system-date/$newDate") map {
+    http.GET[HttpResponse](s"$payeRegUrl/paye-registration/test-only/feature-flag/system-date/$newDate")(rawReads, hc, ec) map {
       _ => true
     } recover {
       case _: Exception => false

@@ -17,9 +17,11 @@
 package connectors.test
 
 import config.AppConfig
+import connectors.BaseConnector
+import connectors.httpParsers.BusinessRegistrationHttpParsers
 import models.external.{BusinessProfile, BusinessRegistrationRequest}
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{CorePost, HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.{CorePost, HeaderCarrier, HttpClient, HttpResponse}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -29,18 +31,18 @@ class TestBusinessRegConnectorImpl @Inject()(val http: HttpClient,
   val businessRegUrl = appConfig.servicesConfig.baseUrl("business-registration")
 }
 
-trait TestBusinessRegConnector {
+trait TestBusinessRegConnector extends BaseConnector with BusinessRegistrationHttpParsers {
   implicit val ec: ExecutionContext
   val businessRegUrl: String
   val http: CorePost
 
-  def createBusinessProfileEntry(implicit hc: HeaderCarrier): Future[BusinessProfile] = {
-    val json = Json.toJson[BusinessRegistrationRequest](BusinessRegistrationRequest("ENG"))
-    http.POST[JsValue, BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration", json)
-  }
+  def createBusinessProfileEntry(implicit hc: HeaderCarrier): Future[BusinessProfile] =
+    http.POST[BusinessRegistrationRequest, BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration", BusinessRegistrationRequest("ENG"))(
+      BusinessRegistrationRequest.formats, businessProfileHttpReads, hc, ec
+    )
 
   def updateCompletionCapacity(regId: String, completionCapacity: String)(implicit hc: HeaderCarrier): Future[String] = {
     val json = Json.parse(s"""{"completionCapacity" : "$completionCapacity"}""".stripMargin)
-    http.POST[JsValue, JsValue](s"$businessRegUrl/business-registration/test-only/update-cc/$regId", json) map (_.toString)
+    http.POST[JsValue, HttpResponse](s"$businessRegUrl/business-registration/test-only/update-cc/$regId", json)(implicitly, rawReads, hc, ec) map (_.body)
   }
 }

@@ -85,7 +85,7 @@ trait EmploymentService {
       case (Some(EmployingAnyone(true, _)), _) => Employing.alreadyEmploying
       case (_, Some(WillBePaying(false, _))) => Employing.notEmploying
       case (_, Some(WillBePaying(true, Some(false)))) => Employing.willEmployNextYear
-      case (_, Some(WillBePaying(true, _))) => Employing.willEmployThisYear
+      case _ => Employing.willEmployThisYear
     }
   }
 

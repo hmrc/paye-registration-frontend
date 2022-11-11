@@ -40,15 +40,15 @@ class TestPAYERegConnectorSpec extends PayeComponentSpec {
 
   "Calling addPAYERegistration" should {
     "return a successful outcome for a successful add of PAYE Registration" in new Setup {
-      when(mockHttpClient.POST[PAYERegistration, HttpResponse](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(HttpResponse(OK, "")))
+      when(mockHttpClient.POST[PAYERegistration, DownstreamOutcome.Value](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       await(connector.addPAYERegistration(Fixtures.validPAYERegistrationAPI)) mustBe DownstreamOutcome.Success
     }
 
     "return a failed outcome for an unsuccessful add of PAYE Registration" in new Setup {
-      when(mockHttpClient.POST[PAYERegistration, HttpResponse](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
+      when(mockHttpClient.POST[PAYERegistration, DownstreamOutcome.Value](ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       await(connector.addPAYERegistration(Fixtures.validPAYERegistrationAPI)) mustBe DownstreamOutcome.Failure
     }
