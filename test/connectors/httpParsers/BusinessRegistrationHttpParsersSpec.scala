@@ -207,6 +207,14 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
           }
         }
 
+        "response is CREATED and JSON is valid" must {
+
+          "return the Contact Details" in {
+
+            BusinessRegistrationHttpParsers.retrieveContactDetailsHttpReads(regId).read("", "", HttpResponse(CREATED, json = payeContactDetailsJson, Map())) mustBe Some(payeContactDetails)
+          }
+        }
+
         "response is OK and JSON is malformed" must {
 
           "return None but log an error message" in {
