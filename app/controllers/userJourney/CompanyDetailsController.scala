@@ -147,9 +147,11 @@ class CompanyDetailsController @Inject()(val s4LService: S4LService,
       } yield {
         val addressMap = companyDetailsService.getPPOBPageAddresses(companyDetails)
           .collect { case (id, address) => id -> address.toString }
-          .++(Map("other" -> "Other"))
-
-        Ok(PPOBAddressPage(PPOBForm.form.fill(ChosenAddress(PPOBAddress)), addressMap, prepopAddress))
+        Ok(
+          PPOBAddressPage(
+            PPOBForm.form.fill(ChosenAddress(PPOBAddress)),
+            addressMap,
+            prepopAddress))
       }
   }
 
@@ -164,8 +166,6 @@ class CompanyDetailsController @Inject()(val s4LService: S4LService,
           } yield {
             val addressMap = companyDetailsService.getPPOBPageAddresses(details)
               .collect { case (id, address) => id -> address.toString }
-              .++(Map("other" -> "Other"))
-
             BadRequest(PPOBAddressPage(errs,
               addressMap,
               prepopAddress))
