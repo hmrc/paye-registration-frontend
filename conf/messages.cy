@@ -41,9 +41,9 @@ pages.common.companiesHouse.hiddenIntro2.url                            =    htt
 app.test.heading                                                        =
 app.getHelp                                                             =    A yw’r dudalen hon yn gweithio’n iawn? (yn agor tab newydd)
 site.back                                                               =
-date.day                                                                =
-date.month                                                              =
-date.year                                                               =
+date.day                                                                = Diwrnod
+date.month                                                              = Mis
+date.year                                                               = Blwyddyn
 
 ## timeout page
 page.timeout.description                                                =    Mae’n flin gennym, mae’ch sesiwn wedi dod i ben o ganlyniad i anweithgarwch.
