@@ -21,11 +21,14 @@ import helpers.PayeComponentSpec
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException, UpstreamErrorResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class PAYERegistrationServiceSpec extends PayeComponentSpec {
+
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup {
     val service = new PAYERegistrationService {
@@ -46,14 +49,14 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
 
   "Calling assertRegistrationFootprint" should {
     "return a success response when the Registration is successfully created" in new Setup {
-      when(mockPAYERegConnector.createNewRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.createNewRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       await(service.assertRegistrationFootprint("123", "txID")) mustBe DownstreamOutcome.Success
     }
 
     "return a failure response when the Registration can't be created" in new Setup {
-      when(mockPAYERegConnector.createNewRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.createNewRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       await(service.assertRegistrationFootprint("123", "txID")) mustBe DownstreamOutcome.Failure
@@ -63,10 +66,10 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
   "deleteRejectedRegistration" should {
     "return a RegistrationDeletionSuccess" when {
       "the users paye document was deleted" in new Setup {
-        when(mockPAYERegConnector.deleteRejectedRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPAYERegConnector.deleteRejectedRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(RegistrationDeletion.success))
 
-        when(mockKeystoreConnector.remove()(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockKeystoreConnector.remove()(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(true))
 
         val result = await(service.deleteRejectedRegistration("testRegId", "testTxId"))
@@ -76,7 +79,7 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
 
     "return a RegistrationDeletionInvalidStatus" when {
       "the users paye document was not deleted" in new Setup {
-        when(mockPAYERegConnector.deleteRejectedRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPAYERegConnector.deleteRejectedRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(RegistrationDeletion.invalidStatus))
 
         val result = await(service.deleteRejectedRegistration("testRegId", "testTxId"))
@@ -88,16 +91,16 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
   "handleIIResponse" should {
     "return a success" when {
       "there is no regId in the current profile" in new Setup {
-        when(mockCurrentProfileService.updateCurrentProfileWithIncorpStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockCurrentProfileService.updateCurrentProfileWithIncorpStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future(None))
 
-        when(mockPAYERegConnector.getRegistrationId(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPAYERegConnector.getRegistrationId(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future("testRegId"))
 
-        when(mockS4LService.clear(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockS4LService.clear(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future(HttpResponse(200, "")))
 
-        when(mockPAYERegConnector.deleteRegistrationForRejectedIncorp(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPAYERegConnector.deleteRegistrationForRejectedIncorp(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future(RegistrationDeletion.success))
 
         val result = await(service.handleIIResponse(txId = "testTxId", status = IncorporationStatus.rejected))
@@ -105,13 +108,13 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
       }
 
       "there is a regId in the current profile" in new Setup {
-        when(mockCurrentProfileService.updateCurrentProfileWithIncorpStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockCurrentProfileService.updateCurrentProfileWithIncorpStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future(Some("testRegId")))
 
-        when(mockS4LService.clear(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockS4LService.clear(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future(HttpResponse(200, "")))
 
-        when(mockPAYERegConnector.deleteRegistrationForRejectedIncorp(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPAYERegConnector.deleteRegistrationForRejectedIncorp(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future(RegistrationDeletion.success))
 
         val result = await(service.handleIIResponse(txId = "testTxId", status = IncorporationStatus.rejected))
@@ -120,7 +123,7 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
     }
 
     "return an invalidStatus" in new Setup {
-      when(mockCurrentProfileService.updateCurrentProfileWithIncorpStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockCurrentProfileService.updateCurrentProfileWithIncorpStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future(None))
 
       val result = await(service.handleIIResponse(txId = "testTxId", status = IncorporationStatus.accepted))

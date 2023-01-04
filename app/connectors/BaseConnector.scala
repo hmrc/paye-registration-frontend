@@ -16,15 +16,17 @@
 
 package connectors
 
+import play.api.mvc.Request
 import utils.Logging
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait BaseConnector extends Logging {
 
-  def withRecovery[T](response: => Option[T] = None)(functionName: String, regId: Option[String] = None, txId: Option[String] = None)(f: => Future[T])(implicit ec: ExecutionContext): Future[T] =
+  def withRecovery[T](response: => Option[T] = None)(functionName: String, regId: Option[String] = None, txId: Option[String] = None)(f: => Future[T])
+                     (implicit ec: ExecutionContext, request: Request[_]): Future[T] =
     f recover { case ex: Exception =>
-      logger.error(s"[$functionName] Exception of type '${ex.getClass.getSimpleName}' was thrown${logContext(regId, txId)}")
+      errorLog(s"[$functionName] Exception of type '${ex.getClass.getSimpleName}' was thrown${logContext(regId, txId)}")
       response.fold(throw ex)(identity)
     }
 

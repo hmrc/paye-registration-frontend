@@ -57,7 +57,7 @@ class TestCacheControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
         mockBusinessRegFetch(Future(BusinessProfile(registrationID = "1", language = "EN")))
 
-        when(mockS4LService.clear(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockS4LService.clear(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(testHttpResponse))
 
         val result = controller.tearDownS4L()(FakeRequest())

@@ -62,7 +62,8 @@ class EmploymentController @Inject()(employmentService: EmploymentService,
 
   def weeklyThreshold: Int = thresholdService.getCurrentThresholds("weekly")
 
-  private def ifIncorpDateExist(regId: String, txId: String)(action: LocalDate => Future[Result])(implicit hc: HeaderCarrier): Future[Result] =
+  private def ifIncorpDateExist(regId: String, txId: String)(action: LocalDate => Future[Result])
+                               (implicit hc: HeaderCarrier, request: Request[_]): Future[Result] =
     incorpInfoService.getIncorporationDate(regId, txId) flatMap {
       _.fold(Future.successful(Redirect(controllers.userJourney.routes.EmploymentController.employingStaff)))(action)
     }

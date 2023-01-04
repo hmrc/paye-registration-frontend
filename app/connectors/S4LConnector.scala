@@ -18,6 +18,7 @@ package connectors
 
 import com.codahale.metrics.{Counter, Timer}
 import play.api.libs.json.Format
+import play.api.mvc.Request
 import services.MetricsService
 import uk.gov.hmrc.http.cache.client.{CacheMap, ShortLivedCache}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -45,7 +46,7 @@ trait S4LConnector {
 
   def timer: Timer.Context
 
-  def saveForm[T](userId: String, formId: String, data: T)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {
+  def saveForm[T](userId: String, formId: String, data: T)(implicit hc: HeaderCarrier, format: Format[T], request: Request[_]): Future[CacheMap] = {
     metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
       shortCache.cache[T](userId, formId, data)
     }
@@ -57,7 +58,7 @@ trait S4LConnector {
     }
   }
 
-  def clear(userId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def clear(userId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[HttpResponse] = {
     metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
       shortCache.remove(userId)
     }

@@ -20,15 +20,19 @@ import config.AppConfig
 import connectors._
 import helpers.PayeComponentSpec
 import models.{EmailDifficulties, EmailNotFound, EmailSent}
+import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.Configuration
+import play.api.test.FakeRequest
 import utils.{PAYEFeatureSwitch, TaxYearConfig}
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class EmailServiceSpec extends PayeComponentSpec {
+
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   object TestAppConfig extends AppConfig(mock[Configuration], mock[PAYEFeatureSwitch]) {
     override lazy val adminPeriodStart: String = "2022-02-06"
@@ -49,10 +53,10 @@ class EmailServiceSpec extends PayeComponentSpec {
   "primeEmailData" should {
     "return a cache map" when {
       "the first payment date has been stashed" in {
-        when(mockPayeRegistrationConnector.getEmployment(any())(any()))
+        when(mockPayeRegistrationConnector.getEmployment(any())(any(), ArgumentMatchers.any()))
           .thenReturn(Future(Some(Fixtures.validEmploymentApi)))
 
-        when(mockS4LConnector.saveForm(any(), any(), any())(any(), any()))
+        when(mockS4LConnector.saveForm(any(), any(), any())(any(), any(), any()))
           .thenReturn(Future(Fixtures.blankCacheMap))
 
         val result = await(service.primeEmailData("testRegId"))
@@ -64,13 +68,13 @@ class EmailServiceSpec extends PayeComponentSpec {
   "sendAcknowledgementEmail" should {
     "return an EmailSent" when {
       "the acknowledgement email was sent with template registerYourCompanyRegisterPAYEConfirmationNewTaxYear" in {
-        when(mockCompRegConnector.getVerifiedEmail(any())(any()))
+        when(mockCompRegConnector.getVerifiedEmail(any())(any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some("foo@foo.com")))
 
         when(mockS4LConnector.fetchAndGet[LocalDate](any(), any())(any(), any()))
           .thenReturn(Future(Some(LocalDate.of(2018, 5, 1))))
 
-        when(mockIncorpInfoConnector.getCoHoCompanyDetails(any(), any())(any()))
+        when(mockIncorpInfoConnector.getCoHoCompanyDetails(any(), any())(any(), any()))
           .thenReturn(Future(IncorpInfoSuccessResponse(Fixtures.validCoHoCompanyDetailsResponse)))
 
         when(mockEmailConnector.requestEmailToBeSent(any())(any()))
@@ -81,13 +85,13 @@ class EmailServiceSpec extends PayeComponentSpec {
       }
 
       "the acknowledgement email was sent with template registerYourCompanyRegisterPAYEConfirmation" in {
-        when(mockCompRegConnector.getVerifiedEmail(any())(any()))
+        when(mockCompRegConnector.getVerifiedEmail(any())(any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some("foo@foo.com")))
 
         when(mockS4LConnector.fetchAndGet[LocalDate](any(), any())(any(), any()))
           .thenReturn(Future(Some(LocalDate.of(2018, 10, 26))))
 
-        when(mockIncorpInfoConnector.getCoHoCompanyDetails(any(), any())(any()))
+        when(mockIncorpInfoConnector.getCoHoCompanyDetails(any(), any())(any(), any()))
           .thenReturn(Future(IncorpInfoSuccessResponse(Fixtures.validCoHoCompanyDetailsResponse)))
 
         when(mockEmailConnector.requestEmailToBeSent(any())(any()))
@@ -100,7 +104,7 @@ class EmailServiceSpec extends PayeComponentSpec {
 
     "return EmailDifficulties" when {
       "first payment can't be fetched from S4L" in {
-        when(mockCompRegConnector.getVerifiedEmail(any())(any()))
+        when(mockCompRegConnector.getVerifiedEmail(any())(any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some("foo@foo.com")))
 
         when(mockS4LConnector.fetchAndGet[LocalDate](any(), any())(any(), any()))
@@ -111,13 +115,13 @@ class EmailServiceSpec extends PayeComponentSpec {
       }
 
       "the company name couldn't be fetched from II" in {
-        when(mockCompRegConnector.getVerifiedEmail(any())(any()))
+        when(mockCompRegConnector.getVerifiedEmail(any())(any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some("foo@foo.com")))
 
         when(mockS4LConnector.fetchAndGet[LocalDate](any(), any())(any(), any()))
           .thenReturn(Future(Some(LocalDate.of(2018, 10, 26))))
 
-        when(mockIncorpInfoConnector.getCoHoCompanyDetails(any(), any())(any()))
+        when(mockIncorpInfoConnector.getCoHoCompanyDetails(any(), any())(any(), any()))
           .thenReturn(Future(IncorpInfoBadRequestResponse))
 
         val result = await(service.sendAcknowledgementEmail(cp, "testAckRef", Some("Name from auth")))
@@ -125,13 +129,13 @@ class EmailServiceSpec extends PayeComponentSpec {
       }
 
       "there a problem sending the email" in {
-        when(mockCompRegConnector.getVerifiedEmail(any())(any()))
+        when(mockCompRegConnector.getVerifiedEmail(any())(any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some("foo@foo.com")))
 
         when(mockS4LConnector.fetchAndGet[LocalDate](any(), any())(any(), any()))
           .thenReturn(Future(Some(LocalDate.of(2018, 10, 26))))
 
-        when(mockIncorpInfoConnector.getCoHoCompanyDetails(any(), any())(any()))
+        when(mockIncorpInfoConnector.getCoHoCompanyDetails(any(), any())(any(), any()))
           .thenReturn(Future(IncorpInfoSuccessResponse(Fixtures.validCoHoCompanyDetailsResponse)))
 
         when(mockEmailConnector.requestEmailToBeSent(any())(any()))
@@ -144,7 +148,7 @@ class EmailServiceSpec extends PayeComponentSpec {
 
     "return an EmailNotFound" when {
       "No email address couldn't be fetched from CR" in {
-        when(mockCompRegConnector.getVerifiedEmail(any())(any()))
+        when(mockCompRegConnector.getVerifiedEmail(any())(any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(None))
 
         val result = await(service.sendAcknowledgementEmail(cp, "testAckRef", Some("Name from auth")))

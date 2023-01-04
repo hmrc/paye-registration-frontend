@@ -23,6 +23,7 @@ import enums.DownstreamOutcome
 import models.api.{Employment, CompanyDetails => CompanyDetailsAPI, PAYEContact => PAYEContactAPI, PAYERegistration => PAYERegistrationAPI}
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json}
+import play.api.mvc.Request
 import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpClient, HttpResponse}
 
 import javax.inject.Inject
@@ -47,21 +48,21 @@ trait TestPAYERegConnector extends BaseConnector with PAYERegistrationHttpParser
     )
   }
 
-  def addTestCompanyDetails(details: CompanyDetailsAPI, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] =
+  def addTestCompanyDetails(details: CompanyDetailsAPI, regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] =
     payeRegConnector.upsertCompanyDetails(regId, details) map {
       _ => DownstreamOutcome.Success
     } recover {
       case _ => DownstreamOutcome.Failure
     }
 
-  def addTestPAYEContact(details: PAYEContactAPI, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] =
+  def addTestPAYEContact(details: PAYEContactAPI, regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] =
     payeRegConnector.upsertPAYEContact(regId, details) map {
       _ => DownstreamOutcome.Success
     } recover {
       case _ => DownstreamOutcome.Failure
     }
 
-  def addTestEmploymentInfo(details: Employment, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] =
+  def addTestEmploymentInfo(details: Employment, regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] =
     payeRegConnector.upsertEmployment(regId, details) map {
       _ => DownstreamOutcome.Success
     } recover {

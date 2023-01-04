@@ -22,11 +22,14 @@ import models.external.CompanyRegistrationProfile
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
 import play.api.libs.json.{JsObject, Json}
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
+
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   val testUrl = "testUrl"
   val testUri = "testUri"

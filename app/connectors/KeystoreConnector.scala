@@ -20,10 +20,14 @@ import com.codahale.metrics.{Counter, Timer}
 import models.api.SessionMap
 import models.external.CurrentProfile
 import play.api.libs.json.{Format, Json}
+import play.api.mvc.Request
 import repositories.SessionRepository
 import services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.SessionCache
+import utils.Logging
+import scala.reflect.runtime.universe._
+
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,7 +42,7 @@ class KeystoreConnectorImpl @Inject()(val sessionCache: SessionCache,
   def timer = metricsService.keystoreResponseTimer.time()
 }
 
-trait KeystoreConnector {
+trait KeystoreConnector extends Logging {
   implicit val ec: ExecutionContext
   val sessionCache: SessionCache
   val metricsService: MetricsService
@@ -53,14 +57,16 @@ trait KeystoreConnector {
 
   private def sessionID(implicit hc: HeaderCarrier): String = hc.sessionId.getOrElse(throw new RuntimeException("Active User had no Session ID")).value
 
-  def cache[T](formId: String, regId: String, txId: String, body: T)(implicit hc: HeaderCarrier, format: Format[T]): Future[SessionMap] = {
+  def cache[T](formId: String, regId: String, txId: String, body: T)
+              (implicit hc: HeaderCarrier, format: Format[T], request: Request[_], tag: TypeTag[T]): Future[SessionMap] = {
+    infoLog(s"[cache] attempting to cache ${tag.toString()}")
     metricsService.processDataResponseWithMetrics[SessionMap](successCounter, failedCounter, timer) {
       val updatedCacheMap = SessionMap(sessionID, regId, txId, Map(formId -> Json.toJson(body)))
       sessionRepository.upsertSessionMap(updatedCacheMap) map (_ => updatedCacheMap)
     }
   }
 
-  def cacheSessionMap(map: SessionMap): Future[SessionMap] = {
+  def cacheSessionMap(map: SessionMap)(implicit request: Request[_]): Future[SessionMap] = {
     metricsService.processDataResponseWithMetrics[SessionMap](successCounter, failedCounter, timer) {
       sessionRepository.upsertSessionMap(map) map (_ => map)
     }
@@ -72,7 +78,8 @@ trait KeystoreConnector {
     }
   }
 
-  def fetchAndGetFromKeystore(key: String)(implicit hc: HeaderCarrier, format: Format[CurrentProfile]): Future[Option[CurrentProfile]] = {
+  def fetchAndGetFromKeystore(key: String)
+                             (implicit hc: HeaderCarrier, format: Format[CurrentProfile], request: Request[_]): Future[Option[CurrentProfile]] = {
     metricsService.processOptionalDataWithMetrics(successCounter, emptyResponseCounter, timer) {
       sessionCache.fetchAndGetEntry(key) flatMap { data =>
         data.fold(Future.successful(data)) { cp =>
@@ -97,7 +104,7 @@ trait KeystoreConnector {
     }
   }
 
-  def remove()(implicit hc: HeaderCarrier): Future[Boolean] = {
+  def remove()(implicit hc: HeaderCarrier, request: Request[_]): Future[Boolean] = {
     metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
       sessionRepository.removeDocument(sessionID)
     }

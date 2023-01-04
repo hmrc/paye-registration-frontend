@@ -23,12 +23,15 @@ import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.Format
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class PrepopulationServiceSpec extends PayeComponentSpec {
+
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup {
     val service = new PrepopulationService {
@@ -75,13 +78,13 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
 
   "getBusinessContactDetails" should {
     "return optional digital contact details" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc)))
+      when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(validContactDetails)))
 
       await(service.getBusinessContactDetails(regId)) mustBe Some(validDigitalContact)
     }
     "return no digital contact details" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc)))
+      when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
       await(service.getBusinessContactDetails(regId)) mustBe None
@@ -90,13 +93,13 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
 
   "getPAYEContactDetails" should {
     "return optional contact details" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc)))
+      when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(validContactDetails)))
 
       await(service.getPAYEContactDetails(regId)) mustBe Some(validContactDetails)
     }
     "return no contact details" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc)))
+      when(mockBusinessRegistrationConnector.retrieveContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.eq(hc), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
       await(service.getPAYEContactDetails(regId)) mustBe None
@@ -105,7 +108,7 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
 
   "saveContactDetails" should {
     "save contact details" in new Setup {
-      when(mockBusinessRegistrationConnector.upsertContactDetails(ArgumentMatchers.eq(regId), ArgumentMatchers.any[PAYEContactDetails])(ArgumentMatchers.eq(hc)))
+      when(mockBusinessRegistrationConnector.upsertContactDetails(ArgumentMatchers.eq(regId), ArgumentMatchers.any[PAYEContactDetails])(ArgumentMatchers.eq(hc), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validContactDetails))
 
       await(service.saveContactDetails(regId, validContactDetails)) mustBe validContactDetails
@@ -147,10 +150,10 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
   "GetAddresses" should {
     "return a list of addresses" in new Setup {
       val regId = "regID"
-      when(mockBusinessRegistrationConnector.retrieveAddresses(ArgumentMatchers.contains(regId))(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockBusinessRegistrationConnector.retrieveAddresses(ArgumentMatchers.contains(regId))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Seq(addr1, addr2)))
       when(mockS4LService.saveIntMap(ArgumentMatchers.contains("PrePopAddresses"), ArgumentMatchers.any(), ArgumentMatchers.contains(regId))
-      (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Address]]()))
+      (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Address]](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("PrePopAddresses", Map.empty)))
 
       await(service.getPrePopAddresses(regId, addr3, None, None)) mustBe Map(0 -> addr1, 1 -> addr2)
@@ -160,7 +163,7 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
   "SaveAddress" should {
     "save an address" in new Setup {
       val regId = "12345"
-      when(mockBusinessRegistrationConnector.upsertAddress(ArgumentMatchers.contains(regId), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockBusinessRegistrationConnector.upsertAddress(ArgumentMatchers.contains(regId), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(addr1))
 
       await(service.saveAddress(regId, addr1)) mustBe addr1
@@ -196,13 +199,13 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
 
   "getTradingName" should {
     "return Some of trading name from Business Reg Connector" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveTradingName(ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.retrieveTradingName(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("foo")))
 
       await(service.getTradingName("1")) mustBe Some("foo")
     }
     "return None of trading name from Business Reg Connector" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveTradingName(ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.retrieveTradingName(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
       await(service.getTradingName("1")) mustBe None
@@ -211,7 +214,7 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
 
   "saveTradingName" should {
     "return String from Business Reg Connector" in new Setup {
-      when(mockBusinessRegistrationConnector.upsertTradingName(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.upsertTradingName(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful("foo"))
 
       await(service.saveTradingName("1", "foo")) mustBe "foo"

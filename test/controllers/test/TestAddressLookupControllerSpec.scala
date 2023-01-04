@@ -69,10 +69,10 @@ class TestAddressLookupControllerSpec extends PayeComponentSpec with PayeFakedAp
     }
 
     "return 500 when the mocked address can't be submitted" in new Setup {
-      when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-      when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(address))
 
       AuthHelpers.showAuthorisedWithCP(controller.noLookupPPOBAddress, Fixtures.validCurrentProfile, fakeRequest) {
@@ -82,10 +82,10 @@ class TestAddressLookupControllerSpec extends PayeComponentSpec with PayeFakedAp
     }
 
     "return 303 when the mocked address is successfully submitted" in new Setup {
-      when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(address))
 
       AuthHelpers.showAuthorisedWithCP(controller.noLookupPPOBAddress, Fixtures.validCurrentProfile, fakeRequest) {
@@ -107,9 +107,9 @@ class TestAddressLookupControllerSpec extends PayeComponentSpec with PayeFakedAp
     }
 
     "return 500 when the mocked address can't be submitted" in new Setup {
-      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-      when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(address))
 
       AuthHelpers.showAuthorisedWithCP(controller.noLookupCorrespondenceAddress, Fixtures.validCurrentProfile, fakeRequest) {
@@ -119,10 +119,10 @@ class TestAddressLookupControllerSpec extends PayeComponentSpec with PayeFakedAp
     }
 
     "return 303 when the mocked address is successfully submitted" in new Setup {
-      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(address))
 
       AuthHelpers.showAuthorisedWithCP(controller.noLookupCorrespondenceAddress, Fixtures.validCurrentProfile, fakeRequest) {

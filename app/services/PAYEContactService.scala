@@ -46,7 +46,7 @@ class PAYEContactService @Inject()(val payeRegConnector: PAYERegistrationConnect
     PAYEContactView(Some(apiData.contactDetails), Some(apiData.correspondenceAddress))
   }
 
-  private def saveToS4L(regId: String, viewData: PAYEContactView)(implicit hc: HeaderCarrier): Future[PAYEContactView] = {
+  private def saveToS4L(regId: String, viewData: PAYEContactView)(implicit hc: HeaderCarrier, request: Request[_]): Future[PAYEContactView] = {
     s4LService.saveForm[PAYEContactView](CacheKeys.PAYEContact.toString, viewData, regId).map(_ => viewData)
   }
 
@@ -65,14 +65,14 @@ class PAYEContactService @Inject()(val payeRegConnector: PAYERegistrationConnect
     }
   }
 
-  def getPAYEContact(regId: String)(implicit hc: HeaderCarrier): Future[PAYEContactView] = {
+  def getPAYEContact(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[PAYEContactView] = {
     s4LService.fetchAndGet[PAYEContactView](CacheKeys.PAYEContact.toString, regId) flatMap {
       case Some(contactDetails) => Future.successful(contactDetails)
       case None => getPAYEContactView(regId)
     }
   }
 
-  private[services] def getPAYEContactView(regId: String)(implicit hc: HeaderCarrier): Future[PAYEContactView] = {
+  private[services] def getPAYEContactView(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[PAYEContactView] = {
     for {
       view <- payeRegConnector.getPAYEContact(regId) flatMap {
         case Some(payeRegContactDetails) => Future.successful(apiToView(payeRegContactDetails))
@@ -85,7 +85,7 @@ class PAYEContactService @Inject()(val payeRegConnector: PAYERegistrationConnect
     } yield view
   }
 
-  def submitPAYEContact(viewModel: PAYEContactView, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def submitPAYEContact(viewModel: PAYEContactView, regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
     viewToAPI(viewModel).fold(
       incompleteView =>
         saveToS4L(regId, incompleteView) map { _ => DownstreamOutcome.Success },
@@ -117,7 +117,7 @@ class PAYEContactService @Inject()(val payeRegConnector: PAYERegistrationConnect
 
   def dataHasChanged(viewData: PAYEContactDetails, s4lData: Option[PAYEContactDetails]): Boolean = s4lData.isEmpty || s4lData.exists(flattenData(viewData) != flattenData(_))
 
-  def submitCorrespondence(regId: String, correspondenceAddress: Address)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def submitCorrespondence(regId: String, correspondenceAddress: Address)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
     getPAYEContact(regId) flatMap {
       data => submitPAYEContact(PAYEContactView(data.contactDetails, Some(correspondenceAddress)), regId)
     }

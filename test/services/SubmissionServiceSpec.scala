@@ -25,11 +25,14 @@ import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.JsValue
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class SubmissionServiceSpec extends PayeComponentSpec with PayeFakedApp {
+
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup extends CodeMocks {
     val service = new SubmissionService {
@@ -57,44 +60,44 @@ class SubmissionServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   "submitRegistration" should {
     "return a Success DES Response" in new Setup {
-      when(mockPAYERegConnector.submitRegistration(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPAYERegConnector.submitRegistration(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Success))
 
-      when(mockIncorpInfoConnector.cancelSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockIncorpInfoConnector.cancelSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(true))
 
       val cp = currentProfile(regId).copy(payeRegistrationSubmitted = true)
 
-      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(cp))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(cp))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(SessionMap("testSessionId", regId, "40-123456", Map.empty[String, JsValue])))
 
       await(service.submitRegistration(currentProfile(regId))) mustBe Success
     }
 
     "return a Cancelled DES Response" in new Setup {
-      when(mockPAYERegConnector.submitRegistration(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPAYERegConnector.submitRegistration(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Cancelled))
 
-      when(mockIncorpInfoConnector.cancelSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockIncorpInfoConnector.cancelSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(true))
 
       val cp = currentProfile(regId).copy(incorpStatus = Some(IncorporationStatus.rejected))
 
-      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(cp))(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(cp))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(SessionMap("testSessionId", regId, "40-123456", Map.empty[String, JsValue])))
 
       await(service.submitRegistration(currentProfile(regId))) mustBe Cancelled
     }
 
     "return a Failed DES Response" in new Setup {
-      when(mockPAYERegConnector.submitRegistration(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPAYERegConnector.submitRegistration(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Failed))
 
       await(service.submitRegistration(currentProfile(regId))) mustBe Failed
     }
 
     "return a TimedOut DES Response" in new Setup {
-      when(mockPAYERegConnector.submitRegistration(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPAYERegConnector.submitRegistration(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(TimedOut))
 
       await(service.submitRegistration(currentProfile(regId))) mustBe TimedOut

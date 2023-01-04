@@ -27,11 +27,13 @@ import play.api.http.HeaderNames
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, NO_CONTENT}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsResultException, JsValue, Json}
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 
 class AddressLookupConnectorISpec extends IntegrationSpecBase {
 
   implicit val hc = HeaderCarrier()
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(Map("microservice.services.address-lookup-frontend.port" -> s"${WiremockHelper.wiremockPort}"))

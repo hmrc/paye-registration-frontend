@@ -23,6 +23,8 @@ import models.api.{Director, Employment, PAYEContact, SICCode, CompanyDetails =>
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.Json
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http._
 
 import scala.concurrent.ExecutionContext
@@ -33,6 +35,8 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
 
     when(mockAppConfig.servicesConfig).thenReturn(mockServicesConfig)
     when(mockServicesConfig.baseUrl("paye-registration")).thenReturn("tst-url")
+
+    implicit val request: FakeRequest[_] = FakeRequest()
 
     val connector = new PAYERegistrationConnector(
       new MockMetrics,

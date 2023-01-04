@@ -18,6 +18,7 @@ package services
 
 import connectors.S4LConnector
 import play.api.libs.json._
+import play.api.mvc.Request
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import utils.Formatters
@@ -31,13 +32,13 @@ trait S4LService {
   implicit val ec: ExecutionContext
   val s4LConnector: S4LConnector
 
-  def saveForm[T](formId: String, data: T, regId: String)(implicit hc: HeaderCarrier, format: Format[T]): Future[CacheMap] = {
+  def saveForm[T](formId: String, data: T, regId: String)(implicit hc: HeaderCarrier, format: Format[T], request: Request[_]): Future[CacheMap] = {
     for {
       cacheMap <- s4LConnector.saveForm[T](regId, formId, data)
     } yield cacheMap
   }
 
-  def saveIntMap[V](formId: String, data: Map[Int, V], regId: String)(implicit hc: HeaderCarrier, formatV: Format[V]): Future[CacheMap] = {
+  def saveIntMap[V](formId: String, data: Map[Int, V], regId: String)(implicit hc: HeaderCarrier, formatV: Format[V], request: Request[_]): Future[CacheMap] = {
     implicit val mapFormat: Format[Map[Int, V]] = Format(Formatters.intMapReads[V], Formatters.intMapWrites[V])
     for {
       cacheMap <- s4LConnector.saveForm[Map[Int, V]](regId, formId, data)
@@ -57,7 +58,7 @@ trait S4LService {
     } yield cacheMap
   }
 
-  def clear(regId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def clear(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[HttpResponse] = {
     for {
       resp <- s4LConnector.clear(regId)
     } yield resp

@@ -25,6 +25,7 @@ import play.api.Application
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsString, JsValue, Json}
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
 class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
@@ -40,6 +41,8 @@ class PayeRegistrationConnectorISpec extends IntegrationSpecBase {
 
   val regId = "12345"
   val txnId = "67890"
+
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   implicit val hc = HeaderCarrier()
 

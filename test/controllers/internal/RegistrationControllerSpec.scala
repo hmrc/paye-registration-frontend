@@ -68,7 +68,7 @@ class RegistrationControllerSpec extends PayeComponentSpec with PayeFakedApp {
       """.stripMargin)
 
       "all data is passed in and data is deleted" in new Setup {
-        when(mockPayeRegService.handleIIResponse(ArgumentMatchers.eq("fooTxID"), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPayeRegService.handleIIResponse(ArgumentMatchers.eq("fooTxID"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(RegistrationDeletion.success))
 
         AuthHelpers.submitUnauthorisedT[JsValue](controller.companyIncorporation, FakeRequest().withBody(responseJson)) {
@@ -120,7 +120,7 @@ class RegistrationControllerSpec extends PayeComponentSpec with PayeFakedApp {
              |}
       """.stripMargin)
 
-        when(mockPayeRegService.handleIIResponse(ArgumentMatchers.eq("fooTxID"), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPayeRegService.handleIIResponse(ArgumentMatchers.eq("fooTxID"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.failed(new Exception("ouch it hurts")))
 
         AuthHelpers.submitUnauthorisedT[JsValue](controller.companyIncorporation, FakeRequest().withBody(responseJson)) {
@@ -146,7 +146,7 @@ class RegistrationControllerSpec extends PayeComponentSpec with PayeFakedApp {
              |}
       """.stripMargin)
 
-        when(mockPayeRegService.handleIIResponse(ArgumentMatchers.eq("fooTxID"), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPayeRegService.handleIIResponse(ArgumentMatchers.eq("fooTxID"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(RegistrationDeletion.notfound))
 
         AuthHelpers.submitUnauthorisedT[JsValue](controller.companyIncorporation, FakeRequest().withBody(responseJson)) {

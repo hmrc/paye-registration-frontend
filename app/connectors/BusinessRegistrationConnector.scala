@@ -21,6 +21,7 @@ import connectors.httpParsers.BusinessRegistrationHttpParsers
 import models.Address
 import models.external.BusinessProfile
 import models.view.{CompanyDetails, PAYEContactDetails}
+import play.api.mvc.Request
 import services.MetricsService
 import uk.gov.hmrc.http._
 
@@ -33,28 +34,30 @@ class BusinessRegistrationConnector @Inject()(val metricsService: MetricsService
 
   val businessRegUrl = appConfig.servicesConfig.baseUrl("business-registration")
 
-  def retrieveCurrentProfile(implicit hc: HeaderCarrier): Future[BusinessProfile] =
+  def retrieveCurrentProfile(implicit hc: HeaderCarrier, request: Request[_]): Future[BusinessProfile] = {
+    infoLog("[retrieveCurrentProfile] attempting to retrieveCurrentProfile")
     withTimer {
       withRecovery()("retrieveCurrentProfile") {
         http.GET[BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration")(businessProfileHttpReads, hc, ec)
       }
     }
+  }
 
-  def retrieveCompletionCapacity(implicit hc: HeaderCarrier): Future[Option[String]] =
+  def retrieveCompletionCapacity(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[String]] =
     withTimer {
       withRecovery()("retrieveCurrentProfile") {
         http.GET[Option[String]](s"$businessRegUrl/business-registration/business-tax-registration")(retrieveCompletionCapacityHttpReads, hc, ec)
       }
     }
 
-  def retrieveTradingName(regId: String)(implicit hc: HeaderCarrier): Future[Option[String]] =
+  def retrieveTradingName(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[String]] =
     withTimer {
       withRecovery(Some(Option.empty[String]))("retrieveTradingName", Some(regId)) {
         http.GET[Option[String]](s"$businessRegUrl/business-registration/$regId/trading-name")(retrieveTradingNameHttpReads(regId), hc, ec)
       }
     }
 
-  def upsertTradingName(regId: String, tradingName: String)(implicit hc: HeaderCarrier): Future[String] =
+  def upsertTradingName(regId: String, tradingName: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[String] =
     withTimer {
       withRecovery(Some(tradingName))("upsertTradingName", Some(regId)) {
         http.POST[String, String](s"$businessRegUrl/business-registration/$regId/trading-name", tradingName)(
@@ -63,14 +66,15 @@ class BusinessRegistrationConnector @Inject()(val metricsService: MetricsService
       }
     }
 
-  def retrieveContactDetails(regId: String)(implicit hc: HeaderCarrier): Future[Option[PAYEContactDetails]] =
+  def retrieveContactDetails(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[PAYEContactDetails]] =
     withTimer {
       withRecovery(Some(Option.empty[PAYEContactDetails]))("retrieveContactDetails", Some(regId)) {
         http.GET[Option[PAYEContactDetails]](s"$businessRegUrl/business-registration/$regId/contact-details")(retrieveContactDetailsHttpReads(regId), hc, ec)
       }
     }
 
-  def upsertContactDetails(regId: String, contactDetails: PAYEContactDetails)(implicit hc: HeaderCarrier): Future[PAYEContactDetails] =
+  def upsertContactDetails(regId: String, contactDetails: PAYEContactDetails)
+                          (implicit hc: HeaderCarrier, request: Request[_]): Future[PAYEContactDetails] =
     withTimer {
       withRecovery(Some(contactDetails))("upsertContactDetails", Some(regId)) {
         http.POST[PAYEContactDetails, PAYEContactDetails](s"$businessRegUrl/business-registration/$regId/contact-details", contactDetails)(
@@ -79,14 +83,14 @@ class BusinessRegistrationConnector @Inject()(val metricsService: MetricsService
       }
     }
 
-  def retrieveAddresses(regId: String)(implicit hc: HeaderCarrier): Future[Seq[Address]] =
+  def retrieveAddresses(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Seq[Address]] =
     withRecovery(Some(Seq.empty[Address]))("retrieveAddresses", Some(regId)) {
       withTimer {
         http.GET[Seq[Address]](s"$businessRegUrl/business-registration/$regId/addresses")(retrieveAddressesHttpReads(regId), hc, ec)
       }
     }
 
-  def upsertAddress(regId: String, address: Address)(implicit hc: HeaderCarrier): Future[Address] =
+  def upsertAddress(regId: String, address: Address)(implicit hc: HeaderCarrier, request: Request[_]): Future[Address] =
     withRecovery(Some(address))("upsertAddress", Some(regId)) {
       withTimer {
         http.POST[Address, Address](s"$businessRegUrl/business-registration/$regId/addresses", address)(

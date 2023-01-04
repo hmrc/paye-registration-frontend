@@ -76,10 +76,10 @@ class SessionProfileSpec extends PayeComponentSpec {
       "payeRegistrationSubmitted is 'false' and ct is pending" in new Setup {
         val cp = Some(validProfile(false, Some("04")))
         mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, None)
-        when(mockKeystoreConnector.fetchAndGetFromKeystore(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        when(mockKeystoreConnector.fetchAndGetFromKeystore(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(cp))
 
-        when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(None))
 
         val result = testSession.withCurrentProfile { _ => testFunc }
@@ -89,10 +89,10 @@ class SessionProfileSpec extends PayeComponentSpec {
       "payeRegistrationSubmitted is 'false' and ct is accepted" in new Setup {
         val cp = Some(validProfile(false, Some("04")))
         mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, None)
-        when(mockKeystoreConnector.fetchAndGetFromKeystore(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        when(mockKeystoreConnector.fetchAndGetFromKeystore(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(cp))
 
-        when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(IncorporationStatus.accepted)))
 
         val result = testSession.withCurrentProfile { _ => testFunc }
@@ -102,13 +102,13 @@ class SessionProfileSpec extends PayeComponentSpec {
       "payeRegistrationSubmitted is 'false' and ct is rejected" in new Setup {
         val cp = Some(validProfile(false, Some("04")))
         mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, None)
-        when(mockKeystoreConnector.fetchAndGetFromKeystore(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        when(mockKeystoreConnector.fetchAndGetFromKeystore(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(cp))
 
-        when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(IncorporationStatus.rejected)))
 
-        when(mockPayeRegService.handleIIResponse(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPayeRegService.handleIIResponse(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(RegistrationDeletion.success))
 
         val result = testSession.withCurrentProfile { _ => testFunc }
@@ -140,7 +140,7 @@ class SessionProfileSpec extends PayeComponentSpec {
 
     "redirect to start of journey" when {
       "currentProfile is not in SessionRepository & Keystore" in new Setup {
-        when(mockKeystoreConnector.fetchAndGetFromKeystore(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        when(mockKeystoreConnector.fetchAndGetFromKeystore(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(None))
         mockKeystoreFetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString, None)
 

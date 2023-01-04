@@ -22,8 +22,9 @@ import enums.{CacheKeys, IncorporationStatus, PAYEStatus}
 import models.api.SessionMap
 import models.external.CurrentProfile
 import play.api.libs.json.Json
+import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.http.HeaderCarrier
-import utils.RegistrationAllowlist
+import utils.{Logging, RegistrationAllowlist}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,7 +36,7 @@ class CurrentProfileServiceImpl @Inject()(val businessRegistrationConnector: Bus
                                           val incorporationInformationConnector: IncorporationInformationConnector
                                          )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends CurrentProfileService
 
-trait CurrentProfileService extends RegistrationAllowlist {
+trait CurrentProfileService extends RegistrationAllowlist with Logging {
   implicit val appConfig: AppConfig
   implicit val ec: ExecutionContext
   val businessRegistrationConnector: BusinessRegistrationConnector
@@ -44,7 +45,8 @@ trait CurrentProfileService extends RegistrationAllowlist {
   val keystoreConnector: KeystoreConnector
   val incorporationInformationConnector: IncorporationInformationConnector
 
-  def fetchAndStoreCurrentProfile(implicit hc: HeaderCarrier): Future[CurrentProfile] = {
+  def fetchAndStoreCurrentProfile(implicit hc: HeaderCarrier, request: Request[_]): Future[CurrentProfile] = {
+    infoLog(s"[fetchAndStoreCurrentProfile] attempting to fetchAndStoreCurrentProfile")
     for {
       businessProfile <- businessRegistrationConnector.retrieveCurrentProfile
       companyProfile <- ifRegIdNotAllowlisted(businessProfile.registrationID) {
@@ -66,7 +68,7 @@ trait CurrentProfileService extends RegistrationAllowlist {
       session.copy(data = Map(CacheKeys.CurrentProfile.toString -> Json.toJson(updatedCp)))
   }
 
-  def updateCurrentProfileWithIncorpStatus(txId: String, status: IncorporationStatus.Value)(implicit hc: HeaderCarrier): Future[Option[String]] = for {
+  def updateCurrentProfileWithIncorpStatus(txId: String, status: IncorporationStatus.Value)(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[String]] = for {
     updatedSessionMap <- keystoreConnector.fetchByTransactionId(txId).map(updateSessionMap(_, status))
     _ = updatedSessionMap.map(sessionMap => keystoreConnector.cacheSessionMap(sessionMap))
     regId = updatedSessionMap.flatMap(_.getEntry[CurrentProfile](CacheKeys.CurrentProfile.toString).map(_.registrationID))

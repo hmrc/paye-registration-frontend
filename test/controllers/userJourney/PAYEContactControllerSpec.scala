@@ -66,7 +66,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "payeContactDetails" should {
     "return an OK with data from registration" in new Setup {
-      when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validPAYEContactView))
 
       AuthHelpers.showAuthorisedWithCP(testController.payeContactDetails, Fixtures.validCurrentProfile, fakeRequest()) {
@@ -76,7 +76,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return an OK with data from prepopulation" in new Setup {
-      when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.emptyPAYEContactView))
 
       AuthHelpers.showAuthorisedWithCP(testController.payeContactDetails, Fixtures.validCurrentProfile, fakeRequest()) {
@@ -86,10 +86,10 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return an OK without data" in new Setup {
-      when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.emptyPAYEContactView))
 
-      when(mockPrepopService.getPAYEContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPrepopService.getPAYEContactDetails(ArgumentMatchers.eq(regId))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
       AuthHelpers.showAuthorisedWithCP(testController.payeContactDetails, Fixtures.validCurrentProfile, fakeRequest()) {
@@ -146,7 +146,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockPAYEContactService.submitPayeContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      when(mockPrepopService.saveContactDetails(ArgumentMatchers.eq(regId), ArgumentMatchers.any[PAYEContactDetails]())(ArgumentMatchers.any[HeaderCarrier]))
+      when(mockPrepopService.saveContactDetails(ArgumentMatchers.eq(regId), ArgumentMatchers.any[PAYEContactDetails]())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any()))
         .thenReturn(Future.failed(new RuntimeException))
 
       AuthHelpers.submitAuthorisedWithCPAndAudit(testController.submitPAYEContactDetails, Fixtures.validCurrentProfile, request) {
@@ -164,13 +164,13 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "correspondence" -> Fixtures.validCompanyDetailsViewModel.ppobAddress.get
       )
 
-      when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validPAYEContactView))
 
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
-      when(mockPrepopService.getPrePopAddresses(ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPrepopService.getPrePopAddresses(ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Map.empty[Int, Address]))
 
       when(mockPAYEContactService.getCorrespondenceAddresses(ArgumentMatchers.any(), ArgumentMatchers.any()))
@@ -193,13 +193,13 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "correspondence" -> Fixtures.validCompanyDetailsViewModel.ppobAddress.get
       )
 
-      when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPAYEContactService.getPAYEContact(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validPAYEContactView))
 
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
-      when(mockPrepopService.getPrePopAddresses(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPrepopService.getPrePopAddresses(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Map(1 -> Fixtures.validCompanyDetailsViewModel.roAddress)))
 
       when(mockPAYEContactService.getCorrespondenceAddresses(ArgumentMatchers.any(), ArgumentMatchers.any()))
@@ -226,10 +226,10 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "chosenAddress" -> "roAddress"
       )
 
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
-      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       when(mockAuditService.auditCorrespondenceAddress(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[AuditingInformation](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[AnyContent]], ArgumentMatchers.any[ExecutionContext]()))
@@ -246,10 +246,10 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "chosenAddress" -> "ppobAddress"
       )
 
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
-      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       when(mockAuditService.auditCorrespondenceAddress(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[AuditingInformation](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[AnyContent]], ArgumentMatchers.any[ExecutionContext]()))
@@ -266,7 +266,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "chosenAddress" -> "ppobAddress"
       )
 
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel.copy(ppobAddress = None)))
 
       AuthHelpers.submitAuthorisedWithCPAndAudit(testController.submitPAYECorrespondenceAddress, Fixtures.validCurrentProfile, request) { result =>
@@ -279,10 +279,10 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "chosenAddress" -> "roAddress"
       )
 
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
-      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       when(mockAuditService.auditCorrespondenceAddress(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[AuditingInformation](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[AnyContent]], ArgumentMatchers.any[ExecutionContext]()))
@@ -298,7 +298,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "chosenAddress" -> "otherAddress"
       )
 
-      when(mockAddressLookupService.buildAddressLookupUrl(ArgumentMatchers.any[String](), ArgumentMatchers.any[Call]())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Messages]))
+      when(mockAddressLookupService.buildAddressLookupUrl(ArgumentMatchers.any[String](), ArgumentMatchers.any[Call]())(ArgumentMatchers.any[HeaderCarrier], ArgumentMatchers.any[Messages](), ArgumentMatchers.any()))
         .thenReturn(Future.successful("testUrl"))
 
       AuthHelpers.submitAuthorisedWithCPAndAudit(testController.submitPAYECorrespondenceAddress, Fixtures.validCurrentProfile, request) { result =>
@@ -323,7 +323,7 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockPrepopService.getAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(address))
 
-      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthHelpers.submitAuthorisedWithCPAndAudit(testController.submitPAYECorrespondenceAddress, Fixtures.validCurrentProfile, request) { result =>
@@ -345,13 +345,13 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
           Some("testCode")
         )
 
-      when(mockAddressLookupService.getAddress(ArgumentMatchers.contains(testAlfId))(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockAddressLookupService.getAddress(ArgumentMatchers.contains(testAlfId))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(expected))
 
-      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any()))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(expected))
 
       AuthHelpers.showAuthorisedWithCP(testController.savePAYECorrespondenceAddress(Some(testAlfId)), Fixtures.validCurrentProfile, fakeRequest()) { result =>
@@ -371,13 +371,13 @@ class PAYEContactControllerSpec extends PayeComponentSpec with PayeFakedApp {
           Some("testCode")
         )
 
-      when(mockAddressLookupService.getAddress(ArgumentMatchers.contains(testAlfId))(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockAddressLookupService.getAddress(ArgumentMatchers.contains(testAlfId))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(expected))
 
-      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any()))
+      when(mockPAYEContactService.submitCorrespondence(ArgumentMatchers.anyString(), ArgumentMatchers.any[Address]())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-      when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPrepopService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(expected))
 
       AuthHelpers.showAuthorisedWithCP(testController.savePAYECorrespondenceAddress(Some(testAlfId)), Fixtures.validCurrentProfile, fakeRequest()) { result =>

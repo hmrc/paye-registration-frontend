@@ -17,6 +17,7 @@
 package services
 
 import connectors.PAYERegistrationConnector
+import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{SystemDate, TaxYearConfig}
 
@@ -43,7 +44,7 @@ trait ConfirmationService {
 
   val payeRegistrationConnector: PAYERegistrationConnector
 
-  def getAcknowledgementReference(regId: String)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+  def getAcknowledgementReference(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[String]] = {
     payeRegistrationConnector.getAcknowledgementReference(regId)
   }
 

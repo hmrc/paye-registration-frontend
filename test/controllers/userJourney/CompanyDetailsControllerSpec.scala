@@ -88,9 +88,9 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "show the correctly pre-populated trading name page when data has already been entered" in new Setup {
-      when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
-      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
       AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest()) {
@@ -106,9 +106,9 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "show the correctly pre-populated trading name page when negative data has already been entered" in new Setup {
       val negativeTradingNameCompanyDetails = Fixtures.validCompanyDetailsViewModel.copy(tradingName = Some(Fixtures.negativeTradingNameViewModel))
-      when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(negativeTradingNameCompanyDetails))
-      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("foo bar")))
 
       AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest()) {
@@ -124,9 +124,9 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "show a blank trading name page when no Trading Name data has been entered and no pre pop exists" in new Setup {
       val noTradingNameCompanyDetails = Fixtures.validCompanyDetailsViewModel.copy(tradingName = None)
-      when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(noTradingNameCompanyDetails))
-      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
       AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest()) {
@@ -143,9 +143,9 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     "show a pre popped trading name page when no Company Details data has been entered but pre pop returns a string" in new Setup {
       val cName = "Tst Company Name"
       val defaultCompanyDetailsView = CompanyDetailsView(cName, None, Fixtures.validROAddress, None, None)
-      when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(defaultCompanyDetailsView))
-      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.getTradingNamePrepop(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("foo bar wizz")))
       AuthHelpers.showAuthorisedWithCP(controller.tradingName, Fixtures.validCurrentProfile, fakeRequest()) {
         response =>
@@ -169,7 +169,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to the confirm ro address page when a user enters valid data" in new Setup {
-      when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthHelpers.submitAuthorisedWithCP(controller.submitTradingName, Fixtures.validCurrentProfile, fakeRequest("POST").withFormUrlEncodedBody(
@@ -183,7 +183,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "show an error page when there is an error response from the microservice" in new Setup {
-      when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthHelpers.submitAuthorisedWithCP(controller.submitTradingName, Fixtures.validCurrentProfile, fakeRequest("POST").withFormUrlEncodedBody(
@@ -196,13 +196,13 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return 400 when a user enters no data" in new Setup {
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
-      when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.submitTradingName(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCoHoCompanyDetailsResponse))
 
       AuthHelpers.submitAuthorisedWithCP(controller.submitTradingName, Fixtures.validCurrentProfile, fakeRequest("POST").withFormUrlEncodedBody()) {
@@ -212,10 +212,10 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return 400 when a user enters invalid data" in new Setup {
-      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCoHoCompanyDetailsResponse))
 
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
       AuthHelpers.submitAuthorisedWithCP(controller.submitTradingName, Fixtures.validCurrentProfile, fakeRequest("POST").withFormUrlEncodedBody(
@@ -230,7 +230,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
   "roAddress" should {
     "return an ok" when {
       "the user is authorised to view the page" in new Setup {
-        when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+        when(mockCompanyDetailsService.withLatestCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
         AuthHelpers.showAuthorisedWithCP(controller.roAddress, Fixtures.validCurrentProfile, fakeRequest()) {
@@ -275,7 +275,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return an ok" when {
       "the user is authorised to view the page and there is a saved buiness contact details model" in new Setup {
-        when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel.copy(businessContactDetails = Some(bcd))))
 
         AuthHelpers.showAuthorisedWithCP(controller.businessContactDetails, Fixtures.validCurrentProfile, fakeRequest()) {
@@ -287,10 +287,10 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return an ok" when {
       "the user is authorised to view the page and there is no business contact details model" in new Setup {
-        when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel.copy(businessContactDetails = None)))
 
-        when(mockPrepopulationService.getBusinessContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockPrepopulationService.getBusinessContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(None))
 
         AuthHelpers.showAuthorisedWithCP(controller.businessContactDetails, Fixtures.validCurrentProfile, fakeRequest()) {
@@ -302,13 +302,13 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return an ok" when {
       "the user is authorised to view the page with prepopulated data and there is no business contact details model" in new Setup {
-        when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel.copy(businessContactDetails = None)))
 
-        when(mockPrepopulationService.getBusinessContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockPrepopulationService.getBusinessContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel.businessContactDetails))
 
-        when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
         AuthHelpers.showAuthorisedWithCP(controller.businessContactDetails, Fixtures.validCurrentProfile, fakeRequest()) {
@@ -337,7 +337,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "show form errors" in new Setup {
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
       AuthHelpers.submitAuthorisedWithCPAndAudit(controller.submitBusinessContactDetails, Fixtures.validCurrentProfile, fakeRequest("POST").withSession(companyNameKey -> "FakeCompany").withFormUrlEncodedBody()) {
@@ -379,10 +379,10 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "ppob" -> Fixtures.validCompanyDetailsViewModel.ppobAddress.get
       )
 
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
-      when(mockPrepopulationService.getPrePopAddresses(ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPrepopulationService.getPrePopAddresses(ArgumentMatchers.anyString(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Map.empty[Int, Address]))
 
       when(mockCompanyDetailsService.getPPOBPageAddresses(ArgumentMatchers.any()))
@@ -400,10 +400,10 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "chosenAddress" -> ""
       )
 
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
-      when(mockPrepopulationService.getPrePopAddresses(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPrepopulationService.getPrePopAddresses(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Map(1 -> Fixtures.validCompanyDetailsViewModel.roAddress)))
 
       when(mockCompanyDetailsService.getPPOBPageAddresses(ArgumentMatchers.any()))
@@ -422,7 +422,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "chosenAddress" -> "ppobAddress"
       )
 
-      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsViewModel))
 
       AuthHelpers.submitAuthorisedWithCPAndAudit(controller.submitPPOBAddress, Fixtures.validCurrentProfile, request) { result =>
@@ -436,7 +436,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "chosenAddress" -> "roAddress"
       )
 
-      when(mockCompanyDetailsService.copyROAddrToPPOBAddr(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.copyROAddrToPPOBAddr(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       when(mockAuditService.auditPPOBAddress(ArgumentMatchers.anyString())(ArgumentMatchers.any[AuditingInformation](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Request[AnyContent]], ArgumentMatchers.any[ExecutionContext]()))
@@ -453,7 +453,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         "chosenAddress" -> "otherAddress"
       )
 
-      when(mockAddressLookupService.buildAddressLookupUrl(ArgumentMatchers.any[String](), ArgumentMatchers.any[Call]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Messages]))
+      when(mockAddressLookupService.buildAddressLookupUrl(ArgumentMatchers.any[String](), ArgumentMatchers.any[Call]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Messages](), ArgumentMatchers.any()))
         .thenReturn(Future.successful("testUrl"))
 
       AuthHelpers.submitAuthorisedWithCPAndAudit(controller.submitPPOBAddress, Fixtures.validCurrentProfile, request) { result =>
@@ -488,7 +488,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockPrepopulationService.getAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
         .thenReturn(Future.successful(address))
 
-      when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthHelpers.submitAuthorisedWithCPAndAudit(controller.submitPPOBAddress, Fixtures.validCurrentProfile, request) { result =>
@@ -511,13 +511,13 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
         )
 
 
-      when(mockAddressLookupService.getAddress(ArgumentMatchers.contains(testAlfId))(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockAddressLookupService.getAddress(ArgumentMatchers.contains(testAlfId))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(expected))
 
-      when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      when(mockPrepopulationService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPrepopulationService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(expected))
 
       AuthHelpers.showAuthorisedWithCP(controller.savePPOBAddress(Some(testAlfId)), Fixtures.validCurrentProfile, fakeRequest()) { result =>
@@ -537,13 +537,13 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
           Some("testCode")
         )
 
-      when(mockAddressLookupService.getAddress(ArgumentMatchers.contains(testAlfId))(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockAddressLookupService.getAddress(ArgumentMatchers.contains(testAlfId))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(expected))
 
-      when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompanyDetailsService.submitPPOBAddr(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-      when(mockPrepopulationService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPrepopulationService.saveAddress(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(expected))
 
       AuthHelpers.showAuthorisedWithCP(controller.savePPOBAddress(Some(testAlfId)), Fixtures.validCurrentProfile, fakeRequest()) { result =>

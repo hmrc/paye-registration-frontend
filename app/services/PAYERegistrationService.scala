@@ -20,6 +20,7 @@ import connectors._
 import enums.{CacheKeys, DownstreamOutcome, IncorporationStatus, RegistrationDeletion}
 import models.external.CurrentProfile
 import play.api.http.Status._
+import play.api.mvc.Request
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 
 import javax.inject.Inject
@@ -38,11 +39,12 @@ trait PAYERegistrationService {
   val s4LService: S4LService
   implicit val ec: ExecutionContext
 
-  def assertRegistrationFootprint(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def assertRegistrationFootprint(regId: String, txId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
     payeRegistrationConnector.createNewRegistration(regId, txId)
   }
 
-  def deleteRejectedRegistration(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
+  def deleteRejectedRegistration(regId: String, txId: String)
+                                (implicit hc: HeaderCarrier, request: Request[_]): Future[RegistrationDeletion.Value] = {
     payeRegistrationConnector.deleteRejectedRegistrationDocument(regId, txId) flatMap {
       case RegistrationDeletion.success | RegistrationDeletion.notfound => keyStoreConnector.remove() map {
         _ => RegistrationDeletion.success
@@ -51,7 +53,8 @@ trait PAYERegistrationService {
     }
   }
 
-  def handleIIResponse(txId: String, status: IncorporationStatus.Value)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
+  def handleIIResponse(txId: String, status: IncorporationStatus.Value)
+                      (implicit hc: HeaderCarrier, request: Request[_]): Future[RegistrationDeletion.Value] = {
     currentProfileService.updateCurrentProfileWithIncorpStatus(txId, status).flatMap { oRegIdFromCp =>
       if (status == IncorporationStatus.rejected) {
         oRegIdFromCp.fold(payeRegistrationConnector.getRegistrationId(txId))(Future.successful) flatMap { regId =>
@@ -67,12 +70,12 @@ trait PAYERegistrationService {
     }
   }
 
-  private def tearDownUserData(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = for {
+  private def tearDownUserData(regId: String, txId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[RegistrationDeletion.Value] = for {
     _ <- s4LService.clear(regId)
     response <- payeRegistrationConnector.deleteRegistrationForRejectedIncorp(regId, txId)
   } yield response
 
-  def deletePayeRegistrationInProgress(regId: String)(implicit hc: HeaderCarrier): Future[RegistrationDeletion.Value] = {
+  def deletePayeRegistrationInProgress(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[RegistrationDeletion.Value] = {
     getCurrentProfile flatMap { profile =>
       if (regId != profile.registrationID) {
         Future.successful(RegistrationDeletion.forbidden)
@@ -86,7 +89,7 @@ trait PAYERegistrationService {
     }
   }
 
-  private def getCurrentProfile(implicit hc: HeaderCarrier): Future[CurrentProfile] = {
+  private def getCurrentProfile(implicit hc: HeaderCarrier, request: Request[_]): Future[CurrentProfile] = {
     keyStoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString) flatMap {
       case Some(currentProfile) => Future.successful(currentProfile)
       case None => currentProfileService.fetchAndStoreCurrentProfile

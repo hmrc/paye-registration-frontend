@@ -49,7 +49,7 @@ trait CompanyDetailsService extends RegistrationAllowlist {
   val prepopService: PrepopulationService
   val auditService: AuditService
 
-  def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+  def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[CompanyDetailsView] = {
     s4LService.fetchAndGet[CompanyDetailsView](CacheKeys.CompanyDetails.toString, regId) flatMap {
       case Some(companyDetails) => Future.successful(companyDetails)
       case None => for {
@@ -62,7 +62,7 @@ trait CompanyDetailsService extends RegistrationAllowlist {
     }
   }
 
-  def withLatestCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+  def withLatestCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[CompanyDetailsView] = {
     for {
       oCoHoCompanyDetails <- incorpInfoService.getCompanyDetails(regId, txId) map (Some(_)) recover { case _ => None }
       companyDetails <- getCompanyDetails(regId, txId)
@@ -71,11 +71,13 @@ trait CompanyDetailsService extends RegistrationAllowlist {
     } yield details
   }
 
-  def getTradingNamePrepop(regId: String, tradingName: Option[TradingNameView])(implicit hc: HeaderCarrier): Future[Option[String]] = {
+  def getTradingNamePrepop(regId: String, tradingName: Option[TradingNameView])
+                          (implicit hc: HeaderCarrier, request: Request[_]): Future[Option[String]] = {
     if (tradingName.exists(_.differentName)) Future.successful(None) else prepopService.getTradingName(regId)
   }
 
-  private[services] def convertOrCreateCompanyDetailsView(regId: String, txId: String, oAPI: Option[CompanyDetailsAPI])(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+  private[services] def convertOrCreateCompanyDetailsView(regId: String, txId: String, oAPI: Option[CompanyDetailsAPI])
+                                                         (implicit hc: HeaderCarrier, request: Request[_]): Future[CompanyDetailsView] = {
     oAPI match {
       case Some(detailsAPI) => Future.successful(apiToView(detailsAPI))
       case None => for {
@@ -85,11 +87,12 @@ trait CompanyDetailsService extends RegistrationAllowlist {
     }
   }
 
-  private def saveToS4L(viewData: CompanyDetailsView, regId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+  private def saveToS4L(viewData: CompanyDetailsView, regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[CompanyDetailsView] = {
     s4LService.saveForm[CompanyDetailsView](CacheKeys.CompanyDetails.toString, viewData, regId).map(_ => viewData)
   }
 
-  private[services] def saveCompanyDetails(viewModel: CompanyDetailsView, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  private[services] def saveCompanyDetails(viewModel: CompanyDetailsView, regId: String)
+                                          (implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
     viewToAPI(viewModel) fold(
       incompleteView =>
         saveToS4L(incompleteView, regId) map { _ => DownstreamOutcome.Success },
@@ -101,7 +104,8 @@ trait CompanyDetailsService extends RegistrationAllowlist {
     )
   }
 
-  def submitTradingName(tradingNameView: TradingNameView, regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def submitTradingName(tradingNameView: TradingNameView, regId: String, txId: String)
+                       (implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
     getCompanyDetails(regId, txId).flatMap { details =>
       saveCompanyDetails(details.copy(tradingName = Some(tradingNameView)), regId).flatMap { outcome =>
         tradingNameView.tradingName.fold(Future.successful(outcome)) { tName =>
@@ -118,14 +122,14 @@ trait CompanyDetailsService extends RegistrationAllowlist {
     }.getOrElse(Map("ro" -> companyDetailsView.roAddress))
   }
 
-  def copyROAddrToPPOBAddr(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def copyROAddrToPPOBAddr(regId: String, txId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
     for {
       details <- getCompanyDetails(regId, txId)
       outcome <- saveCompanyDetails(details.copy(ppobAddress = Some(details.roAddress)), regId)
     } yield outcome
   }
 
-  def submitPPOBAddr(ppobAddr: Address, regId: String, txId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def submitPPOBAddr(ppobAddr: Address, regId: String, txId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
     for {
       details <- getCompanyDetails(regId, txId)
       outcome <- saveCompanyDetails(details.copy(ppobAddress = Some(ppobAddr)), regId)

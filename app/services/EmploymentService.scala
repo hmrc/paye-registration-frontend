@@ -23,6 +23,7 @@ import forms.employmentDetails.EmployingStaffForm
 import models.api.{Employing, Employment}
 import models.external.CurrentProfile
 import models.view.{EmployingAnyone, EmployingStaff, WillBePaying}
+import play.api.mvc.Request
 import uk.gov.hmrc.http.{HeaderCarrier, InternalServerException}
 import utils.SystemDate
 
@@ -89,7 +90,7 @@ trait EmploymentService {
     }
   }
 
-  def fetchEmployingStaff(implicit hc: HeaderCarrier, cp: CurrentProfile): Future[EmployingStaff] = {
+  def fetchEmployingStaff(implicit hc: HeaderCarrier, cp: CurrentProfile, request: Request[_]): Future[EmployingStaff] = {
     s4LService.fetchAndGet[EmployingStaff](CacheKeys.EmploymentV2.toString, cp.registrationID) flatMap {
       case Some(employment) => Future.successful(employment)
       case None => payeRegConnector.getEmployment(cp.registrationID) flatMap { employment =>
@@ -102,7 +103,7 @@ trait EmploymentService {
     }
   }
 
-  private[services] def saveEmployingStaff(regId: String, viewData: EmployingStaff)(implicit hc: HeaderCarrier): Future[EmployingStaff] = {
+  private[services] def saveEmployingStaff(regId: String, viewData: EmployingStaff)(implicit hc: HeaderCarrier, request: Request[_]): Future[EmployingStaff] = {
     viewToApi(viewData).fold(
       view => s4LService.saveForm[EmployingStaff](CacheKeys.EmploymentV2.toString, view, regId) map (_ => view),
       api => for {
@@ -114,27 +115,28 @@ trait EmploymentService {
     }
   }
 
-  def fetchAndUpdateViewModel(f: EmployingStaff => EmployingStaff)(implicit hc: HeaderCarrier, cp: CurrentProfile): Future[EmployingStaff] = {
+  def fetchAndUpdateViewModel(f: EmployingStaff => EmployingStaff)
+                             (implicit hc: HeaderCarrier, cp: CurrentProfile, request: Request[_]): Future[EmployingStaff] = {
     fetchEmployingStaff flatMap (viewModel => saveEmployingStaff(cp.registrationID, f(viewModel)))
   }
 
-  def saveEmployingAnyone(employingAnyone: EmployingAnyone)(implicit hc: HeaderCarrier, cp: CurrentProfile): Future[EmployingStaff] = {
+  def saveEmployingAnyone(employingAnyone: EmployingAnyone)(implicit hc: HeaderCarrier, cp: CurrentProfile, request: Request[_]): Future[EmployingStaff] = {
     fetchAndUpdateViewModel(_.copy(employingAnyone = Some(employingAnyone)))
   }
 
-  def saveWillEmployAnyone(willBePaying: WillBePaying)(implicit hc: HeaderCarrier, cp: CurrentProfile): Future[EmployingStaff] = {
+  def saveWillEmployAnyone(willBePaying: WillBePaying)(implicit hc: HeaderCarrier, cp: CurrentProfile, request: Request[_]): Future[EmployingStaff] = {
     fetchAndUpdateViewModel(_.copy(willBePaying = Some(willBePaying)))
   }
 
-  def saveConstructionIndustry(construction: Boolean)(implicit hc: HeaderCarrier, cp: CurrentProfile): Future[EmployingStaff] = {
+  def saveConstructionIndustry(construction: Boolean)(implicit hc: HeaderCarrier, cp: CurrentProfile, request: Request[_]): Future[EmployingStaff] = {
     fetchAndUpdateViewModel(_.copy(construction = Some(construction)))
   }
 
-  def saveSubcontractors(subcontractors: Boolean)(implicit hc: HeaderCarrier, cp: CurrentProfile): Future[EmployingStaff] = {
+  def saveSubcontractors(subcontractors: Boolean)(implicit hc: HeaderCarrier, cp: CurrentProfile, request: Request[_]): Future[EmployingStaff] = {
     fetchAndUpdateViewModel(_.copy(subcontractors = Some(subcontractors)))
   }
 
-  def savePensionPayment(companyPension: Boolean)(implicit hc: HeaderCarrier, cp: CurrentProfile): Future[EmployingStaff] = {
+  def savePensionPayment(companyPension: Boolean)(implicit hc: HeaderCarrier, cp: CurrentProfile, request: Request[_]): Future[EmployingStaff] = {
     fetchAndUpdateViewModel(_.copy(companyPension = Some(companyPension)))
   }
 }

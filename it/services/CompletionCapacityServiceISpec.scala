@@ -23,6 +23,7 @@ import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.view.CompletionCapacity
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.util.UUID
@@ -51,6 +52,7 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
 
   implicit val hc = HeaderCarrier()
   lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   val regID = "1234"
   val sId = UUID.randomUUID().toString

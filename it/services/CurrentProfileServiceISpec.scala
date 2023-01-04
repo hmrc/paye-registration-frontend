@@ -25,6 +25,8 @@ import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProf
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 
 import scala.concurrent.ExecutionContext
@@ -33,6 +35,8 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase with CachingStub {
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort
   val mockUrl = s"http://$mockHost:$mockPort"
+
+  implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
   val config = Map(
     "auditing.consumer.baseUri.host" -> s"$mockHost",

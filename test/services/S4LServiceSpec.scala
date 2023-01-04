@@ -20,6 +20,7 @@ import helpers.PayeComponentSpec
 import models.view.{TradingName => TradingNameView}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -27,6 +28,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class S4LServiceSpec extends PayeComponentSpec {
 
+
+  implicit val request: FakeRequest[_] = FakeRequest()
   trait Setup {
     val service = new S4LService {
       override val s4LConnector = mockS4LConnector
@@ -40,7 +43,7 @@ class S4LServiceSpec extends PayeComponentSpec {
   "S4L Service" should {
 
     "save a form with the correct key" in new Setup {
-      when(mockS4LConnector.saveForm[TradingNameView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockS4LConnector.saveForm[TradingNameView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("t-name", Map.empty)))
 
       await(service.saveForm[TradingNameView]("tradingName", tstTradingNameModel, "regId")).id mustBe "t-name"
@@ -54,7 +57,7 @@ class S4LServiceSpec extends PayeComponentSpec {
     }
 
     "save a Map with the correct key" in new Setup {
-      when(mockS4LConnector.saveForm[Map[Int, String]](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockS4LConnector.saveForm[Map[Int, String]](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("int-map", Map.empty)))
 
       await(service.saveIntMap[String]("intMap", Map(1 -> "string", 2 -> "otherString"), "regId")).id mustBe "int-map"
@@ -70,7 +73,7 @@ class S4LServiceSpec extends PayeComponentSpec {
     }
 
     "clear down S4L data" in new Setup {
-      when(mockS4LConnector.clear(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockS4LConnector.clear(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(HttpResponse(200, "")))
 
       await(service.clear("regId")).status mustBe 200

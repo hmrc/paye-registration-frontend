@@ -26,6 +26,7 @@ import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.{Format, Json}
+import play.api.mvc.Request
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
@@ -36,6 +37,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   val returnHttpResponse = HttpResponse(200, "")
+
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup {
     val service = new CompanyDetailsService {
@@ -61,11 +64,11 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-      override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+      override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[CompanyDetailsView] = {
         Future.successful(CompanyDetailsView("test compay name", None, Fixtures.validROAddress, None, None))
       }
 
-      override def saveCompanyDetails(detailsView: CompanyDetailsView, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+      override def saveCompanyDetails(detailsView: CompanyDetailsView, regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
         Future.successful(DownstreamOutcome.Failure)
       }
     }
@@ -83,11 +86,11 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
 
-      override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CompanyDetailsView] = {
+      override def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[CompanyDetailsView] = {
         Future.successful(Fixtures.validCompanyDetailsViewModel)
       }
 
-      override def saveCompanyDetails(detailsView: CompanyDetailsView, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+      override def saveCompanyDetails(detailsView: CompanyDetailsView, regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
         Future.successful(DownstreamOutcome.Success)
       }
     }
@@ -252,10 +255,10 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockS4LService.fetchAndGet(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(Fixtures.validCompanyDetailsAPI)))
 
-      when(mockS4LService.saveForm(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
+      when(mockS4LService.saveForm(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
       await(service.getCompanyDetails("54321", "txId")) mustBe Fixtures.validCompanyDetailsViewModel
@@ -277,19 +280,19 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockS4LService.fetchAndGet(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
-      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(tstCompanyDetailsModel))
 
-      when(mockPrepopulationService.getBusinessContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockPrepopulationService.getBusinessContactDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(tstDigitalContactDetails)))
 
-      when(mockS4LService.saveForm(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
+      when(mockS4LService.saveForm(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
-      when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(companyProfile("txId")))
 
       await(service.getCompanyDetails("54321", "txId")) mustBe CompanyDetailsView("tstCompanyName", None, tstROAddress, None, Some(tstDigitalContactDetails))
@@ -299,14 +302,14 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockS4LService.fetchAndGet(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(UpstreamErrorResponse("403", 403, 403)))
 
       an[UpstreamErrorResponse] mustBe thrownBy(await(service.getCompanyDetails("54321", "txId")))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
-      when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getCompanyDetails(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new ArrayIndexOutOfBoundsException))
 
       an[Exception] mustBe thrownBy(await(service.getCompanyDetails("54321", "txId")))
@@ -318,13 +321,13 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       val defaultCompanyDetails = CompanyDetailsView("test Name", None, Fixtures.validAddress, None, None)
       val expectedCompanyDetails = CompanyDetailsView(Fixtures.validCoHoCompanyDetailsResponse.companyName, None, Fixtures.validCoHoCompanyDetailsResponse.roAddress, None, None)
 
-      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCoHoCompanyDetailsResponse))
 
       when(mockS4LService.fetchAndGet[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(defaultCompanyDetails)))
 
-      when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
       val result = await(service.withLatestCompanyDetails("testRegId", "testTxId"))
@@ -334,13 +337,13 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     "return a default Company Details from Company Details service if Incorporation Information returns an error" in new Setup {
       val defaultCompanyDetails = CompanyDetailsView("test Name", None, Fixtures.validAddress, None, None)
 
-      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new Exception))
 
       when(mockS4LService.fetchAndGet[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(defaultCompanyDetails)))
 
-      when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
       val result = await(service.withLatestCompanyDetails("testRegId", "testTxId"))
@@ -349,7 +352,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
   }
   "Calling getTradingNamePrepop" should {
     "return Some of pre pop trading name if trading name model is None" in new Setup {
-      when(mockPrepopulationService.getTradingName(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(Some("foo bar wizz")))
+      when(mockPrepopulationService.getTradingName(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(Some("foo bar wizz")))
 
       await(service.getTradingNamePrepop("12345", None)) mustBe Some("foo bar wizz")
     }
@@ -357,12 +360,12 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       await(service.getTradingNamePrepop("12345", Some(TradingNameView(true, Some("foo"))))) mustBe None
     }
     "return Some of pre pop trading name as the trading name model = Some of false" in new Setup {
-      when(mockPrepopulationService.getTradingName(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(Some("foo bar wizz")))
+      when(mockPrepopulationService.getTradingName(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(Some("foo bar wizz")))
 
       await(service.getTradingNamePrepop("12345", Some(TradingNameView(false, None)))) mustBe Some("foo bar wizz")
     }
     "return None if prep pop returns nothing and trading name model = None" in new Setup {
-      when(mockPrepopulationService.getTradingName(ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(None))
+      when(mockPrepopulationService.getTradingName(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(None))
 
       await(service.getTradingNamePrepop("12345", None)) mustBe None
     }
@@ -370,10 +373,10 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   "Calling saveCompanyDetails" should {
     "return a success response when the upsert completes successfully" in new Setup {
-      when(mockPAYERegConnector.upsertCompanyDetails(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.upsertCompanyDetails(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCompanyDetailsAPI))
 
-      when(mockS4LService.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockS4LService.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(returnHttpResponse))
 
       await(service.saveCompanyDetails(Fixtures.validCompanyDetailsViewModel, "54321")) mustBe DownstreamOutcome.Success
@@ -388,7 +391,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
         Some(DigitalContactDetails(Some("test@paye.co.uk"), None, None))
       )
 
-      when(mockS4LService.saveForm(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]]()))
+      when(mockS4LService.saveForm(ArgumentMatchers.contains(CacheKeys.CompanyDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[CompanyDetailsView]](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
       await(service.saveCompanyDetails(incompleteCompanyDetailsViewModel, "54321")) mustBe DownstreamOutcome.Success
@@ -397,7 +400,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   "Calling submitTradingName" should {
     "return a success response when submit is completed successfully" in new CompanyDetailsMockedSetup {
-      when(mockPrepopulationService.saveTradingName(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(""))
+      when(mockPrepopulationService.saveTradingName(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(""))
       await(service.submitTradingName(Fixtures.validTradingNameViewModel, "54322", "txId")) mustBe DownstreamOutcome.Success
     }
 
@@ -406,7 +409,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return a failure response when submit is not completed successfully" in new NoCompanyDetailsMockedSetup {
-      when(mockPrepopulationService.saveTradingName(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any())).thenReturn(Future.successful(""))
+      when(mockPrepopulationService.saveTradingName(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(""))
       await(service.submitTradingName(Fixtures.validTradingNameViewModel, "543222", "txId")) mustBe DownstreamOutcome.Failure
     }
   }

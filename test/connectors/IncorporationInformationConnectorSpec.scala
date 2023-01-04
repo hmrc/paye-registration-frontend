@@ -23,12 +23,15 @@ import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.api.Name
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import play.api.libs.json.JsObject
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{BadRequestException, InternalServerException}
 
 import java.time.LocalDate
 import scala.concurrent.Future
 
 class IncorporationInformationConnectorSpec extends PayeComponentSpec with PayeFakedApp {
+
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup(unStubbed: Boolean = true) extends CodeMocks {
     val connector = new IncorporationInformationConnector(

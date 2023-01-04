@@ -20,6 +20,7 @@ import config.AppConfig
 import connectors._
 import enums.{CacheKeys, IncorporationStatus}
 import models.external.CurrentProfile
+import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.RegistrationAllowlist
 
@@ -37,7 +38,7 @@ trait SubmissionService extends RegistrationAllowlist {
   val iiConnector: IncorporationInformationConnector
   implicit val ec: ExecutionContext
 
-  def submitRegistration(profile: CurrentProfile)(implicit hc: HeaderCarrier): Future[DESResponse] = {
+  def submitRegistration(profile: CurrentProfile)(implicit hc: HeaderCarrier, request: Request[_]): Future[DESResponse] = {
     ifRegIdNotAllowlisted(profile.registrationID) {
       payeRegistrationConnector.submitRegistration(profile.registrationID).flatMap {
         case status@(Success | Cancelled) =>
