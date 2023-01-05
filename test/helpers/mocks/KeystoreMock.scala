@@ -36,17 +36,17 @@ trait KeystoreMock {
   }
 
   def mockKeystoreCache[T](key: String, regId: String, txId: String, sessionMap: SessionMap): OngoingStubbing[Future[SessionMap]] = {
-    when(mockKeystoreConnector.cache(ArgumentMatchers.contains(key), ArgumentMatchers.contains(regId), ArgumentMatchers.contains(txId), ArgumentMatchers.any[T]())(ArgumentMatchers.any(), ArgumentMatchers.any[Format[T]]()))
+    when(mockKeystoreConnector.cache(ArgumentMatchers.contains(key), ArgumentMatchers.contains(regId), ArgumentMatchers.contains(txId), ArgumentMatchers.any[T]())(ArgumentMatchers.any(), ArgumentMatchers.any[Format[T]](), ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(sessionMap))
   }
 
   def mockKeystoreCacheError[T](key: String, regId: String, txId: String, err: Exception): OngoingStubbing[Future[SessionMap]] = {
-    when(mockKeystoreConnector.cache(ArgumentMatchers.contains(key), ArgumentMatchers.contains(regId), ArgumentMatchers.contains(txId), ArgumentMatchers.any[T]())(ArgumentMatchers.any(), ArgumentMatchers.any[Format[T]]()))
+    when(mockKeystoreConnector.cache(ArgumentMatchers.contains(key), ArgumentMatchers.contains(regId), ArgumentMatchers.contains(txId), ArgumentMatchers.any[T]())(ArgumentMatchers.any(), ArgumentMatchers.any[Format[T]](), ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.failed(err))
   }
 
   def mockKeystoreClear(): OngoingStubbing[Future[Boolean]] = {
-    when(mockKeystoreConnector.remove()(ArgumentMatchers.any()))
+    when(mockKeystoreConnector.remove()(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(true))
   }
 

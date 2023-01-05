@@ -24,6 +24,7 @@ import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.{JsValue, Json}
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, NotFoundException}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -43,6 +44,8 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with PayeFakedApp {
     }
   }
 
+  implicit val request = FakeRequest()
+
   val validBusinessProfile = Fixtures.validBusinessRegistrationResponse
   val validCompanyProfile = CompanyRegistrationProfile("held", "txId")
 
@@ -57,59 +60,59 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with PayeFakedApp {
   "fetchAndStoreCurrentProfile" should {
 
     "Return a successful outcome after successfully storing a valid Business Registration response" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future(validBusinessProfile))
 
-      when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCompanyProfile))
 
-      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(SessionMap("", "", "", Map.empty[String, JsValue])))
 
-      when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(IncorporationStatus.accepted)))
 
-      when(mockPAYERegConnector.getStatus(ArgumentMatchers.contains(validBusinessProfile.registrationID))(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPAYERegConnector.getStatus(ArgumentMatchers.contains(validBusinessProfile.registrationID))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(PAYEStatus.draft)))
 
       await(service.fetchAndStoreCurrentProfile) mustBe validCurrentProfile
     }
 
     "Return a successful outcome after nothing is returned from II subscription" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future(validBusinessProfile))
 
-      when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCompanyProfile))
 
-      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(SessionMap("", "", "", Map.empty[String, JsValue])))
 
-      when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockIncorpInfoConnector.setupSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getStatus(ArgumentMatchers.contains(validBusinessProfile.registrationID))(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockPAYERegConnector.getStatus(ArgumentMatchers.contains(validBusinessProfile.registrationID))(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(PAYEStatus.draft)))
 
       await(service.fetchAndStoreCurrentProfile) mustBe validCurrentProfile.copy(incorpStatus = None)
     }
 
     "Return an unsuccessful outcome when there is no record in Business Registration" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new NotFoundException("")))
 
       intercept[NotFoundException](await(service.fetchAndStoreCurrentProfile))
     }
 
     "Return an unsuccessful outcome when the user is not authorised for Business Registration" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new ForbiddenException("")))
 
       intercept[ForbiddenException](await(service.fetchAndStoreCurrentProfile))
     }
 
     "Return an unsuccessful outcome when Business Registration returns an error response" in new Setup {
-      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any()))
+      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new RuntimeException("")))
 
       intercept[RuntimeException](await(service.fetchAndStoreCurrentProfile))
@@ -153,7 +156,7 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockKeystoreConnector.fetchByTransactionId(ArgumentMatchers.any()))
         .thenReturn(Future(Some(testSessionMap)))
 
-      when(mockKeystoreConnector.cacheSessionMap(ArgumentMatchers.any()))
+      when(mockKeystoreConnector.cacheSessionMap(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future(testSessionMap))
 
       val result = await(service.updateCurrentProfileWithIncorpStatus(txId = "testTxId", status = IncorporationStatus.rejected))

@@ -24,6 +24,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.i18n.Lang
 import play.api.mvc.Call
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.util.Locale
@@ -31,6 +32,8 @@ import scala.concurrent.Future
 
 
 class AddressLookupServiceSpec extends PayeComponentSpec with PayeFakedApp {
+
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   implicit val mockMessages = injMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
   val metricsMock = new MockMetrics
@@ -44,7 +47,7 @@ class AddressLookupServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   "Calling buildAddressLookupUrl" should {
     "return the Address Lookup frontend Url with payereg1 journey" in new Setup {
-      when(mockAddressLookupConnector.getOnRampUrl(ArgumentMatchers.any[AlfJourneyConfig]())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockAddressLookupConnector.getOnRampUrl(ArgumentMatchers.any[AlfJourneyConfig]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful("test-url"))
 
       await(service.buildAddressLookupUrl("payereg1", Call("GET", "/register-for-paye/test-url"))) mustBe "test-url"
@@ -63,7 +66,7 @@ class AddressLookupServiceSpec extends PayeComponentSpec with PayeFakedApp {
           Some("testCode")
         )
 
-      when(mockAddressLookupConnector.getAddress(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]))
+      when(mockAddressLookupConnector.getAddress(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(expected))
 
       await(service.getAddress("1234567890")) mustBe expected

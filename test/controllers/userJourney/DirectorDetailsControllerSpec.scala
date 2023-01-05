@@ -89,7 +89,7 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
     }
 
     "return an OK" in new Setup {
-      when(mockDirectorDetailService.getDirectorDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockDirectorDetailService.getDirectorDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(testDirectors))
 
       when(mockDirectorDetailService.createDirectorNinos(ArgumentMatchers.any()))
@@ -118,7 +118,7 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
       val request = fakeRequest("POST").withFormUrlEncodedBody(
         "nino[0]" -> ""
       )
-      when(mockDirectorDetailService.getDirectorDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockDirectorDetailService.getDirectorDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(testDirectors))
 
       when(mockDirectorDetailService.createDisplayNamesMap(ArgumentMatchers.any()))
@@ -132,7 +132,7 @@ class DirectorDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp 
 
     "return a SEE_OTHER and redirect to the PAYE Contact page" in new Setup {
       val request = fakeRequest("POST").withFormUrlEncodedBody()
-      when(mockDirectorDetailService.submitNinos(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockDirectorDetailService.submitNinos(ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitDirectorDetails, Fixtures.validCurrentProfile, request) {

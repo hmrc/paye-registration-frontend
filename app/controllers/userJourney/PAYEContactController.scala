@@ -150,7 +150,8 @@ class PAYEContactController @Inject()(val companyDetailsService: CompanyDetailsS
     }
   }
 
-  private def submitCorrespondenceWithPrepopAddress(regId: String, prepop: PrepopAddress)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  private def submitCorrespondenceWithPrepopAddress(regId: String, prepop: PrepopAddress)
+                                                   (implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
     (for {
       prepopAddress <- prepopService.getAddress(regId, prepop.index)
       res <- payeContactService.submitCorrespondence(regId, prepopAddress)

@@ -91,7 +91,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "show an Error page for an authorised user without a registration ID" in new Setup {
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new Exception))
 
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
@@ -101,10 +101,10 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "show an Error page for an authorised user with a registration ID and CoHo Company Details, with an error response from the microservice" in new Setup {
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCurrentProfile.get))
 
-      when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
       AuthHelpers.showAuthorisedOrg(controller().startPaye, FakeRequest()) {
@@ -114,10 +114,10 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to the paid employees page for an authorised user with a registration ID and CoHo Company Details, with PAYE Footprint correctly asserted" in new Setup {
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("submitted")))
 
-      when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
@@ -128,10 +128,10 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to the paid employees page for an authorised user with valid details, with PAYE Footprint correctly asserted, with CT accepted" in new Setup {
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("acknowledged", Some("04"))))
 
-      when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
@@ -142,12 +142,12 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to the paid employees page for an authorised user with valid details, with CT submitted and with incorporation paid" in new Setup {
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(
           CurrentProfile("testRegId", CompanyRegistrationProfile("held", "txId", None, Some("paid")), "en", false, None)
         ))
 
-      when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
@@ -158,12 +158,12 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to Company Registration for an authorised user with valid details, with CT submitted but with incorporation unpaid" in new Setup {
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(
           CurrentProfile("testRegId", CompanyRegistrationProfile("held", "txId", None, None), "en", false, None)
         ))
 
-      when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPayeRegService.assertRegistrationFootprint(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
@@ -174,7 +174,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to OTRS for a user with no CT Footprint found" in new Setup {
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new NotFoundException("404")))
 
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
@@ -188,7 +188,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
       import common.exceptions.DownstreamExceptions.ConfirmationRefsNotFoundException
 
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new ConfirmationRefsNotFoundException))
 
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
@@ -199,7 +199,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect the user to OTRS if their Company Registration document has a status of 'draft'" in new Setup {
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("draft")))
 
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
@@ -210,7 +210,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect the user to post sign in if their CT is rejected" in new Setup {
-      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any()))
+      when(mockCurrentProfileService.fetchAndStoreCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(validCurrentProfile("acknowledged", Some("06"))))
 
       AuthHelpers.showAuthorisedOrg(controller().startPaye, fakeRequest) {
@@ -227,7 +227,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(validCurrentProfile("rejected"))))
 
-        when(mockPayeRegService.deleteRejectedRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPayeRegService.deleteRejectedRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(RegistrationDeletion.success))
 
         AuthHelpers.showAuthorised(controller().restartPaye, fakeRequest) {
@@ -251,13 +251,13 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(None))
 
-        when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any()))
+        when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(testBusinessProfile))
 
-        when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockCompRegConnector.getCompanyRegistrationDetails(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(testCompanyProfile))
 
-        when(mockPayeRegService.deleteRejectedRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPayeRegService.deleteRejectedRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(RegistrationDeletion.success))
 
         AuthHelpers.showAuthorised(controller().restartPaye, fakeRequest) {
@@ -273,7 +273,7 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockKeystoreConnector.fetchAndGet[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(validCurrentProfile("rejected"))))
 
-        when(mockPayeRegService.deleteRejectedRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+        when(mockPayeRegService.deleteRejectedRegistration(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(RegistrationDeletion.invalidStatus))
 
         AuthHelpers.showAuthorised(controller().restartPaye, fakeRequest) {

@@ -22,7 +22,6 @@ import models.view.CompletionCapacity
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.mvc.MessagesControllerComponents
-import play.api.test.FakeRequest
 import services.CompletionCapacityService
 import uk.gov.hmrc.http.HeaderCarrier
 import views.html.pages.completionCapacity
@@ -56,7 +55,7 @@ class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedA
     "return an OK if a capacity has been found" in new Setup {
       val capacity = CompletionCapacity(UserCapacity.director, "")
 
-      when(mockCompletionCapacityService.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockCompletionCapacityService.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(capacity)))
 
       AuthHelpers.showAuthorisedWithCP(testController.completionCapacity, Fixtures.validCurrentProfile, fakeRequest()) { result =>
@@ -65,7 +64,7 @@ class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedA
     }
 
     "return an OK if a capacity has NOT been found" in new Setup {
-      when(mockCompletionCapacityService.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockCompletionCapacityService.getCompletionCapacity(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
       AuthHelpers.showAuthorisedWithCP(testController.completionCapacity, Fixtures.validCurrentProfile, fakeRequest()) { result =>
@@ -91,7 +90,7 @@ class CompletionCapacityControllerSpec extends PayeComponentSpec with PayeFakedA
         "completionCapacityOther" -> ""
       )
 
-      when(mockCompletionCapacityService.saveCompletionCapacity(ArgumentMatchers.anyString(), ArgumentMatchers.any[CompletionCapacity]())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockCompletionCapacityService.saveCompletionCapacity(ArgumentMatchers.anyString(), ArgumentMatchers.any[CompletionCapacity]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitCompletionCapacity, Fixtures.validCurrentProfile, request) { result =>

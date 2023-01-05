@@ -20,6 +20,7 @@ import connectors.PAYERegistrationConnector
 import enums.DownstreamOutcome
 import models.api.SICCode
 import models.view.NatureOfBusiness
+import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject
@@ -37,13 +38,13 @@ trait NatureOfBusinessService {
   private[services] def natureOfBusiness2SICCodes(nob: NatureOfBusiness): Seq[SICCode] =
     Seq(SICCode(None, Some(nob.natureOfBusiness)))
 
-  def getNatureOfBusiness(regId: String)(implicit hc: HeaderCarrier): Future[Option[NatureOfBusiness]] = {
+  def getNatureOfBusiness(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[NatureOfBusiness]] = {
     for {
       sicCodes <- payeRegConnector.getSICCodes(regId)
     } yield sicCodes2NatureOfBusiness(sicCodes)
   }
 
-  def saveNatureOfBusiness(nob: NatureOfBusiness, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def saveNatureOfBusiness(nob: NatureOfBusiness, regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
     for {
       details <- payeRegConnector.upsertSICCodes(regId, natureOfBusiness2SICCodes(nob))
     } yield DownstreamOutcome.Success

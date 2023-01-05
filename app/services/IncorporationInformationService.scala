@@ -20,6 +20,7 @@ import connectors._
 import models.api.Director
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import models.view.Directors
+import play.api.mvc.Request
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, InternalServerException, NotFoundException}
 
 import java.time.LocalDate
@@ -35,7 +36,7 @@ trait IncorporationInformationService {
   val incorpInfoConnector: IncorporationInformationConnector
   val keystoreConnector: KeystoreConnector
 
-  def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[CoHoCompanyDetailsModel] = {
+  def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[CoHoCompanyDetailsModel] = {
     incorpInfoConnector.getCoHoCompanyDetails(regId, txId) map {
       case IncorpInfoSuccessResponse(companyDetails) => companyDetails
       case IncorpInfoBadRequestResponse => throw new BadRequestException(s"Received a BadRequest status code when expecting company details for regId: $regId / TX-ID: $txId")
@@ -44,12 +45,12 @@ trait IncorporationInformationService {
     }
   }
 
-  def getIncorporationDate(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[Option[LocalDate]] =
+  def getIncorporationDate(regId: String, txId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[LocalDate]] =
     incorpInfoConnector.getIncorporationInfoDate(regId, txId) recover {
       case e: Exception => throw new InternalServerException(s"[IncorpInfoService][getIncorpDate] an exception occurred for regId: $regId, txId: $txId error - ${e.getMessage}")
     }
 
-  def getDirectorDetails(txId: String, regId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
+  def getDirectorDetails(txId: String, regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Directors] = {
     for {
       officerList <- incorpInfoConnector.getOfficerList(txId, regId)
       directorDetails <- convertOfficerList2Directors(officerList)

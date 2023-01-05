@@ -19,6 +19,7 @@ package services
 import connectors._
 import models.{EmailDifficulties, EmailNotFound, EmailResponse}
 import models.external.{CurrentProfile, EmailRequest}
+import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import utils.{Logging, SystemDate, TaxYearConfig}
@@ -67,14 +68,15 @@ class EmailService @Inject()(companyRegistrationConnector: CompanyRegistrationCo
     )
   }
 
-  def primeEmailData(regId: String)(implicit hc: HeaderCarrier): Future[CacheMap] = {
+  def primeEmailData(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[CacheMap] = {
     for {
       Some(employment) <- payeRegistrationConnector.getEmployment(regId)
       stashed <- s4LConnector.saveForm[LocalDate](regId, FIRST_PAYMENT_DATE, employment.firstPaymentDate)
     } yield stashed
   }
 
-  def sendAcknowledgementEmail(profile: CurrentProfile, ackRef: String, nameFromAuth: Option[String])(implicit hc: HeaderCarrier): Future[EmailResponse] =
+  def sendAcknowledgementEmail(profile: CurrentProfile, ackRef: String, nameFromAuth: Option[String])
+                              (implicit hc: HeaderCarrier, request: Request[_]): Future[EmailResponse] =
     companyRegistrationConnector.getVerifiedEmail(profile.registrationID).flatMap {
       case Some(verifiedEmail) =>
         for {

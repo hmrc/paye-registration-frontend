@@ -22,6 +22,7 @@ import connectors.httpParsers.IncorporationInformationHttpParsers
 import enums.IncorporationStatus
 import models.external.{CoHoCompanyDetailsModel, IncorpUpdateResponse, OfficerList}
 import play.api.libs.json._
+import play.api.mvc.Request
 import services.MetricsService
 import uk.gov.hmrc.http._
 import utils.RegistrationAllowlist
@@ -48,7 +49,8 @@ class IncorporationInformationConnector @Inject()(val metricsService: MetricsSer
 
   def timer: Timer.Context = metricsService.incorpInfoResponseTimer.time()
 
-  def setupSubscription(transactionId: String, regId: String, regime: String = "paye-fe", subscriber: String = "SCRS")(implicit hc: HeaderCarrier): Future[Option[IncorporationStatus.Value]] = {
+  def setupSubscription(transactionId: String, regId: String, regime: String = "paye-fe", subscriber: String = "SCRS")
+                       (implicit hc: HeaderCarrier, request: Request[_]): Future[Option[IncorporationStatus.Value]] = {
     withRecovery()("setupSubscription", Some(regId), Some(transactionId)) {
       implicit val reads = IncorpUpdateResponse.reads(transactionId, subscriber, regime)
       http.POST[JsObject, Option[IncorporationStatus.Value]](
@@ -58,14 +60,15 @@ class IncorporationInformationConnector @Inject()(val metricsService: MetricsSer
     }
   }
 
-  def cancelSubscription(transactionId: String, regId: String, regime: String = "paye-fe", subscriber: String = "SCRS")(implicit hc: HeaderCarrier): Future[Boolean] =
+  def cancelSubscription(transactionId: String, regId: String, regime: String = "paye-fe", subscriber: String = "SCRS")
+                        (implicit hc: HeaderCarrier, request: Request[_]): Future[Boolean] =
     withRecovery(response = Some(false))("cancelSubscription", Some(regId), Some(transactionId)) {
       http.DELETE[Boolean](
         url = s"$incorpInfoUrl/incorporation-information/subscribe/$transactionId/regime/$regime/subscriber/$subscriber"
       )(cancelSubscriptionHttpReads(regId, transactionId), hc, ec)
     }
 
-  def getCoHoCompanyDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[IncorpInfoResponse] =
+  def getCoHoCompanyDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[IncorpInfoResponse] =
     ifRegIdNotAllowlisted(regId) {
       val incorpInfoTimer: Timer.Context = timer
       http.GET[IncorpInfoResponse](s"$incorpInfoUrl$incorpInfoUri/$transactionId/company-profile")(getCoHoCompanyDetailsHttpReads(regId, transactionId), hc, ec).map { response =>
@@ -81,14 +84,14 @@ class IncorporationInformationConnector @Inject()(val metricsService: MetricsSer
       }
     }
 
-  def getIncorporationInfoDate(regId: String, txId: String)(implicit hc: HeaderCarrier): Future[Option[LocalDate]] =
+  def getIncorporationInfoDate(regId: String, txId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[LocalDate]] =
     withTimer {
       withRecovery()("getIncorporationInfoDate", Some(regId), Some(txId)) {
         http.GET[Option[LocalDate]](s"$incorpInfoUrl$incorpInfoUri/$txId/incorporation-update")(getIncorpInfoDateHttpReads(regId, txId), hc, ec)
       }
     }
 
-  def getOfficerList(transactionId: String, regId: String)(implicit hc: HeaderCarrier): Future[OfficerList] =
+  def getOfficerList(transactionId: String, regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[OfficerList] =
     ifRegIdNotAllowlisted(regId) {
       withTimer {
         withRecovery()("getOfficerList", Some(regId), Some(transactionId)) {

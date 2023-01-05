@@ -22,12 +22,15 @@ import models.api.SICCode
 import models.view.NatureOfBusiness
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class NatureOfBusinessServiceSpec extends PayeComponentSpec {
   val returnHttpResponse = HttpResponse(200, "")
+
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup {
     val service = new NatureOfBusinessService {
@@ -79,21 +82,21 @@ class NatureOfBusinessServiceSpec extends PayeComponentSpec {
 
   "Calling getNatureOfBusiness" should {
     "return the correct View response when SIC Codes are returned from the microservice" in new Setup {
-      when(mockPAYERegConnector.getSICCodes(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getSICCodes(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validSICCodesList))
 
       await(service.getNatureOfBusiness("54321")) mustBe Some(NatureOfBusiness(natureOfBusiness = "laundring"))
     }
 
     "throw an UpstreamErrorResponse when a 403 response is returned from the connector" in new Setup {
-      when(mockPAYERegConnector.getSICCodes(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getSICCodes(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(UpstreamErrorResponse("403", 403, 403)))
 
       an[UpstreamErrorResponse] mustBe thrownBy(await(service.getNatureOfBusiness("54321")))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
-      when(mockPAYERegConnector.getSICCodes(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getSICCodes(ArgumentMatchers.contains("54321"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new ArrayIndexOutOfBoundsException))
 
       an[Exception] mustBe thrownBy(await(service.getNatureOfBusiness("54321")))
@@ -104,7 +107,7 @@ class NatureOfBusinessServiceSpec extends PayeComponentSpec {
     "return a success response when the upsert completes successfully" in new Setup {
       val validNatureOfBusiness = NatureOfBusiness(natureOfBusiness = "laundring")
 
-      when(mockPAYERegConnector.upsertSICCodes(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.upsertSICCodes(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validSICCodesList))
 
       await(service.saveNatureOfBusiness(validNatureOfBusiness, "54321")) mustBe DownstreamOutcome.Success

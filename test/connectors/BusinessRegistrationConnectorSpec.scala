@@ -25,12 +25,15 @@ import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.Future
 
 class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
+
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup {
 

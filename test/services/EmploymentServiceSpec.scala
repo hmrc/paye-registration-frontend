@@ -21,12 +21,15 @@ import models.api.{Employing, Employment}
 import models.view.{EmployingAnyone, EmployingStaff, WillBePaying}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HttpResponse
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class EmploymentServiceSpec extends PayeComponentSpec {
+
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   def testService(date: LocalDate = LocalDate.of(2018, 1, 1)): EmploymentService = new EmploymentService {
     override def now: LocalDate = date
@@ -159,7 +162,7 @@ class EmploymentServiceSpec extends PayeComponentSpec {
       when(mockS4LService.fetchAndGet[EmployingStaff](any(), any())(any(), any()))
         .thenReturn(Future(Some(partialView)))
 
-      when(mockIncorpInfoService.getIncorporationDate(any(), any())(any()))
+      when(mockIncorpInfoService.getIncorporationDate(any(), any())(any(), any()))
         .thenReturn(Future.successful(Some(LocalDate.now)))
 
       val result = await(testService().fetchEmployingStaff)
@@ -170,10 +173,10 @@ class EmploymentServiceSpec extends PayeComponentSpec {
       when(mockS4LService.fetchAndGet[EmployingStaff](any(), any())(any(), any()))
         .thenReturn(Future(None))
 
-      when(mockPayeRegistrationConnector.getEmployment(any())(any()))
+      when(mockPayeRegistrationConnector.getEmployment(any())(any(), any()))
         .thenReturn(Future(Some(willEmployNextYearApiModel)))
 
-      when(mockIncorpInfoService.getIncorporationDate(any(), any())(any()))
+      when(mockIncorpInfoService.getIncorporationDate(any(), any())(any(), any()))
         .thenReturn(Future.successful(Some(LocalDate.now)))
 
       val result = await(testService(newTaxYearDateInRange).fetchEmployingStaff)
@@ -184,10 +187,10 @@ class EmploymentServiceSpec extends PayeComponentSpec {
       when(mockS4LService.fetchAndGet[EmployingStaff](any(), any())(any(), any()))
         .thenReturn(Future(None))
 
-      when(mockPayeRegistrationConnector.getEmployment(any())(any()))
+      when(mockPayeRegistrationConnector.getEmployment(any())(any(), any()))
         .thenReturn(Future(None))
 
-      when(mockIncorpInfoService.getIncorporationDate(any(), any())(any()))
+      when(mockIncorpInfoService.getIncorporationDate(any(), any())(any(), any()))
         .thenReturn(Future.successful(Some(LocalDate.now)))
 
       val result = await(testService().fetchEmployingStaff)
@@ -198,7 +201,7 @@ class EmploymentServiceSpec extends PayeComponentSpec {
   "saveEmploymentView" should {
     "return a view model" when {
       "the view model being processed isn't complete and has been saved into S4L" in {
-        when(mockS4LService.saveForm[EmployingStaff](any(), any(), any())(any(), any()))
+        when(mockS4LService.saveForm[EmployingStaff](any(), any(), any())(any(), any(), any()))
           .thenReturn(Future(Fixtures.blankCacheMap))
 
         val result = await(testService().saveEmployingStaff("testRegId", EmployingStaff(Some(EmployingAnyone(false, None)), None, None, None, Some(true))))
@@ -206,10 +209,10 @@ class EmploymentServiceSpec extends PayeComponentSpec {
       }
 
       "the view model is complete and the view model has been transformed into an api model and has been saved into the api" in {
-        when(mockPayeRegistrationConnector.upsertEmployment(any(), any())(any()))
+        when(mockPayeRegistrationConnector.upsertEmployment(any(), any())(any(), any()))
           .thenReturn(Future(willEmployNextYearApiModel))
 
-        when(mockS4LService.clear(any())(any()))
+        when(mockS4LService.clear(any())(any(), any()))
           .thenReturn(Future(HttpResponse(200, "")))
 
         val result = await(testService().saveEmployingStaff("testRegId", willEmployNextYearViewModel))
@@ -223,10 +226,10 @@ class EmploymentServiceSpec extends PayeComponentSpec {
       when(mockS4LService.fetchAndGet[EmployingStaff](any(), any())(any(), any()))
         .thenReturn(Future(Some(alreadyEmployingViewModel)))
 
-      when(mockPayeRegistrationConnector.upsertEmployment(any(), any())(any()))
+      when(mockPayeRegistrationConnector.upsertEmployment(any(), any())(any(), any()))
         .thenReturn(Future(alreadyEmployingApiModel))
 
-      when(mockS4LService.clear(any())(any()))
+      when(mockS4LService.clear(any())(any(), any()))
         .thenReturn(Future(HttpResponse(200, "")))
 
       await(testService().fetchAndUpdateViewModel(identity)) mustBe alreadyEmployingViewModel
@@ -264,13 +267,13 @@ class EmploymentServiceSpec extends PayeComponentSpec {
           when(mockS4LService.fetchAndGet[EmployingStaff](any(), any())(any(), any()))
             .thenReturn(Future(None))
 
-          when(mockPayeRegistrationConnector.getEmployment(any())(any()))
+          when(mockPayeRegistrationConnector.getEmployment(any())(any(), any()))
             .thenReturn(Future(None))
 
-          when(mockS4LService.saveForm[EmployingStaff](any(), any(), any())(any(), any()))
+          when(mockS4LService.saveForm[EmployingStaff](any(), any(), any())(any(), any(), any()))
             .thenReturn(Future(Fixtures.blankCacheMap))
 
-          when(mockIncorpInfoService.getIncorporationDate(any(), any())(any()))
+          when(mockIncorpInfoService.getIncorporationDate(any(), any())(any(), any()))
             .thenReturn(Future.successful(Some(LocalDate.now)))
 
           await(function()) mustBe expected

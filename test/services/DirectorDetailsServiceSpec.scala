@@ -24,6 +24,8 @@ import models.view.{Directors, Ninos, UserEnteredNino}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.{Format, Json}
+import play.api.mvc.Request
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
 
@@ -31,6 +33,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
   val returnHttpResponse = HttpResponse(200, "")
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup {
     val service = new DirectorDetailsService {
@@ -52,11 +55,11 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
 
-      override def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
+      override def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Directors] = {
         Future.successful(Fixtures.validDirectorDetailsViewModel)
       }
 
-      override def saveDirectorDetails(detailsView: Directors, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+      override def saveDirectorDetails(detailsView: Directors, regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
         Future.successful(DownstreamOutcome.Failure)
       }
     }
@@ -71,11 +74,11 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
 
-      override def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
+      override def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Directors] = {
         Future.successful(Fixtures.validDirectorDetailsViewModel)
       }
 
-      override def saveDirectorDetails(detailsView: Directors, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+      override def saveDirectorDetails(detailsView: Directors, regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
         Future.successful(DownstreamOutcome.Success)
       }
     }
@@ -376,13 +379,13 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
         )
       )
 
-      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(directorDetails))
 
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(Some(directorDetails)))
 
-      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
+      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
       await(service.getDirectorDetails("12345", "txId")) mustBe directorDetails
@@ -402,16 +405,16 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       val payeregDirectors = Seq(dir(nino = None, title = Some("Title2"))
 
       )
-      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(cohoDirectors))
 
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(payeregDirectors))
 
-      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
+      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
       await(service.getDirectorDetails("12345", "txId")) mustBe cohoDirectors
@@ -433,13 +436,13 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
           "0" -> dir(nino = None, title = Some("Title2"))
         )
       )
-      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(cohoDirectors))
 
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(Some(s4lDirectors)))
 
-      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
+      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
       await(service.getDirectorDetails("12345", "txId")) mustBe cohoDirectors
@@ -458,16 +461,16 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
         )
       )
 
-      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(directorDetails))
 
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Seq(dir)))
 
-      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
+      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
       await(service.getDirectorDetails("12345", "txId")) mustBe directorDetails
@@ -486,13 +489,13 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Nil))
 
-      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(directorDetails))
 
-      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
+      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
       await(service.getDirectorDetails("12345", "txId")) mustBe directorDetails
@@ -508,20 +511,20 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
         )
       )
 
-      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(directorDetails))
 
       when(mockS4LService.fetchAndGet(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
         .thenReturn(Future.successful(None))
 
-      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(UpstreamErrorResponse("403", 403, 403)))
 
       an[UpstreamErrorResponse] mustBe thrownBy(await(service.getDirectorDetails("12345", "txId")))
     }
 
     "throw an Exception when `an unexpected response is returned from the connector" in new Setup {
-      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getDirectors(ArgumentMatchers.contains("12345"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new ArrayIndexOutOfBoundsException))
 
       an[Exception] mustBe thrownBy(await(service.getDirectorDetails("12345", "txId")))
@@ -530,10 +533,10 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   "Calling saveDirectorDetails" should {
     "return a success response when the upsert completes successfully" in new Setup {
-      when(mockPAYERegConnector.upsertDirectors(ArgumentMatchers.contains("12345"), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.upsertDirectors(ArgumentMatchers.contains("12345"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validDirectorList))
 
-      when(mockS4LService.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockS4LService.clear(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(returnHttpResponse))
 
       await(service.saveDirectorDetails(Fixtures.validDirectorDetailsViewModel, "12345")) mustBe DownstreamOutcome.Success
@@ -542,7 +545,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     "return a success response when the S4L save completes successfully" in new Setup {
       val incompleteCompanyDetailsViewModel = Directors(directorMapping = Map())
 
-      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]]()))
+      when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))
 
       await(service.saveDirectorDetails(incompleteCompanyDetailsViewModel, "12345")) mustBe DownstreamOutcome.Success

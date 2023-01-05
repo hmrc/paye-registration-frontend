@@ -18,6 +18,9 @@ package services
 
 import com.codahale.metrics.{Counter, Timer}
 import com.kenshoo.play.metrics.Metrics
+import play.api.mvc.Request
+import utils.Logging
+import scala.reflect.runtime.universe._
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -47,7 +50,7 @@ class MetricsServiceImpl @Inject()(metrics: Metrics) extends MetricsService {
   override val addressLookupFailedResponseCounter = metrics.defaultRegistry.counter("address-lookup-failed-response-counter")
 }
 
-trait MetricsService {
+trait MetricsService extends Logging {
   val payeRegistrationResponseTimer: Timer
   val addressLookupResponseTimer: Timer
   val businessRegistrationResponseTimer: Timer
@@ -83,13 +86,15 @@ trait MetricsService {
     }
   }
 
-  def processDataResponseWithMetrics[T](success: Counter, failed: Counter, timer: Timer.Context)(f: => Future[T])(implicit ec: ExecutionContext): Future[T] = {
+  def processDataResponseWithMetrics[T](success: Counter, failed: Counter, timer: Timer.Context)(f: => Future[T])
+                                       (implicit ec: ExecutionContext, request: Request[_], tag: TypeTag[T]): Future[T] = {
     f map { data =>
       timer.stop()
       success.inc(1)
       data
     } recover {
       case e =>
+        errorLog(s"[processDataResponseWithMetrics] failed to process data response with metrics for ${tag.toString()}")
         timer.stop()
         failed.inc(1)
         throw e

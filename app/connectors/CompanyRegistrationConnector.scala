@@ -20,6 +20,7 @@ import config.AppConfig
 import connectors.httpParsers.CompanyRegistrationHttpParsers
 import models.external.CompanyRegistrationProfile
 import play.api.libs.json._
+import play.api.mvc.Request
 import services.MetricsService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpException}
 import utils.PAYEFeatureSwitch
@@ -37,7 +38,8 @@ class CompanyRegistrationConnector @Inject()(val featureSwitch: PAYEFeatureSwitc
   lazy val stubUrl: String = appConfig.servicesConfig.baseUrl("incorporation-frontend-stubs")
   lazy val stubUri: String = appConfig.servicesConfig.getString("microservice.services.incorporation-frontend-stubs.uri")
 
-  def getCompanyRegistrationDetails(regId: String)(implicit hc: HeaderCarrier): Future[CompanyRegistrationProfile] = {
+  def getCompanyRegistrationDetails(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[CompanyRegistrationProfile] = {
+    infoLog("[getCompanyRegistrationDetails] attempting to getCompanyRegistrationDetails")
     val url = if (useCompanyRegistration) s"$companyRegistrationUrl$companyRegistrationUri/corporation-tax-registration" else s"$stubUrl$stubUri"
     withTimer {
       withRecovery()("getCompanyRegistrationDetails", Some(regId)) {
@@ -46,7 +48,7 @@ class CompanyRegistrationConnector @Inject()(val featureSwitch: PAYEFeatureSwitc
     }
   }
 
-  def getVerifiedEmail(regId: String)(implicit hc: HeaderCarrier): Future[Option[String]] =
+  def getVerifiedEmail(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[String]] =
     withRecovery(Some(Option.empty[String]))("getVerifiedEmail", Some(regId)) {
       http.GET[Option[String]](s"$companyRegistrationUrl$companyRegistrationUri/corporation-tax-registration/$regId/retrieve-email")(verifiedEmailHttpReads(regId), hc, ec)
     }

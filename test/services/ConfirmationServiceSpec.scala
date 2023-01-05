@@ -19,12 +19,14 @@ package services
 import helpers.PayeComponentSpec
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
+import play.api.test.FakeRequest
 
 import java.time.LocalDate
 import scala.concurrent.Future
 
 class ConfirmationServiceSpec extends PayeComponentSpec {
 
+  implicit val request: FakeRequest[_] = FakeRequest()
   trait Setup {
     val testNow: LocalDate
 
@@ -41,7 +43,7 @@ class ConfirmationServiceSpec extends PayeComponentSpec {
     "return an acknowledgment reference" in new Setup {
       override val testNow = LocalDate.now
 
-      when(mockPAYERegConnector.getAcknowledgementReference(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.getAcknowledgementReference(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("BRPY00000000001")))
 
       await(service.getAcknowledgementReference("45632")) mustBe Some("BRPY00000000001")

@@ -28,7 +28,7 @@ import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.play.language.LanguageUtils
-import utils.PAYEFeatureSwitches
+import utils.{Logging, PAYEFeatureSwitches}
 import views.html.pages.error.restart
 
 import javax.inject.{Inject, Singleton}
@@ -49,7 +49,8 @@ class PayeStartController @Inject()(val currentProfileService: CurrentProfileSer
                                     mcc: MessagesControllerComponents,
                                     restart: restart,
                                     languageUtils: LanguageUtils
-                                   )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
+                                   )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc)
+  with AuthRedirectUrls with Logging {
 
   private val welsh = Lang("cy")
   private val english = "english"
@@ -59,6 +60,7 @@ class PayeStartController @Inject()(val currentProfileService: CurrentProfileSer
   }
 
   def startPaye(): Action[AnyContent] = isAuthorisedAndIsOrg { implicit request =>
+    infoLog("[startPaye] attempting to startPaye")
     checkAndStoreCurrentProfile { profile =>
       assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId) {
         if((languageUtils.getCurrentLang == welsh) && !appConfig.languageTranslationEnabled) {
@@ -80,7 +82,7 @@ class PayeStartController @Inject()(val currentProfileService: CurrentProfileSer
     }
   }
 
-  private def getRegIdAndTxId(implicit hc: HeaderCarrier): Future[(String, String)] = {
+  private def getRegIdAndTxId(implicit hc: HeaderCarrier, request: Request[_]): Future[(String, String)] = {
     keystoreConnector.fetchAndGet[CurrentProfile](CacheKeys.CurrentProfile.toString) flatMap {
       case Some(profile) => Future.successful((profile.registrationID, profile.companyTaxRegistration.transactionId))
       case None => for {
@@ -93,16 +95,20 @@ class PayeStartController @Inject()(val currentProfileService: CurrentProfileSer
   }
 
   private def checkAndStoreCurrentProfile(f: => CurrentProfile => Future[Result])(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+    infoLog(s"[checkAndStoreCurrentProfile] attempting to checkAndStoreCurrentProfile")
     currentProfileService.fetchAndStoreCurrentProfile flatMap { currentProfile: CurrentProfile =>
       currentProfileChecks(currentProfile)(f)
     } recover {
       case _: NotFoundException => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
       case _: ConfirmationRefsNotFoundException => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
-      case _ => InternalServerError(restart())
+      case _ =>
+        warnLog(s"[checkAndStoreCurrentProfile] failed to checkAndStoreCurrentProfile")
+        InternalServerError(restart())
     }
   }
 
   private def assertPAYERegistrationFootprint(regId: String, txId: String)(f: => Result)(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] = {
+    infoLog("[assertPAYERegistrationFootprint] attempting to assertPAYERegistrationFootprint")
     payeRegistrationService.assertRegistrationFootprint(regId, txId) map {
       case DownstreamOutcome.Success => f
       case DownstreamOutcome.Failure => InternalServerError(restart())

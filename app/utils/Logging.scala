@@ -17,17 +17,29 @@
 package utils
 
 import org.slf4j.{Logger, LoggerFactory}
+import play.api.mvc.Request
 import play.api.{LoggerLike, MarkerContext}
+import uk.gov.hmrc.http.{HeaderNames, HttpResponse, SessionKeys}
 
 trait Logging {
 
   private lazy val packageName: String =  this.getClass.getPackage.getName
   private lazy val className: String = this.getClass.getSimpleName.stripSuffix("$")
 
-  val logger: LoggerLike = new LoggerLike {
+  lazy val trueClientIp: Request[_] => Option[String] = request => request.headers.get(HeaderNames.trueClientIp).map(trueClientIp => s"trueClientIp: $trueClientIp ")
 
-    private lazy val prefixLog: String => String = msg =>
-      s"[$className]${if (msg.startsWith("[")) msg else " " + msg}"
+  lazy val sessionId: Request[_] => Option[String] = request => request.session.get(SessionKeys.sessionId).map(sessionId => s"sessionId: $sessionId ")
+
+  lazy val identifiers: Request[_] => String = request => Seq(trueClientIp(request), sessionId(request)).flatten.foldLeft("")(_ + _)
+
+  lazy val trueClientIpFromHttpResponse: HttpResponse => Option[String] = httpResponse => httpResponse.headers.get(HeaderNames.trueClientIp).map(trueClientIp => s"trueClientIp: $trueClientIp")
+  lazy val sessionIdFromHttpResponse: HttpResponse => Option[String] = httpResponse => httpResponse.headers.get(HeaderNames.xSessionId).map(sessionId => s"sessionId: $sessionId")
+  lazy val identifiersFromHttpResponse: HttpResponse => String = request => Seq(trueClientIpFromHttpResponse(request), sessionIdFromHttpResponse(request)).flatten.foldLeft("")(_ + _)
+
+  private lazy val prefixLog: String => String = msg =>
+    s"[$className]${if (msg.startsWith("[")) msg else " " + msg}"
+
+  val logger: LoggerLike = new LoggerLike {
 
     override val logger: Logger = LoggerFactory.getLogger(s"application.$packageName.$className")
 
@@ -41,4 +53,9 @@ trait Logging {
     override def warn(message: => String, e: => Throwable)(implicit mc: MarkerContext): Unit = super.warn(prefixLog(message), e)
     override def error(message: => String, e: => Throwable)(implicit mc: MarkerContext): Unit = super.error(prefixLog(message), e)
   }
+
+  def infoLog(message: => String)(implicit mc: MarkerContext, request: Request[_]): Unit = logger.info(s"$message (${identifiers(request)})")
+  def warnLog(message: => String)(implicit mc: MarkerContext, request: Request[_]): Unit = logger.warn(s"$message (${identifiers(request)})")
+  def errorLog(message: => String)(implicit mc: MarkerContext, request: Request[_]): Unit = logger.error(s"$message (${identifiers(request)})")
+
 }

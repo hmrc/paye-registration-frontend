@@ -24,12 +24,13 @@ import play.api.Application
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
 class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
 
   implicit val hc = HeaderCarrier()
-
+  implicit val request: FakeRequest[_] = FakeRequest()
   val regId = "12345"
 
   override lazy val app: Application = new GuiceApplicationBuilder()

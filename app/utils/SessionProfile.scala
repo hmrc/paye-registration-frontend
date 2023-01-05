@@ -21,7 +21,7 @@ import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import enums.{CacheKeys, IncorporationStatus, RegistrationDeletion}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{Call, Request, Result}
+import play.api.mvc.{AnyContent, Call, Request, Result}
 import services.PAYERegistrationService
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -66,7 +66,10 @@ trait SessionProfile extends InternalExceptions with Logging {
     }
   }
 
-  protected[utils] def currentProfileChecks(currentProfile: CurrentProfile, checkSubmissionStatus: Boolean = true)(f: CurrentProfile => Future[Result]): Future[Result] = {
+  protected[utils] def currentProfileChecks(currentProfile: CurrentProfile, checkSubmissionStatus: Boolean = true)
+                                           (f: CurrentProfile => Future[Result])
+                                           (implicit request: Request[_]): Future[Result] = {
+    infoLog("[currentProfileChecks] attempting currentProfileChecks")
     currentProfile match {
       case ctRejected@CurrentProfile(_, CompanyRegistrationProfile(_, _, Some(a), _), _, _, _) if Try(a.toInt).getOrElse(6) >= 6 =>
         Future.successful(Redirect(controllers.userJourney.routes.SignInOutController.postSignIn))
@@ -79,7 +82,7 @@ trait SessionProfile extends InternalExceptions with Logging {
 
       case ctDraft@CurrentProfile(_, CompanyRegistrationProfile("draft", _, _, hasPaid), _, _, _) =>
         if (hasPaid.isDefined) {
-          logger.warn("[currentProfileChecks] CR Document status DRAFT but user HAS PAID for incorporation")
+          warnLog("[currentProfileChecks] CR Document status DRAFT but user HAS PAID for incorporation")
         }
         Future.successful(Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes"))
 
@@ -91,7 +94,7 @@ trait SessionProfile extends InternalExceptions with Logging {
 
       case validProfile@CurrentProfile(_, CompanyRegistrationProfile(_, _, _, hasPaid), _, _, _) =>
         if (hasPaid.isEmpty) {
-          logger.warn("[currentProfileChecks] CT PROCESSED but user HAS NO PAYMENT REFERENCE for incorporation")
+          warnLog("[currentProfileChecks] CT PROCESSED but user HAS NO PAYMENT REFERENCE for incorporation")
         }
         f(validProfile)
     }

@@ -21,11 +21,14 @@ import helpers.PayeComponentSpec
 import models.view.CompletionCapacity
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
+import play.api.test.FakeRequest
 
 import scala.concurrent.{ExecutionContext, Future}
 
 
 class CompletionCapacityServiceSpec extends PayeComponentSpec {
+
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup {
     val service = new CompletionCapacityService {
@@ -41,7 +44,7 @@ class CompletionCapacityServiceSpec extends PayeComponentSpec {
       val jobTitle = "Grand Vizier"
       val tstCapacity = CompletionCapacity(UserCapacity.other, "Grand Vizier")
 
-      when(mockPAYERegConnector.upsertCompletionCapacity(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockPAYERegConnector.upsertCompletionCapacity(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(jobTitle))
 
       await(service.saveCompletionCapacity("12345", tstCapacity)) mustBe DownstreamOutcome.Success

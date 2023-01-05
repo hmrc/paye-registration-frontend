@@ -27,6 +27,7 @@ import play.api.Application
 import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
+import play.api.test.FakeRequest
 import services.MetricsService
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient}
 import utils.PAYEFeatureSwitch
@@ -34,6 +35,8 @@ import utils.PAYEFeatureSwitch
 import scala.concurrent.ExecutionContext
 
 class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
+
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   val incorpInfoUri = "/incorpInfoUri"
 

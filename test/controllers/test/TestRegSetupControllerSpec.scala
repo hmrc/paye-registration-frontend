@@ -326,7 +326,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
           "businessContactDetails.mobileNumber" -> "testNumber",
           "businessContactDetails.phoneNumber" -> "testNumber"
         )
-        when(mockTestPayeRegConnector.addTestCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestPayeRegConnector.addTestCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
         AuthHelpers.submitAuthorisedWithCP(controller.submitRegSetupCompanyDetails, Fixtures.validCurrentProfile, request) { result =>
@@ -357,7 +357,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
           "businessContactDetails.mobileNumber" -> "testNumber",
           "businessContactDetails.phoneNumber" -> "testNumber"
         )
-        when(mockTestPayeRegConnector.addTestCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestPayeRegConnector.addTestCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
         AuthHelpers.submitAuthorisedWithCP(controller.submitRegSetupCompanyDetails, Fixtures.validCurrentProfile, request) { result =>
@@ -401,7 +401,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
           "correspondenceAddress.postCode" -> "testPostCode",
           "correspondenceAddress.country" -> "testCountry"
         )
-        when(mockTestPayeRegConnector.addTestPAYEContact(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestPayeRegConnector.addTestPAYEContact(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
         AuthHelpers.submitAuthorisedWithCP(controller.submitRegSetupPAYEContact, Fixtures.validCurrentProfile, request) { result =>
@@ -424,7 +424,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
           "correspondenceAddress.postCode" -> "testPostCode",
           "correspondenceAddress.country" -> "testCountry"
         )
-        when(mockTestPayeRegConnector.addTestPAYEContact(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestPayeRegConnector.addTestPAYEContact(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
         AuthHelpers.submitAuthorisedWithCP(controller.submitRegSetupPAYEContact, Fixtures.validCurrentProfile, request) { result =>

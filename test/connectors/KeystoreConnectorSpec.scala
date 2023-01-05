@@ -23,6 +23,7 @@ import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.Json
+import play.api.test.FakeRequest
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,6 +41,8 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
     override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   }
+
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   case class TestModel(test: String)
 

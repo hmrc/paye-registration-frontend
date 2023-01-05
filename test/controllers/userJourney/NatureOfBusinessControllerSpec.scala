@@ -68,7 +68,7 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
     }
 
     "return an OK when there is a nature of business in the microservice" in new Setup {
-      when(mockNatureOfBusinessService.getNatureOfBusiness(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockNatureOfBusinessService.getNatureOfBusiness(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(testNOB)))
 
       AuthHelpers.showAuthorisedWithCP(testController.natureOfBusiness, Fixtures.validCurrentProfile, fakeRequest()) {
@@ -78,7 +78,7 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
     }
 
     "return an OK when there is no nature of business in the microservice" in new Setup {
-      when(mockNatureOfBusinessService.getNatureOfBusiness(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockNatureOfBusinessService.getNatureOfBusiness(ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
       AuthHelpers.showAuthorisedWithCP(testController.natureOfBusiness, Fixtures.validCurrentProfile, fakeRequest()) {
@@ -120,7 +120,7 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
     }
 
     "show an error page when there is an error response from the microservice" in new Setup {
-      when(mockNatureOfBusinessService.saveNatureOfBusiness(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
+      when(mockNatureOfBusinessService.saveNatureOfBusiness(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(DownstreamOutcome.Failure))
       AuthHelpers.submitAuthorisedWithCP(testController.submitNatureOfBusiness(), Fixtures.validCurrentProfile, fakeRequest("POST").withFormUrlEncodedBody(
         "description" -> "testing"
       )) {
@@ -133,7 +133,7 @@ class NatureOfBusinessControllerSpec extends PayeComponentSpec with PayeFakedApp
       val request = fakeRequest("POST").withFormUrlEncodedBody(
         "description" -> "computing"
       )
-      when(mockNatureOfBusinessService.saveNatureOfBusiness(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier]()))
+      when(mockNatureOfBusinessService.saveNatureOfBusiness(ArgumentMatchers.any(), ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
       AuthHelpers.submitAuthorisedWithCP(testController.submitNatureOfBusiness, Fixtures.validCurrentProfile, request) {

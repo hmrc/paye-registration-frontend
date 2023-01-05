@@ -21,7 +21,7 @@ import connectors._
 import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.PAYEStatus
 import models.external.CurrentProfile
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.HeaderCarrier
@@ -77,7 +77,8 @@ class SummaryController @Inject()(val summaryService: SummaryService,
       }
   }
 
-  private[controllers] def invalidSubmissionGuard(profile: CurrentProfile)(f: => Future[Result])(implicit hc: HeaderCarrier) = {
+  private[controllers] def invalidSubmissionGuard(profile: CurrentProfile)(f: => Future[Result])
+                                                 (implicit hc: HeaderCarrier, request: Request[_]) = {
     payeRegistrationConnector.getRegistration(profile.registrationID) flatMap { regDoc =>
       regDoc.status match {
         case PAYEStatus.draft => f

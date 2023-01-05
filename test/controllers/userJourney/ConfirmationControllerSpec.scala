@@ -70,14 +70,14 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
   "showConfirmation" should {
     "display the confirmation page with an acknowledgement reference retrieved from backend with Inclusive content not shown" in new Setup {
 
-      when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("BRPY00000000001")))
       when(mockConfirmationService.determineIfInclusiveContentIsShown) thenReturn false
       when(mockConfirmationService.endDate) thenReturn LocalDate.parse("2022-05-17")
 
-      when(mockEmailService.sendAcknowledgementEmail(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockEmailService.sendAcknowledgementEmail(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(EmailSent))
-      when(mockS4LService.clear(any())(any())) thenReturn Future.successful(successHttpResponse)
+      when(mockS4LService.clear(any())(any(), ArgumentMatchers.any())) thenReturn Future.successful(successHttpResponse)
 
       when(authConnector.authorise(ArgumentMatchers.eq(EmptyPredicate), ArgumentMatchers.eq(Retrievals.name))(ArgumentMatchers.any(), ArgumentMatchers.any())
             ).thenReturn(Future.successful(Some(Name(Some("testFirstName"), None))))
@@ -96,14 +96,14 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "display the confirmation page with an acknowledgement reference retrieved from backend even if email fails and inclusive content is shown" in new Setup {
-      when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("BRPY00000000001")))
       when(mockConfirmationService.determineIfInclusiveContentIsShown) thenReturn true
       when(mockConfirmationService.endDate) thenReturn LocalDate.parse("2022-09-17")
 
-      when(mockEmailService.sendAcknowledgementEmail(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockEmailService.sendAcknowledgementEmail(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(EmailDifficulties))
-      when(mockS4LService.clear(any())(any())) thenReturn Future.successful(successHttpResponse)
+      when(mockS4LService.clear(any())(any(), ArgumentMatchers.any())) thenReturn Future.successful(successHttpResponse)
       when(authConnector.authorise(ArgumentMatchers.eq(EmptyPredicate), ArgumentMatchers.eq(Retrievals.name))(ArgumentMatchers.any(), ArgumentMatchers.any())
       ).thenReturn(Future.successful(Some(Name(Some("testFirstName"), None))))
 
@@ -118,7 +118,7 @@ class ConfirmationControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "show an error page when there is no acknowledgement reference returned from the backend" in new Setup {
-      when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.any())(ArgumentMatchers.any()))
+      when(mockConfirmationService.getAcknowledgementReference(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(None))
 
       showAuthorisedWithCP(controller.showConfirmation, Fixtures.validCurrentProfile, FakeRequest()) {

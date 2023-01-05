@@ -22,12 +22,15 @@ import models.view.Directors
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.Json
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.BadRequestException
 
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class IncorporationInformationServiceSpec extends PayeComponentSpec {
+
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup {
     val service = new IncorporationInformationService {
@@ -45,28 +48,28 @@ class IncorporationInformationServiceSpec extends PayeComponentSpec {
 
   "Calling getCompanyDetails" should {
     "return the Company Details from Incorportation Information service" in new Setup {
-      when(mockIncorpInfoConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockIncorpInfoConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(IncorpInfoSuccessResponse(Fixtures.validCoHoCompanyDetailsResponse)))
 
       await(service.getCompanyDetails("regId", "txId")) mustBe Fixtures.validCoHoCompanyDetailsResponse
     }
 
     "throw a BadRequestException when Bad Request response is returned from Incorporation Information" in new Setup {
-      when(mockIncorpInfoConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockIncorpInfoConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(IncorpInfoBadRequestResponse))
 
       a[BadRequestException] mustBe thrownBy(await(service.getCompanyDetails("regId", "txId")))
     }
 
     "throw a Exception when IncorpInfoNotFoundResponse is returned from Incorporation Information" in new Setup {
-      when(mockIncorpInfoConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockIncorpInfoConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(IncorpInfoNotFoundResponse))
 
       a[Exception] mustBe thrownBy(await(service.getCompanyDetails("regId", "txId")))
     }
 
     "throw a Exception when IncorpInfoErrorResponse is returned from Incorporation Information" in new Setup {
-      when(mockIncorpInfoConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockIncorpInfoConnector.getCoHoCompanyDetails(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(IncorpInfoErrorResponse(new Exception)))
 
       a[Exception] mustBe thrownBy(await(service.getCompanyDetails("regId", "txId")))
@@ -79,14 +82,14 @@ class IncorporationInformationServiceSpec extends PayeComponentSpec {
 
       val date = LocalDate.of(2018, 5, 5)
 
-      when(mockIncorpInfoConnector.getIncorporationInfoDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockIncorpInfoConnector.getIncorporationInfoDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(date)))
 
       await(service.getIncorporationDate("regId", "txId")) mustBe Some(date)
     }
 
     "throw an Exception when unexpected failed future occurs" in new Setup {
-      when(mockIncorpInfoConnector.getIncorporationInfoDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any()))
+      when(mockIncorpInfoConnector.getIncorporationInfoDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new Exception))
 
       a[Exception] mustBe thrownBy(await(service.getIncorporationDate("regId", "txId")))
@@ -95,12 +98,12 @@ class IncorporationInformationServiceSpec extends PayeComponentSpec {
 
   "Calling getDirectorDetails" should {
     "return the nothing when there are no directors details in the Officer list in CoHo API" in new Setup {
-      when(mockIncorpInfoConnector.getOfficerList(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(Fixtures.invalidOfficerList))
+      when(mockIncorpInfoConnector.getOfficerList(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(Fixtures.invalidOfficerList))
 
       await(service.getDirectorDetails("testTransactionId", "testRegId")) mustBe Directors(Map())
     }
     "return the directors details when there is Officer list in CoHo API" in new Setup {
-      when(mockIncorpInfoConnector.getOfficerList(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any())).thenReturn(Future.successful(Fixtures.validOfficerList))
+      when(mockIncorpInfoConnector.getOfficerList(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(Fixtures.validOfficerList))
 
       await(service.getDirectorDetails("testTransactionId", "testRegId")) mustBe Fixtures.validDirectorDetails
     }

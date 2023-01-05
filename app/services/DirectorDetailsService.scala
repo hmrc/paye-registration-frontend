@@ -21,6 +21,7 @@ import connectors.PAYERegistrationConnector
 import enums.{CacheKeys, DownstreamOutcome}
 import models.api.Director
 import models.view.{Directors, Ninos, UserEnteredNino}
+import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.RegistrationAllowlist
 
@@ -56,11 +57,11 @@ trait DirectorDetailsService extends RegistrationAllowlist {
   }
 
 
-  private def saveToS4L(viewData: Directors, regId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
+  private def saveToS4L(viewData: Directors, regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Directors] = {
     s4LService.saveForm[Directors](CacheKeys.DirectorDetails.toString, viewData, regId).map(_ => viewData)
   }
 
-  def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[Directors] = {
+  def getDirectorDetails(regId: String, transactionId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Directors] = {
     for {
       iiDirectors <- incorpInfoService.getDirectorDetails(txId = transactionId, regId)
       backendDirectors <- s4LService.fetchAndGet(CacheKeys.DirectorDetails.toString, regId) flatMap {
@@ -80,7 +81,7 @@ trait DirectorDetailsService extends RegistrationAllowlist {
     }
   }
 
-  private[services] def saveDirectorDetails(viewModel: Directors, regId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  private[services] def saveDirectorDetails(viewModel: Directors, regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
     viewToAPI(viewModel) fold(
       incompleteView =>
         saveToS4L(incompleteView, regId) map { _ => DownstreamOutcome.Success },
@@ -125,7 +126,7 @@ trait DirectorDetailsService extends RegistrationAllowlist {
     }.toList)
   }
 
-  def submitNinos(ninos: Ninos, regId: String, transactionId: String)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def submitNinos(ninos: Ninos, regId: String, transactionId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
     for {
       details <- getDirectorDetails(regId, transactionId)
       outcome <- saveDirectorDetails(details.copy(directorMapping = ninosToDirectorsMap(details, ninos)), regId)

@@ -23,6 +23,7 @@ import itutil.{CachingStub, IntegrationSpecBase, WiremockHelper}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 
 import java.util.UUID
@@ -57,6 +58,7 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
 
   val sId = UUID.randomUUID().toString
   implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sId)))
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   def currentProfile(regId: String) = CurrentProfile(
     registrationID = regId,

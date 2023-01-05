@@ -19,6 +19,7 @@ package services
 import connectors._
 import enums.{DownstreamOutcome, UserCapacity}
 import models.view.CompletionCapacity
+import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.Logging
 
@@ -34,13 +35,13 @@ trait CompletionCapacityService extends Logging {
   val businessRegistrationConnector: BusinessRegistrationConnector
   implicit val ec: ExecutionContext
 
-  def saveCompletionCapacity(regId: String, completionCapacity: CompletionCapacity)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def saveCompletionCapacity(regId: String, completionCapacity: CompletionCapacity)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
     payeRegConnector.upsertCompletionCapacity(regId, viewToAPI(completionCapacity)) map {
       _ => DownstreamOutcome.Success
     }
   }
 
-  def getCompletionCapacity(regId: String)(implicit hc: HeaderCarrier): Future[Option[CompletionCapacity]] = {
+  def getCompletionCapacity(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[CompletionCapacity]] = {
     payeRegConnector.getCompletionCapacity(regId) flatMap {
       case Some(prCC) => Future.successful(Some(apiToView(prCC)))
       case None => businessRegistrationConnector.retrieveCompletionCapacity flatMap {

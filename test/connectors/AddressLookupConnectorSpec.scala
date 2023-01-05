@@ -16,12 +16,12 @@
 
 package connectors
 
-import com.codahale.metrics.Counter
 import helpers.mocks.MockMetrics
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.{JsObject, Json}
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{ForbiddenException, NotFoundException}
 
 import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionContext}
@@ -30,6 +30,8 @@ import scala.concurrent.Future
 class AddressLookupConnectorSpec extends PayeComponentSpec with PayeFakedApp {
 
   val mockMetrics = new MockMetrics
+
+  implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup extends CodeMocks {
     val testConnector: AddressLookupConnector = new AddressLookupConnector(

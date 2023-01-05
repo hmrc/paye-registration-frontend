@@ -21,6 +21,7 @@ import connectors.BusinessRegistrationConnector
 import enums.CacheKeys
 import models.view.PAYEContactDetails
 import models.{Address, DigitalContactDetails}
+import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject
@@ -34,7 +35,7 @@ trait PrepopulationService {
   val s4LService: S4LService
   implicit val ec: ExecutionContext
 
-  def getBusinessContactDetails(regId: String)(implicit hc: HeaderCarrier): Future[Option[DigitalContactDetails]] = {
+  def getBusinessContactDetails(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[DigitalContactDetails]] = {
     busRegConnector.retrieveContactDetails(regId) map {
       case Some(contactDetails) => Some(DigitalContactDetails(contactDetails.digitalContactDetails.email,
         contactDetails.digitalContactDetails.mobileNumber,
@@ -43,23 +44,25 @@ trait PrepopulationService {
     }
   }
 
-  def getPAYEContactDetails(regId: String)(implicit hc: HeaderCarrier): Future[Option[PAYEContactDetails]] = {
+  def getPAYEContactDetails(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[PAYEContactDetails]] = {
     busRegConnector.retrieveContactDetails(regId)
   }
 
-  def saveContactDetails(regId: String, contactDetails: PAYEContactDetails)(implicit hc: HeaderCarrier): Future[PAYEContactDetails] = {
+  def saveContactDetails(regId: String, contactDetails: PAYEContactDetails)
+                        (implicit hc: HeaderCarrier, request: Request[_]): Future[PAYEContactDetails] = {
     busRegConnector.upsertContactDetails(regId, contactDetails) map (_ => contactDetails)
   }
 
-  def getTradingName(regId: String)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+  def getTradingName(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[String]] = {
     busRegConnector.retrieveTradingName(regId)
   }
 
-  def saveTradingName(regId: String, tradingName: String)(implicit hc: HeaderCarrier): Future[String] = {
+  def saveTradingName(regId: String, tradingName: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[String] = {
     busRegConnector.upsertTradingName(regId, tradingName)
   }
 
-  def getPrePopAddresses(regId: String, roAddress: Address, ppobAddress: Option[Address], otherAddress: Option[Address])(implicit hc: HeaderCarrier): Future[Map[Int, Address]] = {
+  def getPrePopAddresses(regId: String, roAddress: Address, ppobAddress: Option[Address], otherAddress: Option[Address])
+                        (implicit hc: HeaderCarrier, request: Request[_]): Future[Map[Int, Address]] = {
     busRegConnector.retrieveAddresses(regId) flatMap {
       addresses =>
         val filteredAddresses = filterAddresses(addresses, Seq(Some(roAddress), ppobAddress, otherAddress).flatten)
@@ -78,7 +81,7 @@ trait PrepopulationService {
     }.toMap
   }
 
-  def saveAddress(regId: String, address: Address)(implicit hc: HeaderCarrier): Future[Address] = {
+  def saveAddress(regId: String, address: Address)(implicit hc: HeaderCarrier, request: Request[_]): Future[Address] = {
     busRegConnector.upsertAddress(regId, address) map {
       _ => address
     }

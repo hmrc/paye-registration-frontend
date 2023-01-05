@@ -20,8 +20,10 @@ import config.AppConfig
 import connectors.httpParsers.AddressLookupHttpParsers
 import models.Address
 import models.external._
+import play.api.mvc.Request
 import services.MetricsService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import scala.reflect.runtime.universe._
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,17 +36,17 @@ class AddressLookupConnector @Inject()(metricsService: MetricsService,
 
   lazy val addressLookupFrontendUrl: String = appConfig.servicesConfig.baseUrl("address-lookup-frontend")
 
-  def getAddress(id: String)(implicit hc: HeaderCarrier): Future[Address] =
+  def getAddress(id: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Address] =
     withTimer {
       http.GET[Address](s"$addressLookupFrontendUrl/api/confirmed?id=$id")(addressHttpReads, hc, ec)
     }
 
-  def getOnRampUrl(alfJourneyConfig: AlfJourneyConfig)(implicit hc: HeaderCarrier): Future[String] =
+  def getOnRampUrl(alfJourneyConfig: AlfJourneyConfig)(implicit hc: HeaderCarrier, request: Request[_]): Future[String] =
     withTimer {
       http.POST[AlfJourneyConfig, String](s"$addressLookupFrontendUrl/api/v2/init", alfJourneyConfig)(AlfJourneyConfig.journeyConfigFormat, onRampHttpReads, hc, ec)
     }
 
-  private def withTimer[T](f: => Future[T]) = {
+  private def withTimer[T](f: => Future[T])(implicit request: Request[_], tag: TypeTag[T]): Future[T] = {
     metricsService.processDataResponseWithMetrics(
       metricsService.addressLookupSuccessResponseCounter,
       metricsService.addressLookupFailedResponseCounter,
