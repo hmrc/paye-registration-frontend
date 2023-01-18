@@ -56,6 +56,10 @@ trait Logging {
 
   def infoLog(message: => String)(implicit mc: MarkerContext, request: Request[_]): Unit = logger.info(s"$message (${identifiers(request)})")
   def warnLog(message: => String)(implicit mc: MarkerContext, request: Request[_]): Unit = logger.warn(s"$message (${identifiers(request)})")
+  def warnConnectorLog(message: => String)(implicit httpResponse: HttpResponse): Unit = logger.warn(s"$message (${identifiersFromHttpResponse(httpResponse)})")
+
   def errorLog(message: => String)(implicit mc: MarkerContext, request: Request[_]): Unit = logger.error(s"$message (${identifiers(request)})")
+
+  def errorConnectorLog(message: => String)(implicit httpResponse: HttpResponse): Unit = logger.error(s"$message (${identifiersFromHttpResponse(httpResponse)})")
 
 }

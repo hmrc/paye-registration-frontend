@@ -23,10 +23,13 @@ import models.{Address, EmailDifficulties, EmailSent}
 import models.external.EmailRequest
 import play.api.http.HeaderNames
 import play.api.libs.json.{JsResultException, Json}
+import play.api.mvc.Request
 import uk.gov.hmrc.http.{HttpResponse, NotFoundException, UpstreamErrorResponse}
 import utils.LogCapturingHelper
 
 class EmailHttpParsersSpec extends PayeComponentSpec with LogCapturingHelper {
+
+  implicit val request: Request[_] = fakeRequest()
 
   "EmailHttpParsers" when {
 

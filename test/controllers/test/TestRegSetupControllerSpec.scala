@@ -199,7 +199,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
           "payeContact.correspondenceAddress.country" -> "testCountry"
         )
 
-        when(mockTestPayeRegConnector.addPAYERegistration(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestPayeRegConnector.addPAYERegistration(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(DownstreamOutcome.Success))
 
         when(mockTestBusRegConnector.updateCompletionCapacity(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
@@ -271,7 +271,7 @@ class TestRegSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
           "payeContact.correspondenceAddress.postCode" -> "testPostCode",
           "payeContact.correspondenceAddress.country" -> "testCountry"
         )
-        when(mockTestPayeRegConnector.addPAYERegistration(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestPayeRegConnector.addPAYERegistration(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
         when(mockTestBusRegConnector.updateCompletionCapacity(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))

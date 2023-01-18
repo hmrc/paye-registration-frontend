@@ -22,11 +22,14 @@ import models.external.EmailRequest
 import org.mockito.{ArgumentCaptor, ArgumentMatchers}
 import org.mockito.ArgumentMatchers.{any, same}
 import org.mockito.Mockito.{times, verify, when}
+import play.api.mvc.Request
 import uk.gov.hmrc.http.{CorePost, HttpException, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class EmailConnectorSpec extends PayeComponentSpec {
+
+  implicit val request: Request[_] = fakeRequest()
 
   class Setup {
 

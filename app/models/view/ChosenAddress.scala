@@ -16,6 +16,7 @@
 
 package models.view
 
+import play.api.mvc.Request
 import utils.Logging
 
 class ConvertToPrepopAddressException(msg: String) extends Exception(msg)

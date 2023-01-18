@@ -21,16 +21,19 @@ import common.exceptions.DownstreamExceptions
 import connectors.{Cancelled, Success, TimedOut}
 import enums.{DownstreamOutcome, PAYEStatus}
 import helpers.PayeComponentSpec
-import models.{Address, DigitalContactDetails}
-import models.api.{CompanyDetails, Director, Employing, Employment, Name, PAYEContact, PAYERegistration, SICCode}
+import models.api._
 import models.view.PAYEContactDetails
+import models.{Address, DigitalContactDetails}
 import play.api.libs.json.{JsResultException, JsString, Json}
+import play.api.mvc.Request
 import uk.gov.hmrc.http.HttpResponse
 import utils.LogCapturingHelper
 
 import java.time.LocalDate
 
 class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturingHelper {
+
+  implicit val request: Request[_] = fakeRequest()
 
   val regId = "reg1234"
   val txId = "tx1234"

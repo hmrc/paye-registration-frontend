@@ -42,7 +42,7 @@ trait TestPAYERegConnector extends BaseConnector with PAYERegistrationHttpParser
   val http: CoreGet with CorePost
   val payeRegConnector: PAYERegistrationConnector
 
-  def addPAYERegistration(reg: PAYERegistrationAPI)(implicit hc: HeaderCarrier): Future[DownstreamOutcome.Value] = {
+  def addPAYERegistration(reg: PAYERegistrationAPI)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
     http.POST[PAYERegistrationAPI, DownstreamOutcome.Value](s"$payeRegUrl/paye-registration/test-only/update-registration/${reg.registrationID}", reg)(
       PAYERegistrationAPI.format, createNewRegistrationHttpReads(reg.registrationID, reg.transactionID), hc, ec
     )

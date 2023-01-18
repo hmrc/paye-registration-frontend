@@ -21,6 +21,7 @@ import common.exceptions.DownstreamExceptions
 import connectors.BaseConnector
 import models.external.CompanyRegistrationProfile
 import play.api.http.Status.{NOT_FOUND, OK}
+import play.api.mvc.Request
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
 import scala.util.{Failure, Success, Try}
@@ -30,35 +31,35 @@ trait CompanyRegistrationHttpParsers extends BaseHttpReads { _: BaseConnector =>
   override def unexpectedStatusException(url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
     new exceptions.DownstreamExceptions.CompanyRegistrationException(s"Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")
 
-  def companyRegistrationDetailsHttpReads(regId: String): HttpReads[CompanyRegistrationProfile] =
+  def companyRegistrationDetailsHttpReads(regId: String)(implicit request: Request[_]): HttpReads[CompanyRegistrationProfile] =
     (_: String, url: String, response: HttpResponse) =>
       response.status match {
         case OK =>
           Try(response.json.as[CompanyRegistrationProfile](CompanyRegistrationProfile.companyRegistrationReads)) match {
             case Success(profile) => profile
             case Failure(e: DownstreamExceptions.ConfirmationRefsNotFoundException) =>
-              logger.error(s"[companyRegistrationDetailsHttpReads] Received an error when expecting a Company Registration document for reg id: $regId could not find confirmation references (has user completed Incorp/CT?)")
+              errorLog(s"[companyRegistrationDetailsHttpReads] Received an error when expecting a Company Registration document for reg id: $regId could not find confirmation references (has user completed Incorp/CT?)")
               throw e
             case Failure(e) =>
-              logger.error(s"[companyRegistrationDetailsHttpReads] JSON returned from company-registration could not be parsed to CompanyRegistrationProfile model for reg id: $regId")
+              errorLog(s"[companyRegistrationDetailsHttpReads] JSON returned from company-registration could not be parsed to CompanyRegistrationProfile model for reg id: $regId")
               throw e
           }
         case status =>
           unexpectedStatusHandling()("companyRegistrationDetailsHttpReads", url, status, Some(regId))
       }
 
-  def verifiedEmailHttpReads(regId: String): HttpReads[Option[String]] =
+  def verifiedEmailHttpReads(regId: String)(implicit request: Request[_]): HttpReads[Option[String]] =
     (_: String, url: String, response: HttpResponse) =>
       response.status match {
         case OK =>
           (response.json \ "address").asOpt[String] match {
             case Some(address) => Some(address)
             case None =>
-              logger.info(s"[verifiedEmailHttpReads] A response for the verified email was returned but did not contain the 'address' object for regId: $regId")
+              infoLog(s"[verifiedEmailHttpReads] A response for the verified email was returned but did not contain the 'address' object for regId: $regId")
               None
           }
         case NOT_FOUND =>
-          logger.info(s"[verifiedEmailHttpReads] A call was made to company reg and a NotFound response was returned for regId: $regId")
+          infoLog(s"[verifiedEmailHttpReads] A call was made to company reg and a NotFound response was returned for regId: $regId")
           None
         case status =>
           unexpectedStatusHandling(Some(None))("verifiedEmailHttpReads", url, status, Some(regId))

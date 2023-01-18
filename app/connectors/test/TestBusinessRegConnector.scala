@@ -21,6 +21,7 @@ import connectors.BaseConnector
 import connectors.httpParsers.BusinessRegistrationHttpParsers
 import models.external.{BusinessProfile, BusinessRegistrationRequest}
 import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.Request
 import uk.gov.hmrc.http.{CorePost, HeaderCarrier, HttpClient, HttpResponse}
 
 import javax.inject.Inject
@@ -36,7 +37,7 @@ trait TestBusinessRegConnector extends BaseConnector with BusinessRegistrationHt
   val businessRegUrl: String
   val http: CorePost
 
-  def createBusinessProfileEntry(implicit hc: HeaderCarrier): Future[BusinessProfile] =
+  def createBusinessProfileEntry(implicit hc: HeaderCarrier, request: Request[_]): Future[BusinessProfile] =
     http.POST[BusinessRegistrationRequest, BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration", BusinessRegistrationRequest("ENG"))(
       BusinessRegistrationRequest.formats, businessProfileHttpReads, hc, ec
     )

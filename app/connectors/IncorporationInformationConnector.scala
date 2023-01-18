@@ -77,7 +77,7 @@ class IncorporationInformationConnector @Inject()(val metricsService: MetricsSer
         response
       } recover {
         case ex: Exception =>
-          logger.error(s"[getCoHoCompanyDetails] Received an error when expecting company details for regId: $regId / TX-ID: $transactionId error: ${ex.getMessage}")
+          errorLog(s"[getCoHoCompanyDetails] Received an error when expecting company details for regId: $regId / TX-ID: $transactionId error: ${ex.getMessage}")
           incorpInfoTimer.stop()
           failedCounter.inc()
           IncorpInfoErrorResponse(ex)

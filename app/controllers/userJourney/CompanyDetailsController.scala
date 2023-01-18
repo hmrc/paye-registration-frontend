@@ -197,11 +197,11 @@ class CompanyDetailsController @Inject()(val s4LService: S4LService,
         res <- companyDetailsService.submitPPOBAddr(prepopAddress, regId, txId)
       } yield res) recover {
         case e: S4LFetchException =>
-          logger.warn(s"[submitPPOBAddressChoice] Error while saving PPOB Address with a PrepopAddress: ${e.getMessage}")
+          warnLog(s"[submitPPOBAddressChoice] Error while saving PPOB Address with a PrepopAddress: ${e.getMessage}")
           DownstreamOutcome.Failure
       }
       case CorrespondenceAddress =>
-        logger.warn("[submitPPOBAddressChoice] Correspondence address returned as selected address in PPOB Address page")
+        warnLog("[submitPPOBAddressChoice] Correspondence address returned as selected address in PPOB Address page")
         Future.successful(DownstreamOutcome.Failure)
     }
   }

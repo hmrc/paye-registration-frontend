@@ -20,6 +20,7 @@ import config.AppConfig
 import connectors.httpParsers.EmailHttpParsers
 import models.external.EmailRequest
 import models.{EmailDifficulties, EmailResponse}
+import play.api.mvc.Request
 import uk.gov.hmrc.http._
 
 import javax.inject.Inject
@@ -29,11 +30,13 @@ class EmailConnector @Inject()(val http: HttpClient, appConfig: AppConfig)(impli
 
   val sendEmailURL: String = appConfig.servicesConfig.getString("microservice.services.email.sendAnEmailURL")
 
-  def requestEmailToBeSent(emailRequest: EmailRequest)(implicit hc: HeaderCarrier): Future[EmailResponse] = {
+  def requestEmailToBeSent(emailRequest: EmailRequest)(implicit hc: HeaderCarrier, request: Request[_]): Future[EmailResponse] = {
 
     http.POST[EmailRequest, EmailResponse](sendEmailURL, emailRequest)(EmailRequest.format, requestEmailToBeSentHttpReads(emailRequest), hc, ec) recover {
       case e: Exception =>
-        logger.error(s"[requestEmailToBeSent] an unexpected error has occurred when attemping to request an email to be sent via the email service with templateId: ${emailRequest.templateId} with details: ${e.getMessage}")
+        errorLog(s"[requestEmailToBeSent] " +
+          s"an unexpected error has occurred when attemping to request an email to be sent via the email service " +
+          s"with templateId: ${emailRequest.templateId} with details: ${e.getMessage}")
         EmailDifficulties
     }
   }

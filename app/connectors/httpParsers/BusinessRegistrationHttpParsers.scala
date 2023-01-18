@@ -22,6 +22,7 @@ import models.Address
 import models.external.BusinessProfile
 import models.view.{CompanyDetails, PAYEContactDetails}
 import play.api.libs.json.{Reads, __}
+import play.api.mvc.Request
 import uk.gov.hmrc.http.HttpReads
 
 trait BusinessRegistrationHttpParsers extends BaseHttpReads { _: BaseConnector =>
@@ -29,36 +30,36 @@ trait BusinessRegistrationHttpParsers extends BaseHttpReads { _: BaseConnector =
   override def unexpectedStatusException(url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
     new DownstreamExceptions.BusinessRegistrationException(s"Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")
 
-  val businessProfileHttpReads: HttpReads[BusinessProfile] =
+  def businessProfileHttpReads()(implicit request: Request[_]): HttpReads[BusinessProfile] =
     httpReads("businessProfileHttpReads")
 
-  val retrieveCompletionCapacityHttpReads: HttpReads[Option[String]] = {
+  def retrieveCompletionCapacityHttpReads()(implicit request: Request[_]): HttpReads[Option[String]] = {
     implicit val reads = (__ \ "completionCapacity").read[String]
     optionHttpReads("retrieveCompletionCapacityHttpReads")
   }
 
-  def retrieveTradingNameHttpReads(regId: String): HttpReads[Option[String]] = {
+  def retrieveTradingNameHttpReads(regId: String)(implicit request: Request[_]): HttpReads[Option[String]] = {
     implicit val reads = CompanyDetails.tradingNameApiPrePopReads
     optionHttpReads("retrieveTradingNameHttpReads", Some(regId), logInfoMsg = true, defaultToNoneOnError = true)
   }
 
-  def upsertTradingNameHttpReads(regId: String, tradingName: String): HttpReads[String] =
+  def upsertTradingNameHttpReads(regId: String, tradingName: String)(implicit request: Request[_]): HttpReads[String] =
     basicUpsertReads("upsertTradingNameHttpReads", tradingName, Some(regId))
 
-  def retrieveContactDetailsHttpReads(regId: String): HttpReads[Option[PAYEContactDetails]] = {
+  def retrieveContactDetailsHttpReads(regId: String)(implicit request: Request[_]): HttpReads[Option[PAYEContactDetails]] = {
     implicit val reads = PAYEContactDetails.prepopReads
     optionHttpReads("retrieveContactDetailsHttpReads", Some(regId), defaultToNoneOnError = true)
   }
 
-  def upsertContactDetailsHttpReads(regId: String, contactDetails: PAYEContactDetails): HttpReads[PAYEContactDetails] =
+  def upsertContactDetailsHttpReads(regId: String, contactDetails: PAYEContactDetails)(implicit request: Request[_]): HttpReads[PAYEContactDetails] =
     basicUpsertReads("upsertContactDetailsHttpReads", contactDetails, Some(regId))
 
-  def retrieveAddressesHttpReads(regId: String): HttpReads[Seq[Address]] = {
+  def retrieveAddressesHttpReads(regId: String)(implicit request: Request[_]): HttpReads[Seq[Address]] = {
     implicit val reads = (__ \ "addresses").read[Seq[Address]](Reads.seq(Address.prePopReads))
-    seqHttpReads("retrieveAddressesHttpReads", Some(regId), defaultToEmptyOnError = true)(reads, manifest[Address])
+    seqHttpReads("retrieveAddressesHttpReads", Some(regId), defaultToEmptyOnError = true)(reads, manifest[Address], request)
   }
 
-  def upsertAddressHttpReads(regId: String, address: Address): HttpReads[Address] =
+  def upsertAddressHttpReads(regId: String, address: Address)(implicit request: Request[_]): HttpReads[Address] =
     basicUpsertReads("upsertAddressHttpReads", address, Some(regId))
 }
 
