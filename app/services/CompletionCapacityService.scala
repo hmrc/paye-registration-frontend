@@ -50,11 +50,11 @@ trait CompletionCapacityService extends Logging {
             _ => Future.successful(Some(apiToView(brCC)))
           }
         case None =>
-          logger.info(s"[getCompletionCapacity] BR document was found for regId $regId but it contained no completion capacity")
+          infoLog(s"[getCompletionCapacity] BR document was found for regId $regId but it contained no completion capacity")
           Future.successful(None)
       } recover {
         case e: Throwable =>
-          logger.warn(s"[getCompletionCapacity] No document was found in business registration for regId $regId: reason ${e.getMessage}")
+          warnLog(s"[getCompletionCapacity] No document was found in business registration for regId $regId: reason ${e.getMessage}")
           None
       }
     }

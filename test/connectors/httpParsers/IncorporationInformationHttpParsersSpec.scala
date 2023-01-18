@@ -25,12 +25,15 @@ import models.Address
 import models.api.Name
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import play.api.libs.json.{JsResultException, Json}
+import play.api.mvc.Request
 import uk.gov.hmrc.http.HttpResponse
 import utils.LogCapturingHelper
 
 import java.time.LocalDate
 
 class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with LogCapturingHelper {
+
+  implicit val request: Request[_] = fakeRequest()
 
   val regId: String = "reg1234"
   val transactionId: String = "txn1234"

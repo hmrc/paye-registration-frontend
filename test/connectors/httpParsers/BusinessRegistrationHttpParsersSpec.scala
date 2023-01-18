@@ -25,10 +25,13 @@ import models.external.BusinessProfile
 import models.view.PAYEContactDetails
 import play.api.http.HeaderNames
 import play.api.libs.json.{JsResultException, Json}
+import play.api.mvc.Request
 import uk.gov.hmrc.http.{HttpResponse, NotFoundException, UpstreamErrorResponse}
 import utils.LogCapturingHelper
 
 class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturingHelper {
+
+  implicit val request: Request[_] = fakeRequest()
 
   val regId = "reg1234"
 

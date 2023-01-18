@@ -43,12 +43,12 @@ trait SessionProfile extends InternalExceptions with Logging {
               payeRegistrationService.handleIIResponse(cp.companyTaxRegistration.transactionId, res.get) map {
                 case RegistrationDeletion.success => Redirect(controllers.userJourney.routes.SignInOutController.incorporationRejected)
                 case _ =>
-                  logger.warn(s"[ifInflightUserChecksElseRedirectTo] Registration txId: ${cp.companyTaxRegistration.transactionId} - regId: ${cp.registrationID} " +
+                  warnLog(s"[ifInflightUserChecksElseRedirectTo] Registration txId: ${cp.companyTaxRegistration.transactionId} - regId: ${cp.registrationID} " +
                     s"incorporation is rejected but the cleanup failed probably due to the wrong status of the paye registration")
                   Redirect(controllers.userJourney.routes.SignInOutController.postSignIn)
               } recover {
                 case err =>
-                  logger.error(s"[ifInflightUserChecksElseRedirectTo] Registration txId: ${cp.companyTaxRegistration.transactionId} - regId: ${cp.registrationID} " +
+                  errorLog(s"[ifInflightUserChecksElseRedirectTo] Registration txId: ${cp.companyTaxRegistration.transactionId} - regId: ${cp.registrationID} " +
                     s"Incorporation is rejected but handleIIResponse threw an unexpected exception whilst trying to cleanup with message: ${err.getMessage}")
                   Redirect(controllers.userJourney.routes.SignInOutController.incorporationRejected)
               }

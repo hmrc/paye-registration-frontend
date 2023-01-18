@@ -46,10 +46,10 @@ abstract class PayeBaseController(mcc: MessagesControllerComponents) extends Fro
       f(request)
     } recover {
       case e: InsufficientConfidenceLevel =>
-        logger.warn(s"[isAuthorised] unauthenticated user attempting to access ${request.path} with insufficient confidence level redirecting to login")
+        warnLog(s"[isAuthorised] unauthenticated user attempting to access ${request.path} with insufficient confidence level redirecting to login")
         redirectToLogin
       case e: AuthorisationException =>
-        logger.info(s"[isAuthorised] unauthenticated user attempting to access ${request.path} redirecting to login : ${e.getMessage}")
+        infoLog(s"[isAuthorised] unauthenticated user attempting to access ${request.path} redirecting to login : ${e.getMessage}")
         redirectToLogin
     }
   }
@@ -59,10 +59,10 @@ abstract class PayeBaseController(mcc: MessagesControllerComponents) extends Fro
       withCurrentProfile(profile => f(request)(profile))
     } recover {
       case _: InsufficientConfidenceLevel =>
-        logger.warn(s"[isAuthorisedWithProfile] unauthenticated user attempting to access ${request.path} with insufficient confidence level redirecting to login")
+        warnLog(s"[isAuthorisedWithProfile] unauthenticated user attempting to access ${request.path} with insufficient confidence level redirecting to login")
         redirectToLogin
       case e: AuthorisationException =>
-        logger.info(s"[isAuthorisedWithProfile] unauthenticated user attempting to access ${request.path} redirecting to login: ${e.getMessage}")
+        infoLog(s"[isAuthorisedWithProfile] unauthenticated user attempting to access ${request.path} redirecting to login: ${e.getMessage}")
         redirectToLogin
     }
   }
@@ -75,10 +75,10 @@ abstract class PayeBaseController(mcc: MessagesControllerComponents) extends Fro
       )
     } recover {
       case _: InsufficientConfidenceLevel =>
-        logger.warn(s"[isAuthorisedWithProfileNoSubmissionCheck] unauthenticated user attempting to access ${request.path} with insufficient confidence level redirecting to loginUrl")
+        warnLog(s"[isAuthorisedWithProfileNoSubmissionCheck] unauthenticated user attempting to access ${request.path} with insufficient confidence level redirecting to loginUrl")
         redirectToLogin
       case e: AuthorisationException =>
-        logger.info(s"[isAuthorisedWithProfileNoSubmissionCheck] unauthenticated user attempting to access ${request.path} redirecting to login: ${e.getMessage}")
+        infoLog(s"[isAuthorisedWithProfileNoSubmissionCheck] unauthenticated user attempting to access ${request.path} redirecting to login: ${e.getMessage}")
         redirectToLogin
     }
   }
@@ -88,18 +88,18 @@ abstract class PayeBaseController(mcc: MessagesControllerComponents) extends Fro
       if (aG.contains(Organisation)) {
         f(request)
       } else {
-        logger.warn(s"[isAuthorisedAndIsOrg] User attempting to access ${request.path} doesn't have org affinity redirecting to OTRS")
+        warnLog(s"[isAuthorisedAndIsOrg] User attempting to access ${request.path} doesn't have org affinity redirecting to OTRS")
         Future(Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes"))
       }
     } recover {
       case _: InsufficientConfidenceLevel =>
-        logger.warn(s"[isAuthorisedAndIsOrg] unauthenticated user attempting to access ${request.path} with insufficient confidence level redirecting to login")
+        warnLog(s"[isAuthorisedAndIsOrg] unauthenticated user attempting to access ${request.path} with insufficient confidence level redirecting to login")
         redirectToLogin
       case e: UnsupportedAffinityGroup =>
-        logger.warn(s"[isAuthorisedAndIsOrg] unauthenticated user attempting to access ${request.path} with incorrect affinity group redirecting to login")
+        warnLog(s"[isAuthorisedAndIsOrg] unauthenticated user attempting to access ${request.path} with incorrect affinity group redirecting to login")
         redirectToLogin
       case e: AuthorisationException =>
-        logger.info(s"[isAuthorisedAndIsOrg] unauthenticated user attempting to access ${request.path} redirecting to login : ${e.getMessage}")
+        infoLog(s"[isAuthorisedAndIsOrg] unauthenticated user attempting to access ${request.path} redirecting to login : ${e.getMessage}")
         redirectToLogin
     }
   }
@@ -110,14 +110,14 @@ abstract class PayeBaseController(mcc: MessagesControllerComponents) extends Fro
         val auditingInformation = AuditingInformation(exId, creds.providerId)
         withCurrentProfile(profile => f(request)(profile)(auditingInformation))
       case _ =>
-        logger.warn(s"[isAuthorisedWithProfileAndAuditing] User attempting to access ${request.path} doesn't have either externalId or credentials redirecting to $redirectToPostSign")
+        warnLog(s"[isAuthorisedWithProfileAndAuditing] User attempting to access ${request.path} doesn't have either externalId or credentials redirecting to $redirectToPostSign")
         Future.successful(redirectToPostSign)
     } recover {
       case _: InsufficientConfidenceLevel =>
-        logger.warn(s"[isAuthorisedWithProfileAndAuditing] unauthenticated user attempting to access ${request.path} with insufficient confidence level redirecting to login")
+        warnLog(s"[isAuthorisedWithProfileAndAuditing] unauthenticated user attempting to access ${request.path} with insufficient confidence level redirecting to login")
         redirectToLogin
       case e: AuthorisationException =>
-        logger.info(s"[isAuthorisedWithProfileAndAuditing] unauthenticated user attempting to access ${request.path} redirecting to login: ${e.getMessage}")
+        infoLog(s"[isAuthorisedWithProfileAndAuditing] unauthenticated user attempting to access ${request.path} redirecting to login: ${e.getMessage}")
         redirectToLogin
     }
   }

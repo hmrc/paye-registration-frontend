@@ -105,7 +105,7 @@ class PAYEContactService @Inject()(val payeRegConnector: PAYERegistrationConnect
           for {
             _ <- auditService.auditPAYEContactDetails(regId, newViewData, currentView.contactDetails)
             _ <- prepopService.saveContactDetails(regId, newViewData) map {
-              _ => logger.info(s"[submitPayeContactDetails] Successfully saved Contact Details to Prepopulation for regId: $regId")
+              _ => infoLog(s"[submitPayeContactDetails] Successfully saved Contact Details to Prepopulation for regId: $regId")
             }
           } yield currentView
         case currentView =>

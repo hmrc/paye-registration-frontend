@@ -18,20 +18,22 @@ package connectors.httpParsers
 
 import models.external.EmailRequest
 import models.{EmailDifficulties, EmailResponse, EmailSent}
+import play.api.mvc.Request
 import uk.gov.hmrc.http.HttpReads.is2xx
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import utils.Logging
 
 trait EmailHttpParsers extends Logging {
 
-  def requestEmailToBeSentHttpReads(emailRequest: EmailRequest): HttpReads[EmailResponse] = (_: String, _: String, response: HttpResponse) => response.status match {
-    case status if is2xx(status) =>
-      logger.info(s"[requestEmailToBeSent] Email has been sent successfully for template ${emailRequest.templateId}")
-      EmailSent
-    case status =>
-      logger.error(s"[requestEmailToBeSent] an unexpected error has occurred when attemping to request an email to be sent via the email service with templateId: ${emailRequest.templateId} with status: '$status'")
-      EmailDifficulties
-  }
+  def requestEmailToBeSentHttpReads(emailRequest: EmailRequest)(implicit request: Request[_]): HttpReads[EmailResponse] =
+    (_: String, _: String, response: HttpResponse) => response.status match {
+      case status if is2xx(status) =>
+        infoLog(s"[requestEmailToBeSent] Email has been sent successfully for template ${emailRequest.templateId}")
+        EmailSent
+      case status =>
+        errorLog(s"[requestEmailToBeSent] an unexpected error has occurred when attemping to request an email to be sent via the email service with templateId: ${emailRequest.templateId} with status: '$status'")
+        EmailDifficulties
+    }
 }
 
 object EmailHttpParsers extends EmailHttpParsers

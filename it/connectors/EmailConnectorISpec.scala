@@ -24,11 +24,15 @@ import play.api.Application
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.Request
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
 class EmailConnectorISpec extends IntegrationSpecBase {
 
   implicit val hc = HeaderCarrier()
+
+  implicit val request: Request[_] = FakeRequest()
 
   val regId = "12345"
 

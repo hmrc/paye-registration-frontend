@@ -21,10 +21,13 @@ import common.exceptions.DownstreamExceptions
 import helpers.PayeComponentSpec
 import models.external.CompanyRegistrationProfile
 import play.api.libs.json.{JsResultException, Json}
-import uk.gov.hmrc.http.{BadRequestException, HttpResponse, NotFoundException, UpstreamErrorResponse}
+import play.api.mvc.Request
+import uk.gov.hmrc.http.HttpResponse
 import utils.LogCapturingHelper
 
 class CompanyRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturingHelper {
+
+  implicit val request: Request[_] = fakeRequest()
 
   val regId = "reg12345"
 

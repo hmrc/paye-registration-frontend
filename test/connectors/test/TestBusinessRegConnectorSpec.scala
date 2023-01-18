@@ -21,11 +21,15 @@ import models.external.BusinessProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.JsValue
+import play.api.mvc.Request
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestBusinessRegConnectorSpec extends PayeComponentSpec {
+
+  implicit val request: Request[_] = FakeRequest()
 
   class Setup extends CodeMocks {
     val testConnector = new TestBusinessRegConnector {

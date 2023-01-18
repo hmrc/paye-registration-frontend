@@ -71,7 +71,7 @@ class CurrentProfileControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.failed(new NotFoundException("")))
 
-        when(mockTestBusRegConnector.createBusinessProfileEntry(ArgumentMatchers.any[HeaderCarrier]()))
+        when(mockTestBusRegConnector.createBusinessProfileEntry(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(testProfile))
 
         when(mockKeystoreConnector.cache[CurrentProfile](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[CurrentProfile]())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))

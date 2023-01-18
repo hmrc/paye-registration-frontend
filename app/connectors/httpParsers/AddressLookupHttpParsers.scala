@@ -35,21 +35,21 @@ trait AddressLookupHttpParsers extends BaseHttpReads { _ : BaseConnector =>
       Try(response.json.as[Address](Address.addressLookupReads)) match {
         case Success(address) => address
         case Failure(e) =>
-          logger.error("[addressHttpReads] Address returned from ALF could not be parsed to Address model")
+          errorConnectorLog("[addressHttpReads] Address returned from ALF could not be parsed to Address model")(response)
           throw e
       }
     case status =>
-      unexpectedStatusHandling()("addressHttpReads", url, status)
+      unexpectedStatusConnectorHandling()("addressHttpReads", url, status)(response)
   }
 
   val onRampHttpReads: HttpReads[String] = (_: String, url: String, response: HttpResponse) => response.status match {
     case status if is2xx(status) =>
       response.header(HeaderNames.LOCATION).getOrElse {
-        logger.error("[onRampHttpReads] Location header not set in AddressLookup response")
+        errorConnectorLog("[onRampHttpReads] Location header not set in AddressLookup response")(response)
         throw new ALFLocationHeaderNotSetException
       }
     case status =>
-      unexpectedStatusHandling()("onRampHttpReads", url, status)
+      unexpectedStatusConnectorHandling()("onRampHttpReads", url, status)(response)
   }
 }
 
