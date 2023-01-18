@@ -76,7 +76,9 @@ class RegistrationController @Inject()(val keystoreConnector: KeystoreConnector,
           }
           Ok
       } recover {
-        case e: Exception => InternalServerError
+        case e: Exception =>
+          errorLog(s"[companyIncorporation] failed to handle II response. Error: $e")
+          InternalServerError
       }
       case _ =>
         errorLog(s"[companyIncorporation] Incorp Status or transaction Id not received or invalid from II for txId $txId")

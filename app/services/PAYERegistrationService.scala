@@ -22,6 +22,7 @@ import models.external.CurrentProfile
 import play.api.http.Status._
 import play.api.mvc.Request
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, UpstreamErrorResponse}
+import utils.Logging
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,7 +32,7 @@ class PAYERegistrationServiceImpl @Inject()(val payeRegistrationConnector: PAYER
                                             val currentProfileService: CurrentProfileService,
                                             val s4LService: S4LService)(implicit val ec: ExecutionContext) extends PAYERegistrationService
 
-trait PAYERegistrationService {
+trait PAYERegistrationService extends Logging {
 
   val payeRegistrationConnector: PAYERegistrationConnector
   val keyStoreConnector: KeystoreConnector
@@ -55,16 +56,26 @@ trait PAYERegistrationService {
 
   def handleIIResponse(txId: String, status: IncorporationStatus.Value)
                       (implicit hc: HeaderCarrier, request: Request[_]): Future[RegistrationDeletion.Value] = {
+    infoLog(s"[handleIIResponse] txId: $txId incorporation status: $status . Attempting to handle II response")
     currentProfileService.updateCurrentProfileWithIncorpStatus(txId, status).flatMap { oRegIdFromCp =>
       if (status == IncorporationStatus.rejected) {
         oRegIdFromCp.fold(payeRegistrationConnector.getRegistrationId(txId))(Future.successful) flatMap { regId =>
+          infoLog(s"[handleIIResponse] txId: $txId incorporation status: $status . paye regId found: $regId")
           tearDownUserData(regId, txId)
         } recoverWith {
-          case e: NotFoundException => Future.successful(RegistrationDeletion.notfound)
-          case e: UpstreamErrorResponse if e.statusCode == NOT_FOUND => Future.successful(RegistrationDeletion.notfound)
+          case e: NotFoundException =>
+            warnLog(s"[handleIIResponse] txId: $txId incorporation status: $status" +
+              s"\n NotFoundException: failed to retrieve registration-id from paye-registration")
+            Future.successful(RegistrationDeletion.notfound)
+          case e: UpstreamErrorResponse if e.statusCode == NOT_FOUND =>
+            warnLog(s"[handleIIResponse] txId: $txId incorporation status: $status" +
+              s"\n UpstreamErrorResponse NOT_FOUND: failed to retrieve registration-id from paye-registration")
+            Future.successful(RegistrationDeletion.notfound)
         }
       }
       else {
+        warnLog(s"[handleIIResponse] txId: $txId incorporation status: $status" +
+          s"\n oRegIdFromCp found: $oRegIdFromCp , ${RegistrationDeletion.invalidStatus} returned")
         Future.successful(RegistrationDeletion.invalidStatus)
       }
     }
