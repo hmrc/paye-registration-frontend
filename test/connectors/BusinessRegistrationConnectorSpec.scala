@@ -28,7 +28,7 @@ import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-
+import common.exceptions.DownstreamExceptions.CurrentProfileNotFoundException
 import scala.concurrent.Future
 
 class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
@@ -52,10 +52,17 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
 
   "retrieveCurrentProfile" should {
     "return a a CurrentProfile response if one is found in business registration micro-service" in new Setup {
-      when(mockHttpClient.GET[BusinessProfile](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
-        .thenReturn(Future(Fixtures.validBusinessRegistrationResponse))
+      when(mockHttpClient.GET[Option[BusinessProfile]](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some(Fixtures.validBusinessRegistrationResponse)))
 
       await(testConnector.retrieveCurrentProfile) mustBe Fixtures.validBusinessRegistrationResponse
+    }
+
+    "return an CurrentProfileNotFoundException response when an unspecified error has occurred" in new Setup {
+      when(mockHttpClient.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.failed(new CurrentProfileNotFoundException))
+
+      intercept[CurrentProfileNotFoundException](await(testConnector.retrieveCurrentProfile))
     }
 
     "return an Exception response when an unspecified error has occurred" in new Setup {

@@ -50,17 +50,16 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
         "response is OK and JSON is valid" must {
 
           "return the Business Profile" in {
-
-            BusinessRegistrationHttpParsers.businessProfileHttpReads.read("", "", HttpResponse(OK, json = businessProfileJson, Map())) mustBe businessProfile
+            BusinessRegistrationHttpParsers.businessProfileHttpReads.read("", "", HttpResponse(OK, json = businessProfileJson, Map())) mustBe Some(businessProfile)
           }
         }
 
         "response is OK and JSON is malformed" must {
 
-          "return a JsResultException and log an error message" in {
+          "return a None and log an error message" in {
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
-              intercept[JsResultException](BusinessRegistrationHttpParsers.businessProfileHttpReads.read("", "", HttpResponse(OK, json = Json.obj(), Map())))
+              BusinessRegistrationHttpParsers.businessProfileHttpReads.read("", "", HttpResponse(OK, json = Json.obj(), Map())) mustBe None
               logs.containsMsg(Level.ERROR, "[businessProfileHttpReads] JSON returned could not be parsed to models.external.BusinessProfile model")
             }
           }

@@ -25,7 +25,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.{Logging, RegistrationAllowlist}
-
+import common.exceptions
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
