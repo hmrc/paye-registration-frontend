@@ -16,7 +16,7 @@
 
 package controllers.userJourney
 
-import common.exceptions.DownstreamExceptions.ConfirmationRefsNotFoundException
+import common.exceptions.DownstreamExceptions.{ConfirmationRefsNotFoundException, CurrentProfileNotFoundException}
 import config.AppConfig
 import connectors._
 import controllers.{AuthRedirectUrls, PayeBaseController}
@@ -101,6 +101,7 @@ class PayeStartController @Inject()(val currentProfileService: CurrentProfileSer
     } recover {
       case _: NotFoundException => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
       case _: ConfirmationRefsNotFoundException => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
+      case _: CurrentProfileNotFoundException => NotFound(restart())
       case _ =>
         warnLog(s"[checkAndStoreCurrentProfile] failed to checkAndStoreCurrentProfile")
         InternalServerError(restart())

@@ -16,6 +16,7 @@
 
 package connectors
 
+import common.exceptions.DownstreamExceptions.CurrentProfileNotFoundException
 import config.AppConfig
 import connectors.httpParsers.BusinessRegistrationHttpParsers
 import models.Address
@@ -38,7 +39,8 @@ class BusinessRegistrationConnector @Inject()(val metricsService: MetricsService
     infoLog("[retrieveCurrentProfile] attempting to retrieveCurrentProfile")
     withTimer {
       withRecovery()("retrieveCurrentProfile") {
-        http.GET[BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration")(businessProfileHttpReads, hc, ec)
+        http.GET[Option[BusinessProfile]](s"$businessRegUrl/business-registration/business-tax-registration")(businessProfileHttpReads, hc, ec)
+          .map(_.getOrElse(throw new CurrentProfileNotFoundException))
       }
     }
   }
