@@ -22,12 +22,17 @@ import enums.{DownstreamOutcome, PAYEStatus, RegistrationDeletion}
 import models.api._
 import play.api.http.Status._
 import play.api.mvc.Request
-import uk.gov.hmrc.http.{HttpReads, HttpResponse}
+import uk.gov.hmrc.http.{HttpReads, HttpResponse, NotFoundException}
 
 trait PAYERegistrationHttpParsers extends BaseHttpReads { _: BaseConnector =>
 
-  override def unexpectedStatusException(url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
-    new exceptions.DownstreamExceptions.PAYEMicroserviceException(s"Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")
+  override def unexpectedStatusException(functionName: String, url: String, status: Int, regId: Option[String], txId: Option[String]): Exception = {
+    if(functionName.contains("getRegistrationIdHttpReads") && status == NOT_FOUND) {
+      new NotFoundException(s"Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")
+    } else {
+      new exceptions.DownstreamExceptions.PAYEMicroserviceException(s"Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")
+    }
+  }
 
   def createNewRegistrationHttpReads(regId: String, transactionId: String)(implicit request: Request[_]): HttpReads[DownstreamOutcome.Value] =
     (_: String, url: String, response: HttpResponse) => response.status match {

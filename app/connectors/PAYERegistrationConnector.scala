@@ -65,7 +65,7 @@ class PAYERegistrationConnector @Inject()(val metricsService: MetricsService,
   def getRegistrationId(txId: String)
                        (implicit hc: HeaderCarrier, request: Request[_]): Future[String] =
     withTimer {
-      withRecovery()("getRegistration", txId = Some(txId)) {
+      withRecovery()("getRegistrationId", txId = Some(txId)) {
         http.GET[String](s"$payeRegUrl/paye-registration/$txId/registration-id")(getRegistrationIdHttpReads(txId), hc, ec)
       }
     }

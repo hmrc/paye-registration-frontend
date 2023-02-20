@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.HttpReads
 
 trait BusinessRegistrationHttpParsers extends BaseHttpReads { _: BaseConnector =>
 
-  override def unexpectedStatusException(url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
+  override def unexpectedStatusException(functionName: String, url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
     new DownstreamExceptions.BusinessRegistrationException(s"Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")
 
   def businessProfileHttpReads()(implicit request: Request[_]): HttpReads[Option[BusinessProfile]] =

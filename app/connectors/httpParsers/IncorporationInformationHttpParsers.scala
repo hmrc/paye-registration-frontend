@@ -32,7 +32,7 @@ import scala.util.{Failure, Success, Try}
 trait IncorporationInformationHttpParsers extends BaseHttpReads {
   _: BaseConnector =>
 
-  override def unexpectedStatusException(url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
+  override def unexpectedStatusException(functionName: String, url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
     new exceptions.DownstreamExceptions.IncorporationInformationResponseException(s"Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")
 
   def setupSubscriptionHttpReads(regId: String, transactionId: String, subscriber: String, regime: String)
