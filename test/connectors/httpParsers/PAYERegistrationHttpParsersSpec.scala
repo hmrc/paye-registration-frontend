@@ -26,7 +26,7 @@ import models.view.PAYEContactDetails
 import models.{Address, DigitalContactDetails}
 import play.api.libs.json.{JsResultException, JsString, Json}
 import play.api.mvc.Request
-import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.http.{HttpResponse, NotFoundException}
 import utils.LogCapturingHelper
 
 import java.time.LocalDate
@@ -198,6 +198,13 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
               logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][getRegistrationIdHttpReads] Calling url: '/regId' returned unexpected status: '$INTERNAL_SERVER_ERROR' for txId: '$txId'")
             }
           }
+
+            "throw a NotFoundException response and log an error" in {
+              withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
+                intercept[NotFoundException](rds.read("getRegistrationIdHttpReads", "/regId", HttpResponse(NOT_FOUND, "")))
+                logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][getRegistrationIdHttpReads] Calling url: '/regId' returned unexpected status: '$NOT_FOUND' for txId: '$txId'")
+              }
+            }
         }
       }
 

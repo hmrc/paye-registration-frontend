@@ -16,6 +16,7 @@
 
 package services
 
+import common.exceptions.DownstreamExceptions
 import connectors._
 import enums.{CacheKeys, DownstreamOutcome, IncorporationStatus, RegistrationDeletion}
 import models.external.CurrentProfile

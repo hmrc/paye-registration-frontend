@@ -30,7 +30,7 @@ import scala.util.{Failure, Success, Try}
 trait BaseHttpReads extends Logging {
   _: BaseConnector =>
 
-  def unexpectedStatusException(url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
+  def unexpectedStatusException(functionName: String, url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
     new Exception(s"Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")
 
   val rawReads: HttpReads[HttpResponse] = (_: String, _: String, response: HttpResponse) => response
@@ -108,7 +108,7 @@ trait BaseHttpReads extends Logging {
                                                                       transactionId: Option[String] = None)
                                  (implicit request: Request[_]): T = {
     errorLog(s"[$functionName] Calling url: '$url' returned unexpected status: '$status'${logContext(regId, transactionId)}")
-    defaultResult.fold(throw unexpectedStatusException(url, status, regId, transactionId))(identity)
+    defaultResult.fold(throw unexpectedStatusException(functionName, url, status, regId, transactionId))(identity)
   }
 
   def unexpectedStatusConnectorHandling[T](defaultResult: => Option[T] = None)(functionName: String,
@@ -118,7 +118,7 @@ trait BaseHttpReads extends Logging {
                                                                                transactionId: Option[String] = None)
                                           (implicit httpResponse: HttpResponse): T = {
     errorConnectorLog(s"[$functionName] Calling url: '$url' returned unexpected status: '$status'${logContext(regId, transactionId)}")
-    defaultResult.fold(throw unexpectedStatusException(url, status, regId, transactionId))(identity)
+    defaultResult.fold(throw unexpectedStatusException(functionName, url, status, regId, transactionId))(identity)
   }
 
 }
