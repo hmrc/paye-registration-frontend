@@ -69,11 +69,18 @@ class BusinessRegistrationConnectorISpec extends IntegrationSpecBase {
         result mustBe businessProfile
       }
 
+      "handle a NOT_FOUND response and throw a CurrentProfileNotFoundException" in {
+
+        stubRetrieveCurrentProfile(NOT_FOUND, None)
+
+        intercept[DownstreamExceptions.CurrentProfileNotFoundException](await(connector.retrieveCurrentProfile))
+      }
+
       "handle any other response returning an BusinessRegistrationException" in {
 
         stubRetrieveCurrentProfile(INTERNAL_SERVER_ERROR, None)
 
-        intercept[DownstreamExceptions.BusinessRegistrationException](await(connector.retrieveCurrentProfile))
+        intercept[DownstreamExceptions.UnexpectedException](await(connector.retrieveCurrentProfile))
       }
     }
 

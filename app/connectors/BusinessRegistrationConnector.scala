@@ -16,7 +16,7 @@
 
 package connectors
 
-import common.exceptions.DownstreamExceptions.CurrentProfileNotFoundException
+import common.exceptions.{CurrentProfileNotFoundExceptionType, DownstreamExceptionsType, UnexpectedExceptionType}
 import config.AppConfig
 import connectors.httpParsers.BusinessRegistrationHttpParsers
 import models.Address
@@ -33,14 +33,24 @@ class BusinessRegistrationConnector @Inject()(val metricsService: MetricsService
                                               val http: HttpClient,
                                               appConfig: AppConfig)(implicit val ec: ExecutionContext) extends BaseConnector with BusinessRegistrationHttpParsers {
 
-  val businessRegUrl = appConfig.servicesConfig.baseUrl("business-registration")
+  val businessRegUrl: String = appConfig.servicesConfig.baseUrl("business-registration")
 
   def retrieveCurrentProfile(implicit hc: HeaderCarrier, request: Request[_]): Future[BusinessProfile] = {
-    infoLog("[retrieveCurrentProfile] attempting to retrieveCurrentProfile")
+    val functionName = "retrieveCurrentProfile"
+    infoLog(s"[$functionName] attempting to retrieveCurrentProfile")
     withTimer {
-      withRecovery()("retrieveCurrentProfile") {
-        http.GET[Option[BusinessProfile]](s"$businessRegUrl/business-registration/business-tax-registration")(businessProfileHttpReads, hc, ec)
-          .map(_.getOrElse(throw new CurrentProfileNotFoundException))
+      withRecovery()(functionName) {
+        http.GET[BusinessRegistrationReadsResponse[BusinessProfile]](s"$businessRegUrl/business-registration/business-tax-registration")(businessProfileHttpReads, hc, ec).flatMap {
+          case Right(businessProfile) => Future.successful(businessProfile)
+          case Left(_: CurrentProfileNotFoundExceptionType) =>
+            val currentProfileNotFoundException = new CurrentProfileNotFoundException
+            errorLog(s"[$functionName] CurrentProfileNotFoundExceptionType exception was thrown")
+            throw currentProfileNotFoundException
+
+          case Left(exception: UnexpectedExceptionType) =>
+            errorLog(s"[$functionName] ${exception.toString}")
+            throw new UnexpectedException(exception.toString)
+        }
       }
     }
   }

@@ -18,9 +18,12 @@ package common.exceptions
 
 object DownstreamExceptions extends DownstreamExceptions
 
+sealed trait DownstreamExceptionsType
+sealed trait CurrentProfileNotFoundExceptionType extends DownstreamExceptionsType
+sealed trait UnexpectedExceptionType extends DownstreamExceptionsType
 trait DownstreamExceptions {
 
-  class CurrentProfileNotFoundException extends Exception
+  class CurrentProfileNotFoundException extends Exception with CurrentProfileNotFoundExceptionType
 
   class PAYEMicroserviceException(msg: String) extends Exception(msg)
 
@@ -39,5 +42,7 @@ trait DownstreamExceptions {
   class BusinessRegistrationException(msg: String) extends Exception(msg)
 
   class AddressLookupException(msg: String) extends Exception(msg)
+
+  class UnexpectedException(msg: String) extends Exception(msg) with UnexpectedExceptionType
 
 }

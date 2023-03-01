@@ -17,16 +17,17 @@
 package connectors.httpParsers
 
 import ch.qos.logback.classic.Level
-import common.exceptions.DownstreamExceptions
-import connectors.ALFLocationHeaderNotSetException
+import common.exceptions.DownstreamExceptions.UnexpectedException
+import common.exceptions.{CurrentProfileNotFoundExceptionType, DownstreamExceptions, UnexpectedExceptionType}
+import connectors.httpParsers.BusinessRegistrationHttpParsers.BusinessRegistrationReadsResponse
 import helpers.PayeComponentSpec
-import models.{Address, DigitalContactDetails}
 import models.external.BusinessProfile
 import models.view.PAYEContactDetails
-import play.api.http.HeaderNames
-import play.api.libs.json.{JsResultException, Json}
+import models.{Address, DigitalContactDetails}
+import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
+import play.api.libs.json.{JsObject, JsResultException, Json}
 import play.api.mvc.Request
-import uk.gov.hmrc.http.{HttpResponse, NotFoundException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.HttpResponse
 import utils.LogCapturingHelper
 
 class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturingHelper {
@@ -35,42 +36,69 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
 
   val regId = "reg1234"
 
+  val businessProfile: BusinessProfile = BusinessProfile("12345", "EN")
+  val businessProfileJson: JsObject = Json.obj(
+    "registrationID" -> "12345",
+    "language" -> "EN"
+  )
+
   "BusinessRegistrationHttpParsers" when {
 
     "For Business Profile" when {
 
       "calling .businessProfileHttpReads" when {
 
-        val businessProfile = BusinessProfile("12345", "EN")
-        val businessProfileJson = Json.obj(
-          "registrationID" -> "12345",
-          "language" -> "EN"
-        )
-
         "response is OK and JSON is valid" must {
 
           "return the Business Profile" in {
-            BusinessRegistrationHttpParsers.businessProfileHttpReads.read("", "", HttpResponse(OK, json = businessProfileJson, Map())) mustBe Some(businessProfile)
+            BusinessRegistrationHttpParsers.businessProfileHttpReads.read("", "", HttpResponse(OK, json = businessProfileJson, Map())) mustBe Right(businessProfile)
           }
         }
 
         "response is OK and JSON is malformed" must {
 
-          "return a None and log an error message" in {
+          "return a JsResultException and log an error message" in {
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
-              BusinessRegistrationHttpParsers.businessProfileHttpReads.read("", "", HttpResponse(OK, json = Json.obj(), Map())) mustBe None
+              intercept[JsResultException](BusinessRegistrationHttpParsers.businessProfileHttpReads.read("", "", HttpResponse(OK, json = Json.obj(), Map())))
               logs.containsMsg(Level.ERROR, "[businessProfileHttpReads] JSON returned could not be parsed to models.external.BusinessProfile model")
+            }
+          }
+        }
+
+        "response is NOT_FOUND" must {
+
+          "return a CurrentProfileNotFoundException" in {
+
+            withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
+
+              val currentProfileNotFoundException: CurrentProfileNotFoundExceptionType = new DownstreamExceptions.CurrentProfileNotFoundException
+
+              val expectedResult: BusinessRegistrationReadsResponse[BusinessProfile] = Left(currentProfileNotFoundException)
+              val actualResult: BusinessRegistrationReadsResponse[BusinessProfile] =
+                BusinessRegistrationHttpParsers.businessProfileHttpReads.read("", "", HttpResponse(NOT_FOUND, json = Json.obj(), Map()))
+
+              expectedResult should matchPattern { case Left(_: CurrentProfileNotFoundExceptionType) => }
+              actualResult should matchPattern { case Left(_: CurrentProfileNotFoundExceptionType) => }
+              logs.containsMsg(Level.WARN, "[BusinessRegistrationHttpParsers][businessProfileReads] profile not found on business-registration")
             }
           }
         }
 
         "response is any other status, e.g ISE" must {
 
-          "return an Upstream Error response and log an error" in {
+          "return an UnexpectedException response and log an error" in {
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
-              intercept[DownstreamExceptions.BusinessRegistrationException](BusinessRegistrationHttpParsers.businessProfileHttpReads.read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+
+              val unexpectedException = new DownstreamExceptions.UnexpectedException("Calling url: '' returned unexpected status: '500'")
+
+              val expectedResult: BusinessRegistrationReadsResponse[BusinessProfile] = Left(unexpectedException)
+              val actualResult: BusinessRegistrationReadsResponse[BusinessProfile] =
+                BusinessRegistrationHttpParsers.businessProfileHttpReads.read("", "", HttpResponse(INTERNAL_SERVER_ERROR, json = Json.obj(), Map()))
+
+              expectedResult should matchPattern { case Left(_: UnexpectedExceptionType) => }
+              actualResult should matchPattern { case Left(_: UnexpectedExceptionType) => }
               logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][businessProfileHttpReads] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR'")
             }
           }

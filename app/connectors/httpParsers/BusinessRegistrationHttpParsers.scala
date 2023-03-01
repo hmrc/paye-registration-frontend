@@ -16,22 +16,43 @@
 
 package connectors.httpParsers
 
-import common.exceptions.DownstreamExceptions
+import common.exceptions.{DownstreamExceptions, DownstreamExceptionsType}
 import connectors.BaseConnector
 import models.Address
 import models.external.BusinessProfile
 import models.view.{CompanyDetails, PAYEContactDetails}
+import play.api.http.Status.{CREATED, NOT_FOUND, OK}
 import play.api.libs.json.{Reads, __}
 import play.api.mvc.Request
-import uk.gov.hmrc.http.HttpReads
+import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
-trait BusinessRegistrationHttpParsers extends BaseHttpReads { _: BaseConnector =>
+trait BusinessRegistrationHttpParsers extends BaseHttpReads {
+  _: BaseConnector =>
 
   override def unexpectedStatusException(functionName: String, url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
     new DownstreamExceptions.BusinessRegistrationException(s"Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")
 
-  def businessProfileHttpReads()(implicit request: Request[_]): HttpReads[Option[BusinessProfile]] =
-    optionHttpReads("businessProfileHttpReads")
+  type BusinessRegistrationReadsResponse[T] = Either[DownstreamExceptionsType, T]
+
+  def businessProfileReads[T](functionName: String,
+                              regId: Option[String] = None,
+                              txId: Option[String] = None,
+                              defaultResponse: Option[T] = None)
+                             (implicit reads: Reads[T], mf: Manifest[T], request: Request[_]): HttpReads[BusinessRegistrationReadsResponse[T]] =
+    (_: String, url: String, response: HttpResponse) =>
+      response.status match {
+        case OK | CREATED =>
+          Right(jsonParse(response)(functionName, regId, txId))
+        case NOT_FOUND =>
+          warnLog("[BusinessRegistrationHttpParsers][businessProfileReads] profile not found on business-registration")
+          Left(new CurrentProfileNotFoundException)
+
+        case status =>
+          unexpectedDownstreamStatusHandling(defaultResponse)(functionName, url, status, regId, txId)
+      }
+
+  def businessProfileHttpReads(implicit request: Request[_]): HttpReads[BusinessRegistrationReadsResponse[BusinessProfile]] =
+    businessProfileReads("businessProfileHttpReads")
 
   def retrieveCompletionCapacityHttpReads()(implicit request: Request[_]): HttpReads[Option[String]] = {
     implicit val reads = (__ \ "completionCapacity").read[String]

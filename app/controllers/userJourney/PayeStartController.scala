@@ -16,7 +16,8 @@
 
 package controllers.userJourney
 
-import common.exceptions.DownstreamExceptions.{ConfirmationRefsNotFoundException, CurrentProfileNotFoundException}
+import common.exceptions.CurrentProfileNotFoundExceptionType
+import common.exceptions.DownstreamExceptions.ConfirmationRefsNotFoundException
 import config.AppConfig
 import connectors._
 import controllers.{AuthRedirectUrls, PayeBaseController}
@@ -55,7 +56,7 @@ class PayeStartController @Inject()(val currentProfileService: CurrentProfileSer
   private val welsh = Lang("cy")
   private val english = "english"
 
-  def steppingStone(): Action[AnyContent] = Action { implicit request =>
+  def steppingStone(): Action[AnyContent] = Action { _ =>
     Redirect(s"$payeRegElFEURL$payeRegElFEURI")
   }
 
@@ -63,7 +64,7 @@ class PayeStartController @Inject()(val currentProfileService: CurrentProfileSer
     infoLog("[startPaye] attempting to startPaye")
     checkAndStoreCurrentProfile { profile =>
       assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId) {
-        if((languageUtils.getCurrentLang == welsh) && !appConfig.languageTranslationEnabled) {
+        if ((languageUtils.getCurrentLang == welsh) && !appConfig.languageTranslationEnabled) {
           Redirect(controllers.routes.LanguageSwitchController.setLanguage(english))
         } else {
           Redirect(routes.EmploymentController.paidEmployees)
@@ -99,11 +100,18 @@ class PayeStartController @Inject()(val currentProfileService: CurrentProfileSer
     currentProfileService.fetchAndStoreCurrentProfile flatMap { currentProfile: CurrentProfile =>
       currentProfileChecks(currentProfile)(f)
     } recover {
-      case _: NotFoundException => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
-      case _: ConfirmationRefsNotFoundException => Redirect("https://www.tax.service.gov.uk/business-registration/select-taxes")
-      case _: CurrentProfileNotFoundException => NotFound(restart())
-      case _ =>
-        warnLog(s"[checkAndStoreCurrentProfile] failed to checkAndStoreCurrentProfile")
+      case _: NotFoundException =>
+        warnLog("[PayeStartController][checkAndStoreCurrentProfile] NotFoundException redirecting to OTRS")
+        Redirect(appConfig.otrsUrl)
+      case _: ConfirmationRefsNotFoundException =>
+        //This exception is not caught by this case. See DL-9843
+        warnLog("[PayeStartController][checkAndStoreCurrentProfile] ConfirmationRefsNotFoundException redirecting to OTRS")
+        Redirect(appConfig.otrsUrl)
+      case _: CurrentProfileNotFoundExceptionType =>
+        warnLog("[PayeStartController][checkAndStoreCurrentProfile] no company profile found. Redirecting to OTRS")
+        Redirect(appConfig.otrsUrl)
+      case error =>
+        errorLog(s"[checkAndStoreCurrentProfile] failed to checkAndStoreCurrentProfile. Error: $error")
         InternalServerError(restart())
     }
   }

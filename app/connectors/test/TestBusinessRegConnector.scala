@@ -39,7 +39,7 @@ trait TestBusinessRegConnector extends BaseConnector with BusinessRegistrationHt
 
   def createBusinessProfileEntry(implicit hc: HeaderCarrier, request: Request[_]): Future[BusinessProfile] =
     http.POST[BusinessRegistrationRequest, BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration", BusinessRegistrationRequest("ENG"))(
-      BusinessRegistrationRequest.formats, businessProfileHttpReads.map(_.get), hc, ec
+      BusinessRegistrationRequest.formats, httpReads("businessProfileHttpReads"), hc, ec
     )
 
   def updateCompletionCapacity(regId: String, completionCapacity: String)(implicit hc: HeaderCarrier): Future[String] = {
