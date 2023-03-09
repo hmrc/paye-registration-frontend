@@ -16,29 +16,36 @@
 
 package connectors
 
+import ch.qos.logback.classic.Level
+import common.exceptions.{CurrentProfileNotFoundExceptionType, UnexpectedExceptionType}
+import common.exceptions.DownstreamExceptions.{CurrentProfileNotFoundException, UnexpectedException}
 import config.AppConfig
+import connectors.httpParsers.BusinessRegistrationHttpParsers
+import connectors.httpParsers.BusinessRegistrationHttpParsers.BusinessRegistrationReadsResponse
 import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics
 import models.external.BusinessProfile
 import models.view.PAYEContactDetails
 import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
-import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.libs.json.{JsValue, Writes}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import common.exceptions.DownstreamExceptions.CurrentProfileNotFoundException
+import utils.LogCapturingHelper
+
 import scala.concurrent.Future
 
-class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
+class BusinessRegistrationConnectorSpec extends PayeComponentSpec with LogCapturingHelper {
 
   implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup {
 
-    val mockAppConfig = mock[AppConfig]
-    val mockServicesConfig = mock[ServicesConfig]
+    val mockAppConfig: AppConfig = mock[AppConfig]
+    val mockServicesConfig: ServicesConfig = mock[ServicesConfig]
 
     when(mockAppConfig.servicesConfig).thenReturn(mockServicesConfig)
     when(mockServicesConfig.baseUrl("business-registration")).thenReturn("testBusinessRegUrl")
@@ -50,23 +57,61 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
     )(scala.concurrent.ExecutionContext.Implicits.global)
   }
 
-  "retrieveCurrentProfile" should {
-    "return a a CurrentProfile response if one is found in business registration micro-service" in new Setup {
-      when(mockHttpClient.GET[Option[BusinessProfile]](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(Some(Fixtures.validBusinessRegistrationResponse)))
+  override def beforeEach(): Unit = {
+    reset(mockHttpClient)
+  }
 
-      await(testConnector.retrieveCurrentProfile) mustBe Fixtures.validBusinessRegistrationResponse
+  val businessTaxRegUrl = "/business-registration/business-tax-registration"
+
+  "retrieveCurrentProfile" when {
+
+    "response is Right(businessProfile)" must {
+
+      "return a a CurrentProfile response if one is found in business registration micro-service" in new Setup {
+        when(mockHttpClient.GET[BusinessRegistrationReadsResponse[BusinessProfile]](ArgumentMatchers.contains(businessTaxRegUrl), any(), any())(any(), any[HeaderCarrier](), any()))
+          .thenReturn(Future.successful(Right(Fixtures.validBusinessRegistrationResponse)))
+
+        await(testConnector.retrieveCurrentProfile) mustBe Fixtures.validBusinessRegistrationResponse
+      }
     }
 
-    "return an CurrentProfileNotFoundException response when an unspecified error has occurred" in new Setup {
-      when(mockHttpClient.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(new CurrentProfileNotFoundException))
+    "response is Left(CurrentProfileNotFoundException)" must {
 
-      intercept[CurrentProfileNotFoundException](await(testConnector.retrieveCurrentProfile))
+      "return an CurrentProfileNotFoundException response when an unspecified error has occurred" in new Setup {
+
+        withCaptureOfLoggingFrom(testConnector.logger) { logs =>
+
+          val currentProfileNotFoundException: CurrentProfileNotFoundExceptionType = new CurrentProfileNotFoundException
+
+          when(mockHttpClient.GET[BusinessRegistrationReadsResponse[BusinessProfile]](ArgumentMatchers.contains(businessTaxRegUrl), any(), any())(any(), any(), any()))
+            .thenReturn(Future.successful(Left(currentProfileNotFoundException)))
+
+          intercept[CurrentProfileNotFoundExceptionType](await(testConnector.retrieveCurrentProfile))
+          logs.containsMsg(Level.ERROR, s"[retrieveCurrentProfile] CurrentProfileNotFoundExceptionType exception was thrown")
+
+        }
+      }
+    }
+
+    "response is Left(UnexpectedException)" must {
+
+      "return an CurrentProfileNotFoundException response when an unspecified error has occurred" in new Setup {
+
+        withCaptureOfLoggingFrom(testConnector.logger) { logs =>
+
+          val currentProfileNotFoundException: UnexpectedException = new UnexpectedException("error")
+
+          when(mockHttpClient.GET[BusinessRegistrationReadsResponse[BusinessProfile]](ArgumentMatchers.contains(businessTaxRegUrl), any(), any())(any(), any(), any()))
+            .thenReturn(Future.successful(Left(currentProfileNotFoundException)))
+
+          intercept[UnexpectedException](await(testConnector.retrieveCurrentProfile))
+          logs.containsMsg(Level.ERROR, "[BusinessRegistrationConnector][retrieveCurrentProfile] common.exceptions.DownstreamExceptions$UnexpectedException: error ()")
+        }
+      }
     }
 
     "return an Exception response when an unspecified error has occurred" in new Setup {
-      when(mockHttpClient.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockHttpClient.GET[BusinessProfile](ArgumentMatchers.contains("/business-registration/business-tax-registration"),any(),any())(any(), any(), any()))
         .thenReturn(Future.failed(new RuntimeException("Runtime Exception")))
 
       intercept[RuntimeException](await(testConnector.retrieveCurrentProfile))
@@ -75,14 +120,14 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
 
   "retrieveCompletionCapacity" should {
     "return an optional string when connector response is successful" in new Setup {
-      when(mockHttpClient.GET[Option[String]](ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockHttpClient.GET[Option[String]](any(),any(),any())(any(), ArgumentMatchers.any[HeaderCarrier](), any()))
         .thenReturn(Future.successful(Some("director")))
 
       await(testConnector.retrieveCompletionCapacity) mustBe Some("director")
     }
 
     "throw a Exception when something unexpected happened" in new Setup {
-      when(mockHttpClient.GET[JsValue](ArgumentMatchers.contains("/business-registration/business-tax-registration"),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockHttpClient.GET[JsValue](ArgumentMatchers.contains("/business-registration/business-tax-registration"),any(),any())(any(), any(), any()))
         .thenReturn(Future.failed(new RuntimeException("Run time exception")))
 
       intercept[RuntimeException](await(testConnector.retrieveCompletionCapacity))
@@ -92,13 +137,13 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
   "retrieveTradingName" should {
     val regId = "12345"
     "return an optional string Some(trading name)" in new Setup {
-      when(mockHttpClient.GET[Option[String]](ArgumentMatchers.contains(s"/business-registration/$regId/trading-name"),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockHttpClient.GET[Option[String]](ArgumentMatchers.contains(s"/business-registration/$regId/trading-name"),any(),any())(any(), any(), any()))
         .thenReturn(Future.successful(Some(tradingName)))
 
       await(testConnector.retrieveTradingName(regId)) mustBe Some(tradingName)
     }
     "return None when unexpected exception occurs" in new Setup {
-      when(mockHttpClient.GET[Option[String]](ArgumentMatchers.contains(s"/business-registration/$regId/trading-name"),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockHttpClient.GET[Option[String]](ArgumentMatchers.contains(s"/business-registration/$regId/trading-name"),any(),any())(any(), any(), any()))
         .thenReturn(Future.failed(new Exception("foo")))
 
       await(testConnector.retrieveTradingName(regId)) mustBe None
@@ -107,16 +152,16 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
   "upsertTradingName" should {
     val regId = "12345"
     "return the trading name on successful response from Business-Registration" in new Setup {
-      when(mockHttpClient.POST[String, String](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
-        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockHttpClient.POST[String, String](any(), any(), any())
+        (any(), any(), any(), any()))
         .thenReturn(Future.successful(tradingName))
 
       await(testConnector.upsertTradingName(regId, tradingName)) mustBe tradingName
 
     }
     "return the trading name on a non success response from Business-Registration" in new Setup {
-      when(mockHttpClient.POST[String, String](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
-        (ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockHttpClient.POST[String, String](any(), any(), any())
+        (any(), any(), any(), any()))
         .thenReturn(Future.failed(new Exception("foo bar wizz bang")))
 
       await(testConnector.upsertTradingName(regId, tradingName)) mustBe tradingName
@@ -129,14 +174,14 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
     val validContactDetails = PAYEContactDetails("Test Name", DigitalContactDetails(Some("email@test.test"), Some("012345"), Some("543210")))
 
     "return an optional PAYE Contact Details if contact details are found in Business Registration" in new Setup {
-      when(mockHttpClient.GET[Option[PAYEContactDetails]](ArgumentMatchers.contains(s"/business-registration/$regId/contact-details"),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockHttpClient.GET[Option[PAYEContactDetails]](ArgumentMatchers.contains(s"/business-registration/$regId/contact-details"),any(),any())(any(), any(), any()))
         .thenReturn(Future.successful(Some(validContactDetails)))
 
       await(testConnector.retrieveContactDetails(regId)) mustBe Some(validContactDetails)
     }
 
     "return no Contact Details if unexpected exception occurs" in new Setup {
-      when(mockHttpClient.GET[Option[PAYEContactDetails]](ArgumentMatchers.contains(s"/business-registration/$regId/contact-details"),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockHttpClient.GET[Option[PAYEContactDetails]](ArgumentMatchers.contains(s"/business-registration/$regId/contact-details"),any(),any())(any(), any(), any()))
         .thenReturn(Future.failed(new Exception("foo")))
 
       await(testConnector.retrieveContactDetails(regId)) mustBe None
@@ -149,15 +194,15 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
     val validContactDetails = PAYEContactDetails("Test Name", DigitalContactDetails(Some("email@test.test"), Some("012345"), Some("543210")))
 
     "return PAYE Contact Details if contact details are stored in Business Registration" in new Setup {
-      when(mockHttpClient.POST[PAYEContactDetails, PAYEContactDetails](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockHttpClient.POST[PAYEContactDetails, PAYEContactDetails](any(), any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(validContactDetails))
 
       await(testConnector.upsertContactDetails(regId, validContactDetails)) mustBe validContactDetails
     }
 
     "return Contact Details if contact details are not stored in Business Registration" in new Setup {
-      when(mockHttpClient.POST[PAYEContactDetails, PAYEContactDetails](ArgumentMatchers.anyString(), ArgumentMatchers.any[PAYEContactDetails](), ArgumentMatchers.any())
-        (ArgumentMatchers.any[Writes[PAYEContactDetails]](), ArgumentMatchers.any[HttpReads[PAYEContactDetails]](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockHttpClient.POST[PAYEContactDetails, PAYEContactDetails](ArgumentMatchers.anyString(), ArgumentMatchers.any[PAYEContactDetails](), any())
+        (ArgumentMatchers.any[Writes[PAYEContactDetails]](), ArgumentMatchers.any[HttpReads[PAYEContactDetails]](), ArgumentMatchers.any[HeaderCarrier](), any()))
         .thenReturn(Future.failed(new Exception("foo")))
 
       await(testConnector.upsertContactDetails(regId, validContactDetails)) mustBe validContactDetails
@@ -189,14 +234,14 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
     )
 
     "return a list of addresses" in new Setup {
-      when(mockHttpClient.GET[Seq[Address]](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockHttpClient.GET[Seq[Address]](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"),any(),any())(any(), any(), any()))
         .thenReturn(Future.successful(addresses))
 
       await(testConnector.retrieveAddresses(regId)) mustBe addresses
     }
 
     "return an empty list of addresses if unexpected exception occurs" in new Setup {
-      when(mockHttpClient.GET[Seq[Address]](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"),ArgumentMatchers.any(),ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
+      when(mockHttpClient.GET[Seq[Address]](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"),any(),any())(any(), any(), any()))
         .thenReturn(Future.failed(new Exception("foo")))
 
       await(testConnector.retrieveAddresses(regId)) mustBe Seq.empty
@@ -214,14 +259,14 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec {
     val regId = "99999"
 
     "successfully upsert an address" in new Setup {
-      when(mockHttpClient.POST[Address, Address](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"), ArgumentMatchers.any[Address](), ArgumentMatchers.any())(ArgumentMatchers.any[Writes[Address]](), ArgumentMatchers.any[HttpReads[Address]](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockHttpClient.POST[Address, Address](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"), ArgumentMatchers.any[Address](), any())(ArgumentMatchers.any[Writes[Address]](), ArgumentMatchers.any[HttpReads[Address]](), ArgumentMatchers.any[HeaderCarrier](), any()))
         .thenReturn(Future.successful(address))
 
       await(testConnector.upsertAddress(regId, address)) mustBe address
     }
 
     "successfully complete in case of unexpected exception" in new Setup {
-      when(mockHttpClient.POST[Address, Address](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"), ArgumentMatchers.any[Address](), ArgumentMatchers.any())(ArgumentMatchers.any[Writes[Address]](), ArgumentMatchers.any[HttpReads[Address]](), ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
+      when(mockHttpClient.POST[Address, Address](ArgumentMatchers.contains(s"/business-registration/$regId/addresses"), ArgumentMatchers.any[Address](), any())(ArgumentMatchers.any[Writes[Address]](), ArgumentMatchers.any[HttpReads[Address]](), ArgumentMatchers.any[HeaderCarrier](), any()))
         .thenReturn(Future.failed(new Exception("foo")))
 
       await(testConnector.upsertAddress(regId, address)) mustBe address

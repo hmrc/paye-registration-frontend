@@ -16,8 +16,9 @@
 
 package connectors.httpParsers
 
-import common.exceptions
+import common.exceptions.DownstreamExceptions
 import connectors.BaseConnector
+import connectors.httpParsers.BusinessRegistrationHttpParsers.BusinessRegistrationReadsResponse
 import play.api.http.Status.{CREATED, NOT_FOUND, NO_CONTENT, OK}
 import play.api.libs.json.Reads
 import play.api.mvc.Request
@@ -27,7 +28,7 @@ import utils.Logging
 
 import scala.util.{Failure, Success, Try}
 
-trait BaseHttpReads extends Logging {
+trait BaseHttpReads extends Logging with DownstreamExceptions {
   _: BaseConnector =>
 
   def unexpectedStatusException(functionName: String, url: String, status: Int, regId: Option[String], txId: Option[String]): Exception =
@@ -109,6 +110,20 @@ trait BaseHttpReads extends Logging {
                                  (implicit request: Request[_]): T = {
     errorLog(s"[$functionName] Calling url: '$url' returned unexpected status: '$status'${logContext(regId, transactionId)}")
     defaultResult.fold(throw unexpectedStatusException(functionName, url, status, regId, transactionId))(identity)
+  }
+
+  private def unexpectedDownstreamStatusException(url: String, status: Int, regId: Option[String], txId: Option[String]): UnexpectedException =
+    new UnexpectedException(s"Calling url: '$url' returned unexpected status: '$status'${logContext(regId, txId)}")
+
+  def unexpectedDownstreamStatusHandling[T](defaultResult: => Option[T] = None)(functionName: String,
+                                                                                url: String,
+                                                                                status: Int,
+                                                                                regId: Option[String] = None,
+                                                                                transactionId: Option[String] = None)
+                                           (implicit request: Request[_]): BusinessRegistrationReadsResponse[T] = {
+    errorLog(s"[$functionName] Calling url: '$url' returned unexpected status: '$status'${logContext(regId, transactionId)}")
+    val exceptionResult: Either[UnexpectedException, T] = Left(unexpectedDownstreamStatusException(url, status, regId, transactionId))
+    defaultResult.fold(exceptionResult)(default => Right(default))
   }
 
   def unexpectedStatusConnectorHandling[T](defaultResult: => Option[T] = None)(functionName: String,

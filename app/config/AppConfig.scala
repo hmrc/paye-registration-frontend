@@ -108,4 +108,6 @@ class AppConfig @Inject()(configuration: Configuration,
   lazy val adminPeriodStart: String = servicesConfig.getString("paye.admin-period-start")
   lazy val adminPeriodEnd: String = servicesConfig.getString("paye.admin-period-end")
 
+  lazy val otrsUrl: String = "https://www.tax.service.gov.uk/business-registration/select-taxes"
+
 }
