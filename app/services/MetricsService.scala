@@ -62,14 +62,14 @@ class MetricsService @Inject()(metrics: Metrics) extends Logging {
   }
 
   def processDataResponseWithMetrics[T](success: Counter, failed: Counter, timer: Timer.Context)(f: => Future[T])
-                                       (implicit ec: ExecutionContext, request: Request[_], tag: TypeTag[T]): Future[T] = {
+                                       (implicit ec: ExecutionContext, request: Request[_]): Future[T] = {
     f map { data =>
       timer.stop()
       success.inc(1)
       data
     } recover {
       case e =>
-        errorLog(s"[processDataResponseWithMetrics] failed to process data response with metrics for ${tag.toString()}")
+        errorLog(s"[processDataResponseWithMetrics] failed to process data response with metrics for ")
         timer.stop()
         failed.inc(1)
         throw e
