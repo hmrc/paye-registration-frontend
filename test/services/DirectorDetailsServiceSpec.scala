@@ -32,25 +32,26 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
 import scala.concurrent.{ExecutionContext, Future}
 
 class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
-  val returnHttpResponse = HttpResponse(200, "")
+  val returnHttpResponse: HttpResponse = HttpResponse(200, "")
   implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup {
-    val service = new DirectorDetailsService {
-      override val payeRegConnector = mockPAYERegConnector
-      override val incorpInfoService = mockIncorpInfoService
-      override val s4LService = mockS4LService
+    val service: DirectorDetailsService = new DirectorDetailsService(
+      payeRegConnector = mockPAYERegConnector,
+      incorpInfoService = mockIncorpInfoService,
+      s4LService = mockS4LService
+    ) {
       override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
     }
   }
 
   class NoDirectorDetailsMockedSetup {
-    val service = new DirectorDetailsService {
-      override val payeRegConnector = mockPAYERegConnector
-      override val incorpInfoService = mockIncorpInfoService
-      override val s4LService = mockS4LService
+    val service: DirectorDetailsService = new DirectorDetailsService(
+      payeRegConnector = mockPAYERegConnector,
+      incorpInfoService = mockIncorpInfoService,
+      s4LService = mockS4LService
+    ) {
       override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
@@ -66,10 +67,11 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
   }
 
   class DirectorDetailsMockedSetup {
-    val service = new DirectorDetailsService {
-      override val payeRegConnector = mockPAYERegConnector
-      override val incorpInfoService = mockIncorpInfoService
-      override val s4LService = mockS4LService
+    val service: DirectorDetailsService = new DirectorDetailsService(
+      payeRegConnector = mockPAYERegConnector,
+      incorpInfoService = mockIncorpInfoService,
+      s4LService = mockS4LService
+    ) {
       override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
@@ -85,13 +87,13 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
   }
 
   class APIConverterMockedSetup {
-    val service = new DirectorDetailsService {
-      override val payeRegConnector = mockPAYERegConnector
-      override val incorpInfoService = mockIncorpInfoService
-      override val s4LService = mockS4LService
+    val service: DirectorDetailsService = new DirectorDetailsService(
+      payeRegConnector = mockPAYERegConnector,
+      incorpInfoService = mockIncorpInfoService,
+      s4LService = mockS4LService
+    ) {
       override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
 
       override def apiToView(apiModel: Seq[Director]): Directors = {
         Fixtures.validDirectorDetailsViewModel
@@ -101,7 +103,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   "Calling apiToView" should {
     "correctly produce a view model from a list of Director API model" in new Setup {
-      val tstModelAPI = List(
+      val tstModelAPI: Seq[Director] = List(
         Director(
           name = Name(
             forename = Some("Timothy"),
@@ -121,7 +123,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
           nino = None
         )
       )
-      val tstModelView = Directors(
+      val tstModelView: Directors = Directors(
         directorMapping = Map(
           "0" -> Director(
             name = Name(Some("Timothy"), Some("Potterley-Smythe"), Some("Buttersford"), Some("Mr")),
@@ -140,7 +142,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   "Calling viewToAPI" should {
     "correctly produce a Directors API model from a completed view model" in new Setup {
-      val tstModelAPI = List(
+      val tstModelAPI: Seq[Director] = List(
         Director(
           name = Name(
             forename = Some("Timothy"),
@@ -161,7 +163,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
         )
       )
 
-      val tstModelView = Directors(
+      val tstModelView: Directors = Directors(
         directorMapping = Map(
           "0" -> Director(
             name = Name(Some("Timothy"), Some("Potterley-Smythe"), Some("Buttersford"), Some("Mr")),
@@ -196,7 +198,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     "Calling createDisplayNamesMap" should {
       "correctly produce a map of IDs to names from a completed view model" in new Setup {
 
-        val displayMap = Map(
+        val displayMap: Map[String, String] = Map(
           "0" -> "Mr Timothy Potterley-Smythe Buttersford",
           "1" -> "Sir Peter Simpson"
         )
@@ -208,7 +210,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     "Calling createDirectorNinos" should {
       "correctly produce a mapping of ninos to IDs from a completed view model" in new Setup {
 
-        val ninos = Ninos(ninoMapping = List(
+        val ninos: Ninos = Ninos(ninoMapping = List(
           UserEnteredNino("0", Some("ZZ123456A")),
           UserEnteredNino("1", None)
         ))
@@ -222,14 +224,14 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
   "areDirectorsUnchanged" should {
     "return true" when {
       "the II mapping is the same as the backend mapping" in new Setup {
-        val iiDirectors = Directors(
+        val iiDirectors: Directors = Directors(
           Map(
             "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("title")), None),
             "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
           )
         )
 
-        val backendDirectors = Directors(
+        val backendDirectors: Directors = Directors(
           Map(
             "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("title")), None),
             "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
@@ -239,14 +241,14 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
         service.directorsNotChanged(iiDirectors, backendDirectors) mustBe true
       }
       "the II mapping is the same as the backend mapping but the order of directors is different" in new Setup {
-        val iiDirectors = Directors(
+        val iiDirectors: Directors = Directors(
           Map(
             "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("title")), None),
             "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
           )
         )
 
-        val backendDirectors = Directors(
+        val backendDirectors: Directors = Directors(
           Map(
             "0" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None),
             "1" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("title")), None)
@@ -260,14 +262,14 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return false" when {
       "the II mapping is different to the backend mapping" in new Setup {
-        val iiDirectors = Directors(
+        val iiDirectors: Directors = Directors(
           Map(
             "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("title")), None),
             "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
           )
         )
 
-        val backendDirectors = Directors(
+        val backendDirectors: Directors = Directors(
           Map(
             "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("NewTitle")), None),
             "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), Some("NewTitle")), None)
@@ -278,13 +280,13 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       }
 
       "the II mapping is different (less elements in backend map" in new Setup {
-        val iiDirectors = Directors(
+        val iiDirectors: Directors = Directors(
           Map(
             "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("title")), None),
             "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
           )
         )
-        val backendDirectors = Directors(
+        val backendDirectors: Directors = Directors(
           Map(
             "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("NewTitle")), None)
           )
@@ -293,13 +295,13 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
         service.directorsNotChanged(iiDirectors, backendDirectors) mustBe false
       }
       "the II mapping is different whereby the casing is different for title" in new Setup {
-        val iiDirectors = Directors(
+        val iiDirectors: Directors = Directors(
           Map(
             "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("title")), None),
             "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
           )
         )
-        val backendDirectors = Directors(
+        val backendDirectors: Directors = Directors(
           Map(
             "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("Title")), None),
             "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
@@ -310,12 +312,12 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
       }
       "the ii mapping is different whereby coho has less elements" in new Setup {
-        val iiDirectors = Directors(
+        val iiDirectors: Directors = Directors(
           Map(
             "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("title")), None)
           )
         )
-        val backendDirectors = Directors(
+        val backendDirectors: Directors = Directors(
           Map(
             "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("Title")), None),
             "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
@@ -325,10 +327,10 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
         service.directorsNotChanged(iiDirectors, backendDirectors) mustBe false
       }
       "the ii mapping has no elements" in new Setup {
-        val iiDirectors = Directors(
+        val iiDirectors: Directors = Directors(
           Map()
         )
-        val backendDirectors = Directors(
+        val backendDirectors: Directors = Directors(
           Map(
             "0" -> Director(Name(Some("first"), Some("middle"), Some("last"), Some("Title")), None),
             "1" -> Director(Name(Some("first1"), Some("middle1"), Some("last1"), None), None)
@@ -342,14 +344,14 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   "Calling ninosToDirectorsMap" should {
     "correctly produce a Directors map from a Ninos model" in new APIConverterMockedSetup {
-      val validNinos = Ninos(
+      val validNinos: Ninos = Ninos(
         List(
           UserEnteredNino("0", Some("AA123456Z")),
           UserEnteredNino("1", Some("ZZ123456A"))
         )
       )
 
-      val expectedDirectorDetailsViewModel = Map(
+      val expectedDirectorDetailsViewModel: Map[String, Director] = Map(
         "0" -> Director(
           name = Name(Some("Bob"), None, Some("Smith"), None),
           nino = Some("AA123456Z")
@@ -370,7 +372,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
   "Calling getDirectorDetails" should {
     "return the correct View response when Director Details are returned from S4L" in new Setup {
 
-      val directorDetails = Directors(
+      val directorDetails: Directors = Directors(
         directorMapping = Map(
           "0" -> Director(
             name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
@@ -393,16 +395,16 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return coho directors when paye reg directors do not match" in new Setup {
 
-      def dir(nino: Option[String], title: Option[String]) = Director(
+      def dir(nino: Option[String], title: Option[String]): Director = Director(
         name = Name(Some("test2"), Some("test22"), Some("testb"), title),
         nino = nino)
 
-      val cohoDirectors = Directors(
+      val cohoDirectors: Directors = Directors(
         directorMapping = Map(
           "0" -> dir(nino = Some("foo"), title = Some("title1"))
         )
       )
-      val payeregDirectors = Seq(dir(nino = None, title = Some("Title2"))
+      val payeregDirectors: Seq[Director] = Seq(dir(nino = None, title = Some("Title2"))
 
       )
       when(mockIncorpInfoService.getDirectorDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
@@ -422,16 +424,16 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return coho directors when s4l directors do not match" in new Setup {
-      def dir(nino: Option[String], title: Option[String]) = Director(
+      def dir(nino: Option[String], title: Option[String]): Director = Director(
         name = Name(Some("test2"), Some("test22"), Some("testb"), title),
         nino = nino)
 
-      val cohoDirectors = Directors(
+      val cohoDirectors: Directors = Directors(
         directorMapping = Map(
           "0" -> dir(nino = Some("foo"), title = Some("title1"))
         )
       )
-      val s4lDirectors = Directors(
+      val s4lDirectors: Directors = Directors(
         directorMapping = Map(
           "0" -> dir(nino = None, title = Some("Title2"))
         )
@@ -450,12 +452,12 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return the correct View response when Director Details are returned from the microservice" in new Setup {
 
-      val dir = Director(
+      val dir: Director = Director(
         name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
         nino = None
       )
 
-      val directorDetails = Directors(
+      val directorDetails: Directors = Directors(
         directorMapping = Map(
           "0" -> dir
         )
@@ -478,7 +480,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
     "return the correct View response when Director Details are returned from the CoHo service" in new Setup {
 
-      val directorDetails = Directors(
+      val directorDetails: Directors = Directors(
         directorMapping = Map(
           "0" -> Director(
             name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
@@ -502,7 +504,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "throw an UpstreamErrorResponse when a 403 response is returned from the connector" in new Setup {
-      val directorDetails = Directors(
+      val directorDetails: Directors = Directors(
         directorMapping = Map(
           "0" -> Director(
             name = Name(Some("test2"), Some("test22"), Some("testb"), Some("Mr")),
@@ -543,7 +545,7 @@ class DirectorDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return a success response when the S4L save completes successfully" in new Setup {
-      val incompleteCompanyDetailsViewModel = Directors(directorMapping = Map())
+      val incompleteCompanyDetailsViewModel: Directors = Directors(directorMapping = Map())
 
       when(mockS4LService.saveForm(ArgumentMatchers.eq(CacheKeys.DirectorDetails.toString), ArgumentMatchers.any, ArgumentMatchers.anyString())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Directors]](), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("", Map("" -> Json.toJson("")))))

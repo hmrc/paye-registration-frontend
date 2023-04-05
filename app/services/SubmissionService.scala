@@ -27,16 +27,10 @@ import utils.RegistrationAllowlist
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class SubmissionServiceImpl @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,
+class SubmissionService @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,
                                       val keystoreConnector: KeystoreConnector,
                                       val iiConnector: IncorporationInformationConnector
-                                     )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends SubmissionService
-
-trait SubmissionService extends RegistrationAllowlist {
-  val payeRegistrationConnector: PAYERegistrationConnector
-  val keystoreConnector: KeystoreConnector
-  val iiConnector: IncorporationInformationConnector
-  implicit val ec: ExecutionContext
+                                     )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends RegistrationAllowlist {
 
   def submitRegistration(profile: CurrentProfile)(implicit hc: HeaderCarrier, request: Request[_]): Future[DESResponse] = {
     ifRegIdNotAllowlisted(profile.registrationID) {

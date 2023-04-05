@@ -31,18 +31,18 @@ class CompletionCapacityServiceSpec extends PayeComponentSpec {
   implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup {
-    val service = new CompletionCapacityService {
-      override val payeRegConnector = mockPAYERegConnector
-      override val businessRegistrationConnector = mockBusinessRegistrationConnector
+    val service: CompletionCapacityService = new CompletionCapacityService(
+      payeRegConnector = mockPAYERegConnector,
+      businessRegistrationConnector = mockBusinessRegistrationConnector
+    ) {
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
     }
   }
 
   "Calling saveCompletionCapacity" should {
     "return success for a successful save" in new Setup {
       val jobTitle = "Grand Vizier"
-      val tstCapacity = CompletionCapacity(UserCapacity.other, "Grand Vizier")
+      val tstCapacity: CompletionCapacity = CompletionCapacity(UserCapacity.other, "Grand Vizier")
 
       when(mockPAYERegConnector.upsertCompletionCapacity(ArgumentMatchers.anyString(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(jobTitle))

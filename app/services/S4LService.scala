@@ -26,11 +26,7 @@ import utils.Formatters
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class S4LServiceImpl @Inject()(val s4LConnector: S4LConnector)(implicit val ec: ExecutionContext) extends S4LService
-
-trait S4LService {
-  implicit val ec: ExecutionContext
-  val s4LConnector: S4LConnector
+class S4LService @Inject()(val s4LConnector: S4LConnector)(implicit val ec: ExecutionContext) {
 
   def saveForm[T](formId: String, data: T, regId: String)(implicit hc: HeaderCarrier, format: Format[T], request: Request[_]): Future[CacheMap] = {
     for {

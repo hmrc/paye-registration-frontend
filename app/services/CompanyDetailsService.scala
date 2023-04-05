@@ -30,24 +30,13 @@ import utils.RegistrationAllowlist
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyDetailsServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
+class CompanyDetailsService @Inject()(val payeRegConnector: PAYERegistrationConnector,
                                           val incorpInfoService: IncorporationInformationService,
                                           val s4LService: S4LService,
                                           val compRegConnector: CompanyRegistrationConnector,
                                           val prepopService: PrepopulationService,
                                           val auditService: AuditService
-                                         )(implicit val appConfig: AppConfig,implicit val ec: ExecutionContext) extends CompanyDetailsService
-
-trait CompanyDetailsService extends RegistrationAllowlist {
-
-  implicit val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val payeRegConnector: PAYERegistrationConnector
-  val compRegConnector: CompanyRegistrationConnector
-  val incorpInfoService: IncorporationInformationService
-  val s4LService: S4LService
-  val prepopService: PrepopulationService
-  val auditService: AuditService
+                                         )(implicit val appConfig: AppConfig,implicit val ec: ExecutionContext) extends RegistrationAllowlist {
 
   def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[CompanyDetailsView] = {
     s4LService.fetchAndGet[CompanyDetailsView](CacheKeys.CompanyDetails.toString, regId) flatMap {

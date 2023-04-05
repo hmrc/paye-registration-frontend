@@ -23,6 +23,7 @@ import models.view.PAYEContactDetails
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.Json
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.play.audit.AuditExtensions.auditHeaderCarrier
@@ -32,35 +33,35 @@ import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
 import java.time.Instant
 import java.util.UUID
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 
 
 class AuditServiceSpec extends PayeComponentSpec {
 
   class Setup(otherHcHeaders: Seq[(String, String)] = Seq()) {
 
-    implicit val hc = HeaderCarrier(sessionId = Some(SessionId("session-123")), otherHeaders = otherHcHeaders)
-    implicit val ec = ExecutionContext.global
-    implicit val request = FakeRequest()
+    implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId("session-123")), otherHeaders = otherHcHeaders)
+    implicit val ec: ExecutionContextExecutor = ExecutionContext.global
+    implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-    val mockAuditConnector = mock[AuditConnector]
-    val mockAuditingConfig = mock[AuditingConfig]
+    val mockAuditConnector: AuditConnector = mock[AuditConnector]
+    val mockAuditingConfig: AuditingConfig = mock[AuditingConfig]
 
     val regId = "12345"
-    val instantNow = Instant.now()
+    val instantNow: Instant = Instant.now()
     val appName = "business-registration-notification"
     val auditType = "testAudit"
-    val testEventId = UUID.randomUUID().toString
+    val testEventId: String = UUID.randomUUID().toString
     val txnName = "transactionName"
 
     when(mockAuditConnector.auditingConfig) thenReturn mockAuditingConfig
     when(mockAuditingConfig.auditSource) thenReturn appName
 
-    val event = PPOBAddressAuditEventDetail("externalUserId", "authProviderId", regId)
+    val event: PPOBAddressAuditEventDetail = PPOBAddressAuditEventDetail("externalUserId", "authProviderId", regId)
 
-    val service = new AuditService {
-
-      override val auditConnector = mockAuditConnector
+    val service: AuditService = new AuditService(
+      mockAuditConnector
+    ) {
 
       override private[services] def now() = instantNow
       override private[services] def eventId() = testEventId
@@ -105,7 +106,7 @@ class AuditServiceSpec extends PayeComponentSpec {
               )
             ) thenReturn Future.successful(AuditResult.Success)
 
-            val actual = await(service.sendEvent(auditType, event, Some(txnName)))
+            val actual: AuditResult = await(service.sendEvent(auditType, event, Some(txnName)))
 
             actual mustBe AuditResult.Success
           }
@@ -134,7 +135,7 @@ class AuditServiceSpec extends PayeComponentSpec {
               )
             ) thenReturn Future.successful(AuditResult.Success)
 
-            val actual = await(service.sendEvent(auditType, event, None))
+            val actual: AuditResult = await(service.sendEvent(auditType, event, None))
 
             actual mustBe AuditResult.Success
           }
@@ -164,7 +165,7 @@ class AuditServiceSpec extends PayeComponentSpec {
             )
           ) thenReturn Future.failed(exception)
 
-          val actual = intercept[Exception](await(service.sendEvent(auditType, event, Some(txnName))))
+          val actual: Exception = intercept[Exception](await(service.sendEvent(auditType, event, Some(txnName))))
 
           actual.getMessage mustBe exception.getMessage
         }

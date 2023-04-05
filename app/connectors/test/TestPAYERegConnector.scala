@@ -29,18 +29,10 @@ import uk.gov.hmrc.http.{CoreGet, CorePost, HeaderCarrier, HttpClient, HttpRespo
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TestPAYERegConnectorImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
+class TestPAYERegConnector @Inject()(val payeRegConnector: PAYERegistrationConnector,
                                          val http: HttpClient,
-                                         appConfig: AppConfig, implicit val ec: ExecutionContext) extends TestPAYERegConnector {
-  val payeRegUrl = appConfig.servicesConfig.baseUrl("paye-registration")
-}
-
-trait TestPAYERegConnector extends BaseConnector with PAYERegistrationHttpParsers {
-
-  implicit val ec: ExecutionContext
-  val payeRegUrl: String
-  val http: CoreGet with CorePost
-  val payeRegConnector: PAYERegistrationConnector
+                                         appConfig: AppConfig, implicit val ec: ExecutionContext) extends BaseConnector with PAYERegistrationHttpParsers {
+  val payeRegUrl: String = appConfig.servicesConfig.baseUrl("paye-registration")
 
   def addPAYERegistration(reg: PAYERegistrationAPI)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
     http.POST[PAYERegistrationAPI, DownstreamOutcome.Value](s"$payeRegUrl/paye-registration/test-only/update-registration/${reg.registrationID}", reg)(

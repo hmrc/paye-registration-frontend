@@ -56,5 +56,5 @@ class CompanyRegistrationConnector @Inject()(val featureSwitch: PAYEFeatureSwitc
   private[connectors] def useCompanyRegistration: Boolean = featureSwitch.companyReg.enabled
 
   private def withTimer[T](f: => Future[T]) =
-    metricsService.processDataResponseWithMetrics(metricsService.companyRegistrationResponseTimer.time())(f)
+    metricsService.processDataResponseWithMetrics1(metricsService.companyRegistrationResponseTimer.time())(f)
 }

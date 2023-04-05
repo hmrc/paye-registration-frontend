@@ -28,7 +28,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class TestAddressLookupControllerImpl @Inject()(val companyDetailsService: CompanyDetailsService,
+class TestAddressLookupController @Inject()(val companyDetailsService: CompanyDetailsService,
                                                 val keystoreConnector: KeystoreConnector,
                                                 val payeContactService: PAYEContactService,
                                                 val authConnector: AuthConnector,
@@ -38,14 +38,7 @@ class TestAddressLookupControllerImpl @Inject()(val companyDetailsService: Compa
                                                 val incorporationInformationConnector: IncorporationInformationConnector,
                                                 val payeRegistrationService: PAYERegistrationService,
                                                 mcc: MessagesControllerComponents
-                                               )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends TestAddressLookupController(mcc) with AuthRedirectUrls
-
-abstract class TestAddressLookupController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-  val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val companyDetailsService: CompanyDetailsService
-  val payeContactService: PAYEContactService
-  val prepopService: PrepopulationService
+                                               )(val appConfig: AppConfig, implicit val ec: ExecutionContext)  extends PayeBaseController(mcc)  with AuthRedirectUrls {
 
   def noLookupPPOBAddress: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>profile =>
     val address = Address(

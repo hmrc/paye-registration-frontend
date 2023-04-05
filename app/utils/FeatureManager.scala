@@ -63,9 +63,7 @@ case class ValueSetFeatureSwitch(name: String, setValue: String) extends Feature
   override def value = setValue
 }
 
-class FeatureSwitchManager @Inject extends FeatureManager
-
-trait FeatureManager {
+class FeatureSwitchManager @Inject()() {
 
   val DisabledIntervalExtractor = """!(\S+)_(\S+)""".r
   val EnabledIntervalExtractor = """(\S+)_(\S+)""".r
@@ -111,19 +109,10 @@ trait FeatureManager {
   def unapply(fs: FeatureSwitch): Option[(String, Boolean)] = Some(fs.name -> fs.enabled)
 }
 
-class PAYEFeatureSwitch @Inject()(val manager: FeatureManager) extends PAYEFeatureSwitches {
+class PAYEFeatureSwitch @Inject()(val manager: FeatureSwitchManager) {
   val companyRegistration = "companyRegistration"
   val setSystemDate = "system-date"
   val isWelsh = "isWelsh"
-}
-
-trait PAYEFeatureSwitches {
-
-  protected val companyRegistration: String
-  protected val setSystemDate: String
-  protected val isWelsh: String
-
-  protected val manager: FeatureManager
 
   def companyReg: FeatureSwitch = manager.getProperty(companyRegistration)
 

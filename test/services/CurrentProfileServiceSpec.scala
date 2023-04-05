@@ -20,10 +20,11 @@ import config.AppConfig
 import enums.{IncorporationStatus, PAYEStatus}
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.api.SessionMap
-import models.external.{CompanyRegistrationProfile, CurrentProfile}
+import models.external.{BusinessProfile, CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{ForbiddenException, HeaderCarrier, NotFoundException}
 
@@ -32,24 +33,24 @@ import scala.concurrent.{ExecutionContext, Future}
 class CurrentProfileServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   class Setup {
-    val service = new CurrentProfileService {
-      override val businessRegistrationConnector = mockBusinessRegistrationConnector
-      override val companyRegistrationConnector = mockCompRegConnector
-      override val payeRegistrationConnector = mockPAYERegConnector
-      override val keystoreConnector = mockKeystoreConnector
-      override val incorporationInformationConnector = mockIncorpInfoConnector
+    val service: CurrentProfileService = new CurrentProfileService(
+      businessRegistrationConnector = mockBusinessRegistrationConnector,
+      payeRegistrationConnector = mockPAYERegConnector,
+      keystoreConnector = mockKeystoreConnector,
+      companyRegistrationConnector = mockCompRegConnector,
+      incorporationInformationConnector = mockIncorpInfoConnector
+    ) {
       override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
     }
   }
 
-  implicit val request = FakeRequest()
+  implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-  val validBusinessProfile = Fixtures.validBusinessRegistrationResponse
-  val validCompanyProfile = CompanyRegistrationProfile("held", "txId")
+  val validBusinessProfile: BusinessProfile = Fixtures.validBusinessRegistrationResponse
+  val validCompanyProfile: CompanyRegistrationProfile = CompanyRegistrationProfile("held", "txId")
 
-  val validCurrentProfile = CurrentProfile(
+  val validCurrentProfile: CurrentProfile = CurrentProfile(
     validBusinessProfile.registrationID,
     validCompanyProfile,
     validBusinessProfile.language,
@@ -144,7 +145,7 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with PayeFakedApp {
   "updateCurrentProfileWithIncorpStatus" should {
     "return some regId" in new Setup {
 
-      val testSessionMap = SessionMap(
+      val testSessionMap: SessionMap = SessionMap(
         sessionId = "testSessionId",
         registrationId = validCurrentProfile.registrationID,
         transactionId = validCurrentProfile.companyTaxRegistration.transactionId,
@@ -159,7 +160,7 @@ class CurrentProfileServiceSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockKeystoreConnector.cacheSessionMap(ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future(testSessionMap))
 
-      val result = await(service.updateCurrentProfileWithIncorpStatus(txId = "testTxId", status = IncorporationStatus.rejected))
+      val result: Option[String] = await(service.updateCurrentProfileWithIncorpStatus(txId = "testTxId", status = IncorporationStatus.rejected))
       result mustBe Some(validCurrentProfile.registrationID)
     }
   }

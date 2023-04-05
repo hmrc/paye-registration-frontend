@@ -29,21 +29,12 @@ import utils.{Logging, RegistrationAllowlist}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CurrentProfileServiceImpl @Inject()(val businessRegistrationConnector: BusinessRegistrationConnector,
+class CurrentProfileService @Inject()(val businessRegistrationConnector: BusinessRegistrationConnector,
                                           val payeRegistrationConnector: PAYERegistrationConnector,
                                           val keystoreConnector: KeystoreConnector,
                                           val companyRegistrationConnector: CompanyRegistrationConnector,
                                           val incorporationInformationConnector: IncorporationInformationConnector
-                                         )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends CurrentProfileService
-
-trait CurrentProfileService extends RegistrationAllowlist with Logging {
-  implicit val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val businessRegistrationConnector: BusinessRegistrationConnector
-  val payeRegistrationConnector: PAYERegistrationConnector
-  val companyRegistrationConnector: CompanyRegistrationConnector
-  val keystoreConnector: KeystoreConnector
-  val incorporationInformationConnector: IncorporationInformationConnector
+                                         )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends RegistrationAllowlist with Logging {
 
   def fetchAndStoreCurrentProfile(implicit hc: HeaderCarrier, request: Request[_]): Future[CurrentProfile] = {
     infoLog(s"[fetchAndStoreCurrentProfile] attempting to fetchAndStoreCurrentProfile")

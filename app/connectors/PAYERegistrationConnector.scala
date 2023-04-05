@@ -213,5 +213,5 @@ class PAYERegistrationConnector @Inject()(val metricsService: MetricsService,
   }
 
   private def withTimer[T](f: => Future[T]) =
-    metricsService.processDataResponseWithMetrics(metricsService.payeRegistrationResponseTimer.time())(f)
+    metricsService.processDataResponseWithMetrics1(metricsService.payeRegistrationResponseTimer.time())(f)
 }

@@ -30,20 +30,11 @@ import utils.SystemDate
 import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
-class EmploymentServiceImpl @Inject()(val s4LService: S4LService,
+class EmploymentService @Inject()(val s4LService: S4LService,
                                       val payeRegConnector: PAYERegistrationConnector,
-                                      val iiService: IncorporationInformationService)(implicit val ec: ExecutionContext) extends EmploymentService {
-  override def now: LocalDate = SystemDate.getSystemDate.toLocalDate
-}
+                                      val iiService: IncorporationInformationService)(implicit val ec: ExecutionContext) {
 
-trait EmploymentService {
-
-  def now: LocalDate
-
-  implicit val ec: ExecutionContext
-  val iiService: IncorporationInformationService
-  val s4LService: S4LService
-  val payeRegConnector: PAYERegistrationConnector
+   def now: LocalDate = SystemDate.getSystemDate.toLocalDate
 
   private[services] def viewToApi(viewData: EmployingStaff): Either[EmployingStaff, Employment] = viewData match {
     case EmployingStaff(Some(EmployingAnyone(true, Some(date))), _, Some(true), Some(subcontractors), Some(pension)) =>

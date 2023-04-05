@@ -17,31 +17,42 @@
 package helpers.mocks
 
 import com.codahale.metrics.{Counter, Timer}
+import com.kenshoo.play.metrics.Metrics
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
 import services.MetricsService
 
-class MockMetrics extends MetricsService with MockitoSugar {
+trait MockMetrics extends MockitoSugar {
+
   lazy val mockContext = mock[Timer.Context]
 
   val mockTimer = new Timer()
   val mockCounter = mock[Counter]
+  val mockMetricssss = mock[Metrics]
+  when(mockMetricssss.defaultRegistry.timer(any())).thenReturn(mockTimer)
+  when(mockMetricssss.defaultRegistry.counter(any())).thenReturn(mockCounter)
 
-  override val payeRegistrationResponseTimer = mockTimer
-  override val addressLookupResponseTimer = mockTimer
-  override val businessRegistrationResponseTimer = mockTimer
-  override val incorpInfoResponseTimer = mockTimer
-  override val companyRegistrationResponseTimer = mockTimer
-  override val keystoreResponseTimer = mockTimer
-  override val s4lResponseTimer = mockTimer
-  override val deskproResponseTimer = mockTimer
-  override val keystoreSuccessResponseCounter = mockCounter
-  override val keystoreEmptyResponseCounter = mockCounter
-  override val keystoreFailedResponseCounter = mockCounter
-  override val s4lSuccessResponseCounter = mockCounter
-  override val s4lEmptyResponseCounter = mockCounter
-  override val s4lFailedResponseCounter = mockCounter
-  override val companyDetailsSuccessResponseCounter = mockCounter
-  override val companyDetailsFailedResponseCounter = mockCounter
-  override val addressLookupSuccessResponseCounter = mockCounter
-  override val addressLookupFailedResponseCounter = mockCounter
+  val metricsServiceTestttt = new MetricsService(
+    mockMetricssss
+  ) {
+    override val payeRegistrationResponseTimer = mockTimer
+    override val addressLookupResponseTimer = mockTimer
+    override val businessRegistrationResponseTimer = mockTimer
+    override val incorpInfoResponseTimer = mockTimer
+    override val companyRegistrationResponseTimer = mockTimer
+    override val keystoreResponseTimer = mockTimer
+    override val s4lResponseTimer = mockTimer
+    override val deskproResponseTimer = mockTimer
+    override val keystoreSuccessResponseCounter = mockCounter
+    override val keystoreEmptyResponseCounter = mockCounter
+    override val keystoreFailedResponseCounter = mockCounter
+    override val s4lSuccessResponseCounter = mockCounter
+    override val s4lEmptyResponseCounter = mockCounter
+    override val s4lFailedResponseCounter = mockCounter
+    override val companyDetailsSuccessResponseCounter = mockCounter
+    override val companyDetailsFailedResponseCounter = mockCounter
+    override val addressLookupSuccessResponseCounter = mockCounter
+    override val addressLookupFailedResponseCounter = mockCounter
+  }
 }

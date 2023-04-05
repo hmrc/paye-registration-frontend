@@ -16,6 +16,7 @@
 
 package connectors.test
 
+import config.AppConfig
 import helpers.PayeComponentSpec
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.HttpResponse
@@ -25,20 +26,24 @@ import scala.concurrent.ExecutionContext
 class TestCoHoAPIConnectorSpec extends PayeComponentSpec {
 
   val testUrl = "testIncorpInfoUrl"
+  val config: AppConfig = app.injector.instanceOf[AppConfig]
+
 
   class Setup extends CodeMocks {
-    val testConnector = new TestIncorpInfoConnector {
-      override val incorpFEStubsUrl = testUrl
-      override val incorpInfoUrl = testUrl
-      override val http = mockHttpClient
+    val testConnector: TestIncorpInfoConnector = new TestIncorpInfoConnector(
+      mockHttpClient,
+      config,
+      ec
+    ) {
+      override val incorpFEStubsUrl: String = testUrl
+      override val incorpInfoUrl: String = testUrl
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
     }
   }
 
   "setupCoHoCompanyDetails" should {
     "return a valid response when successfully set up" in new Setup {
-      val resp = HttpResponse(200, "")
+      val resp: HttpResponse = HttpResponse(200, "")
 
       mockHttpPOST[JsValue, HttpResponse](testConnector.incorpFEStubsUrl, resp)
 
@@ -48,7 +53,7 @@ class TestCoHoAPIConnectorSpec extends PayeComponentSpec {
 
   "teardownCoHoCompanyDetails" should {
     "return a valid response when successfully set up" in new Setup {
-      val resp = HttpResponse(200, "")
+      val resp: HttpResponse = HttpResponse(200, "")
 
       mockHttpPUT[String, HttpResponse](testConnector.incorpFEStubsUrl, resp)
 

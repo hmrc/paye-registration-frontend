@@ -28,18 +28,10 @@ import utils.Logging
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class PAYERegistrationServiceImpl @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,
+class PAYERegistrationService @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,
                                             val keyStoreConnector: KeystoreConnector,
                                             val currentProfileService: CurrentProfileService,
-                                            val s4LService: S4LService)(implicit val ec: ExecutionContext) extends PAYERegistrationService
-
-trait PAYERegistrationService extends Logging {
-
-  val payeRegistrationConnector: PAYERegistrationConnector
-  val keyStoreConnector: KeystoreConnector
-  val currentProfileService: CurrentProfileService
-  val s4LService: S4LService
-  implicit val ec: ExecutionContext
+                                            val s4LService: S4LService)(implicit val ec: ExecutionContext) extends Logging {
 
   def assertRegistrationFootprint(regId: String, txId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
     payeRegistrationConnector.createNewRegistration(regId, txId)

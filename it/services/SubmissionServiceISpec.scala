@@ -75,7 +75,7 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
     "NOT send the submission if the regId is in allow-list" in {
       val regIdAllowlisted = "regAllowlist123"
 
-      val submissionService = new SubmissionServiceImpl(payeRegistrationConnector, keystoreConnector, incorpInfoConnector)
+      val submissionService = new SubmissionService(payeRegistrationConnector, keystoreConnector, incorpInfoConnector)
 
       def getResponse = submissionService.submitRegistration(currentProfile(regIdAllowlisted))
 
@@ -89,7 +89,7 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
       stubPut(s"/paye-registration/$regId/submit-registration", 200, "")
       stubDelete(s"/incorporation-information/subscribe/$transactionId/regime/paye-fe/subscriber/SCRS", 200, "")
 
-      val submissionService = new SubmissionServiceImpl(payeRegistrationConnector, keystoreConnector, incorpInfoConnector)
+      val submissionService = new SubmissionService(payeRegistrationConnector, keystoreConnector, incorpInfoConnector)
 
       def getResponse = submissionService.submitRegistration(currentProfile(regId))
 
@@ -115,7 +115,7 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
       stubPut(s"/paye-registration/$regId/submit-registration", 204, "")
       stubDelete(s"/incorporation-information/subscribe/$transactionId/regime/paye-fe/subscriber/SCRS", 404, "")
 
-      val submissionService = new SubmissionServiceImpl(payeRegistrationConnector, keystoreConnector, incorpInfoConnector)
+      val submissionService = new SubmissionService(payeRegistrationConnector, keystoreConnector, incorpInfoConnector)
 
       def getResponse = submissionService.submitRegistration(currentProfile(regId))
 
@@ -139,7 +139,7 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
 
       stubPut(s"/paye-registration/$regId/submit-registration", 400, "")
 
-      val submissionService = new SubmissionServiceImpl(payeRegistrationConnector, keystoreConnector, incorpInfoConnector)
+      val submissionService = new SubmissionService(payeRegistrationConnector, keystoreConnector, incorpInfoConnector)
 
       def getResponse = submissionService.submitRegistration(currentProfile(regId))
 

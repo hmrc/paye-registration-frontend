@@ -16,35 +16,32 @@
 
 package controllers.test
 
-import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.BusinessProfile
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{MessagesControllerComponents, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class TestCacheControllerSpec extends PayeComponentSpec with PayeFakedApp {
-  val testHttpResponse = HttpResponse(status = OK, body = "")
-  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
+  val testHttpResponse: HttpResponse = HttpResponse(status = OK, body = "")
+  lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
   class Setup extends CodeMocks {
-    val controller = new TestCacheController(mockMcc) {
-      override val appConfig: AppConfig = mockAppConfig
-      override val redirectToLogin = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-
-      override val keystoreConnector = mockKeystoreConnector
-      override val s4LService = mockS4LService
-      override val businessRegConnector = mockBusinessRegistrationConnector
-      override val messagesApi = injMessagesApi
-      override val authConnector = mockAuthConnector
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService = mockPayeRegService
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
+    val controller: TestCacheController = new TestCacheController(
+      businessRegConnector = mockBusinessRegistrationConnector,
+      s4LService = mockS4LService,
+      authConnector = mockAuthConnector,
+      keystoreConnector = mockKeystoreConnector,
+      companyDetailsService = mockCompanyDetailsService,
+      incorpInfoService = mockIncorpInfoService,
+      incorporationInformationConnector = mockIncorpInfoConnector,
+      payeRegistrationService = mockPayeRegService,
+      mcc = mockMcc)(mockAppConfig, ec) {
+      override lazy val redirectToLogin: Result = MockAuthRedirects.redirectToLogin
+      override lazy val redirectToPostSign: Result = MockAuthRedirects.redirectToPostSign
     }
   }
 
@@ -60,7 +57,7 @@ class TestCacheControllerSpec extends PayeComponentSpec with PayeFakedApp {
         when(mockS4LService.clear(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(testHttpResponse))
 
-        val result = controller.tearDownS4L()(FakeRequest())
+        val result: Future[Result] = controller.tearDownS4L()(FakeRequest())
         status(result) mustBe OK
       }
     }

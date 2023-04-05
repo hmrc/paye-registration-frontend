@@ -26,7 +26,7 @@ import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.{Format, Json}
-import play.api.mvc.Request
+import play.api.mvc.{AnyContentAsEmpty, Request}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
@@ -36,31 +36,33 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
-  val returnHttpResponse = HttpResponse(200, "")
+  val returnHttpResponse: HttpResponse = HttpResponse(200, "")
 
   implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup {
-    val service = new CompanyDetailsService {
-      override val incorpInfoService = mockIncorpInfoService
-      override val compRegConnector = mockCompRegConnector
-      override val payeRegConnector = mockPAYERegConnector
-      override val s4LService = mockS4LService
-      override val prepopService = mockPrepopulationService
-      override val auditService = mockAuditService
+    val service: CompanyDetailsService = new CompanyDetailsService(
+      payeRegConnector = mockPAYERegConnector,
+      incorpInfoService = mockIncorpInfoService,
+      s4LService = mockS4LService,
+      compRegConnector = mockCompRegConnector,
+      prepopService = mockPrepopulationService,
+      auditService = mockAuditService
+    ) {
       override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
     }
   }
 
   class NoCompanyDetailsMockedSetup {
-    val service = new CompanyDetailsService {
-      override val incorpInfoService = mockIncorpInfoService
-      override val compRegConnector = mockCompRegConnector
-      override val payeRegConnector = mockPAYERegConnector
-      override val s4LService = mockS4LService
-      override val prepopService = mockPrepopulationService
-      override val auditService = mockAuditService
+    val service: CompanyDetailsService = new CompanyDetailsService(
+      payeRegConnector = mockPAYERegConnector,
+      incorpInfoService = mockIncorpInfoService,
+      s4LService = mockS4LService,
+      compRegConnector = mockCompRegConnector,
+      prepopService = mockPrepopulationService,
+      auditService = mockAuditService
+    ){
       override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
@@ -75,13 +77,14 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
   }
 
   class CompanyDetailsMockedSetup {
-    val service = new CompanyDetailsService {
-      override val incorpInfoService = mockIncorpInfoService
-      override val compRegConnector = mockCompRegConnector
-      override val payeRegConnector = mockPAYERegConnector
-      override val s4LService = mockS4LService
-      override val prepopService = mockPrepopulationService
-      override val auditService = mockAuditService
+    val service: CompanyDetailsService = new CompanyDetailsService(
+      payeRegConnector = mockPAYERegConnector,
+      incorpInfoService = mockIncorpInfoService,
+      s4LService = mockS4LService,
+      compRegConnector = mockCompRegConnector,
+      prepopService = mockPrepopulationService,
+      auditService = mockAuditService
+    ) {
       override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
@@ -97,13 +100,14 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
   }
 
   class APIConverterMockedSetup {
-    val service = new CompanyDetailsService {
-      override val incorpInfoService = mockIncorpInfoService
-      override val compRegConnector = mockCompRegConnector
-      override val payeRegConnector = mockPAYERegConnector
-      override val s4LService = mockS4LService
-      override val prepopService = mockPrepopulationService
-      override val auditService = mockAuditService
+    val service: CompanyDetailsService = new CompanyDetailsService(
+      payeRegConnector = mockPAYERegConnector,
+      incorpInfoService = mockIncorpInfoService,
+      s4LService = mockS4LService,
+      compRegConnector = mockCompRegConnector,
+      prepopService = mockPrepopService,
+      auditService = mockAuditService
+    ) {
       override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
@@ -114,18 +118,18 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     }
   }
 
-  def companyProfile(txId: String) = CompanyRegistrationProfile("held", txId)
+  def companyProfile(txId: String): CompanyRegistrationProfile = CompanyRegistrationProfile("held", txId)
 
   "Calling apiToView" should {
     "correctly produce a view model from a Company Details API model with a completed trading name" in new Setup {
-      val tstModelAPI = CompanyDetailsAPI(
+      val tstModelAPI: CompanyDetailsAPI = CompanyDetailsAPI(
         "Comp name",
         Some("trading name"),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK")),
         DigitalContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
-      val tstModelView = CompanyDetailsView(
+      val tstModelView: CompanyDetailsView = CompanyDetailsView(
         "Comp name",
         Some(TradingNameView(
           differentName = true,
@@ -139,14 +143,14 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "correctly produce a view model from a Company Details API model without a completed trading name" in new Setup {
-      val tstModelAPI = CompanyDetailsAPI(
+      val tstModelAPI: CompanyDetailsAPI = CompanyDetailsAPI(
         "Comp name",
         None,
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         Address("15 St Test Avenue", "Testpool", Some("TestUponAvon"), Some("Nowhereshire"), Some("LE1 1ST"), Some("UK")),
         DigitalContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
-      val tstModelView = CompanyDetailsView(
+      val tstModelView: CompanyDetailsView = CompanyDetailsView(
         "Comp name",
         Some(TradingNameView(
           differentName = false,
@@ -162,14 +166,14 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   "Calling viewToAPI" should {
     "correctly produce a Company Details API model from a completed view model" in new Setup {
-      val tstModelAPI = CompanyDetailsAPI(
+      val tstModelAPI: CompanyDetailsAPI = CompanyDetailsAPI(
         "Comp name",
         Some("trading name"),
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         DigitalContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
-      val tstModelView = CompanyDetailsView(
+      val tstModelView: CompanyDetailsView = CompanyDetailsView(
         "Comp name",
         Some(TradingNameView(
           differentName = true,
@@ -183,14 +187,14 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "correctly produce a Company Details API model from a completed view model with 'trade under different name - no'" in new Setup {
-      val tstModelAPI = CompanyDetailsAPI(
+      val tstModelAPI: CompanyDetailsAPI = CompanyDetailsAPI(
         "Comp name",
         None,
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         Address("15 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
         DigitalContactDetails(Some("test@email.com"), Some("1234567890"), Some("0987654321"))
       )
-      val tstModelView = CompanyDetailsView(
+      val tstModelView: CompanyDetailsView = CompanyDetailsView(
         "Comp name",
         Some(TradingNameView(
           differentName = false,
@@ -204,7 +208,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return the original view model when tradingName has not been completed" in new Setup {
-      val tstModelView = CompanyDetailsView(
+      val tstModelView: CompanyDetailsView = CompanyDetailsView(
         "Comp name",
         None,
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
@@ -215,7 +219,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return the original view model when business contact details has not been completed" in new Setup {
-      val tstModelView = CompanyDetailsView(
+      val tstModelView: CompanyDetailsView = CompanyDetailsView(
         "Comp name",
         Some(TradingNameView(
           differentName = false,
@@ -229,7 +233,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return the original view model when PPOB Address has not been completed" in new Setup {
-      val tstModelView = CompanyDetailsView(
+      val tstModelView: CompanyDetailsView = CompanyDetailsView(
         "Comp name",
         Some(TradingNameView(
           differentName = false,
@@ -265,13 +269,13 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return a default View model with company name and RO Address when no Company Details are returned from the connector" in new Setup {
-      val tstROAddress = Address("addrLine1", "addrLine2", None, None, Some("TE9 9ST"))
-      val tstCompanyDetailsModel = CoHoCompanyDetailsModel(
+      val tstROAddress: Address = Address("addrLine1", "addrLine2", None, None, Some("TE9 9ST"))
+      val tstCompanyDetailsModel: CoHoCompanyDetailsModel = CoHoCompanyDetailsModel(
         companyName = "tstCompanyName",
         roAddress = tstROAddress
       )
 
-      val tstDigitalContactDetails = DigitalContactDetails(
+      val tstDigitalContactDetails: DigitalContactDetails = DigitalContactDetails(
         email = Some("test@email.uk"),
         mobileNumber = None,
         phoneNumber = None
@@ -318,8 +322,8 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   "calling withLatestCompanyDetails" should {
     "return an up to date Company Details with Incorporation Information data" in new Setup {
-      val defaultCompanyDetails = CompanyDetailsView("test Name", None, Fixtures.validAddress, None, None)
-      val expectedCompanyDetails = CompanyDetailsView(Fixtures.validCoHoCompanyDetailsResponse.companyName, None, Fixtures.validCoHoCompanyDetailsResponse.roAddress, None, None)
+      val defaultCompanyDetails: CompanyDetailsView = CompanyDetailsView("test Name", None, Fixtures.validAddress, None, None)
+      val expectedCompanyDetails: CompanyDetailsView = CompanyDetailsView(Fixtures.validCoHoCompanyDetailsResponse.companyName, None, Fixtures.validCoHoCompanyDetailsResponse.roAddress, None, None)
 
       when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validCoHoCompanyDetailsResponse))
@@ -330,12 +334,12 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
-      val result = await(service.withLatestCompanyDetails("testRegId", "testTxId"))
+      val result: CompanyDetailsView = await(service.withLatestCompanyDetails("testRegId", "testTxId"))
       result mustBe expectedCompanyDetails
     }
 
     "return a default Company Details from Company Details service if Incorporation Information returns an error" in new Setup {
-      val defaultCompanyDetails = CompanyDetailsView("test Name", None, Fixtures.validAddress, None, None)
+      val defaultCompanyDetails: CompanyDetailsView = CompanyDetailsView("test Name", None, Fixtures.validAddress, None, None)
 
       when(mockIncorpInfoService.getCompanyDetails(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.failed(new Exception))
@@ -346,23 +350,24 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockS4LService.saveForm[CompanyDetailsView](ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(CacheMap("key", Map.empty)))
 
-      val result = await(service.withLatestCompanyDetails("testRegId", "testTxId"))
+      val result: CompanyDetailsView = await(service.withLatestCompanyDetails("testRegId", "testTxId"))
       result mustBe defaultCompanyDetails
     }
   }
   "Calling getTradingNamePrepop" should {
     "return Some of pre pop trading name if trading name model is None" in new Setup {
-      when(mockPrepopulationService.getTradingName(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(Some("foo bar wizz")))
+      when(mockPrepopulationService.getTradingName(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
+        .thenReturn(Future.successful(Some("foo bar wizz")))
 
       await(service.getTradingNamePrepop("12345", None)) mustBe Some("foo bar wizz")
     }
     "return None as the trading name model = Some of true" in new Setup {
-      await(service.getTradingNamePrepop("12345", Some(TradingNameView(true, Some("foo"))))) mustBe None
+      await(service.getTradingNamePrepop("12345", Some(TradingNameView(differentName = true, Some("foo"))))) mustBe None
     }
     "return Some of pre pop trading name as the trading name model = Some of false" in new Setup {
       when(mockPrepopulationService.getTradingName(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(Some("foo bar wizz")))
 
-      await(service.getTradingNamePrepop("12345", Some(TradingNameView(false, None)))) mustBe Some("foo bar wizz")
+      await(service.getTradingNamePrepop("12345", Some(TradingNameView(differentName = false, None)))) mustBe Some("foo bar wizz")
     }
     "return None if prep pop returns nothing and trading name model = None" in new Setup {
       when(mockPrepopulationService.getTradingName(ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(None))
@@ -383,7 +388,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return a success response when the S4L save completes successfully" in new Setup {
-      val incompleteCompanyDetailsViewModel = CompanyDetailsView(
+      val incompleteCompanyDetailsViewModel: CompanyDetailsView = CompanyDetailsView(
         "Tst Company Name",
         None,
         Address("14 St Test Walk", "Testley", Some("Testford"), Some("Testshire"), Some("TE1 1ST"), Some("UK")),
@@ -405,7 +410,7 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return a success response when submit is completed successfully but user selected false so prepop was not called" in new CompanyDetailsMockedSetup {
-      await(service.submitTradingName(TradingNameView(false, None), "54322", "txId")) mustBe DownstreamOutcome.Success
+      await(service.submitTradingName(TradingNameView(differentName = false, None), "54322", "txId")) mustBe DownstreamOutcome.Success
     }
 
     "return a failure response when submit is not completed successfully" in new NoCompanyDetailsMockedSetup {
@@ -426,26 +431,26 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "return a single RO Address when there is no PPOOB Address" in new Setup {
-      val roAddr = Address("line1", "line2", None, None, Some("postcode"), None)
+      val roAddr: Address = Address("line1", "line2", None, None, Some("postcode"), None)
 
-      def model = viewModel(roAddr, None)
+      def model: CompanyDetailsView = viewModel(roAddr, None)
 
       service.getPPOBPageAddresses(model) mustBe Map("ro" -> roAddr)
     }
 
     "return a single PPOB Address when the RO Address and PPOB Address are the same" in new Setup {
-      val roAddr = Address("line1", "line2", None, None, Some("postcode"), None)
+      val roAddr: Address = Address("line1", "line2", None, None, Some("postcode"), None)
 
-      def model = viewModel(roAddr, Some(roAddr))
+      def model: CompanyDetailsView = viewModel(roAddr, Some(roAddr))
 
       service.getPPOBPageAddresses(model) mustBe Map("ppob" -> roAddr)
     }
 
     "return an RO Address and PPOB Address when the RO Address and PPOB Address are different" in new Setup {
-      val roAddr = Address("line1", "line2", None, None, Some("postcode"), None)
-      val ppobAddr = Address("lineA", "lineB", None, None, Some("postKode"), None)
+      val roAddr: Address = Address("line1", "line2", None, None, Some("postcode"), None)
+      val ppobAddr: Address = Address("lineA", "lineB", None, None, Some("postKode"), None)
 
-      def model = viewModel(roAddr, Some(ppobAddr))
+      def model: CompanyDetailsView = viewModel(roAddr, Some(ppobAddr))
 
       service.getPPOBPageAddresses(model) mustBe Map("ro" -> roAddr, "ppob" -> ppobAddr)
     }
@@ -476,14 +481,14 @@ class CompanyDetailsServiceSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockAuditService.auditBusinessContactDetails(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any[ExecutionContext]))
         .thenReturn(Future.successful(AuditResult.Success))
 
-      implicit val request = FakeRequest()
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
       await(service.submitBusinessContact(Fixtures.validBusinessContactModel, "54322", "txId")) mustBe DownstreamOutcome.Success
     }
 
     "return a failure response when submit is not completed successfully" in new NoCompanyDetailsMockedSetup {
 
-      implicit val request = FakeRequest()
+      implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
       await(service.submitBusinessContact(Fixtures.validBusinessContactModel, "54322", "txId")) mustBe DownstreamOutcome.Failure
     }
   }

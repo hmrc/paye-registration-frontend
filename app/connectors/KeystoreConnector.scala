@@ -17,6 +17,7 @@
 package connectors
 
 import com.codahale.metrics.{Counter, Timer}
+import config.PAYESessionCache
 import models.api.SessionMap
 import models.external.CurrentProfile
 import play.api.libs.json.{Format, Json}
@@ -24,36 +25,20 @@ import play.api.mvc.Request
 import repositories.SessionRepository
 import services.MetricsService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.SessionCache
 import utils.Logging
-import scala.reflect.runtime.universe._
-
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.reflect.runtime.universe._
 
-class KeystoreConnectorImpl @Inject()(val sessionCache: SessionCache,
-                                      val metricsService: MetricsService,
-                                      val sessionRepository: SessionRepository)(implicit val ec: ExecutionContext) extends KeystoreConnector {
-  val successCounter = metricsService.keystoreSuccessResponseCounter
-  val emptyResponseCounter = metricsService.keystoreEmptyResponseCounter
-  val failedCounter = metricsService.keystoreFailedResponseCounter
+class KeystoreConnector @Inject()(val sessionCache: PAYESessionCache,
+                                  val metricsService: MetricsService,
+                                  val sessionRepository: SessionRepository)(implicit val ec: ExecutionContext) extends Logging {
+  val successCounter: Counter = metricsService.keystoreSuccessResponseCounter
+  val emptyResponseCounter: Counter = metricsService.keystoreEmptyResponseCounter
+  val failedCounter: Counter = metricsService.keystoreFailedResponseCounter
 
-  def timer = metricsService.keystoreResponseTimer.time()
-}
-
-trait KeystoreConnector extends Logging {
-  implicit val ec: ExecutionContext
-  val sessionCache: SessionCache
-  val metricsService: MetricsService
-  val sessionRepository: SessionRepository
-
-
-  val successCounter: Counter
-  val emptyResponseCounter: Counter
-  val failedCounter: Counter
-
-  def timer: Timer.Context
+  def timer: Timer.Context = metricsService.keystoreResponseTimer.time()
 
   private def sessionID(implicit hc: HeaderCarrier): String = hc.sessionId.getOrElse(throw new RuntimeException("Active User had no Session ID")).value
 

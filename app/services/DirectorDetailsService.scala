@@ -21,6 +21,7 @@ import connectors.PAYERegistrationConnector
 import enums.{CacheKeys, DownstreamOutcome}
 import models.api.Director
 import models.view.{Directors, Ninos, UserEnteredNino}
+import play.api.libs.json.OFormat
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import utils.RegistrationAllowlist
@@ -28,19 +29,12 @@ import utils.RegistrationAllowlist
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class DirectorDetailsServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
+class DirectorDetailsService @Inject()(val payeRegConnector: PAYERegistrationConnector,
                                            val incorpInfoService: IncorporationInformationService,
                                            val s4LService: S4LService
-                                          )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends DirectorDetailsService
+                                          )(implicit val appConfig: AppConfig, implicit val ec: ExecutionContext) extends RegistrationAllowlist {
 
-trait DirectorDetailsService extends RegistrationAllowlist {
-  implicit val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val payeRegConnector: PAYERegistrationConnector
-  val s4LService: S4LService
-  val incorpInfoService: IncorporationInformationService
-
-  implicit val formatRecordSet = Directors.directorMappingFormat
+  implicit val formatRecordSet: OFormat[Directors] = Directors.directorMappingFormat
 
   private[services] def ninosToDirectorsMap(details: Directors, ninos: Ninos): Map[String, Director] = {
     details.directorMapping.map {

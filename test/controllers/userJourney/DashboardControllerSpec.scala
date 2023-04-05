@@ -16,29 +16,29 @@
 
 package controllers.userJourney
 
-import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{AnyContentAsEmpty, MessagesControllerComponents, Result}
 import play.api.test.FakeRequest
 
-import scala.concurrent.ExecutionContext
-
 class DashboardControllerSpec extends PayeComponentSpec with PayeFakedApp {
-  val fakeRequest = FakeRequest("GET", "/")
-  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
+  val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
+  lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
 
   class Setup {
-    val controller = new DashboardController(mockMcc) {
-      override val redirectToLogin = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-      override val appConfig: AppConfig = injAppConfig
-      override val authConnector = mockAuthConnector
-      override val keystoreConnector = mockKeystoreConnector
-      override val companyRegUrl = "testUrl"
-      override val companyRegUri = "/testUri"
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService = mockPayeRegService
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+    val controller: DashboardController = new DashboardController(
+      keystoreConnector = mockKeystoreConnector,
+      authConnector = mockAuthConnector,
+      s4LService = mockS4LService,
+      companyDetailsService = mockCompanyDetailsService,
+      incorpInfoService = mockIncorpInfoService,
+      incorporationInformationConnector = mockIncorpInfoConnector,
+      payeRegistrationService = mockPayeRegService,
+      mcc = mockMcc
+    )(injAppConfig, ec) {
+      override lazy val redirectToLogin: Result = MockAuthRedirects.redirectToLogin
+      override lazy val redirectToPostSign: Result = MockAuthRedirects.redirectToPostSign
+      override lazy val companyRegUrl = "testUrl"
+      override lazy val companyRegUri = "/testUri"
 
     }
   }

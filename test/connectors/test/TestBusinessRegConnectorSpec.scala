@@ -16,6 +16,7 @@
 
 package connectors.test
 
+import config.AppConfig
 import helpers.PayeComponentSpec
 import models.external.BusinessProfile
 import org.mockito.ArgumentMatchers
@@ -31,12 +32,12 @@ class TestBusinessRegConnectorSpec extends PayeComponentSpec {
 
   implicit val request: Request[_] = FakeRequest()
 
-  class Setup extends CodeMocks {
-    val testConnector = new TestBusinessRegConnector {
-      override val businessRegUrl = "testBusinessRegUrl"
-      override val http = mockHttpClient
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+  val config: AppConfig = app.injector.instanceOf[AppConfig]
 
+  class Setup extends CodeMocks {
+    val testConnector: TestBusinessRegConnector = new TestBusinessRegConnector(mockHttpClient, config) {
+      override val businessRegUrl = "testBusinessRegUrl"
+      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
     }
   }
 

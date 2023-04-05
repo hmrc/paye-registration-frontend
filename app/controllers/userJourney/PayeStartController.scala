@@ -29,7 +29,7 @@ import services._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.play.language.LanguageUtils
-import utils.{Logging, PAYEFeatureSwitches}
+import utils.{Logging, PAYEFeatureSwitch}
 import views.html.pages.error.restart
 
 import javax.inject.{Inject, Singleton}
@@ -45,7 +45,7 @@ class PayeStartController @Inject()(val currentProfileService: CurrentProfileSer
                                     val incorpInfoService: IncorporationInformationService,
                                     val businessRegistrationConnector: BusinessRegistrationConnector,
                                     val companyRegistrationConnector: CompanyRegistrationConnector,
-                                    val featureSwitches: PAYEFeatureSwitches,
+                                    val featureSwitches: PAYEFeatureSwitch,
                                     val incorporationInformationConnector: IncorporationInformationConnector,
                                     mcc: MessagesControllerComponents,
                                     restart: restart,

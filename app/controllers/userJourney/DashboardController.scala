@@ -26,7 +26,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class DashboardControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
+class DashboardController @Inject()(val keystoreConnector: KeystoreConnector,
                                         val authConnector: AuthConnector,
                                         val s4LService: S4LService,
                                         val companyDetailsService: CompanyDetailsService,
@@ -34,17 +34,10 @@ class DashboardControllerImpl @Inject()(val keystoreConnector: KeystoreConnector
                                         val incorporationInformationConnector: IncorporationInformationConnector,
                                         val payeRegistrationService: PAYERegistrationService,
                                         mcc: MessagesControllerComponents
-                                       )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends DashboardController(mcc) with AuthRedirectUrls {
+                                       )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
-  override lazy val companyRegUrl = appConfig.servicesConfig.getConfString("company-registration-frontend.www.url", "Could not find Company Registration Frontend URL")
-  override lazy val companyRegUri = appConfig.servicesConfig.getConfString("company-registration-frontend.www.uri", "Could not find Company Registration Frontend URI")
-}
-
-abstract class DashboardController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-  val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val companyRegUrl: String
-  val companyRegUri: String
+   lazy val companyRegUrl: String = appConfig.servicesConfig.getConfString("company-registration-frontend.www.url", "Could not find Company Registration Frontend URL")
+   lazy val companyRegUri: String = appConfig.servicesConfig.getConfString("company-registration-frontend.www.uri", "Could not find Company Registration Frontend URI")
 
   def dashboard = isAuthorised { implicit request =>
     Future.successful(Redirect(s"$companyRegUrl$companyRegUri/company-registration-overview"))

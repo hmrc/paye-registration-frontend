@@ -16,20 +16,24 @@
 
 package connectors
 
+import com.codahale.metrics.Timer
 import helpers.PayeComponentSpec
-import helpers.mocks.MockMetrics
 import models.external.CompanyRegistrationProfile
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{times, verify, when}
-import play.api.libs.json.{JsObject, Json}
+import org.mockito.Mockito.when
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.libs.json.JsObject
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
+import services.MetricsService
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
+class CompanyRegistrationConnectorSpec extends  PayeComponentSpec {
+  val mockTimer = new Timer()
 
   implicit val request: FakeRequest[_] = FakeRequest()
+  val mockMetricsService: MetricsService = app.injector.instanceOf[MetricsService]
 
   val testUrl = "testUrl"
   val testUri = "testUri"
@@ -42,10 +46,10 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
     when(mockServicesConfig.baseUrl("incorporation-frontend-stubs")).thenReturn(testUrl)
     when(mockServicesConfig.getString("microservice.services.incorporation-frontend-stubs.uri")).thenReturn(testUri)
 
-    val testConnector = new CompanyRegistrationConnector(
+    val testConnector: CompanyRegistrationConnector = new CompanyRegistrationConnector(
       mockFeatureSwitch,
       mockHttpClient,
-      new MockMetrics,
+      mockMetricsService,
       mockAppConfig
     ) {
       override def useCompanyRegistration = false
@@ -60,15 +64,16 @@ class CompanyRegistrationConnectorSpec extends PayeComponentSpec {
   "calling .getCompanyRegistrationDetails(regId: String)" should {
 
     "return a CompanyProfile when successful" in new Setup {
-
-      val compRegProfile = CompanyRegistrationProfile(status, transactionId, ackRefStatus)
+      val compRegProfile: CompanyRegistrationProfile = CompanyRegistrationProfile(status, transactionId, ackRefStatus)
 
       when(mockHttpClient.GET[CompanyRegistrationProfile](any(), any(), any())(any(), any[HeaderCarrier](), any()))
         .thenReturn(Future(compRegProfile))
 
-      val result = await(testConnector.getCompanyRegistrationDetails("testRegId"))
+
+      val result: CompanyRegistrationProfile = await(testConnector.getCompanyRegistrationDetails("testRegId"))
 
       result mustBe compRegProfile
+
     }
 
     "throwing any other exception" in new Setup {

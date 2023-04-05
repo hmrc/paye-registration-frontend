@@ -25,24 +25,14 @@ import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.Future
 
-class ConfirmationServiceImpl @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,
+class ConfirmationService @Inject()(val payeRegistrationConnector: PAYERegistrationConnector,
                                         taxYearConfig: TaxYearConfig
-                                       ) extends ConfirmationService {
+                                       ) {
 
   def now: LocalDate = SystemDate.getSystemDate.toLocalDate
 
   val startDate: LocalDate = taxYearConfig.adminPeriodStart
   val endDate: LocalDate = taxYearConfig.adminPeriodEnd
-
-}
-
-trait ConfirmationService {
-  def now: LocalDate
-
-  val startDate: LocalDate
-  val endDate: LocalDate
-
-  val payeRegistrationConnector: PAYERegistrationConnector
 
   def getAcknowledgementReference(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[String]] = {
     payeRegistrationConnector.getAcknowledgementReference(regId)

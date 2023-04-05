@@ -16,20 +16,20 @@
 
 package connectors
 
+import com.kenshoo.play.metrics.Metrics
 import enums.{DownstreamOutcome, RegistrationDeletion}
 import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics
 import models.api.{Director, Employment, PAYEContact, SICCode, CompanyDetails => CompanyDetailsAPI, PAYERegistration => PAYERegistrationAPI}
-import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import play.api.libs.json.Json
-import play.api.mvc.AnyContentAsEmpty
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.test.FakeRequest
+import services.MetricsService
 import uk.gov.hmrc.http._
 
-import scala.concurrent.ExecutionContext
-
 class PAYERegistrationConnectorSpec extends PayeComponentSpec {
+  val mockMetricsService: MetricsService = app.injector.instanceOf[MetricsService]
+
 
   class Setup extends CodeMocks {
 
@@ -39,19 +39,19 @@ class PAYERegistrationConnectorSpec extends PayeComponentSpec {
     implicit val request: FakeRequest[_] = FakeRequest()
 
     val connector = new PAYERegistrationConnector(
-      new MockMetrics,
+      mockMetricsService,
       mockHttpClient,
       mockAppConfig
     )
   }
 
-  val ok = HttpResponse(200, "")
-  val accepted = HttpResponse(202, "")
-  val noContent = HttpResponse(204, "")
+  val ok: HttpResponse = HttpResponse(200, "")
+  val accepted: HttpResponse = HttpResponse(202, "")
+  val noContent: HttpResponse = HttpResponse(204, "")
   val badRequest = new BadRequestException("400")
-  val forbidden = UpstreamErrorResponse("403", 403, 403)
-  val upstream4xx = UpstreamErrorResponse("418", 418, 418)
-  val upstream5xx = UpstreamErrorResponse("500", 500, 500)
+  val forbidden: UpstreamErrorResponse = UpstreamErrorResponse("403", 403, 403)
+  val upstream4xx: UpstreamErrorResponse = UpstreamErrorResponse("418", 418, 418)
+  val upstream5xx: UpstreamErrorResponse = UpstreamErrorResponse("500", 500, 500)
   val notFound = new NotFoundException("404")
   val internalServiceException = new InternalServerException("502")
 

@@ -26,7 +26,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TestCacheControllerImpl @Inject()(val businessRegConnector: BusinessRegistrationConnector,
+class TestCacheController @Inject()(val businessRegConnector: BusinessRegistrationConnector,
                                         val s4LService: S4LService,
                                         val authConnector: AuthConnector,
                                         val keystoreConnector: KeystoreConnector,
@@ -35,13 +35,7 @@ class TestCacheControllerImpl @Inject()(val businessRegConnector: BusinessRegist
                                         val incorporationInformationConnector: IncorporationInformationConnector,
                                         val payeRegistrationService: PAYERegistrationService,
                                         mcc: MessagesControllerComponents
-                                       )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends TestCacheController(mcc) with AuthRedirectUrls
-
-abstract class TestCacheController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-  val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val businessRegConnector: BusinessRegistrationConnector
-  val s4LService: S4LService
+                                       )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
   def tearDownS4L: Action[AnyContent] = isAuthorised { implicit request =>
     for {

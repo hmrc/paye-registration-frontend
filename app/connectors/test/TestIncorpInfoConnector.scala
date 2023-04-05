@@ -25,17 +25,10 @@ import uk.gov.hmrc.http._
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TestIncorpInfoConnectorImpl @Inject()(val http: HttpClient,
-                                            appConfig: AppConfig, implicit val ec: ExecutionContext) extends TestIncorpInfoConnector {
-  val incorpFEStubsUrl = appConfig.servicesConfig.baseUrl("incorporation-frontend-stubs")
-  val incorpInfoUrl = appConfig.servicesConfig.baseUrl("incorporation-information")
-}
-
-trait TestIncorpInfoConnector extends BaseConnector with IncorporationInformationHttpParsers {
-  implicit val ec: ExecutionContext
-  val incorpFEStubsUrl: String
-  val incorpInfoUrl: String
-  val http: CorePost with CorePut with CoreGet
+class TestIncorpInfoConnector @Inject()(val http: HttpClient,
+                                            appConfig: AppConfig, implicit val ec: ExecutionContext) extends BaseConnector with IncorporationInformationHttpParsers {
+  val incorpFEStubsUrl: String = appConfig.servicesConfig.baseUrl("incorporation-frontend-stubs")
+  val incorpInfoUrl: String = appConfig.servicesConfig.baseUrl("incorporation-information")
 
   private def txId(regId: String): String = s"000-434-$regId"
 
