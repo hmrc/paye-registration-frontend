@@ -67,7 +67,7 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
         )
       )
 
-      val tstCap = new CompletionCapacityServiceImpl(payeRegistrationConnector, busRegConnector)
+      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
       val res = await(tstCap.getCompletionCapacity(regID))
 
       res mustBe Some(CompletionCapacity(UserCapacity.director, ""))
@@ -82,7 +82,7 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
         )
       )
 
-      val tstCap = new CompletionCapacityServiceImpl(payeRegistrationConnector, busRegConnector)
+      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
       val res = await(tstCap.getCompletionCapacity(regID))
 
       res mustBe Some(CompletionCapacity(UserCapacity.other, "friend"))
@@ -114,7 +114,7 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
 
       stubPatch(s"/paye-registration/$regID/capacity", 200, "\"director\"")
 
-      val tstCap = new CompletionCapacityServiceImpl(payeRegistrationConnector, busRegConnector)
+      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
       val res = await(tstCap.getCompletionCapacity(regID))
 
       res mustBe Some(CompletionCapacity(UserCapacity.director, ""))
@@ -145,7 +145,7 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
 
       stubPatch(s"/paye-registration/$regID/capacity", 200, "\"aunt\"")
 
-      val tstCap = new CompletionCapacityServiceImpl(payeRegistrationConnector, busRegConnector)
+      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
       val res = await(tstCap.getCompletionCapacity(regID))
 
       res mustBe Some(CompletionCapacity(UserCapacity.other, "aunt"))
@@ -166,7 +166,7 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
         )
       )
 
-      val tstCap = new CompletionCapacityServiceImpl(payeRegistrationConnector, busRegConnector)
+      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
       val res = await(tstCap.getCompletionCapacity(regID))
 
       res mustBe None
@@ -194,7 +194,7 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
         )
       )
 
-      val tstCap = new CompletionCapacityServiceImpl(payeRegistrationConnector, busRegConnector)
+      val tstCap = new CompletionCapacityService(payeRegistrationConnector, busRegConnector)
       val res = await(tstCap.getCompletionCapacity(regID))
 
       res mustBe None

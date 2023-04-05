@@ -17,6 +17,7 @@
 package connectors
 
 import ch.qos.logback.classic.Level
+import com.kenshoo.play.metrics.Metrics
 import common.exceptions.{CurrentProfileNotFoundExceptionType, UnexpectedExceptionType}
 import common.exceptions.DownstreamExceptions.{CurrentProfileNotFoundException, UnexpectedException}
 import config.AppConfig
@@ -30,8 +31,10 @@ import models.{Address, DigitalContactDetails}
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsValue, Writes}
 import play.api.test.FakeRequest
+import services.MetricsService
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import utils.LogCapturingHelper
@@ -41,6 +44,7 @@ import scala.concurrent.Future
 class BusinessRegistrationConnectorSpec extends PayeComponentSpec with LogCapturingHelper {
 
   implicit val request: FakeRequest[_] = FakeRequest()
+  val mockMetricsService: MetricsService = app.injector.instanceOf[MetricsService]
 
   class Setup {
 
@@ -51,7 +55,7 @@ class BusinessRegistrationConnectorSpec extends PayeComponentSpec with LogCaptur
     when(mockServicesConfig.baseUrl("business-registration")).thenReturn("testBusinessRegUrl")
 
     val testConnector = new BusinessRegistrationConnector(
-      metricsService = new MockMetrics,
+      metricsService = mockMetricsService,
       http = mockHttpClient,
       appConfig = mockAppConfig
     )(scala.concurrent.ExecutionContext.Implicits.global)

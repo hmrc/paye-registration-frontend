@@ -22,7 +22,7 @@ import models.Address
 import models.external.AlfJourneyConfig
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.i18n.Lang
+import play.api.i18n.{Lang, Messages}
 import play.api.mvc.Call
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
@@ -35,8 +35,7 @@ class AddressLookupServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   implicit val request: FakeRequest[_] = FakeRequest()
 
-  implicit val mockMessages = injMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
-  val metricsMock = new MockMetrics
+  implicit val mockMessages: Messages = injMessagesApi.preferred(Seq(Lang(Locale.ENGLISH)))
 
   class Setup {
     val service = new AddressLookupService(
@@ -56,7 +55,7 @@ class AddressLookupServiceSpec extends PayeComponentSpec with PayeFakedApp {
 
   "Calling getAddress" should {
     "return an address" in new Setup {
-      val expected =
+      val expected: Address =
         Address(
           "L1",
           "L2",

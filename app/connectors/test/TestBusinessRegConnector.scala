@@ -27,15 +27,9 @@ import uk.gov.hmrc.http.{CorePost, HeaderCarrier, HttpClient, HttpResponse}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class TestBusinessRegConnectorImpl @Inject()(val http: HttpClient,
-                                             appConfig: AppConfig)(implicit val ec: ExecutionContext) extends TestBusinessRegConnector {
-  val businessRegUrl = appConfig.servicesConfig.baseUrl("business-registration")
-}
-
-trait TestBusinessRegConnector extends BaseConnector with BusinessRegistrationHttpParsers {
-  implicit val ec: ExecutionContext
-  val businessRegUrl: String
-  val http: CorePost
+class TestBusinessRegConnector @Inject()(val http: HttpClient,
+                                             appConfig: AppConfig)(implicit val ec: ExecutionContext) extends BaseConnector with BusinessRegistrationHttpParsers {
+  val businessRegUrl: String = appConfig.servicesConfig.baseUrl("business-registration")
 
   def createBusinessProfileEntry(implicit hc: HeaderCarrier, request: Request[_]): Future[BusinessProfile] =
     http.POST[BusinessRegistrationRequest, BusinessProfile](s"$businessRegUrl/business-registration/business-tax-registration", BusinessRegistrationRequest("ENG"))(

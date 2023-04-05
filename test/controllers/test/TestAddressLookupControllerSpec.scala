@@ -21,35 +21,36 @@ import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.Address
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{AnyContentAsEmpty, MessagesControllerComponents, Result}
 import play.api.test.FakeRequest
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class TestAddressLookupControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
-  val fakeRequest = FakeRequest("GET", "/")
-  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
+  val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
+  lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+
   class Setup {
-    val controller = new TestAddressLookupController(mockMcc) {
-      override val appConfig = injAppConfig
-      override val redirectToLogin = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-
-      override val messagesApi = injMessagesApi
-      override val authConnector = mockAuthConnector
-      override val companyDetailsService = mockCompanyDetailsService
-      override val payeContactService = mockPAYEContactService
-      override val keystoreConnector = mockKeystoreConnector
-      override val prepopService = mockPrepopService
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService = mockPayeRegService
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
+    val controller: TestAddressLookupController = new TestAddressLookupController(
+      companyDetailsService = mockCompanyDetailsService,
+      keystoreConnector = mockKeystoreConnector,
+      payeContactService = mockPAYEContactService,
+      authConnector = mockAuthConnector,
+      s4LService = mockS4LService,
+      incorpInfoService = mockIncorpInfoService,
+      prepopService = mockPrepopService,
+      incorporationInformationConnector = mockIncorpInfoConnector,
+      payeRegistrationService = mockPayeRegService,
+      mcc = mockMcc
+    )(injAppConfig, ec)
+     {
+      override lazy val redirectToLogin: Result = MockAuthRedirects.redirectToLogin
+      override lazy val redirectToPostSign: Result = MockAuthRedirects.redirectToPostSign
     }
   }
 
-  val address = Address(
+  val address: Address = Address(
     line1 = "13 Test Street",
     line2 = "No Lookup Town",
     line3 = Some("NoLookupShire"),

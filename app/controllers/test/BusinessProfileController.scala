@@ -28,7 +28,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class BusinessProfileControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
+class BusinessProfileController @Inject()(val keystoreConnector: KeystoreConnector,
                                               val businessRegConnector: BusinessRegistrationConnector,
                                               val authConnector: AuthConnector,
                                               val s4LService: S4LService,
@@ -38,13 +38,7 @@ class BusinessProfileControllerImpl @Inject()(val keystoreConnector: KeystoreCon
                                               val incorporationInformationConnector: IncorporationInformationConnector,
                                               val payeRegistrationService: PAYERegistrationService,
                                               mcc: MessagesControllerComponents
-                                             )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends BusinessProfileController(mcc) with AuthRedirectUrls
-
-abstract class BusinessProfileController(mcc: MessagesControllerComponents) extends PayeBaseController(mcc) {
-  val appConfig: AppConfig
-  implicit val ec: ExecutionContext
-  val businessRegConnector: BusinessRegistrationConnector
-  val testBusinessRegConnector: TestBusinessRegConnector
+                                             )(val appConfig: AppConfig, implicit val ec: ExecutionContext) extends PayeBaseController(mcc) with AuthRedirectUrls {
 
   def businessProfileSetup = isAuthorised { implicit request =>
     doBusinessProfileSetup map { res =>

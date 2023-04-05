@@ -31,19 +31,23 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
   implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup {
-    val service = new PAYERegistrationService {
-      override val payeRegistrationConnector = mockPAYERegConnector
-      override val keyStoreConnector = mockKeystoreConnector
-      override val currentProfileService = mockCurrentProfileService
-      override val s4LService = mockS4LService
+    val service: PAYERegistrationService = new PAYERegistrationService(
+      payeRegistrationConnector = mockPAYERegConnector,
+      keyStoreConnector = mockKeystoreConnector,
+      currentProfileService = mockCurrentProfileService,
+      s4LService = mockS4LService
+    ) {
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
     }
   }
 
-  val validCurrentProfile = CurrentProfile("testRegId", CompanyRegistrationProfile("rejected", "txId"), "en", false, None)
+  val validCurrentProfile: CurrentProfile = CurrentProfile("testRegId",
+    CompanyRegistrationProfile("rejected", "txId"),
+    "en",
+    payeRegistrationSubmitted = false,
+    None)
 
-  val forbidden = UpstreamErrorResponse("403", 403, 403)
+  val forbidden: UpstreamErrorResponse = UpstreamErrorResponse("403", 403, 403)
   val notFound = new NotFoundException("404")
   val runTimeException = new RuntimeException("tst")
 
@@ -72,7 +76,7 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
         when(mockKeystoreConnector.remove()(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(true))
 
-        val result = await(service.deleteRejectedRegistration("testRegId", "testTxId"))
+        val result: RegistrationDeletion.Value = await(service.deleteRejectedRegistration("testRegId", "testTxId"))
         result mustBe RegistrationDeletion.success
       }
     }
@@ -82,7 +86,7 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
         when(mockPAYERegConnector.deleteRejectedRegistrationDocument(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(RegistrationDeletion.invalidStatus))
 
-        val result = await(service.deleteRejectedRegistration("testRegId", "testTxId"))
+        val result: RegistrationDeletion.Value = await(service.deleteRejectedRegistration("testRegId", "testTxId"))
         result mustBe RegistrationDeletion.invalidStatus
       }
     }
@@ -103,7 +107,7 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
         when(mockPAYERegConnector.deleteRegistrationForRejectedIncorp(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future(RegistrationDeletion.success))
 
-        val result = await(service.handleIIResponse(txId = "testTxId", status = IncorporationStatus.rejected))
+        val result: RegistrationDeletion.Value = await(service.handleIIResponse(txId = "testTxId", status = IncorporationStatus.rejected))
         result mustBe RegistrationDeletion.success
       }
 
@@ -117,7 +121,7 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
         when(mockPAYERegConnector.deleteRegistrationForRejectedIncorp(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future(RegistrationDeletion.success))
 
-        val result = await(service.handleIIResponse(txId = "testTxId", status = IncorporationStatus.rejected))
+        val result: RegistrationDeletion.Value = await(service.handleIIResponse(txId = "testTxId", status = IncorporationStatus.rejected))
         result mustBe RegistrationDeletion.success
       }
     }
@@ -126,7 +130,7 @@ class PAYERegistrationServiceSpec extends PayeComponentSpec {
       when(mockCurrentProfileService.updateCurrentProfileWithIncorpStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future(None))
 
-      val result = await(service.handleIIResponse(txId = "testTxId", status = IncorporationStatus.accepted))
+      val result: RegistrationDeletion.Value = await(service.handleIIResponse(txId = "testTxId", status = IncorporationStatus.accepted))
       result mustBe RegistrationDeletion.invalidStatus
     }
   }

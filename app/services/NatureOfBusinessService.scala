@@ -26,11 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class NatureOfBusinessServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector)(implicit val ec: ExecutionContext) extends NatureOfBusinessService
-
-trait NatureOfBusinessService {
-  val payeRegConnector: PAYERegistrationConnector
-  implicit val ec: ExecutionContext
+class NatureOfBusinessService @Inject()(val payeRegConnector: PAYERegistrationConnector)(implicit val ec: ExecutionContext)  {
 
   private[services] def sicCodes2NatureOfBusiness(sicCodes: Seq[SICCode]): Option[NatureOfBusiness] =
     sicCodes.headOption.flatMap(_.description.map(NatureOfBusiness(_)))

@@ -26,14 +26,8 @@ import utils.Logging
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CompletionCapacityServiceImpl @Inject()(val payeRegConnector: PAYERegistrationConnector,
-                                              val businessRegistrationConnector: BusinessRegistrationConnector)(implicit val ec: ExecutionContext) extends CompletionCapacityService
-
-trait CompletionCapacityService extends Logging {
-
-  val payeRegConnector: PAYERegistrationConnector
-  val businessRegistrationConnector: BusinessRegistrationConnector
-  implicit val ec: ExecutionContext
+class CompletionCapacityService @Inject()(val payeRegConnector: PAYERegistrationConnector,
+                                              val businessRegistrationConnector: BusinessRegistrationConnector)(implicit val ec: ExecutionContext) extends Logging {
 
   def saveCompletionCapacity(regId: String, completionCapacity: CompletionCapacity)(implicit hc: HeaderCarrier, request: Request[_]): Future[DownstreamOutcome.Value] = {
     payeRegConnector.upsertCompletionCapacity(regId, viewToAPI(completionCapacity)) map {

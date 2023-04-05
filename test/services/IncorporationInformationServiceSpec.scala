@@ -21,7 +21,6 @@ import helpers.PayeComponentSpec
 import models.view.Directors
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.BadRequestException
 
@@ -33,17 +32,17 @@ class IncorporationInformationServiceSpec extends PayeComponentSpec {
   implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup {
-    val service = new IncorporationInformationService {
-      override val incorpInfoConnector = mockIncorpInfoConnector
-      override val keystoreConnector = mockKeystoreConnector
+    val service: IncorporationInformationService = new IncorporationInformationService(
+      keystoreConnector = mockKeystoreConnector,
+      incorpInfoConnector = mockIncorpInfoConnector
+    ) {
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
     }
   }
 
-  val tstSuccessResult = IncorpInfoSuccessResponse(Fixtures.validCoHoCompanyDetailsResponse)
-  val tstBadRequestResult = IncorpInfoBadRequestResponse
-  val tstInternalErrorResult = IncorpInfoErrorResponse(new RuntimeException)
+  val tstSuccessResult: IncorpInfoSuccessResponse = IncorpInfoSuccessResponse(Fixtures.validCoHoCompanyDetailsResponse)
+  val tstBadRequestResult: IncorpInfoResponse = IncorpInfoBadRequestResponse
+  val tstInternalErrorResult: IncorpInfoErrorResponse = IncorpInfoErrorResponse(new RuntimeException)
 
 
   "Calling getCompanyDetails" should {
@@ -80,7 +79,7 @@ class IncorporationInformationServiceSpec extends PayeComponentSpec {
 
     "get the incorporation date if it is present in the response" in new Setup {
 
-      val date = LocalDate.of(2018, 5, 5)
+      val date: LocalDate = LocalDate.of(2018, 5, 5)
 
       when(mockIncorpInfoConnector.getIncorporationInfoDate(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(date)))

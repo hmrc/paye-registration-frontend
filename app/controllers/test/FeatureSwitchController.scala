@@ -25,16 +25,10 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class FeatureSwitchControllerImpl @Inject()(val featureManager: FeatureManager,
-                                            val payeFeatureSwitch: PAYEFeatureSwitches,
+class FeatureSwitchController @Inject()(val featureManager: FeatureSwitchManager,
+                                            val payeFeatureSwitch: PAYEFeatureSwitch,
                                             val payeRegConnector: PAYERegistrationConnector,
-                                            mcc: MessagesControllerComponents) extends FeatureSwitchController(mcc)
-
-abstract class FeatureSwitchController(mcc: MessagesControllerComponents) extends FrontendController(mcc) {
-
-  val featureManager: FeatureManager
-  val payeFeatureSwitch: PAYEFeatureSwitches
-  val payeRegConnector: PAYERegistrationConnector
+                                            mcc: MessagesControllerComponents) extends FrontendController(mcc) {
 
   def switcher(featureName: String, featureState: String): Action[AnyContent] = Action.async {
     implicit request =>

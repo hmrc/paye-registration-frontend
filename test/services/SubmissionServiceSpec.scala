@@ -35,13 +35,13 @@ class SubmissionServiceSpec extends PayeComponentSpec with PayeFakedApp {
   implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup extends CodeMocks {
-    val service = new SubmissionService {
-      override val payeRegistrationConnector = mockPAYERegConnector
-      override val keystoreConnector = mockKeystoreConnector
-      override val iiConnector = mockIncorpInfoConnector
+    val service: SubmissionService = new SubmissionService(
+      payeRegistrationConnector = mockPAYERegConnector,
+      keystoreConnector = mockKeystoreConnector,
+      iiConnector = mockIncorpInfoConnector
+    ) {
       override implicit val appConfig: AppConfig = injAppConfig
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
     }
   }
 
@@ -66,7 +66,7 @@ class SubmissionServiceSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockIncorpInfoConnector.cancelSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(true))
 
-      val cp = currentProfile(regId).copy(payeRegistrationSubmitted = true)
+      val cp: CurrentProfile = currentProfile(regId).copy(payeRegistrationSubmitted = true)
 
       when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(cp))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(SessionMap("testSessionId", regId, "40-123456", Map.empty[String, JsValue])))
@@ -81,7 +81,7 @@ class SubmissionServiceSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockIncorpInfoConnector.cancelSubscription(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(true))
 
-      val cp = currentProfile(regId).copy(incorpStatus = Some(IncorporationStatus.rejected))
+      val cp: CurrentProfile = currentProfile(regId).copy(incorpStatus = Some(IncorporationStatus.rejected))
 
       when(mockKeystoreConnector.cache(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.eq(cp))(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(SessionMap("testSessionId", regId, "40-123456", Map.empty[String, JsValue])))

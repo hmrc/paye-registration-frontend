@@ -29,9 +29,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
 @Singleton
-class PAYESessionIDFilterImpl @Inject()(val mat: Materializer) extends PAYESessionIDFilter
-
-trait PAYESessionIDFilter extends Filter {
+class PAYESessionIDFilter @Inject()(val mat: Materializer) extends Filter {
 
   private def getHeaderCarrier(request: RequestHeader): HeaderCarrier =
     HeaderCarrierConverter.fromRequestAndSession(request, request.session)

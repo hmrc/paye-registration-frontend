@@ -16,43 +16,43 @@
 
 package controllers.test
 
-import config.AppConfig
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.{BusinessProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{AnyContentAsEmpty, MessagesControllerComponents, Result}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, NotFoundException}
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class CurrentProfileControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
-  val testProfile = BusinessProfile("testRegId", "testLang")
-  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
+  val testProfile: BusinessProfile = BusinessProfile("testRegId", "testLang")
+  lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+
   class Setup {
-    val controller = new BusinessProfileController(mockMcc) {
-      override val appConfig: AppConfig = injAppConfig
-      override val redirectToLogin = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
-
-      override val messagesApi = injMessagesApi
-      override val businessRegConnector = mockBusinessRegistrationConnector
-      override val keystoreConnector = mockKeystoreConnector
-      override val testBusinessRegConnector = mockTestBusRegConnector
-      override val authConnector = mockAuthConnector
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService = mockPayeRegService
-      override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
+    val controller: BusinessProfileController = new BusinessProfileController(
+      keystoreConnector = mockKeystoreConnector,
+      businessRegConnector = mockBusinessRegistrationConnector,
+      authConnector = mockAuthConnector,
+      s4LService = mockS4LService,
+      companyDetailsService = mockCompanyDetailsService,
+      incorpInfoService = mockIncorpInfoService,
+      testBusinessRegConnector = mockTestBusRegConnector,
+      incorporationInformationConnector = mockIncorpInfoConnector,
+      payeRegistrationService = mockPayeRegService,
+      mcc = mockMcc
+    )(injAppConfig, ec) {
+      override lazy val redirectToLogin: Result = MockAuthRedirects.redirectToLogin
+      override lazy val redirectToPostSign: Result = MockAuthRedirects.redirectToPostSign
     }
   }
 
   "currentProfileSetup" should {
     "return an OK" when {
       "the current profile has been returned and has been cached in keystore" in new Setup {
-        val request = FakeRequest()
+        val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
         when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.successful(testProfile))
@@ -66,7 +66,7 @@ class CurrentProfileControllerSpec extends PayeComponentSpec with PayeFakedApp {
       }
 
       "the current profile hasn't been found, but has then proceeded to create one and cache it in keystore" in new Setup {
-        val request = FakeRequest()
+        val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
         when(mockBusinessRegistrationConnector.retrieveCurrentProfile(ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any()))
           .thenReturn(Future.failed(new NotFoundException("")))

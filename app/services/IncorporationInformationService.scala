@@ -27,14 +27,8 @@ import java.time.LocalDate
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class IncorporationInformationServiceImpl @Inject()(val keystoreConnector: KeystoreConnector,
-                                                    val incorpInfoConnector: IncorporationInformationConnector)(implicit val ec: ExecutionContext) extends IncorporationInformationService
-
-trait IncorporationInformationService {
-
-  implicit val ec: ExecutionContext
-  val incorpInfoConnector: IncorporationInformationConnector
-  val keystoreConnector: KeystoreConnector
+class IncorporationInformationService @Inject()(val keystoreConnector: KeystoreConnector,
+                                                    val incorpInfoConnector: IncorporationInformationConnector)(implicit val ec: ExecutionContext) {
 
   def getCompanyDetails(regId: String, txId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[CoHoCompanyDetailsModel] = {
     incorpInfoConnector.getCoHoCompanyDetails(regId, txId) map {

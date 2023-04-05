@@ -336,7 +336,7 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
               intercept[JsResultException](BusinessRegistrationHttpParsers.retrieveAddressesHttpReads(regId).read("", "", HttpResponse(OK, json = Json.obj(), Map())))
-              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][retrieveAddressesHttpReads] JSON returned could not be parsed to scala.collection.Seq model for regId: '$regId'")
+              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][retrieveAddressesHttpReads] JSON returned could not be parsed to scala.collection.immutable.Seq model for regId: '$regId'")
             }
           }
         }

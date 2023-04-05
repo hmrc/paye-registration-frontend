@@ -26,9 +26,10 @@ import org.mockito.Mockito.reset
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.{HeaderNames, HttpProtocol, MimeTypes, Status}
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{AnyContent, Call, Request, Result}
+import play.api.mvc.{AnyContent, AnyContentAsEmpty, Call, Request, Result}
 import play.api.test._
 import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
@@ -52,7 +53,8 @@ trait PayeComponentSpec
     with RouteInvokers
     with FutureAwaits
     with MockedComponents
-    with JsonFormValidation {
+    with JsonFormValidation
+    with GuiceOneAppPerSuite {
 
   override implicit def defaultAwaitTimeout: Timeout = 5.seconds
 
@@ -63,7 +65,7 @@ trait PayeComponentSpec
 
   implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
 
-  def fakeRequest(method: String = "GET") = FakeRequest(method, "")
+  def fakeRequest(method: String = "GET"): FakeRequest[AnyContentAsEmpty.type] = FakeRequest(method, "")
 
   private def resetMocks(): Unit = {
     reset(
@@ -86,7 +88,6 @@ trait PayeComponentSpec
       mockAddressLookupConnector,
       mockSessionCache,
       mockFeatureSwitch,
-      mockFeatureSwitches,
       mockPAYERegConnector,
       mockKeystoreConnector,
       mockPayeRegistrationConnector,
@@ -101,7 +102,9 @@ trait PayeComponentSpec
       mockThresholdService,
       mockEmploymentService,
       mockConfirmationService,
-      mockSessionRepository
+      mockSessionRepository,
+      mockTaxYearConfig,
+      mockMetricService
     )
   }
 

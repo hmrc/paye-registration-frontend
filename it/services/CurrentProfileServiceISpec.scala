@@ -103,7 +103,7 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase with CachingStub {
       stubGet(s"/paye-registration/$regIdAllowlisted/status", 200, backendStatus("draft"))
       stubPost(s"/incorporation-information/subscribe/fakeTxId-$regIdAllowlisted/regime/paye-fe/subscriber/SCRS", 202, "")
 
-      val currentProfileService = new CurrentProfileServiceImpl(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector, incorpInfoConnector)
+      val currentProfileService = new CurrentProfileService(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector, incorpInfoConnector)
 
       def getResponse = currentProfileService.fetchAndStoreCurrentProfile
 
@@ -138,7 +138,7 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase with CachingStub {
       stubGet(s"/paye-registration/$regId/status", 404, "")
       stubPost(s"/incorporation-information/subscribe/$txId/regime/paye-fe/subscriber/SCRS", 202, "")
 
-      val currentProfileService = new CurrentProfileServiceImpl(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector, incorpInfoConnector)
+      val currentProfileService = new CurrentProfileService(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector, incorpInfoConnector)
 
       def getResponse = currentProfileService.fetchAndStoreCurrentProfile
 
@@ -184,7 +184,7 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase with CachingStub {
         stubGet(s"/paye-registration/$regId/status", 200, backendStatus("submitted"))
         stubPost(s"/incorporation-information/subscribe/$txId/regime/paye-fe/subscriber/SCRS", 202, "")
 
-        val currentProfileService = new CurrentProfileServiceImpl(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector, incorpInfoConnector)
+        val currentProfileService = new CurrentProfileService(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector, incorpInfoConnector)
 
         def getResponse = currentProfileService.fetchAndStoreCurrentProfile
 
@@ -239,7 +239,7 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase with CachingStub {
         stubGet(s"/paye-registration/$regId/status", 200, backendStatus("submitted"))
         stubPost(s"/incorporation-information/subscribe/$txId/regime/paye-fe/subscriber/SCRS", 200, iiSubscriptionRes)
 
-        val currentProfileService = new CurrentProfileServiceImpl(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector, incorpInfoConnector)
+        val currentProfileService = new CurrentProfileService(businessRegistrationConnector, payeRegistrationConnector, keystoreConnector, companyRegistrationConnector, incorpInfoConnector)
 
         def getResponse = currentProfileService.fetchAndStoreCurrentProfile
 

@@ -16,30 +16,36 @@
 
 package connectors
 
+import com.codahale.metrics.{Counter, Timer}
+import com.kenshoo.play.metrics.Metrics
 import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics
 import models.api.SessionMap
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
+import services.MetricsService
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class KeystoreConnectorSpec extends PayeComponentSpec {
 
-  val connector = new KeystoreConnector {
-    override val metricsService = new MockMetrics
-    override val sessionCache = mockSessionCache
-    override val sessionRepository = mockSessionRepository
-    override val successCounter = metricsService.keystoreSuccessResponseCounter
-    override val failedCounter = metricsService.keystoreFailedResponseCounter
-    override val emptyResponseCounter = metricsService.keystoreFailedResponseCounter
+  val mockMetricsService: MetricsService = app.injector.instanceOf[MetricsService]
 
-    override def timer = metricsService.keystoreResponseTimer.time()
+  val connector: KeystoreConnector = new KeystoreConnector (
+    mockSessionCache,
+    mockMetricsService,
+    mockSessionRepository
+  ) {
+    override val successCounter: Counter = metricsService.keystoreSuccessResponseCounter
+    override val failedCounter: Counter = metricsService.keystoreFailedResponseCounter
+    override val emptyResponseCounter: Counter = metricsService.keystoreFailedResponseCounter
+
+    override def timer: Timer.Context = metricsService.keystoreResponseTimer.time()
     override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
   }
 
   implicit val request: FakeRequest[_] = FakeRequest()

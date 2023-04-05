@@ -27,6 +27,7 @@ import uk.gov.hmrc.crypto.json.JsonEncryptor
 import uk.gov.hmrc.crypto.{ApplicationCrypto, Protected}
 import uk.gov.hmrc.mongo.test.MongoSupport
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
@@ -39,7 +40,7 @@ trait CachingStub extends MongoSupport with BeforeAndAfterEach {
 
   def customAwait[A](future: Future[A])(implicit timeout: Duration): A = Await.result(future, timeout)
 
-  val defaultTimeout: FiniteDuration = 5 seconds
+  val defaultTimeout: FiniteDuration = new FiniteDuration(5, TimeUnit.SECONDS)
 
   override def beforeEach(): Unit = {
     super.beforeEach()

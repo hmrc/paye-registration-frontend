@@ -30,18 +30,20 @@ class ConfirmationServiceSpec extends PayeComponentSpec {
   trait Setup {
     val testNow: LocalDate
 
-    val service = new ConfirmationService {
-      def now = testNow
+    val service: ConfirmationService = new ConfirmationService(
+      payeRegistrationConnector = mockPAYERegConnector,
+      taxYearConfig = mockTaxYearConfig
+    ) {
+      override def now: LocalDate = testNow
 
-      val startDate = LocalDate.of(2018, 2, 6)
-      val endDate = LocalDate.of(2018, 5, 17)
-      val payeRegistrationConnector = mockPAYERegConnector
+      override val startDate: LocalDate = LocalDate.of(2018, 2, 6)
+      override val endDate: LocalDate = LocalDate.of(2018, 5, 17)
     }
   }
 
   "Calling getAcknowledgementReference" should {
     "return an acknowledgment reference" in new Setup {
-      override val testNow = LocalDate.now
+      override val testNow: LocalDate = LocalDate.now
 
       when(mockPAYERegConnector.getAcknowledgementReference(ArgumentMatchers.contains("45632"))(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some("BRPY00000000001")))
@@ -53,19 +55,19 @@ class ConfirmationServiceSpec extends PayeComponentSpec {
   "determineIfInclusiveContentIsShown" should {
     "return true" when {
       "now is equal to the start date" in new Setup {
-        override val testNow = LocalDate.of(2018, 2, 6)
+        override val testNow: LocalDate = LocalDate.of(2018, 2, 6)
 
         service.determineIfInclusiveContentIsShown mustBe true
       }
 
       "now is equal to the end date" in new Setup {
-        override val testNow = LocalDate.of(2018, 5, 17)
+        override val testNow: LocalDate = LocalDate.of(2018, 5, 17)
 
         service.determineIfInclusiveContentIsShown mustBe true
       }
 
       "now is after the start date but before the end date" in new Setup {
-        override val testNow = LocalDate.of(2018, 4, 4)
+        override val testNow: LocalDate = LocalDate.of(2018, 4, 4)
 
         service.determineIfInclusiveContentIsShown mustBe true
       }
@@ -73,13 +75,13 @@ class ConfirmationServiceSpec extends PayeComponentSpec {
 
     "return false" when {
       "now is before the start date" in new Setup {
-        override val testNow = LocalDate.of(2018, 1, 1)
+        override val testNow: LocalDate = LocalDate.of(2018, 1, 1)
 
         service.determineIfInclusiveContentIsShown mustBe false
       }
 
       "now is after the end date" in new Setup {
-        override val testNow = LocalDate.of(2018, 10, 26)
+        override val testNow: LocalDate = LocalDate.of(2018, 10, 26)
 
         service.determineIfInclusiveContentIsShown mustBe false
       }

@@ -19,43 +19,36 @@ package controllers.test
 import config.AppConfig
 import connectors._
 import connectors.test._
-import controllers.AuthRedirectUrls
+import controllers.{AuthRedirectUrls, PayeBaseController}
 import enums.DownstreamOutcome
+import play.api.mvc.Results.Redirect
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request}
 import services._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.http.HeaderCarrier
+import utils.Logging
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class TestSetupControllerImpl @Inject()(val keystoreConnector: KeystoreConnector,
-                                        val businessRegConnector: BusinessRegistrationConnector,
-                                        val testBusinessRegConnector: TestBusinessRegConnector,
+class TestSetupController @Inject()(
                                         val testIncorpInfoConnector: TestIncorpInfoConnector,
                                         val coHoAPIService: IncorporationInformationService,
-                                        val companyDetailsService: CompanyDetailsService,
-                                        val incorpInfoService: IncorporationInformationService,
                                         val testPAYERegConnector: TestPAYERegConnector,
                                         val payeRegService: PAYERegistrationService,
+                                        val businessProfileController: BusinessProfileController,
+                                        val appConfig: AppConfig,
+                                        val testBusinessRegConnector: TestBusinessRegConnector,
                                         val authConnector: AuthConnector,
-                                        val s4LService: S4LService,
-                                        val incorporationInformationConnector: IncorporationInformationConnector,
                                         val payeRegistrationService: PAYERegistrationService,
+                                        val keystoreConnector: KeystoreConnector,
+                                        val incorporationInformationConnector: IncorporationInformationConnector,
+                                        val businessRegConnector: BusinessRegistrationConnector,
+                                        val s4LService: S4LService,
                                         mcc: MessagesControllerComponents
-                                       )(val appConfig: AppConfig) extends TestSetupController(mcc) with AuthRedirectUrls
-
-abstract class TestSetupController(mcc: MessagesControllerComponents) extends BusinessProfileController(mcc) {
-  val appConfig: AppConfig
-
-  val businessRegConnector: BusinessRegistrationConnector
-  val testBusinessRegConnector: TestBusinessRegConnector
-  val testIncorpInfoConnector: TestIncorpInfoConnector
-  val coHoAPIService: IncorporationInformationService
-  val payeRegService: PAYERegistrationService
-  val testPAYERegConnector: TestPAYERegConnector
-  val s4LService: S4LService
-  implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+                                   )(implicit val ec: ExecutionContext)
+  extends PayeBaseController(mcc) with AuthRedirectUrls with Logging {
 
   private def log[T](f: String, res: Future[T])(implicit ec: ExecutionContext): Future[T] = {
     res.flatMap(msg => {
@@ -66,7 +59,7 @@ abstract class TestSetupController(mcc: MessagesControllerComponents) extends Bu
 
   def testSetup(companyName: String) = isAuthorised { implicit request =>
     for {
-      bp <- log("CurrentProfileSetup", doBusinessProfileSetup)
+      bp <- log("CurrentProfileSetup", businessProfileController.doBusinessProfileSetup)
       _ <- log("CoHoCompanyDetailsTeardown", doCoHoCompanyDetailsTearDown(bp.registrationID))
       _ <- log("AddCoHoCompanyDetails", doAddCoHoCompanyDetails(bp.registrationID, companyName))
       _ <- log("RegTeardown", doIndividualRegTeardown(bp.registrationID))

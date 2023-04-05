@@ -103,5 +103,5 @@ class IncorporationInformationConnector @Inject()(val metricsService: MetricsSer
     }
 
   private def withTimer[T](f: => Future[T]) =
-    metricsService.processDataResponseWithMetrics(metricsService.incorpInfoResponseTimer.time())(f)
+    metricsService.processDataResponseWithMetrics1(metricsService.incorpInfoResponseTimer.time())(f)
 }

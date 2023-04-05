@@ -16,12 +16,14 @@
 
 package connectors
 
+import com.kenshoo.play.metrics.Metrics
 import helpers.mocks.MockMetrics
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
+import services.MetricsService
 import uk.gov.hmrc.http.{ForbiddenException, NotFoundException}
 
 import scala.concurrent.ExecutionContext.Implicits.{global => globalExecutionContext}
@@ -29,13 +31,13 @@ import scala.concurrent.Future
 
 class AddressLookupConnectorSpec extends PayeComponentSpec with PayeFakedApp {
 
-  val mockMetrics = new MockMetrics
+  val mockMetricsService: MetricsService = app.injector.instanceOf[MetricsService]
 
   implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup extends CodeMocks {
     val testConnector: AddressLookupConnector = new AddressLookupConnector(
-      mockMetrics,
+      mockMetricsService,
       mockHttpClient
     )(mockAppConfig, globalExecutionContext) {
       override lazy val addressLookupFrontendUrl = "testBusinessRegUrl"

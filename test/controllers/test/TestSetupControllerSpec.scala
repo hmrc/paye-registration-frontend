@@ -21,35 +21,37 @@ import enums.DownstreamOutcome
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import models.external.BusinessProfile
 import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import play.api.http.Status
-import play.api.mvc.{AnyContent, MessagesControllerComponents, Request}
+import play.api.mvc.{AnyContent, MessagesControllerComponents, Request, Result}
 import play.api.test.FakeRequest
 
 import scala.concurrent.Future
 
 class TestSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
-  lazy val mockMcc = app.injector.instanceOf[MessagesControllerComponents]
+  lazy val mockMcc: MessagesControllerComponents = app.injector.instanceOf[MessagesControllerComponents]
+  val config: AppConfig = app.injector.instanceOf[AppConfig]
+
   class Setup extends CodeMocks {
-    val controller = new TestSetupController(mockMcc) {
-      override val appConfig: AppConfig = mockAppConfig
-      override val redirectToLogin = MockAuthRedirects.redirectToLogin
-      override val redirectToPostSign = MockAuthRedirects.redirectToPostSign
+    val controller: TestSetupController = new TestSetupController(
+      testIncorpInfoConnector = mockTestIncorpInfoConnector,
+      coHoAPIService = mockIncorpInfoService,
+      testPAYERegConnector = mockTestPayeRegConnector,
+      payeRegService = mockPayeRegService,
+      businessProfileController = mockBusinessProfileController,
+      appConfig = config,
+      testBusinessRegConnector = mockTestBusRegConnector,
+      authConnector = mockAuthConnector,
+      payeRegistrationService = mockPayeRegService,
+      keystoreConnector = mockKeystoreConnector,
+      incorporationInformationConnector = mockIncorpInfoConnector,
+      mcc = mockMcc,
+      businessRegConnector = mockBusinessRegistrationConnector,
+      s4LService = mockS4LService
+    ) {
 
-      override val businessRegConnector = mockBusinessRegistrationConnector
-      override val keystoreConnector = mockKeystoreConnector
-      override val testBusinessRegConnector = mockTestBusRegConnector
-      override val authConnector = mockAuthConnector
-      override val testIncorpInfoConnector = mockTestIncorpInfoConnector
-      override val coHoAPIService = mockIncorpInfoService
-      override val messagesApi = injMessagesApi
-      override val payeRegService = mockPayeRegService
-      override val testPAYERegConnector = mockTestPayeRegConnector
-      override val s4LService = mockS4LService
-      override val incorporationInformationConnector = mockIncorpInfoConnector
-      override val payeRegistrationService = mockPayeRegService
-
-      override def doBusinessProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = Future.successful(BusinessProfile("regId", "en"))
+//      override def businessProfileSetup(implicit request: Request[AnyContent]): Future[BusinessProfile] = Future.successful(BusinessProfile("regId", "en"))
 
       override def doCoHoCompanyDetailsTearDown(regId: String)(implicit request: Request[AnyContent]): Future[String] = Future.successful("test")
 
@@ -71,7 +73,9 @@ class TestSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
       when(mockTestBusRegConnector.updateCompletionCapacity(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful("director"))
 
-      val result = controller.testSetup("TESTLTD")(FakeRequest())
+      when(mockBusinessProfileController.doBusinessProfileSetup(any())).thenReturn(Future.successful(BusinessProfile("regId", "en")))
+
+      val result: Future[Result] = controller.testSetup("TESTLTD")(FakeRequest())
       status(result) mustBe Status.SEE_OTHER
       redirectLocation(result) mustBe Some("/register-for-paye")
     }
@@ -79,28 +83,35 @@ class TestSetupControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "update-status" should {
     "return 200 for success" in new Setup {
+      mockFetchCurrentProfile()
       when(mockAuthConnector.authorise[Unit](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(()))
 
-      mockBusinessRegFetch(Future.successful(BusinessProfile("regID", "EN")))
+      when(mockBusinessProfileController.doBusinessProfileSetup(any())).thenReturn(Future.successful(BusinessProfile("regId", "en")))
+      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(any(), any()))
+        .thenReturn(Future.successful(BusinessProfile("regId", "en")))
 
       when(mockTestPayeRegConnector.updateStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Success))
 
-      val result = controller.updateStatus("draft")(FakeRequest())
+      val result: Future[Result] = controller.updateStatus("draft")(FakeRequest())
       status(result) mustBe OK
     }
 
     "return 500 for failure" in new Setup {
+      mockFetchCurrentProfile()
+
       when(mockAuthConnector.authorise[Unit](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(()))
 
-      mockBusinessRegFetch(Future.successful(BusinessProfile("regID", "EN")))
+      when(mockBusinessProfileController.doBusinessProfileSetup(any())).thenReturn(Future.successful(BusinessProfile("regId", "en")))
+      when(mockBusinessRegistrationConnector.retrieveCurrentProfile(any(), any()))
+        .thenReturn(Future.successful(BusinessProfile("regId", "en")))
 
       when(mockTestPayeRegConnector.updateStatus(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any()))
         .thenReturn(Future.successful(DownstreamOutcome.Failure))
 
-      val result = controller.updateStatus("draft")(FakeRequest())
+      val result: Future[Result] = controller.updateStatus("draft")(FakeRequest())
       status(result) mustBe INTERNAL_SERVER_ERROR
     }
   }

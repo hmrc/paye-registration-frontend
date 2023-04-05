@@ -28,21 +28,21 @@ import uk.gov.hmrc.http.{HttpResponse, UpstreamErrorResponse}
 import scala.concurrent.{ExecutionContext, Future}
 
 class NatureOfBusinessServiceSpec extends PayeComponentSpec {
-  val returnHttpResponse = HttpResponse(200, "")
+  val returnHttpResponse: HttpResponse = HttpResponse(200, "")
 
   implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup {
-    val service = new NatureOfBusinessService {
-      override val payeRegConnector = mockPAYERegConnector
+    val service: NatureOfBusinessService = new NatureOfBusinessService(
+      payeRegConnector = mockPAYERegConnector
+    ) {
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
     }
   }
 
   "Calling sicCodes2NatureOfBusiness" should {
     "correctly produce a NatureOfBusiness view model from a list of SICCode API model" in new Setup {
-      val tstModelAPI = Seq(
+      val tstModelAPI: Seq[SICCode] = Seq(
         SICCode(
           code = Some("999"),
           description = Some("banking")
@@ -53,13 +53,13 @@ class NatureOfBusinessServiceSpec extends PayeComponentSpec {
         )
       )
 
-      val tstModelView = NatureOfBusiness(natureOfBusiness = "banking")
+      val tstModelView: NatureOfBusiness = NatureOfBusiness(natureOfBusiness = "banking")
 
       service.sicCodes2NatureOfBusiness(tstModelAPI) mustBe Some(tstModelView)
     }
 
     "produce an empty model from an empty list of SICCode API model" in new Setup {
-      val tstModelAPI = Seq.empty
+      val tstModelAPI: Seq[Nothing] = Seq.empty
 
       service.sicCodes2NatureOfBusiness(tstModelAPI) mustBe None
     }
@@ -67,14 +67,14 @@ class NatureOfBusinessServiceSpec extends PayeComponentSpec {
 
   "Calling natureOfBusiness2SICCodes" should {
     "correctly produce a list of SICCode API model from a NatureOfBusiness view model" in new Setup {
-      val tstModelAPI = Seq(
+      val tstModelAPI: Seq[SICCode] = Seq(
         SICCode(
           code = None,
           description = Some("laundring")
         )
       )
 
-      val tstModelView = NatureOfBusiness(natureOfBusiness = "laundring")
+      val tstModelView: NatureOfBusiness = NatureOfBusiness(natureOfBusiness = "laundring")
 
       service.natureOfBusiness2SICCodes(tstModelView) mustBe tstModelAPI
     }
@@ -105,7 +105,7 @@ class NatureOfBusinessServiceSpec extends PayeComponentSpec {
 
   "Calling saveNatureOfBusiness" should {
     "return a success response when the upsert completes successfully" in new Setup {
-      val validNatureOfBusiness = NatureOfBusiness(natureOfBusiness = "laundring")
+      val validNatureOfBusiness: NatureOfBusiness = NatureOfBusiness(natureOfBusiness = "laundring")
 
       when(mockPAYERegConnector.upsertSICCodes(ArgumentMatchers.contains("54321"), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Fixtures.validSICCodesList))

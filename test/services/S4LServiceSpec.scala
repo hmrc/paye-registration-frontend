@@ -31,14 +31,14 @@ class S4LServiceSpec extends PayeComponentSpec {
 
   implicit val request: FakeRequest[_] = FakeRequest()
   trait Setup {
-    val service = new S4LService {
-      override val s4LConnector = mockS4LConnector
+    val service: S4LService = new S4LService(
+      s4LConnector = mockS4LConnector
+    ) {
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
     }
   }
 
-  val tstTradingNameModel = TradingNameView(differentName = false, tradingName = None)
+  val tstTradingNameModel: TradingNameView = TradingNameView(differentName = false, tradingName = None)
 
   "S4L Service" should {
 

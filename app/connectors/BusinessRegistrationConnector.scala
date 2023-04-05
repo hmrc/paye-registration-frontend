@@ -112,6 +112,6 @@ class BusinessRegistrationConnector @Inject()(val metricsService: MetricsService
     }
 
   private def withTimer[T](f: => Future[T]) =
-    metricsService.processDataResponseWithMetrics(metricsService.businessRegistrationResponseTimer.time())(f)
+    metricsService.processDataResponseWithMetrics1(metricsService.businessRegistrationResponseTimer.time())(f)
 
 }

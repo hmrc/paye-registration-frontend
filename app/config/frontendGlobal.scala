@@ -47,6 +47,6 @@ class ControllerConfiguration @Inject()(config: Configuration) extends Controlle
   lazy val controllerConfigs: Config = config.underlying.getConfig("controllers")
 }
 
-class LoggingFilterImpl @Inject()(config: ControllerConfigs)
+class LoggingFilter @Inject()(config: ControllerConfigs)
                                  (implicit val materializer: Materializer,
                                   override val ec: ExecutionContext) extends DefaultLoggingFilter(config)

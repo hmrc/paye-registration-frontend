@@ -25,57 +25,32 @@ import scala.reflect.runtime.universe._
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class MetricsServiceImpl @Inject()(metrics: Metrics) extends MetricsService {
-  override val payeRegistrationResponseTimer = metrics.defaultRegistry.timer("paye-registration-call-timer")
-  override val addressLookupResponseTimer = metrics.defaultRegistry.timer("address-lookup-call-timer")
-  override val businessRegistrationResponseTimer = metrics.defaultRegistry.timer("business-registration-call-timer")
-  override val incorpInfoResponseTimer = metrics.defaultRegistry.timer("incorporation-information-call-timer")
-  override val companyRegistrationResponseTimer = metrics.defaultRegistry.timer("company-registration-call-timer")
-  override val keystoreResponseTimer = metrics.defaultRegistry.timer("keystore-call-timer")
-  override val s4lResponseTimer = metrics.defaultRegistry.timer("s4l-call-timer")
-  override val deskproResponseTimer = metrics.defaultRegistry.timer("deskpro-call-timer")
+class MetricsService @Inject()(metrics: Metrics) extends Logging {
 
-  override val keystoreSuccessResponseCounter = metrics.defaultRegistry.counter("keystore-success-response-counter")
-  override val keystoreEmptyResponseCounter = metrics.defaultRegistry.counter("keystore-empty-response-counter")
-  override val keystoreFailedResponseCounter = metrics.defaultRegistry.counter("keystore-failed-response-counter")
+  val payeRegistrationResponseTimer: Timer = metrics.defaultRegistry.timer("paye-registration-call-timer")
+  val addressLookupResponseTimer: Timer = metrics.defaultRegistry.timer("address-lookup-call-timer")
+  val businessRegistrationResponseTimer: Timer = metrics.defaultRegistry.timer("business-registration-call-timer")
+  val incorpInfoResponseTimer: Timer = metrics.defaultRegistry.timer("incorporation-information-call-timer")
+  val companyRegistrationResponseTimer: Timer = metrics.defaultRegistry.timer("company-registration-call-timer")
+  val keystoreResponseTimer: Timer = metrics.defaultRegistry.timer("keystore-call-timer")
+  val s4lResponseTimer: Timer = metrics.defaultRegistry.timer("s4l-call-timer")
+  val deskproResponseTimer: Timer = metrics.defaultRegistry.timer("deskpro-call-timer")
 
-  override val s4lSuccessResponseCounter = metrics.defaultRegistry.counter("s4l-success-response-counter")
-  override val s4lEmptyResponseCounter = metrics.defaultRegistry.counter("s4l-empty-response-counter")
-  override val s4lFailedResponseCounter = metrics.defaultRegistry.counter("s4l-failed-response-counter")
+  val keystoreSuccessResponseCounter: Counter = metrics.defaultRegistry.counter("keystore-success-response-counter")
+  val keystoreEmptyResponseCounter: Counter = metrics.defaultRegistry.counter("keystore-empty-response-counter")
+  val keystoreFailedResponseCounter: Counter = metrics.defaultRegistry.counter("keystore-failed-response-counter")
 
-  override val companyDetailsSuccessResponseCounter = metrics.defaultRegistry.counter("coho-ro-address-success-response-counter")
-  override val companyDetailsFailedResponseCounter = metrics.defaultRegistry.counter("coho-ro-address-failed-response-counter")
+  val s4lSuccessResponseCounter: Counter = metrics.defaultRegistry.counter("s4l-success-response-counter")
+  val s4lEmptyResponseCounter: Counter = metrics.defaultRegistry.counter("s4l-empty-response-counter")
+  val s4lFailedResponseCounter: Counter = metrics.defaultRegistry.counter("s4l-failed-response-counter")
 
-  override val addressLookupSuccessResponseCounter = metrics.defaultRegistry.counter("address-lookup-success-response-counter")
-  override val addressLookupFailedResponseCounter = metrics.defaultRegistry.counter("address-lookup-failed-response-counter")
-}
+  val companyDetailsSuccessResponseCounter: Counter = metrics.defaultRegistry.counter("coho-ro-address-success-response-counter")
+ val companyDetailsFailedResponseCounter: Counter = metrics.defaultRegistry.counter("coho-ro-address-failed-response-counter")
 
-trait MetricsService extends Logging {
-  val payeRegistrationResponseTimer: Timer
-  val addressLookupResponseTimer: Timer
-  val businessRegistrationResponseTimer: Timer
-  val incorpInfoResponseTimer: Timer
-  val companyRegistrationResponseTimer: Timer
-  val keystoreResponseTimer: Timer
-  val s4lResponseTimer: Timer
-  val deskproResponseTimer: Timer
+  val addressLookupSuccessResponseCounter: Counter = metrics.defaultRegistry.counter("address-lookup-success-response-counter")
+  val addressLookupFailedResponseCounter: Counter = metrics.defaultRegistry.counter("address-lookup-failed-response-counter")
 
-  val keystoreSuccessResponseCounter: Counter
-  val keystoreEmptyResponseCounter: Counter
-  val keystoreFailedResponseCounter: Counter
-
-  val s4lSuccessResponseCounter: Counter
-  val s4lEmptyResponseCounter: Counter
-  val s4lFailedResponseCounter: Counter
-
-  val companyDetailsSuccessResponseCounter: Counter
-  val companyDetailsFailedResponseCounter: Counter
-
-  val addressLookupSuccessResponseCounter: Counter
-  val addressLookupFailedResponseCounter: Counter
-
-
-  def processDataResponseWithMetrics[T](timer: Timer.Context)(f: => Future[T])(implicit ec: ExecutionContext): Future[T] = {
+  def processDataResponseWithMetrics1[T](timer: Timer.Context)(f: => Future[T])(implicit ec: ExecutionContext): Future[T] = {
     f map { data =>
       timer.stop()
       data

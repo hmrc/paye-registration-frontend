@@ -34,15 +34,15 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
   implicit val request: FakeRequest[_] = FakeRequest()
 
   class Setup {
-    val service = new PrepopulationService {
-      override val busRegConnector = mockBusinessRegistrationConnector
-      override val s4LService = mockS4LService
+    val service: PrepopulationService = new PrepopulationService(
+      busRegConnector = mockBusinessRegistrationConnector,
+      s4LService = mockS4LService
+    ) {
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
     }
   }
 
-  val addr1 = Address(
+  val addr1: Address = Address(
     line1 = "line 1",
     line2 = "line 2",
     line3 = Some("line 3"),
@@ -52,7 +52,7 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
     auditRef = Some("tstAuditRef")
   )
 
-  val addr2 = Address(
+  val addr2: Address = Address(
     line1 = "line one",
     line2 = "line two",
     line3 = None,
@@ -61,7 +61,7 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
     country = None
   )
 
-  val addr3 = Address(
+  val addr3: Address = Address(
     line1 = "line",
     line2 = "other line",
     line3 = Some("line 3"),
@@ -73,8 +73,8 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
 
   val regId = "55555"
 
-  val validDigitalContact = DigitalContactDetails(Some("a@b.c"), Some("123"), Some("321"))
-  val validContactDetails = PAYEContactDetails("testName", validDigitalContact)
+  val validDigitalContact: DigitalContactDetails = DigitalContactDetails(Some("a@b.c"), Some("123"), Some("321"))
+  val validContactDetails: PAYEContactDetails = PAYEContactDetails("testName", validDigitalContact)
 
   "getBusinessContactDetails" should {
     "return optional digital contact details" in new Setup {
@@ -117,32 +117,32 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
 
   "FilterAddresses" should {
     "return an address map when no duplicates and no address is different" in new Setup {
-      val addresses = Seq(addr1, addr2)
-      val resMap = Map(0 -> addr1, 1 -> addr2)
+      val addresses: Seq[Address] = Seq(addr1, addr2)
+      val resMap: Map[Int, Address] = Map(0 -> addr1, 1 -> addr2)
       service.filterAddresses(addresses, Seq(addr3)) mustBe resMap
     }
 
     "filter out duplicates" in new Setup {
-      val addresses = Seq(addr1, addr2, addr1)
-      val resMap = Map(0 -> addr1, 1 -> addr2)
+      val addresses: Seq[Address] = Seq(addr1, addr2, addr1)
+      val resMap: Map[Int, Address] = Map(0 -> addr1, 1 -> addr2)
       service.filterAddresses(addresses, Seq(addr3)) mustBe resMap
     }
 
     "filter out address when it is the same as one of the passed addresses" in new Setup {
-      val addresses = Seq(addr1, addr2, addr3)
-      val resMap = Map(0 -> addr2, 1 -> addr3)
+      val addresses: Seq[Address] = Seq(addr1, addr2, addr3)
+      val resMap: Map[Int, Address] = Map(0 -> addr2, 1 -> addr3)
       service.filterAddresses(addresses, Seq(addr1)) mustBe resMap
     }
 
     "filter out multiple addresses when it is the same as one of the passed addresses" in new Setup {
-      val addresses = Seq(addr1, addr2, addr3)
-      val resMap = Map(0 -> addr2)
+      val addresses: Seq[Address] = Seq(addr1, addr2, addr3)
+      val resMap: Map[Int, Address] = Map(0 -> addr2)
       service.filterAddresses(addresses, Seq(addr1, addr3)) mustBe resMap
     }
 
     "handle an empty list" in new Setup {
-      val addresses = Seq.empty
-      val resMap = Map.empty
+      val addresses: Seq[Nothing] = Seq.empty
+      val resMap: Map[Nothing, Nothing] = Map.empty
       service.filterAddresses(addresses, Seq(addr3, addr2)) mustBe resMap
     }
   }

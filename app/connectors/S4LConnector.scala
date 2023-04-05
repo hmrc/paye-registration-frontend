@@ -17,6 +17,7 @@
 package connectors
 
 import com.codahale.metrics.{Counter, Timer}
+import config.PAYEShortLivedCache
 import play.api.libs.json.Format
 import play.api.mvc.Request
 import services.MetricsService
@@ -26,25 +27,13 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class S4LConnectorImpl @Inject()(val shortCache: ShortLivedCache,
-                                 val metricsService: MetricsService)(implicit val ec: ExecutionContext) extends S4LConnector {
-  val successCounter = metricsService.s4lSuccessResponseCounter
-  val emptyResponseCounter = metricsService.s4lEmptyResponseCounter
-  val failedCounter = metricsService.s4lFailedResponseCounter
+class S4LConnector @Inject()(val shortCache: PAYEShortLivedCache,
+                                 val metricsService: MetricsService)(implicit val ec: ExecutionContext) {
+  val successCounter: Counter = metricsService.s4lSuccessResponseCounter
+  val emptyResponseCounter: Counter = metricsService.s4lEmptyResponseCounter
+  val failedCounter: Counter = metricsService.s4lFailedResponseCounter
 
-  def timer = metricsService.s4lResponseTimer.time()
-}
-
-trait S4LConnector {
-  val shortCache: ShortLivedCache
-  val metricsService: MetricsService
-
-  val successCounter: Counter
-  val emptyResponseCounter: Counter
-  val failedCounter: Counter
-  implicit val ec: ExecutionContext
-
-  def timer: Timer.Context
+  def timer: Timer.Context = metricsService.s4lResponseTimer.time()
 
   def saveForm[T](userId: String, formId: String, data: T)(implicit hc: HeaderCarrier, format: Format[T], request: Request[_]): Future[CacheMap] = {
     metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {

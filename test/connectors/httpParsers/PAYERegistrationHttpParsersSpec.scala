@@ -722,7 +722,7 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
           "throw JsResultException and log an error" in {
             withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
               intercept[JsResultException](rds.read("", "", HttpResponse(OK, json = Json.obj(), Map())))
-              logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][sicCodesHttpReads] JSON returned could not be parsed to scala.collection.Seq model for regId: '$regId'")
+              logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][sicCodesHttpReads] JSON returned could not be parsed to scala.collection.immutable.Seq model for regId: '$regId'")
             }
           }
         }
@@ -773,7 +773,7 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
           "throw JsResultException and log an error" in {
             withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
               intercept[JsResultException](rds.read("", "", HttpResponse(OK, json = Json.obj(), Map())))
-              logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][directorsHttpReads] JSON returned could not be parsed to scala.collection.Seq model for regId: '$regId'")
+              logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][directorsHttpReads] JSON returned could not be parsed to scala.collection.immutable.Seq model for regId: '$regId'")
             }
           }
         }

@@ -16,6 +16,7 @@
 
 package connectors.test
 
+import config.AppConfig
 import enums.DownstreamOutcome
 import helpers.PayeComponentSpec
 import models.api.PAYERegistration
@@ -23,21 +24,21 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.JsObject
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestPAYERegConnectorSpec extends PayeComponentSpec {
 
   implicit val request: FakeRequest[_] = FakeRequest()
+  val config: AppConfig = app.injector.instanceOf[AppConfig]
 
   class Setup extends CodeMocks {
-    val connector = new TestPAYERegConnector {
-      override val payeRegConnector = mockPAYERegConnector
-      override val http: HttpClient = mockHttpClient
+    val connector: TestPAYERegConnector = new TestPAYERegConnector(
+      mockPAYERegConnector, mockHttpClient, config, ec
+    ) {
       override val payeRegUrl: String = "tst-url"
       override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
     }
   }
 

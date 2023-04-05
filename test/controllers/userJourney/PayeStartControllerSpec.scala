@@ -44,20 +44,20 @@ class PayeStartControllerSpec extends PayeComponentSpec with PayeFakedApp with L
 
   class Setup {
     def controller() = new PayeStartController(
-      mockCurrentProfileService,
-      mockPayeRegService,
-      mockKeystoreConnector,
-      mockAuthConnector,
-      mockS4LService,
-      mockCompanyDetailsService,
-      mockIncorpInfoService,
-      mockBusinessRegistrationConnector,
-      mockCompRegConnector,
-      mockFeatureSwitches,
-      mockIncorpInfoConnector,
-      mockMcc,
-      mockRestart,
-      mockLanguageUtils,
+      currentProfileService = mockCurrentProfileService,
+      payeRegistrationService = mockPayeRegService,
+      keystoreConnector = mockKeystoreConnector,
+      authConnector = mockAuthConnector,
+      s4LService = mockS4LService,
+      companyDetailsService = mockCompanyDetailsService,
+      incorpInfoService = mockIncorpInfoService,
+      businessRegistrationConnector = mockBusinessRegistrationConnector,
+      companyRegistrationConnector = mockCompRegConnector,
+      featureSwitches = mockFeatureSwitch,
+      incorporationInformationConnector = mockIncorpInfoConnector,
+      mcc = mockMcc,
+      restart = mockRestart,
+      languageUtils = mockLanguageUtils
     )(injAppConfig,
       globalExecutionContext)
   }

@@ -33,11 +33,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AuditServiceImpl @Inject()(val auditConnector: AuditConnector) extends AuditService {
-}
-
-trait AuditService {
-  val auditConnector: AuditConnector
+class AuditService @Inject()(val auditConnector: AuditConnector) {
 
   private[services] def now() = Instant.now()
   private[services] def eventId() = UUID.randomUUID().toString
