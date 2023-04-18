@@ -101,6 +101,10 @@ trait IncorporationInformationHttpParsers extends BaseHttpReads {
           errorLog(s"[getOfficersHttpReads] Received an empty Officer list for regId: $regId and txId: $transactionId")
           throw new DownstreamExceptions.OfficerListNotFoundException
         }
+      case NO_CONTENT => {
+          errorLog(s"[getOfficersHttpReads] Received a 204 status and an empty Officer list for regId: $regId and txId: $transactionId")
+          throw new DownstreamExceptions.OfficerListNotFoundException
+        }
       case NOT_FOUND =>
         errorLog(s"[getOfficerList] Received a NotFound status code when expecting an Officer list for regId: $regId and txId: $transactionId")
         throw new DownstreamExceptions.OfficerListNotFoundException
