@@ -383,6 +383,19 @@ class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with Log
         }
       }
 
+      "response is NO_CONTENT" must {
+
+        "return OfficerListNotFoundException and log an error message" in {
+
+          withCaptureOfLoggingFrom(IncorporationInformationHttpParsers.logger) { logs =>
+            intercept[DownstreamExceptions.OfficerListNotFoundException](IncorporationInformationHttpParsers.getOfficersHttpReads(regId, transactionId)
+              .read("", "", HttpResponse.apply(responseStatus = NO_CONTENT)))
+
+            logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][getOfficersHttpReads] Received a 204 status and an empty Officer list for regId: $regId and txId: $transactionId")
+          }
+        }
+      }
+
       "response is NOT_FOUND" must {
 
         "return OfficerListNotFoundException and log an error message" in {
