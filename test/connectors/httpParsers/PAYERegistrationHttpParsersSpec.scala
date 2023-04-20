@@ -17,7 +17,7 @@
 package connectors.httpParsers
 
 import ch.qos.logback.classic.Level
-import common.exceptions.DownstreamExceptions
+import common.exceptions.PAYEMicroserviceExceptionType
 import connectors.{Cancelled, Success, TimedOut}
 import enums.{DownstreamOutcome, PAYEStatus}
 import helpers.PayeComponentSpec
@@ -157,10 +157,10 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
 
         "response is any other status, e.g ISE" must {
 
-          "throw a DownstreamExceptions.PAYEMicroserviceException response and log an error" in {
+          "throw a PAYEMicroserviceExceptionType response and log an error" in {
 
             withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
-              intercept[DownstreamExceptions.PAYEMicroserviceException](rds.read("", "/payeDetails", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              intercept[PAYEMicroserviceExceptionType](rds.read("", "/payeDetails", HttpResponse(INTERNAL_SERVER_ERROR, "")))
               logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][getRegistrationHttpReads] Calling url: '/payeDetails' returned unexpected status: '$INTERNAL_SERVER_ERROR'")
             }
           }
@@ -191,10 +191,10 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
 
         "response is any other status, e.g ISE" must {
 
-          "throw a DownstreamExceptions.PAYEMicroserviceException response and log an error" in {
+          "throw a PAYEMicroserviceExceptionType response and log an error" in {
 
             withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
-              intercept[DownstreamExceptions.PAYEMicroserviceException](rds.read("", "/regId", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              intercept[PAYEMicroserviceExceptionType](rds.read("", "/regId", HttpResponse(INTERNAL_SERVER_ERROR, "")))
               logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][getRegistrationIdHttpReads] Calling url: '/regId' returned unexpected status: '$INTERNAL_SERVER_ERROR' for txId: '$txId'")
             }
           }
@@ -252,10 +252,10 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
 
         "response is any other status, e.g ISE" must {
 
-          "throw a DownstreamExceptions.PAYEMicroserviceException response and log an error" in {
+          "throw a PAYEMicroserviceExceptionType response and log an error" in {
 
             withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
-              intercept[DownstreamExceptions.PAYEMicroserviceException](rds.read("", "/submit", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              intercept[PAYEMicroserviceExceptionType](rds.read("", "/submit", HttpResponse(INTERNAL_SERVER_ERROR, "")))
               logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][submitRegistrationHttpReads] Calling url: '/submit' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
@@ -300,10 +300,10 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
 
         "response is any other status, e.g ISE" must {
 
-          "throw a DownstreamExceptions.PAYEMicroserviceException response and log an error" in {
+          "throw a PAYEMicroserviceExceptionType response and log an error" in {
 
             withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
-              intercept[DownstreamExceptions.PAYEMicroserviceException](rds.read("", "/status", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              intercept[PAYEMicroserviceExceptionType](rds.read("", "/status", HttpResponse(INTERNAL_SERVER_ERROR, "")))
               logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][getStatusHttpReads] Calling url: '/status' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
@@ -352,10 +352,10 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
 
         "response is any other status, e.g ISE" must {
 
-          "throw a DownstreamExceptions.PAYEMicroserviceException response and log an error" in {
+          "throw a PAYEMicroserviceExceptionType response and log an error" in {
 
             withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
-              intercept[DownstreamExceptions.PAYEMicroserviceException](rds.read("", "/companyDeetz", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              intercept[PAYEMicroserviceExceptionType](rds.read("", "/companyDeetz", HttpResponse(INTERNAL_SERVER_ERROR, "")))
               logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][getCompanyDetailsHttpReads] Calling url: '/companyDeetz' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
@@ -386,10 +386,10 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
 
         "response is any other status, e.g ISE" must {
 
-          "throw a DownstreamExceptions.PAYEMicroserviceException response and log an error" in {
+          "throw a PAYEMicroserviceExceptionType response and log an error" in {
 
             withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
-              intercept[DownstreamExceptions.PAYEMicroserviceException](rds.read("", "/companyDeetz", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              intercept[PAYEMicroserviceExceptionType](rds.read("", "/companyDeetz", HttpResponse(INTERNAL_SERVER_ERROR, "")))
               logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][upsertCompanyDetailsHttpReads] Calling url: '/companyDeetz' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
@@ -437,10 +437,10 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
 
         "response is any other status, e.g ISE" must {
 
-          "throw a DownstreamExceptions.PAYEMicroserviceException response and log an error" in {
+          "throw a PAYEMicroserviceExceptionType response and log an error" in {
 
             withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
-              intercept[DownstreamExceptions.PAYEMicroserviceException](rds.read("", "/employment", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              intercept[PAYEMicroserviceExceptionType](rds.read("", "/employment", HttpResponse(INTERNAL_SERVER_ERROR, "")))
               logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][getEmploymentHttpReads] Calling url: '/employment' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
@@ -471,10 +471,10 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
 
         "response is any other status, e.g ISE" must {
 
-          "throw a DownstreamExceptions.PAYEMicroserviceException response and log an error" in {
+          "throw a PAYEMicroserviceExceptionType response and log an error" in {
 
             withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
-              intercept[DownstreamExceptions.PAYEMicroserviceException](rds.read("", "/employment", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              intercept[PAYEMicroserviceExceptionType](rds.read("", "/employment", HttpResponse(INTERNAL_SERVER_ERROR, "")))
               logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][upsertEmploymentHttpReads] Calling url: '/employment' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
@@ -522,10 +522,10 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
 
         "response is any other status, e.g ISE" must {
 
-          "throw a DownstreamExceptions.PAYEMicroserviceException response and log an error" in {
+          "throw a PAYEMicroserviceExceptionType response and log an error" in {
 
             withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
-              intercept[DownstreamExceptions.PAYEMicroserviceException](rds.read("", "/payeContactDeetz", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              intercept[PAYEMicroserviceExceptionType](rds.read("", "/payeContactDeetz", HttpResponse(INTERNAL_SERVER_ERROR, "")))
               logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][getPAYEContactHttpReads] Calling url: '/payeContactDeetz' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
@@ -556,10 +556,10 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
 
         "response is any other status, e.g ISE" must {
 
-          "throw a DownstreamExceptions.PAYEMicroserviceException response and log an error" in {
+          "throw a PAYEMicroserviceExceptionType response and log an error" in {
 
             withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
-              intercept[DownstreamExceptions.PAYEMicroserviceException](rds.read("", "/payeContactDeetz", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              intercept[PAYEMicroserviceExceptionType](rds.read("", "/payeContactDeetz", HttpResponse(INTERNAL_SERVER_ERROR, "")))
               logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][upsertPAYEContactHttpReads] Calling url: '/payeContactDeetz' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
@@ -607,10 +607,10 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
 
         "response is any other status, e.g ISE" must {
 
-          "throw a DownstreamExceptions.PAYEMicroserviceException response and log an error" in {
+          "throw a PAYEMicroserviceExceptionType response and log an error" in {
 
             withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
-              intercept[DownstreamExceptions.PAYEMicroserviceException](rds.read("", "/completionCapacity", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              intercept[PAYEMicroserviceExceptionType](rds.read("", "/completionCapacity", HttpResponse(INTERNAL_SERVER_ERROR, "")))
               logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][getCompletionCapacityHttpReads] Calling url: '/completionCapacity' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
@@ -641,10 +641,10 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
 
         "response is any other status, e.g ISE" must {
 
-          "throw a DownstreamExceptions.PAYEMicroserviceException response and log an error" in {
+          "throw a PAYEMicroserviceExceptionType response and log an error" in {
 
             withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
-              intercept[DownstreamExceptions.PAYEMicroserviceException](rds.read("", "/completionCapacity", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              intercept[PAYEMicroserviceExceptionType](rds.read("", "/completionCapacity", HttpResponse(INTERNAL_SERVER_ERROR, "")))
               logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][upsertCompletionCapacityHttpReads] Calling url: '/completionCapacity' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
@@ -692,10 +692,10 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
 
         "response is any other status, e.g ISE" must {
 
-          "throw a DownstreamExceptions.PAYEMicroserviceException response and log an error" in {
+          "throw a PAYEMicroserviceExceptionType response and log an error" in {
 
             withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
-              intercept[DownstreamExceptions.PAYEMicroserviceException](rds.read("", "/ackRef", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              intercept[PAYEMicroserviceExceptionType](rds.read("", "/ackRef", HttpResponse(INTERNAL_SERVER_ERROR, "")))
               logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][getAcknowledgementReferenceHttpReads] Calling url: '/ackRef' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
@@ -743,10 +743,10 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
 
         "response is any other status, e.g ISE" must {
 
-          "throw a DownstreamExceptions.PAYEMicroserviceException response and log an error" in {
+          "throw a PAYEMicroserviceExceptionType response and log an error" in {
 
             withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
-              intercept[DownstreamExceptions.PAYEMicroserviceException](rds.read("", "/sicCodes", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              intercept[PAYEMicroserviceExceptionType](rds.read("", "/sicCodes", HttpResponse(INTERNAL_SERVER_ERROR, "")))
               logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][sicCodesHttpReads] Calling url: '/sicCodes' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }
@@ -794,10 +794,10 @@ class PAYERegistrationHttpParsersSpec extends PayeComponentSpec with LogCapturin
 
         "response is any other status, e.g ISE" must {
 
-          "throw a DownstreamExceptions.PAYEMicroserviceException response and log an error" in {
+          "throw a PAYEMicroserviceExceptionType response and log an error" in {
 
             withCaptureOfLoggingFrom(PAYERegistrationHttpParsers.logger) { logs =>
-              intercept[DownstreamExceptions.PAYEMicroserviceException](rds.read("", "/directors", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              intercept[PAYEMicroserviceExceptionType](rds.read("", "/directors", HttpResponse(INTERNAL_SERVER_ERROR, "")))
               logs.containsMsg(Level.ERROR, s"[PAYERegistrationHttpParsers][directorsHttpReads] Calling url: '/directors' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
             }
           }

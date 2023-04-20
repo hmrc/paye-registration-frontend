@@ -21,27 +21,37 @@ object DownstreamExceptions extends DownstreamExceptions
 sealed trait DownstreamExceptionsType
 sealed trait CurrentProfileNotFoundExceptionType extends DownstreamExceptionsType
 sealed trait UnexpectedExceptionType extends DownstreamExceptionsType
+sealed trait PAYEMicroserviceExceptionType extends DownstreamExceptionsType
+sealed trait OfficerListNotFoundExceptionType extends DownstreamExceptionsType
+sealed trait S4LFetchExceptionType extends DownstreamExceptionsType
+sealed trait PPOBAddressNotFoundExceptionType extends DownstreamExceptionsType
+sealed trait ConfirmationRefsNotFoundExceptionType extends DownstreamExceptionsType
+sealed trait IncorporationInformationResponseExceptionType extends DownstreamExceptionsType
+sealed trait CompanyRegistrationExceptionType extends DownstreamExceptionsType
+sealed trait BusinessRegistrationExceptionType extends DownstreamExceptionsType
+sealed trait AddressLookupExceptionType extends DownstreamExceptionsType
+
 trait DownstreamExceptions {
 
   class CurrentProfileNotFoundException extends Exception with CurrentProfileNotFoundExceptionType
 
-  class PAYEMicroserviceException(msg: String) extends Exception(msg)
+  class PAYEMicroserviceException(msg: String) extends Exception(msg) with PAYEMicroserviceExceptionType
 
-  class OfficerListNotFoundException extends Exception
+  class OfficerListNotFoundException extends Exception with OfficerListNotFoundExceptionType
 
-  class S4LFetchException(msg: String) extends Exception(msg)
+  class S4LFetchException(msg: String) extends Exception(msg) with S4LFetchExceptionType
 
-  class PPOBAddressNotFoundException extends Exception
+  class PPOBAddressNotFoundException extends Exception with PPOBAddressNotFoundExceptionType
 
-  class ConfirmationRefsNotFoundException extends Exception
+  class ConfirmationRefsNotFoundException extends Exception with ConfirmationRefsNotFoundExceptionType
 
-  class IncorporationInformationResponseException(msg: String) extends Exception(msg)
+  class IncorporationInformationResponseException(msg: String) extends Exception(msg) with IncorporationInformationResponseExceptionType
 
-  class CompanyRegistrationException(msg: String) extends Exception(msg)
+  class CompanyRegistrationException(msg: String) extends Exception(msg) with CompanyRegistrationExceptionType
 
-  class BusinessRegistrationException(msg: String) extends Exception(msg)
+  class BusinessRegistrationException(msg: String) extends Exception(msg) with BusinessRegistrationExceptionType
 
-  class AddressLookupException(msg: String) extends Exception(msg)
+  class AddressLookupException(msg: String) extends Exception(msg) with AddressLookupExceptionType
 
   class UnexpectedException(msg: String) extends Exception(msg) with UnexpectedExceptionType
 

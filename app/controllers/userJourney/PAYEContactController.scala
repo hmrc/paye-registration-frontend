@@ -16,7 +16,8 @@
 
 package controllers.userJourney
 
-import common.exceptions.DownstreamExceptions.{PPOBAddressNotFoundException, S4LFetchException}
+import common.exceptions.DownstreamExceptions.PPOBAddressNotFoundException
+import common.exceptions.{PPOBAddressNotFoundExceptionType, S4LFetchExceptionType}
 import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
@@ -144,7 +145,7 @@ class PAYEContactController @Inject()(val companyDetailsService: CompanyDetailsS
       res <- payeContactService.submitCorrespondence(regId, companyDetails.ppobAddress.getOrElse(throw new PPOBAddressNotFoundException))
       _ <- auditService.auditCorrespondenceAddress(regId, "PrincipalPlaceOfBusiness")
     } yield res) recover {
-      case _: PPOBAddressNotFoundException =>
+      case _: PPOBAddressNotFoundExceptionType =>
         warnLog(s"[submitCorrespondenceWithPPOBAddress] Error while saving Correspondence Address with a PPOBAddress which is missing")
         DownstreamOutcome.Failure
     }
@@ -156,7 +157,7 @@ class PAYEContactController @Inject()(val companyDetailsService: CompanyDetailsS
       prepopAddress <- prepopService.getAddress(regId, prepop.index)
       res <- payeContactService.submitCorrespondence(regId, prepopAddress)
     } yield res) recover {
-      case e: S4LFetchException =>
+      case e: S4LFetchExceptionType =>
         warnLog(s"[submitCorrespondenceWithPrepopAddress] Error while saving Correspondence Address with a PrepopAddress: ${e.getMessage}")
         DownstreamOutcome.Failure
     }

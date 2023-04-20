@@ -17,7 +17,7 @@
 package connectors.httpParsers
 
 import ch.qos.logback.classic.Level
-import common.exceptions.DownstreamExceptions
+import common.exceptions.{DownstreamExceptions, IncorporationInformationResponseExceptionType, OfficerListNotFoundExceptionType}
 import connectors.{IncorpInfoBadRequestResponse, IncorpInfoNotFoundResponse, IncorpInfoSuccessResponse}
 import enums.IncorporationStatus
 import helpers.PayeComponentSpec
@@ -119,7 +119,7 @@ class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with Log
         "return IncorporationInformationResponseException and log an error message" in {
 
           withCaptureOfLoggingFrom(IncorporationInformationHttpParsers.logger) { logs =>
-            intercept[DownstreamExceptions.IncorporationInformationResponseException](IncorporationInformationHttpParsers.setupSubscriptionHttpReads(regId, transactionId, subscriber, regime)
+            intercept[IncorporationInformationResponseExceptionType](IncorporationInformationHttpParsers.setupSubscriptionHttpReads(regId, transactionId, subscriber, regime)
               .read("", "/foo/bar", HttpResponse(INTERNAL_SERVER_ERROR, "")))
 
             logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][setupSubscription] Calling url: '/foo/bar' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId' and txId: '$transactionId'")
@@ -228,7 +228,7 @@ class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with Log
         "return false and log an error message" in {
 
           withCaptureOfLoggingFrom(IncorporationInformationHttpParsers.logger) { logs =>
-            intercept[DownstreamExceptions.IncorporationInformationResponseException](IncorporationInformationHttpParsers.getCoHoCompanyDetailsHttpReads(regId, transactionId)
+            intercept[IncorporationInformationResponseExceptionType](IncorporationInformationHttpParsers.getCoHoCompanyDetailsHttpReads(regId, transactionId)
               .read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
             logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][getCoHoCompanyDetailsHttpReads] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId' and txId: '$transactionId'")
           }
@@ -295,7 +295,7 @@ class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with Log
         "throw Exception and log an error message" in {
 
           withCaptureOfLoggingFrom(IncorporationInformationHttpParsers.logger) { logs =>
-            intercept[DownstreamExceptions.IncorporationInformationResponseException](IncorporationInformationHttpParsers.getIncorpInfoDateHttpReads(regId, transactionId)
+            intercept[IncorporationInformationResponseExceptionType](IncorporationInformationHttpParsers.getIncorpInfoDateHttpReads(regId, transactionId)
               .read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
             logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][getIncorpInfoDateHttpReads] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId' and txId: '$transactionId'")
           }
@@ -375,7 +375,7 @@ class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with Log
         "return OfficerListNotFoundException and log an error message" in {
 
           withCaptureOfLoggingFrom(IncorporationInformationHttpParsers.logger) { logs =>
-            intercept[DownstreamExceptions.OfficerListNotFoundException](IncorporationInformationHttpParsers.getOfficersHttpReads(regId, transactionId)
+            intercept[OfficerListNotFoundExceptionType](IncorporationInformationHttpParsers.getOfficersHttpReads(regId, transactionId)
               .read("", "", HttpResponse(OK, json = Json.obj("officers" -> Json.arr()), Map())))
 
             logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][getOfficersHttpReads] Received an empty Officer list for regId: $regId and txId: $transactionId")
@@ -401,7 +401,7 @@ class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with Log
         "return OfficerListNotFoundException and log an error message" in {
 
           withCaptureOfLoggingFrom(IncorporationInformationHttpParsers.logger) { logs =>
-            intercept[DownstreamExceptions.OfficerListNotFoundException](IncorporationInformationHttpParsers.getOfficersHttpReads(regId, transactionId)
+            intercept[OfficerListNotFoundExceptionType](IncorporationInformationHttpParsers.getOfficersHttpReads(regId, transactionId)
               .read("", "", HttpResponse(NOT_FOUND, "")))
 
             logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][getOfficerList] Received a NotFound status code when expecting an Officer list for regId: $regId and txId: $transactionId")
@@ -414,7 +414,7 @@ class IncorporationInformationHttpParsersSpec extends PayeComponentSpec with Log
         "throw IncorporationInformationResponseException and log an error message" in {
 
           withCaptureOfLoggingFrom(IncorporationInformationHttpParsers.logger) { logs =>
-            intercept[DownstreamExceptions.IncorporationInformationResponseException](IncorporationInformationHttpParsers.getOfficersHttpReads(regId, transactionId)
+            intercept[IncorporationInformationResponseExceptionType](IncorporationInformationHttpParsers.getOfficersHttpReads(regId, transactionId)
               .read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
             logs.containsMsg(Level.ERROR, s"[IncorporationInformationHttpParsers][getOfficerList] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId' and txId: '$transactionId'")
           }

@@ -16,8 +16,7 @@
 
 package connectors
 
-import com.kenshoo.play.metrics.Metrics
-import common.exceptions.DownstreamExceptions
+import common.exceptions.{DownstreamExceptions, IncorporationInformationResponseExceptionType}
 import enums.IncorporationStatus
 import helpers.mocks.MockMetrics
 import helpers.{PayeComponentSpec, PayeFakedApp}
@@ -101,7 +100,7 @@ class IncorporationInformationConnectorSpec extends PayeComponentSpec with PayeF
 
     "return an IncorporationInformationResponseException when unexpected failed future occurs" in new Setup(true) {
       mockHttpGet[Option[LocalDate]](connector.incorpInfoUrl, Future.failed(new DownstreamExceptions.IncorporationInformationResponseException("tstException")))
-      intercept[DownstreamExceptions.IncorporationInformationResponseException](await(connector.getIncorporationInfoDate(testRegId, testTransId)))
+      intercept[IncorporationInformationResponseExceptionType](await(connector.getIncorporationInfoDate(testRegId, testTransId)))
     }
   }
 

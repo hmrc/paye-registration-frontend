@@ -17,7 +17,7 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import common.exceptions.DownstreamExceptions
+import common.exceptions.{BusinessRegistrationExceptionType, DownstreamExceptions}
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.external._
 import models.view.PAYEContactDetails
@@ -130,7 +130,7 @@ class BusinessRegistrationConnectorISpec extends IntegrationSpecBase {
 
         stubRetrieveCompletionCapacity(INTERNAL_SERVER_ERROR, None)
 
-        intercept[DownstreamExceptions.BusinessRegistrationException](await(connector.retrieveCompletionCapacity))
+        intercept[BusinessRegistrationExceptionType](await(connector.retrieveCompletionCapacity))
       }
     }
 

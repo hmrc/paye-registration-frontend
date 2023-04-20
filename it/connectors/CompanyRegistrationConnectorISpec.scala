@@ -17,7 +17,7 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import common.exceptions.DownstreamExceptions
+import common.exceptions.{CompanyRegistrationExceptionType, ConfirmationRefsNotFoundExceptionType}
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.external._
 import play.api.Application
@@ -107,7 +107,7 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
 
             stubCompanyRegistrationDetails(OK, Some(companyRegistrationProfileJson.-("confirmationReferences")))
 
-            intercept[DownstreamExceptions.ConfirmationRefsNotFoundException](await(connector.getCompanyRegistrationDetails(regId)))
+            intercept[ConfirmationRefsNotFoundExceptionType](await(connector.getCompanyRegistrationDetails(regId)))
           }
 
           "handle any other response returning an CompanyRegistrationException" in {
@@ -116,7 +116,7 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
 
             stubCompanyRegistrationDetails(INTERNAL_SERVER_ERROR, None)
 
-            intercept[DownstreamExceptions.CompanyRegistrationException](await(connector.getCompanyRegistrationDetails(regId)))
+            intercept[CompanyRegistrationExceptionType](await(connector.getCompanyRegistrationDetails(regId)))
           }
         }
       }

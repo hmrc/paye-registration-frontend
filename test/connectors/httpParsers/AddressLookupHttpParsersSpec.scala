@@ -17,13 +17,13 @@
 package connectors.httpParsers
 
 import ch.qos.logback.classic.Level
-import common.exceptions.DownstreamExceptions
+import common.exceptions.{AddressLookupExceptionType, DownstreamExceptions}
 import connectors.ALFLocationHeaderNotSetException
 import helpers.PayeComponentSpec
 import models.Address
 import play.api.http.HeaderNames
 import play.api.libs.json.{JsResultException, Json}
-import uk.gov.hmrc.http.{HttpResponse, NotFoundException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.HttpResponse
 import utils.LogCapturingHelper
 
 class AddressLookupHttpParsersSpec extends PayeComponentSpec with LogCapturingHelper {
@@ -102,7 +102,7 @@ class AddressLookupHttpParsersSpec extends PayeComponentSpec with LogCapturingHe
         "return an AddressLookupException and log an error" in {
 
           withCaptureOfLoggingFrom(AddressLookupHttpParsers.logger) { logs =>
-            intercept[DownstreamExceptions.AddressLookupException](AddressLookupHttpParsers.addressHttpReads.read("", "/address/1234", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+            intercept[AddressLookupExceptionType](AddressLookupHttpParsers.addressHttpReads.read("", "/address/1234", HttpResponse(INTERNAL_SERVER_ERROR, "")))
             logs.containsMsg(Level.ERROR, s"[AddressLookupHttpParsers][addressHttpReads] Calling url: '/address/1234' returned unexpected status: '$INTERNAL_SERVER_ERROR'")
           }
         }
@@ -139,7 +139,7 @@ class AddressLookupHttpParsersSpec extends PayeComponentSpec with LogCapturingHe
         "return an AddressLookupException and log an error" in {
 
           withCaptureOfLoggingFrom(AddressLookupHttpParsers.logger) { logs =>
-            intercept[DownstreamExceptions.AddressLookupException](AddressLookupHttpParsers.onRampHttpReads.read("", "/address/1234", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+            intercept[AddressLookupExceptionType](AddressLookupHttpParsers.onRampHttpReads.read("", "/address/1234", HttpResponse(INTERNAL_SERVER_ERROR, "")))
             logs.containsMsg(Level.ERROR, s"[AddressLookupHttpParsers][onRampHttpReads] Calling url: '/address/1234' returned unexpected status: '$INTERNAL_SERVER_ERROR'")
           }
         }
