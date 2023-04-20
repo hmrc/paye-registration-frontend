@@ -16,7 +16,7 @@
 
 package controllers.userJourney
 
-import common.exceptions.DownstreamExceptions.S4LFetchException
+import common.exceptions.S4LFetchExceptionType
 import config.AppConfig
 import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import controllers.{AuthRedirectUrls, PayeBaseController}
@@ -196,7 +196,7 @@ class CompanyDetailsController @Inject()(val s4LService: S4LService,
         prepopAddress <- prepopService.getAddress(regId, prepop.index)
         res <- companyDetailsService.submitPPOBAddr(prepopAddress, regId, txId)
       } yield res) recover {
-        case e: S4LFetchException =>
+        case e: S4LFetchExceptionType =>
           warnLog(s"[submitPPOBAddressChoice] Error while saving PPOB Address with a PrepopAddress: ${e.getMessage}")
           DownstreamOutcome.Failure
       }

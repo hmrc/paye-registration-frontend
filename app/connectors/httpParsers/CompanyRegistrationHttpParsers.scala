@@ -17,7 +17,7 @@
 package connectors.httpParsers
 
 import common.exceptions
-import common.exceptions.DownstreamExceptions
+import common.exceptions.ConfirmationRefsNotFoundExceptionType
 import connectors.BaseConnector
 import models.external.CompanyRegistrationProfile
 import play.api.http.Status.{NOT_FOUND, OK}
@@ -37,7 +37,7 @@ trait CompanyRegistrationHttpParsers extends BaseHttpReads { _: BaseConnector =>
         case OK =>
           Try(response.json.as[CompanyRegistrationProfile](CompanyRegistrationProfile.companyRegistrationReads)) match {
             case Success(profile) => profile
-            case Failure(e: DownstreamExceptions.ConfirmationRefsNotFoundException) =>
+            case Failure(e: ConfirmationRefsNotFoundExceptionType) =>
               errorLog(s"[companyRegistrationDetailsHttpReads] Received an error when expecting a Company Registration document for reg id: $regId could not find confirmation references (has user completed Incorp/CT?)")
               throw e
             case Failure(e) =>

@@ -17,7 +17,7 @@
 package connectors.httpParsers
 
 import ch.qos.logback.classic.Level
-import common.exceptions.DownstreamExceptions
+import common.exceptions.{CompanyRegistrationExceptionType, ConfirmationRefsNotFoundExceptionType}
 import helpers.PayeComponentSpec
 import models.external.CompanyRegistrationProfile
 import play.api.libs.json.{JsResultException, Json}
@@ -82,7 +82,7 @@ class CompanyRegistrationHttpParsersSpec extends PayeComponentSpec with LogCaptu
         "throw a DownstreamExceptions.ConfirmationRefsNotFoundException and log an error message" in {
 
           withCaptureOfLoggingFrom(CompanyRegistrationHttpParsers.logger) { logs =>
-            intercept[DownstreamExceptions.ConfirmationRefsNotFoundException](
+            intercept[ConfirmationRefsNotFoundExceptionType](
               CompanyRegistrationHttpParsers.companyRegistrationDetailsHttpReads(regId).read("", "", HttpResponse(OK, json = Json.obj(), Map()))
             )
             logs.containsMsg(Level.ERROR, s"[companyRegistrationDetailsHttpReads] Received an error when expecting a Company Registration document for reg id: $regId could not find confirmation references (has user completed Incorp/CT?)")
@@ -106,7 +106,7 @@ class CompanyRegistrationHttpParsersSpec extends PayeComponentSpec with LogCaptu
         "return an Upstream Error response and log an error" in {
 
           withCaptureOfLoggingFrom(CompanyRegistrationHttpParsers.logger) { logs =>
-            intercept[DownstreamExceptions.CompanyRegistrationException](CompanyRegistrationHttpParsers.companyRegistrationDetailsHttpReads(regId).read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+            intercept[CompanyRegistrationExceptionType](CompanyRegistrationHttpParsers.companyRegistrationDetailsHttpReads(regId).read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
             logs.containsMsg(Level.ERROR, s"[companyRegistrationDetailsHttpReads] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR' for regId: '$regId'")
           }
         }

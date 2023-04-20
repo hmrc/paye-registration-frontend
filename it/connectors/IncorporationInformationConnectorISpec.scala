@@ -17,22 +17,17 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import common.exceptions.DownstreamExceptions.OfficerListNotFoundException
-import config.AppConfig
+import common.exceptions.OfficerListNotFoundExceptionType
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.Address
 import models.api.Name
 import models.external.{CoHoCompanyDetailsModel, Officer, OfficerList}
 import play.api.Application
-import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
+import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, OK}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.FakeRequest
-import services.MetricsService
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient}
-import utils.PAYEFeatureSwitch
-
-import scala.concurrent.ExecutionContext
+import uk.gov.hmrc.http.HeaderCarrier
 
 class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
 
@@ -233,14 +228,14 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
 
       setupWiremockResult(OK, Some(Json.obj("officers" -> Json.arr())))
 
-      intercept[OfficerListNotFoundException](await(incorpInfoConnector.getOfficerList(testTransId, testRegId)))
+      intercept[OfficerListNotFoundExceptionType](await(incorpInfoConnector.getOfficerList(testTransId, testRegId)))
     }
 
     "throw an OfficerListNotFoundException for a 404 response" in {
 
       setupWiremockResult(NOT_FOUND, None)
 
-      intercept[OfficerListNotFoundException](await(incorpInfoConnector.getOfficerList(testTransId, testRegId)))
+      intercept[OfficerListNotFoundExceptionType](await(incorpInfoConnector.getOfficerList(testTransId, testRegId)))
     }
 
     "throw an Exception" in {

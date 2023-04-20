@@ -16,7 +16,7 @@
 
 package services
 
-import common.exceptions.DownstreamExceptions.S4LFetchException
+import common.exceptions.S4LFetchExceptionType
 import helpers.PayeComponentSpec
 import models.view.PAYEContactDetails
 import models.{Address, DigitalContactDetails}
@@ -185,7 +185,7 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
       (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Address]]()))
         .thenReturn(Future.successful(None))
 
-      intercept[S4LFetchException](await(service.getAddress(regId, 1)))
+      intercept[S4LFetchExceptionType](await(service.getAddress(regId, 1)))
     }
     "throw an exception when there is no address corresponding to the passed key returned from S4L" in new Setup {
       val regId = "9999"
@@ -193,7 +193,7 @@ class PrepopulationServiceSpec extends PayeComponentSpec {
       (ArgumentMatchers.any[HeaderCarrier](), ArgumentMatchers.any[Format[Address]]()))
         .thenReturn(Future.successful(Some(Map(0 -> addr1, 1 -> addr2))))
 
-      intercept[S4LFetchException](await(service.getAddress(regId, 2)))
+      intercept[S4LFetchExceptionType](await(service.getAddress(regId, 2)))
     }
   }
 

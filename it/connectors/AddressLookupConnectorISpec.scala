@@ -18,17 +18,17 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.http.{HttpHeader, HttpHeaders}
-import common.exceptions.DownstreamExceptions
+import common.exceptions.{AddressLookupExceptionType, DownstreamExceptions}
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.Address
 import models.external._
 import play.api.Application
 import play.api.http.HeaderNames
-import play.api.http.Status.{INTERNAL_SERVER_ERROR, NOT_FOUND, NO_CONTENT}
+import play.api.http.Status.{INTERNAL_SERVER_ERROR, NO_CONTENT}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsResultException, JsValue, Json}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 
 class AddressLookupConnectorISpec extends IntegrationSpecBase {
 
@@ -120,7 +120,7 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
 
         stubGetAddress(500, None)
 
-        intercept[DownstreamExceptions.AddressLookupException](await(connector.getAddress(addressId)))
+        intercept[AddressLookupExceptionType](await(connector.getAddress(addressId)))
       }
     }
 
@@ -254,7 +254,7 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase {
 
         stubAddressOnRamp(Json.toJson(alfJourneyConfig))(INTERNAL_SERVER_ERROR)
 
-        intercept[DownstreamExceptions.AddressLookupException](await(connector.getOnRampUrl(alfJourneyConfig)))
+        intercept[AddressLookupExceptionType](await(connector.getOnRampUrl(alfJourneyConfig)))
       }
     }
   }

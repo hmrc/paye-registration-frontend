@@ -16,8 +16,7 @@
 
 package controllers.userJourney
 
-import common.exceptions.CurrentProfileNotFoundExceptionType
-import common.exceptions.DownstreamExceptions.ConfirmationRefsNotFoundException
+import common.exceptions.{ConfirmationRefsNotFoundExceptionType, CurrentProfileNotFoundExceptionType}
 import config.AppConfig
 import connectors._
 import controllers.{AuthRedirectUrls, PayeBaseController}
@@ -103,8 +102,7 @@ class PayeStartController @Inject()(val currentProfileService: CurrentProfileSer
       case _: NotFoundException =>
         warnLog("[PayeStartController][checkAndStoreCurrentProfile] NotFoundException redirecting to OTRS")
         Redirect(appConfig.otrsUrl)
-      case _: ConfirmationRefsNotFoundException =>
-        //This exception is not caught by this case. See DL-9843
+      case _: ConfirmationRefsNotFoundExceptionType =>
         warnLog("[PayeStartController][checkAndStoreCurrentProfile] ConfirmationRefsNotFoundException redirecting to OTRS")
         Redirect(appConfig.otrsUrl)
       case _: CurrentProfileNotFoundExceptionType =>

@@ -17,8 +17,7 @@
 package connectors.httpParsers
 
 import ch.qos.logback.classic.Level
-import common.exceptions.DownstreamExceptions.UnexpectedException
-import common.exceptions.{CurrentProfileNotFoundExceptionType, DownstreamExceptions, UnexpectedExceptionType}
+import common.exceptions.{BusinessRegistrationExceptionType, CurrentProfileNotFoundExceptionType, DownstreamExceptions, UnexpectedExceptionType}
 import connectors.httpParsers.BusinessRegistrationHttpParsers.BusinessRegistrationReadsResponse
 import helpers.PayeComponentSpec
 import models.external.BusinessProfile
@@ -140,7 +139,7 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
           "return an BusinessRegistrationException response and log an error" in {
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
-              intercept[DownstreamExceptions.BusinessRegistrationException](BusinessRegistrationHttpParsers.retrieveCompletionCapacityHttpReads.read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
+              intercept[BusinessRegistrationExceptionType](BusinessRegistrationHttpParsers.retrieveCompletionCapacityHttpReads.read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
               logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][retrieveCompletionCapacityHttpReads] Calling url: '' returned unexpected status: '${INTERNAL_SERVER_ERROR}'")
             }
           }
