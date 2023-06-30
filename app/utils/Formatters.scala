@@ -38,6 +38,7 @@ object Formatters {
   lazy val normalizeTrimmedReads: Reads[String] = Reads.StringReads.map(s => normaliseString(s, extraSpecialCharacters = specialCharacterConverts))
   lazy val normalizeTrimmedListReads: Reads[List[String]] = Reads.list[String](normalizeTrimmedReads)
   lazy val normalizeTrimmedHMRCReads: Reads[String] = Reads.StringReads.map(s => normaliseString(s, Some("[^A-Za-z 0-9\\-']".r)))
+  lazy val normalizeTrimmedTitleHMRCReads: Reads[String] = Reads.StringReads.map(s => normaliseString(s, Some("[^A-Za-z \\-']".r)))
   lazy val normalizeTrimmedHMRCAddressReads: Reads[String] = Reads.StringReads.map(s => normaliseString(s, Some("""[^a-zA-Z0-9, .\(\)/&'\"\-\\]""".r)))
 
   def ninoFormatter(nino: String): String = nino.grouped(2).mkString(" ")

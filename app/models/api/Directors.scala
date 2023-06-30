@@ -37,7 +37,7 @@ object Name {
     (__ \ "forename").readNullable[String](Formatters.normalizeTrimmedHMRCReads) and
       (__ \ "other_forenames").readNullable[String](Formatters.normalizeTrimmedHMRCReads) and
       (__ \ "surname").readNullable[String](Formatters.normalizeTrimmedHMRCReads) and
-      (__ \ "title").readNullable[String](Formatters.normalizeTrimmedHMRCReads).map(opt => opt.filter(_.length <= 20))
+      (__ \ "title").readNullable[String](Formatters.normalizeTrimmedTitleHMRCReads).map(opt => opt.filter(_.length <= 20))
     ) (Name.apply _)
 }
 
