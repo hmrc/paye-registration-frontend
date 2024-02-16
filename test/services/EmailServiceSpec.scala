@@ -35,8 +35,8 @@ class EmailServiceSpec extends PayeComponentSpec {
   implicit val request: FakeRequest[_] = FakeRequest()
 
   object TestAppConfig extends AppConfig(mock[Configuration], mock[PAYEFeatureSwitch]) {
-    override lazy val adminPeriodStart: String = "2022-02-06"
-    override lazy val adminPeriodEnd: String = "2022-05-17"
+    override lazy val adminPeriodStart: String = LocalDate.now().getYear.toString +  "-02-06"
+    override lazy val adminPeriodEnd: String = LocalDate.now().getYear.toString + "-05-17"
     override lazy val taxYearStartDate: String = "2022-04-06"
   }
 

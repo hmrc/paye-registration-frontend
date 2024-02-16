@@ -19,7 +19,6 @@ package config
 import java.net.URLEncoder
 import java.nio.charset.Charset
 import java.util.Base64
-
 import javax.inject.{Inject, Singleton}
 import models.Address
 import models.api.Director
@@ -29,6 +28,8 @@ import play.api.i18n.Lang
 import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import utils.PAYEFeatureSwitch
+
+import java.time.LocalDate
 
 @Singleton
 class AppConfig @Inject()(configuration: Configuration,
@@ -98,6 +99,8 @@ class AppConfig @Inject()(configuration: Configuration,
 
   lazy val taxYearStartDate: String = servicesConfig.getString("tax-year-start-date")
 
+  lazy val thresholdSwitchDate: String = servicesConfig.getString("threshold-switch-date")
+
   lazy val currentPayeWeeklyThreshold: Int = servicesConfig.getInt("paye.weekly-threshold")
   lazy val currentPayeMonthlyThreshold: Int = servicesConfig.getInt("paye.monthly-threshold")
   lazy val currentPayeAnnualThreshold: Int = servicesConfig.getInt("paye.annual-threshold")
@@ -105,8 +108,8 @@ class AppConfig @Inject()(configuration: Configuration,
   lazy val oldPayeMonthlyThreshold: Int = servicesConfig.getInt("paye.old-monthly-threshold")
   lazy val oldPayeAnnualThreshold: Int = servicesConfig.getInt("paye.old-annual-threshold")
 
-  lazy val adminPeriodStart: String = servicesConfig.getString("paye.admin-period-start")
-  lazy val adminPeriodEnd: String = servicesConfig.getString("paye.admin-period-end")
+  lazy val adminPeriodStart: String = LocalDate.now.getYear.toString + servicesConfig.getString("paye.admin-period-start")
+  lazy val adminPeriodEnd: String = LocalDate.now.getYear.toString + servicesConfig.getString("paye.admin-period-end")
 
   lazy val otrsUrl: String = "https://www.tax.service.gov.uk/business-registration/select-taxes"
 

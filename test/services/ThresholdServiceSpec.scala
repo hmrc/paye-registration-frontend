@@ -27,6 +27,7 @@ class ThresholdServiceSpec extends PayeComponentSpec {
 
   object TestAppConfig extends AppConfig(mock[Configuration], mock[PAYEFeatureSwitch]) {
     override lazy val taxYearStartDate: String = LocalDate.now().toString
+    override lazy val thresholdSwitchDate: String = LocalDate.now().toString
     override lazy val currentPayeWeeklyThreshold: Int = 10
     override lazy val currentPayeMonthlyThreshold: Int = 20
     override lazy val currentPayeAnnualThreshold: Int = 30
