@@ -37,7 +37,7 @@ class EmailServiceSpec extends PayeComponentSpec {
   object TestAppConfig extends AppConfig(mock[Configuration], mock[PAYEFeatureSwitch]) {
     override lazy val adminPeriodStart: String = LocalDate.now().getYear.toString +  "-02-06"
     override lazy val adminPeriodEnd: String = LocalDate.now().getYear.toString + "-05-17"
-    override lazy val thresholdSwitchDate: String = "2022-04-06"
+    override lazy val taxYearStartDate: String = "2022-04-06"
   }
 
   val service = new EmailService(

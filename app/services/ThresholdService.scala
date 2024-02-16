@@ -27,7 +27,7 @@ class ThresholdService @Inject()(appConfig: AppConfig){
   def now: LocalDate = LocalDate.now()
 
   def getCurrentThresholds: Map[String, Int] = {
-    val taxYearStartDate = LocalDate.parse(appConfig.taxYearStartDate)
+    val taxYearStartDate = LocalDate.parse(appConfig.thresholdSwitchDate)
 
     val isTaxYear = now.isEqual(taxYearStartDate) || now.isAfter(taxYearStartDate)
 

@@ -27,6 +27,6 @@ class TaxYearConfig @Inject()(appConfig: AppConfig) {
   val adminPeriodStart: LocalDate = LocalDate.parse(appConfig.adminPeriodStart)
   val adminPeriodEnd: LocalDate = LocalDate.parse(appConfig.adminPeriodEnd)
 
-  val taxYearStartDate: LocalDate = LocalDate.parse(appConfig.thresholdSwitchDate)
+  val taxYearStartDate: LocalDate = LocalDate.parse(appConfig.taxYearStartDate)
 
 }
