@@ -16,12 +16,12 @@
 
 package models.api
 
-import play.api.libs.json.{JsValue, Json, Reads}
+import play.api.libs.json.{JsValue, Json, OFormat, Reads}
 
 case class SessionMap(sessionId: String, registrationId: String, transactionId: String, data: Map[String, JsValue]) {
   def getEntry[T](key: String)(implicit reads: Reads[T]): Option[T] = data.get(key).flatMap(_.asOpt[T])
 }
 
 object SessionMap {
-  implicit val format = Json.format[SessionMap]
+  implicit val format: OFormat[SessionMap] = Json.format[SessionMap]
 }

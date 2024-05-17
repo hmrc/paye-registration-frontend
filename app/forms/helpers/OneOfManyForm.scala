@@ -24,7 +24,7 @@ trait OneOfManyForm {
   val optionalFields: Seq[String]
   val noFieldsCompletedMessage: String
 
-  implicit val multiPartFormatter = new Formatter[Option[String]] {
+  implicit val multiPartFormatter: Formatter[Option[String]] = new Formatter[Option[String]] {
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] = {
       if (optionalFields.flatMap(data.get).forall(_ == "")) {

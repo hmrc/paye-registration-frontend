@@ -16,7 +16,8 @@
 
 package itutil
 
-import akka.util.Timeout
+
+import org.apache.pekko.util.Timeout
 import org.scalatest._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatestplus.play.PlaySpec
@@ -25,6 +26,7 @@ import play.api.libs.ws.WSResponse
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import uk.gov.hmrc.mongo.test.MongoSupport
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 trait IntegrationSpecBase extends PlaySpec
@@ -38,8 +40,7 @@ trait IntegrationSpecBase extends PlaySpec
     with DefaultAwaitTimeout
     with MongoSupport {
 
-  override implicit def defaultAwaitTimeout: Timeout = 5.seconds
-
+  implicit val duration: Timeout = Timeout(DurationInt(20).seconds)
   override def beforeEach(): Unit = {
     super.beforeEach()
     resetWiremock()

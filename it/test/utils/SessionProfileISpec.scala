@@ -73,7 +73,6 @@ class SessionProfileISpec extends IntegrationSpecBase with CachingStub {
   lazy val mockKeystoreConnector = app.injector.instanceOf[KeystoreConnector]
   lazy val mockIncorporationInformationConnector = app.injector.instanceOf[IncorporationInformationConnector]
   lazy val mockPayeRegistrationService = app.injector.instanceOf[PAYERegistrationService]
-  lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
 
   implicit val fakeRequest = FakeRequest("GET", "/")
   val testFunc: CurrentProfile => Future[Result] = _ => Future.successful(Ok)

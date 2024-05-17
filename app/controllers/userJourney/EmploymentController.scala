@@ -82,7 +82,7 @@ class EmploymentController @Inject()(employmentService: EmploymentService,
   def submitPaidEmployees: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     implicit profile =>
       ifIncorpDateExist(profile.registrationID, profile.companyTaxRegistration.transactionId) { incorpDate =>
-        PaidEmployeesForm.form(incorpDate).bindFromRequest.fold(
+        PaidEmployeesForm.form(incorpDate).bindFromRequest().fold(
           errors => Future.successful(BadRequest(PaidEmployeesPage(errors, weeklyThreshold))),
           model => {
             employmentService.saveEmployingAnyone(model) map { model =>

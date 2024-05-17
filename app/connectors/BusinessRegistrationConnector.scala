@@ -58,7 +58,7 @@ class BusinessRegistrationConnector @Inject()(val metricsService: MetricsService
   def retrieveCompletionCapacity(implicit hc: HeaderCarrier, request: Request[_]): Future[Option[String]] =
     withTimer {
       withRecovery()("retrieveCurrentProfile") {
-        http.GET[Option[String]](s"$businessRegUrl/business-registration/business-tax-registration")(retrieveCompletionCapacityHttpReads, hc, ec)
+        http.GET[Option[String]](s"$businessRegUrl/business-registration/business-tax-registration")(retrieveCompletionCapacityHttpReads(), hc, ec)
       }
     }
 

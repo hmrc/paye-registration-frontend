@@ -54,7 +54,7 @@ class SubmissionServiceISpec extends IntegrationSpecBase with CachingStub {
   lazy val keystoreConnector = app.injector.instanceOf[KeystoreConnector]
   lazy val incorpInfoConnector = app.injector.instanceOf[IncorporationInformationConnector]
   implicit lazy val appConfig = app.injector.instanceOf[AppConfig]
-  lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
+  override lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
 
   val sId = UUID.randomUUID().toString
   implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sId)))

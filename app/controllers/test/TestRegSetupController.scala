@@ -73,7 +73,7 @@ class TestRegSetupController @Inject()(val payeRegService: PAYERegistrationServi
 
   def submitRegSetup: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     profile =>
-      TestPAYERegSetupForm.form.bindFromRequest.fold(
+      TestPAYERegSetupForm.form.bindFromRequest().fold(
         errors =>
           Future.successful(BadRequest(payeRegistrationSetup(errors, profile.registrationID, profile.companyTaxRegistration.transactionId))),
         success =>
@@ -95,7 +95,7 @@ class TestRegSetupController @Inject()(val payeRegService: PAYERegistrationServi
 
   def submitRegSetupCompanyDetails: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     profile =>
-      TestPAYERegCompanyDetailsSetupForm.form.bindFromRequest.fold(
+      TestPAYERegCompanyDetailsSetupForm.form.bindFromRequest().fold(
         errors => Future.successful(BadRequest(payeRegCompanyDetailsSetup(errors))),
         success => testPAYERegConnector.addTestCompanyDetails(success, profile.registrationID) map {
           case DownstreamOutcome.Success => Ok("Company details successfully set up")
@@ -110,7 +110,7 @@ class TestRegSetupController @Inject()(val payeRegService: PAYERegistrationServi
 
   def submitRegSetupPAYEContact: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     profile =>
-      TestPAYEContactForm.form.bindFromRequest.fold(
+      TestPAYEContactForm.form.bindFromRequest().fold(
         errors => Future.successful(BadRequest(payeRegPAYEContactSetup(errors))),
         success => testPAYERegConnector.addTestPAYEContact(success, profile.registrationID) map {
           case DownstreamOutcome.Success => Ok("PAYE Contact details successfully set up")
@@ -125,7 +125,7 @@ class TestRegSetupController @Inject()(val payeRegService: PAYERegistrationServi
 
   def submitRegSetupEmploymentInfo: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     profile =>
-      TestPAYERegEmploymentInfoSetupForm.form.bindFromRequest.fold(
+      TestPAYERegEmploymentInfoSetupForm.form.bindFromRequest().fold(
         errors => Future.successful(BadRequest(payeRegEmploymentInfoSetup(errors))),
         success => testPAYERegConnector.addTestEmploymentInfo(success, profile.registrationID) map {
           case DownstreamOutcome.Success => Ok("Employment info successfully set up")

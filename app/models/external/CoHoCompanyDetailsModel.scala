@@ -33,10 +33,10 @@ object CoHoCompanyDetailsModel {
 
   val apiReads: Reads[CoHoCompanyDetailsModel] = r(CoHoCompanyDetailsModel.apply _)
   val apiWrites: Writes[CoHoCompanyDetailsModel] = w(unlift(CoHoCompanyDetailsModel.unapply))
-  val incorpInfoReads = (
+  val incorpInfoReads: Reads[CoHoCompanyDetailsModel] = (
     (__ \ "company_name").read[String] and
       (__ \ "registered_office_address").read[Address](Address.incorpInfoReads)
     ) (CoHoCompanyDetailsModel.apply _)
 
-  implicit val format = Format(apiReads, apiWrites)
+  implicit val format: Format[CoHoCompanyDetailsModel] = Format(apiReads, apiWrites)
 }

@@ -17,7 +17,7 @@
 package models
 
 import models.api.SessionMap
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{Format, JsValue, Json, OFormat}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.Instant
@@ -29,8 +29,8 @@ case class DatedSessionMap(sessionId: String,
                            lastUpdated: Instant = Instant.now)
 
 object DatedSessionMap {
-  implicit val dateFormat = MongoJavatimeFormats.instantFormat
-  implicit val formats = Json.format[DatedSessionMap]
+  implicit val dateFormat: Format[Instant] = MongoJavatimeFormats.instantFormat
+  implicit val formats: OFormat[DatedSessionMap] = Json.format[DatedSessionMap]
 
   def apply(sessionMap: SessionMap): DatedSessionMap = DatedSessionMap(sessionMap.sessionId, sessionMap.registrationId, sessionMap.transactionId, sessionMap.data)
 }

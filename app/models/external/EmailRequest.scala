@@ -16,7 +16,7 @@
 
 package models.external
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class EmailRequest(to: Seq[String],
                         templateId: String,
@@ -24,5 +24,5 @@ case class EmailRequest(to: Seq[String],
                         force: Boolean)
 
 object EmailRequest {
-  implicit val format = Json.format[EmailRequest]
+  implicit val format: OFormat[EmailRequest] = Json.format[EmailRequest]
 }

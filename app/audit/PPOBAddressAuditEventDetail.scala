@@ -28,7 +28,7 @@ case class PPOBAddressAuditEventDetail(externalUserId: String,
 object PPOBAddressAuditEventDetail {
   private val REGISTERED_OFFICE_ADDRESS = "registeredOfficeAddress"
 
-  implicit val writes = Writes[PPOBAddressAuditEventDetail] { detail =>
+  implicit val writes: Writes[PPOBAddressAuditEventDetail] = Writes[PPOBAddressAuditEventDetail] { detail =>
     Json.obj(
       EXTERNAL_USER_ID -> detail.externalUserId,
       AUTH_PROVIDER_ID -> detail.authProviderId,

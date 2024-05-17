@@ -7,11 +7,11 @@ Source code for the PAYE Registration frontend microservice, part of the SCRS jo
 
 In order to run the microservice, you must have SBT installed. You should then be able to start the application using: 
 
-```sbt "run 9870 -Dapplication.router=testOnlyDoNotUseInAppConf.Routes"```
+```run.sh```
 
-To run the tests for the application, you can run: ```sbt test it:test``` 
+To run the tests for the application, you can run: ```sbt test it/test``` 
 
-or ```sbt coverage test it:test coverageReport```
+or ```sbt coverage test it/test coverageReport```
 
 ###  License
 

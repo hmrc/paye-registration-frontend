@@ -23,8 +23,10 @@ import org.mongodb.scala.bson.BsonDocument
 import org.scalatest.BeforeAndAfterEach
 import play.api.libs.json._
 import repositories.SessionRepository
-import uk.gov.hmrc.crypto.json.JsonEncryptor
-import uk.gov.hmrc.crypto.{ApplicationCrypto, Protected}
+import uk.gov.hmrc.crypto.{ApplicationCrypto, Sensitive}
+import uk.gov.hmrc.crypto.json.JsonEncryption
+
+import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.mongo.test.MongoSupport
 
 import java.util.concurrent.TimeUnit
@@ -33,10 +35,14 @@ import scala.concurrent.{Await, Future}
 
 trait CachingStub extends MongoSupport with BeforeAndAfterEach {
   self: IntegrationSpecBase =>
-  implicit lazy val jsonCrypto = new ApplicationCrypto(app.configuration.underlying).JsonCrypto
-  implicit lazy val encryptionFormat = new JsonEncryptor[JsObject]()
 
-  lazy val repo = new SessionRepository(app.configuration, mongoComponent)
+  case class SensitiveT[T](override val decryptedValue: T) extends Sensitive[T]
+  
+  implicit lazy val jsonCrypto = new ApplicationCrypto(app.configuration.underlying).JsonCrypto
+
+  implicit lazy val encryptionFormat = JsonEncryption.sensitiveEncrypter[JsObject, SensitiveT[JsObject]]
+  lazy val ec: ExecutionContext = ExecutionContext.global
+  lazy val repo = new SessionRepository(app.configuration, mongoComponent)(ec)
 
   def customAwait[A](future: Future[A])(implicit timeout: Duration): A = Await.result(future, timeout)
 
@@ -94,7 +100,7 @@ trait CachingStub extends MongoSupport with BeforeAndAfterEach {
 
   def stubS4LGet(regId: String, key: String, data: String) = {
     val s4lData = Json.parse(data).as[JsObject]
-    val encData = encryptionFormat.writes(Protected(s4lData)).as[JsString]
+    val encData = encryptionFormat.writes(SensitiveT(s4lData)).as[JsString]
 
     val s4LResponse = Json.obj(
       "id" -> key,
@@ -112,7 +118,7 @@ trait CachingStub extends MongoSupport with BeforeAndAfterEach {
 
   def stubS4LPut(regId: String, key: String, data: String) = {
     val s4lData = Json.parse(data).as[JsObject]
-    val encData = encryptionFormat.writes(Protected(s4lData)).as[JsString]
+    val encData = encryptionFormat.writes(SensitiveT(s4lData)).as[JsString]
 
     val s4LResponse = Json.obj(
       "id" -> key,

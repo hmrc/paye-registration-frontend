@@ -54,7 +54,27 @@ class NatureOfBusinessController @Inject()(val natureOfBusinessService: NatureOf
 
   def submitNatureOfBusiness: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     profile =>
-      NatureOfBusinessForm.form.bindFromRequest.fold(
+      NatureOfBusinessForm.form.bindFromRequest()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        .fold(
         errors => Future.successful(BadRequest(NatureOfBusinessPage(errors))),
         success => natureOfBusinessService.saveNatureOfBusiness(success, profile.registrationID) map {
           case DownstreamOutcome.Success => Redirect(controllers.userJourney.routes.DirectorDetailsController.directorDetails)

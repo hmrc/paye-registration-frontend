@@ -29,13 +29,13 @@ case class TradingName(differentName: Boolean,
                        tradingName: Option[String])
 
 object TradingName {
-  implicit val format = Json.format[TradingName]
+  implicit val format: OFormat[TradingName] = Json.format[TradingName]
 }
 
 
 object CompanyDetails {
-  implicit val businessContactFormat = DigitalContactDetails.format
-  implicit val format = Json.format[CompanyDetails]
+  implicit val businessContactFormat: OFormat[DigitalContactDetails] = DigitalContactDetails.format
+  implicit val format: OFormat[CompanyDetails] = Json.format[CompanyDetails]
 
   val tradingNameApiPrePopReads: Reads[String] = (__ \ "tradingName").read[String]
   val tradingNameApiPrePopWrites: Writes[String] = new Writes[String] {

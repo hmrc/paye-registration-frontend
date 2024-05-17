@@ -33,7 +33,7 @@ object AmendedBusinessContactDetailsEventDetail {
   private val PREVIOUS_CONTACT_DETAILS = "previousContactDetails"
   private val NEW_CONTACT_DETAILS = "newContactDetails"
 
-  implicit val writes = Writes[AmendedBusinessContactDetailsEventDetail] { detail =>
+  implicit val writes: Writes[AmendedBusinessContactDetailsEventDetail] = Writes[AmendedBusinessContactDetailsEventDetail] { detail =>
     Json.obj(
       EXTERNAL_USER_ID -> detail.externalUserId,
       AUTH_PROVIDER_ID -> detail.authProviderId,

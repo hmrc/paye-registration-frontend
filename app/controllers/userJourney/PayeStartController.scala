@@ -59,7 +59,7 @@ class PayeStartController @Inject()(val currentProfileService: CurrentProfileSer
     Redirect(s"$payeRegElFEURL$payeRegElFEURI")
   }
 
-  def startPaye(): Action[AnyContent] = isAuthorisedAndIsOrg { implicit request =>
+  def startPaye: Action[AnyContent] = isAuthorisedAndIsOrg { implicit request =>
     infoLog("[startPaye] attempting to startPaye")
     checkAndStoreCurrentProfile { profile =>
       assertPAYERegistrationFootprint(profile.registrationID, profile.companyTaxRegistration.transactionId) {

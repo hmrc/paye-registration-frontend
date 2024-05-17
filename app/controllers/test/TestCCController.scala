@@ -49,7 +49,7 @@ class TestCCController @Inject()(val testBusRegConnector: TestBusinessRegConnect
 
   def submitUpdateCC: Action[AnyContent] = isAuthorisedWithProfile { implicit user =>
     profile =>
-      TestCCUpdateForm.form.bindFromRequest.fold(
+      TestCCUpdateForm.form.bindFromRequest().fold(
         errors => Future.successful(BadRequest(updateCCPage(errors))),
         valid => testBusRegConnector.updateCompletionCapacity(profile.registrationID, valid.cc) map (_ => Ok(valid.cc))
       )

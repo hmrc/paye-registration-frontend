@@ -42,10 +42,10 @@ class FormattersSpec extends PayeComponentSpec {
   )
 
   def testJsonWrite[V](map: Map[Int, V])(implicit formatV: Format[V]) =
-    Json.toJson[Map[Int, V]](map)(Formatters.intMapWrites[V])
+    Json.toJson[Map[Int, V]](map)(Formatters.intMapWrites[V]())
 
   def testJsonRead[V](json: JsValue)(implicit formatV: Format[V]) =
-    Json.fromJson[Map[Int, V]](json)(Formatters.intMapReads[V])
+    Json.fromJson[Map[Int, V]](json)(Formatters.intMapReads[V]())
 
 
   "MapWrites" should {

@@ -16,8 +16,8 @@
 
 package filters
 
-import akka.event.slf4j.Logger
-import akka.stream.Materializer
+import org.apache.pekko.event.slf4j.Logger
+import org.apache.pekko.stream.Materializer
 import controllers.userJourney.{routes => userJourneyRoutes}
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Filter, RequestHeader, Result}

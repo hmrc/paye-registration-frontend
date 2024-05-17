@@ -16,7 +16,6 @@
 
 package helpers
 
-import akka.util.Timeout
 import helpers.auth.AuthHelpers
 import helpers.fixtures._
 import helpers.mocks.internal.BusinessRegistrationConnectorMock
@@ -33,7 +32,7 @@ import play.api.mvc.{AnyContent, AnyContentAsEmpty, Call, Request, Result}
 import play.api.test._
 import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
-
+import org.apache.pekko.util.Timeout
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
@@ -56,8 +55,7 @@ trait PayeComponentSpec
     with JsonFormValidation
     with GuiceOneAppPerSuite {
 
-  override implicit def defaultAwaitTimeout: Timeout = 5.seconds
-
+  implicit val duration: Timeout = Timeout(DurationInt(20).seconds)
   implicit val cp: CurrentProfile = Fixtures.validCurrentProfile.get
   implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId("testSessionId")))
 

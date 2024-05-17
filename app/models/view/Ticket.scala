@@ -16,12 +16,12 @@
 
 package models.view
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class Ticket(name: String,
                   email: String,
                   message: String)
 
 object Ticket {
-  implicit val format = Json.format[Ticket]
+  implicit val format: OFormat[Ticket] = Json.format[Ticket]
 }

@@ -64,7 +64,7 @@ class PAYEContactController @Inject()(val companyDetailsService: CompanyDetailsS
   def submitPAYEContactDetails: Action[AnyContent] = isAuthorisedWithProfileAndAuditing { implicit request =>
     profile =>
       implicit audit =>
-        PAYEContactDetailsForm.form.bindFromRequest.fold(
+        PAYEContactDetailsForm.form.bindFromRequest().fold(
           errs => Future.successful(BadRequest(PAYEContactDetailsPage(errs))),
           success => {
             val trimmed = trimPAYEContactDetails(success)
@@ -98,7 +98,7 @@ class PAYEContactController @Inject()(val companyDetailsService: CompanyDetailsS
   def submitPAYECorrespondenceAddress: Action[AnyContent] = isAuthorisedWithProfileAndAuditing { implicit request =>
     profile =>
       implicit audit =>
-        CorrespondenceAddressForm.form.bindFromRequest.fold(
+        CorrespondenceAddressForm.form.bindFromRequest().fold(
           errs => for {
             payeContact <- payeContactService.getPAYEContact(profile.registrationID)
             companyDetails <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)

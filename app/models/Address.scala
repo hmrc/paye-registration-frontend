@@ -34,7 +34,7 @@ case class Address(line1: String,
 }
 
 object Address {
-  implicit val format = Json.format[Address]
+  implicit val format: OFormat[Address] = Json.format[Address]
 
   private val unitedKingdomDomains = List("United Kingdom", "UK", "GB", "Great Britain", "Wales", "Scotland", "Northern Ireland")
 
@@ -195,5 +195,5 @@ object Address {
 
   val prePopAddressesReads: Reads[Seq[Address]] = (__ \ "addresses").read[Seq[Address]](Reads.seq(prePopReads))
 
-  val prePopFormat = Format(prePopReads, prePopWrites)
+  val prePopFormat: Format[Address] = Format(prePopReads, prePopWrites)
 }

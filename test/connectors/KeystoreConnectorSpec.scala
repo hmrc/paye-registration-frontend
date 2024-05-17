@@ -17,7 +17,6 @@
 package connectors
 
 import com.codahale.metrics.{Counter, Timer}
-import com.kenshoo.play.metrics.Metrics
 import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics
 import models.api.SessionMap

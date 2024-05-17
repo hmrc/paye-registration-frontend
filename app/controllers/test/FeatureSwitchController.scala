@@ -22,13 +22,12 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import utils._
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class FeatureSwitchController @Inject()(val featureManager: FeatureSwitchManager,
                                             val payeFeatureSwitch: PAYEFeatureSwitch,
                                             val payeRegConnector: PAYERegistrationConnector,
-                                            mcc: MessagesControllerComponents) extends FrontendController(mcc) {
+                                            mcc: MessagesControllerComponents)(implicit val ec: ExecutionContext) extends FrontendController(mcc) {
 
   def switcher(featureName: String, featureState: String): Action[AnyContent] = Action.async {
     implicit request =>

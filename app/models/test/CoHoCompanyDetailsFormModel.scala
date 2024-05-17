@@ -16,7 +16,7 @@
 
 package models.test
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class CoHoCompanyDetailsFormModel(companyName: String,
                                        sicCodes: List[String],
@@ -24,5 +24,5 @@ case class CoHoCompanyDetailsFormModel(companyName: String,
 
 
 object CoHoCompanyDetailsFormModel {
-  implicit val formats = Json.format[CoHoCompanyDetailsFormModel]
+  implicit val formats: OFormat[CoHoCompanyDetailsFormModel] = Json.format[CoHoCompanyDetailsFormModel]
 }

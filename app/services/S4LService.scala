@@ -35,7 +35,7 @@ class S4LService @Inject()(val s4LConnector: S4LConnector)(implicit val ec: Exec
   }
 
   def saveIntMap[V](formId: String, data: Map[Int, V], regId: String)(implicit hc: HeaderCarrier, formatV: Format[V], request: Request[_]): Future[CacheMap] = {
-    implicit val mapFormat: Format[Map[Int, V]] = Format(Formatters.intMapReads[V], Formatters.intMapWrites[V])
+    implicit val mapFormat: Format[Map[Int, V]] = Format(Formatters.intMapReads[V](), Formatters.intMapWrites[V]())
     for {
       cacheMap <- s4LConnector.saveForm[Map[Int, V]](regId, formId, data)
     } yield cacheMap
@@ -48,7 +48,7 @@ class S4LService @Inject()(val s4LConnector: S4LConnector)(implicit val ec: Exec
   }
 
   def fetchAndGetIntMap[V](formId: String, regId: String)(implicit hc: HeaderCarrier, formatV: Format[V]): Future[Option[Map[Int, V]]] = {
-    implicit val mapFormat: Format[Map[Int, V]] = Format(Formatters.intMapReads[V], Formatters.intMapWrites[V])
+    implicit val mapFormat: Format[Map[Int, V]] = Format(Formatters.intMapReads[V](), Formatters.intMapWrites[V]())
     for {
       cacheMap <- s4LConnector.fetchAndGet[Map[Int, V]](regId, formId)
     } yield cacheMap
