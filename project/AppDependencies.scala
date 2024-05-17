@@ -20,39 +20,37 @@ import sbt._
 
 private object AppDependencies {
 
-  val playSuffix                      =  "-play-28"
-  val hmrcMongoVersion                =  "0.74.0"
-  val taxYearVersion                  =  "3.1.0"
-  val bootstrapVersion                =  "7.15.0"
-  val playPartialsVersion             = s"8.4.0$playSuffix"
-  val httpCachingVersion              = s"10.0.0$playSuffix"
-  val playConditionalMappingVersion   = s"1.13.0$playSuffix"
-  val commonsValidatorVersion         =  "1.7"
+  val playSuffix                      =  "-play-30"
+  val hmrcMongoVersion                =  "1.9.0"
+  val taxYearVersion                  =  "4.0.0"
+  val bootstrapVersion                =  "8.6.0"
+  val playPartialsVersion             =  "9.1.0"
+  val httpCachingVersion              =  "11.2.0"
+  val playConditionalMappingVersion   =  "2.0.0"
+  val commonsValidatorVersion         =  "1.8.0"
   val scalaTestVersion                =  "3.2.12"
-  val playFrontendHmrc                = s"7.3.0$playSuffix"
+  val playFrontendHmrc                =  "9.10.0"
 
-  val compile = Seq(
+  val compile: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"             %%  s"bootstrap-frontend$playSuffix"    % bootstrapVersion,
     "uk.gov.hmrc"             %%   "tax-year"                         % taxYearVersion,
-    "uk.gov.hmrc"             %%   "play-partials"                    % playPartialsVersion,
-    "uk.gov.hmrc"             %%   "http-caching-client"              % httpCachingVersion,
-    "uk.gov.hmrc"             %%   "play-conditional-form-mapping"    % playConditionalMappingVersion,
-    "uk.gov.hmrc.mongo"       %%  s"hmrc-mongo$playSuffix"            % hmrcMongoVersion,
+    "uk.gov.hmrc"             %%   s"play-partials$playSuffix"        % playPartialsVersion,
+    "uk.gov.hmrc"             %%   s"http-caching-client$playSuffix"  % httpCachingVersion,
+    "uk.gov.hmrc"             %%   s"play-conditional-form-mapping$playSuffix"    % playConditionalMappingVersion,
+    "uk.gov.hmrc.mongo"       %%   s"hmrc-mongo$playSuffix"           % hmrcMongoVersion,
     "commons-validator"       %    "commons-validator"                % commonsValidatorVersion,
-    "uk.gov.hmrc"             %%   "play-frontend-hmrc"               % playFrontendHmrc
+    "uk.gov.hmrc"             %%   s"play-frontend-hmrc$playSuffix"   % playFrontendHmrc
   )
 
-  val test = Seq(
-    "uk.gov.hmrc"             %%  s"bootstrap-test$playSuffix"        % bootstrapVersion          % "test, it",
-    "org.jsoup"               %   "jsoup"                             % "1.15.4"                  % "test, it",
-    "org.scalatestplus"       %%  "mockito-4-5"                       % s"$scalaTestVersion.0"    % "test, it",
-    "org.scalatestplus.play"  %%  "scalatestplus-play"                % "5.1.0"                   % "test, it",
-    "com.typesafe.play"       %%  "play-test"                         % PlayVersion.current       % "test, it",
-    "com.vladsch.flexmark"    %   "flexmark-all"                      % "0.64.0"                  % "test, it",
-    "org.scalatestplus"       %%  "scalacheck-1-16"                   % s"$scalaTestVersion.0"    % "test, it",
-    "com.github.tomakehurst"  %   "wiremock-jre8-standalone"          % "2.35.0"                  % "it",
-    "uk.gov.hmrc.mongo"       %% s"hmrc-mongo-test$playSuffix"        % hmrcMongoVersion          % "it"
+  val test: Seq[ModuleID] = Seq(
+    "uk.gov.hmrc"             %%  s"bootstrap-test$playSuffix"        % bootstrapVersion          % Test,
+    "org.jsoup"               %   "jsoup"                             % "1.17.2"                  % Test,
+    "org.scalatestplus"       %%  "mockito-4-5"                       % s"$scalaTestVersion.0"    % Test,
+    "org.scalatestplus.play"  %%  "scalatestplus-play"                % "7.0.1"                   % Test,
+    "org.playframework"       %%  "play-test"                         % "3.0.3"                   % Test,
+    "com.vladsch.flexmark"    %   "flexmark-all"                      % "0.64.8"                  % Test,
+    "org.scalatestplus"       %%  "scalacheck-1-17"                   % "3.2.18.0"                % Test,
+    "org.wiremock"            % "wiremock-standalone"                 % "3.5.4"                   % Test,
+    "uk.gov.hmrc.mongo"       %% s"hmrc-mongo-test$playSuffix"        % hmrcMongoVersion          % Test
   )
-
-  def apply() = compile ++ test
 }

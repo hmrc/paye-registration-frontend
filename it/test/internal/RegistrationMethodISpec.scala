@@ -27,7 +27,7 @@ import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 
-class RegistrationMethodISpec extends IntegrationSpecBase
+abstract class RegistrationMethodISpec extends IntegrationSpecBase
   with LoginStub
   with CachingStub
   with BeforeAndAfterEach

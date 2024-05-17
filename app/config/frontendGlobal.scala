@@ -16,7 +16,7 @@
 
 package config
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import com.typesafe.config.Config
 import play.api.Configuration
 import play.api.i18n.MessagesApi

@@ -24,8 +24,8 @@ case class PAYEContactDetails(name: String,
                               digitalContactDetails: DigitalContactDetails)
 
 object PAYEContactDetails {
-  implicit val digitalContactFormat = DigitalContactDetails.format
-  implicit val format = Json.format[PAYEContactDetails]
+  implicit val digitalContactFormat: OFormat[DigitalContactDetails] = DigitalContactDetails.format
+  implicit val format: OFormat[PAYEContactDetails] = Json.format[PAYEContactDetails]
 
   val prepopReads: Reads[PAYEContactDetails] = (json: JsValue) => {
     val oFirstName = (json \ "firstName").asOpt[String](Formatters.normalizeTrimmedReads)
@@ -76,6 +76,6 @@ case class PAYEContact(contactDetails: Option[PAYEContactDetails],
                        correspondenceAddress: Option[Address])
 
 object PAYEContact {
-  implicit val digitalContactFormat = DigitalContactDetails.format
-  implicit val format = Json.format[PAYEContact]
+  implicit val digitalContactFormat: OFormat[DigitalContactDetails] = DigitalContactDetails.format
+  implicit val format: OFormat[PAYEContact] = Json.format[PAYEContact]
 }

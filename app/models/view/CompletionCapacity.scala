@@ -17,10 +17,10 @@
 package models.view
 
 import enums.UserCapacity
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class CompletionCapacity(completionCapacity: UserCapacity.Value, completionCapacityOther: String)
 
 object CompletionCapacity {
-  implicit val format = Json.format[CompletionCapacity]
+  implicit val format: OFormat[CompletionCapacity] = Json.format[CompletionCapacity]
 }

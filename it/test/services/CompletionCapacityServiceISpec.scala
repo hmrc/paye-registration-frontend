@@ -51,7 +51,7 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
   lazy val busRegConnector = app.injector.instanceOf[BusinessRegistrationConnector]
 
   implicit val hc = HeaderCarrier()
-  lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
+  override lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
   implicit val request: FakeRequest[_] = FakeRequest()
 
   val regID = "1234"

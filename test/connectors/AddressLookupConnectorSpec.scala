@@ -16,7 +16,6 @@
 
 package connectors
 
-import com.kenshoo.play.metrics.Metrics
 import helpers.mocks.MockMetrics
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.mockito.ArgumentMatchers

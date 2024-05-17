@@ -69,7 +69,7 @@ class CompanyDetailsController @Inject()(val s4LService: S4LService,
 
   def submitTradingName: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     profile =>
-      TradingNameForm.form.bindFromRequest.fold(
+      TradingNameForm.form.bindFromRequest().fold(
         errors => badRequestResponse(profile.registrationID, profile.companyTaxRegistration.transactionId, errors),
         success => {
           val validatedForm = TradingNameForm.validateForm(TradingNameForm.form.fill(success))
@@ -122,7 +122,7 @@ class CompanyDetailsController @Inject()(val s4LService: S4LService,
     profile =>
       implicit audit =>
         optCompanyName match {
-          case Some(companyName) => BusinessContactDetailsForm.form.bindFromRequest.fold(
+          case Some(companyName) => BusinessContactDetailsForm.form.bindFromRequest().fold(
             errs => Future.successful(BadRequest(BusinessContactDetailsPage(errs, companyName))),
             success => {
               val trimmed = success.copy(email = success.email map (_.trim), phoneNumber = success.phoneNumber map (_.trim), mobileNumber = success.mobileNumber map (_.trim))
@@ -158,7 +158,7 @@ class CompanyDetailsController @Inject()(val s4LService: S4LService,
   def submitPPOBAddress: Action[AnyContent] = isAuthorisedWithProfileAndAuditing { implicit request =>
     profile =>
       implicit audit =>
-        PPOBForm.form.bindFromRequest.fold(
+        PPOBForm.form.bindFromRequest().fold(
           errs => for {
             details <- companyDetailsService.getCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId)
             prepopAddress <- prepopService.getPrePopAddresses(profile.registrationID, details.roAddress, details.ppobAddress, None)

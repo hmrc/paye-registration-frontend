@@ -18,13 +18,13 @@ package models.api
 
 import models.Address
 import models.view.PAYEContactDetails
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class PAYEContact(contactDetails: PAYEContactDetails,
                        correspondenceAddress: Address)
 
 object PAYEContact {
-  implicit val payeContactFormat = PAYEContactDetails.format
-  implicit val addressFormat = Address.format
-  implicit val format = Json.format[PAYEContact]
+  implicit val payeContactFormat: OFormat[PAYEContactDetails] = PAYEContactDetails.format
+  implicit val addressFormat: OFormat[Address] = Address.format
+  implicit val format: OFormat[PAYEContact] = Json.format[PAYEContact]
 }

@@ -16,10 +16,10 @@
 
 package models.test
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class TestCC(cc: String)
 
 object TestCC {
-  implicit val format = Json.format[TestCC]
+  implicit val format: OFormat[TestCC] = Json.format[TestCC]
 }

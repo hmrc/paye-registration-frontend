@@ -24,7 +24,7 @@ case class DigitalContactDetails(email: Option[String],
                                  phoneNumber: Option[String])
 
 object DigitalContactDetails {
-  implicit val format = Json.format[DigitalContactDetails]
+  implicit val format: OFormat[DigitalContactDetails] = Json.format[DigitalContactDetails]
 
   val prepopReads: Reads[DigitalContactDetails] = new Reads[DigitalContactDetails] {
     override def reads(json: JsValue): JsResult[DigitalContactDetails] = {

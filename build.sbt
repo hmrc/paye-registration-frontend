@@ -15,8 +15,8 @@
  */
 
 import scoverage.ScoverageKeys
-import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, integrationTestSettings, scalaSettings}
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
+import uk.gov.hmrc.DefaultBuildSettings
+import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings}
 import uk.gov.hmrc.versioning.SbtGitVersioning.autoImport.majorVersion
 
 val appName: String = "paye-registration-frontend"
@@ -29,23 +29,30 @@ lazy val scoverageSettings = Seq(
 )
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(Seq(PlayScala, SbtDistributablesPlugin): _*)
+  .enablePlugins(Seq(PlayScala, SbtDistributablesPlugin) *)
   .settings(PlayKeys.playDefaultPort := 9870)
-  .settings(scoverageSettings: _*)
-  .settings(scalaSettings: _*)
-  .settings(publishingSettings: _*)
-  .settings(defaultSettings(): _*)
-  .settings(integrationTestSettings())
-  .settings(majorVersion := 1)
-  .configs(IntegrationTest)
+  .settings(scoverageSettings *)
+  .settings(scalaSettings *)
+  .settings(defaultSettings() *)
+  .settings(inConfig(Test)(testSettings) *)
   .settings(
     scalacOptions += "-Xlint:-unused",
-    scalaVersion := "2.13.10",
-    libraryDependencies ++= AppDependencies(),
+    libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     retrieveManaged := true,
-    addTestReportOption(IntegrationTest, "int-test-reports"),
   )
+ThisBuild / majorVersion := 1
+ThisBuild / scalaVersion := "2.13.13"
 
-libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
+lazy val testSettings: Seq[Def.Setting[?]] = Seq(
+  fork                      := true,
+  Test / testForkedParallel := true
+)
+
+lazy val it = project
+  .enablePlugins(PlayScala)
+  .dependsOn(microservice % "test->test") // the "test->test" allows reusing test code and test dependencies
+  .settings(DefaultBuildSettings.itSettings())
+  .settings(libraryDependencies ++= AppDependencies.test)
 
 Test / javaOptions += "-Dlogger.resource=logback-test.xml"
+

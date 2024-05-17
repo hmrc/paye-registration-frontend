@@ -16,10 +16,10 @@
 
 package models.api
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class SICCode(code: Option[String], description: Option[String])
 
 object SICCode {
-  implicit val format = Json.format[SICCode]
+  implicit val format: OFormat[SICCode] = Json.format[SICCode]
 }

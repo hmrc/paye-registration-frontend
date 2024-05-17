@@ -49,7 +49,7 @@ class TestCoHoController @Inject()(val testIncorpInfoConnector: TestIncorpInfoCo
   }
 
   def submitCoHoCompanyDetailsSetup: Action[AnyContent] = isAuthorised { implicit request =>
-    TestCoHoCompanyDetailsForm.form.bindFromRequest.fold(
+    TestCoHoCompanyDetailsForm.form.bindFromRequest().fold(
       errors => Future.successful(BadRequest(coHoCompanyDetailsSetup(errors))),
       success => for {
         profile <- businessRegConnector.retrieveCurrentProfile

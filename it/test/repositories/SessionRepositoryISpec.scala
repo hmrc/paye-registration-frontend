@@ -56,13 +56,13 @@ class SessionRepositoryISpec extends IntegrationSpecBase with MongoSupport with 
     "microservice.services.incorporation-information.port" -> s"$mockPort",
     "mongodb.uri" -> s"$mongoUri"
   )
-
   override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(config)
     .build
 
   val sId = UUID.randomUUID().toString
   implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sId)))
+  lazy val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
   class Setup(replaceIndexes: Boolean = false) {
 
@@ -73,7 +73,7 @@ class SessionRepositoryISpec extends IntegrationSpecBase with MongoSupport with 
     when(mockConfiguration.get[String]("appName")).thenReturn(app.configuration.get[String]("appName"))
     when(mockConfiguration.get[Int]("mongodb.timeToLiveInSeconds")).thenReturn(expireAfter)
 
-    val repository = new SessionRepository(mockConfiguration, mongoComponent)
+    val repository = new SessionRepository(mockConfiguration, mongoComponent)(ec)
     val connector = app.injector.instanceOf[KeystoreConnector]
     await(repository.collection.drop().toFuture())
     await(repository.ensureIndexes)

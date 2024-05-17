@@ -52,7 +52,7 @@ class CompletionCapacityController @Inject()(val completionCapacityService: Comp
 
   def submitCompletionCapacity: Action[AnyContent] = isAuthorisedWithProfile { implicit request =>
     profile =>
-      CompletionCapacityForm.form.bindFromRequest.fold(
+      CompletionCapacityForm.form.bindFromRequest().fold(
         errors => Future.successful(BadRequest(CompletionCapacityView(errors))),
         success => {
           completionCapacityService.saveCompletionCapacity(profile.registrationID, success) map {

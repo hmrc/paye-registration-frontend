@@ -17,25 +17,25 @@
 package models.view
 
 import models.api.Director
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 
 case class Directors(directorMapping: Map[String, Director])
 
 object Directors {
-  implicit val directorFormat = Director.format
-  implicit val directorMappingFormat = Json.format[Directors]
+  implicit val directorFormat: OFormat[Director] = Director.format
+  implicit val directorMappingFormat: OFormat[Directors] = Json.format[Directors]
 }
 
 case class UserEnteredNino(id: String,
                            nino: Option[String])
 
 object UserEnteredNino {
-  implicit val format = Json.format[UserEnteredNino]
+  implicit val format: OFormat[UserEnteredNino] = Json.format[UserEnteredNino]
 }
 
 case class Ninos(ninoMapping: List[UserEnteredNino])
 
 object Ninos {
-  implicit val format = Json.format[Ninos]
+  implicit val format: OFormat[Ninos] = Json.format[Ninos]
 }

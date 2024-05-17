@@ -24,14 +24,14 @@ import play.api.libs.json._
 case class BusinessRegistrationRequest(language: String)
 
 object BusinessRegistrationRequest {
-  implicit val formats = Json.format[BusinessRegistrationRequest]
+  implicit val formats: OFormat[BusinessRegistrationRequest] = Json.format[BusinessRegistrationRequest]
 }
 
 case class BusinessProfile(registrationID: String,
                            language: String)
 
 object BusinessProfile {
-  implicit val formats = Json.format[BusinessProfile]
+  implicit val formats: OFormat[BusinessProfile] = Json.format[BusinessProfile]
 }
 
 case class CompanyRegistrationProfile(status: String,
@@ -40,9 +40,9 @@ case class CompanyRegistrationProfile(status: String,
                                       paidIncorporation: Option[String] = None)
 
 object CompanyRegistrationProfile {
-  implicit val formats = Json.format[CompanyRegistrationProfile]
+  implicit val formats: OFormat[CompanyRegistrationProfile] = Json.format[CompanyRegistrationProfile]
 
-  val companyRegistrationReads = (
+  val companyRegistrationReads: Reads[CompanyRegistrationProfile] = (
     (__ \ "status").read[String] and
       (__ \ "confirmationReferences" \ "transaction-id").readNullable[String].map {
         case Some(txId) => txId
@@ -61,7 +61,7 @@ case class CurrentProfile(registrationID: String,
 
 object CurrentProfile {
 
-  val reads = (
+  val reads: Reads[CurrentProfile] = (
     (__ \ "registrationID").read[String] and
       (__ \ "companyTaxRegistration").read[CompanyRegistrationProfile] and
       (__ \ "language").read[String] and
@@ -69,7 +69,7 @@ object CurrentProfile {
       (__ \ "incorpStatus").readNullable[IncorporationStatus.Value]
     ) (CurrentProfile.apply _)
 
-  val writes = Json.writes[CurrentProfile]
+  val writes: OWrites[CurrentProfile] = Json.writes[CurrentProfile]
 
-  implicit val format = Format(reads, writes)
+  implicit val format: Format[CurrentProfile] = Format(reads, writes)
 }

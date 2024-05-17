@@ -17,7 +17,7 @@
 package helpers.mocks
 
 import com.codahale.metrics.{Counter, Timer}
-import com.kenshoo.play.metrics.Metrics
+import com.codahale.metrics.MetricRegistry
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
@@ -29,9 +29,9 @@ trait MockMetrics extends MockitoSugar {
 
   val mockTimer = new Timer()
   val mockCounter = mock[Counter]
-  val mockMetricssss = mock[Metrics]
-  when(mockMetricssss.defaultRegistry.timer(any())).thenReturn(mockTimer)
-  when(mockMetricssss.defaultRegistry.counter(any())).thenReturn(mockCounter)
+  val mockMetricssss = mock[MetricRegistry]
+  when(mockMetricssss.timer(any())).thenReturn(mockTimer)
+  when(mockMetricssss.counter(any())).thenReturn(mockCounter)
 
   val metricsServiceTestttt = new MetricsService(
     mockMetricssss

@@ -16,7 +16,6 @@
 
 package connectors
 
-import com.kenshoo.play.metrics.Metrics
 import enums.{DownstreamOutcome, RegistrationDeletion}
 import helpers.PayeComponentSpec
 import helpers.mocks.MockMetrics

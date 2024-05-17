@@ -33,7 +33,7 @@ object CompletionCapacityForm {
   private def ifOther(mapping: Mapping[String]): Mapping[String] =
     onlyIf(isEqual("completionCapacity", "other"), mapping)("")
 
-  implicit val completionCapacityFormatter = new Formatter[UserCapacity.Value] {
+  implicit val completionCapacityFormatter: Formatter[UserCapacity.Value] = new Formatter[UserCapacity.Value] {
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], UserCapacity.Value] = {
       Try(UserCapacity.fromString(data.getOrElse(key, ""))) match {
@@ -63,7 +63,7 @@ object CompletionCapacityForm {
     text.verifying(otherConstraint)
   }
 
-  val form = Form(
+  val form: Form[CompletionCapacityView] = Form(
     mapping(
       "completionCapacity" -> completionCapacity,
       "completionCapacityOther" -> ifOther(otherValidation)

@@ -16,7 +16,7 @@
 
 package models.view
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 import java.time.LocalDate
 
@@ -33,7 +33,7 @@ case class WillBePaying(willPay: Boolean,
                         beforeSixApril: Option[Boolean])
 
 object EmployingStaff {
-  implicit val formatEmployingAnyone = Json.format[EmployingAnyone]
-  implicit val formatWillbePaying = Json.format[WillBePaying]
-  implicit val format = Json.format[EmployingStaff]
+  implicit val formatEmployingAnyone: OFormat[EmployingAnyone] = Json.format[EmployingAnyone]
+  implicit val formatWillbePaying: OFormat[WillBePaying] = Json.format[WillBePaying]
+  implicit val format: OFormat[EmployingStaff] = Json.format[EmployingStaff]
 }

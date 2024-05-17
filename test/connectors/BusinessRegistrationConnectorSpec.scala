@@ -17,7 +17,6 @@
 package connectors
 
 import ch.qos.logback.classic.Level
-import com.kenshoo.play.metrics.Metrics
 import common.exceptions.{CurrentProfileNotFoundExceptionType, UnexpectedExceptionType}
 import common.exceptions.DownstreamExceptions.{CurrentProfileNotFoundException, UnexpectedException}
 import config.AppConfig

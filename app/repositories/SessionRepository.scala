@@ -28,11 +28,10 @@ import utils.Logging
 
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SessionRepository @Inject()(config: Configuration, mongo: MongoComponent)
+class SessionRepository @Inject()(config: Configuration, mongo: MongoComponent)(implicit val ec: ExecutionContext)
   extends PlayMongoRepository[DatedSessionMap](
     mongoComponent = mongo,
     collectionName = config.get[String]("appName"),

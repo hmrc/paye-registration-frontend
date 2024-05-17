@@ -27,7 +27,7 @@ case class CorrespondenceAddressAuditEventDetail(externalUserId: String,
 object CorrespondenceAddressAuditEventDetail {
   private val ADDRESS_USED = "addressUsed"
 
-  implicit val writes = Writes[CorrespondenceAddressAuditEventDetail] { detail =>
+  implicit val writes: Writes[CorrespondenceAddressAuditEventDetail] = Writes[CorrespondenceAddressAuditEventDetail] { detail =>
     Json.obj(
       EXTERNAL_USER_ID -> detail.externalUserId,
       AUTH_PROVIDER_ID -> detail.authProviderId,

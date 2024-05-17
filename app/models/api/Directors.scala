@@ -26,14 +26,14 @@ case class Name(forename: Option[String],
                 title: Option[String])
 
 object Name {
-  implicit val format = (
+  implicit val format: OFormat[Name] = (
     (__ \ "forename").formatNullable[String] and
       (__ \ "other_forenames").formatNullable[String] and
       (__ \ "surname").formatNullable[String] and
       (__ \ "title").formatNullable[String]
     ) (Name.apply, unlift(Name.unapply))
 
-  val normalizeNameReads = (
+  val normalizeNameReads: Reads[Name] = (
     (__ \ "forename").readNullable[String](Formatters.normalizeTrimmedHMRCReads) and
       (__ \ "other_forenames").readNullable[String](Formatters.normalizeTrimmedHMRCReads) and
       (__ \ "surname").readNullable[String](Formatters.normalizeTrimmedHMRCReads) and
@@ -44,7 +44,7 @@ object Name {
 case class Director(name: Name, nino: Option[String])
 
 object Director {
-  implicit val format = (
+  implicit val format: OFormat[Director] = (
     (__ \ "director").format[Name] and
       (__ \ "nino").formatNullable[String]
     ) (Director.apply, unlift(Director.unapply))

@@ -80,7 +80,7 @@ class CurrentProfileServiceISpec extends IntegrationSpecBase with CachingStub {
   lazy val payeRegistrationConnector = app.injector.instanceOf[PAYERegistrationConnector]
   lazy val incorpInfoConnector = app.injector.instanceOf[IncorporationInformationConnector]
   implicit lazy val appConfig = app.injector.instanceOf[AppConfig]
-  lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
+  override lazy implicit val ec = app.injector.instanceOf[ExecutionContext]
 
   val sessionId = "session-123"
   implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sessionId)))

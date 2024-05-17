@@ -16,10 +16,10 @@
 
 package models.view
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class NatureOfBusiness(natureOfBusiness: String)
 
 object NatureOfBusiness {
-  implicit val format = Json.format[NatureOfBusiness]
+  implicit val format: OFormat[NatureOfBusiness] = Json.format[NatureOfBusiness]
 }

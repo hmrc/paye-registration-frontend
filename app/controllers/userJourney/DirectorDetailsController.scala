@@ -58,7 +58,7 @@ class DirectorDetailsController @Inject()(val directorDetailsService: DirectorDe
     profile => {
       directorDetailsService.getDirectorDetails(profile.registrationID, profile.companyTaxRegistration.transactionId) flatMap { directors =>
         val names = directorDetailsService.createDisplayNamesMap(directors)
-        DirectorDetailsForm.form(names).bindFromRequest.fold(
+        DirectorDetailsForm.form(names).bindFromRequest().fold(
           errors =>
             Future.successful(BadRequest(DirectorDetailsPage(errors, names))),
           success =>
