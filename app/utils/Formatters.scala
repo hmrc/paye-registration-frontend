@@ -29,7 +29,7 @@ object Formatters {
   def normaliseString(string: String, charFilter: Option[Regex] = None, extraSpecialCharacters: Map[Char, String] = Map()): String = {
     normalize(string, Form.NFKD)
       .replaceAll("\\p{M}", "")
-      .map(char => extraSpecialCharacters.getOrElse(char, char))
+      .map(char => extraSpecialCharacters.getOrElse(char, char.toString))
       .mkString
       .replaceAll(charFilter.fold("")(_.toString), "")
       .trim

@@ -33,56 +33,56 @@ trait AuthHelpers {
   val authConnector: AuthConnector
   val keystoreConnector: KeystoreConnector
 
-  def showAuthorised(action: Action[AnyContent], request: Request[AnyContent])(test: Future[Result] => Any) = {
+  def showAuthorised(action: Action[AnyContent], request: Request[AnyContent])(test: Future[Result] => Any): Any = {
     when(authConnector.authorise[Unit](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(()))
 
     test(action(request))
   }
 
-  def showUnauthorised(action: Action[AnyContent], request: Request[AnyContent])(test: Future[Result] => Any) = {
+  def showUnauthorised(action: Action[AnyContent], request: Request[AnyContent])(test: Future[Result] => Any): Any = {
     when(authConnector.authorise[Unit](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.failed(InsufficientConfidenceLevel("")))
 
     test(action(request))
   }
 
-  def showAuthorisedOrg(action: Action[AnyContent], request: Request[AnyContent])(test: Future[Result] => Any) {
+  def showAuthorisedOrg(action: Action[AnyContent], request: Request[AnyContent])(test: Future[Result] => Any): Unit = {
     when(authConnector.authorise[Option[AffinityGroup]](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future(Some(Organisation)))
 
     test(action(request))
   }
 
-  def showAuthorisedNotOrg(action: Action[AnyContent], request: Request[AnyContent])(test: Future[Result] => Any) {
+  def showAuthorisedNotOrg(action: Action[AnyContent], request: Request[AnyContent])(test: Future[Result] => Any): Unit = {
     when(authConnector.authorise[Option[AffinityGroup]](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future(Some(Individual)))
 
     test(action(request))
   }
 
-  def submitAuthorised(action: Action[AnyContent], request: FakeRequest[AnyContentAsFormUrlEncoded])(test: Future[Result] => Any) {
+  def submitAuthorised(action: Action[AnyContent], request: FakeRequest[AnyContentAsFormUrlEncoded])(test: Future[Result] => Any): Unit = {
     when(authConnector.authorise[Unit](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(()))
 
     test(action(request))
   }
 
-  def submitUnauthorised(action: Action[AnyContent], request: Request[AnyContent])(test: Future[Result] => Any) = {
+  def submitUnauthorised(action: Action[AnyContent], request: Request[AnyContent])(test: Future[Result] => Any): Any = {
     when(authConnector.authorise[Unit](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.failed(InsufficientConfidenceLevel("")))
 
     test(action(request))
   }
 
-  def submitUnauthorisedT[T](action: Action[T], request: Request[T])(test: Future[Result] => Any) = {
+  def submitUnauthorisedT[T](action: Action[T], request: Request[T])(test: Future[Result] => Any): Any = {
     when(authConnector.authorise[Unit](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.failed(InsufficientConfidenceLevel("")))
 
     test(action(request))
   }
 
-  def showAuthorisedWithCP(action: Action[AnyContent], currentProfile: Option[CurrentProfile], request: Request[AnyContent])(test: Future[Result] => Any) {
+  def showAuthorisedWithCP(action: Action[AnyContent], currentProfile: Option[CurrentProfile], request: Request[AnyContent])(test: Future[Result] => Any): Unit = {
     when(authConnector.authorise[Unit](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(()))
 
@@ -92,7 +92,7 @@ trait AuthHelpers {
     test(action(request))
   }
 
-  def showAuthorisedWithCpAndAuthResponse(action: Action[AnyContent], currentProfile: Option[CurrentProfile], request: Request[AnyContent])(test: Future[Result] => Any) {
+  def showAuthorisedWithCpAndAuthResponse(action: Action[AnyContent], currentProfile: Option[CurrentProfile], request: Request[AnyContent])(test: Future[Result] => Any): Unit = {
     when(authConnector.authorise[Unit](ArgumentMatchers.eq(ConfidenceLevel.L50), ArgumentMatchers.eq(EmptyRetrieval))(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(()))
 
@@ -102,7 +102,7 @@ trait AuthHelpers {
     test(action(request))
   }
 
-  def submitAuthorisedWithCP(action: Action[AnyContent], currentProfile: Option[CurrentProfile], request: FakeRequest[AnyContentAsFormUrlEncoded])(test: Future[Result] => Any) {
+  def submitAuthorisedWithCP(action: Action[AnyContent], currentProfile: Option[CurrentProfile], request: FakeRequest[AnyContentAsFormUrlEncoded])(test: Future[Result] => Any): Unit = {
     when(authConnector.authorise[Unit](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future.successful(()))
 
@@ -113,7 +113,7 @@ trait AuthHelpers {
   }
 
 
-  def submitAuthorisedWithCPAndAudit(action: Action[AnyContent], currentProfile: Option[CurrentProfile], request: FakeRequest[AnyContentAsFormUrlEncoded])(test: Future[Result] => Any) {
+  def submitAuthorisedWithCPAndAudit(action: Action[AnyContent], currentProfile: Option[CurrentProfile], request: FakeRequest[AnyContentAsFormUrlEncoded])(test: Future[Result] => Any): Unit = {
     when(authConnector.authorise[~[Option[String], Option[Credentials]]](ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
       .thenReturn(Future(new ~(Some("testId"), Some(Credentials("testProviderId", "testProvideType")))))
 

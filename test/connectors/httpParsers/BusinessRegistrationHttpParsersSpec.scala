@@ -140,7 +140,7 @@ class BusinessRegistrationHttpParsersSpec extends PayeComponentSpec with LogCapt
 
             withCaptureOfLoggingFrom(BusinessRegistrationHttpParsers.logger) { logs =>
               intercept[BusinessRegistrationExceptionType](BusinessRegistrationHttpParsers.retrieveCompletionCapacityHttpReads.read("", "", HttpResponse(INTERNAL_SERVER_ERROR, "")))
-              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][retrieveCompletionCapacityHttpReads] Calling url: '' returned unexpected status: '${INTERNAL_SERVER_ERROR}'")
+              logs.containsMsg(Level.ERROR, s"[BusinessRegistrationHttpParsers][retrieveCompletionCapacityHttpReads] Calling url: '' returned unexpected status: '$INTERNAL_SERVER_ERROR'")
             }
           }
         }

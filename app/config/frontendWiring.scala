@@ -16,7 +16,7 @@
 
 package config
 
-import uk.gov.hmrc.crypto.ApplicationCrypto
+import uk.gov.hmrc.crypto.{ApplicationCrypto, Decrypter, Encrypter}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.cache.client.{SessionCache, ShortLivedCache, ShortLivedHttpCaching}
 
@@ -31,7 +31,7 @@ class PAYEShortLivedHttpCaching @Inject()(val http: HttpClient, appConfig: AppCo
 
 class PAYEShortLivedCache @Inject()(val shortLiveCache: PAYEShortLivedHttpCaching,
                                     val cryptoDi: ApplicationCrypto) extends ShortLivedCache {
-  override implicit lazy val crypto = cryptoDi.JsonCrypto
+  override implicit lazy val crypto: Encrypter with Decrypter = cryptoDi.JsonCrypto
 }
 
 class PAYESessionCache @Inject()(val http: HttpClient, appConfig: AppConfig) extends SessionCache {

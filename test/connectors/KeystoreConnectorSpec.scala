@@ -18,13 +18,11 @@ package connectors
 
 import com.codahale.metrics.{Counter, Timer}
 import helpers.PayeComponentSpec
-import helpers.mocks.MockMetrics
 import models.api.SessionMap
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 import play.api.test.FakeRequest
 import services.MetricsService
 
@@ -52,7 +50,7 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
   case class TestModel(test: String)
 
   object TestModel {
-    implicit val formats = Json.format[TestModel]
+    implicit val formats: OFormat[TestModel] = Json.format[TestModel]
   }
 
   "Saving into SessionRepository" should {
@@ -88,7 +86,7 @@ class KeystoreConnectorSpec extends PayeComponentSpec {
 
   "Fetching and getting from Keystore & saving into SessionRepository" should {
     "return a CurrentProfile" in {
-      val cp = CurrentProfile("regId", CompanyRegistrationProfile("held", "txId", None), "", false, None)
+      val cp = CurrentProfile("regId", CompanyRegistrationProfile("held", "txId", None), "", payeRegistrationSubmitted = false, None)
 
       when(mockSessionCache.fetchAndGetEntry[CurrentProfile](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
         .thenReturn(Future.successful(Some(cp)))
