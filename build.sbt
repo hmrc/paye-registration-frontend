@@ -41,7 +41,7 @@ lazy val microservice = Project(appName, file("."))
     retrieveManaged := true,
   )
 ThisBuild / majorVersion := 1
-ThisBuild / scalaVersion := "2.13.13"
+ThisBuild / scalaVersion := "2.13.16"
 
 lazy val testSettings: Seq[Def.Setting[?]] = Seq(
   fork                      := true,

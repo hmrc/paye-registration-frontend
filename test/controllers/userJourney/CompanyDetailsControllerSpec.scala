@@ -432,7 +432,7 @@ class CompanyDetailsControllerSpec extends PayeComponentSpec with PayeFakedApp {
     }
 
     "redirect to business contact details if ro is chosen" in new Setup {
-      implicit val request = fakeRequest("POST").withFormUrlEncodedBody(
+      implicit val request: FakeRequest[AnyContentAsFormUrlEncoded] = fakeRequest("POST").withFormUrlEncodedBody(
         "chosenAddress" -> "roAddress"
       )
 

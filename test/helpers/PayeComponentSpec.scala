@@ -16,11 +16,13 @@
 
 package helpers
 
+import connectors.KeystoreConnector
 import helpers.auth.AuthHelpers
 import helpers.fixtures._
 import helpers.mocks.internal.BusinessRegistrationConnectorMock
 import helpers.mocks.{KeystoreMock, SaveForLaterMock, WSHTTPMock}
 import models.external.{AuditingInformation, CurrentProfile}
+import org.apache.pekko.util.Timeout
 import org.mockito.Mockito.reset
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatestplus.mockito.MockitoSugar
@@ -28,11 +30,12 @@ import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.{HeaderNames, HttpProtocol, MimeTypes, Status}
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{AnyContent, AnyContentAsEmpty, Call, Request, Result}
+import play.api.mvc.{AnyContentAsEmpty, Call, Result}
 import play.api.test._
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
-import org.apache.pekko.util.Timeout
+
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
@@ -117,8 +120,8 @@ trait PayeComponentSpec
   }
 
   object AuthHelpers extends AuthHelpers {
-    override val authConnector = mockAuthConnector
-    override val keystoreConnector = mockKeystoreConnector
+    override val authConnector: AuthConnector = mockAuthConnector
+    override val keystoreConnector: KeystoreConnector = mockKeystoreConnector
   }
 
   object Fixtures
@@ -149,6 +152,6 @@ trait PayeComponentSpec
 
   }
 
-  def getNameFromAuth(implicit request: Request[AnyContent]): Future[Name]  = Future.successful(Name(Some("Fullname"), None))
+  def getNameFromAuth: Future[Name]  = Future.successful(Name(Some("Fullname"), None))
 
 }

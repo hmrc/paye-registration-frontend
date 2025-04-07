@@ -21,25 +21,25 @@
 @import views.html.helper._
 
 @elements = @{
-    new FieldElements(field.id, field, null, args.toMap, messages)
+    FieldElements(field.id, field, null, args.toMap, messages)
 }
 @fieldsetClass = {
-@elements.args.get('_groupClass)@if(elements.hasErrors) { form-group-error}
+@elements.args.get(Symbol("_groupClass"))@if(elements.hasErrors) { form-group-error}
 }
 @labelAfter = @{
-    elements.args.get('_labelAfter).getOrElse(false).asInstanceOf[Boolean]
+    elements.args.getOrElse(Symbol("_labelAfter"), false).asInstanceOf[Boolean]
 }
 
 <fieldset class="@fieldsetClass" id="@field.id"
-    @if(elements.args.get('_fieldsetAttributes).isDefined) {
-        @elements.args.get('_fieldsetAttributes)}>
-@if(elements.args.get('_legend).isDefined) {
-    <legend class="visually-hidden" @if(elements.args.get('_legendClass).isDefined) {
-        class="@elements.args.get('_legendClass)"}>
+    @if(elements.args.contains(Symbol("_fieldsetAttributes"))) {
+        @elements.args.get(Symbol("_fieldsetAttributes"))}>
+@if(elements.args.contains(Symbol("_legend"))) {
+    <legend class="visually-hidden" @if(elements.args.contains(Symbol("_legendClass"))) {
+        class="@elements.args.get(Symbol("_legendClass"))"}>
     @if(isHeading) {
-        <h1 class="form-title heading-large">@elements.args.get('_legend)</h1>
+        <h1 class="form-title heading-large">@elements.args.get(Symbol("_legend"))</h1>
     } else {
-        @elements.args.get('_legend)
+        @elements.args.get(Symbol("_legend"))
     }
     </legend>
 }
@@ -55,9 +55,9 @@
     }
 }
 
-@if(elements.args.get('_helpText).isDefined) {
+@if(elements.args.contains(Symbol("_helpText"))) {
     <span class="error-message">
-    @elements.args.get('_helpText)
+    @elements.args.get(Symbol("_helpText"))
     </span>
 }
 
@@ -69,15 +69,16 @@
             id="@inputId"
             name="@elements.field.name"
             value="@value"
-                @elements.args.get('_inputClass).map { inputClass => class="@inputClass" }
-                @if(elements.args.contains('_dataAttributes)) {
-                    @elements.args.get('_dataAttributes)
+                @elements.args.get(Symbol("_inputClass")).map { inputClass => class="@inputClass" }
+                @if(elements.args.contains(Symbol("_dataAttributes"))) {
+                    @elements.args.get(Symbol("_dataAttributes"))
                 }
-                @field.value.filter(_ == value).map { _ => checked="checked"}/>
+                @field.value.filter(_ == value).map{ _ => checked="checked"}
+            />
             <label for="@inputId"
-                @elements.args.get('_labelClass).map { labelClass => class="@labelClass @field.value.filter(_ == value).map { _ => selected }" }>
+                @elements.args.get(Symbol("_labelClass")).map { labelClass => class="@labelClass @field.value.filter(_ == value).map { _ => selected }" }>
                 @if(!labelAfter) {
-                    @if(elements.args.get('_stackedLabel)) {
+                    @if(elements.args.get(Symbol("_stackedLabel"))) {
                         @if(label.split(" ").length < 2) {
                             <br>
                             @label
@@ -94,7 +95,7 @@
                 }
 
                 @if(labelAfter) {
-                    @if(elements.args.get('_stackedLabel)) {
+                    @if(elements.args.get(Symbol("_stackedLabel"))) {
                         @if(label.split(" ").length < 2) {
                             <br>
                             @Html(label)

@@ -18,7 +18,7 @@ package controllers.errors
 
 import helpers.{PayeComponentSpec, PayeFakedApp}
 import org.jsoup.Jsoup
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{AnyContentAsEmpty, MessagesControllerComponents}
 import play.api.test.FakeRequest
 import views.BaseSelectors
 import views.html.pages.error.{ineligible, newIneligible, submissionFailed, submissionTimeout}
@@ -60,7 +60,7 @@ class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "GET /start" should {
     "return 200" in new Setup {
-      val fakeRequest = FakeRequest("GET", "/authenticated/ineligible")
+      val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/authenticated/ineligible")
 
       AuthHelpers.showAuthorisedWithCP(testController.ineligible, Fixtures.validCurrentProfile, fakeRequest) { result =>
         status(result) mustBe OK
@@ -73,7 +73,7 @@ class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "retrySubmission" should {
     "return 200" in new Setup {
-      implicit val fakeRequest = FakeRequest("GET", "/")
+      implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
 
       AuthHelpers.showAuthorisedWithCP(testController.retrySubmission, Fixtures.validCurrentProfile, fakeRequest) { result =>
         status(result) mustBe OK
@@ -85,7 +85,7 @@ class ErrorControllerSpec extends PayeComponentSpec with PayeFakedApp {
 
   "failedSubmission" should {
     "return 200" in new Setup {
-      implicit val fakeRequest = FakeRequest("GET", "/")
+      implicit val fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("GET", "/")
 
       AuthHelpers.showAuthorisedWithCP(testController.failedSubmission, Fixtures.validCurrentProfile, fakeRequest) { result =>
         status(result) mustBe OK
