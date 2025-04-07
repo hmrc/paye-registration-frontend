@@ -29,7 +29,7 @@ private object AppDependencies {
   val playConditionalMappingVersion   =  "2.0.0"
   val commonsValidatorVersion         =  "1.8.0"
   val scalaTestVersion                =  "3.2.12"
-  val playFrontendHmrc                =  "9.10.0"
+  val playFrontendHmrc                =  "9.11.0"
 
   val compile: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"             %%  s"bootstrap-frontend$playSuffix"    % bootstrapVersion,
