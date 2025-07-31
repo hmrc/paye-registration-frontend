@@ -45,7 +45,7 @@ class SignInOutController @Inject()(val authConnector: AuthConnector,
   }
 
   def signOut: Action[AnyContent] = Action.async {
-    _ => Future.successful(Redirect(appConfig.betaFeedbackUrl).withNewSession)
+    _ => Future.successful(Redirect(appConfig.signOutUrl).withNewSession)
   }
 
   def renewSession: Action[AnyContent] = isAuthorised { implicit request =>
