@@ -70,7 +70,7 @@ class SignInOutControllerSpec extends PayeComponentSpec with PayeFakedApp {
       AuthHelpers.showAuthorised(controller.signOut, FakeRequest()) {
         result =>
           status(result) mustBe SEE_OTHER
-          redirectLocation(result) mustBe Some(appConfig.betaFeedbackUrl)
+          redirectLocation(result) mustBe Some(appConfig.signOutUrl)
       }
     }
   }

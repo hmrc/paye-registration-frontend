@@ -71,6 +71,7 @@ class AppConfig @Inject()(configuration: Configuration,
   }
 
   //feedback
+  lazy val signOutUrl: String = loadConfig("sign-out.url")
   lazy val feedbackFrontendUrl = loadConfig("microservice.services.feedback-frontend.host")
   lazy val betaFeedbackUrl = s"$feedbackFrontendUrl/feedback/$contactFormServiceIdentifier"
 
