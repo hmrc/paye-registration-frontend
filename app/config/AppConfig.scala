@@ -71,9 +71,16 @@ class AppConfig @Inject()(configuration: Configuration,
   }
 
   //feedback
-  lazy val signOutUrl: String = loadConfig("sign-out.url")
+  lazy val basGatewayUrl: String = loadConfig(s"bas-gateway-frontend.host")
+  lazy val signOutUri: String = loadConfig("sign-out.uri")
+  lazy val signOutUrl: String = s"$basGatewayUrl$signOutUri"
+
   lazy val feedbackFrontendUrl = loadConfig("microservice.services.feedback-frontend.host")
   lazy val betaFeedbackUrl = s"$feedbackFrontendUrl/feedback/$contactFormServiceIdentifier"
+
+  lazy val exitSurveyServiceIdentifier = "SCRS"
+  lazy val feedbackUrl = s"$feedbackFrontendUrl/feedback/$exitSurveyServiceIdentifier"
+
 
   lazy val self: String = servicesConfig.getConfString("paye-registration-frontend.www.url", "")
   lazy val regIdAllowlist: Seq[String] = allowListConfig("regIdAllowlist")
