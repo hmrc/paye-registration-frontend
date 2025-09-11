@@ -22,7 +22,7 @@ import connectors.httpParsers.BusinessRegistrationHttpParsers.BusinessRegistrati
 import play.api.http.Status.{CREATED, NOT_FOUND, NO_CONTENT, OK}
 import play.api.libs.json.Reads
 import play.api.mvc.Request
-import uk.gov.hmrc.http.HttpReads.is2xx
+import uk.gov.hmrc.http.HttpErrorFunctions.is2xx
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import utils.Logging
 

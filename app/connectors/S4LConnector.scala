@@ -47,7 +47,7 @@ class S4LConnector @Inject()(val shortCache: PAYEShortLivedCache,
     }
   }
 
-  def clear(userId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[HttpResponse] = {
+  def clear(userId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Unit] = {
     metricsService.processDataResponseWithMetrics(successCounter, failedCounter, timer) {
       shortCache.remove(userId)
     }
