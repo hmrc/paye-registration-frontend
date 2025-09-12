@@ -769,7 +769,9 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       json mustBe Json.parse(updatedPayeDoc)
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      reqPostsAudit.size mustBe 1
+      reqPostsAudit.forEach {
+        auditEvent => auditEvent.getBodyAsString.contains("registeredOfficeUsedAsPrincipalPlaceOfBusiness") mustBe false
+      }
     }
 
     "return an error page when fail saving to microservice with full company details data and prepop address" in {
