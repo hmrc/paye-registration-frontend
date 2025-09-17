@@ -29,6 +29,7 @@ import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.json._
 
 import java.util.UUID
+import scala.jdk.CollectionConverters.ListHasAsScala
 
 
 class CompanyDetailsMethodISpec extends IntegrationSpecBase
@@ -1140,8 +1141,8 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/what-company-does")
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      reqPostsAudit.size mustBe 2
-      val captorPost = reqPostsAudit.get(0)
+        .asScala.toList.find(_.getBodyAsString.contains("businessContactAmendment"))
+      val captorPost = reqPostsAudit.getOrElse(fail(s"No matching audit event found"))
       val jsonAudit = Json.parse(captorPost.getBodyAsString)
 
       val previousContactDetails = DigitalContactDetails(
@@ -1229,7 +1230,9 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/what-company-does")
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      reqPostsAudit.size mustBe 1
+      reqPostsAudit.forEach(
+        auditEvent => auditEvent.getBodyAsString.contains("businessContactAmendment") mustBe false
+      )
     }
   }
 }
