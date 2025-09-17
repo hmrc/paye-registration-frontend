@@ -622,9 +622,10 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val captor = crPuts.get(0)
       val json = Json.parse(captor.getBodyAsString)
       (json \ "ppobAddress").as[JsObject].toString() mustBe roDoc
-
+      
       val reqPosts = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      val captorPost = reqPosts.get(0)
+        .asScala.toList.find(_.getBodyAsString.contains("registeredOfficeUsedAsPrincipalPlaceOfBusiness"))
+      val captorPost = reqPosts.getOrElse(fail(s"No matching audit event found"))
       val jsonAudit = Json.parse(captorPost.getBodyAsString)
 
       (jsonAudit \ "auditSource").as[JsString].value mustBe "paye-registration-frontend"
