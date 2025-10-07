@@ -84,10 +84,8 @@ class PAYERegistrationService @Inject()(val payeRegistrationConnector: PAYERegis
       if (regId != profile.registrationID) {
         Future.successful(RegistrationDeletion.forbidden)
       } else {
-        s4LService.clear(regId) flatMap { response =>
-          response.status match {
-            case NO_CONTENT => payeRegistrationConnector.deleteCurrentRegistrationInProgress(regId, profile.companyTaxRegistration.transactionId)
-          }
+        s4LService.clear(regId) flatMap { _ =>
+          payeRegistrationConnector.deleteCurrentRegistrationInProgress(regId, profile.companyTaxRegistration.transactionId)
         }
       }
     }

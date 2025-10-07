@@ -19,7 +19,7 @@ package connectors.httpParsers
 import models.external.EmailRequest
 import models.{EmailDifficulties, EmailResponse, EmailSent}
 import play.api.mvc.Request
-import uk.gov.hmrc.http.HttpReads.is2xx
+import uk.gov.hmrc.http.HttpErrorFunctions.is2xx
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 import utils.Logging
 

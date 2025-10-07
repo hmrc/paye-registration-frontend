@@ -29,6 +29,7 @@ import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.json._
 
 import java.util.UUID
+import scala.jdk.CollectionConverters.ListHasAsScala
 
 
 class CompanyDetailsMethodISpec extends IntegrationSpecBase
@@ -621,9 +622,10 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       val captor = crPuts.get(0)
       val json = Json.parse(captor.getBodyAsString)
       (json \ "ppobAddress").as[JsObject].toString() mustBe roDoc
-
+      
       val reqPosts = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      val captorPost = reqPosts.get(0)
+        .asScala.toList.find(_.getBodyAsString.contains("registeredOfficeUsedAsPrincipalPlaceOfBusiness"))
+      val captorPost = reqPosts.getOrElse(fail(s"No matching audit event found"))
       val jsonAudit = Json.parse(captorPost.getBodyAsString)
 
       (jsonAudit \ "auditSource").as[JsString].value mustBe "paye-registration-frontend"
@@ -769,7 +771,9 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       json mustBe Json.parse(updatedPayeDoc)
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      reqPostsAudit.size mustBe 1
+      reqPostsAudit.forEach {
+        auditEvent => auditEvent.getBodyAsString.contains("registeredOfficeUsedAsPrincipalPlaceOfBusiness") mustBe false
+      }
     }
 
     "return an error page when fail saving to microservice with full company details data and prepop address" in {
@@ -1138,8 +1142,8 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/what-company-does")
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      reqPostsAudit.size mustBe 2
-      val captorPost = reqPostsAudit.get(0)
+        .asScala.toList.find(_.getBodyAsString.contains("businessContactAmendment"))
+      val captorPost = reqPostsAudit.getOrElse(fail(s"No matching audit event found"))
       val jsonAudit = Json.parse(captorPost.getBodyAsString)
 
       val previousContactDetails = DigitalContactDetails(
@@ -1227,7 +1231,9 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/what-company-does")
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      reqPostsAudit.size mustBe 1
+      reqPostsAudit.forEach(
+        auditEvent => auditEvent.getBodyAsString.contains("businessContactAmendment") mustBe false
+      )
     }
   }
 }

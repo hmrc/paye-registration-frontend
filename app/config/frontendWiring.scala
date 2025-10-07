@@ -17,12 +17,12 @@
 package config
 
 import uk.gov.hmrc.crypto.{ApplicationCrypto, Decrypter, Encrypter}
-import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.cache.client.{SessionCache, ShortLivedCache, ShortLivedHttpCaching}
+import uk.gov.hmrc.http.client.HttpClientV2
 
 import javax.inject.Inject
 
-class PAYEShortLivedHttpCaching @Inject()(val http: HttpClient, appConfig: AppConfig) extends ShortLivedHttpCaching {
+class PAYEShortLivedHttpCaching @Inject()(val httpClientV2: HttpClientV2, appConfig: AppConfig) extends ShortLivedHttpCaching {
   override lazy val defaultSource: String = appConfig.servicesConfig.getString("appName")
   override lazy val baseUri: String = appConfig.servicesConfig.baseUrl("cachable.short-lived-cache")
   override lazy val domain: String = appConfig.servicesConfig.getConfString("cachable.short-lived-cache.domain",
@@ -34,7 +34,7 @@ class PAYEShortLivedCache @Inject()(val shortLiveCache: PAYEShortLivedHttpCachin
   override implicit lazy val crypto: Encrypter with Decrypter = cryptoDi.JsonCrypto
 }
 
-class PAYESessionCache @Inject()(val http: HttpClient, appConfig: AppConfig) extends SessionCache {
+class PAYESessionCache @Inject()(val httpClientV2: HttpClientV2, appConfig: AppConfig) extends SessionCache {
   override lazy val defaultSource: String = appConfig.servicesConfig.getString("appName")
   override lazy val baseUri: String = appConfig.servicesConfig.baseUrl("cachable.session-cache")
   override lazy val domain: String = appConfig.servicesConfig.getConfString("cachable.session-cache.domain",

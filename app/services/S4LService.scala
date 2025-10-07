@@ -54,7 +54,7 @@ class S4LService @Inject()(val s4LConnector: S4LConnector)(implicit val ec: Exec
     } yield cacheMap
   }
 
-  def clear(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[HttpResponse] = {
+  def clear(regId: String)(implicit hc: HeaderCarrier, request: Request[_]): Future[Unit] = {
     for {
       resp <- s4LConnector.clear(regId)
     } yield resp

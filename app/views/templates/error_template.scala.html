@@ -18,7 +18,7 @@
       h1: components.h1,
       p: components.p)
 
-@(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages, appConfig: config.AppConfig)
+@(pageTitle: String, heading: String, message: String)(implicit request: RequestHeader, messages: Messages, appConfig: config.AppConfig)
 
 @layout(pageTitle = Some(pageTitle)) {
 

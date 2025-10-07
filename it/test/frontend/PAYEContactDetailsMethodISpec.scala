@@ -29,6 +29,7 @@ import play.api.libs.crypto.DefaultCookieSigner
 import play.api.libs.json.{JsObject, JsString, Json}
 
 import java.util.UUID
+import scala.jdk.CollectionConverters.ListHasAsScala
 
 class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
   with LoginStub
@@ -321,7 +322,8 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       json mustBe Json.parse(prepopJson)
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      val captorPost = reqPostsAudit.get(0)
+        .asScala.toList.find(_.getBodyAsString.contains("payeContactDetailsAmendment"))
+      val captorPost = reqPostsAudit.getOrElse(fail(s"No matching audit event found"))
       val jsonAudit = Json.parse(captorPost.getBodyAsString)
 
       val previousPAYEContactDetails = AuditPAYEContactDetails(
@@ -695,7 +697,9 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/check-and-confirm-your-answers")
 
       val reqPosts = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      val captorPost = reqPosts.get(0)
+        .asScala.toList.find(_.getBodyAsString.contains("correspondenceAddress"))
+      val captorPost = reqPosts.getOrElse(fail(s"No matching audit event found"))
+
       val json = Json.parse(captorPost.getBodyAsString)
 
       (json \ "auditSource").as[JsString].value mustBe "paye-registration-frontend"

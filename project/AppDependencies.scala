@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import play.core.PlayVersion
-import sbt._
+import sbt.*
 
 
 private object AppDependencies {
 
   val playSuffix                      =  "-play-30"
-  val hmrcMongoVersion                =  "2.6.0"
-  val taxYearVersion                  =  "4.0.0"
-  val bootstrapVersion                =  "8.6.0"
-  val playPartialsVersion             =  "9.1.0"
-  val httpCachingVersion              =  "11.2.0"
-  val playConditionalMappingVersion   =  "2.0.0"
-  val commonsValidatorVersion         =  "1.8.0"
+  val hmrcMongoVersion                =  "2.7.0"
+  val taxYearVersion                  =  "6.0.0"
+  val bootstrapVersion                =  "10.1.0"
+  val playPartialsVersion             =  "10.1.0"
+  val httpCachingVersion              =  "12.2.0"
+  val playConditionalMappingVersion   =  "3.3.0"
+  val commonsValidatorVersion         =  "1.10.0"
   val scalaTestVersion                =  "3.2.12"
   val playFrontendHmrc                =  "9.11.0"
 
@@ -44,13 +43,13 @@ private object AppDependencies {
 
   val test: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"             %%  s"bootstrap-test$playSuffix"        % bootstrapVersion          % Test,
-    "org.jsoup"               %   "jsoup"                             % "1.17.2"                  % Test,
+    "org.jsoup"               %   "jsoup"                             % "1.21.2"                  % Test,
     "org.scalatestplus"       %%  "mockito-4-5"                       % s"$scalaTestVersion.0"    % Test,
-    "org.scalatestplus.play"  %%  "scalatestplus-play"                % "7.0.1"                   % Test,
-    "org.playframework"       %%  "play-test"                         % "3.0.3"                   % Test,
+    "org.scalatestplus.play"  %%  "scalatestplus-play"                % "7.0.2"                   % Test,
+    "org.playframework"       %%  "play-test"                         % "3.0.8"                   % Test,
     "com.vladsch.flexmark"    %   "flexmark-all"                      % "0.64.8"                  % Test,
     "org.scalatestplus"       %%  "scalacheck-1-17"                   % "3.2.18.0"                % Test,
-    "org.wiremock"            % "wiremock-standalone"                 % "3.5.4"                   % Test,
+    "org.wiremock"            % "wiremock-standalone"                 % "3.13.1"                  % Test,
     "uk.gov.hmrc.mongo"       %% s"hmrc-mongo-test$playSuffix"        % hmrcMongoVersion          % Test
   )
 }

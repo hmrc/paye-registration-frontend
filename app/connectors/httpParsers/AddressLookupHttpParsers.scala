@@ -20,7 +20,7 @@ import common.exceptions
 import connectors.{ALFLocationHeaderNotSetException, BaseConnector}
 import models.Address
 import play.api.http.HeaderNames
-import uk.gov.hmrc.http.HttpReads.is2xx
+import uk.gov.hmrc.http.HttpErrorFunctions.is2xx
 import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
 import scala.util.{Failure, Success, Try}
