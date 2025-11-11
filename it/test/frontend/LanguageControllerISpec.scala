@@ -64,8 +64,8 @@ class LanguageControllerISpec extends IntegrationSpecBase with LoginStub with Ca
   }
 
   "setLanguage" should {
-    val welshCookie = Some(DefaultWSCookie("PLAY_LANG", "cy", None, Some("/"), None, true, false))
-    val englishCookie = Some(DefaultWSCookie("PLAY_LANG", "en", None, Some("/"), None, true, false))
+    val welshCookie = Some(DefaultWSCookie("PLAY_LANG", "cy", None, Some("/"), None, false, false))
+    val englishCookie = Some(DefaultWSCookie("PLAY_LANG", "en", None, Some("/"), None, false, false))
 
     "return a 303 when language is switched" in {
       setupSimpleAuthMocks()
