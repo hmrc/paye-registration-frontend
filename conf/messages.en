@@ -178,7 +178,7 @@ pages.paysPension.description                                   = Does the compa
 pages.paysPension.error                                         = Tell us if the company makes pension payments to a former employee or their dependants
 
 ## NATURE OF BUSINESS
-pages.natureOfBusiness.description                              = What does the company do?
+pages.natureOfBusiness.description                              = What goods or services does the company sell?
 pages.natureOfBusiness.textArea.label                           = Enter a description of the type of goods or services the company sells.
 
 ## Director Details Page
