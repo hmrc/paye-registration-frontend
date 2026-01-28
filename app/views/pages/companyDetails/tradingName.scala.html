@@ -35,14 +35,17 @@
 @hiddenYesNoContent = {
 
 @inputText(
-    form = tradingNameForm,
-    name = "tradingName",
-    id = "tradingName",
-    label = messages("pages.tradingName.tradingNameLabel"),
-    isLabelHidden = false,
-    isPageHeading = false,
-    hint = Some(Html(messages("pages.tradingdetails.input.hint-text")))
+     form = tradingNameForm,
+     name = "tradingName",
+     id = "tradingName",
+     label = messages("pages.tradingName.tradingNameLabel"),
+     isLabelHidden = false,
+     isPageHeading = false,
 )
+
+<p class="govuk-hint">
+    @messages("pages.tradingdetails.input.hint-text")
+</p>
 }
 
 @hiddenDetailsContent = {
