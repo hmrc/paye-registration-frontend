@@ -179,7 +179,7 @@ pages.paysPension.description                                           =    A y
 pages.paysPension.error                                                 =    Rhowch wybod i ni a yw’r cwmni’n gwneud taliadau pensiwn i gyn-gyflogai neu ei ddibynyddion
 
 ## NATURE OF BUSINESS
-pages.natureOfBusiness.description                                      =    Beth mae’r cwmni’n ei wneud?
+pages.natureOfBusiness.description                                      =    Pa nwyddau neu wasanaethau sy’n cael eu gwerthu gan y cwmni?
 pages.natureOfBusiness.textArea.label                                   =    Nodwch ddisgrifiad o’r math o nwyddau neu wasanaethau y mae’r cwmni’n eu gwerthu.
 
 ## Director Details Page
