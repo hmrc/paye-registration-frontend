@@ -21,6 +21,8 @@
 @import views.html.templates.layout
 @import uk.gov.hmrc.govukfrontend.views.viewmodels.radios.RadioItem
 @import uk.gov.hmrc.govukfrontend.views.Aliases.Text
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.hint.Hint
+@import uk.gov.hmrc.govukfrontend.views.Aliases.HtmlContent
 
 @this(inputText: components.inputText,
         layout: layout,
@@ -70,12 +72,14 @@
                 RadioItem(
                     id = Some("agent"),
                     content = Text(messages("pages.completionCapacity.agent")),
+                    hint = Some(Hint(content = HtmlContent(messages("pages.completionCapacity.agent-hint")))),
                     value = Some("agent"),
                     checked = completionCapacityForm("completionCapacity").value.contains("agent")
                 ),
                 RadioItem(
                     id = Some("other"),
                     content = Text(messages("pages.completionCapacity.other")),
+                    hint = Some(Hint(content = HtmlContent(messages("pages.completionCapacity.other-hint")))),
                     value = Some("other"),
                     checked = completionCapacityForm("completionCapacity").value.contains("other"),
                     conditionalHtml = Some(otherHidden)
