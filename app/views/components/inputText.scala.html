@@ -41,10 +41,12 @@
 )(implicit messages: Messages)
 
 @labelClasses = @{
+  attributes.get("labelClasses").getOrElse {
     if(isPageHeading) "govuk-label--xl"
     else if(hint.isDefined) "govuk-!-font-weight-bold"
     else if(isLabelHidden) "govuk-visually-hidden"
         else ""
+  }
 }
 
 @govukInput(

@@ -59,24 +59,18 @@
     @form(action = controllers.userJourney.routes.DirectorDetailsController.submitDirectorDetails) {
 
         @helper.repeat(ninoForm("nino")) { ninoField =>
-          @defining(ninoField.name.filter("0123456789".toSet)) { index =>
             <div class="form-field">
-                @if(index == "0") {
-                <div id="@{ninoField.name}-hint" class="govuk-hint">
-                @messages("pages.directorDetails.input.hint-text")
-                </div>
-                }
                 @inputText(
                     form = ninoForm,
                     name = ninoField.name,
                     id = ninoField.name,
-                    label = messages("pages.directorDetails.name-suffix", directorNames.getOrElse(index,"Error fetching name")),
+                    hint = Some(Html{if(ninoField.name.filter("0123456789".toSet) == "0"){ messages("pages.directorDetails.input.hint-text") } else {""}}),
+                    label = messages("pages.directorDetails.name-suffix", directorNames.getOrElse(ninoField.name.filter("0123456789".toSet),"Error fetching name")),
                     classes = Some("govuk-input--width-10"),
-                    attributes = if(index == "0") Map("aria-describedby" -> s"${ninoField.name}-hint") else Map.empty,
-                    isPageHeading = false
+                    isPageHeading = false,
+                    attributes = Map("labelClasses" -> "")
                 )
             </div>
-          }
         }
 
         @button("app.common.saveAndContinue")
