@@ -119,6 +119,7 @@ pages.correspondenceAddress.addressChoice.noEntry               = Tell us where 
 
 ## Business Contact Details
 pages.businessContact.description                               = Give us one or more ways to contact {0}
+pages.businessContact.hint                                      = We will only do this if we have questions about the company's PAYE
 pages.businessContact.email                                     = Email address
 pages.businessContact.contact                                   = Contact number
 pages.businessContact.othercontact                              = Other contact number

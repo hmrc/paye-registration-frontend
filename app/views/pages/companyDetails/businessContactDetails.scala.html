@@ -44,7 +44,7 @@
 
     @form(action = controllers.userJourney.routes.CompanyDetailsController.submitBusinessContactDetails) {
 
-        @p {  @messages("pages.businessContact.description", companyName) }
+        @p {  @messages("pages.businessContact.hint") }
 
         @inputText(
             form = contactForm,
@@ -59,7 +59,7 @@
             name = "mobileNumber",
             id = "mobileNumber",
             label = messages("pages.businessContact.contact"),
-            classes = Some("form-label cascading"),
+            classes = Some("govuk-input--width-20"),
             isPageHeading = false,
             attributes = Map("autocomplete" -> "tel")
         )
@@ -69,7 +69,7 @@
             name = "phoneNumber",
             id = "phoneNumber",
             label = messages("pages.businessContact.othercontact"),
-            classes = Some("form-label cascading"),
+            classes = Some("govuk-input--width-20"),
             isPageHeading = false,
             attributes = Map("autocomplete" -> "tel")
         )
