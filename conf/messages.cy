@@ -120,6 +120,7 @@ pages.correspondenceAddress.addressChoice.noEntry                       =    Rho
 
 ## Business Contact Details
 pages.businessContact.description                                       =    Rhowch un ffordd neu fwy i ni o gysylltu â {0}
+pages.businessContact.hint                                              =    Dim ond os oes gennym gwestiynau am TWE y cwmni y byddwn yn gwneud hyn.
 pages.businessContact.email                                             =    Cyfeiriad e-bost
 pages.businessContact.contact                                           =    Rhif cyswllt
 pages.businessContact.othercontact                                      =    Rhif cyswllt arall
