@@ -66,8 +66,9 @@
                     id = ninoField.name,
                     hint = Some(Html{if(ninoField.name.filter("0123456789".toSet) == "0"){ messages("pages.directorDetails.input.hint-text") } else {""}}),
                     label = messages("pages.directorDetails.name-suffix", directorNames.getOrElse(ninoField.name.filter("0123456789".toSet),"Error fetching name")),
-                    classes = Some("form-label"),
-                    isPageHeading = false
+                    classes = Some("govuk-input--width-10"),
+                    isPageHeading = false,
+                    attributes = Map("labelClasses" -> "")
                 )
             </div>
         }
