@@ -415,7 +415,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       reqPosts.size mustBe 0
 
       val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      reqPostsAudit.size mustBe 0
+      reqPostsAudit.size mustBe 1
     }
   }
 
