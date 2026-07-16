@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ object TestPAYERegEmploymentInfoSetupForm extends CustomDateForm {
 
   implicit def employingStatusFormatter: Formatter[Employing.Value] = new Formatter[Employing.Value] {
     def bind(key: String, data: Map[String, String]) = {
-      Right(data.getOrElse(key, "")).right.flatMap {
+      Right(data.getOrElse(key, "")).flatMap {
         case "alreadyEmploying" => Right(Employing.alreadyEmploying)
         case "willEmployNextYear" => Right(Employing.willEmployNextYear)
         case "willEmployThisYear" => Right(Employing.willEmployThisYear)

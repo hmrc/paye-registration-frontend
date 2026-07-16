@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,9 +112,10 @@ class PAYEContactController @Inject()(val companyDetailsService: CompanyDetailsS
           success => submitCorrespondenceAddress(profile.registrationID, profile.companyTaxRegistration.transactionId, success.chosenAddress) flatMap {
             case DownstreamOutcome.Success => Future.successful(Redirect(controllers.userJourney.routes.SummaryController.summary))
             case DownstreamOutcome.Failure => Future.successful(InternalServerError(restart()))
-            case DownstreamOutcome.Redirect => addressLookupService.buildAddressLookupUrl("correspondence", controllers.userJourney.routes.PAYEContactController.savePAYECorrespondenceAddress(None)) map {
-              Redirect(_)
-            }
+            case DownstreamOutcome.Redirect =>
+                addressLookupService.buildAddressLookupUrl("correspondence", controllers.userJourney.routes.PAYEContactController.savePAYECorrespondenceAddress(None)) map {
+                  Redirect(_)
+                }
           }
         )
   }

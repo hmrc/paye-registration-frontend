@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,11 +37,11 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
   with BeforeAndAfterEach
   with WiremockHelper {
 
-  val mockHost = WiremockHelper.wiremockHost
-  val mockPort = WiremockHelper.wiremockPort
-  val mockUrl = s"http://$mockHost:$mockPort"
+  val mockHost: String = WiremockHelper.wiremockHost
+  val mockPort: Int = WiremockHelper.wiremockPort
+  val mockUrl: String = s"http://$mockHost:$mockPort"
 
-  lazy val config = Map(
+  lazy val config: Map[String, String] = Map(
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
     "auditing.consumer.baseUri.host" -> s"$mockHost",
@@ -65,7 +65,7 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
 
   override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(config)
-    .build
+    .build()
 
   lazy val defaultCookieSigner: DefaultCookieSigner = app.injector.instanceOf[DefaultCookieSigner]
 

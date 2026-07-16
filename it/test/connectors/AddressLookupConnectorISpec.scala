@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.http.{HttpHeader, HttpHeaders}
-import common.exceptions.{AddressLookupExceptionType, DownstreamExceptions}
+import common.exceptions.AddressLookupExceptionType
 import itutil.{IntegrationSpecBase, WiremockHelper}
 import models.Address
 import models.external._
@@ -32,7 +32,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 class AddressLookupConnectorISpec extends IntegrationSpecBase {
 
-  implicit val hc = HeaderCarrier()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
   implicit val request: FakeRequest[_] = FakeRequest()
 
   override lazy val app: Application = new GuiceApplicationBuilder()

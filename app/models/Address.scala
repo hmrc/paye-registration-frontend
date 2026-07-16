@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package models
 
-import models.Address.prePopReads
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import utils.{Formatters, Validators}
@@ -160,7 +159,7 @@ object Address {
   val prePopReads: Reads[Address] = new Reads[Address] {
     override def reads(json: JsValue): JsResult[Address] = {
       val unvalidatedPostcode = json.\("postcode").asOpt[String](Formatters.normalizeTrimmedReads)
-      val validatedPostcode = validatePostcode(unvalidatedPostcode).right.toOption
+      val validatedPostcode = validatePostcode(unvalidatedPostcode).toOption
 
       val ctry = validatedPostcode match {
         case None => json.\("country").asOpt[String](Formatters.normalizeTrimmedReads)

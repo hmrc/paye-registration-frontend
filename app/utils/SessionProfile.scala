@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import connectors.{IncorporationInformationConnector, KeystoreConnector}
 import enums.{CacheKeys, IncorporationStatus, RegistrationDeletion}
 import models.external.{CompanyRegistrationProfile, CurrentProfile}
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{AnyContent, Call, Request, Result}
+import play.api.mvc.{Call, Request, Result}
 import services.PAYERegistrationService
 import uk.gov.hmrc.http.HeaderCarrier
 

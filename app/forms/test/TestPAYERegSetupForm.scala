@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with CustomDateForm {
 
   implicit def payeStatusFormatter: Formatter[PAYEStatus.Value] = new Formatter[PAYEStatus.Value] {
     def bind(key: String, data: Map[String, String]) = {
-      Right(data.getOrElse(key, "")).right.flatMap {
+      Right(data.getOrElse(key, "")).flatMap {
         case "draft" => Right(PAYEStatus.draft)
         case "" => Right(PAYEStatus.draft)
         case "held" => Right(PAYEStatus.held)
@@ -57,7 +57,7 @@ object TestPAYERegSetupForm extends RequiredBooleanForm with CustomDateForm {
   implicit def employingStatusFormatter: Formatter[Employing.Value] = new Formatter[Employing.Value] {
     def bind(key: String, data: Map[String, String]) = {
       Try {
-        Right(data.getOrElse(key, "")).right.map(Employing.withName(_))
+        Right(data.getOrElse(key, "")).map(Employing.withName(_))
       } recover {
         case _ => Left(Seq(FormError(key, "error.required", Nil)))
       }

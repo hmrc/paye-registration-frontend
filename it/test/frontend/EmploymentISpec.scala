@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package frontend
 
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
-import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
 import play.api.Application
 import play.api.http.HeaderNames
@@ -28,11 +27,11 @@ import java.time.LocalDate
 
 class EmploymentISpec extends IntegrationSpecBase with LoginStub with CachingStub with BeforeAndAfterEach with WiremockHelper {
 
-  val mockHost = WiremockHelper.wiremockHost
-  val mockPort = WiremockHelper.wiremockPort
-  val mockUrl = s"http://$mockHost:$mockPort"
+  val mockHost: String = WiremockHelper.wiremockHost
+  val mockPort: Int = WiremockHelper.wiremockPort
+  val mockUrl: String = s"http://$mockHost:$mockPort"
 
-  lazy val config = Map(
+  lazy val config: Map[String, String] = Map(
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",

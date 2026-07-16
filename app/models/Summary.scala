@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
 package models
 
 import play.api.i18n.Messages
-import play.api.libs.functional.syntax._
-import play.api.libs.json.{Reads, _}
 import uk.gov.hmrc.govukfrontend.views.Aliases._
-import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.{SummaryList, SummaryListRow}
+import uk.gov.hmrc.govukfrontend.views.viewmodels.summarylist.SummaryListRow
 
 object SummaryListRowUtils {
   def optSummaryListRowString(questionId: String,

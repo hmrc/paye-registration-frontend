@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,17 +38,17 @@ trait PaidEmployeesFormT extends RequiredBooleanForm with CustomDateForm {
 
   def ctyMinus2Years: Int = TaxYear.current.currentYear - 2
 
-  val dateTimeFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy")
+  val dateTimeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
 
   def isOnOrAfter(date: LocalDate, comparator: LocalDate): Boolean = date.isEqual(comparator) || date.isAfter(comparator)
 
   override def validation(dt: LocalDate, cdt: LocalDate) = {
     if (dt.isBefore(cdt)) {
-      Left(Seq(FormError(s"${customFormPrefix}", ("pages.paidEmployees.date.dateTooEarly"), Seq(s"${customFormPrefix}.Day", cdt.format(dateTimeFormat)))))
+      Left(Seq(FormError(s"$customFormPrefix", "pages.paidEmployees.date.dateTooEarly", Seq(s"$customFormPrefix.Day", cdt.format(dateTimeFormat)))))
     } else if (isOnOrAfter(dt, cdt) && !isOnOrAfter(dt, LocalDate.of(ctyMinus2Years, 4, 6))) {
-      Left(Seq(FormError(s"${customFormPrefix}", "pages.paidEmployees.date.moreThanTwoTaxYears", Seq(s"${customFormPrefix}.Day"))))
+      Left(Seq(FormError(s"$customFormPrefix", "pages.paidEmployees.date.moreThanTwoTaxYears", Seq(s"$customFormPrefix.Day"))))
     } else if (dt.isAfter(now)) {
-      Left(Seq(FormError(s"${customFormPrefix}", "pages.paidEmployees.date.dateInFuture", Seq(s"${customFormPrefix}.Day"))))
+      Left(Seq(FormError(s"$customFormPrefix", "pages.paidEmployees.date.dateInFuture", Seq(s"$customFormPrefix.Day"))))
     } else {
       Right(dt)
     }

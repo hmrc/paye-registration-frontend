@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ class IncorporationInformationConnectorISpec extends IntegrationSpecBase {
       "defaultCHROAddress" -> "eyJsaW5lMSI6IjMwIFRlc3QgUm9hZCIsImxpbmUyIjoiVGVzdGxleSIsImxpbmUzIjoiVGVzdGZvcmQiLCJsaW5lNCI6IlRlc3RzaGlyZSIsInBvc3RDb2RlIjoiVEUxIDNTVCJ9",
       "defaultOfficerList" -> "ICBbDQogICAgew0KICAgICAgIm5hbWUiIDogInRlc3QiLA0KICAgICAgIm5hbWVfZWxlbWVudHMiIDogew0KICAgICAgICAiZm9yZW5hbWUiIDogInRlc3QxIiwNCiAgICAgICAgIm90aGVyX2ZvcmVuYW1lcyIgOiAidGVzdDExIiwNCiAgICAgICAgInN1cm5hbWUiIDogInRlc3RhIiwNCiAgICAgICAgInRpdGxlIiA6ICJNciINCiAgICAgIH0sDQogICAgICAib2ZmaWNlcl9yb2xlIiA6ICJjaWMtbWFuYWdlciINCiAgICB9LCB7DQogICAgICAibmFtZSIgOiAidGVzdCIsDQogICAgICAibmFtZV9lbGVtZW50cyIgOiB7DQogICAgICAgICJmb3JlbmFtZSIgOiAidGVzdDIiLA0KICAgICAgICAib3RoZXJfZm9yZW5hbWVzIiA6ICJ0ZXN0MjIiLA0KICAgICAgICAic3VybmFtZSIgOiAidGVzdGIiLA0KICAgICAgICAidGl0bGUiIDogIk1yIg0KICAgICAgfSwNCiAgICAgICJvZmZpY2VyX3JvbGUiIDogImNvcnBvcmF0ZS1kaXJlY3RvciINCiAgICB9DQogIF0=",
     ))
-    .build
+    .build()
 
   val incorpInfoConnector = app.injector.instanceOf[IncorporationInformationConnector]
 

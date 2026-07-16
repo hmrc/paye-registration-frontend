@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,11 @@ import play.api.libs.ws.DefaultWSCookie
 
 class LanguageControllerISpec extends IntegrationSpecBase with LoginStub with CachingStub with BeforeAndAfterEach with WiremockHelper {
 
-  val mockHost = WiremockHelper.wiremockHost
-  val mockPort = WiremockHelper.wiremockPort
-  val mockUrl = s"http://$mockHost:$mockPort"
+  val mockHost: String = WiremockHelper.wiremockHost
+  val mockPort: Int = WiremockHelper.wiremockPort
+  val mockUrl: String = s"http://$mockHost:$mockPort"
 
-  lazy val config = Map(
+  lazy val config: Map[String, String] = Map(
     "play.filters.csrf.header.bypassHeaders.X-Requested-With" -> "*",
     "play.filters.csrf.header.bypassHeaders.Csrf-Token" -> "nocheck",
     "application.router" -> "testOnlyDoNotUseInAppConf.Routes",
@@ -59,13 +59,13 @@ class LanguageControllerISpec extends IntegrationSpecBase with LoginStub with Ca
 
   lazy val defaultCookieSigner: DefaultCookieSigner = app.injector.instanceOf[DefaultCookieSigner]
 
-  override def beforeEach() {
+  override def beforeEach(): Unit = {
     resetWiremock()
   }
 
   "setLanguage" should {
-    val welshCookie = Some(DefaultWSCookie("PLAY_LANG", "cy", None, Some("/"), None, false, false))
-    val englishCookie = Some(DefaultWSCookie("PLAY_LANG", "en", None, Some("/"), None, false, false))
+    val welshCookie = Some(DefaultWSCookie("PLAY_LANG", "cy", None, Some("/"), None, secure = false, httpOnly = false))
+    val englishCookie = Some(DefaultWSCookie("PLAY_LANG", "en", None, Some("/"), None, secure = false, httpOnly = false))
 
     "return a 303 when language is switched" in {
       setupSimpleAuthMocks()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ class CompanyRegistrationConnectorISpec extends IntegrationSpecBase {
       "microservice.services.incorporation-frontend-stubs.port" -> s"${WiremockHelper.wiremockPort}",
       "application.router" -> "testOnlyDoNotUseInAppConf.Routes"
     ))
-    .build
+    .build()
 
   lazy val connector = app.injector.instanceOf[CompanyRegistrationConnector]
 
