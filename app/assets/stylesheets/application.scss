@@ -1,7 +1,8 @@
 $govuk-assets-path: "/register-for-paye/assets/lib/govuk-frontend/dist/govuk/assets/";
 $hmrc-assets-path: "/register-for-paye/assets/lib/hmrc-frontend/hmrc/";
+$govuk-suppressed-warnings: (libsass, legacy-organisation-colours);
 
-@import "lib/govuk-frontend/dist/govuk/all";
+@import "lib/govuk-frontend/dist/govuk/index";
 @import "lib/hmrc-frontend/hmrc/all";
 
 .app-reference-number {
