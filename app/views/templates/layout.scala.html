@@ -15,10 +15,11 @@
  *@
 
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcTimeoutDialog
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcLayout
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.timeoutdialog.TimeoutDialog
 @import views.html.helper.CSPNonce
 @import uk.gov.hmrc.hmrcfrontend.views.config.StandardBetaBanner
+
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcLayout
 
 @this(
     hmrcTimeoutDialog: HmrcTimeoutDialog,
@@ -30,18 +31,18 @@
 @(pageTitle: Option[String] = None, beforeContentBlock: Option[Html] = None, backLink: Boolean = true, signOutLink: Boolean = true, timeout: Boolean = true)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages, appConfig: config.AppConfig)
 
 @head = {
-<!--[if lte IE 8]><link href=' @controllers.routes.Assets.versioned("stylesheets/application-ie-8.css")' rel="stylesheet" type="text/css" /><![endif]-->
-<!--[if gt IE 8]><!--> <link href='@controllers.routes.Assets.versioned("stylesheets/application.css")' media="screen" rel="stylesheet" type="text/css" />
-<!--<![endif]-->
-@if(timeout) {
-    @hmrcTimeoutDialog(TimeoutDialog(
-        language = Some("en"),
-        timeout = Option(appConfig.timeoutInSeconds),
-        countdown = Option(appConfig.timeoutDisplayLength),
-        keepAliveUrl = Some(controllers.userJourney.routes.SignInOutController.renewSession.url),
-        signOutUrl = Some(controllers.userJourney.routes.SignInOutController.signOut.url)
-    ))
-}
+    <!--[if lte IE 8]><link href=' @controllers.routes.Assets.versioned("stylesheets/application-ie-8.css")' rel="stylesheet" type="text/css" /><![endif]-->
+    <!--[if gt IE 8]><!--> <link href='@controllers.routes.Assets.versioned("stylesheets/application.css")' media="screen" rel="stylesheet" type="text/css" />
+    <!--<![endif]-->
+    @if(timeout) {
+        @hmrcTimeoutDialog(TimeoutDialog(
+            language = Some("en"),
+            timeout = Option(appConfig.timeoutInSeconds),
+            countdown = Option(appConfig.timeoutDisplayLength),
+            keepAliveUrl = Some(controllers.userJourney.routes.SignInOutController.renewSession.url),
+            signOutUrl = Some(controllers.userJourney.routes.SignInOutController.signOut.url)
+        ))
+    }
 }
 
 
