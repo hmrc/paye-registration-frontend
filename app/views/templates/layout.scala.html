@@ -1,5 +1,5 @@
 @*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,35 +15,34 @@
  *@
 
 @import uk.gov.hmrc.hmrcfrontend.views.html.components.HmrcTimeoutDialog
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcLayout
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.timeoutdialog.TimeoutDialog
 @import views.html.helper.CSPNonce
 @import uk.gov.hmrc.hmrcfrontend.views.config.StandardBetaBanner
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcStandardPage
+@import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
 
 @this(
-    hmrcTimeoutDialog: HmrcTimeoutDialog,
-    phaseBanner: components.phaseBanner,
-    hmrcLayout: HmrcLayout,
-    standardBetaBanner: StandardBetaBanner
+    hmrcStandardPage: HmrcStandardPage,
+    standardBetaBanner: StandardBetaBanner,
+    hmrcTimeoutDialog: HmrcTimeoutDialog
 )
 
 @(pageTitle: Option[String] = None, beforeContentBlock: Option[Html] = None, backLink: Boolean = true, signOutLink: Boolean = true, timeout: Boolean = true)(contentBlock: Html)(implicit request: RequestHeader, messages: Messages, appConfig: config.AppConfig)
 
 @head = {
-<!--[if lte IE 8]><link href=' @controllers.routes.Assets.versioned("stylesheets/application-ie-8.css")' rel="stylesheet" type="text/css" /><![endif]-->
-<!--[if gt IE 8]><!--> <link href='@controllers.routes.Assets.versioned("stylesheets/application.css")' media="screen" rel="stylesheet" type="text/css" />
-<!--<![endif]-->
-@if(timeout) {
-    @hmrcTimeoutDialog(TimeoutDialog(
-        language = Some("en"),
-        timeout = Option(appConfig.timeoutInSeconds),
-        countdown = Option(appConfig.timeoutDisplayLength),
-        keepAliveUrl = Some(controllers.userJourney.routes.SignInOutController.renewSession.url),
-        signOutUrl = Some(controllers.userJourney.routes.SignInOutController.signOut.url)
-    ))
+    <!--[if lte IE 8]><link href=' @controllers.routes.Assets.versioned("stylesheets/application-ie-8.css")' rel="stylesheet" type="text/css" /><![endif]-->
+    <!--[if gt IE 8]><!--> <link href='@controllers.routes.Assets.versioned("stylesheets/application.css")' media="screen" rel="stylesheet" type="text/css" />
+    <!--<![endif]-->
+    @if(timeout) {
+        @hmrcTimeoutDialog(TimeoutDialog(
+            language = Some("en"),
+            timeout = Option(appConfig.timeoutInSeconds),
+            countdown = Option(appConfig.timeoutDisplayLength),
+            keepAliveUrl = Some(controllers.userJourney.routes.SignInOutController.renewSession.url),
+            signOutUrl = Some(controllers.userJourney.routes.SignInOutController.signOut.url)
+        ))
+    }
 }
-}
-
 
 @scripts = {
     <script @{CSPNonce.attr} src="@controllers.routes.Assets.versioned("javascripts/backLink.js")"></script>
@@ -61,16 +60,19 @@
     </div>
 }
 
-@hmrcLayout(
-    pageTitle = pageTitle,
-    serviceName = Some(messages("service.name")),
-    isWelshTranslationAvailable = appConfig.languageTranslationEnabled,
-    additionalHeadBlock = Some(head),
-    signOutUrl = if (signOutLink) Some(controllers.userJourney.routes.SignInOutController.signOut.url) else None,
-    serviceUrl = Some(""),
-    phaseBanner = Some(standardBetaBanner(url = appConfig.betaFeedbackUrl)),
-    backLinkUrl = if (backLink) Some("#") else None,
-    displayHmrcBanner = false,
-    accessibilityStatementUrl = Some(appConfig.accessibilityStatementUrl),
-    additionalScriptsBlock = Some(scripts)
-)(content)
+@hmrcStandardPage(
+    HmrcStandardPageParams(
+        serviceURLs = ServiceURLs(
+            serviceUrl = Some(""),
+            signOutUrl = if (signOutLink) Some(controllers.userJourney.routes.SignInOutController.signOut.url) else None,
+            accessibilityStatementUrl = Some(appConfig.accessibilityStatementUrl),
+        ),
+        banners = Banners(displayHmrcBanner = false, phaseBanner = Some(standardBetaBanner(url = appConfig.betaFeedbackUrl))),
+        serviceName = Some(messages("service.name")),
+        pageTitle = pageTitle,
+        isWelshTranslationAvailable = appConfig.languageTranslationEnabled,
+        templateOverrides = TemplateOverrides(
+            additionalHeadBlock = Some(head),
+            additionalScriptsBlock = Some(scripts)
+        )
+))(content)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,15 @@ trait BooleanForm {
     override val format = Some(("format.boolean", Nil))
 
     // default play binding is to data.getOrElse(key, "false")
-    def bind(key: String, data: Map[String, String]) = {
-      Right(data.getOrElse(key, "")).right.flatMap {
+    def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Boolean] = {
+      Right(data.getOrElse(key, "")).flatMap {
         case "true" => Right(true)
         case "false" => Right(false)
         case _ => Left(Seq(FormError(key, errorMsg, Nil)))
       }
     }
 
-    def unbind(key: String, value: Boolean) = Map(key -> value.toString)
+    def unbind(key: String, value: Boolean): Map[String, String] = Map(key -> value.toString)
   }
 
   val requiredBoolean: String => Mapping[Boolean] = errorMsg => Forms.of[Boolean](requiredBooleanFormatter(errorMsg))

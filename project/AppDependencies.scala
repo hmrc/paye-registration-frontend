@@ -20,15 +20,15 @@ import sbt.*
 private object AppDependencies {
 
   val playSuffix                      =  "-play-30"
-  val hmrcMongoVersion                =  "2.10.0"
+  val hmrcMongoVersion                =  "2.12.0"
   val taxYearVersion                  =  "6.0.0"
-  val bootstrapVersion                =  "10.4.0"
+  val bootstrapVersion                =  "10.7.1"
   val playPartialsVersion             =  "10.2.0"
   val httpCachingVersion              =  "12.2.0"
-  val playConditionalMappingVersion   =  "3.3.0"
+  val playConditionalMappingVersion   =  "3.5.0"
   val commonsValidatorVersion         =  "1.10.0"
   val scalaTestVersion                =  "3.2.12"
-  val playFrontendHmrc                =  "12.20.0"
+  val playFrontendHmrc                =  "12.32.1"
 
   val compile: Seq[ModuleID] = Seq(
     "uk.gov.hmrc"             %%  s"bootstrap-frontend$playSuffix"    % bootstrapVersion,

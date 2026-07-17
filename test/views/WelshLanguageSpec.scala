@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package views
 
 import helpers.{PayeComponentSpec, PayeFakedApp}
-import org.apache.commons.io.IOUtils
 import play.api.i18n.{I18nSupport, Lang, MessagesApi}
 
 import scala.io.{BufferedSource, Source}

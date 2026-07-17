@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ class EmailConnectorISpec extends IntegrationSpecBase {
 
   override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(Map("microservice.services.email.sendAnEmailURL" -> s"${WiremockHelper.url}/hmrc/email"))
-    .build
+    .build()
 
   lazy val connector = app.injector.instanceOf[EmailConnector]
 

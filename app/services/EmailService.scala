@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,8 @@ class EmailService @Inject()(companyRegistrationConnector: CompanyRegistrationCo
       case Some(verifiedEmail) =>
         for {
           Some(firstPaymentDate) <- s4LConnector.fetchAndGet[LocalDate](profile.registrationID, FIRST_PAYMENT_DATE)
-          iiResponse <- incorporationInformationConnector.getCoHoCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId).map { case IncorpInfoSuccessResponse(resp) => resp }
+          iiResponse <- incorporationInformationConnector.getCoHoCompanyDetails(profile.registrationID, profile.companyTaxRegistration.transactionId).map
+                          { case IncorpInfoSuccessResponse(resp) => resp }
           emailRequest = buildEmailRequest(verifiedEmail, iiResponse.companyName, ackRef, firstPaymentDate, nameFromAuth)
           emailResponse <- emailConnector.requestEmailToBeSent(emailRequest)
         } yield emailResponse
@@ -92,5 +93,4 @@ class EmailService @Inject()(companyRegistrationConnector: CompanyRegistrationCo
         warnLog(s"[sendAcknowledgementEmail] There was a problem sending the acknowledgement email for regId ${profile.registrationID} : txId ${profile.companyTaxRegistration.transactionId}")
         EmailDifficulties
     }
-
 }

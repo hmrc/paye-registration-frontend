@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,11 @@ import java.util.UUID
 import scala.concurrent.ExecutionContext
 
 class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStub {
-  val mockHost = WiremockHelper.wiremockHost
-  val mockPort = WiremockHelper.wiremockPort
-  val mockUrl = s"http://$mockHost:$mockPort"
+  val mockHost: String = WiremockHelper.wiremockHost
+  val mockPort: Int = WiremockHelper.wiremockPort
+  val mockUrl: String = s"http://$mockHost:$mockPort"
 
-  val config = Map(
+  val config: Map[String, String] = Map(
     "microservice.services.paye-registration.host" -> s"$mockHost",
     "microservice.services.paye-registration.port" -> s"$mockPort",
     "microservice.services.business-registration.port" -> s"$mockHost",
@@ -45,7 +45,7 @@ class CompletionCapacityServiceISpec extends IntegrationSpecBase with CachingStu
 
   override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(config)
-    .build
+    .build()
 
   lazy val payeRegistrationConnector = app.injector.instanceOf[PAYERegistrationConnector]
   lazy val busRegConnector = app.injector.instanceOf[BusinessRegistrationConnector]

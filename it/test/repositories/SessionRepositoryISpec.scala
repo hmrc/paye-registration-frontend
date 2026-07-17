@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,11 +41,11 @@ object Index {
 }
 
 class SessionRepositoryISpec extends IntegrationSpecBase with MongoSupport with MockitoSugar {
-  val mockHost = WiremockHelper.wiremockHost
-  val mockPort = WiremockHelper.wiremockPort
-  val mockUrl = s"http://$mockHost:$mockPort"
+  val mockHost: String = WiremockHelper.wiremockHost
+  val mockPort: Int = WiremockHelper.wiremockPort
+  val mockUrl: String = s"http://$mockHost:$mockPort"
 
-  val config = Map(
+  val config: Map[String, String] = Map(
     "microservice.services.paye-registration.host" -> s"$mockHost",
     "microservice.services.paye-registration.port" -> s"$mockPort",
     "microservice.services.cachable.session-cache.host" -> s"$mockHost",
@@ -58,16 +58,16 @@ class SessionRepositoryISpec extends IntegrationSpecBase with MongoSupport with 
   )
   override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(config)
-    .build
+    .build()
 
-  val sId = UUID.randomUUID().toString
-  implicit val hc = HeaderCarrier(sessionId = Some(SessionId(sId)))
+  val sId: String = UUID.randomUUID().toString
+  implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId(sId)))
   lazy val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
   class Setup(replaceIndexes: Boolean = false) {
 
-    val mockConfiguration = mock[Configuration]
-    val expireAfter = app.configuration.get[Int]("mongodb.timeToLiveInSeconds")
+    val mockConfiguration: Configuration = mock[Configuration]
+    val expireAfter: Int = app.configuration.get[Int]("mongodb.timeToLiveInSeconds")
 
     when(mockConfiguration.get[String]("mongodb.replaceIndexes")).thenReturn(replaceIndexes.toString)
     when(mockConfiguration.get[String]("appName")).thenReturn(app.configuration.get[String]("appName"))

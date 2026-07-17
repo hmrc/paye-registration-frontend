@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,15 +31,15 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 class BusinessRegistrationConnectorISpec extends IntegrationSpecBase {
 
-  implicit val hc = HeaderCarrier()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
   implicit val request: FakeRequest[_] = FakeRequest()
   val regId = "12345"
 
   override lazy val app: Application = new GuiceApplicationBuilder()
     .configure(Map("microservice.services.business-registration.port" -> s"${WiremockHelper.wiremockPort}"))
-    .build
+    .build()
 
-  lazy val connector = app.injector.instanceOf[BusinessRegistrationConnector]
+  lazy val connector: BusinessRegistrationConnector = app.injector.instanceOf[BusinessRegistrationConnector]
 
   "BusinessRegistrationConnector" when {
 
