@@ -690,9 +690,13 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 303
       response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/business-contact-details")
 
-      val reqPosts = findAll(postRequestedFor(urlMatching(s"/write/audit")))
       eventually {
-        reqPosts.asScala.exists(_.getBodyAsString.contains("registeredOfficeUsedAsPrincipalPlaceOfBusiness")) mustBe true
+        val reqPosts = findAll(postRequestedFor(urlMatching("/write/audit")))
+        reqPosts.asScala.exists { req =>
+          val json = Json.parse(req.getBodyAsString)
+          (json \ "auditSource").as[String] == "paye-registration-frontend" &&
+            (json \ "auditType").as[String] == "registeredOfficeUsedAsPrincipalPlaceOfBusiness"
+        } mustBe true
       }
     }
 
