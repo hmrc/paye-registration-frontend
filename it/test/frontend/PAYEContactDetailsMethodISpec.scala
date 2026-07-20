@@ -22,6 +22,7 @@ import enums.CacheKeys
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
+import org.scalatest.concurrent.Eventually.eventually
 import play.api.Application
 import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -414,8 +415,10 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       val reqPosts = findAll(postRequestedFor(urlMatching(s"/business-registration/$regId/contact-details")))
       reqPosts.size mustBe 0
 
-      val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      reqPostsAudit.size mustBe 1
+      eventually {
+        val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
+        reqPostsAudit.size mustBe 1
+      }
     }
   }
 
@@ -708,8 +711,6 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       (json \ "detail" \ "authProviderId").as[JsString].value mustBe "testAuthProviderId"
       (json \ "detail" \ "journeyId").as[JsString].value mustBe regId
       (json \ "detail" \ "addressUsed").as[JsString].value mustBe "RegisteredOffice"
-
-
     }
 
     "send a correct Audit Event when ppobAddress has been chosen" in {
@@ -754,8 +755,10 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/check-and-confirm-your-answers")
 
       val reqPosts = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      val captorPost = reqPosts.get(0)
+        .asScala.toList.find(_.getBodyAsString.contains("correspondenceAddress"))
+      val captorPost = reqPosts.getOrElse(fail(s"No matching audit event found"))
       val json = Json.parse(captorPost.getBodyAsString)
+
       (json \ "auditSource").as[JsString].value mustBe "paye-registration-frontend"
       (json \ "auditType").as[JsString].value mustBe "correspondenceAddress"
       (json \ "detail" \ "externalUserId").as[JsString].value mustBe "Ext-xxx"

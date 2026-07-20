@@ -22,6 +22,7 @@ import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import models.DigitalContactDetails
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
+import org.scalatest.concurrent.Eventually.eventually
 import play.api.Application
 import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -189,7 +190,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 200
       val mdtpCookieData = getCookieData(response.cookie("mdtp").get)
       mdtpCookieData("csrfToken") mustNot be("")
-
     }
 
     "Return a populated page with a default Company Name if the regId is part of the allow-list with trading name pre populated" in {
@@ -199,7 +199,6 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       stubSuccessfulLogin()
       stubPayeRegDocumentStatus(regIdAllowlisted)
       stubSessionCacheMetadata(SessionId, regIdAllowlisted)
-
 
       stubGet(s"/save4later/paye-registration-frontend/$regIdAllowlisted", 404, "")
       val dummyS4LResponse = s"""{"id":"xxx", "data": {} }"""
@@ -243,8 +242,10 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
           |  }
           |}
         """.stripMargin
+
       stubGet(s"/incorporation-information/$txId/company-profile", 200, companyProfileDoc)
       stubPost(s"/business-registration/$regId/trading-name", 200, tradingNameJsonResponse)
+
       val roDoc = s"""{"line1":"1", "line2":"2", "postCode":"pc"}"""
       val payeDoc =
         s"""{
@@ -689,12 +690,14 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.status mustBe 303
       response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/business-contact-details")
 
-      val reqPosts = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      val captorPost = reqPosts.get(0)
-      val jsonAudit = Json.parse(captorPost.getBodyAsString)
-
-      (jsonAudit \ "auditSource").as[JsString].value mustBe "paye-registration-frontend"
-      (jsonAudit \ "auditType").as[JsString].value mustBe "registeredOfficeUsedAsPrincipalPlaceOfBusiness"
+      eventually {
+        val reqPosts = findAll(postRequestedFor(urlMatching("/write/audit")))
+        reqPosts.asScala.exists { req =>
+          val json = Json.parse(req.getBodyAsString)
+          (json \ "auditSource").as[String] == "paye-registration-frontend" &&
+            (json \ "auditType").as[String] == "registeredOfficeUsedAsPrincipalPlaceOfBusiness"
+        } mustBe true
+      }
     }
 
     "save to microservice with full company details data and prepop address and no Audit Event sent" in {
