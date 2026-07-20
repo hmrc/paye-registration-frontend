@@ -22,6 +22,7 @@ import enums.CacheKeys
 import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
+import org.scalatest.concurrent.Eventually.eventually
 import play.api.Application
 import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -414,8 +415,10 @@ class PAYEContactDetailsMethodISpec extends IntegrationSpecBase
       val reqPosts = findAll(postRequestedFor(urlMatching(s"/business-registration/$regId/contact-details")))
       reqPosts.size mustBe 0
 
-      val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      reqPostsAudit.size mustBe 1
+      eventually {
+        val reqPostsAudit = findAll(postRequestedFor(urlMatching(s"/write/audit")))
+        reqPostsAudit.size mustBe 1
+      }
     }
   }
 
