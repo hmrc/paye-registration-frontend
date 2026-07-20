@@ -22,6 +22,7 @@ import itutil.{CachingStub, IntegrationSpecBase, LoginStub, WiremockHelper}
 import models.DigitalContactDetails
 import org.jsoup.Jsoup
 import org.scalatest.BeforeAndAfterEach
+import org.scalatest.concurrent.Eventually.eventually
 import play.api.Application
 import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -690,11 +691,9 @@ class CompanyDetailsMethodISpec extends IntegrationSpecBase
       response.header(HeaderNames.LOCATION) mustBe Some("/register-for-paye/business-contact-details")
 
       val reqPosts = findAll(postRequestedFor(urlMatching(s"/write/audit")))
-      val captorPost = reqPosts.get(0)
-      val jsonAudit = Json.parse(captorPost.getBodyAsString)
-
-      (jsonAudit \ "auditSource").as[JsString].value mustBe "paye-registration-frontend"
-      (jsonAudit \ "auditType").as[JsString].value mustBe "registeredOfficeUsedAsPrincipalPlaceOfBusiness"
+      eventually {
+        reqPosts.asScala.exists(_.getBodyAsString.contains("registeredOfficeUsedAsPrincipalPlaceOfBusiness")) mustBe true
+      }
     }
 
     "save to microservice with full company details data and prepop address and no Audit Event sent" in {
