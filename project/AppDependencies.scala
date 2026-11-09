@@ -20,7 +20,7 @@ import sbt.*
 private object AppDependencies {
 
   val playSuffix                      =  "-play-30"
-  val hmrcMongoVersion                =  "2.12.0"
+  val hmrcMongoVersion                =  "2.14.0"
   val taxYearVersion                  =  "6.0.0"
   val bootstrapVersion                =  "10.7.1"
   val playPartialsVersion             =  "10.2.0"
