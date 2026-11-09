@@ -4,3 +4,4 @@ test-repositories:
   - paye-registration-performance-tests
   - paye-registration-acceptance-tests
   - scrs-ui-journey-tests
+serviceNowMapping: SNSVC0005869
